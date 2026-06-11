@@ -525,7 +525,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   });
   const gif = useGifRecorder({ src });
 
-  const { resolvedImdbId, resolvedImdbVerified, resolutionSettled } = useTrackAutoload({
+  const { resolvedImdbId, resolvedImdbVerified, resolutionSettled, userPickedSubRef } = useTrackAutoload({
     bridgeRef,
     src,
     snap,
@@ -1233,11 +1233,12 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           const t = snap.audioTracks.find((x) => x.id === id);
           if (t?.lang) writePlayerPrefs(src.meta.id, { audioLang: t.lang });
         }}
-        onSubtitle={(id) => {
-          bridgeRef.current?.setSubtitleTrack(id);
-          const t = snap.subtitleTracks.find((x) => x.id === id);
-          if (t?.lang) writePlayerPrefs(src.meta.id, { subLang: t.lang });
-        }}
+       onSubtitle={(id) => {
+      userPickedSubRef.current = true;
+      bridgeRef.current?.setSubtitleTrack(id);
+      const t = snap.subtitleTracks.find((x) => x.id === id);
+      if (t?.lang) writePlayerPrefs(src.meta.id, { subLang: t.lang });
+    }}
         onSubDelay={(s) => {
           bridgeRef.current?.setSubDelay(s);
           writePlayerPrefs(src.meta.id, { subDelaySec: s });

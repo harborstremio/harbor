@@ -81,6 +81,7 @@ export function useTrackAutoload(params: {
   }, [authKey]);
 
   const autoSubLoadKeyRef = useRef<string | null>(null);
+  const userPickedSubRef = useRef(false);
   useEffect(() => {
     if (!resolvedImdbId) return;
     if (snap.audioTracks.length === 0 && snap.durationSec === 0) return;
@@ -96,6 +97,7 @@ export function useTrackAutoload(params: {
     );
     const langs = subIsAnime ? rawLangs : rawLangs.filter((l) => !isJapanese(l));
     autoSubLoadKeyRef.current = key;
+    userPickedSubRef.current = false;
     const enabled = settings.subProvidersEnabled ?? {};
     void (async () => {
       console.info("[subs/autoload] starting", {
@@ -148,7 +150,7 @@ export function useTrackAutoload(params: {
         perLang.set(k, n + 1);
         const blocked = snapRef.current.subtitleTracks.some((t) => t.selected);
         const shouldSelect =
-          !settings.subtitlesOffByDefault && !blocked && !firstAdded;
+          !settings.subtitlesOffByDefault && !blocked && !firstAdded && !userPickedSubRef.current;
         attempted++;
         const labeled = labelForTrack(r);
         const ok = await b.addSubtitle(r.url, r.lang, labeled, shouldSelect);
@@ -182,6 +184,7 @@ export function useTrackAutoload(params: {
     if (autoTrackKeyRef.current === key) return;
     if (snap.audioTracks.length === 0 && snap.subtitleTracks.length === 0) return;
     autoTrackKeyRef.current = key;
+    if (userPickedSubRef.current) return;
     if (engine === "mpv") void applySubStyle(settings);
     if (settings.audioNormalize) bridgeRef.current?.setAudioNormalize(true);
 
@@ -211,7 +214,7 @@ export function useTrackAutoload(params: {
       if (want && (!cur || cur.id !== want.id)) bridgeRef.current?.setAudioTrack(want.id);
     }
     const subSelected = snap.subtitleTracks.some((t) => t.selected);
-    if (!subSelected && snap.subtitleTracks.length > 0 && subLangs.length > 0) {
+    if (!subSelected && snap.subtitleTracks.length > 0 && subLangs.length > 0 && !userPickedSubRef.current) {
       const want = pickBestTrack(snap.subtitleTracks, subLangs);
       if (want) bridgeRef.current?.setSubtitleTrack(want.id);
     }
@@ -227,7 +230,7 @@ export function useTrackAutoload(params: {
     }
   }, [engine, src.url, src.meta.id, snap.audioTracks, snap.subtitleTracks, snap.rate, snap.subDelaySec, settings]);
 
-  return { resolvedImdbId, resolvedImdbVerified, resolutionSettled };
+  return { resolvedImdbId, resolvedImdbVerified, resolutionSettled, userPickedSubRef };
 }
 
 function resolveLangPreference(
