@@ -77,6 +77,7 @@ export function usePlayerBridge(params: {
           ? settings.playerAnime4kShaders
           : [],
         getEmbedRect,
+        preferredLangs: settings.preferredSubLangs ?? [],
       });
       if (cancelled) return;
       bridge = choose;

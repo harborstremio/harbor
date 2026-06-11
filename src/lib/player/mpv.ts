@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { pickBestTrack } from "@/lib/subtitles/language";
 import {
   emptySnapshot,
   type PlayerBridge,
@@ -50,6 +51,7 @@ export type MpvOptions = {
   anime4kShaders?: string[];
   d3d11Flip?: boolean;
   getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
+  preferredLangs?: string[]; 
 };
 
 export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
@@ -133,6 +135,12 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         }
         snap.audioTracks = audio;
         snap.subtitleTracks = subs;
+        if (subs.length > 0 && mpvOptions?.preferredLangs?.length) {
+        const best = pickBestTrack(subs, mpvOptions.preferredLangs);
+        if (best) {
+          invoke("mpv_set_property", { name: "sid", value: Number(best.id) }).catch(() => {});
+        }
+      }
       }
       if (name === "sub-delay" && typeof data === "number") snap.subDelaySec = data;
       if (name === "audio-delay" && typeof data === "number") snap.audioDelaySec = data;

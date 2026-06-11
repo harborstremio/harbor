@@ -92,13 +92,15 @@ function streamMatchScore(r: SubResult, hints: StreamHints | undefined): number 
 
 function sourcePriority(source: SubResult["source"]): number {
   switch (source) {
+    case "embedded":
+      return 5;
+    case "addon":
+      return 4;
     case "opensubtitles":
       return 3;
     case "wyzie":
       return 2;
     case "jimaku":
-      return 2;
-    case "addon":
       return 1;
     default:
       return 0;
@@ -151,14 +153,21 @@ function interleaveBySource(
   const sourceOrder = [...buckets.keys()].sort(
     (a, b) => sourcePriority(b as SubResult["source"]) - sourcePriority(a as SubResult["source"]),
   );
-  const out: SubResult[] = [];
+const out: SubResult[] = [];
   let depth = 0;
   let added = true;
   while (added) {
     added = false;
     for (const src of sourceOrder) {
       const arr = buckets.get(src);
-      if (arr && arr[depth]) {
+      if (arr && arr[depth] && langScore(arr[depth].lang, preferred) > 0) {
+        out.push(arr[depth]);
+        added = true;
+      }
+    }
+    for (const src of sourceOrder) {
+      const arr = buckets.get(src);
+      if (arr && arr[depth] && !out.includes(arr[depth])) {
         out.push(arr[depth]);
         added = true;
       }

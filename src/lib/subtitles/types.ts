@@ -4,7 +4,7 @@ export type SubResult = {
   lang: string;
   langName?: string;
   title?: string;
-  source: "wyzie" | "addon" | "opensubtitles" | "jimaku";
+  source: "wyzie" | "addon" | "opensubtitles" | "jimaku" | "embedded";
   format?: "srt" | "vtt" | "ass" | "ssa" | "sub";
   encoding?: string;
   fps?: number;

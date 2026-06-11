@@ -39,6 +39,7 @@ export async function pickBridge(
     embed?: boolean;
     anime4kShaders?: string[];
     d3d11Flip?: boolean;
+    preferredLangs?: string[]; 
     getEmbedRect?: () =>
       | Promise<{ screenX: number; screenY: number; w: number; h: number } | null>
       | { screenX: number; screenY: number; w: number; h: number }
