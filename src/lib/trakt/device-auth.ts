@@ -1,7 +1,6 @@
 import {
   TRAKT_API_BASE,
   TRAKT_CLIENT_ID,
-  TRAKT_CLIENT_SECRET,
 } from "./config";
 import { setSession } from "./session";
 import type { DeviceCode, TraktSession, TraktUserMe } from "./types";
@@ -44,13 +43,13 @@ export type PollResult =
   | { kind: "error"; message: string };
 
 async function pollOnce(deviceCode: string): Promise<PollResult> {
-  const res = await fetch(`${TRAKT_API_BASE}/oauth/device/token`, {
+  // Security fix: Call a secure backend proxy instead of the Trakt API directly
+  // to prevent exposing the TRAKT_CLIENT_SECRET in the frontend bundle.
+  const res = await fetch(`/api/trakt/poll-token`, {
     method: "POST",
     headers: baseHeaders(),
     body: JSON.stringify({
       code: deviceCode,
-      client_id: TRAKT_CLIENT_ID,
-      client_secret: TRAKT_CLIENT_SECRET,
     }),
   });
   if (res.status === 200) {
