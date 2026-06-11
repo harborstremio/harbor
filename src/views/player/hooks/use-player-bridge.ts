@@ -78,6 +78,7 @@ export function usePlayerBridge(params: {
           : [],
         getEmbedRect,
         preferredLangs: settings.subtitlesOffByDefault ? [] : (settings.preferredSubLangs ?? []),
+        subsOff: settings.subtitlesOffByDefault === true,
       });
       if (cancelled) return;
       bridge = choose;

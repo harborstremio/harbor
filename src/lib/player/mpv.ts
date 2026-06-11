@@ -51,7 +51,8 @@ export type MpvOptions = {
   anime4kShaders?: string[];
   d3d11Flip?: boolean;
   getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
-  preferredLangs?: string[]; 
+  preferredLangs?: string[];
+  subsOff?: boolean;
 };
 
 export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
@@ -137,11 +138,20 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         }
         snap.audioTracks = audio;
         snap.subtitleTracks = subs;
-        if (!userPickedSub && !pickedAutoTrack && subs.length > 0 && mpvOptions?.preferredLangs?.length) {
-          const best = pickBestTrack(subs, mpvOptions.preferredLangs);
-          if (best) {
-            pickedAutoTrack = true;
-            invoke("mpv_set_property", { name: "sid", value: Number(best.id) }).catch(() => {});
+        if (!userPickedSub && !pickedAutoTrack) {
+          if (mpvOptions?.subsOff) {
+            const anySelected = subs.some((t) => t.selected);
+            if (anySelected) {
+              pickedAutoTrack = true;
+              invoke("mpv_set_property", { name: "sid", value: "no" }).catch(() => {});
+              for (const t of subs) t.selected = false;
+            }
+          } else if (subs.length > 0 && mpvOptions?.preferredLangs?.length) {
+            const best = pickBestTrack(subs, mpvOptions.preferredLangs);
+            if (best) {
+              pickedAutoTrack = true;
+              invoke("mpv_set_property", { name: "sid", value: Number(best.id) }).catch(() => {});
+            }
           }
         }
       }
