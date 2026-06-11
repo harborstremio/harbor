@@ -68,6 +68,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let geomTauriUnlisten: Array<() => void> = [];
   let mpvStarted = false;
   let suppressEndFileUntil = 0;
+  let userPickedSub = false;
+  let pickedAutoTrack = false;
 
   const emit = () => {
     const next: PlayerSnapshot = { ...snap };
@@ -135,12 +137,13 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         }
         snap.audioTracks = audio;
         snap.subtitleTracks = subs;
-        if (subs.length > 0 && mpvOptions?.preferredLangs?.length) {
-        const best = pickBestTrack(subs, mpvOptions.preferredLangs);
-        if (best) {
-          invoke("mpv_set_property", { name: "sid", value: Number(best.id) }).catch(() => {});
+        if (!userPickedSub && !pickedAutoTrack && subs.length > 0 && mpvOptions?.preferredLangs?.length) {
+          const best = pickBestTrack(subs, mpvOptions.preferredLangs);
+          if (best) {
+            pickedAutoTrack = true;
+            invoke("mpv_set_property", { name: "sid", value: Number(best.id) }).catch(() => {});
+          }
         }
-      }
       }
       if (name === "sub-delay" && typeof data === "number") snap.subDelaySec = data;
       if (name === "audio-delay" && typeof data === "number") snap.audioDelaySec = data;
@@ -222,6 +225,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.durationSec = 0;
       snap.bufferedSec = 0;
       pendingTracks = {};
+      userPickedSub = false;
+      pickedAutoTrack = false;
       emit();
       if (!unlistenEvent) {
         unlistenEvent = await listen<MpvEvent>("mpv://event", (ev) => handleEvent(ev.payload));
@@ -371,6 +376,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       invoke("mpv_set_property", { name: "aid", value: Number(id) || id }).catch(() => {});
     },
     setSubtitleTrack(id) {
+      userPickedSub = true;
+      pickedAutoTrack = true;
       if (id == null) {
         invoke("mpv_set_property", { name: "sid", value: "no" }).catch(() => {});
         snap.subText = "";

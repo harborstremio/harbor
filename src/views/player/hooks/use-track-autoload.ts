@@ -201,12 +201,11 @@ export function useTrackAutoload(params: {
     const baseSub = stripJaForNonAnime(
       resolveLangPreference(settings.preferredSubLangs, settings.preferredLanguages),
     );
-    const audioLangs = prefs?.audioLang
-      ? [prefs.audioLang, ...baseAudio.filter((l) => l !== prefs.audioLang)]
-      : baseAudio;
-    const subLangs = prefs?.subLang
-      ? [prefs.subLang, ...baseSub.filter((l) => l !== prefs.subLang)]
-      : baseSub;
+    const audioLangs =
+      prefs?.audioLang && langScore(prefs.audioLang, baseAudio) >= 0
+        ? [prefs.audioLang, ...baseAudio.filter((l) => l !== prefs.audioLang)]
+        : baseAudio;
+    const subLangs = baseSub;
 
     if (snap.audioTracks.length > 0) {
       const want = pickBestTrack(snap.audioTracks, audioLangs);
@@ -214,7 +213,7 @@ export function useTrackAutoload(params: {
       if (want && (!cur || cur.id !== want.id)) bridgeRef.current?.setAudioTrack(want.id);
     }
     const subSelected = snap.subtitleTracks.some((t) => t.selected);
-    if (!subSelected && snap.subtitleTracks.length > 0 && subLangs.length > 0 && !userPickedSubRef.current) {
+    if (!subSelected && snap.subtitleTracks.length > 0 && subLangs.length > 0 && !userPickedSubRef.current && !settings.subtitlesOffByDefault) {
       const want = pickBestTrack(snap.subtitleTracks, subLangs);
       if (want) bridgeRef.current?.setSubtitleTrack(want.id);
     }

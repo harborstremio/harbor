@@ -83,11 +83,12 @@ export function pickBestTrack<T extends { lang?: string; default?: boolean; forc
   for (const t of tracks) {
     if (t.forced) continue;
     const ls = langScore(t.lang ?? "", preferred);
+    if (ls < 0) continue;
     const score = ls * 10 + (t.default ? 1 : 0);
     if (score > bestScore) {
       bestScore = score;
       best = t;
     }
   }
-  return best ?? tracks[0];
+  return best;
 }
