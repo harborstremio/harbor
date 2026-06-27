@@ -9,13 +9,32 @@ export type CalendarEpisode = TraktItem & {
   episodeTitle?: string;
 };
 
+function utcIsoToLocalDate(iso: string): string {
+  if (!iso) return "";
+  if (!iso.includes("T")) return iso.slice(0, 10);
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso.slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function localDateToday(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export async function fetchUpcomingEpisodes(days = 14): Promise<CalendarEpisode[]> {
   type Raw = {
     first_aired: string;
     episode: { season: number; number: number; title?: string; ids: { imdb?: string; tmdb?: number; tvdb?: number } };
     show: { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; tvdb?: number } };
   };
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateToday();
   const rows = await traktRequest<Raw[]>(
     `/calendars/my/shows/${today}/${days}`,
   ).catch(() => [] as Raw[]);
@@ -24,7 +43,7 @@ export async function fetchUpcomingEpisodes(days = 14): Promise<CalendarEpisode[
     title: r.show.title,
     year: r.show.year,
     ids: r.show.ids,
-    airDate: r.first_aired,
+    airDate: utcIsoToLocalDate(r.first_aired),
     season: r.episode.season,
     number: r.episode.number,
     episodeTitle: r.episode.title,
@@ -36,7 +55,7 @@ export async function fetchUpcomingMovies(days = 30): Promise<TraktItem[]> {
     released: string;
     movie: { title: string; year: number | null; ids: { imdb?: string; tmdb?: number } };
   };
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateToday();
   const rows = await traktRequest<Raw[]>(
     `/calendars/my/movies/${today}/${days}`,
   ).catch(() => [] as Raw[]);
@@ -88,7 +107,7 @@ export async function fetchAnticipatedShows(): Promise<AnticipatedShow[]> {
       title: r.show.title,
       year: r.show.year,
       ids: r.show.ids,
-      firstAired: (r.show.first_aired ?? "").slice(0, 10),
+      firstAired: utcIsoToLocalDate(r.show.first_aired ?? ""),
       poster: null,
       overview: r.show.overview ?? "",
     }));
@@ -115,7 +134,7 @@ export async function fetchAnticipatedMovies(): Promise<AnticipatedMovie[]> {
       title: r.movie.title,
       year: r.movie.year,
       ids: r.movie.ids,
-      released: (r.movie.released ?? "").slice(0, 10),
+      released: utcIsoToLocalDate(r.movie.released ?? ""),
       poster: null,
       overview: r.movie.overview ?? "",
     }));
