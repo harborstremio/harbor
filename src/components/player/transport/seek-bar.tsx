@@ -12,6 +12,7 @@ import { SeekBarVisual } from "./seek-bar-visual";
 import { fmtTime } from "./transport-utils";
 
 const BUFFER_PAD_SEC = 4;
+const PENDING_MAX_MS = 2500;
 
 export function SeekBar({
   durationSec,
@@ -26,9 +27,12 @@ export function SeekBar({
   const [hover, setHover] = useState<number | null>(null);
   const [scrub, setScrub] = useState<number | null>(null);
   const [pending, setPending] = useState<number | null>(null);
+  const pendingAtRef = useRef<number | null>(null);
+  const positionRef = useRef(0);
   const { settings } = useSettings();
   const { active: trickplayActive, bufferedOnly } = useTrickplayState();
   const position = usePlaybackPositionGated(active);
+  positionRef.current = position;
   const buffered = usePlaybackBufferedGated(active);
   const dur = durationSec || 1;
   const value = scrub ?? pending ?? position;
@@ -43,14 +47,50 @@ export function SeekBar({
       color: s.kind === "ad" ? "rgba(239,68,68,0.9)" : undefined,
     }));
 
+  const clearInteraction = () => {
+    setScrub(null);
+    setHover(null);
+  };
+
   useEffect(() => {
     setSeekHovering(hover != null || scrub != null);
   }, [hover, scrub]);
   useEffect(() => () => setSeekHovering(false), []);
   useEffect(() => {
+    const clearInterruptedInteraction = () => {
+      setScrub(null);
+      setHover(null);
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") clearInterruptedInteraction();
+    };
+    window.addEventListener("blur", clearInterruptedInteraction);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("blur", clearInterruptedInteraction);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+  useEffect(() => {
     if (pending == null) return;
-    if (Math.abs(position - pending) < 0.75) setPending(null);
-  }, [pending, position]);
+    const startedAt = pendingAtRef.current ?? Date.now();
+    pendingAtRef.current = startedAt;
+    const clear = () => {
+      setPending(null);
+      pendingAtRef.current = null;
+    };
+    if (Math.abs(positionRef.current - pending) < 0.75 || Date.now() - startedAt >= PENDING_MAX_MS) {
+      clear();
+      return;
+    }
+    const interval = window.setInterval(() => {
+      if (Math.abs(positionRef.current - pending) < 0.75 || Date.now() - startedAt >= PENDING_MAX_MS) {
+        clearInterval(interval);
+        clear();
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [pending]);
 
   const fromEvent = (clientX: number): number => {
     const r = ref.current?.getBoundingClientRect();
@@ -64,16 +104,23 @@ export function SeekBar({
     if (scrub != null) setScrub(fromEvent(e.clientX));
   };
   const onLeave = () => setHover(null);
+  const onCancel = () => clearInteraction();
   const onDown = (e: React.PointerEvent) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
     setPending(null);
+    pendingAtRef.current = null;
     setScrub(fromEvent(e.clientX));
   };
   const onUp = (e: React.PointerEvent) => {
-    e.currentTarget.releasePointerCapture(e.pointerId);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
     if (scrub != null) {
       onSeek(scrub);
       setPending(scrub);
+      pendingAtRef.current = Date.now();
     }
     setScrub(null);
   };
@@ -86,6 +133,7 @@ export function SeekBar({
         onPointerLeave={onLeave}
         onPointerDown={onDown}
         onPointerUp={onUp}
+        onPointerCancel={onCancel}
         className="absolute inset-x-0 top-1/2 -translate-y-1/2 cursor-pointer"
       >
         <SeekBarVisual
