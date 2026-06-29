@@ -7,9 +7,20 @@ import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { omdbPrefetch, useOmdbScores } from "@/lib/providers/omdb";
 import { useImdbRating } from "@/lib/imdb-rating";
-import { tmdbImdbId, tmdbLogo, tmdbMovieImages, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
+import {
+  tmdbImdbId,
+  tmdbLogo,
+  tmdbMovieImages,
+  tmdbTrailerList,
+  useTmdbImdbId,
+} from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
-import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
+import {
+  fetchTrailer,
+  prefetchTrailer,
+  trailerSrc,
+  type TrailerInfo,
+} from "@/lib/trailer";
 import { useView } from "@/lib/view";
 import { usePageVisible } from "@/lib/visibility";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
@@ -20,12 +31,16 @@ export const Hero = memo(function Hero({
   playTrailer = false,
   active = true,
   loadBackdrop = true,
+  full = false,
+  fullQuality = false,
 }: {
   meta: Meta;
   rank?: { label: string; position: number };
   playTrailer?: boolean;
   active?: boolean;
   loadBackdrop?: boolean;
+  full?: boolean;
+  fullQuality?: boolean;
 }) {
   const { settings } = useSettings();
   const { openMeta } = useView();
@@ -34,7 +49,11 @@ export const Hero = memo(function Hero({
   const inWatchlist = useInWatchlist(meta.id, [resolvedImdb]);
   const [bgUrl, setBgUrl] = useState<string | undefined>(meta.background);
   const [bgResolved, setBgResolved] = useState<boolean>(!!meta.background);
-  const bg = bgUrl ? upsizeTmdb(bgUrl) : bgResolved ? meta.poster : undefined;
+  const bg = bgUrl
+    ? upsizeTmdb(bgUrl, fullQuality)
+    : bgResolved
+      ? meta.poster
+      : undefined;
   const [trailerCandidates, setTrailerCandidates] = useState<string[]>([]);
   const [trailerInfo, setTrailerInfo] = useState<TrailerInfo | null>(null);
   const [videoReady, setVideoReady] = useState(false);
@@ -46,7 +65,8 @@ export const Hero = memo(function Hero({
   const omdb = useOmdbScores(resolvedImdb ?? undefined);
   const imdbRating = useImdbRating(meta, resolvedImdb);
   const pageVisible = usePageVisible();
-  const wantsPlayback = !!playTrailer && !!trailerInfo && !overControls && pageVisible;
+  const wantsPlayback =
+    !!playTrailer && !!trailerInfo && !overControls && pageVisible;
 
   useEffect(() => {
     setTrailerCandidates([]);
@@ -171,7 +191,7 @@ export const Hero = memo(function Hero({
   return (
     <section
       onClick={() => openMeta({ ...meta, logo: logo ?? meta.logo })}
-      className="group relative h-[560px] cursor-pointer overflow-hidden rounded-[28px] bg-canvas"
+      className={`group relative cursor-pointer overflow-hidden bg-canvas ${full ? "h-[clamp(560px,82vh,920px)] rounded-none" : "h-[560px] rounded-[28px]"}`}
       style={{ isolation: "isolate" }}
     >
       {bg && loadBackdrop && (
@@ -180,13 +200,13 @@ export const Hero = memo(function Hero({
           alt=""
           decoding="async"
           fetchPriority={active ? "high" : "low"}
-          className="absolute inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[26px] object-cover transition-opacity duration-500"
+          className={`absolute object-cover transition-opacity duration-500 ${full ? "inset-0 h-full w-full rounded-none" : "inset-[2px] h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[26px]"}`}
           style={{ opacity: wantsPlayback && videoReady ? 0 : 0.9 }}
         />
       )}
       {trailerInfo && (
         <div
-          className="pointer-events-none absolute inset-[2px] overflow-hidden rounded-[26px] transition-opacity duration-500"
+          className={`pointer-events-none absolute overflow-hidden transition-opacity duration-500 ${full ? "inset-0 rounded-none" : "inset-[2px] rounded-[26px]"}`}
           style={{ opacity: wantsPlayback && videoReady ? 1 : 0 }}
         >
           <video
@@ -208,24 +228,41 @@ export const Hero = memo(function Hero({
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-canvas via-canvas/70 via-50% to-transparent" />
       <MetaAwardsCorner meta={meta} imdbId={resolvedImdb} />
 
-      <div className="relative flex h-full flex-col justify-center p-14">
+      <div
+        className={`relative flex h-full flex-col justify-center p-14 ${full ? "pt-28 lg:pt-32" : ""}`}
+      >
         <div className="max-w-2xl">
           {rank && (
             <div className="mb-5 inline-flex items-center gap-1.5 self-start rounded-md bg-canvas/85 px-2.5 py-1 text-[12px] font-semibold text-ink">
               <TrendingUp size={12} className="text-accent" />
               <span>
-                {t("#{position} in {label} Today", { position: rank.position, label: t(rank.label) })}
+                {t("#{position} in {label} Today", {
+                  position: rank.position,
+                  label: t(rank.label),
+                })}
               </span>
             </div>
           )}
-          <HeroTitlePlate name={meta.name} logo={logo} loaded={logoLoaded} resolved={logoResolved} onLoad={() => setLogoLoaded(true)} onError={() => { setLogo(undefined); setLogoResolved(true); }} />
+          <HeroTitlePlate
+            name={meta.name}
+            logo={logo}
+            loaded={logoLoaded}
+            resolved={logoResolved}
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => {
+              setLogo(undefined);
+              setLogoResolved(true);
+            }}
+          />
           {meta.description && (
             <p className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted">
               {meta.description}
             </p>
           )}
           <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-2 text-[14px]">
-            {meta.releaseInfo && <Stat label={t("Year")} value={meta.releaseInfo} />}
+            {meta.releaseInfo && (
+              <Stat label={t("Year")} value={meta.releaseInfo} />
+            )}
             {settings.showImdbBadge && imdbRating && (
               <span className="flex items-center gap-2">
                 <ImdbIcon className="h-[18px] w-auto rounded-[4px] shadow-[0_1px_3px_rgba(0,0,0,0.35)]" />
@@ -235,7 +272,9 @@ export const Hero = memo(function Hero({
             {settings.showRtBadge && omdb?.rtCritics != null && (
               <span className="flex items-center gap-2">
                 <RtBadge score={omdb.rtCritics} className="h-[18px] w-auto" />
-                <span className="font-semibold text-ink">{omdb.rtCritics}%</span>
+                <span className="font-semibold text-ink">
+                  {omdb.rtCritics}%
+                </span>
               </span>
             )}
             {meta.runtime && <Stat label={t("Runtime")} value={meta.runtime} />}
@@ -268,7 +307,11 @@ export const Hero = memo(function Hero({
               }}
               className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75"
             >
-              {inWatchlist ? <Check size={18} strokeWidth={2.4} /> : <Plus size={18} strokeWidth={2} />}
+              {inWatchlist ? (
+                <Check size={18} strokeWidth={2.4} />
+              ) : (
+                <Plus size={18} strokeWidth={2} />
+              )}
               {inWatchlist ? t("In Watchlist") : t("Add to Watchlist")}
             </button>
           </div>
@@ -311,7 +354,10 @@ function HeroTitlePlate({
       ) : resolved ? (
         <h2
           className="font-display text-[68px] font-medium leading-[0.98] tracking-tight text-ink"
-          style={{ animation: "harbor-fade-in 420ms cubic-bezier(0.32, 0.72, 0.24, 1) both" }}
+          style={{
+            animation:
+              "harbor-fade-in 420ms cubic-bezier(0.32, 0.72, 0.24, 1) both",
+          }}
         >
           {name}
         </h2>
@@ -329,7 +375,8 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function upsizeTmdb(url?: string): string | undefined {
+function upsizeTmdb(url?: string, full = false): string | undefined {
   if (!url) return url;
-  return url.replace("/t/p/w780/", "/t/p/w1280/");
+  const size = full ? "original" : "w1280";
+  return url.replace("/t/p/w780/", `/t/p/${size}/`);
 }

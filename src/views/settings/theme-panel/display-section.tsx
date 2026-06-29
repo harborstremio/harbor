@@ -15,11 +15,15 @@ export function DisplaySection() {
     <>
       <Section
         title={t("Poster card style")}
-        subtitle={t("Tune the size and corner radius of every poster across Home, Discover, and your library. The preview updates live.")}
+        subtitle={t(
+          "Tune the size and corner radius of every poster across Home, Discover, and your library. The preview updates live.",
+        )}
       >
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
           <div className="flex shrink-0 flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-6 sm:w-[250px]">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Live preview")}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+              {t("Live preview")}
+            </span>
             <div className="flex justify-center py-1">
               <img
                 src={previewPoster}
@@ -36,11 +40,15 @@ export function DisplaySection() {
                   value={cardW}
                   min={90}
                   max={300}
-                  onCommit={(px) => update({ posterScale: Math.round((px / 150) * 100) / 100 })}
+                  onCommit={(px) =>
+                    update({ posterScale: Math.round((px / 150) * 100) / 100 })
+                  }
                 />
               </span>
               <span className="flex items-center justify-between gap-3">
-                <span className="font-medium text-ink">{t("Corner radius")}</span>
+                <span className="font-medium text-ink">
+                  {t("Corner radius")}
+                </span>
                 <PxField
                   value={settings.posterRadius}
                   min={0}
@@ -54,32 +62,54 @@ export function DisplaySection() {
                   value={cardH}
                   min={135}
                   max={450}
-                  onCommit={(px) => update({ posterScale: Math.round((px / 225) * 100) / 100 })}
+                  onCommit={(px) =>
+                    update({ posterScale: Math.round((px / 225) * 100) / 100 })
+                  }
                 />
               </span>
             </div>
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Size")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Size")}
+              </span>
               <Segmented
                 value={posterSizeKey(settings.posterScale)}
-                options={POSTER_SIZES.map((p) => ({ value: p.value, label: p.label }))}
+                options={POSTER_SIZES.map((p) => ({
+                  value: p.value,
+                  label: p.label,
+                }))}
                 onChange={(v) =>
-                  update({ posterScale: POSTER_SIZES.find((p) => p.value === v)?.scale ?? 1 })
+                  update({
+                    posterScale:
+                      POSTER_SIZES.find((p) => p.value === v)?.scale ?? 1,
+                  })
                 }
               />
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Corner radius")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Corner radius")}
+              </span>
               <Segmented
                 value={radiusKey(settings.posterRadius)}
-                options={POSTER_RADII.map((p) => ({ value: p.value, label: t(p.label) }))}
-                onChange={(v) => update({ posterRadius: POSTER_RADII.find((p) => p.value === v)?.px ?? 12 })}
+                options={POSTER_RADII.map((p) => ({
+                  value: p.value,
+                  label: t(p.label),
+                }))}
+                onChange={(v) =>
+                  update({
+                    posterRadius:
+                      POSTER_RADII.find((p) => p.value === v)?.px ?? 12,
+                  })
+                }
               />
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Load effect")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Load effect")}
+              </span>
               <Segmented
                 value={settings.posterEffect}
                 options={[
@@ -87,10 +117,14 @@ export function DisplaySection() {
                   { value: "fade", label: t("Fade") },
                   { value: "off", label: t("Instant") },
                 ]}
-                onChange={(v) => update({ posterEffect: v as "blur" | "fade" | "off" })}
+                onChange={(v) =>
+                  update({ posterEffect: v as "blur" | "fade" | "off" })
+                }
               />
               <p className="text-[12px] leading-relaxed text-ink-subtle">
-                {t("How posters appear as they load. Blur up looks smoothest; Fade is lighter on older or low-power devices; Instant turns it off.")}
+                {t(
+                  "How posters appear as they load. Blur up looks smoothest; Fade is lighter on older or low-power devices; Instant turns it off.",
+                )}
               </p>
             </div>
           </div>
@@ -99,7 +133,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Title text")}
-        subtitle={t("Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.")}
+        subtitle={t(
+          "Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.",
+        )}
       >
         <SizeSlider
           label={t("Row titles")}
@@ -113,7 +149,9 @@ export function DisplaySection() {
         />
         <ToggleRow
           label={t("Show series name first in the player")}
-          sub={t("Lead with the show name instead of the episode title at the top of the player.")}
+          sub={t(
+            "Lead with the show name instead of the episode title at the top of the player.",
+          )}
           value={settings.playerTitleSeriesFirst}
           onChange={(v) => update({ playerTitleSeriesFirst: v })}
         />
@@ -121,10 +159,14 @@ export function DisplaySection() {
 
       <Section
         title={t("Accessibility")}
-        subtitle={t("Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.")}
+        subtitle={t(
+          "Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.",
+        )}
       >
         <div className="flex items-center gap-4 px-1 py-1.5">
-          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Interface scale")}</span>
+          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
+            {t("Interface scale")}
+          </span>
           <input
             type="range"
             min={0.8}
@@ -150,11 +192,15 @@ export function DisplaySection() {
 
       <Section
         title={t("Stream format chips")}
-        subtitle={t("The little 4K · HDR · codec · audio chips that ride along each stream in the play picker.")}
+        subtitle={t(
+          "The little 4K · HDR · codec · audio chips that ride along each stream in the play picker.",
+        )}
       >
         <ToggleRow
           label={t("Show format chips on stream rows")}
-          sub={t("The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.")}
+          sub={t(
+            "The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.",
+          )}
           value={settings.showQualityBadge}
           onChange={(v) => update({ showQualityBadge: v })}
         />
@@ -162,18 +208,46 @@ export function DisplaySection() {
       </Section>
 
       <Section
+        title={t("Home hero")}
+        subtitle={t("Make the featured banner on Home bigger and sharper.")}
+      >
+        <ToggleRow
+          label={t("Full hero banner")}
+          sub={t(
+            "Stretch the featured hero edge to edge and taller, across every layout.",
+          )}
+          value={settings.heroFull}
+          onChange={(v) => update({ heroFull: v })}
+        />
+        <ToggleRow
+          label={t("Full quality hero image")}
+          sub={t(
+            "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.",
+          )}
+          value={settings.heroFullQuality}
+          onChange={(v) => update({ heroFullQuality: v })}
+        />
+      </Section>
+
+      <Section
         title={t("Home hero shadow")}
-        subtitle={t("How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.")}
+        subtitle={t(
+          "How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.",
+        )}
       >
         <div className="flex items-center gap-4 px-1 py-1.5">
-          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Shadow")}</span>
+          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
+            {t("Shadow")}
+          </span>
           <input
             type="range"
             min={0}
             max={100}
             step={5}
             value={settings.heroShadow}
-            onChange={(e) => update({ heroShadow: parseInt(e.target.value, 10) })}
+            onChange={(e) =>
+              update({ heroShadow: parseInt(e.target.value, 10) })
+            }
             className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
           />
           <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
@@ -192,7 +266,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Trailer quality")}
-        subtitle={t("How sharp the trailer is when you hit the preview button. Auto picks from your connection speed. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.")}
+        subtitle={t(
+          "How sharp the trailer is when you hit the preview button. Auto picks from your connection speed. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.",
+        )}
       >
         <Segmented
           value={settings.trailerQuality}
@@ -207,7 +283,9 @@ export function DisplaySection() {
         />
         <ToggleRow
           label={t("Autoplay trailer on detail pages")}
-          sub={t("Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.")}
+          sub={t(
+            "Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.",
+          )}
           value={settings.detailTrailerAutoplay}
           onChange={(v) => update({ detailTrailerAutoplay: v })}
         />
@@ -228,7 +306,9 @@ function SizeSlider({
   const t = useT();
   return (
     <div className="flex items-center gap-4 px-1 py-1.5">
-      <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{label}</span>
+      <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
+        {label}
+      </span>
       <input
         type="range"
         min={0.8}
@@ -262,7 +342,9 @@ const POSTER_RADII = [
 ];
 
 function radiusKey(px: number): string {
-  return POSTER_RADII.reduce((best, p) => (Math.abs(p.px - px) < Math.abs(best.px - px) ? p : best)).value;
+  return POSTER_RADII.reduce((best, p) =>
+    Math.abs(p.px - px) < Math.abs(best.px - px) ? p : best,
+  ).value;
 }
 
 function PxField({

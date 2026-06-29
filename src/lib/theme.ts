@@ -21,9 +21,33 @@ export type ThemePresetId =
   | "forest"
   | "noir";
 
-export type ThemeLayout = "sidebar" | "topdock" | "rail" | "stremio" | "minui" | "dracula" | "nord" | "forest" | "royal" | "custom";
-export type ThemeCardStyle = "flat" | "glass" | "stremio" | "minui" | "crunch" | "noir" | "custom";
-export type ThemeButtonStyle = "flat" | "glossy" | "minui" | "crunch" | "noir" | "custom";
+export type ThemeLayout =
+  | "sidebar"
+  | "topdock"
+  | "rail"
+  | "stremio"
+  | "minui"
+  | "dracula"
+  | "nord"
+  | "forest"
+  | "royal"
+  | "cinematic"
+  | "custom";
+export type ThemeCardStyle =
+  | "flat"
+  | "glass"
+  | "stremio"
+  | "minui"
+  | "crunch"
+  | "noir"
+  | "custom";
+export type ThemeButtonStyle =
+  | "flat"
+  | "glossy"
+  | "minui"
+  | "crunch"
+  | "noir"
+  | "custom";
 
 export type ActiveThemeId = ThemePresetId | "custom" | `user:${string}`;
 
@@ -322,7 +346,8 @@ export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
   {
     id: "minui" as ThemePresetId,
     name: "MinUI",
-    blurb: "Floating icon dock. Crisp and light. Big targets, restrained chrome.",
+    blurb:
+      "Floating icon dock. Crisp and light. Big targets, restrained chrome.",
     previewImage: minuiPreview,
     swatch: ["#f7f7f8", "#ffffff", "#0d7c66"],
     tokens: {
@@ -505,7 +530,10 @@ export function getThemeById(id: string): ThemePreset | null {
   const template = TEMPLATE_THEMES.find((t) => t.id === id);
   if (template) return template;
   if (id.startsWith("user:")) {
-    return (getCustomThemes().find((t) => t.id === id) as ThemePreset | undefined) ?? null;
+    return (
+      (getCustomThemes().find((t) => t.id === id) as ThemePreset | undefined) ??
+      null
+    );
   }
   return null;
 }
@@ -563,7 +591,13 @@ export function resolveChromeTheme(
   return activeLayout(theme) === "stremio" ? "stremio" : "default";
 }
 
-const TOPBAR_BACK_LAYOUTS = new Set(["sidebar", "dracula", "nord", "forest", "stremio"]);
+const TOPBAR_BACK_LAYOUTS = new Set([
+  "sidebar",
+  "dracula",
+  "nord",
+  "forest",
+  "stremio",
+]);
 
 export function layoutHasGlobalBack(): boolean {
   const l = document.documentElement.dataset.themeLayout ?? "sidebar";
@@ -575,7 +609,10 @@ export function activeBokeh(theme: ThemeSettings): boolean {
   return !!preset?.bokeh;
 }
 
-export function applyCustomColorsPreview(c: CustomColors, fontPair: FontPairId): void {
+export function applyCustomColorsPreview(
+  c: CustomColors,
+  fontPair: FontPairId,
+): void {
   applyTheme({
     preset: "custom",
     customColors: c,

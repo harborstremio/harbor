@@ -12,7 +12,15 @@ const SNAP_RATIO = 0.18;
 const FLICK_VELOCITY = 0.45;
 const SLIDE_GAP_PX = 22;
 
-export function HeroCarousel({ slides }: { slides: Slide[] }) {
+export function HeroCarousel({
+  slides,
+  full = false,
+  fullQuality = false,
+}: {
+  slides: Slide[];
+  full?: boolean;
+  fullQuality?: boolean;
+}) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -37,8 +45,12 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
   const widthRef = useRef(0);
 
   useEffect(() => {
-    if (paused || dragging || !inViewport || !pageVisible || slides.length < 2) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % slides.length), 13000);
+    if (paused || dragging || !inViewport || !pageVisible || slides.length < 2)
+      return;
+    const id = setInterval(
+      () => setActive((a) => (a + 1) % slides.length),
+      13000,
+    );
     return () => clearInterval(id);
   }, [paused, dragging, inViewport, pageVisible, slides.length]);
 
@@ -48,7 +60,9 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
 
   if (slides.length === 0) {
     return (
-      <div className="min-h-[560px] animate-pulse rounded-[28px] border border-edge-soft bg-elevated/30" />
+      <div
+        className={`animate-pulse border border-edge-soft bg-elevated/30 ${full ? "min-h-[clamp(560px,82vh,920px)] rounded-none" : "min-h-[560px] rounded-[28px]"}`}
+      />
     );
   }
 
@@ -103,7 +117,9 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
     const distance = offset;
     const threshold = W * SNAP_RATIO;
     const v = velocity.current;
-    const wantNext = (distance < -threshold || v < -FLICK_VELOCITY) && active < slides.length - 1;
+    const wantNext =
+      (distance < -threshold || v < -FLICK_VELOCITY) &&
+      active < slides.length - 1;
     const wantPrev = (distance > threshold || v > FLICK_VELOCITY) && active > 0;
     if (wantNext) setActive(active + 1);
     else if (wantPrev) setActive(active - 1);
@@ -133,7 +149,7 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onClickCapture={onClickCapture}
-        className={`relative overflow-hidden rounded-[28px] ${
+        className={`relative overflow-hidden ${full ? "rounded-none" : "rounded-[28px]"} ${
           dragging ? "cursor-grabbing" : "cursor-grab"
         } select-none`}
         style={{ touchAction: "pan-y" }}
@@ -171,9 +187,13 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
                     rank={s.rank}
                     active={isActive}
                     loadBackdrop={distance === 0}
+                    full={full}
+                    fullQuality={fullQuality}
                   />
                 ) : (
-                  <div className="h-[560px] w-full rounded-[28px] bg-elevated/30" />
+                  <div
+                    className={`w-full bg-elevated/30 ${full ? "h-[clamp(560px,82vh,920px)] rounded-none" : "h-[560px] rounded-[28px]"}`}
+                  />
                 )}
               </div>
             );
@@ -188,7 +208,9 @@ export function HeroCarousel({ slides }: { slides: Slide[] }) {
               onClick={() => setActive(i)}
               aria-label={t("Slide {n}", { n: i + 1 })}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === active ? "w-12 bg-ink" : "w-6 bg-ink-muted/70 hover:bg-ink-muted"
+                i === active
+                  ? "w-12 bg-ink"
+                  : "w-6 bg-ink-muted/70 hover:bg-ink-muted"
               }`}
             />
           ))}

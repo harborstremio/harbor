@@ -40,6 +40,12 @@ const LAYOUTS: LayoutDef[] = [
     diagram: (a) => <Diagram active={a} kind="minui" />,
   },
   {
+    id: "cinematic",
+    name: "Cinematic",
+    blurb: "Immersive floating overlay nav.",
+    diagram: (a) => <Diagram active={a} kind="cinematic" />,
+  },
+  {
     id: "custom",
     name: "Custom",
     blurb: "Write your own chrome with HTML + CSS.",
@@ -74,7 +80,9 @@ export function LayoutPicker({
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-[13.5px] font-semibold text-ink">{l.name}</span>
+                <span className="text-[13.5px] font-semibold text-ink">
+                  {l.name}
+                </span>
                 <span className="text-[11.5px] text-ink-subtle">{l.blurb}</span>
               </div>
               {active && (
@@ -90,71 +98,161 @@ export function LayoutPicker({
   );
 }
 
-function Diagram({
-  active,
-  kind,
-}: {
-  active: boolean;
-  kind: ThemeLayout;
-}) {
+function Diagram({ active, kind }: { active: boolean; kind: ThemeLayout }) {
   const accent = active ? "var(--color-accent)" : "var(--color-ink-subtle)";
   const dim = "var(--color-edge)";
   if (kind === "sidebar") {
     return (
       <svg viewBox="0 0 80 60" className="h-full w-full">
-        <rect x="3" y="3" width="22" height="54" rx="3" fill={accent} opacity="0.18" />
+        <rect
+          x="3"
+          y="3"
+          width="22"
+          height="54"
+          rx="3"
+          fill={accent}
+          opacity="0.18"
+        />
         <circle cx="14" cy="14" r="2" fill={accent} />
         <rect x="20" y="13" width="0" height="0" />
         <line x1="20" y1="14" x2="22" y2="14" stroke={accent} strokeWidth="2" />
         <circle cx="14" cy="22" r="2" fill={dim} />
         <circle cx="14" cy="30" r="2" fill={dim} />
-        <rect x="29" y="6" width="48" height="6" rx="2" fill={dim} opacity="0.5" />
-        <rect x="29" y="18" width="48" height="36" rx="2" fill={dim} opacity="0.3" />
+        <rect
+          x="29"
+          y="6"
+          width="48"
+          height="6"
+          rx="2"
+          fill={dim}
+          opacity="0.5"
+        />
+        <rect
+          x="29"
+          y="18"
+          width="48"
+          height="36"
+          rx="2"
+          fill={dim}
+          opacity="0.3"
+        />
       </svg>
     );
   }
   if (kind === "topdock") {
     return (
       <svg viewBox="0 0 80 60" className="h-full w-full">
-        <rect x="6" y="4" width="68" height="9" rx="4.5" fill={accent} opacity="0.18" />
+        <rect
+          x="6"
+          y="4"
+          width="68"
+          height="9"
+          rx="4.5"
+          fill={accent}
+          opacity="0.18"
+        />
         <circle cx="14" cy="8.5" r="1.8" fill={accent} />
         <circle cx="22" cy="8.5" r="1.8" fill={dim} />
         <circle cx="30" cy="8.5" r="1.8" fill={dim} />
         <circle cx="38" cy="8.5" r="1.8" fill={dim} />
-        <rect x="6" y="18" width="68" height="38" rx="2" fill={dim} opacity="0.3" />
+        <rect
+          x="6"
+          y="18"
+          width="68"
+          height="38"
+          rx="2"
+          fill={dim}
+          opacity="0.3"
+        />
       </svg>
     );
   }
   if (kind === "rail") {
     return (
       <svg viewBox="0 0 80 60" className="h-full w-full">
-        <rect x="3" y="3" width="11" height="54" rx="3" fill={accent} opacity="0.18" />
+        <rect
+          x="3"
+          y="3"
+          width="11"
+          height="54"
+          rx="3"
+          fill={accent}
+          opacity="0.18"
+        />
         <circle cx="8.5" cy="12" r="2" fill={accent} />
         <circle cx="8.5" cy="22" r="2" fill={dim} />
         <circle cx="8.5" cy="32" r="2" fill={dim} />
         <circle cx="8.5" cy="42" r="2" fill={dim} />
-        <rect x="18" y="6" width="59" height="6" rx="2" fill={dim} opacity="0.5" />
-        <rect x="18" y="18" width="59" height="36" rx="2" fill={dim} opacity="0.3" />
+        <rect
+          x="18"
+          y="6"
+          width="59"
+          height="6"
+          rx="2"
+          fill={dim}
+          opacity="0.5"
+        />
+        <rect
+          x="18"
+          y="18"
+          width="59"
+          height="36"
+          rx="2"
+          fill={dim}
+          opacity="0.3"
+        />
       </svg>
     );
   }
   if (kind === "stremio") {
     return (
       <svg viewBox="0 0 80 60" className="h-full w-full">
-        <rect x="3" y="3" width="13" height="54" rx="3" fill={accent} opacity="0.18" />
+        <rect
+          x="3"
+          y="3"
+          width="13"
+          height="54"
+          rx="3"
+          fill={accent}
+          opacity="0.18"
+        />
         <rect x="6" y="9" width="7" height="7" rx="1.5" fill={accent} />
         <rect x="6" y="19" width="7" height="7" rx="1.5" fill={dim} />
         <rect x="6" y="29" width="7" height="7" rx="1.5" fill={dim} />
         <rect x="6" y="39" width="7" height="7" rx="1.5" fill={dim} />
-        <rect x="20" y="6" width="57" height="48" rx="2" fill={dim} opacity="0.3" />
+        <rect
+          x="20"
+          y="6"
+          width="57"
+          height="48"
+          rx="2"
+          fill={dim}
+          opacity="0.3"
+        />
       </svg>
     );
   }
   if (kind === "minui") {
     return (
       <svg viewBox="0 0 80 60" className="h-full w-full">
-        <rect x="3" y="3" width="74" height="44" rx="2" fill={dim} opacity="0.3" />
-        <rect x="20" y="49" width="40" height="8" rx="4" fill={accent} opacity="0.22" />
+        <rect
+          x="3"
+          y="3"
+          width="74"
+          height="44"
+          rx="2"
+          fill={dim}
+          opacity="0.3"
+        />
+        <rect
+          x="20"
+          y="49"
+          width="40"
+          height="8"
+          rx="4"
+          fill={accent}
+          opacity="0.22"
+        />
         <circle cx="26" cy="53" r="1.8" fill={dim} />
         <circle cx="33" cy="53" r="2.2" fill={accent} />
         <circle cx="41" cy="53" r="1.8" fill={dim} />
@@ -163,9 +261,75 @@ function Diagram({
       </svg>
     );
   }
+  if (kind === "cinematic") {
+    return (
+      <svg viewBox="0 0 80 60" className="h-full w-full">
+        <rect
+          x="3"
+          y="3"
+          width="74"
+          height="54"
+          rx="2"
+          fill={accent}
+          opacity="0.16"
+        />
+        <rect
+          x="3"
+          y="3"
+          width="74"
+          height="22"
+          rx="2"
+          fill={accent}
+          opacity="0.10"
+        />
+        <rect
+          x="22"
+          y="7"
+          width="36"
+          height="7"
+          rx="3.5"
+          fill={accent}
+          opacity="0.5"
+        />
+        <circle cx="29" cy="10.5" r="1.4" fill={accent} />
+        <circle cx="36" cy="10.5" r="1.4" fill={dim} />
+        <circle cx="43" cy="10.5" r="1.4" fill={dim} />
+        <circle cx="50" cy="10.5" r="1.4" fill={dim} />
+        <rect
+          x="10"
+          y="40"
+          width="30"
+          height="4"
+          rx="2"
+          fill={dim}
+          opacity="0.6"
+        />
+        <rect
+          x="10"
+          y="47"
+          width="20"
+          height="3"
+          rx="1.5"
+          fill={dim}
+          opacity="0.4"
+        />
+      </svg>
+    );
+  }
   return (
     <svg viewBox="0 0 80 60" className="h-full w-full">
-      <rect x="3" y="3" width="74" height="54" rx="2" fill={accent} opacity="0.08" stroke={accent} strokeWidth="0.6" strokeDasharray="2 2" />
+      <rect
+        x="3"
+        y="3"
+        width="74"
+        height="54"
+        rx="2"
+        fill={accent}
+        opacity="0.08"
+        stroke={accent}
+        strokeWidth="0.6"
+        strokeDasharray="2 2"
+      />
       <text
         x="40"
         y="28"

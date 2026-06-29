@@ -23,7 +23,12 @@ export type WebhookTrigger =
   | { event: "fromCountry"; countryCodes: string[] }
   | { event: "fromTraktAnticipated" }
   | { event: "fromTraktWatchlist" }
-  | { event: "liveTvEvent"; channelIds?: string[]; favoritesOnly?: boolean; leadMinutes?: number };
+  | {
+      event: "liveTvEvent";
+      channelIds?: string[];
+      favoritesOnly?: boolean;
+      leadMinutes?: number;
+    };
 
 export type ContentCategory = "anime" | "liveTv" | "sports" | "adult";
 
@@ -70,6 +75,8 @@ export type Settings = {
   trailerQuality: "auto" | "360p" | "720p" | "1080p" | "best";
   detailTrailerAutoplay: boolean;
   heroShadow: number;
+  heroFull: boolean;
+  heroFullQuality: boolean;
   resumePrompt: boolean;
   resumePlayback: boolean;
   badgePlacement: "top" | "bottom";
@@ -148,12 +155,22 @@ export type Settings = {
   subStyle: "shadow" | "outline" | "box";
   subFontFamily: string;
   subBold: boolean;
-  customFonts: Array<{ id: string; name: string; dataUrl: string; format: string }>;
+  customFonts: Array<{
+    id: string;
+    name: string;
+    dataUrl: string;
+    format: string;
+  }>;
   subBoxOpacity: number;
   subBoxColor: string;
   subOpacity: number;
   subLineSpacing: number;
-  subProvidersEnabled: { wyzie: boolean; opensubtitles: boolean; jimaku: boolean; addons: boolean };
+  subProvidersEnabled: {
+    wyzie: boolean;
+    opensubtitles: boolean;
+    jimaku: boolean;
+    addons: boolean;
+  };
   subShowInPip: boolean;
   subtitlesOffByDefault: boolean;
   preferEmbeddedSubs: boolean;
