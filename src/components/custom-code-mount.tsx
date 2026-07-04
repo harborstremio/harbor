@@ -61,30 +61,6 @@ export function CustomCodeMount() {
     el.textContent = themeExt?.css ?? "";
   }, [themeExt?.css]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const code = (settings.customJs ?? "").trim();
-    if (!code) return;
-    try {
-      new Function(code)();
-    } catch (err) {
-      console.warn("[harbor-custom-js] error:", err);
-    }
-    return () => runThemeCleanup("__harborCustomCleanup");
-  }, [settings.customJs]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const code = (themeExt?.js ?? "").trim();
-    if (!code) return;
-    try {
-      new Function(code)();
-    } catch (err) {
-      console.warn("[harbor-theme-js] error:", err);
-    }
-    return () => runThemeCleanup("__harborThemeCleanup");
-  }, [themeExt?.js]);
-
   const html = `${settings.customHtml ?? ""}${themeExt?.html ?? ""}`;
   return (
     <div
