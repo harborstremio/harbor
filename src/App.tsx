@@ -922,7 +922,7 @@ function Shell() {
                 key={`picker-${picker.meta.id}-${picker.episode?.season ?? ""}-${picker.episode?.episode ?? ""}-${picker.attempt ?? 0}-${picker.intent ?? "play"}`}
                 meta={picker.meta}
                 episode={picker.episode}
-                autoPlay={picker.intent === "download" ? false : picker.autoPlay}
+                autoPlay={picker.intent === "download" || picker.intent === "download-season" ? false : picker.autoPlay}
                 attempt={picker.attempt}
                 intent={picker.intent}
                 resume={picker.resume}

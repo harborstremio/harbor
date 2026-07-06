@@ -66,7 +66,7 @@ export function usePickHandler({
   sendInvite: (invite: PlayInvite) => void;
   claimHost: (fresh: boolean) => void;
   openPlayer: (src: PlayerSrc) => void;
-  intent?: "play" | "download";
+  intent?: "play" | "download" | "download-season";
   onDownloadStarted?: (label?: string | null) => void;
   autoActive: boolean;
   autoAttemptIdx: number;
@@ -189,7 +189,7 @@ export function usePickHandler({
         }
         return;
       }
-      if (intent === "download") {
+      if (intent === "download" || intent === "download-season") {
         const label =
           [stream.resolution, stream.source].filter(Boolean).join(" ") ||
           stream.parsedTitle ||

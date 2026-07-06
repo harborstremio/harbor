@@ -99,7 +99,7 @@ export type Frame =
   | { kind: "grid"; grid: GridSpec }
   | { kind: "award"; awardType: import("./providers/wikidata").AwardType }
   | { kind: "anime-award"; sourceId: import("./anime-awards").AwardSourceId }
-  | { kind: "picker"; meta: Meta; episode?: PlayEpisode; autoPlay?: boolean; attempt?: number; intent?: "play" | "download"; resume?: boolean }
+  | { kind: "picker"; meta: Meta; episode?: PlayEpisode; autoPlay?: boolean; attempt?: number; intent?: "play" | "download" | "download-season"; resume?: boolean }
   | { kind: "player"; src: PlayerSrc }
   | { kind: "match-detail"; game: SportsGame };
 
@@ -156,11 +156,11 @@ type ViewValue = {
   animeAwardSource: import("./anime-awards").AwardSourceId | null;
   openAnimeAward: (s: import("./anime-awards").AwardSourceId) => void;
   homeResetTick: number;
-  picker: { meta: Meta; episode?: PlayEpisode; autoPlay?: boolean; attempt?: number; intent?: "play" | "download"; resume?: boolean } | null;
+  picker: { meta: Meta; episode?: PlayEpisode; autoPlay?: boolean; attempt?: number; intent?: "play" | "download" | "download-season"; resume?: boolean } | null;
   openPicker: (
     meta: Meta,
     episode?: PlayEpisode,
-    opts?: { autoPlay?: boolean; attempt?: number; intent?: "play" | "download"; resume?: boolean },
+    opts?: { autoPlay?: boolean; attempt?: number; intent?: "play" | "download" | "download-season"; resume?: boolean },
   ) => void;
   player: PlayerSrc | null;
   openPlayer: (src: PlayerSrc) => void;
@@ -697,7 +697,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   }, [setNavStack]);
 
   const openPicker = useCallback(
-    (m: Meta, ep?: PlayEpisode, opts?: { autoPlay?: boolean; attempt?: number; intent?: "play" | "download"; resume?: boolean }) => {
+    (m: Meta, ep?: PlayEpisode, opts?: { autoPlay?: boolean; attempt?: number; intent?: "play" | "download" | "download-season"; resume?: boolean }) => {
       if (opts?.autoPlay) beginMarathonAdvance();
       setNavStack((cur) => {
         const t = cur[cur.length - 1];

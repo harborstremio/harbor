@@ -65,10 +65,10 @@ export function PlayPicker({
   episode?: PlayEpisode;
   autoPlay?: boolean;
   attempt?: number;
-  intent?: "play" | "download";
+  intent?: "play" | "download" | "download-season";
   resume?: boolean;
 }) {
-  const isDownload = intent === "download";
+  const isDownload = intent === "download" || intent === "download-season";
   const { openPlayer, openSettings, exitPickerToDetail } = useView();
   const backToDetail = () => {
     void exitWindowFullscreen();
