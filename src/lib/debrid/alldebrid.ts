@@ -235,14 +235,20 @@ export function createAllDebrid(apiKey: string): DebridStore {
       if (!status.ok) return status;
       if (status.data.statusCode === 4) {
         const links = status.data.links ?? [];
-        return {
-          ok: true,
-          data: links.map((l, i) => ({
+        const result: DebridFile[] = [];
+        for (let i = 0; i < links.length; i++) {
+          if (signal.aborted) return { ok: false, code: "aborted", status: 0 };
+          const u = await postForm<AdUnlock>("/link/unlock", { link: links[i].link }, signal);
+          if (!u.ok) continue;
+          result.push({
             id: String(i),
-            name: l.filename,
-            size: l.size ?? 0,
-          })),
-        };
+            name: links[i].filename,
+            size: links[i].size ?? 0,
+            url: u.data.link,
+          });
+        }
+        if (result.length === 0) continue;
+        return { ok: true, data: result };
       }
       if (status.data.statusCode >= 5 && status.data.statusCode <= 15) {
         return { ok: false, code: `status-${status.data.statusCode}`, status: 0 };

@@ -219,17 +219,21 @@ export function createDebridLink(apiKey: string): DebridStore {
       if (!list.ok) return list;
       const seedbox = list.data.value?.[0];
       if (seedbox?.files && seedbox.files.length > 0) {
-        return {
-          ok: true,
-          data: seedbox.files.map((f, i) => ({
-            id: String(i),
-            name: f.name,
-            size: f.size,
-          })),
-        };
+        if (seedbox.status === 6 || seedbox.downloadPercent === 100) {
+          return {
+            ok: true,
+            data: seedbox.files.map((f, i) => ({
+              id: String(i),
+              name: f.name,
+              size: f.size,
+              url: f.downloadUrl,
+            })),
+          };
+        }
       }
       await sleep(800, signal);
     }
+    await delEmpty(`/seedbox/${id}/remove`, signal);
     return { ok: false, code: "timeout", status: 0 };
   }
 

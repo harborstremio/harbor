@@ -34,6 +34,7 @@ export type DebridFile = {
   name: string;
   size: number;
   selected?: boolean;
+  url?: string;
 };
 
 export type Transfer = {

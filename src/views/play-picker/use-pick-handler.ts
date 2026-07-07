@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { DebridStore } from "@/lib/debrid/types";
-import { magnetFromHash } from "@/lib/debrid/types";
 import { savePlayback } from "@/lib/playback-history";
 import { saveSeasonLock } from "@/lib/season-lock";
 import { markStreamDead, recordStubEvent } from "@/lib/dead-streams";
@@ -122,6 +121,59 @@ export function usePickHandler({
     resolveAcRef.current = ac;
     let opened = false;
     try {
+      if (intent === "download-season" && stream.infoHash) {
+        const label =
+          [stream.resolution, stream.source].filter(Boolean).join(" ") ||
+          stream.parsedTitle ||
+          stream.title ||
+          stream.name ||
+          stream.addonName ||
+          null;
+        let enqueued = 0;
+        for (const d of debrids) {
+          if (ac.signal.aborted) break;
+          if (!d.listTorrentFiles) continue;
+          const filesResult = await d.listTorrentFiles(stream.infoHash, ac.signal);
+          if (!filesResult.ok || filesResult.data.length === 0) continue;
+          const videoFiles = filesResult.data.filter((f) =>
+            /\.(mkv|mp4|avi|m4v|webm|ts|mov|wmv)$/i.test(f.name),
+          );
+          if (videoFiles.length === 0) continue;
+          const targetSeason = episode?.season ?? 1;
+          for (let i = 0; i < videoFiles.length; i++) {
+            if (ac.signal.aborted) break;
+            const file = videoFiles[i];
+            if (!file.url) continue;
+            const name = file.name;
+            let seaNum = targetSeason;
+            let epNum: number;
+            const seaEp = name.match(/[Ss](\d+)[Ee](\d+)/);
+            if (seaEp) {
+              seaNum = parseInt(seaEp[1], 10);
+              epNum = parseInt(seaEp[2], 10);
+            } else {
+              const epMatch = name.match(/[Ee]0*(\d+)/);
+              epNum = epMatch ? parseInt(epMatch[1], 10) : i + 1;
+            }
+            if (seaNum !== targetSeason) continue;
+            await enqueueDownload({
+              meta,
+              episode: { season: seaNum, episode: epNum },
+              streamLabel: `${label} S${String(seaNum).padStart(2, "0")}E${String(epNum).padStart(2, "0")}`,
+              url: file.url,
+            });
+            enqueued++;
+          }
+          if (enqueued > 0) break;
+        }
+        if (enqueued > 0) {
+          onDownloadStarted?.(`${enqueued} episodes`);
+          opened = true;
+          setResolving(null);
+          return;
+        }
+      }
+
       const hint = episode ? { season: episode.season ?? null, episode: episode.episode ?? null } : undefined;
       const r = await resolveStream(stream, debrids, ac.signal, userCommitted, forceP2p, hint);
       if (ac.signal.aborted) return;
@@ -198,43 +250,6 @@ export function usePickHandler({
           stream.name ||
           stream.addonName ||
           null;
-        if (intent === "download-season" && stream.infoHash) {
-          let enqueued = 0;
-          for (const d of debrids) {
-            if (ac.signal.aborted) break;
-            if (!d.listTorrentFiles) continue;
-            const filesResult = await d.listTorrentFiles(stream.infoHash, ac.signal);
-            if (!filesResult.ok || filesResult.data.length === 0) continue;
-            const videoFiles = filesResult.data.filter((f) =>
-              /\.(mkv|mp4|avi|m4v|webm|ts|mov|wmv)$/i.test(f.name),
-            );
-            if (videoFiles.length === 0) continue;
-            const magnet = magnetFromHash(stream.infoHash);
-            for (let i = 0; i < videoFiles.length; i++) {
-              if (ac.signal.aborted) break;
-              const file = videoFiles[i];
-              const epMatch = file.name.match(/[Ee]0*(\d+)/);
-              const epNum = epMatch ? parseInt(epMatch[1], 10) : i + 1;
-              const fileIdx = parseInt(file.id, 10);
-              const urlResult = await d.playableUrl(magnet, fileIdx, ac.signal);
-              if (!urlResult.ok) continue;
-              void enqueueDownload({
-                meta,
-                episode: { season: episode?.season ?? 1, episode: epNum },
-                streamLabel: `${label} E${epNum}`,
-                url: urlResult.data.url,
-              });
-              enqueued++;
-            }
-            if (enqueued > 0) break;
-          }
-          if (enqueued > 0) {
-            onDownloadStarted?.(`${enqueued} episodes`);
-            opened = true;
-            setResolving(null);
-            return;
-          }
-        }
         void enqueueDownload({ meta, episode, streamLabel: label, url: playUrl });
         opened = true;
         setResolving(null);

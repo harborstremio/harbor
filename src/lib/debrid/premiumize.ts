@@ -163,6 +163,7 @@ export function createPremiumize(apiKey: string): DebridStore {
         id: String(i),
         name: f.path?.split("/").pop() ?? f.path ?? `file-${i}`,
         size: typeof f.size === "string" ? parseInt(f.size, 10) || 0 : (f.size ?? 0),
+        url: f.link,
       })),
     };
   }

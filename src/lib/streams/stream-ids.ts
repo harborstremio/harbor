@@ -5,6 +5,7 @@ export function buildStreamIds(
   episode: PlayEpisode | undefined,
   imdbId: string | null,
   defaultVideoId?: string | null,
+  omitEpisode?: boolean,
 ): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
@@ -21,7 +22,7 @@ export function buildStreamIds(
   const mappedImdb =
     episode?.imdbSeason != null && episode?.imdbEpisode != null ? (episode.imdbId ?? imdbId) : null;
   if (mappedImdb && mappedImdb.startsWith("tt")) {
-    push(`${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
+    push(omitEpisode ? `${mappedImdb}:${episode!.imdbSeason}` : `${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
   }
 
   if (episode?.kitsuStreamId) {
@@ -31,23 +32,23 @@ export function buildStreamIds(
   } else if ((metaId.startsWith("kitsu:") || metaId.startsWith("mal:")) && !episode) {
     push(metaId);
   } else if (metaId.startsWith("tt") && episode) {
-    if (!animeMeta) push(`${metaId}:${episode.season}:${episode.episode}`);
+    if (!animeMeta) push(omitEpisode ? `${metaId}:${episode.season}` : `${metaId}:${episode.season}:${episode.episode}`);
   } else if (metaId.startsWith("tt") && !episode) {
     push(metaId);
   } else if (metaId.startsWith("tmdb:")) {
     if (episode) {
-      if (!animeMeta) push(`${metaId}:${episode.season}:${episode.episode}`);
+      if (!animeMeta) push(omitEpisode ? `${metaId}:${episode.season}` : `${metaId}:${episode.season}:${episode.episode}`);
     } else {
       push(metaId);
     }
   } else {
-    if (episode) push(`${metaId}:${episode.season}:${episode.episode}`);
+    if (episode) push(omitEpisode ? `${metaId}:${episode.season}` : `${metaId}:${episode.season}:${episode.episode}`);
     else push(metaId);
   }
 
   if (imdbId && imdbId.startsWith("tt")) {
     if (!episode) push(imdbId);
-    else if (!animeMeta) push(`${imdbId}:${episode.season}:${episode.episode}`);
+    else if (!animeMeta) push(omitEpisode ? `${imdbId}:${episode.season}` : `${imdbId}:${episode.season}:${episode.episode}`);
   }
 
   return out;

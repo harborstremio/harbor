@@ -82,7 +82,7 @@ export function PlayPicker({
   const inSession = roomSnapshot.state === "joined";
   const resolvedImdb = useImdbId(meta, settings.tmdbKey);
   const imdbId = resolvedImdb.id;
-  const streamIds = useStreamIds(meta, episode, imdbId);
+  const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-season");
   const { addons } = useAddons(authKey, settings);
   const [resolving, setResolving] = useState<{ stream: ScoredStream } | null>(null);
   const [failedStreams, setFailedStreams] = useState<Set<ScoredStream>>(new Set());
@@ -192,7 +192,26 @@ export function PlayPicker({
       if (cached.length > 0) all = cached;
     }
     if (intent === "download-season") {
-      all = all.filter(s => s.seasonPack || (s.size != null && s.size > 20 * 1024 * 1024 * 1024));
+      const byHash = new Map<string, ScoredStream[]>();
+      for (const s of all) {
+        if (s.infoHash) {
+          const arr = byHash.get(s.infoHash);
+          if (arr) arr.push(s);
+          else byHash.set(s.infoHash, [s]);
+        }
+      }
+      const grouped: ScoredStream[] = [];
+      const seen = new Set<string>();
+      for (const s of all) {
+        if (s.infoHash && byHash.get(s.infoHash)!.length >= 2) {
+          if (seen.has(s.infoHash)) continue;
+          seen.add(s.infoHash);
+          grouped.push({ ...s, name: `${s.name} (${byHash.get(s.infoHash)!.length} episodes)` });
+        } else if (s.size != null && s.size > 20 * 1024 * 1024 * 1024) {
+          grouped.push(s);
+        }
+      }
+      all = grouped;
     }
     const cachedFirst = all.slice().sort((a, b) => (isCached(b) ? 1 : 0) - (isCached(a) ? 1 : 0));
     const ranked = hostMatch

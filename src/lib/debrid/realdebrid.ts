@@ -218,15 +218,27 @@ export function createRealDebrid(apiKey: string): DebridStore {
       if (status === "downloaded") {
         const files = info.data.files ?? [];
         const selected = files.filter((f) => f.selected === 1);
-        return {
-          ok: true,
-          data: selected.map((f, i) => ({
-            id: String(i),
+        const links = info.data.links ?? [];
+        const result: DebridFile[] = [];
+        for (let i = 0; i < selected.length; i++) {
+          if (signal.aborted) {
+            await delEmpty(`/torrents/delete/${id}`, signal);
+            return { ok: false, code: "aborted", status: 0 };
+          }
+          const link = links[i];
+          if (!link) continue;
+          const u = await postForm<RdUnrestrict>("/unrestrict/link", { link }, signal);
+          if (!u.ok) continue;
+          const f = selected[i];
+          result.push({
+            id: String(f.id),
             name: f.path.split("/").pop() ?? f.path,
             size: f.bytes,
-            selected: true,
-          })),
-        };
+            url: u.data.download,
+          });
+        }
+        if (result.length === 0) continue;
+        return { ok: true, data: result };
       }
       if (status === "downloading" || status === "compressing" || status === "uploading") {
         await sleep(POLL_DELAY_MS, signal);
