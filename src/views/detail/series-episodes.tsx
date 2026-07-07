@@ -42,6 +42,7 @@ export function SeriesEpisodes({
   cinemetaVideos,
   stremioWatched,
   resumeSeason,
+  onSeasonChange,
 }: {
   meta: Meta;
   tvId: number;
@@ -52,6 +53,7 @@ export function SeriesEpisodes({
   cinemetaVideos?: NonNullable<Meta["videos"]>;
   stremioWatched?: Set<string>;
   resumeSeason?: number;
+  onSeasonChange?: (season: number) => void;
 }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -130,6 +132,7 @@ export function SeriesEpisodes({
     if (saved != null && seasons.some((s) => s.seasonNumber === saved)) {
       autoSeasonRef.current = true;
       setActive(saved);
+      onSeasonChange?.(saved);
     }
   }, [meta.id, seasons]);
 
@@ -140,13 +143,16 @@ export function SeriesEpisodes({
     if (saved != null && seasons.some((s) => s.seasonNumber === saved)) return;
     autoSeasonRef.current = true;
     setActive(resumeSeason);
+    onSeasonChange?.(resumeSeason);
   }, [resumeSeason, seasons, meta.id]);
 
   useEffect(() => {
     if (userPickedRef.current || autoSeasonRef.current) return;
     if (!stremioWatched || stremioWatched.size === 0) return;
     autoSeasonRef.current = true;
-    setActive(resumeDefaultSeason(meta.id, seasons, stremioWatched));
+    const defaultSeason = resumeDefaultSeason(meta.id, seasons, stremioWatched);
+    setActive(defaultSeason);
+    onSeasonChange?.(defaultSeason);
   }, [stremioWatched, seasons, meta.id]);
 
   useEffect(() => {
@@ -345,6 +351,7 @@ export function SeriesEpisodes({
                 userPickedRef.current = true;
                 setLastSeason(meta.id, n);
                 setActive(n);
+                onSeasonChange?.(n);
               }}
               lastEpisodeAir={lastEpisodeAir}
             />
