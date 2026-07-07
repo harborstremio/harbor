@@ -9,11 +9,13 @@ export function EpisodeDownloadButton({
   episode,
   size = 40,
   variant = "row",
+  intent = "download",
 }: {
   meta: Meta;
   episode?: PlayEpisode;
   size?: number;
   variant?: "row" | "bar";
+  intent?: "play" | "download" | "download-season";
 }) {
   const t = useT();
   const { openPicker } = useView();
@@ -35,7 +37,7 @@ export function EpisodeDownloadButton({
       cancelDownload(dl.id);
       return;
     }
-    openPicker(meta, episode, { intent: "download" });
+    openPicker(meta, episode, { intent });
   };
 
   const r = (dim - 7) / 2;
