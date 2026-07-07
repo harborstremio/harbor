@@ -192,7 +192,7 @@ export function PlayPicker({
       if (cached.length > 0) all = cached;
     }
     if (intent === "download-season") {
-      all = all.filter(s => s.seasonPack);
+      all = all.filter(s => s.seasonPack || (s.size != null && s.size > 20 * 1024 * 1024 * 1024));
     }
     const cachedFirst = all.slice().sort((a, b) => (isCached(b) ? 1 : 0) - (isCached(a) ? 1 : 0));
     const ranked = hostMatch
