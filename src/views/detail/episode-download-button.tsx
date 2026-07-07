@@ -45,7 +45,7 @@ export function EpisodeDownloadButton({
     openPicker(meta, episode, { intent });
   };
 
-  const r = (dim - 7) / 2;
+  const r = isBar ? 23 : (dim - 7) / 2;
   const circ = 2 * Math.PI * r;
   const stroke = dim >= 38 ? 2.5 : 2.2;
 
@@ -95,61 +95,41 @@ export function EpisodeDownloadButton({
       className={wrapperClass}
       style={{ width: dim, height: dim }}
     >
-      {showProgress ? (
-        <>
-          <svg
-            width={dim}
-            height={dim}
-            viewBox={`0 0 ${dim} ${dim}`}
-            className="absolute inset-0 -rotate-90"
-          >
-            <circle
-              cx={dim / 2}
-              cy={dim / 2}
-              r={r}
-              fill="none"
-              className="text-ink"
-              stroke="currentColor"
-              strokeOpacity="0.15"
-              strokeWidth={stroke}
-            />
-            <circle
-              cx={dim / 2}
-              cy={dim / 2}
-              r={r}
-              fill="none"
-              className="text-accent transition-[stroke-dashoffset] duration-500 ease-out"
-              stroke="currentColor"
-              strokeWidth={stroke}
-              strokeLinecap="round"
-              strokeDasharray={circ}
-              strokeDashoffset={circ * (1 - Math.min(1, Math.max(0.03, ratio)))}
-            />
-          </svg>
-          <span className="absolute text-[9.5px] font-semibold tabular-nums text-ink-muted transition-opacity duration-150 group-hover/dl:opacity-0">
-            {paused ? "II" : pct}
-          </span>
-          {downloading && (
-            <Pause
-              size={dim * 0.34}
-              strokeWidth={2.2}
-              className="absolute text-ink opacity-0 transition-opacity duration-150 group-hover/dl:opacity-100"
-            />
-          )}
-          {paused && (
-            <Play
-              size={dim * 0.34}
-              strokeWidth={2.2}
-              className="absolute text-ink opacity-0 transition-opacity duration-150 group-hover/dl:opacity-100"
-            />
-          )}
-        </>
-      ) : done ? (
-        <Check size={dim * 0.46} strokeWidth={2.6} />
-      ) : failed ? (
-        <RotateCw size={dim * 0.42} strokeWidth={2.2} />
-      ) : (
-        <ArrowDownToLine size={dim * 0.46} strokeWidth={2} />
+      {showProgress && (
+        <svg
+          viewBox={`0 0 ${dim} ${dim}`}
+          className="absolute inset-0 -rotate-90"
+        >
+          <circle
+            cx={dim / 2}
+            cy={dim / 2}
+            r={r}
+            fill="none"
+            className="text-ink"
+            stroke="currentColor"
+            strokeOpacity="0.15"
+            strokeWidth={stroke}
+          />
+          <circle
+            cx={dim / 2}
+            cy={dim / 2}
+            r={r}
+            fill="none"
+            className="text-accent transition-[stroke-dashoffset] duration-500 ease-out"
+            stroke="currentColor"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            strokeDashoffset={circ * (1 - Math.min(1, Math.max(0.03, ratio)))}
+          />
+        </svg>
+      )}
+      {downloading && <Pause size={isBar ? 20 : dim * 0.46} strokeWidth={2.2} />}
+      {paused && <Play size={isBar ? 20 : dim * 0.46} strokeWidth={2.2} />}
+      {done && <Check size={20} strokeWidth={2.6} />}
+      {failed && <RotateCw size={20} strokeWidth={2.2} />}
+      {!downloading && !paused && !done && !failed && (
+        <ArrowDownToLine size={20} strokeWidth={2} />
       )}
     </button>
   );

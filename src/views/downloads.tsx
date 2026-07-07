@@ -293,6 +293,9 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
             <RowBtn label="Show in folder" onClick={() => void revealDownload(d.id)}>
               <FolderOpen size={16} strokeWidth={2} />
             </RowBtn>
+            <RowBtn label="Delete download and file" onClick={() => removeDownload(d.id)}>
+              <Trash2 size={16} strokeWidth={2} />
+            </RowBtn>
           </>
         )}
         {(d.status === "canceled" || d.status === "error" || d.status === "interrupted") && (
