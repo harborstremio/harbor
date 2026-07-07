@@ -1,12 +1,14 @@
 import { useMemo, type ReactNode } from "react";
-import { Check, Download as DownloadIcon, FolderOpen, Play, Trash2, X } from "lucide-react";
+import { Check, Download as DownloadIcon, FolderOpen, Pause, Play, Trash2, X } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { DownloadDirBar } from "./downloads/download-dir-bar";
 import {
   cancelDownload,
+  pauseDownload,
   removeDownload,
+  resumeDownload,
   revealDownload,
   useDownloads,
   type DownloadItem,
@@ -185,7 +187,6 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
     d.season != null ? "series" : "movie",
   );
   const pct = Math.round(d.ratio * 100);
-  const downloading = d.status === "downloading";
   const playLocal = () =>
     openPlayer({
       meta: {
@@ -219,7 +220,7 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
             <span className="shrink-0 truncate text-[12px] text-ink-subtle">{d.subtitle}</span>
           )}
         </div>
-        {downloading ? (
+        {d.status === "downloading" || d.status === "paused" ? (
           <>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
               <div
@@ -228,14 +229,20 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
               />
             </div>
             <div className="flex flex-wrap items-center gap-x-2 text-[11.5px] tabular-nums text-ink-muted">
-              <span>{pct}%</span>
-              {d.totalBytes != null && (
-                <span className="text-ink-subtle">
-                  {fmtBytes(d.receivedBytes)} / {fmtBytes(d.totalBytes)}
-                </span>
+              {d.status === "paused" ? (
+                <span className="text-amber-300/85">Paused</span>
+              ) : (
+                <>
+                  <span>{pct}%</span>
+                  {d.totalBytes != null && (
+                    <span className="text-ink-subtle">
+                      {fmtBytes(d.receivedBytes)} / {fmtBytes(d.totalBytes)}
+                    </span>
+                  )}
+                  {fmtSpeed(d.bytesPerSec) && <span>· {fmtSpeed(d.bytesPerSec)}</span>}
+                  {fmtEta(d) && <span className="text-ink-subtle">· {fmtEta(d)}</span>}
+                </>
               )}
-              {fmtSpeed(d.bytesPerSec) && <span>· {fmtSpeed(d.bytesPerSec)}</span>}
-              {fmtEta(d) && <span className="text-ink-subtle">· {fmtEta(d)}</span>}
             </div>
           </>
         ) : (
@@ -258,26 +265,40 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
         )}
       </div>
       <div className="flex shrink-0 items-center gap-1">
-        {downloading ? (
-          <RowBtn label="Cancel download" onClick={() => cancelDownload(d.id)}>
-            <X size={16} strokeWidth={2.2} />
-          </RowBtn>
-        ) : (
+        {d.status === "downloading" && (
           <>
-            {d.status === "done" && (
-              <>
-                <RowBtn label="Play" onClick={playLocal}>
-                  <Play size={16} strokeWidth={2.2} fill="currentColor" />
-                </RowBtn>
-                <RowBtn label="Show in folder" onClick={() => void revealDownload(d.id)}>
-                  <FolderOpen size={16} strokeWidth={2} />
-                </RowBtn>
-              </>
-            )}
-            <RowBtn label="Delete download and file" onClick={() => removeDownload(d.id)}>
-              <Trash2 size={16} strokeWidth={2} />
+            <RowBtn label="Pause download" onClick={() => pauseDownload(d.id)}>
+              <Pause size={16} strokeWidth={2.2} />
+            </RowBtn>
+            <RowBtn label="Cancel download" onClick={() => cancelDownload(d.id)}>
+              <X size={16} strokeWidth={2.2} />
             </RowBtn>
           </>
+        )}
+        {d.status === "paused" && (
+          <>
+            <RowBtn label="Resume download" onClick={() => void resumeDownload(d.id)}>
+              <Play size={16} strokeWidth={2.2} />
+            </RowBtn>
+            <RowBtn label="Cancel download" onClick={() => cancelDownload(d.id)}>
+              <X size={16} strokeWidth={2.2} />
+            </RowBtn>
+          </>
+        )}
+        {d.status === "done" && (
+          <>
+            <RowBtn label="Play" onClick={playLocal}>
+              <Play size={16} strokeWidth={2.2} fill="currentColor" />
+            </RowBtn>
+            <RowBtn label="Show in folder" onClick={() => void revealDownload(d.id)}>
+              <FolderOpen size={16} strokeWidth={2} />
+            </RowBtn>
+          </>
+        )}
+        {(d.status === "canceled" || d.status === "error" || d.status === "interrupted") && (
+          <RowBtn label="Delete download and file" onClick={() => removeDownload(d.id)}>
+            <Trash2 size={16} strokeWidth={2} />
+          </RowBtn>
         )}
       </div>
     </li>

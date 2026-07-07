@@ -1,6 +1,6 @@
-import { ArrowDownToLine, Check, RotateCw, X } from "lucide-react";
+import { ArrowDownToLine, Check, Pause, Play, RotateCw } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
-import { activeDownloadFor, cancelDownload, useDownloads } from "@/lib/download/downloads-store";
+import { activeDownloadFor, pauseDownload, resumeDownload, useDownloads } from "@/lib/download/downloads-store";
 import { useView, type PlayEpisode } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 
@@ -23,9 +23,10 @@ export function EpisodeDownloadButton({
   const dl = activeDownloadFor(meta.id, episode?.season ?? null, episode?.episode ?? null);
   const status = dl?.status;
   const downloading = status === "downloading";
+  const paused = status === "paused";
   const done = status === "done";
   const failed = status === "error";
-  const persistent = downloading || done || failed;
+  const persistent = downloading || paused || done || failed;
   const ratio = dl?.ratio ?? 0;
   const pct = Math.round(ratio * 100);
   const isBar = variant === "bar";
@@ -34,7 +35,11 @@ export function EpisodeDownloadButton({
   const onClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (downloading && dl) {
-      cancelDownload(dl.id);
+      pauseDownload(dl.id);
+      return;
+    }
+    if (paused && dl) {
+      void resumeDownload(dl.id);
       return;
     }
     openPicker(meta, episode, { intent });
@@ -59,32 +64,38 @@ export function EpisodeDownloadButton({
         persistent ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
       } ${stateTone}`;
 
+  const showProgress = downloading || paused;
+
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={
         downloading
-          ? t("Downloading {pct} percent, click to cancel", { pct })
-          : done
-            ? t("Saved offline")
-            : failed
-              ? t("Download failed, click to retry")
-              : t("Download for offline")
+          ? t("Downloading {pct} percent, click to pause", { pct })
+          : paused
+            ? t("Paused, click to resume")
+            : done
+              ? t("Saved offline")
+              : failed
+                ? t("Download failed, click to retry")
+                : t("Download for offline")
       }
       title={
         downloading
-          ? t("Downloading {pct}%  ·  click to cancel", { pct })
-          : done
-            ? t("Saved offline")
-            : failed
-              ? t("Download failed  ·  click to retry")
-              : t("Download for offline")
+          ? t("Downloading {pct}%  ·  click to pause", { pct })
+          : paused
+            ? t("Paused  ·  click to resume")
+            : done
+              ? t("Saved offline")
+              : failed
+                ? t("Download failed  ·  click to retry")
+                : t("Download for offline")
       }
       className={wrapperClass}
       style={{ width: dim, height: dim }}
     >
-      {downloading ? (
+      {showProgress ? (
         <>
           <svg
             width={dim}
@@ -116,13 +127,22 @@ export function EpisodeDownloadButton({
             />
           </svg>
           <span className="absolute text-[9.5px] font-semibold tabular-nums text-ink-muted transition-opacity duration-150 group-hover/dl:opacity-0">
-            {pct}
+            {paused ? "II" : pct}
           </span>
-          <X
-            size={dim * 0.34}
-            strokeWidth={2.6}
-            className="absolute text-ink opacity-0 transition-opacity duration-150 group-hover/dl:opacity-100"
-          />
+          {downloading && (
+            <Pause
+              size={dim * 0.34}
+              strokeWidth={2.2}
+              className="absolute text-ink opacity-0 transition-opacity duration-150 group-hover/dl:opacity-100"
+            />
+          )}
+          {paused && (
+            <Play
+              size={dim * 0.34}
+              strokeWidth={2.2}
+              className="absolute text-ink opacity-0 transition-opacity duration-150 group-hover/dl:opacity-100"
+            />
+          )}
         </>
       ) : done ? (
         <Check size={dim * 0.46} strokeWidth={2.6} />

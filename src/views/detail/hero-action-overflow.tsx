@@ -1,8 +1,8 @@
-import { ArrowDownToLine, Bookmark, Check, MoreHorizontal, RotateCw, Star, X } from "lucide-react";
+import { ArrowDownToLine, Bookmark, Check, MoreHorizontal, Pause, Play, RotateCw, Star, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
-import { activeDownloadFor, cancelDownload, useDownloads } from "@/lib/download/downloads-store";
+import { activeDownloadFor, cancelDownload, pauseDownload, resumeDownload, useDownloads } from "@/lib/download/downloads-store";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { AnilistMenuItems, SimklMenuItems, TraktMenuItems } from "./overflow-sync-items";
@@ -95,6 +95,7 @@ export function HeroActionOverflow({
 
   const dl = canDownload ? activeDownloadFor(meta.id, null, null) : null;
   const downloading = dl?.status === "downloading";
+  const paused = dl?.status === "paused";
   const done = dl?.status === "done";
   const failed = dl?.status === "error";
   const pct = Math.round((dl?.ratio ?? 0) * 100);
@@ -218,34 +219,71 @@ export function HeroActionOverflow({
               />
             )}
             {canDownload && (
-              <Item
-                icon={
-                  downloading ? (
-                    <X size={14} strokeWidth={2.2} />
-                  ) : done ? (
-                    <Check size={14} strokeWidth={2.4} />
-                  ) : failed ? (
-                    <RotateCw size={14} strokeWidth={2.2} />
-                  ) : (
-                    <ArrowDownToLine size={14} strokeWidth={2} />
-                  )
-                }
-                label={
-                  downloading
-                    ? t("Downloading {pct}%  ·  cancel", { pct })
-                    : done
-                      ? t("Saved offline")
-                      : failed
-                        ? t("Retry download")
-                        : t("Download for offline")
-                }
-                active={done}
-                onClick={() => {
-                  if (downloading && dl) cancelDownload(dl.id);
-                  else openPicker(meta, undefined, { intent: "download" });
-                  setMenu(null);
-                }}
-              />
+              <>
+                {downloading ? (
+                  <Item
+                    icon={<Pause size={14} strokeWidth={2.2} />}
+                    label={t("Downloading {pct}%  ·  pause", { pct })}
+                    onClick={() => {
+                      if (dl) pauseDownload(dl.id);
+                      setMenu(null);
+                    }}
+                  />
+                ) : paused ? (
+                  <Item
+                    icon={<Play size={14} strokeWidth={2.2} />}
+                    label={t("Paused  ·  resume")}
+                    onClick={() => {
+                      if (dl) void resumeDownload(dl.id);
+                      setMenu(null);
+                    }}
+                  />
+                ) : (
+                  <Item
+                    icon={
+                      done ? (
+                        <Check size={14} strokeWidth={2.4} />
+                      ) : failed ? (
+                        <RotateCw size={14} strokeWidth={2.2} />
+                      ) : (
+                        <ArrowDownToLine size={14} strokeWidth={2} />
+                      )
+                    }
+                    label={
+                      done
+                        ? t("Saved offline")
+                        : failed
+                          ? t("Retry download")
+                          : t("Download for offline")
+                    }
+                    active={done}
+                    onClick={() => {
+                      openPicker(meta, undefined, { intent: "download" });
+                      setMenu(null);
+                    }}
+                  />
+                )}
+                {downloading && (
+                  <Item
+                    icon={<X size={14} strokeWidth={2.2} />}
+                    label={t("Cancel download")}
+                    onClick={() => {
+                      if (dl) cancelDownload(dl.id);
+                      setMenu(null);
+                    }}
+                  />
+                )}
+                {paused && (
+                  <Item
+                    icon={<X size={14} strokeWidth={2.2} />}
+                    label={t("Cancel download")}
+                    onClick={() => {
+                      if (dl) cancelDownload(dl.id);
+                      setMenu(null);
+                    }}
+                  />
+                )}
+              </>
             )}
           </div>,
           document.body,
