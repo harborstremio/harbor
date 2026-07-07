@@ -1,10 +1,10 @@
 import { downloadDir as systemDownloadDir } from "@tauri-apps/api/path";
-import { exists, remove } from "@tauri-apps/plugin-fs";
+import { exists, mkdir, remove } from "@tauri-apps/plugin-fs";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
-import { buildDefaultFilename } from "./filename";
+import { buildDefaultFilename, sanitizeName } from "./filename";
 import { startDownload, type DownloadHandle } from "./video-download";
 
 export type DownloadItem = {
@@ -148,7 +148,16 @@ export function activeDownloadFor(
 
 export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
   const { meta, episode, streamLabel, url } = args;
-  const dir = await resolveDir();
+  let dir = await resolveDir();
+  try {
+    const raw = localStorage.getItem("harbor.settings");
+    const settings = raw ? JSON.parse(raw) as { downloadCreateFolders?: boolean } : null;
+    if (settings?.downloadCreateFolders && dir) {
+      const folderName = sanitizeName(meta.name || "download");
+      dir = `${dir}${dir.endsWith(sep()) ? "" : sep()}${folderName}`;
+      await mkdir(dir, { recursive: true }).catch(() => {});
+    }
+  } catch { /* ignore */ }
   const filename = buildDefaultFilename(meta, episode, url, streamLabel);
   const path = await uniquePath(
     dir ? `${dir}${dir.endsWith(sep()) ? "" : sep()}${filename}` : filename,

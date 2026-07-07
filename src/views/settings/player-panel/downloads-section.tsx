@@ -4,6 +4,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { FolderOpen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings";
+import { ToggleRow } from "@/views/settings/shared";
 
 export function DownloadsSection() {
   const { settings, update } = useSettings();
@@ -53,6 +54,12 @@ export function DownloadsSection() {
 
   return (
     <div className="flex flex-col gap-3">
+      <ToggleRow
+        label="Create folders for movies and shows"
+        note="Organize downloads into folders by movie or series name"
+        value={settings.downloadCreateFolders}
+        onChange={(v) => update({ downloadCreateFolders: v })}
+      />
       <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
         <div className="flex min-w-0 flex-col gap-0.5">
           <span className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
