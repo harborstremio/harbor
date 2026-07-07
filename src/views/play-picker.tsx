@@ -191,6 +191,9 @@ export function PlayPicker({
       const cached = all.filter(isCached);
       if (cached.length > 0) all = cached;
     }
+    if (intent === "download-season") {
+      all = all.filter(s => s.seasonPack);
+    }
     const cachedFirst = all.slice().sort((a, b) => (isCached(b) ? 1 : 0) - (isCached(a) ? 1 : 0));
     const ranked = hostMatch
       ? cachedFirst.slice().sort((a, b) => (hostMatch.get(b) ?? 0) - (hostMatch.get(a) ?? 0))

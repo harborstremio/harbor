@@ -5,6 +5,7 @@ import {
   magnetFromHash,
   type Account,
   type CacheMap,
+  type DebridFile,
   type DebridResult,
   type DebridStore,
   type DirectLink,
@@ -187,6 +188,60 @@ export function createRealDebrid(apiKey: string): DebridStore {
     return { ok: true, data };
   }
 
+  async function listTorrentFiles(hash: string, signal: AbortSignal): Promise<DebridResult<DebridFile[]>> {
+    const fullMagnet = magnetFromHash(hash);
+    const add = await postForm<{ id: string }>("/torrents/addMagnet", { magnet: fullMagnet }, signal);
+    if (!add.ok) return add;
+    const id = add.data.id;
+
+    for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
+      if (signal.aborted) {
+        await delEmpty(`/torrents/delete/${id}`, signal);
+        return { ok: false, code: "aborted", status: 0 };
+      }
+      const info = await get<RdTorrentInfo>(`/torrents/info/${id}`, signal);
+      if (!info.ok) return info;
+      const status = info.data.status;
+      if (status === "magnet_error") {
+        await delEmpty(`/torrents/delete/${id}`, signal);
+        return { ok: false, code: "magnet-error", status: 0 };
+      }
+      if (status === "magnet_conversion" || status === "waiting_files_selection") {
+        const files = info.data.files ?? [];
+        const videoIds = files
+          .filter((f) => VIDEO_EXTS.some((ext) => f.path.toLowerCase().endsWith(ext)))
+          .map((f) => f.id);
+        const sel = await postForm(`/torrents/selectFiles/${id}`, { files: videoIds.join(",") }, signal);
+        if (!sel.ok) return sel;
+        continue;
+      }
+      if (status === "downloaded") {
+        const files = info.data.files ?? [];
+        const selected = files.filter((f) => f.selected === 1);
+        return {
+          ok: true,
+          data: selected.map((f, i) => ({
+            id: String(i),
+            name: f.path.split("/").pop() ?? f.path,
+            size: f.bytes,
+            selected: true,
+          })),
+        };
+      }
+      if (status === "downloading" || status === "compressing" || status === "uploading") {
+        await sleep(POLL_DELAY_MS, signal);
+        continue;
+      }
+      if (status === "error" || status === "virus" || status === "dead") {
+        await delEmpty(`/torrents/delete/${id}`, signal);
+        return { ok: false, code: status, status: 0 };
+      }
+      await sleep(POLL_DELAY_MS, signal);
+    }
+    await delEmpty(`/torrents/delete/${id}`, signal);
+    return { ok: false, code: "timeout", status: 0 };
+  }
+
   return {
     slug: "rd",
     name: "Real-Debrid",
@@ -194,6 +249,7 @@ export function createRealDebrid(apiKey: string): DebridStore {
     cacheCheck,
     playableUrl,
     listLibrary,
+    listTorrentFiles,
   };
 }
 

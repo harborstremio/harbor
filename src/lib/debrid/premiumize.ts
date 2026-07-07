@@ -6,6 +6,7 @@ import {
   magnetFromHash,
   type Account,
   type CacheMap,
+  type DebridFile,
   type DebridResult,
   type DebridStore,
   type DirectLink,
@@ -150,6 +151,22 @@ export function createPremiumize(apiKey: string): DebridStore {
     return { ok: true, data };
   }
 
+  async function listTorrentFiles(hash: string, signal: AbortSignal): Promise<DebridResult<DebridFile[]>> {
+    const fullMagnet = magnetFromHash(hash);
+    const dl = await postForm<PmDirectDl>("/transfer/directdl", { src: fullMagnet }, signal);
+    if (!dl.ok) return dl;
+    const content = dl.data.content ?? [];
+    if (content.length === 0) return { ok: false, code: "not-cached", status: 0 };
+    return {
+      ok: true,
+      data: content.map((f, i) => ({
+        id: String(i),
+        name: f.path?.split("/").pop() ?? f.path ?? `file-${i}`,
+        size: typeof f.size === "string" ? parseInt(f.size, 10) || 0 : (f.size ?? 0),
+      })),
+    };
+  }
+
   return {
     slug: "pm",
     name: "Premiumize",
@@ -157,6 +174,7 @@ export function createPremiumize(apiKey: string): DebridStore {
     cacheCheck,
     playableUrl,
     listLibrary,
+    listTorrentFiles,
   };
 }
 

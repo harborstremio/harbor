@@ -6,6 +6,7 @@ import {
   magnetFromHash,
   type Account,
   type CacheMap,
+  type DebridFile,
   type DebridResult,
   type DebridStore,
   type DirectLink,
@@ -203,6 +204,35 @@ export function createDebridLink(apiKey: string): DebridStore {
     return { ok: true, data };
   }
 
+  async function listTorrentFiles(hash: string, signal: AbortSignal): Promise<DebridResult<DebridFile[]>> {
+    const fullMagnet = magnetFromHash(hash);
+    const add = await postForm<DlEnvelope<{ id: string }>>("/seedbox/add", { url: fullMagnet, async: "true" }, signal);
+    if (!add.ok) return add;
+    const id = add.data.value.id;
+
+    for (let attempt = 0; attempt < 24; attempt++) {
+      if (signal.aborted) {
+        await delEmpty(`/seedbox/${id}/remove`, signal);
+        return { ok: false, code: "aborted", status: 0 };
+      }
+      const list = await get<DlEnvelope<DlSeedbox[]>>(`/seedbox/list?ids=${encodeURIComponent(id)}`, signal);
+      if (!list.ok) return list;
+      const seedbox = list.data.value?.[0];
+      if (seedbox?.files && seedbox.files.length > 0) {
+        return {
+          ok: true,
+          data: seedbox.files.map((f, i) => ({
+            id: String(i),
+            name: f.name,
+            size: f.size,
+          })),
+        };
+      }
+      await sleep(800, signal);
+    }
+    return { ok: false, code: "timeout", status: 0 };
+  }
+
   return {
     slug: "dl",
     name: "Debrid-Link",
@@ -210,6 +240,7 @@ export function createDebridLink(apiKey: string): DebridStore {
     cacheCheck,
     playableUrl,
     listLibrary,
+    listTorrentFiles,
   };
 }
 

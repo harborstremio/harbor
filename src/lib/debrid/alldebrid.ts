@@ -6,6 +6,7 @@ import {
   magnetFromHash,
   type Account,
   type CacheMap,
+  type DebridFile,
   type DebridResult,
   type DebridStore,
   type DirectLink,
@@ -218,6 +219,39 @@ export function createAllDebrid(apiKey: string): DebridStore {
     return { ok: true, data };
   }
 
+  async function listTorrentFiles(hash: string, signal: AbortSignal): Promise<DebridResult<DebridFile[]>> {
+    const fullMagnet = magnetFromHash(hash);
+    const upload = await postForm<AdUpload>("/magnet/upload", { "magnets[]": fullMagnet }, signal);
+    if (!upload.ok) return upload;
+    const magnet = upload.data.magnets?.[0];
+    if (!magnet || magnet.error) {
+      return { ok: false, code: magnet?.error?.code ?? "no-magnet", status: 0 };
+    }
+    const id = magnet.id;
+
+    for (let attempt = 0; attempt < 12; attempt++) {
+      if (signal.aborted) return { ok: false, code: "aborted", status: 0 };
+      const status = await get<AdMagnetStatus>(`/magnet/status?id=${id}`, signal);
+      if (!status.ok) return status;
+      if (status.data.statusCode === 4) {
+        const links = status.data.links ?? [];
+        return {
+          ok: true,
+          data: links.map((l, i) => ({
+            id: String(i),
+            name: l.filename,
+            size: l.size ?? 0,
+          })),
+        };
+      }
+      if (status.data.statusCode >= 5 && status.data.statusCode <= 15) {
+        return { ok: false, code: `status-${status.data.statusCode}`, status: 0 };
+      }
+      await sleep(1500, signal);
+    }
+    return { ok: false, code: "timeout", status: 0 };
+  }
+
   return {
     slug: "ad",
     name: "AllDebrid",
@@ -225,6 +259,7 @@ export function createAllDebrid(apiKey: string): DebridStore {
     cacheCheck,
     playableUrl,
     listLibrary,
+    listTorrentFiles,
   };
 }
 
@@ -298,6 +333,10 @@ type AdInstantEntry = {
   magnet?: string;
   hash?: string;
   instant?: boolean;
+};
+
+type AdUpload = {
+  magnets: AdAddResult[];
 };
 
 type AdAddResult = {
