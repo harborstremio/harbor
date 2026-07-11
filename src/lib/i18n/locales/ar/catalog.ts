@@ -95,8 +95,7 @@ const catalog: Record<string, string> = {
   "Pin the catalogs you want up top, hide the ones you never open, and reorder your pinned rails. Your browse view updates instantly.":
     "ثبّت ما تستخدمه، أخفِ الباقي، ورتّب القائمة — التغيير يظهر فورًا.",
   // EN: what shows / hidden / up top
-  "Choose what shows, what stays hidden, and what sits up top.":
-    "حدّد الظاهر والمخفي والمثبّت في الأعلى.",
+  "Choose what shows, what stays hidden, and what sits up top.": "حدّد الظاهر والمخفي والمثبّت في الأعلى.",
   "You've hidden every catalog that matched.": "كل النتائج مخفية. أظهر بعضها من التخصيص.",
   "You've hidden the one catalog that matched.": "النتيجة الوحيدة مخفية. أظهرها من التخصيص.",
   "Show this catalog": "إظهار",
