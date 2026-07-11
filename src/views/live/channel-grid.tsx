@@ -293,19 +293,47 @@ function classifyError(raw: string): { title: string; hint: string; raw: string 
   };
 }
 
-export function EmptyResult({ onClear }: { onClear: () => void }) {
+export function EmptyResult({
+  onClear,
+  onManageHidden,
+  hiddenCount = 0,
+}: {
+  onClear: () => void;
+  onManageHidden?: () => void;
+  hiddenCount?: number;
+}) {
   const t = useT();
+  const hasHidden = hiddenCount > 0;
   return (
     <div className="mx-auto flex max-w-[440px] flex-col items-center gap-3 py-16 text-center">
       <Tv size={26} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[16.5px] font-semibold text-ink">{t("No channels match")}</h2>
-      <p className="text-[13.5px] text-ink-muted">{t("Try a different category or clear your filters.")}</p>
-      <button
-        onClick={onClear}
-        className="mt-1 flex h-10 items-center rounded-xl border border-edge-soft bg-elevated px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-      >
-        {t("Reset filters")}
-      </button>
+      <p className="text-[13.5px] text-ink-muted">
+        {hasHidden
+          ? t(
+              "Categories may be hidden, or filters are too narrow. Reset filters or manage which categories are shown.",
+            )
+          : t("Try a different category or clear your filters.")}
+      </p>
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          onClick={onClear}
+          className="flex h-10 items-center rounded-xl border border-edge-soft bg-elevated px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+        >
+          {t("Reset filters")}
+        </button>
+        {hasHidden && onManageHidden && (
+          <button
+            type="button"
+            onClick={onManageHidden}
+            className="flex h-10 items-center gap-1.5 rounded-xl border border-accent/35 bg-accent/12 px-3.5 text-[12.5px] font-semibold text-accent transition-colors hover:bg-accent/20"
+          >
+            {t("Manage categories")}
+            <span className="rounded-full bg-accent/20 px-1.5 py-0.5 text-[10.5px] tabular-nums">{hiddenCount}</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

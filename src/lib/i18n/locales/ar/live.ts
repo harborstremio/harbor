@@ -122,14 +122,30 @@ const live: Record<string, string> = {
   "Try a different category or clear your filters.": "جرّب فئة مختلفة أو امسح المرشّحات.",
 
   "Channel categories": "فئات القنوات",
+  "All channels": "كل القنوات",
   "Filter categories": "تصفية الفئات",
   "Clear filter": "مسح التصفية",
   "No categories match": "لا توجد فئات مطابقة",
+  "All categories are hidden": "تم إخفاء جميع الفئات",
+  "Use Manage below to unhide categories, or restore everything at once.":
+    "استخدم «إدارة» أدناه لإظهار الفئات، أو أظهرها كلها دفعة واحدة.",
+  "Categories may be hidden, or filters are too narrow. Reset filters or manage which categories are shown.":
+    "قد تكون بعض الفئات مخفية، أو قد تكون عوامل التصفية ضيقة جدًا. أعد تعيينها أو حدّد الفئات التي تريد إظهارها.",
+  "Manage categories": "إدارة الفئات",
+  "Select all": "تحديد الكل",
+  "Unhide all": "إظهار الكل",
+  "Unhide selected": "إظهار المحدد",
+  "{n} selected": "تم تحديد {n}",
+  "Shift+click for range": "Shift+نقر لتحديد نطاق",
+  "Shift+click for range · ⌘/Ctrl+click to toggle": "Shift+نقر لتحديد نطاق · ⌘/Ctrl+نقر للتبديل",
+  Pin: "تثبيت",
   "Hide category": "إخفاء الفئة",
   "Unhide {name}": "إظهار {name}",
   "Pin category to top": "تثبيت الفئة في الأعلى",
   "Unpin category": "إلغاء تثبيت الفئة",
   "Unpin from top": "إلغاء التثبيت من الأعلى",
+  "Heads up: most IPTV providers cap how many streams an account can run at the same time. If other devices or players are using these credentials, close them and try again.":
+    "تنبيه: يحد معظم مزوّدي IPTV عدد عمليات البث التي يمكن للحساب تشغيلها في الوقت نفسه. إذا كانت أجهزة أو مشغلات أخرى تستخدم بيانات الدخول هذه، فأغلقها وحاول مجددًا.",
 
   "Match EPG": "مطابقة دليل البرامج",
   "Match EPG channel": "مطابقة قناة دليل البرامج",

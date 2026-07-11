@@ -1,6 +1,7 @@
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { useT } from "@/lib/i18n";
 import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
+import { useGroupPrefs } from "@/lib/iptv/group-order";
 import { clearPlaylistCache, getCachedPlaylist } from "@/lib/iptv/store";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
 import { isWindowsDesktop } from "@/lib/platform";
@@ -206,6 +207,14 @@ export function LiveView({ active }: { active: boolean }) {
       allSources,
     });
 
+  const groupPrefs = useGroupPrefs(activeId ?? "");
+  const hiddenCategoryCount = groupPrefs.hidden.length;
+  const [openHiddenManager, setOpenHiddenManager] = useState(false);
+  const openCategoryManager = useCallback(() => {
+    if (mode === "home" || mode === "multiview") setMode("grid");
+    setOpenHiddenManager(true);
+  }, [mode, setMode]);
+
   const selectActive = useCallback((id: string | null) => {
     setActiveId(id);
     writeActiveId(id);
@@ -241,17 +250,23 @@ export function LiveView({ active }: { active: boolean }) {
 
   return (
     <main data-rail-flush className={`relative flex min-h-0 flex-1 ${immersive ? "pt-0" : "pt-20"}`}>
-      {playlist && sortedGroups.length > 0 && mode !== "multiview" && mode !== "home" && state.kind !== "error" && (
-        <CategorySidebar
-          groups={sortedGroups}
-          active={group}
-          onSelect={setGroup}
-          counts={counts}
-          groupLogos={groupLogos}
-          favoritesCount={favorites.count}
-          sourceId={activeId ?? ""}
-        />
-      )}
+      {playlist &&
+        (sortedGroups.length > 0 || hiddenCategoryCount > 0) &&
+        mode !== "multiview" &&
+        mode !== "home" &&
+        state.kind !== "error" && (
+          <CategorySidebar
+            groups={sortedGroups}
+            active={group}
+            onSelect={setGroup}
+            counts={counts}
+            groupLogos={groupLogos}
+            favoritesCount={favorites.count}
+            sourceId={activeId ?? ""}
+            openHiddenManager={openHiddenManager}
+            onHiddenManagerOpened={() => setOpenHiddenManager(false)}
+          />
+        )}
       <div className="flex min-w-0 flex-1 flex-col">
         {!immersive && (
           <header className="relative z-[40] flex shrink-0 flex-wrap items-center gap-2.5 border-b border-edge-soft/40 bg-surface px-6 py-2.5">
@@ -363,6 +378,8 @@ export function LiveView({ active }: { active: boolean }) {
                       setQuery("");
                       setGroup(null);
                     }}
+                    hiddenCount={hiddenCategoryCount}
+                    onManageHidden={hiddenCategoryCount > 0 ? openCategoryManager : undefined}
                   />
                 )}
                 {visible.length > 0 && mode === "grid" && (
