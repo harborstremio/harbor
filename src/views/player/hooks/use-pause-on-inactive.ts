@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { useSettings } from "@/lib/settings";
+import { onceUnlisten } from "@/lib/tauri-listener";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -24,8 +25,9 @@ export function usePauseOnInactive({
       listen("harbor://window-activity", () => {
         window.dispatchEvent(new Event("harbor:mpv-force-geom"));
       }).then((u) => {
-        if (cancelled) u();
-        else unlisten = u;
+        const cleanup = onceUnlisten(u);
+        if (cancelled) cleanup();
+        else unlisten = cleanup;
       }),
     );
     return () => {
@@ -55,8 +57,9 @@ export function usePauseOnInactive({
           if (snapRef.current.status === "paused") void bridge.play();
         }
       }).then((u) => {
-        if (cancelled) u();
-        else unlisten = u;
+        const cleanup = onceUnlisten(u);
+        if (cancelled) cleanup();
+        else unlisten = cleanup;
       }),
     );
     return () => {
