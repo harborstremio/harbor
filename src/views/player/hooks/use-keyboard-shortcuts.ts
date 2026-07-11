@@ -148,7 +148,8 @@ export function useKeyboardShortcuts(params: {
         e.preventDefault();
         if (e.repeat) return;
         const h = holdRef.current;
-        h.key = e.key;
+        // Track physical key (e.code) so keyup still matches under Arabic layouts
+        h.key = e.code || e.key;
         h.baseRate = snap.rate;
         h.timer = window.setTimeout(() => {
           h.timer = null;
@@ -361,15 +362,16 @@ export function useKeyboardShortcuts(params: {
         onClipRecord();
         return;
       }
+      // Jump to N/10 of duration via physical top-row / numpad digits (layout-independent)
       if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === "0") {
+        const digitCode = /^Digit([0-9])$/.exec(e.code) ?? /^Numpad([0-9])$/.exec(e.code);
+        if (digitCode) {
           e.preventDefault();
-          seekTo(0);
-          return;
-        }
-        const digit = parseInt(e.key, 10);
-        if (!Number.isNaN(digit) && digit >= 1 && digit <= 9) {
-          e.preventDefault();
+          const digit = parseInt(digitCode[1], 10);
+          if (digit === 0) {
+            seekTo(0);
+            return;
+          }
           if (snap.durationSec > 0) {
             seekTo((snap.durationSec * digit) / 10);
           }
@@ -394,7 +396,8 @@ export function useKeyboardShortcuts(params: {
     };
     const onKeyUp = (e: KeyboardEvent) => {
       const h = holdRef.current;
-      if (h.key == null || e.key !== h.key) return;
+      const released = e.code || e.key;
+      if (h.key == null || released !== h.key) return;
       if (releaseHold() === "tap") playPauseToggle();
     };
     const onBlur = () => {

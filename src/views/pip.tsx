@@ -202,22 +202,23 @@ export function PipApp() {
     const onKey = (e: KeyboardEvent) => {
       const v = videoRef.current;
       if (!v) return;
+      // Use e.code so PiP shortcuts match English physical keys under any layout
       if (e.code === "Space") {
         e.preventDefault();
         if (v.paused) v.play().catch(() => {});
         else v.pause();
-      } else if (e.key === "ArrowLeft") {
+      } else if (e.code === "ArrowLeft") {
         e.preventDefault();
         v.currentTime = Math.max(0, v.currentTime - 5);
-      } else if (e.key === "ArrowRight") {
+      } else if (e.code === "ArrowRight") {
         e.preventDefault();
         v.currentTime = Math.min(
           Number.isFinite(v.duration) ? v.duration - 0.25 : v.currentTime + 5,
           v.currentTime + 5,
         );
-      } else if (e.key === "Escape") {
+      } else if (e.code === "Escape") {
         closeWithState();
-      } else if (e.key === "m" || e.key === "M") {
+      } else if (e.code === "KeyM") {
         v.muted = !v.muted;
       }
     };

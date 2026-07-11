@@ -44,12 +44,14 @@ export function HotkeysPanel() {
     const onKey = (e: KeyboardEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (e.key === "Escape") {
+      // Physical Escape — same key under every OS layout
+      if (e.code === "Escape" || e.key === "Escape") {
         setCapturing(null);
         setConflict(null);
         return;
       }
       if (isModifierOnly(e)) return;
+      // Capture via eventToBinding → US-QWERTY physical key (works in Arabic, etc.)
       const binding = eventToBinding(e);
       const dupe = HOTKEYS.find(
         (h) =>
@@ -69,16 +71,23 @@ export function HotkeysPanel() {
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <p className="text-[13px] text-ink-subtle">
-          {t(
-            "Click any binding to rebind it. Press Esc while capturing to cancel. Letters ignore Shift (so K and Shift+K trigger the same action).",
-          )}
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-1.5 text-[13px] text-ink-subtle">
+          <p>
+            {t(
+              "Click any binding to rebind it. Press Esc while capturing to cancel. Letters ignore Shift (so K and Shift+K trigger the same action).",
+            )}
+          </p>
+          <p>
+            {t(
+              "Shortcuts always use the same physical keys as English (US QWERTY), even when your keyboard language is Arabic or anything else. Rebind or reset anytime — your custom keys are saved in Settings.",
+            )}
+          </p>
+        </div>
         {overrideCount > 0 && (
           <button
             onClick={resetAll}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/80 px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            className="flex shrink-0 self-start items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/80 px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             <RotateCcw size={13} strokeWidth={2.2} />
             {t("Reset all ({n})", { n: overrideCount })}
