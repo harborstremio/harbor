@@ -6,6 +6,7 @@ import common from "./ar/common";
 import detail from "./ar/detail";
 import discover from "./ar/discover";
 import downloads from "./ar/downloads";
+import gap from "./ar/gap";
 import library from "./ar/library";
 import lists from "./ar/lists";
 import live from "./ar/live";
@@ -38,6 +39,7 @@ const ar: Record<string, string> = {
   ...misc,
   ...awards,
   ...addons,
+  ...gap,
 };
 
 export default ar;
