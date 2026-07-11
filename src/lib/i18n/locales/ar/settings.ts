@@ -63,7 +63,7 @@ const settings: Record<string, string> = {
 
   "Hide adult content": "إخفاء المحتوى للبالغين",
   "Filters out streams from adult catalogs and addons. On by default.":
-    "يستبعد البثوث من فهارس وإضافات البالغين. مفعّل افتراضيًا.",
+    "يستبعد البثوث من كتالوجات وإضافات البالغين. مفعّل افتراضيًا.",
   "Hide anime": "إخفاء الأنمي",
   "Removes the Anime tab and any Trending/Popular/Upcoming/New anime rows from Home.":
     "يزيل علامة تبويب الأنمي وأي صفوف أنمي رائجة/شائعة/قادمة/جديدة من الرئيسية.",
@@ -197,7 +197,7 @@ const settings: Record<string, string> = {
   ", and ": "، و ",
   ". Leave empty for the default.": ". اتركه فارغًا للوضع الافتراضي.",
   "Fills in where TMDB comes up empty (anime, older catalog). Free at ":
-    "يملأ الفراغات عندما لا توفر TMDB نتائج (الأنمي، الفهارس القديمة). مجانًا على ",
+    "يملأ الفراغات عندما لا توفر TMDB نتائج (الأنمي، الكتالوجات القديمة). مجانًا على ",
   '. Use the "personal" key, not the project one.': '. استخدم المفتاح "الشخصي" (personal)، وليس مفتاح المشروع.',
   "Show Rotten Tomatoes score on cards": "إظهار تقييم Rotten Tomatoes على البطاقات",
   "Fresh tomatoes for 60% and up, splat for anything under.": "طماطم طازجة لنسبة 60% فأكثر، ولطخة لما دونها.",
@@ -275,7 +275,7 @@ const settings: Record<string, string> = {
   "AllDebrid API key": "مفتاح API لـ AllDebrid",
   "Premiumize API key": "مفتاح API لـ Premiumize",
   "Debrid-Link API key": "مفتاح API لـ Debrid-Link",
-  "Streaming catalogs": "فهارس البث",
+  "Streaming catalogs": "كتالوجات البث",
   "Top titles per service. Toggle off the ones you don't pay for.":
     "أفضل العناوين لكل خدمة. أوقف الخدمات التي لا تدفع اشتراكها.",
   "Stream safety filter": "فلتر أمان البث",
@@ -563,7 +563,7 @@ const settings: Record<string, string> = {
   "Health for {n} services below": "حالة {n} خدمات أدناه",
   "{n}d left": "متبقي {n} يوم",
   "Save a TMDB key in Library & metadata to turn on streaming catalogs.":
-    "احفظ مفتاح TMDB في 'المكتبة والبيانات الوصفية' لتشغيل فهارس البث.",
+    "احفظ مفتاح TMDB في 'المكتبة والبيانات الوصفية' لتشغيل كتالوجات البث.",
   "Sign in to Stremio first. Your installed addons sync from there.":
     "سجل الدخول إلى Stremio أولاً. ستتم مزامنة الإضافات المثبتة من هناك.",
   Manage: "إدارة",
@@ -1371,10 +1371,10 @@ const settings: Record<string, string> = {
   "How the Home page assembles its rails.": "كيف تجمّع الصفحة الرئيسية صفوفها.",
   "Harbor curated": "تنسيق Harbor",
   "Hero carousel, Top 10, Trending, In Theaters, per-service rails. Addon catalogs append underneath, deduped.":
-    "عرض رئيسي دوّار، وأفضل 10، والرائج، وفي دور العرض، وصفوف لكل خدمة. تُضاف فهارس الإضافات أسفلها، بلا تكرار.",
+    "عرض رئيسي دوّار، وأفضل 10، والرائج، وفي دور العرض، وصفوف لكل خدمة. تُضاف كتالوجات الإضافات أسفلها، بلا تكرار.",
   "Classic Stremio": "Stremio الكلاسيكي",
   "Continue Watching, then your installed addons. Every catalog renders as its own row, install order, no dedup, no hero.":
-    "متابعة المشاهدة، ثم إضافاتك المثبّتة. يُعرض كل فهرس كصفّ خاص به، بترتيب التثبيت، بلا إزالة تكرار، بلا عرض رئيسي.",
+    "متابعة المشاهدة، ثم إضافاتك المثبّتة. يُعرض كل كتالوج كصفّ خاص به، بترتيب التثبيت، بلا إزالة تكرار، بلا عرض رئيسي.",
   "Show every addon row": "إظهار كل صفّ إضافة",
   "Watchlist shows only saved titles": "تعرض قائمة المشاهدة العناوين المحفوظة فقط",
   "Advance Continue Watching to the next episode": "تقديم متابعة المشاهدة إلى الحلقة التالية",
@@ -1821,7 +1821,7 @@ const settings: Record<string, string> = {
     "قم بجلب قائمة مشاهدتك، ويومياتك، والأفلام التي أعجبتك وقوائمك من ليتربوكسد (Letterboxd) إلى Harbor عبر جسر Stremboxd.",
   "Enable Letterboxd integration": "تفعيل دمج ليتربوكسد (Letterboxd)",
   "Shows your Letterboxd catalogs on the home page and a Letterboxd panel on film pages.":
-    "يعرض فهارس ليتربوكسد في الصفحة الرئيسية ولوحة ليتربوكسد في صفحات الأفلام.",
+    "يعرض كتالوجات ليتربوكسد في الصفحة الرئيسية ولوحة ليتربوكسد في صفحات الأفلام.",
   Mode: "الوضع",
   Public: "عام (Public)",
   Full: "كامل (Full)",
@@ -1836,18 +1836,18 @@ const settings: Record<string, string> = {
   "Connect / Verify": "ربط / تحقق",
   "Verify & connect": "تحقق وربط",
   "About Stremboxd": "حول Stremboxd",
-  "Connected — {n} catalogs available": "متصل — متاح {n} من الفهارس",
+  "Connected — {n} catalogs available": "متصل — متاح {n} من الكتالوجات",
   "Full mode — diary, friends & ratings enabled": "الوضع الكامل — تفعيل اليوميات، الأصدقاء والتقييمات",
-  "Catalogs to show": "الفهارس المراد عرضها",
+  "Catalogs to show": "الكتالوجات المراد عرضها",
   "Custom lists": "قوائم مخصصة",
   "Remove list": "إزالة القائمة",
   "letterboxd.com/username/list/slug": "letterboxd.com/username/list/slug",
   "Show my rating on movie posters": "إظهار تقييمي على ملصقات الأفلام",
   "Overlays your Letterboxd rating on catalog posters (when available).":
-    "يعرض تقييمك في ليتربوكسد على ملصقات الفهرس (متى توفرت).",
+    "يعرض تقييمك في ليتربوكسد على ملصقات الكتالوج (متى توفرت).",
   "Blur reviews by default": "تمويه المراجعات افتراضياً",
   "Reviews on film pages are blurred until you reveal them.": "مراجعات صفحات الأفلام مموهة حتى تطلب إظهارها.",
-  "Hidden catalogs": "الفهارس المخفية",
+  "Hidden catalogs": "الكتالوجات المخفية",
   Watchlist: "قائمة المشاهدة",
   Diary: "يوميات",
   "Liked Films": "أفلام أعجبتني",
@@ -1892,7 +1892,7 @@ const settings: Record<string, string> = {
   "Finish an episode and the card jumps to the next one instead of sitting at 0m left.":
     "أنهِ حلقة لتنتقل البطاقة إلى الحلقة التالية بدلاً من بقائها عند 0 دقيقة متبقية.",
   "Movies you've finished and shows in progress leave the catalog rows. Continue Watching is never touched.":
-    "تختفي الأفلام التي أنهيتها والمسلسلات قيد المشاهدة من صفوف الفهرس. لا تتأثّر متابعة المشاهدة أبداً.",
+    "تختفي الأفلام التي أنهيتها والمسلسلات قيد المشاهدة من صفوف الكتالوج. لا تتأثّر متابعة المشاهدة أبداً.",
   "No filter. Home shows every language.": "بدون تصفية. تعرض الرئيسية كل اللغات.",
   "language. Home filters to it.": "لغة. تصفّي الرئيسية إليها.",
   "languages. Home filters to these.": "لغات. تصفّي الرئيسية إليها.",

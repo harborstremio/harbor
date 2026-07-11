@@ -50,60 +50,64 @@ const catalog: Record<string, string> = {
   "Show every addon row": "إظهار كل صفوف الإضافات",
   "Show on home": "إظهار في الرئيسية",
   "Hide from home": "إخفاء من الرئيسية",
-  "Feature this catalog in the hero carousel": "إبراز هذا الفهرس في شريط العرض الرئيسي",
-  "Stop feeding the hero carousel (back to automatic)": "إيقاف تغذية شريط العرض الرئيسي (العودة إلى التلقائي)",
-  "Needs artwork-rich titles to feed the hero": "يحتاج إلى عناوين غنية بالصور لتغذية العرض الرئيسي",
-  "Needs at least 10 titles for the Top 10 look": "يحتاج إلى 10 عناوين على الأقل لمظهر أفضل 10",
+  "Feature this catalog in the hero carousel": "اعرض هذا الكتالوج في الشريط الرئيسي",
+  "Stop feeding the hero carousel (back to automatic)": "أوقف تغذية الشريط الرئيسي (يعود للتلقائي)",
+  "Needs artwork-rich titles to feed the hero": "يحتاج عناوين بصور كافية لملء الشريط الرئيسي",
+  "Needs at least 10 titles for the Top 10 look": "يحتاج 10 عناوين على الأقل لمظهر أفضل 10",
 
   "Customize home": "تخصيص الرئيسية",
   "Home layout": "تخطيط الرئيسية",
-  "How the Home page assembles its rails.": "كيف تُرتّب صفحة الرئيسية صفوفها.",
-  "Card overlays": "تراكبات البطاقات",
-  "Hover preview": "معاينة عند التمرير",
+  "How the Home page assembles its rails.": "كيف تُبنى صفوف الصفحة الرئيسية.",
+  "Card overlays": "طبقات على البطاقات",
+  "Hover preview": "معاينة عند المرور",
   "Rest the cursor on a poster to peek at the rating, runtime, and story without opening it.":
-    "أبقِ المؤشر على الملصق لإلقاء نظرة على التقييم والمدة والقصة دون فتحه.",
+    "مرّر على الملصق لترى التقييم والمدة والقصة دون فتح العنوان.",
   "Cleaner grid when your poster service already prints the title on the artwork.":
-    "شبكة أنظف عندما تطبع خدمة الملصقات لديك العنوان على الصورة بالفعل.",
-  "Hide titles under posters": "إخفاء العناوين أسفل الملصقات",
+    "شبكة أوضح إذا كانت خدمة الملصقات تطبع العنوان على الصورة أصلًا.",
+  "Hide titles under posters": "إخفاء العناوين تحت الملصقات",
 
-  "No matches for these filters.": "لا توجد نتائج لهذه المرشّحات.",
-  "No more found for this category.": "لم يُعثر على المزيد لهذه الفئة.",
+  "No matches for these filters.": "لا نتائج بهذه المرشّحات.",
+  "No more found for this category.": "لا مزيد في هذه الفئة.",
   "Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.":
-    "لم تُرجع Cinemeta أي شيء لـ {genre}. جرّب نوعًا مختلفًا أو أضف مفتاح TMDB.",
+    "Cinemeta لم يُرجع شيئًا لـ {genre}. جرّب نوعًا آخر أو أضف مفتاح TMDB.",
   "That's everything Cinemeta has for {genre}. Add a TMDB key for deeper rails.":
-    "هذا كل ما لدى Cinemeta لـ {genre}. أضف مفتاح TMDB لصفوف أعمق.",
+    "هذا كل ما لدى Cinemeta لـ {genre}. أضف مفتاح TMDB لمزيد من الصفوف.",
   "Year, runtime, language, and country filters need TMDB. Genre browsing falls back to Cinemeta automatically.":
-    "تحتاج مرشّحات السنة والمدة واللغة والدولة إلى TMDB. يعود تصفّح الأنواع إلى Cinemeta تلقائيًا.",
+    "مرشّحات السنة والمدة واللغة والدولة تحتاج TMDB. تصفّح الأنواع يعود تلقائيًا إلى Cinemeta.",
   "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.":
-    "أفضل {media} {genre}، مرتّبة حسب المزاج. تصفّح الرائج، وتعمّق في أعمال مخرج، ورتّب حسب العقد، واكتشف الجواهر الهادئة.",
+    "أفضل {media} من نوع {genre}، مرتّبة بالمزاج. من الرائج إلى أعمال مخرج، إلى عقود كاملة، إلى الجواهر الهادئة.",
 
-  // ── Catalogs page (Stremio AR: CATALOG = فهرس) ─────────────────────────
-  Catalog: "فهرس",
-  Catalogs: "الفهارس",
+  // ── صفحة الكتالوج ─────────────────────────────────────────────────────
+  Catalog: "الكتالوج",
+  Catalogs: "الكتالوج",
   Customize: "تخصيص",
   "Customize page": "تخصيص الصفحة",
-  "Search catalogs": "ابحث في الفهارس",
-  "No catalogs yet": "لا فهارس بعد",
-  "No catalogs match your search.": "لا يوجد فهرس يطابق بحثك.",
+  "Search catalogs": "ابحث في الكتالوج",
+  "No catalogs yet": "لا شيء هنا بعد",
+  "No catalogs match your search.": "لا نتائج لهذا البحث.",
+  // EN: everything addons offer · posters · scroll/search/filter
   "Everything your addons offer, shown as posters. Scroll, search, or filter to what you want.":
-    "كل قوائم الأفلام والمسلسلات من إضافاتك، معروضة كملصقات. مرّر أو ابحث أو صفِّ حسب النوع.",
+    "محتوى إضافاتك في مكان واحد. تصفّح، ابحث، أو صفِّ كما تريد.",
+  // EN: install addon → catalogs appear as rails
   "Install a Stremio addon and its catalogs show up here as poster rails, ready to browse.":
-    "ثبّت إضافة Stremio وستظهر فهارسها هنا كصفوف ملصقات جاهزة للتصفّح.",
+    "ثبّت إضافة Stremio ليظهر محتواها هنا جاهزًا للتصفّح.",
+  // EN: pin / hide / reorder → updates instantly
   "Pin the catalogs you want up top, hide the ones you never open, and reorder your pinned rails. Your browse view updates instantly.":
-    "ثبّت الفهارس التي تريدها في الأعلى، وأخفِ ما لا تستخدمه، ورتّب الصفوف المثبّتة. يتحدّث العرض فورًا.",
+    "ثبّت ما تستخدمه، أخفِ الباقي، ورتّب القائمة — التغيير يظهر فورًا.",
+  // EN: what shows / hidden / up top
   "Choose what shows, what stays hidden, and what sits up top.":
-    "اختر أي الفهارس تظهر، وأيها تُخفى، وأيها تُثبَّت في الأعلى.",
-  "You've hidden every catalog that matched.": "أخفيت كل الفهارس المطابقة.",
-  "You've hidden the one catalog that matched.": "أخفيت الفهرس الوحيد المطابق.",
-  "Show this catalog": "إظهار هذا الفهرس",
-  "Hide this catalog": "إخفاء هذا الفهرس",
+    "حدّد الظاهر والمخفي والمثبّت في الأعلى.",
+  "You've hidden every catalog that matched.": "كل النتائج مخفية. أظهر بعضها من التخصيص.",
+  "You've hidden the one catalog that matched.": "النتيجة الوحيدة مخفية. أظهرها من التخصيص.",
+  "Show this catalog": "إظهار",
+  "Hide this catalog": "إخفاء",
   "Show row": "إظهار الصف",
   "Hide row": "إخفاء الصف",
   "Pinned to top": "مثبّت في الأعلى",
   Unpin: "إلغاء التثبيت",
-  "Add to Home Screen": "إضافة إلى الرئيسية",
+  "Add to Home Screen": "إضافة للرئيسية",
   "Remove from Home": "إزالة من الرئيسية",
-  "All Done": "تمّ الكل",
+  "All Done": "تم",
   "Undo All": "التراجع عن الكل",
   Up: "أعلى",
   Down: "أسفل",
