@@ -1,5 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ImagePlus, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,video/mp4,video/webm,video/quicktime";
 const MAX_BYTES = 100 * 1024 * 1024;
@@ -12,6 +13,7 @@ function fmtBytes(n: number): string {
 }
 
 export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: File[]) => void }) {
+  const t = useT();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [reject, setReject] = useState<string | null>(null);
@@ -22,15 +24,19 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
     const next: File[] = [...files];
     for (const f of list) {
       if (next.length >= MAX_FILES) {
-        setReject(`Max ${MAX_FILES} files.`);
+        setReject(t("Max {n} files.", { n: MAX_FILES }));
         break;
       }
       if (f.size > MAX_BYTES) {
-        setReject(`${f.name} is over 100 MB.`);
+        setReject(t("{name} is over 100 MB.", { name: f.name }));
         continue;
       }
       if (!f.type.startsWith("image/") && !f.type.startsWith("video/")) {
-        setReject(`${f.name} is not an image or video.`);
+        setReject(t("{name} is not an image or video.", { name: f.name }));
+        continue;
+      }
+      // Skip exact name+size duplicates
+      if (next.some((x) => x.name === f.name && x.size === f.size && x.lastModified === f.lastModified)) {
         continue;
       }
       next.push(f);
@@ -62,9 +68,11 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
         }`}
       >
         <ImagePlus size={22} strokeWidth={1.7} />
-        <span className="text-[13.5px] font-medium">Drop screenshots or screen recordings, or click to browse</span>
+        <span className="text-[13.5px] font-medium">
+          {t("Drop screenshots or screen recordings, or click to browse")}
+        </span>
         <span className="text-[11.5px] text-ink-subtle">
-          PNG, JPG, WebP, GIF, MP4, WebM, MOV. Up to {MAX_FILES} files, 100 MB each.
+          {t("PNG, JPG, WebP, GIF, MP4, WebM, MOV. Up to {n} files, 100 MB each.", { n: MAX_FILES })}
         </span>
       </button>
       <input
@@ -83,7 +91,7 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {files.map((f, i) => (
             <li
-              key={`${f.name}-${i}`}
+              key={`${f.name}-${f.size}-${f.lastModified}-${i}`}
               className="group relative overflow-hidden rounded-xl border border-edge-soft bg-canvas/50"
             >
               <FilePreview file={f} />
@@ -96,7 +104,7 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
               <button
                 type="button"
                 onClick={() => remove(i)}
-                aria-label="Remove"
+                aria-label={t("Remove")}
                 className="absolute end-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-canvas/85 text-ink-muted opacity-0 transition-opacity hover:text-ink group-hover:opacity-100"
               >
                 <X size={13} strokeWidth={2.2} />
@@ -110,7 +118,16 @@ export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: 
 }
 
 function FilePreview({ file }: { file: File }) {
-  const url = URL.createObjectURL(file);
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  if (!url) return <div className="aspect-video w-full bg-canvas" />;
+
   if (file.type.startsWith("video/")) {
     return (
       <video

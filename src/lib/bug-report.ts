@@ -1,3 +1,6 @@
+import { loadInstalled } from "@/lib/addon-store";
+import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+
 declare const __APP_VERSION__: string;
 
 const ENDPOINT = (import.meta.env.VITE_BUG_REPORT_ENDPOINT as string | undefined) || "https://bugs.harbor.site";
@@ -64,6 +67,25 @@ export function getRecentErrors() {
   return ERR_BUFFER.slice();
 }
 
+function detectOsFromUa(): { os: string; osVersion: string } {
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+  const winMatch = ua.match(/Windows NT ([\d.]+)/i);
+  const macMatch = ua.match(/Mac OS X ([\d_.]+)/i);
+  if (winMatch) {
+    return { os: "Windows", osVersion: winMatch[1] === "10.0" ? "10/11" : winMatch[1] };
+  }
+  if (macMatch) {
+    return { os: "macOS", osVersion: macMatch[1].replace(/_/g, ".") };
+  }
+  if (/linux/i.test(ua) && !/android/i.test(ua)) {
+    return { os: "Linux", osVersion: "" };
+  }
+  if (isWindowsDesktop()) return { os: "Windows", osVersion: "" };
+  if (isMacDesktop()) return { os: "macOS", osVersion: "" };
+  if (isLinuxDesktop()) return { os: "Linux", osVersion: "" };
+  return { os: "unknown", osVersion: "" };
+}
+
 export async function collectDiagnostics(opts: {
   playerEngine: string;
   region: string;
@@ -72,42 +94,59 @@ export async function collectDiagnostics(opts: {
   hasTrakt: boolean;
   hasStremio: boolean;
   debridCount: number;
-  addonCount: number;
+  addonCount?: number;
   iptvCount: number;
 }): Promise<Diagnostics> {
-  let osName = "unknown";
-  let osVer = "";
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-  if (/windows nt 10/i.test(ua)) osName = "Windows";
-  else if (/mac os x/i.test(ua)) osName = "macOS";
-  else if (/linux/i.test(ua)) osName = "Linux";
-  try {
-    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
-      const modName = "@tauri-apps/plugin-os";
-      const osMod: { platform?: () => Promise<string>; version?: () => Promise<string> } = await import(
-        /* @vite-ignore */ modName
-      ).catch(() => ({}));
-      try {
-        osName = (await osMod.platform?.()) || osName;
-      } catch {}
-      try {
-        osVer = (await osMod.version?.()) || "";
-      } catch {}
-    }
-  } catch {}
-
+  const { os, osVersion } = detectOsFromUa();
   const viewport = typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "";
+
+  let addonCount = opts.addonCount;
+  if (addonCount == null) {
+    try {
+      addonCount = loadInstalled().length;
+    } catch {
+      addonCount = 0;
+    }
+  }
 
   return {
     appVersion: typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "dev",
-    os: osName,
-    osVersion: osVer,
+    os,
+    osVersion,
     ua,
     viewport,
     locale: typeof navigator !== "undefined" ? navigator.language : "",
-    flags: opts,
+    flags: {
+      playerEngine: opts.playerEngine,
+      region: opts.region,
+      hasTmdb: opts.hasTmdb,
+      hasRpdb: opts.hasRpdb,
+      hasTrakt: opts.hasTrakt,
+      hasStremio: opts.hasStremio,
+      debridCount: opts.debridCount,
+      addonCount,
+      iptvCount: opts.iptvCount,
+    },
     recentErrors: getRecentErrors().slice(-20),
   };
+}
+
+async function postReport(fd: FormData): Promise<{ id: string }> {
+  let res: Response;
+  try {
+    res = await fetch(`${ENDPOINT}/v1/reports`, { method: "POST", body: fd });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(
+      msg.includes("Failed to fetch") ? "Could not reach the bug report server. Check your connection." : msg,
+    );
+  }
+  if (!res.ok) {
+    const j = (await res.json().catch(() => ({ error: `HTTP ${res.status}` }))) as { error?: string };
+    throw new Error(j.error || `HTTP ${res.status}`);
+  }
+  return (await res.json()) as { id: string };
 }
 
 export async function submitErrorReport(args: {
@@ -117,19 +156,7 @@ export async function submitErrorReport(args: {
   detail?: string;
 }): Promise<{ id: string }> {
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-  const winMatch = ua.match(/Windows NT ([\d.]+)/i);
-  const macMatch = ua.match(/Mac OS X ([\d_.]+)/i);
-  let os = "unknown";
-  let osVersion = "";
-  if (winMatch) {
-    os = "Windows";
-    osVersion = winMatch[1] === "10.0" ? "10/11" : winMatch[1];
-  } else if (macMatch) {
-    os = "macOS";
-    osVersion = macMatch[1].replace(/_/g, ".");
-  } else if (/linux/i.test(ua)) {
-    os = "Linux";
-  }
+  const { os, osVersion } = detectOsFromUa();
   const summary = `[${args.code}] ${args.title}: ${args.message}`.slice(0, 240);
   const fd = new FormData();
   fd.set("summary", summary);
@@ -158,15 +185,13 @@ export async function submitErrorReport(args: {
       recentErrors: getRecentErrors().slice(-20),
     }),
   );
-  const res = await fetch(`${ENDPOINT}/v1/reports`, { method: "POST", body: fd });
-  if (!res.ok) {
-    const j = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    throw new Error(j.error || `HTTP ${res.status}`);
-  }
-  return (await res.json()) as { id: string };
+  return postReport(fd);
 }
 
 export async function submitBugReport(input: BugReportInput, diag: Diagnostics): Promise<{ id: string }> {
+  if (input.summary.trim().length < 6) {
+    throw new Error("Summary needs at least 6 characters");
+  }
   const fd = new FormData();
   fd.set("summary", input.summary);
   fd.set("severity", input.severity);
@@ -186,10 +211,5 @@ export async function submitBugReport(input: BugReportInput, diag: Diagnostics):
   fd.set("diagnostics", JSON.stringify({ flags: diag.flags, recentErrors: diag.recentErrors }));
   for (const f of input.files) fd.append("files", f, f.name);
 
-  const res = await fetch(`${ENDPOINT}/v1/reports`, { method: "POST", body: fd });
-  if (!res.ok) {
-    const j = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    throw new Error(j.error || `HTTP ${res.status}`);
-  }
-  return (await res.json()) as { id: string };
+  return postReport(fd);
 }

@@ -1,4 +1,5 @@
 import { App } from "@/App";
+import { installBugReportErrorCapture } from "@/lib/bug-report";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { HdrOverlayApp } from "@/views/hdr-overlay-app";
 import { ModalOverlayApp } from "@/views/modal-overlay-app";
@@ -8,6 +9,9 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import "@/index.css";
+
+// Capture runtime errors from first paint so bug reports include them
+installBugReportErrorCapture();
 
 function detectPipMode(): boolean {
   if (new URLSearchParams(window.location.search).get("pip") === "1") return true;

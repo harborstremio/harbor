@@ -89,7 +89,7 @@ export function ErrorView() {
   useEffect(() => {
     if (!error) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.code !== "Escape" && e.key !== "Escape") return;
       if (error?.fatal) window.location.reload();
       else setError(null);
     };

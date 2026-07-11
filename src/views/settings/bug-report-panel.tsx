@@ -51,7 +51,7 @@ export function BugReportPanel() {
       hasStremio: !!auth.authKey,
       debridCount: [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(Boolean)
         .length,
-      addonCount: 0,
+      // addonCount resolved inside collectDiagnostics from installed addons
       iptvCount: settings.iptvPlaylists.length,
     }).then((d) => {
       if (!cancelled) setDiag(d);
@@ -267,12 +267,20 @@ function ExportLogButton() {
     setState("exporting");
     setDetail(null);
     try {
-      await invoke<string>("mpv_export_log");
+      const path = await invoke<string>("mpv_export_log");
       setState("done");
-      setDetail(t("Saved to Downloads as harbor-mpv-log.txt"));
+      setDetail(path ? t("Saved to {path}", { path }) : t("Saved to Downloads as harbor-mpv-log.txt"));
     } catch (e) {
       setState("error");
-      setDetail(e instanceof Error ? e.message : String(e));
+      const raw = e instanceof Error ? e.message : String(e);
+      // Map known Rust/Tauri messages to friendly copy
+      if (/No player log yet/i.test(raw)) {
+        setDetail(t("No player log yet. Play something first, then export."));
+      } else if (/not allowed|command|webview/i.test(raw) && !raw.includes("copy")) {
+        setDetail(t("Player log export only works in the desktop app."));
+      } else {
+        setDetail(raw);
+      }
     }
   };
 
