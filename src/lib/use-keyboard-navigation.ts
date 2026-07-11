@@ -156,8 +156,10 @@ function overlap(aStart: number, aEnd: number, bStart: number, bEnd: number) {
 }
 
 function getDirection(e: KeyboardEvent): Dir | null {
-  if (KEY_TO_DIR[e.key]) return KEY_TO_DIR[e.key];
+  // Prefer physical `code` so WASD still navigates under Arabic (and other
+  // non-Latin) keyboard layouts — `e.key` becomes Arabic letters there.
   if (CODE_TO_DIR[e.code]) return CODE_TO_DIR[e.code];
+  if (KEY_TO_DIR[e.key]) return KEY_TO_DIR[e.key];
   return KEYCODE_TO_DIR[e.keyCode] ?? null;
 }
 

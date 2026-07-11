@@ -414,16 +414,60 @@ export const HOTKEY_MAP: Record<HotkeyId, HotkeyDef> = Object.fromEntries(HOTKEY
   HotkeyDef
 >;
 
+/**
+ * Physical key → binding token. Prefer `e.code` over `e.key` so shortcuts keep
+ * working when the OS layout is Arabic (or any non-Latin layout). With Arabic
+ * active, pressing the F key yields `e.key === "ب"` (or similar) while
+ * `e.code` stays `"KeyF"` — defaults like `f` / `Space` / `/` must match that.
+ */
+const CODE_TO_BINDING_KEY: Record<string, string> = {
+  Space: "Space",
+  Slash: "/",
+  Backslash: "\\",
+  Minus: "-",
+  Equal: "=",
+  BracketLeft: "[",
+  BracketRight: "]",
+  Semicolon: ";",
+  Quote: "'",
+  Comma: ",",
+  Period: ".",
+  Backquote: "`",
+};
+
+function keyTokenFromEvent(e: KeyboardEvent): { key: string; isLetter: boolean } {
+  const code = e.code || "";
+
+  // KeyA…KeyZ — physical letter row (layout-independent)
+  if (code.length === 4 && code.startsWith("Key")) {
+    return { key: code.slice(3).toLowerCase(), isLetter: true };
+  }
+  // Digit0…Digit9
+  if (code.length === 6 && code.startsWith("Digit")) {
+    return { key: code.slice(5), isLetter: false };
+  }
+  // Common punctuation used in defaults (/, -, =, …)
+  const fromCode = CODE_TO_BINDING_KEY[code];
+  if (fromCode) {
+    return { key: fromCode, isLetter: false };
+  }
+
+  // Named keys (Escape, ArrowLeft, Enter, F1, …) — e.key is stable across layouts
+  let key = e.key;
+  if (key === " ") key = "Space";
+  const isLetter = key.length === 1 && /[a-zA-Z]/.test(key);
+  if (isLetter) key = key.toLowerCase();
+  return { key, isLetter };
+}
+
 export function eventToBinding(e: KeyboardEvent): string {
   const mods: string[] = [];
-  let key = e.key;
-  const isLetter = key.length === 1 && /[a-zA-Z]/.test(key);
+  const { key, isLetter } = keyTokenFromEvent(e);
   if (e.ctrlKey) mods.push("ctrl");
+  // Letters ignore Shift so K and Shift+K share the same binding (see settings copy).
   if (e.shiftKey && !isLetter) mods.push("shift");
   if (e.altKey) mods.push("alt");
   if (e.metaKey) mods.push("meta");
-  if (key === " ") key = "Space";
-  if (isLetter) key = key.toLowerCase();
   return mods.length === 0 ? key : mods.join("+") + "+" + key;
 }
 
