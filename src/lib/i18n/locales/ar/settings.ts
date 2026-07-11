@@ -400,8 +400,6 @@ const settings: Record<string, string> = {
   "{name} imported to your library": "{name} تم استيرادها إلى مكتبتك",
   "Click any binding to rebind it. Press Esc while capturing to cancel. Letters ignore Shift (so K and Shift+K trigger the same action).":
     "انقر على أي اختصار لإعادة تعيينه. اضغط Esc أثناء التسجيل للإلغاء. الأحرف تتجاهل Shift (لذا K و Shift+K يؤديان نفس الإجراء).",
-  "Shortcuts always use the same physical keys as English (US QWERTY), even when your keyboard language is Arabic or anything else. Rebind or reset anytime — your custom keys are saved in Settings.":
-    "الاختصارات تستخدم دائمًا نفس المفاتيح الفعلية كما في الإنجليزية (US QWERTY)، حتى لو كانت لغة لوحة المفاتيح عربية أو أي لغة أخرى. يمكنك إعادة التعيين أو الاستعادة في أي وقت — تُحفظ مفاتيحك المخصصة في الإعدادات.",
   Global: "عام",
   "Anywhere in Harbor.": "في أي مكان في Harbor.",
   NAVIGATION: "التنقل",
