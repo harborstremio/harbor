@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import type { MalAnime } from "./types";
 
 export function malAnimeToMeta(anime: MalAnime): Meta | null {

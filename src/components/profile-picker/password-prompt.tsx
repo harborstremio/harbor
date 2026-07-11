@@ -1,8 +1,9 @@
-import { Lock } from "lucide-react";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { useT } from "@/lib/i18n";
-import { type Profile } from "@/lib/profiles";
 import { verifyProfilePassword } from "@/lib/profile-password";
+import { type Profile } from "@/lib/profiles";
+import { Lock } from "lucide-react";
+
 import { PinEntry } from "./pin-entry";
 
 export function PasswordPrompt({

@@ -1,40 +1,68 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-type Dir = 'up' | 'down' | 'left' | 'right';
+type Dir = "up" | "down" | "left" | "right";
 
 const SELECTOR = [
-  'a[href]',
-  'button:not([disabled])',
+  "a[href]",
+  "button:not([disabled])",
   'input:not([disabled]):not([type="hidden"])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
+  "select:not([disabled])",
+  "textarea:not([disabled])",
   '[tabindex]:not([tabindex="-1"])',
   '[contenteditable="true"]',
   '[data-focusable="true"]',
-].join(', ');
+].join(", ");
 
 const KEY_TO_DIR: Record<string, Dir> = {
-  ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
-  Up: 'up', Down: 'down', Left: 'left', Right: 'right',
-  w: 'up', W: 'up', s: 'down', S: 'down', a: 'left', A: 'left', d: 'right', D: 'right',
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  Up: "up",
+  Down: "down",
+  Left: "left",
+  Right: "right",
+  w: "up",
+  W: "up",
+  s: "down",
+  S: "down",
+  a: "left",
+  A: "left",
+  d: "right",
+  D: "right",
 };
 
 const CODE_TO_DIR: Record<string, Dir> = {
-  ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
-  KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right',
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  KeyW: "up",
+  KeyS: "down",
+  KeyA: "left",
+  KeyD: "right",
 };
 
 const KEYCODE_TO_DIR: Record<number, Dir> = {
-  38: 'up', 40: 'down', 37: 'left', 39: 'right',
-  19: 'up', 20: 'down', 21: 'left', 22: 'right',
-  87: 'up', 83: 'down', 65: 'left', 68: 'right',
+  38: "up",
+  40: "down",
+  37: "left",
+  39: "right",
+  19: "up",
+  20: "down",
+  21: "left",
+  22: "right",
+  87: "up",
+  83: "down",
+  65: "left",
+  68: "right",
 };
 
 const CENTER_KEYCODES = new Set([13, 23, 32]);
 
 // 4 = Android TV / Android WebView hardware BACK (KEYCODE_BACK)
 const BACK_KEYCODES = new Set([27, 4, 461, 10009, 166]);
-const BACK_KEYS = new Set(['Escape', 'Esc', 'BrowserBack', 'GoBack', 'Back']);
+const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
 
 // FIX #3: was 5px — way too tight for TV-scale layouts where cards/rows
 // are large and have padding/margins that create small axis offsets.
@@ -45,14 +73,14 @@ const AXIS_TOLERANCE = 24;
 function isEditable(el: HTMLElement | null) {
   if (!el) return false;
   const tag = el.tagName;
-  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable;
 }
 
 function isVisible(el: HTMLElement) {
   if (!el.isConnected) return false;
   if (el.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
   const style = window.getComputedStyle(el);
-  if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0) return false;
+  if (style.display === "none" || style.visibility === "hidden" || parseFloat(style.opacity) === 0) return false;
   const rect = el.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return false;
   if (el.getClientRects().length === 0) return false;
@@ -60,17 +88,17 @@ function isVisible(el: HTMLElement) {
 }
 
 function isInNav(el: HTMLElement): boolean {
-  return !!el.closest('[data-harbor-nav]');
+  return !!el.closest("[data-harbor-nav]");
 }
 
 function isInHero(el: HTMLElement): boolean {
-  return !!el.closest('[data-tv-hero-zone]');
+  return !!el.closest("[data-tv-hero-zone]");
 }
 
-function zoneOf(el: HTMLElement): 'nav' | 'hero' | 'content' {
-  if (isInNav(el)) return 'nav';
-  if (isInHero(el)) return 'hero';
-  return 'content';
+function zoneOf(el: HTMLElement): "nav" | "hero" | "content" {
+  if (isInNav(el)) return "nav";
+  if (isInHero(el)) return "hero";
+  return "content";
 }
 
 // FIX #2: dedupe nested focusable matches. If a card wrapper AND one of
@@ -85,16 +113,21 @@ function getFocusable(): HTMLElement[] {
   return all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
 }
 
-function getFocusableInZone(zone: 'nav' | 'hero' | 'content'): HTMLElement[] {
+function getFocusableInZone(zone: "nav" | "hero" | "content"): HTMLElement[] {
   return getFocusable().filter((el) => zoneOf(el) === zone);
 }
 
 function getRect(el: HTMLElement) {
   const r = el.getBoundingClientRect();
   return {
-    left: r.left, right: r.right, top: r.top, bottom: r.bottom,
-    width: r.width, height: r.height,
-    cx: r.left + r.width / 2, cy: r.top + r.height / 2,
+    left: r.left,
+    right: r.right,
+    top: r.top,
+    bottom: r.bottom,
+    width: r.width,
+    height: r.height,
+    cx: r.left + r.width / 2,
+    cy: r.top + r.height / 2,
   };
 }
 
@@ -115,15 +148,15 @@ function isBackKey(e: KeyboardEvent): boolean {
 }
 
 function getInitialFocus(list: HTMLElement[]) {
-  return list.find((el) => el.hasAttribute('data-tv-initial-focus')) ?? list[0] ?? null;
+  return list.find((el) => el.hasAttribute("data-tv-initial-focus")) ?? list[0] ?? null;
 }
 
 let focusStylesInjected = false;
 function ensureFocusStyles() {
-  if (focusStylesInjected || typeof document === 'undefined') return;
+  if (focusStylesInjected || typeof document === "undefined") return;
   focusStylesInjected = true;
-  const style = document.createElement('style');
-  style.setAttribute('data-tv-focus-styles', 'true');
+  const style = document.createElement("style");
+  style.setAttribute("data-tv-focus-styles", "true");
   // FIX #1: removed `transform: scale(1.03)`.
   // getBoundingClientRect() reflects the element AFTER transforms are
   // applied. Scaling the focused element on every focus change means
@@ -150,20 +183,20 @@ let lastFocusedEl: HTMLElement | null = null;
 function focusElement(el: HTMLElement) {
   ensureFocusStyles();
   if (lastFocusedEl && lastFocusedEl !== el) {
-    lastFocusedEl.removeAttribute('data-tv-focused');
+    lastFocusedEl.removeAttribute("data-tv-focused");
   }
-  el.setAttribute('data-tv-focused', 'true');
+  el.setAttribute("data-tv-focused", "true");
   lastFocusedEl = el;
 
   el.focus({ preventScroll: true });
   if (isInHero(el)) {
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     return;
   }
   el.scrollIntoView({
-    block: 'center',
-    inline: 'center',
-    behavior: 'smooth',
+    block: "center",
+    inline: "center",
+    behavior: "smooth",
   });
 }
 
@@ -176,18 +209,21 @@ function findBest(focused: HTMLElement, candidates: HTMLElement[], dir: Dir): HT
     if (el === focused) continue;
     const dst = getRect(el);
 
-    if (dir === 'right' && dst.cx <= src.cx + AXIS_TOLERANCE) continue;
-    if (dir === 'left' && dst.cx >= src.cx - AXIS_TOLERANCE) continue;
-    if (dir === 'down' && dst.cy <= src.cy + AXIS_TOLERANCE) continue;
-    if (dir === 'up' && dst.cy >= src.cy - AXIS_TOLERANCE) continue;
+    if (dir === "right" && dst.cx <= src.cx + AXIS_TOLERANCE) continue;
+    if (dir === "left" && dst.cx >= src.cx - AXIS_TOLERANCE) continue;
+    if (dir === "down" && dst.cy <= src.cy + AXIS_TOLERANCE) continue;
+    if (dir === "up" && dst.cy >= src.cy - AXIS_TOLERANCE) continue;
 
-    const horizontal = dir === 'left' || dir === 'right';
+    const horizontal = dir === "left" || dir === "right";
 
     const primary =
-      dir === 'right' ? Math.max(0, dst.left - src.right) :
-      dir === 'left' ? Math.max(0, src.left - dst.right) :
-      dir === 'down' ? Math.max(0, dst.top - src.bottom) :
-      Math.max(0, src.top - dst.bottom);
+      dir === "right"
+        ? Math.max(0, dst.left - src.right)
+        : dir === "left"
+          ? Math.max(0, src.left - dst.right)
+          : dir === "down"
+            ? Math.max(0, dst.top - src.bottom)
+            : Math.max(0, src.top - dst.bottom);
 
     const secondary = horizontal ? Math.abs(dst.cy - src.cy) : Math.abs(dst.cx - src.cx);
 
@@ -216,15 +252,19 @@ function getSpatialOrder(list: HTMLElement[]) {
 }
 
 type TVNavigationOptions = {
+  /** When false, keyboard/TV remote navigation is fully disabled (e.g. while the player is open). */
+  enabled?: boolean;
   wrap?: boolean;
   onBack?: () => boolean;
   onBackToNav?: () => void;
 };
 
 export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
-  const { wrap = true, onBack, onBackToNav } = options;
+  const { enabled = true, wrap = true, onBack, onBackToNav } = options;
 
   useEffect(() => {
+    if (!enabled) return;
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
@@ -240,7 +280,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
             onBackToNav();
           } else {
             const nav = document.querySelector<HTMLElement>(
-              '[data-harbor-nav] [data-focusable="true"], [data-harbor-nav] a[href], [data-harbor-nav] button'
+              '[data-harbor-nav] [data-focusable="true"], [data-harbor-nav] a[href], [data-harbor-nav] button',
             );
             if (nav) focusElement(nav);
           }
@@ -256,10 +296,9 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         e.preventDefault();
         e.stopPropagation();
 
-        const active =
-          document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-        const zone = active ? zoneOf(active) : 'content';
+        const zone = active ? zoneOf(active) : "content";
         const all = getFocusableInZone(zone);
         if (!all.length) return;
 
@@ -269,9 +308,9 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
           return;
         }
 
-        if (zone === 'hero' && (dir === 'up' || dir === 'down')) {
-          if (dir === 'down') {
-            const contentItems = getFocusableInZone('content');
+        if (zone === "hero" && (dir === "up" || dir === "down")) {
+          if (dir === "down") {
+            const contentItems = getFocusableInZone("content");
             const first = getInitialFocus(contentItems);
             if (first) focusElement(first);
           }
@@ -289,36 +328,35 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
           const idx = ordered.indexOf(active);
           if (idx >= 0) {
             const next =
-              dir === 'down' || dir === 'right'
-                ? ordered[idx + 1] ?? ordered[0]
-                : ordered[idx - 1] ?? ordered[ordered.length - 1];
+              dir === "down" || dir === "right"
+                ? (ordered[idx + 1] ?? ordered[0])
+                : (ordered[idx - 1] ?? ordered[ordered.length - 1]);
             if (next) focusElement(next);
           }
         }
         return;
       }
 
-      const isCenter = CENTER_KEYCODES.has(e.keyCode) || e.key === 'Enter' || e.code === 'Enter';
+      const isCenter = CENTER_KEYCODES.has(e.keyCode) || e.key === "Enter" || e.code === "Enter";
       if (!isCenter) return;
 
-      const active =
-        document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
       if (!active || isEditable(active)) return;
 
       const nativeClickable = active.matches(
-        'button, a[href], input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"]'
+        'button, a[href], input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"]',
       );
 
-      if (e.key === ' ' && nativeClickable) return;
-      if (e.key === 'Enter' && nativeClickable) return;
+      if (e.key === " " && nativeClickable) return;
+      if (e.key === "Enter" && nativeClickable) return;
 
       e.preventDefault();
       e.stopPropagation();
       active.click();
     };
 
-    window.addEventListener('keydown', onKeyDown, true);
-    return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, [wrap, onBack, onBackToNav]);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
+  }, [enabled, wrap, onBack, onBackToNav]);
 }

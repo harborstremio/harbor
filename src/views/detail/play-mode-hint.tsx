@@ -1,9 +1,9 @@
-import { X } from "lucide-react";
-import { useRef } from "react";
+import { useT } from "@/lib/i18n";
 import { useOnboarding } from "@/lib/onboarding";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { X } from "lucide-react";
+import { useRef } from "react";
 
 export function PlayModeHint({ children }: { children: React.ReactNode }) {
   const t = useT();
@@ -24,10 +24,7 @@ export function PlayModeHint({ children }: { children: React.ReactNode }) {
     >
       {children}
       {visible && (
-        <div
-          ref={popoverRef}
-          className="pointer-events-none absolute bottom-full start-0 z-30 mb-3 flex w-[320px]"
-        >
+        <div ref={popoverRef} className="pointer-events-none absolute bottom-full start-0 z-30 mb-3 flex w-[320px]">
           <div className="pointer-events-auto animate-nudge-in relative flex w-full items-start gap-3 rounded-2xl border border-edge-soft bg-elevated/95 px-4 py-3.5 backdrop-blur-md shadow-[0_18px_50px_-20px_rgba(0,0,0,0.65)]">
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
               <p className="text-[13px] font-semibold text-ink">{t("Auto-loading the best stream")}</p>

@@ -1,5 +1,5 @@
-import { ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { ArrowLeft } from "lucide-react";
 
 export function AboutPanel({ onBack }: { onBack: () => void }) {
   const t = useT();

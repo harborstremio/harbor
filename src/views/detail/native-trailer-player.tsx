@@ -1,6 +1,7 @@
+import { useT } from "@/lib/i18n";
 import { Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
+
 import { Tooltip } from "./tooltip";
 import { PiPButton, Scrubber, SpeedPill, VolumeControl, formatTime } from "./trailer-controls";
 
@@ -298,12 +299,7 @@ export function NativeTrailerPlayer({
           <div className="ms-auto flex items-center gap-1.5">
             <SpeedPill speed={speed} onCycle={cycleSpeed} />
             {pipSupported && <PiPButton active={pipActive} onClick={togglePiP} />}
-            <VolumeControl
-              volume={volume}
-              muted={muted}
-              onChange={applyVolume}
-              onToggleMute={toggleMute}
-            />
+            <VolumeControl volume={volume} muted={muted} onChange={applyVolume} onToggleMute={toggleMute} />
           </div>
         </div>
       </div>

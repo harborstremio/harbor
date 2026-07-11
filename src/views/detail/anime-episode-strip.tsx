@@ -1,19 +1,20 @@
-import { Check, Eye } from "lucide-react";
-import { useMemo } from "react";
 import { DragStrip } from "@/components/drag-strip";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
+import { formatAirDate } from "@/lib/dates";
+import { useT } from "@/lib/i18n";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
 import { useView } from "@/lib/view";
-import { formatAirDate } from "@/lib/dates";
-import { useT } from "@/lib/i18n";
+import { Check, Eye } from "lucide-react";
+import { useMemo } from "react";
+
+import { FillerBadge, UpcomingBadge } from "./badges";
 import { EpisodeGrid } from "./episode-grid";
 import type { GridEpisode } from "./episode-grid-types";
-import { FillerBadge, UpcomingBadge } from "./badges";
-import { isUpcomingDate } from "./helpers";
 import { EpisodeRatingBadge } from "./episode-rating-badge";
+import { isUpcomingDate } from "./helpers";
 
 type Progress = { ratio: number; watched: boolean; startedAt: number };
 
@@ -165,9 +166,7 @@ function AnimeEpisodeStripCard({
     <div
       data-ep={ep.number}
       data-no-card-ring
-      onContextMenu={(e) =>
-        onContextMenu?.(e, ep.seasonNumber || 1, ep.number, progress.watched, ep.sourceMetaId)
-      }
+      onContextMenu={(e) => onContextMenu?.(e, ep.seasonNumber || 1, ep.number, progress.watched, ep.sourceMetaId)}
       className="group flex w-full flex-col gap-2.5 text-start"
     >
       <button
@@ -176,7 +175,14 @@ function AnimeEpisodeStripCard({
         className="relative aspect-video overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
       >
         <div className={`${spoiler?.thumb ? SPOILER_THUMB_CLASS : ""} ${upcoming ? "opacity-55 saturate-50" : ""}`}>
-          <Poster src={ep.thumbnail ?? undefined} seed={String(ep.id)} ratio="landscape" className="" lazy fallbacks={[ep.thumbnailFallback, meta.background]} />
+          <Poster
+            src={ep.thumbnail ?? undefined}
+            seed={String(ep.id)}
+            ratio="landscape"
+            className=""
+            lazy
+            fallbacks={[ep.thumbnailFallback, meta.background]}
+          />
         </div>
         {upcoming && (
           <span className="absolute bottom-2 start-2 transition-opacity group-hover:opacity-0">
@@ -191,9 +197,7 @@ function AnimeEpisodeStripCard({
         )}
         {ep.synopsis && (
           <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-black/92 via-black/55 to-transparent p-2 pt-10 text-start pointer-events-none opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-            <p className="line-clamp-5 text-[9.5px] leading-[1.35] text-white/95 drop-shadow-md">
-              {ep.synopsis}
-            </p>
+            <p className="line-clamp-5 text-[9.5px] leading-[1.35] text-white/95 drop-shadow-md">{ep.synopsis}</p>
           </div>
         )}
 
@@ -218,7 +222,9 @@ function AnimeEpisodeStripCard({
           className="flex min-w-0 flex-1 flex-col gap-0.5 text-start focus-visible:outline-none"
         >
           <span className="flex items-center gap-2">
-            <span className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
+            <span
+              className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
+            >
               {ep.title || t("Episode {n}", { n: ep.number })}
             </span>
             {ep.filler && <FillerBadge />}

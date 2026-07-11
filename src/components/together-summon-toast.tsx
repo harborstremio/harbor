@@ -1,7 +1,7 @@
-import { ArrowRight, X } from "lucide-react";
+import type { Meta } from "@/lib/cinemeta";
 import { useTogether } from "@/lib/together/provider";
 import { useView, type View } from "@/lib/view";
-import type { Meta } from "@/lib/cinemeta";
+import { ArrowRight, X } from "lucide-react";
 
 export function TogetherSummonToast() {
   const { incomingSummon, dismissSummon } = useTogether();
@@ -61,9 +61,7 @@ export function TogetherSummonToast() {
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-accent">
             {name} wants you here
           </span>
-          <span className="max-w-[280px] truncate text-[13.5px] font-semibold text-ink">
-            {headline}
-          </span>
+          <span className="max-w-[280px] truncate text-[13.5px] font-semibold text-ink">{headline}</span>
         </div>
 
         <button

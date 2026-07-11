@@ -1,19 +1,20 @@
-import { ArrowRight, Loader2, Play } from "lucide-react";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { mergeBundledAwards } from "@/lib/awards-history";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { Check, Plus } from "lucide-react";
-import { openInAppBrowser } from "@/lib/window";
-import { queueToggle, useIsQueued } from "@/lib/queue";
-import { useMetaWatched } from "@/lib/watched-flag";
-import { HeroRatings } from "@/views/detail/hero-ratings";
-import { HeroAwardsCorner } from "@/views/detail/hero-awards";
-import { isTitleUpcoming } from "@/views/detail/helpers";
-import { UpcomingCta } from "@/views/detail/upcoming-cta";
-import { awardSummary, useAwards } from "@/lib/providers/wikidata";
-import { mergeBundledAwards } from "@/lib/awards-history";
 import { IMG } from "@/lib/providers/tmdb/tmdb-client";
 import type { PersonRef } from "@/lib/providers/tmdb/tmdb-people";
+import { awardSummary, useAwards } from "@/lib/providers/wikidata";
+import { queueToggle, useIsQueued } from "@/lib/queue";
+import { useMetaWatched } from "@/lib/watched-flag";
+import { openInAppBrowser } from "@/lib/window";
+import { isTitleUpcoming } from "@/views/detail/helpers";
+import { HeroAwardsCorner } from "@/views/detail/hero-awards";
+import { HeroRatings } from "@/views/detail/hero-ratings";
+import { UpcomingCta } from "@/views/detail/upcoming-cta";
+import { ArrowRight, Loader2, Play } from "lucide-react";
+import { Check, Plus } from "lucide-react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
+
 import { PeopleRail, PosterRail, RailSection, RailSkeleton, type Person } from "./rails";
 import { useModalRatings } from "./use-modal-ratings";
 import { useTitleDetail } from "./use-title-detail";
@@ -152,9 +153,7 @@ export function TitlePanel({
                 <button
                   key={g.name}
                   type="button"
-                  onClick={() =>
-                    g.id > 0 && onOpenGenre?.(g.name, g.id, mediaType === "show" ? "tv" : "movie")
-                  }
+                  onClick={() => g.id > 0 && onOpenGenre?.(g.name, g.id, mediaType === "show" ? "tv" : "movie")}
                   disabled={!onOpenGenre || !tmdbKey || g.id <= 0}
                   className="rounded-full bg-white/[0.08] px-3 py-1.5 text-[13px] font-medium text-white/75 ring-1 ring-white/10 transition-colors enabled:hover:bg-white/[0.16] enabled:hover:text-white disabled:cursor-default"
                 >
@@ -265,10 +264,7 @@ export function TitlePanel({
         </RailSection>
       ) : cast.length > 0 ? (
         <RailSection label={t("Cast")} count={detail?.cast.length}>
-          <PeopleRail
-            people={cast}
-            onOpen={tmdbKey ? (p) => onOpenPerson(p.id, p.name) : undefined}
-          />
+          <PeopleRail people={cast} onOpen={tmdbKey ? (p) => onOpenPerson(p.id, p.name) : undefined} />
         </RailSection>
       ) : needsKey ? (
         <p className="px-1 text-[13.5px] leading-relaxed text-white/55">

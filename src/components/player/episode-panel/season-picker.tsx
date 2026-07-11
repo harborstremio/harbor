@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function SeasonPicker({
   seasons,
@@ -59,9 +59,7 @@ export function SeasonPicker({
                 setOpen(false);
               }}
               className={`flex w-full items-center rounded-xl px-3.5 py-2.5 text-start text-[13.5px] transition-colors ${
-                n === active
-                  ? "bg-accent font-semibold text-canvas"
-                  : "text-ink-muted hover:bg-raised hover:text-ink"
+                n === active ? "bg-accent font-semibold text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
               }`}
             >
               {t("Season {n}", { n })}

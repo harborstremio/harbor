@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
-import { Check, Pin, Puzzle, Search, SlidersHorizontal, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { listBrowseCatalogs, type BrowseCatalog } from "@/lib/catalog-browse";
-import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { CatalogShelf } from "./catalogs/catalog-shelf";
-import { CatalogManageList } from "./catalogs/catalog-manage-list";
+import { useView } from "@/lib/view";
+import { Check, Pin, Puzzle, Search, SlidersHorizontal, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import { AddonFilterSelect } from "./catalogs/addon-filter-select";
+import { CatalogManageList } from "./catalogs/catalog-manage-list";
+import { CatalogShelf } from "./catalogs/catalog-shelf";
 import { useCatalogList } from "./catalogs/use-catalog-list";
 
 const TYPE_LABELS: Record<string, string> = {

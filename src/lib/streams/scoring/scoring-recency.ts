@@ -18,8 +18,7 @@ export function freshTheatricalAdjust(
   const days = (Date.now() - t) / 86_400_000;
   if (days >= THEATER_WINDOW_DAYS) return { signal: "fresh-skip-mature", delta: 0 };
 
-  const isTheaterCapture =
-    s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC";
+  const isTheaterCapture = s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC";
   const isRemuxOrBluray = s.source === "BluRay" || s.remux === true;
   const claimsHighQuality =
     s.source === "WEB-DL" ||
@@ -40,8 +39,7 @@ export function freshTheatricalAdjust(
 
   if (isTheaterCapture) {
     if (theaterDominated) {
-      const sourceOffset =
-        s.source === "CAM" ? 95 : s.source === "TS" || s.source === "HDTS" ? 75 : 65;
+      const sourceOffset = s.source === "CAM" ? 95 : s.source === "TS" || s.source === "HDTS" ? 75 : 65;
       return { signal: "fresh-theater-cinema-window", delta: sourceOffset };
     }
     if (days < 14) return { signal: "fresh-theater-mild-boost", delta: 25 };

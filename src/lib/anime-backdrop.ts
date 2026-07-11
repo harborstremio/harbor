@@ -1,9 +1,9 @@
-import { lruSet } from "@/lib/cache";
-import type { Meta } from "@/lib/cinemeta";
-import { registerCache } from "@/lib/memory-profiler";
-import { registerEvictable } from "@/lib/maintenance";
 import { anilistArtById, anilistArtByMalId } from "@/lib/anilist/browse";
 import { anilistFranchise } from "@/lib/anilist/relations";
+import { lruSet } from "@/lib/cache";
+import type { Meta } from "@/lib/cinemeta";
+import { registerEvictable } from "@/lib/maintenance";
+import { registerCache } from "@/lib/memory-profiler";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { externalToKitsu, kitsuToAnilist } from "@/lib/providers/anime-mapping";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
@@ -32,11 +32,7 @@ export async function resolveHeroBackdrop(tmdbKey: string, meta: Meta): Promise<
     const year = akm?.releaseInfo ?? meta.releaseInfo;
     const names = [
       ...new Set(
-        [
-          stripFranchiseSuffix(meta.name ?? ""),
-          stripFranchiseSuffix(akm?.name ?? ""),
-          akm?.name ?? "",
-        ].filter(Boolean),
+        [stripFranchiseSuffix(meta.name ?? ""), stripFranchiseSuffix(akm?.name ?? ""), akm?.name ?? ""].filter(Boolean),
       ),
     ];
     if (tmdbKey) {
@@ -64,9 +60,7 @@ export async function resolveHeroBackdrop(tmdbKey: string, meta: Meta): Promise<
       const art = await anilistArtById(anilistId).catch(() => null);
       if (art?.banner) return art.banner;
       const fam = await anilistFranchise(anilistId).catch(() => []);
-      const rooted = fam
-        .filter((n) => !n.upcoming)
-        .sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
+      const rooted = fam.filter((n) => !n.upcoming).sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999));
       const rootBanner = rooted.find((n) => n.banner)?.banner;
       if (rootBanner) return rootBanner;
       for (const n of rooted.slice(0, 2)) {

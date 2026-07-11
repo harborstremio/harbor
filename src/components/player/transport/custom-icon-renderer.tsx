@@ -1,12 +1,13 @@
+import { t as translate } from "@/lib/i18n";
+import type { PlayerControlId } from "@/lib/player-chrome";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import type { PlayerControlId } from "@/lib/player-chrome";
-import { t as translate } from "@/lib/i18n";
+
+import { BigButton } from "./big-button";
 import type { ControlContext } from "./control-renderer";
 import type { StremioRenderCtx } from "./control-renderer-stremio";
-import { BigButton } from "./big-button";
-import { Tooltip } from "./tooltip";
 import { StremioBtn } from "./stremio-btn";
+import { Tooltip } from "./tooltip";
 
 export function CustomIcon({ url, size }: { url: string; size: number }) {
   const [errored, setErrored] = useState(false);
@@ -14,13 +15,7 @@ export function CustomIcon({ url, size }: { url: string; size: number }) {
     setErrored(false);
   }, [url]);
   if (errored) {
-    return (
-      <AlertCircle
-        size={size}
-        strokeWidth={1.6}
-        className="pointer-events-none select-none text-amber-400/70"
-      />
-    );
+    return <AlertCircle size={size} strokeWidth={1.6} className="pointer-events-none select-none text-amber-400/70" />;
   }
   return (
     <img
@@ -166,7 +161,12 @@ export function renderCustomIconControl(
     case "draw-toggle": {
       if (ctx.compact || !ctx.showDraw) return null;
       return (
-        <BigButton onClick={ctx.onToggleDraw} active={ctx.drawMode} ariaLabel={t("Draw on video")} tooltip={t("Draw on video")}>
+        <BigButton
+          onClick={ctx.onToggleDraw}
+          active={ctx.drawMode}
+          ariaLabel={t("Draw on video")}
+          tooltip={t("Draw on video")}
+        >
           <CustomIcon url={iconUrl} size={22} />
         </BigButton>
       );
@@ -248,10 +248,7 @@ export function renderCustomIconControlStremio(
       if (!ctx.canPickAnother) return null;
       return (
         <Tooltip label={ctx.isLiveChannel ? t("TV Guide") : t("Switch stream")}>
-          <StremioBtn
-            onClick={ctx.onPickAnother}
-            ariaLabel={ctx.isLiveChannel ? t("TV Guide") : t("Switch stream")}
-          >
+          <StremioBtn onClick={ctx.onPickAnother} ariaLabel={ctx.isLiveChannel ? t("TV Guide") : t("Switch stream")}>
             <CustomIcon url={iconUrl} size={26} />
           </StremioBtn>
         </Tooltip>

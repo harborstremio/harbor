@@ -1,8 +1,9 @@
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { SLEEP_PRESETS, type SleepMode, type SleepTimerState } from "@/views/player/hooks/use-sleep-timer";
 import { Clock, Gauge, Plus, Settings2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SLEEP_PRESETS, type SleepMode, type SleepTimerState } from "@/views/player/hooks/use-sleep-timer";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+
 import { useMenuSide } from "../menu-side";
 import { Tooltip } from "./tooltip";
 
@@ -57,9 +58,7 @@ export function SpeedMenu({
     const entries = new Map<number, boolean>();
     for (const s of CURATED_SPEEDS) entries.set(s, false);
     for (const s of settings.customPlaybackSpeeds) if (!entries.has(s)) entries.set(s, true);
-    return [...entries.entries()]
-      .map(([value, custom]) => ({ value, custom }))
-      .sort((a, b) => a.value - b.value);
+    return [...entries.entries()].map(([value, custom]) => ({ value, custom })).sort((a, b) => a.value - b.value);
   }, [settings.customPlaybackSpeeds]);
 
   const sleepList = useMemo(() => {
@@ -76,9 +75,9 @@ export function SpeedMenu({
         mode: { kind: "minutes", total, firesAt: 0 } as SleepMode,
         custom,
       }));
-    const episodeRows = SLEEP_PRESETS.filter(
-      (p) => CURATED_SLEEP_IDS.includes(p.id) && p.mode.kind !== "minutes",
-    ).map((p) => ({ id: p.id, label: t(p.label), mode: p.mode, custom: false }));
+    const episodeRows = SLEEP_PRESETS.filter((p) => CURATED_SLEEP_IDS.includes(p.id) && p.mode.kind !== "minutes").map(
+      (p) => ({ id: p.id, label: t(p.label), mode: p.mode, custom: false }),
+    );
     return [...minuteRows, ...episodeRows];
   }, [settings.customSleepMinutes, t]);
 
@@ -161,9 +160,7 @@ export function SpeedMenu({
               <Section title={t("Sleep timer")} leftBorder>
                 {sleepList.map((p) => {
                   const isSel =
-                    (sleep.mode.kind === "minutes" &&
-                      p.mode.kind === "minutes" &&
-                      sleep.mode.total === p.mode.total) ||
+                    (sleep.mode.kind === "minutes" && p.mode.kind === "minutes" && sleep.mode.total === p.mode.total) ||
                     (sleep.mode.kind === p.mode.kind && p.mode.kind !== "minutes");
                   const hint =
                     isSel && sleep.remainingMs != null && p.mode.kind === "minutes"
@@ -222,15 +219,7 @@ export function SpeedMenu({
   );
 }
 
-function Section({
-  title,
-  leftBorder,
-  children,
-}: {
-  title: string;
-  leftBorder?: boolean;
-  children: React.ReactNode;
-}) {
+function Section({ title, leftBorder, children }: { title: string; leftBorder?: boolean; children: React.ReactNode }) {
   return (
     <div className={`p-2 ${leftBorder ? "border-s border-edge-soft" : ""}`}>
       <div className="px-3 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">

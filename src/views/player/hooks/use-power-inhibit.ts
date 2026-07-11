@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect } from "react";
 
 export function usePowerInhibit(snap: PlayerSnapshot) {
   const playing = snap.status === "playing";

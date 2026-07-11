@@ -1,4 +1,3 @@
-import type { AiProvider } from "@/lib/ai-models";
 import anthropicLogo from "@/assets/ai-logos/anthropic.png";
 import deepseekLogo from "@/assets/ai-logos/deepseek.png";
 import geminiLogo from "@/assets/ai-logos/gemini.png";
@@ -9,6 +8,7 @@ import openaiLogo from "@/assets/ai-logos/openai.png";
 import openrouterLogo from "@/assets/ai-logos/openrouter.png";
 import qwenLogo from "@/assets/ai-logos/qwen.png";
 import xaiLogo from "@/assets/ai-logos/xai.png";
+import type { AiProvider } from "@/lib/ai-models";
 
 export const AI_LOGOS: Record<AiProvider | "openrouter", string> = {
   openai: openaiLogo,

@@ -1,10 +1,10 @@
-import { useCallback } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { useView, type PlayEpisode } from "@/lib/view";
-import { useSettings } from "@/lib/settings";
 import { findLocalEpisodeByIds } from "@/lib/local-library";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { openLocalEpisodes } from "@/lib/player/local-episodes-modal";
+import { useSettings } from "@/lib/settings";
+import { useView, type PlayEpisode } from "@/lib/view";
+import { useCallback } from "react";
 
 type PlayOpts = { autoPlay?: boolean; resume?: boolean };
 
@@ -12,13 +12,7 @@ export function useLocalAwareSeriesPlay() {
   const { openPicker, openPlayer } = useView();
   const { settings } = useSettings();
   return useCallback(
-    (args: {
-      meta: Meta;
-      episode: PlayEpisode;
-      opts?: PlayOpts;
-      imdbId?: string | null;
-      videos?: Meta["videos"];
-    }) => {
+    (args: { meta: Meta; episode: PlayEpisode; opts?: PlayOpts; imdbId?: string | null; videos?: Meta["videos"] }) => {
       const { meta, episode, opts, imdbId, videos } = args;
       const stream = () => openPicker(meta, episode, opts);
       if (settings.localPlaybackMode === "stream") {

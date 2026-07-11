@@ -1,4 +1,3 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
 import type { PreviewArt } from "@/lib/hover-preview/preview-data";
 import {
   EASE_OUT,
@@ -8,6 +7,8 @@ import {
   HALO_OPACITY,
   HALO_SATURATE,
 } from "@/lib/hover-preview/timing";
+import { forwardRef, useEffect, useRef, useState } from "react";
+
 import { posterPlate } from "../poster";
 
 type HaloSource = { art: PreviewArt; seed: string };
@@ -30,13 +31,8 @@ function haloStyle(source: HaloSource): React.CSSProperties {
   return base;
 }
 
-export const PreviewHalo = forwardRef<HTMLDivElement, HaloSource>(function PreviewHalo(
-  { art, seed },
-  ref,
-) {
-  const [stack, setStack] = useState<Array<{ key: number; source: HaloSource }>>([
-    { key: 0, source: { art, seed } },
-  ]);
+export const PreviewHalo = forwardRef<HTMLDivElement, HaloSource>(function PreviewHalo({ art, seed }, ref) {
+  const [stack, setStack] = useState<Array<{ key: number; source: HaloSource }>>([{ key: 0, source: { art, seed } }]);
   const nextKey = useRef(1);
   const last = useRef<HaloSource>({ art, seed });
   const incomingRef = useRef<HTMLDivElement>(null);

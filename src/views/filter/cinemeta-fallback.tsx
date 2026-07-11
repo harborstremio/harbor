@@ -1,9 +1,9 @@
-import { Loader2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { PickCard } from "@/components/pick-card";
 import { type Meta, topMovies, topSeries } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import type { MetaFilter } from "@/lib/view";
+import { Loader2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const PAGE_SIZE = 100;
 const MAX_ITEMS = 600;
@@ -78,9 +78,7 @@ export function CinemetaFallback({ filter }: { filter: MetaFilter }) {
   if (filter.kind !== "genre") {
     return (
       <div className="rounded-2xl border border-dashed border-edge bg-canvas/30 p-8 text-center">
-        <p className="text-[14px] font-semibold text-ink">
-          {t("Add a TMDB key to browse by this filter.")}
-        </p>
+        <p className="text-[14px] font-semibold text-ink">{t("Add a TMDB key to browse by this filter.")}</p>
         <p className="mt-1 text-[12.5px] text-ink-muted">
           {t(
             "Year, runtime, language, and country filters need TMDB. Genre browsing falls back to Cinemeta automatically.",
@@ -99,10 +97,7 @@ export function CinemetaFallback({ filter }: { filter: MetaFilter }) {
         {items.length === 0 &&
           loading &&
           Array.from({ length: 14 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-[2/3] w-full animate-pulse rounded-xl bg-elevated/40"
-            />
+            <div key={i} className="aspect-[2/3] w-full animate-pulse rounded-xl bg-elevated/40" />
           ))}
       </div>
       <div ref={sentinelRef} className="h-px w-full" aria-hidden />

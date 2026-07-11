@@ -8,14 +8,10 @@ import {
   type CalendarItem,
   type LastFiredState,
 } from "./calendar";
-import {
-  fetchAnticipatedCalendar,
-  fetchLibraryCalendar,
-  fetchTraktCalendar,
-} from "./calendar-sources";
+import { fetchAnticipatedCalendar, fetchLibraryCalendar, fetchTraktCalendar } from "./calendar-sources";
+import { computeTvgIdCounts, epgProgramsForChannel } from "./iptv/epg-resolver";
 import { getCachedPlaylist } from "./iptv/store";
 import { fetchAndParseXmltv, indexProgramsByChannel } from "./iptv/xmltv";
-import { computeTvgIdCounts, epgProgramsForChannel } from "./iptv/epg-resolver";
 import type { Settings, WebhookTrigger } from "./settings";
 import { getSession as getTraktSession } from "./trakt/session";
 
@@ -51,11 +47,7 @@ function applyContentTypeFilter(items: CalendarItem[], opts: Settings["webhooks"
   });
 }
 
-async function fetchSource(
-  source: SourceKey,
-  settings: Settings,
-  authKey: string | null,
-): Promise<CalendarItem[]> {
+async function fetchSource(source: SourceKey, settings: Settings, authKey: string | null): Promise<CalendarItem[]> {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth();
@@ -112,11 +104,7 @@ function inFutureWindow(item: CalendarItem, todayISO: string, end: string): bool
   return item.releaseDate >= todayISO && item.releaseDate <= end;
 }
 
-function matchesTrigger(
-  item: CalendarItem,
-  trigger: WebhookTrigger,
-  trackedPersonIds: number[],
-): boolean {
+function matchesTrigger(item: CalendarItem, trigger: WebhookTrigger, trackedPersonIds: number[]): boolean {
   void trackedPersonIds;
   switch (trigger.event) {
     case "newMovie":
@@ -280,7 +268,7 @@ export async function runWebhookTick(
     const rows = await sourceFor(source);
     const typed = applyContentTypeFilter(rows, settings.webhooks);
     const fireable = typed.filter((i) => inFutureWindow(i, todayISO, fireEnd));
-    for (const channel of (["discord", "telegram"] as const)) {
+    for (const channel of ["discord", "telegram"] as const) {
       const url = channel === "discord" ? discordUrl : telegramUrl;
       if (!url) continue;
 
@@ -344,8 +332,9 @@ export async function runWebhookTick(
 
     const newMatched = matched.filter((i) => !state[ruleKey(rule.id, i)]);
     if (newMatched.length === 0) continue;
-    const targets = (["discord", "telegram"] as const)
-      .filter((c) => rule.channels[c] && (c === "discord" ? discordUrl : telegramUrl));
+    const targets = (["discord", "telegram"] as const).filter(
+      (c) => rule.channels[c] && (c === "discord" ? discordUrl : telegramUrl),
+    );
     if (targets.length === 0) continue;
     for (const item of newMatched) state[ruleKey(rule.id, item)] = todayISO;
     const aborted = commit(state, "rule fire", channelResults, totalFired);

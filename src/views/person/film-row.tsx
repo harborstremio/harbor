@@ -1,20 +1,12 @@
-import { useMemo } from "react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { Row } from "@/components/row";
 import { useContextMenu } from "@/lib/context-menu";
 import { creditToMeta, type PersonCredit } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { useMemo } from "react";
 
-export function FilmRow({
-  title,
-  credits,
-  showRole,
-}: {
-  title: string;
-  credits: PersonCredit[];
-  showRole: boolean;
-}) {
+export function FilmRow({ title, credits, showRole }: { title: string; credits: PersonCredit[]; showRole: boolean }) {
   return (
     <Row title={title}>
       {credits.map((c, i) => (
@@ -56,9 +48,7 @@ function FilmCard({ credit, showRole }: { credit: PersonCredit; showRole: boolea
             {[role, credit.releaseInfo].filter(Boolean).join(" · ")}
           </p>
         )}
-        {!showRole && credit.releaseInfo && (
-          <p className="text-[11.5px] text-ink-subtle">{credit.releaseInfo}</p>
-        )}
+        {!showRole && credit.releaseInfo && <p className="text-[11.5px] text-ink-subtle">{credit.releaseInfo}</p>}
       </div>
     </button>
   );

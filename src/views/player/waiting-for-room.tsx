@@ -1,8 +1,9 @@
-import { LottiePlayer } from "@/components/lottie-player";
 import waitingAnim from "@/assets/lottie/wt-waiting-white.json";
-import { formatNames } from "./player-utils";
-import type { RoomSnapshot } from "@/lib/together/client";
+import { LottiePlayer } from "@/components/lottie-player";
 import { useT } from "@/lib/i18n";
+import type { RoomSnapshot } from "@/lib/together/client";
+
+import { formatNames } from "./player-utils";
 
 function readyPillClass(ready: boolean, stale: boolean): string {
   if (ready) return "bg-emerald-500/15 text-emerald-300";
@@ -83,9 +84,7 @@ export function WaitingForRoom(props: {
               onClick={onStart}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-[13px] font-semibold text-black transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              {everyoneReady
-                ? t("Start watching")
-                : t("Start anyway ({n} still loading)", { n: stillLoading })}
+              {everyoneReady ? t("Start watching") : t("Start anyway ({n} still loading)", { n: stillLoading })}
             </button>
           )}
           {!isHost && guestEscapeReady && (

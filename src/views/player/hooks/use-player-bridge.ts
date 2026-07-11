@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { isWindowsDesktop } from "@/lib/platform";
 import { emptySnapshot, type PlayerBridge, type PlayerSnapshot } from "@/lib/player/bridge";
 import { probeMpv } from "@/lib/player/mpv";
 import { mergeMpvOptions } from "@/lib/player/mpv-tuning";
-import { anime4kShadersFor, type Anime4kChoice } from "./use-anime4k";
-import type { PlayerSrc } from "@/lib/view";
-import type { Settings } from "@/lib/settings";
 import { setPlaybackClock } from "@/lib/player/playback-clock";
-import { isWindowsDesktop } from "@/lib/platform";
+import type { Settings } from "@/lib/settings";
 import { svpEnsureRunning } from "@/lib/svp";
+import type { PlayerSrc } from "@/lib/view";
+import { useEffect, useRef, useState, type RefObject } from "react";
+
 import { pickBridge } from "../player-utils";
+import { anime4kShadersFor, type Anime4kChoice } from "./use-anime4k";
 
 function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean {
   return (
@@ -68,8 +69,7 @@ export function usePlayerBridge(params: {
   const isLiveLike =
     !!src.meta.id?.startsWith("iptv:") ||
     (!!src.meta.type && !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
-  const chosenEngine =
-    isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
+  const chosenEngine = isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
   const bridgeKey = `${chosenEngine}|${anime4kOn}|${settings.playerHdrToSdr}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
   const [bridgeReady, setBridgeReady] = useState(false);
   useEffect(() => {
@@ -99,11 +99,7 @@ export function usePlayerBridge(params: {
         hdrToSdr: settings.playerHdrToSdr,
         embed: embedActive,
         d3d11Flip: settings.playerD3d11Flip,
-        anime4kShaders: anime4kShadersFor(
-          settings,
-          src,
-          (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
-        ),
+        anime4kShaders: anime4kShadersFor(settings, src, (settings.playerAnime4kOverride as Anime4kChoice) || "auto"),
         macEdr: false,
         extraOptions: mergeMpvOptions(settings, svpOn),
         getEmbedRect,

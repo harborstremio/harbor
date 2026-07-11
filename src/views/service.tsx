@@ -1,16 +1,16 @@
-import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";
 import { ServiceLogo } from "@/components/service-logo";
 import { TopRankCard } from "@/components/top-rank-card";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { SERVICES, providerIdsFor } from "@/lib/providers/streaming";
 import { safeFetch } from "@/lib/safe-fetch";
 import { useSettings, type StreamingService } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 type Category = {
   id: string;
@@ -132,7 +132,10 @@ export function ServiceView({ service }: { service: StreamingService }) {
               <ServiceLogo service={service} height={56} />
             </div>
             <p className="max-w-xl text-[14.5px] leading-relaxed text-ink-muted">
-              {t("The most-watched movies and series on {name} right now in {region}.", { name: meta.name, region: settings.region })}
+              {t("The most-watched movies and series on {name} right now in {region}.", {
+                name: meta.name,
+                region: settings.region,
+              })}
             </p>
           </div>
         </div>
@@ -224,13 +227,7 @@ export function ServiceView({ service }: { service: StreamingService }) {
   );
 }
 
-function CategoryPills({
-  active,
-  onChange,
-}: {
-  active: Category;
-  onChange: (c: Category) => void;
-}) {
+function CategoryPills({ active, onChange }: { active: Category; onChange: (c: Category) => void }) {
   const t = useT();
   const trackRef = useRef<HTMLDivElement>(null);
   const [scrollState, setScrollState] = useState({ canLeft: false, canRight: false });
@@ -313,15 +310,7 @@ function CategoryPills({
   );
 }
 
-function ScrollArrow({
-  side,
-  visible,
-  onClick,
-}: {
-  side: "left" | "right";
-  visible: boolean;
-  onClick: () => void;
-}) {
+function ScrollArrow({ side, visible, onClick }: { side: "left" | "right"; visible: boolean; onClick: () => void }) {
   const t = useT();
   return (
     <button
@@ -329,9 +318,7 @@ function ScrollArrow({
       aria-label={side === "left" ? t("Scroll filters left") : t("Scroll filters right")}
       onClick={onClick}
       className={`absolute top-1/2 -translate-y-1/2 ${side === "left" ? "left-0 -translate-x-1/3" : "right-0 translate-x-1/3"} z-20 flex h-9 w-9 items-center justify-center rounded-full bg-canvas/85 text-ink shadow-[0_8px_24px_-6px_rgba(0,0,0,0.6)] backdrop-blur-md transition-all duration-200 hover:bg-canvas focus:outline-none ${
-        visible
-          ? "opacity-0 group-hover/pills:opacity-100 pointer-events-auto"
-          : "pointer-events-none opacity-0"
+        visible ? "opacity-0 group-hover/pills:opacity-100 pointer-events-auto" : "pointer-events-none opacity-0"
       }`}
     >
       {side === "left" ? <ChevronLeft size={16} strokeWidth={2.4} /> : <ChevronRight size={16} strokeWidth={2.4} />}
@@ -352,13 +339,7 @@ function EdgeFade({ side, visible }: { side: "left" | "right"; visible: boolean 
   );
 }
 
-function CategoryFab({
-  active,
-  onChange,
-}: {
-  active: Category;
-  onChange: (c: Category) => void;
-}) {
+function CategoryFab({ active, onChange }: { active: Category; onChange: (c: Category) => void }) {
   const t = useT();
   const [open, setOpen] = useState(false);
 
@@ -391,9 +372,7 @@ function CategoryFab({
                 setOpen(false);
               }}
               className={`block w-full px-4 py-2 text-start text-[13.5px] transition-colors ${
-                c.id === active.id
-                  ? "bg-ink/10 text-ink"
-                  : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+                c.id === active.id ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
               }`}
             >
               {t(c.label)}

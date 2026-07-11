@@ -1,12 +1,19 @@
+import { AddToListMenu } from "@/components/lists/add-to-list-menu";
+import type { Meta } from "@/lib/cinemeta";
+import type { ListItemInput } from "@/lib/custom-lists";
+import {
+  activeDownloadFor,
+  cancelDownload,
+  pauseDownload,
+  resumeDownload,
+  useDownloads,
+} from "@/lib/download/downloads-store";
+import { useT } from "@/lib/i18n";
+import { useView } from "@/lib/view";
 import { ArrowDownToLine, Bookmark, Check, Layers, MoreHorizontal, Pause, Play, RotateCw, Star, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import type { Meta } from "@/lib/cinemeta";
-import { activeDownloadFor, cancelDownload, pauseDownload, resumeDownload, useDownloads } from "@/lib/download/downloads-store";
-import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
-import { AddToListMenu } from "@/components/lists/add-to-list-menu";
-import type { ListItemInput } from "@/lib/custom-lists";
+
 import { AnilistMenuItems, SimklMenuItems, TraktMenuItems } from "./overflow-sync-items";
 import { PreviewIcon } from "./preview-icon";
 
@@ -155,13 +162,7 @@ export function HeroActionOverflow({
             {showSync && (
               <>
                 <Item
-                  icon={
-                    inWatchlist ? (
-                      <Check size={14} strokeWidth={2.4} />
-                    ) : (
-                      <Bookmark size={14} strokeWidth={2} />
-                    )
-                  }
+                  icon={inWatchlist ? <Check size={14} strokeWidth={2.4} /> : <Bookmark size={14} strokeWidth={2} />}
                   label={inWatchlist ? t("In Watchlist") : t("Add to Watchlist")}
                   active={inWatchlist}
                   onClick={() => {
@@ -169,16 +170,8 @@ export function HeroActionOverflow({
                     setMenu(null);
                   }}
                 />
-                {simkl && (
-                  <SimklMenuItems
-                    harborId={simkl.harborId}
-                    type={simkl.type}
-                    onAction={() => setMenu(null)}
-                  />
-                )}
-                {anilist && (
-                  <AnilistMenuItems harborId={anilist.harborId} onAction={() => setMenu(null)} />
-                )}
+                {simkl && <SimklMenuItems harborId={simkl.harborId} type={simkl.type} onAction={() => setMenu(null)} />}
+                {anilist && <AnilistMenuItems harborId={anilist.harborId} onAction={() => setMenu(null)} />}
                 <TraktMenuItems
                   harborId={meta.id}
                   type={meta.type === "series" ? "series" : "movie"}
@@ -188,13 +181,7 @@ export function HeroActionOverflow({
               </>
             )}
             <Item
-              icon={
-                <Star
-                  size={14}
-                  strokeWidth={isFav ? 0 : 2}
-                  fill={isFav ? "currentColor" : "none"}
-                />
-              }
+              icon={<Star size={14} strokeWidth={isFav ? 0 : 2} fill={isFav ? "currentColor" : "none"} />}
               label={isFav ? t("Favorited") : t("Favorite")}
               active={isFav}
               onClick={() => {
@@ -264,13 +251,7 @@ export function HeroActionOverflow({
                         <ArrowDownToLine size={14} strokeWidth={2} />
                       )
                     }
-                    label={
-                      done
-                        ? t("Saved offline")
-                        : failed
-                          ? t("Retry download")
-                          : t("Download for offline")
-                    }
+                    label={done ? t("Saved offline") : failed ? t("Retry download") : t("Download for offline")}
                     active={done}
                     onClick={() => {
                       openPicker(meta, undefined, { intent: "download" });
@@ -304,12 +285,7 @@ export function HeroActionOverflow({
           document.body,
         )}
       {listItem && (
-        <AddToListMenu
-          item={listItem}
-          anchorRef={btnRef}
-          open={listMenu}
-          onClose={() => setListMenu(false)}
-        />
+        <AddToListMenu item={listItem} anchorRef={btnRef} open={listMenu} onClose={() => setListMenu(false)} />
       )}
     </>
   );

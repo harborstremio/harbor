@@ -48,20 +48,9 @@ const LANG_TO_TOKENS: Record<string, string[]> = {
   finnish: ["FI", "FIN", "FINNISH"],
 };
 
-const NEUTRAL_PRIORITY_BUMP = new Set([
-  "ENTERTAINMENT",
-  "NEWS",
-  "SPORTS",
-  "MOVIES",
-  "KIDS",
-  "DOCUMENTARY",
-]);
+const NEUTRAL_PRIORITY_BUMP = new Set(["ENTERTAINMENT", "NEWS", "SPORTS", "MOVIES", "KIDS", "DOCUMENTARY"]);
 
-export function scoreGroupForUser(
-  group: string,
-  region: string,
-  preferredLanguages: string[],
-): number {
+export function scoreGroupForUser(group: string, region: string, preferredLanguages: string[]): number {
   const tokens = tokenize(group);
   if (tokens.length === 0) return 0;
   const head = tokens[0];
@@ -79,11 +68,7 @@ export function scoreGroupForUser(
   return 0;
 }
 
-export function sortGroupsByRelevance(
-  groups: string[],
-  region: string,
-  preferredLanguages: string[],
-): string[] {
+export function sortGroupsByRelevance(groups: string[], region: string, preferredLanguages: string[]): string[] {
   return [...groups].sort((a, b) => {
     const sa = scoreGroupForUser(a, region, preferredLanguages);
     const sb = scoreGroupForUser(b, region, preferredLanguages);
@@ -92,9 +77,11 @@ export function sortGroupsByRelevance(
   });
 }
 
-export function sortChannelsByGroupRelevance<
-  T extends { group: string | null },
->(channels: T[], region: string, preferredLanguages: string[]): T[] {
+export function sortChannelsByGroupRelevance<T extends { group: string | null }>(
+  channels: T[],
+  region: string,
+  preferredLanguages: string[],
+): T[] {
   const scoreCache = new Map<string, number>();
   const scoreOf = (group: string | null): number => {
     if (!group) return -1;

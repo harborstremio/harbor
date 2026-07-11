@@ -1,8 +1,9 @@
-import { ChevronRight } from "lucide-react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { AddonStarBadge } from "@/components/addon-star-badge";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
+import { ChevronRight } from "lucide-react";
+
 import { idOf } from "./addons-utils";
 import { TorrentioHeroArt } from "./torrentio-hero-art";
 
@@ -62,9 +63,7 @@ export function HeroCard({
           <h2 className="font-display text-[42px] font-medium leading-[1.05] tracking-tight text-ink">
             {c.hero.title}
           </h2>
-          <p className="max-w-[26rem] text-[14.5px] leading-relaxed text-ink-muted">
-            {c.hero.subtitle}
-          </p>
+          <p className="max-w-[26rem] text-[14.5px] leading-relaxed text-ink-muted">{c.hero.subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -82,7 +81,11 @@ export function HeroCard({
           </button>
           <span className="inline-flex h-9 items-center gap-1 rounded-full px-4 text-[12.5px] font-medium text-ink-muted transition-colors group-hover:text-ink">
             {t("View details")}
-            <ChevronRight size={13} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5 rtl:-scale-x-100" />
+            <ChevronRight
+              size={13}
+              strokeWidth={2.4}
+              className="transition-transform group-hover:translate-x-0.5 rtl:-scale-x-100"
+            />
           </span>
         </div>
       </div>

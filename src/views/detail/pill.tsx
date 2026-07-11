@@ -1,10 +1,4 @@
-export function Pill({
-  children,
-  onClick,
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-}) {
+export function Pill({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   if (onClick) {
     return (
       <button

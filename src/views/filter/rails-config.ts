@@ -2,6 +2,7 @@ import { selectSpotlights, type Spotlight } from "@/lib/feed/genre-spotlights";
 import { GENRE_TOPICS, type Topic } from "@/lib/feed/genre-topics";
 import { GENRE_MOVIE_TO_TV, GENRE_TV_TO_MOVIE, MOVIE_GENRES } from "@/lib/feed/tags";
 import type { MetaFilter } from "@/lib/view";
+
 import { languageRails } from "./language-rails";
 
 export type StandardRail = {
@@ -231,9 +232,7 @@ export function railsForFilter(f: MetaFilter): AnyRail[] {
         kicker: "What's new on the network",
         params: {
           with_networks: id,
-          "first_air_date.gte": new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .slice(0, 10),
+          "first_air_date.gte": new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
           sort_by: "popularity.desc",
           "vote_count.gte": "10",
         },
@@ -244,9 +243,7 @@ export function railsForFilter(f: MetaFilter): AnyRail[] {
   const g = String(f.id);
   const spotlights = selectSpotlights(f.name);
   const dateField = f.mediaType === "movie" ? "primary_release_date" : "first_air_date";
-  const fiveYearsAgo = new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10);
+  const fiveYearsAgo = new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const docId = MOVIE_GENRES.Documentary;
   const isDoc = f.id === docId;
   const vc = (n: number) => String(isDoc ? Math.max(10, Math.round(n * 0.2)) : n);
@@ -289,8 +286,7 @@ export function railsForFilter(f: MetaFilter): AnyRail[] {
     },
   });
 
-  const companionId =
-    f.mediaType === "movie" ? GENRE_MOVIE_TO_TV[f.id] : GENRE_TV_TO_MOVIE[f.id];
+  const companionId = f.mediaType === "movie" ? GENRE_MOVIE_TO_TV[f.id] : GENRE_TV_TO_MOVIE[f.id];
   if (companionId) {
     const companionType: "movie" | "tv" = f.mediaType === "movie" ? "tv" : "movie";
     const word = companionType === "tv" ? "Series" : "Movies";

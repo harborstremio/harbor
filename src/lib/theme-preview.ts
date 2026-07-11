@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+
 import type { ThemeLayout } from "./theme";
 
 export type ThemePreviewState = {

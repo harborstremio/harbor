@@ -1,20 +1,11 @@
-import {
-  AlertTriangle,
-  CheckSquare,
-  Download,
-  Info,
-  Play,
-  RefreshCw,
-  Square,
-  Trash2,
-  Wand2,
-} from "lucide-react";
-import { useCallback, useState } from "react";
+import { LocalBadge } from "@/components/local-badge";
 import { Poster } from "@/components/poster";
+import { useT } from "@/lib/i18n";
 import { removeLocalEntry, type LocalEntry } from "@/lib/local-library";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
-import { LocalBadge } from "@/components/local-badge";
+import { AlertTriangle, CheckSquare, Download, Info, Play, RefreshCw, Square, Trash2, Wand2 } from "lucide-react";
+import { useCallback, useState } from "react";
+
 import { CardIconButton, type LocalCardProps } from "./card-actions";
 import { episodeLabel, localPlayerSrc } from "./show-group";
 import { useLocalPoster } from "./use-local-poster";
@@ -41,10 +32,7 @@ export function OwnedCard({
   }, [selectMode, entry, openPlayer, onToggleSelect]);
 
   return (
-    <div
-      className="group relative flex flex-col gap-2 text-start"
-      onMouseLeave={() => setConfirm(false)}
-    >
+    <div className="group relative flex flex-col gap-2 text-start" onMouseLeave={() => setConfirm(false)}>
       <div
         role="button"
         tabIndex={0}
@@ -128,7 +116,10 @@ export function OwnedCard({
         )}
       </div>
       <button type="button" onClick={onActivate} className="text-start">
-        <p className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent" title={entry.filename}>
+        <p
+          className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent"
+          title={entry.filename}
+        >
           {entry.title}
         </p>
         {epLabel ? (

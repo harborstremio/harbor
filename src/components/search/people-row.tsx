@@ -1,8 +1,8 @@
-import { ChevronLeft, ChevronRight, User } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import type { SearchPerson } from "@/lib/search";
 import { useView } from "@/lib/view";
+import { ChevronLeft, ChevronRight, User } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const CARD_WIDTH = 132;
 const GAP = 18;
@@ -101,15 +101,7 @@ export function PeopleRow({ people, onClose }: { people: SearchPerson[]; onClose
   );
 }
 
-function ArrowButton({
-  side,
-  visible,
-  onClick,
-}: {
-  side: "left" | "right";
-  visible: boolean;
-  onClick: () => void;
-}) {
+function ArrowButton({ side, visible, onClick }: { side: "left" | "right"; visible: boolean; onClick: () => void }) {
   const t = useT();
   return (
     <button
@@ -119,9 +111,7 @@ function ArrowButton({
       className={`absolute top-[55px] z-10 -translate-y-1/2 ${
         side === "left" ? "start-1" : "end-1"
       } flex h-10 w-10 items-center justify-center rounded-full bg-canvas/85 text-ink backdrop-blur-md transition-opacity duration-200 hover:bg-canvas focus:outline-none ${
-        visible
-          ? "opacity-0 group-hover/people:opacity-100 pointer-events-auto"
-          : "pointer-events-none opacity-0"
+        visible ? "opacity-0 group-hover/people:opacity-100 pointer-events-auto" : "pointer-events-none opacity-0"
       }`}
     >
       {side === "left" ? (
@@ -134,9 +124,5 @@ function ArrowButton({
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">
-      {children}
-    </h3>
-  );
+  return <h3 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">{children}</h3>;
 }

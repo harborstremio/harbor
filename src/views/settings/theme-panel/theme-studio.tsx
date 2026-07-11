@@ -1,18 +1,10 @@
-import { SlidersHorizontal } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { Inspector } from "./theme-studio/inspector";
-import { StudioHeader } from "./theme-studio/studio-header";
-import { CodePopout } from "./theme-studio/code-popout";
-import { buildChrome, DEFAULT_CHROME } from "./theme-studio/chrome-config";
-import { SUITE_CHROME as STABLE_CHROME } from "./theme-studio/suite-theme";
-import { useStudioPreview } from "./theme-studio/hooks/use-studio-preview";
-import { useDraftHistory } from "./theme-studio/hooks/use-draft-history";
-import type { Draft } from "./theme-studio/studio-types";
 import type { CodeLang } from "@/components/code-editor";
 import { saveCustomTheme, type CustomTheme } from "@/lib/custom-themes";
+import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { downloadText } from "@/lib/download-text";
 import { serializeHarborStyle } from "@/lib/harborstyle";
+import { pushOverlayPin } from "@/lib/overlay-pin";
+import { useSettings } from "@/lib/settings";
 import {
   applyTheme,
   customColorsToTokens,
@@ -21,9 +13,18 @@ import {
   type ChromeConfig,
   type ThemePreset,
 } from "@/lib/theme";
-import { useSettings } from "@/lib/settings";
-import { pushOverlayPin } from "@/lib/overlay-pin";
-import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { SlidersHorizontal } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
+import { buildChrome, DEFAULT_CHROME } from "./theme-studio/chrome-config";
+import { CodePopout } from "./theme-studio/code-popout";
+import { useDraftHistory } from "./theme-studio/hooks/use-draft-history";
+import { useStudioPreview } from "./theme-studio/hooks/use-studio-preview";
+import { Inspector } from "./theme-studio/inspector";
+import { StudioHeader } from "./theme-studio/studio-header";
+import type { Draft } from "./theme-studio/studio-types";
+import { SUITE_CHROME as STABLE_CHROME } from "./theme-studio/suite-theme";
 
 function cssColorToHex(input: string): string {
   const s = input.trim();
@@ -135,11 +136,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
       id: "user:__studio_preview__" as never,
       name: draft.name || "Untitled theme",
       blurb: draft.blurb,
-      swatch: [draft.colors.canvas, draft.colors.surface, draft.colors.accent] as [
-        string,
-        string,
-        string,
-      ],
+      swatch: [draft.colors.canvas, draft.colors.surface, draft.colors.accent] as [string, string, string],
       tokens: customColorsToTokens(draft.colors),
       layout: draft.layout,
       cardStyle: draft.cardStyle,
@@ -269,8 +266,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
     });
 
   const trimmedName = draft.name.trim();
-  const canSave =
-    trimmedName.length > 0 && (draft.layout !== "custom" || draft.chrome.items.length > 0);
+  const canSave = trimmedName.length > 0 && (draft.layout !== "custom" || draft.chrome.items.length > 0);
 
   const buildTheme = (): CustomTheme => {
     const slug =
@@ -280,8 +276,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
         .replace(/^-+|-+$/g, "")
         .slice(0, 40) || "theme";
     const nav = settings.navCustomization;
-    const hasNav =
-      nav.order.length > 0 || nav.hidden.length > 0 || Object.keys(nav.renamed).length > 0;
+    const hasNav = nav.order.length > 0 || nav.hidden.length > 0 || Object.keys(nav.renamed).length > 0;
     return {
       id: `user:${slug}-${Date.now().toString(36)}`,
       name: trimmedName.slice(0, 60),
@@ -409,9 +404,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
             className="animate-in zoom-in-95 fade-in w-[340px] max-w-full overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_30px_80px_-24px_rgba(0,0,0,0.8)] duration-150"
           >
             <div className="flex flex-col px-6 pb-6 pt-5">
-              <h2 className="text-[17px] font-semibold tracking-tight text-ink">
-                Leave without saving?
-              </h2>
+              <h2 className="text-[17px] font-semibold tracking-tight text-ink">Leave without saving?</h2>
               <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-muted">
                 Your changes to this theme aren&apos;t saved yet. They&apos;ll be lost if you leave now.
               </p>

@@ -82,10 +82,7 @@ interface SimklAnimeDetail {
 const relationsCache = new Map<number, Set<number>>();
 const relationsInFlight = new Map<number, Promise<Set<number>>>();
 
-async function fetchRelations(
-  simklId: number,
-  type: "movie" | "show" | "anime",
-): Promise<Set<number>> {
+async function fetchRelations(simklId: number, type: "movie" | "show" | "anime"): Promise<Set<number>> {
   if (relationsCache.has(simklId)) {
     return relationsCache.get(simklId)!;
   }
@@ -122,10 +119,7 @@ async function fetchRelations(
   return promise;
 }
 
-export function groupAnimeByFranchise(
-  items: SimklCacheItem[],
-  useRelationsApi = false,
-): AnimeFranchise[] {
+export function groupAnimeByFranchise(items: SimklCacheItem[], useRelationsApi = false): AnimeFranchise[] {
   void useRelationsApi;
 
   const titleGroups = new Map<string, SimklCacheItem[]>();
@@ -278,9 +272,7 @@ export function computeFranchiseAverageRating(
   franchise: AnimeFranchise,
   getRating: (simklId: number) => number | null,
 ): number | null {
-  const ratings = franchise.simklIds
-    .map((id) => getRating(id))
-    .filter((r): r is number => r != null && r > 0);
+  const ratings = franchise.simklIds.map((id) => getRating(id)).filter((r): r is number => r != null && r > 0);
 
   if (ratings.length === 0) return null;
   return ratings.reduce((sum, r) => sum + r, 0) / ratings.length;

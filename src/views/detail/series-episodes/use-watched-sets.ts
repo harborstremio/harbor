@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { loadSimklWatchedMap, simklWatchedForId } from "@/lib/simkl/list-status";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
+import { useEffect, useState } from "react";
 
 export function useWatchedSets({
   traktConnected,

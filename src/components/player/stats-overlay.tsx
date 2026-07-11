@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
+import type { PlayerSnapshot } from "@/lib/player/bridge";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -41,13 +41,7 @@ async function getProp<T = unknown>(name: string): Promise<T | null> {
   }
 }
 
-export function StatsOverlay({
-  snap,
-  engine,
-}: {
-  snap: PlayerSnapshot;
-  engine: "html5" | "mpv";
-}) {
+export function StatsOverlay({ snap, engine }: { snap: PlayerSnapshot; engine: "html5" | "mpv" }) {
   const tr = useT();
   const [stats, setStats] = useState<MpvStats>(EMPTY_STATS);
 
@@ -95,10 +89,7 @@ export function StatsOverlay({
 
   const rows: Array<[string, string]> = [];
   rows.push([tr("Engine"), engine === "mpv" ? "libmpv" : "HTML5"]);
-  rows.push([
-    tr("Resolution"),
-    snap.videoWidth && snap.videoHeight ? `${snap.videoWidth}×${snap.videoHeight}` : "—",
-  ]);
+  rows.push([tr("Resolution"), snap.videoWidth && snap.videoHeight ? `${snap.videoWidth}×${snap.videoHeight}` : "—"]);
   if (fps != null) rows.push([tr("Frame rate"), `${fps.toFixed(2)} fps`]);
   if (stats.videoCodec) rows.push([tr("Video codec"), stats.videoCodec]);
   if (stats.audioCodec) rows.push([tr("Audio codec"), stats.audioCodec]);
@@ -106,12 +97,8 @@ export function StatsOverlay({
   if (stats.videoBitrate != null) rows.push([tr("Video bitrate"), formatBitrate(stats.videoBitrate)]);
   if (stats.audioBitrate != null) rows.push([tr("Audio bitrate"), formatBitrate(stats.audioBitrate)]);
   if (stats.frameDropDecoder != null)
-    rows.push([
-      tr("Dropped (decode / vo)"),
-      `${stats.frameDropDecoder} / ${stats.frameDropOutput ?? 0}`,
-    ]);
-  if (stats.cacheBufferingState != null)
-    rows.push([tr("Cache buffering"), `${stats.cacheBufferingState.toFixed(0)}%`]);
+    rows.push([tr("Dropped (decode / vo)"), `${stats.frameDropDecoder} / ${stats.frameDropOutput ?? 0}`]);
+  if (stats.cacheBufferingState != null) rows.push([tr("Cache buffering"), `${stats.cacheBufferingState.toFixed(0)}%`]);
   rows.push([tr("Audio track"), audioTrack ? audioTrack.title || audioTrack.lang || audioTrack.id : "—"]);
   rows.push([tr("Subtitle track"), subTrack ? subTrack.title || subTrack.lang || subTrack.id : tr("Off")]);
   rows.push([tr("Speed"), `${snap.rate.toFixed(2)}×`]);

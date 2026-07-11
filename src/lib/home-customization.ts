@@ -1,4 +1,5 @@
 import type { HomeRow } from "@/views/home/home-types";
+
 import type { SourceRow } from "./custom-sources";
 
 export type HomeRowCustomization = {
@@ -77,11 +78,7 @@ export function toggleRowHidden(custom: HomeRowCustomization, key: string): Home
   };
 }
 
-export function renameRow(
-  custom: HomeRowCustomization,
-  key: string,
-  label: string,
-): HomeRowCustomization {
+export function renameRow(custom: HomeRowCustomization, key: string, label: string): HomeRowCustomization {
   const trimmed = label.trim();
   const renamed = { ...custom.renamed };
   if (!trimmed) {
@@ -92,19 +89,13 @@ export function renameRow(
   return { ...custom, renamed };
 }
 
-export function toggleRowNumerals(
-  custom: HomeRowCustomization,
-  key: string,
-): HomeRowCustomization {
+export function toggleRowNumerals(custom: HomeRowCustomization, key: string): HomeRowCustomization {
   const cur = custom.numerals ?? [];
   const has = cur.includes(key);
   return { ...custom, numerals: has ? cur.filter((k) => k !== key) : [...cur, key] };
 }
 
-export function toggleHeroSource(
-  custom: HomeRowCustomization,
-  key: string,
-): HomeRowCustomization {
+export function toggleHeroSource(custom: HomeRowCustomization, key: string): HomeRowCustomization {
   return { ...custom, heroSource: custom.heroSource === key ? null : key };
 }
 

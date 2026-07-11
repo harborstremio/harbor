@@ -20,10 +20,7 @@ export function SubtitlesStep() {
           )}
         </p>
       </div>
-      <LanguagesPicker
-        value={settings.preferredSubLangs}
-        onChange={(langs) => update({ preferredSubLangs: langs })}
-      />
+      <LanguagesPicker value={settings.preferredSubLangs} onChange={(langs) => update({ preferredSubLangs: langs })} />
     </div>
   );
 }

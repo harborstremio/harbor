@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { kitsuToTvdb } from "@/lib/providers/anime-mapping";
+import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import {
   tvdbLangFromIso1,
   tvdbOrderTypeHasEpisodes,
@@ -9,8 +9,9 @@ import {
   type TvdbOrderType,
   type TvdbSeasonTypeOption,
 } from "@/lib/providers/tvdb";
-import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import { fetchTvdbOrderBySeriesId, seasonDateRange, type TvdbOrder } from "@/lib/providers/tvdb-order";
+import { useEffect, useMemo, useState } from "react";
+
 import type { PickerItem } from "../series-episodes/season-arc-picker";
 
 export type AnimeTvdbPanel = {
@@ -67,9 +68,7 @@ export function useAnimeTvdbPanel(
       const candidates = base.some((c) => c.value === "aired")
         ? base
         : [{ value: "aired" as const, label: "Aired Order" }, ...base];
-      const checks = await Promise.all(
-        candidates.map((c) => tvdbOrderTypeHasEpisodes(tvdbKey, seriesId, c.value)),
-      );
+      const checks = await Promise.all(candidates.map((c) => tvdbOrderTypeHasEpisodes(tvdbKey, seriesId, c.value)));
       if (cancelled) return;
       const nonEmpty = candidates.filter((_, i) => checks[i]);
       if (nonEmpty.length === 0) {
@@ -97,7 +96,7 @@ export function useAnimeTvdbPanel(
     const byPair = new Map<string, KitsuEpisode>();
     const byAbs = new Map<number, KitsuEpisode>();
     for (const ep of pool) {
-      const abs = franchiseWide ? ep.absoluteNumber : ep.absoluteNumber ?? ep.number;
+      const abs = franchiseWide ? ep.absoluteNumber : (ep.absoluteNumber ?? ep.number);
       if (abs != null && !byAbs.has(abs)) byAbs.set(abs, ep);
       if (ep.imdbSeason != null && ep.imdbSeason >= 1 && ep.imdbEpisode != null) {
         const k = `${ep.imdbSeason}:${ep.imdbEpisode}`;

@@ -1,6 +1,6 @@
-import { Pencil, RotateCcw, Plus } from "lucide-react";
-import { useT } from "@/lib/i18n";
 import type { HomeRowCustomization } from "@/lib/home-customization";
+import { useT } from "@/lib/i18n";
+import { Pencil, RotateCcw, Plus } from "lucide-react";
 
 export function CustomizeBar({
   editMode,
@@ -17,9 +17,7 @@ export function CustomizeBar({
 }) {
   const t = useT();
   const hasChanges =
-    customization.order.length > 0 ||
-    customization.hidden.length > 0 ||
-    Object.keys(customization.renamed).length > 0;
+    customization.order.length > 0 || customization.hidden.length > 0 || Object.keys(customization.renamed).length > 0;
   return (
     <div className="flex items-center justify-end gap-2">
       {editMode && hasChanges && (

@@ -1,9 +1,10 @@
+import type { Meta } from "@/lib/cinemeta";
+import type { PlayEpisode } from "@/lib/view";
 import { downloadDir as systemDownloadDir } from "@tauri-apps/api/path";
 import { exists, mkdir, remove } from "@tauri-apps/plugin-fs";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useSyncExternalStore } from "react";
-import type { Meta } from "@/lib/cinemeta";
-import type { PlayEpisode } from "@/lib/view";
+
 import { buildDefaultFilename, sanitizeName } from "./filename";
 import { startDownload, type DownloadHandle } from "./video-download";
 
@@ -152,17 +153,17 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
   let dir = await resolveDir();
   try {
     const raw = localStorage.getItem("harbor.settings");
-    const settings = raw ? JSON.parse(raw) as { downloadCreateFolders?: boolean } : null;
+    const settings = raw ? (JSON.parse(raw) as { downloadCreateFolders?: boolean }) : null;
     if (settings?.downloadCreateFolders && dir) {
       const folderName = sanitizeName(meta.name || "download");
       dir = `${dir}${dir.endsWith(sep()) ? "" : sep()}${folderName}`;
       await mkdir(dir, { recursive: true }).catch(() => {});
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   const filename = buildDefaultFilename(meta, episode, url, streamLabel);
-  const path = await uniquePath(
-    dir ? `${dir}${dir.endsWith(sep()) ? "" : sep()}${filename}` : filename,
-  );
+  const path = await uniquePath(dir ? `${dir}${dir.endsWith(sep()) ? "" : sep()}${filename}` : filename);
   const id = randomId();
   const item: DownloadItem = {
     id,
@@ -189,21 +190,27 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
   speed.set(id, { bytes: 0, at: Date.now() });
   rebuild();
 
-  const handle = startDownload(id, url, path, (p) => {
-    const now = Date.now();
-    const s = speed.get(id);
-    let bps = 0;
-    if (s && now - s.at >= 500) {
-      bps = ((p.receivedBytes - s.bytes) / (now - s.at)) * 1000;
-      speed.set(id, { bytes: p.receivedBytes, at: now });
-    }
-    patch(id, {
-      receivedBytes: p.receivedBytes,
-      totalBytes: p.totalBytes,
-      ratio: p.ratio,
-      ...(bps > 0 ? { bytesPerSec: bps } : {}),
-    });
-  }, headers ?? undefined);
+  const handle = startDownload(
+    id,
+    url,
+    path,
+    (p) => {
+      const now = Date.now();
+      const s = speed.get(id);
+      let bps = 0;
+      if (s && now - s.at >= 500) {
+        bps = ((p.receivedBytes - s.bytes) / (now - s.at)) * 1000;
+        speed.set(id, { bytes: p.receivedBytes, at: now });
+      }
+      patch(id, {
+        receivedBytes: p.receivedBytes,
+        totalBytes: p.totalBytes,
+        ratio: p.ratio,
+        ...(bps > 0 ? { bytesPerSec: bps } : {}),
+      });
+    },
+    headers ?? undefined,
+  );
   handles.set(id, handle);
   handle.promise
     .then(() => patch(id, { status: "done", ratio: 1, bytesPerSec: 0 }))
@@ -307,7 +314,11 @@ function subscribe(listener: () => void): () => void {
 }
 
 export function useDownloads(): DownloadItem[] {
-  return useSyncExternalStore(subscribe, () => snapshot, () => snapshot);
+  return useSyncExternalStore(
+    subscribe,
+    () => snapshot,
+    () => snapshot,
+  );
 }
 
 export function useActiveDownloadCount(): number {

@@ -1,4 +1,5 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+
 import type { AnilistSession } from "./types";
 
 const BASE_KEY = "harbor.anilist.session.v1";

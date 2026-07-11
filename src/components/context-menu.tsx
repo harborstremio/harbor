@@ -1,19 +1,36 @@
-import { Bookmark, BookmarkCheck, CheckCheck, ClipboardPaste, Copy, Download, EyeOff, Info, ListChecks, ListPlus, Maximize, Navigation, RotateCcw, Star, UserPlus, Wallpaper } from "lucide-react";
-import { useEffect, useRef } from "react";
 import { useActiveAddon } from "@/lib/active-addon";
 import { useContextMenu, type ViewSummonable } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
-import { usePlayerActions } from "@/lib/player-actions";
-import { useTogether } from "@/lib/together/provider";
-import type { ParticipantLocation } from "@/lib/together/protocol";
-import { useView } from "@/lib/view";
-import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
-import { markMetaWatched, unmarkMetaWatched } from "@/lib/mark-watched";
-import { useMetaWatched } from "@/lib/watched-flag";
-import { useTmdbImdbId } from "@/lib/providers/tmdb";
-import { useIsFavorite, useMediaFavorites } from "@/lib/media-favorites";
 import { useInLocalWatchlist, useLocalWatchlist } from "@/lib/local-watchlist";
+import { markMetaWatched, unmarkMetaWatched } from "@/lib/mark-watched";
+import { useIsFavorite, useMediaFavorites } from "@/lib/media-favorites";
+import { usePlayerActions } from "@/lib/player-actions";
+import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { clearTitleBackdrop, getTitleBackdrop, setTitleBackdrop } from "@/lib/title-backdrop";
+import type { ParticipantLocation } from "@/lib/together/protocol";
+import { useTogether } from "@/lib/together/provider";
+import { useView } from "@/lib/view";
+import { useMetaWatched } from "@/lib/watched-flag";
+import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
+import {
+  Bookmark,
+  BookmarkCheck,
+  CheckCheck,
+  ClipboardPaste,
+  Copy,
+  Download,
+  EyeOff,
+  Info,
+  ListChecks,
+  ListPlus,
+  Maximize,
+  Navigation,
+  RotateCcw,
+  Star,
+  UserPlus,
+  Wallpaper,
+} from "lucide-react";
+import { useEffect, useRef } from "react";
 
 const MENU_WIDTH = 220;
 const MENU_HEIGHT = 120;
@@ -97,8 +114,7 @@ export function ContextMenu() {
       }
       if (topKind === "person") return;
       if (e.target instanceof HTMLElement && e.target.closest("[data-person-card]")) return;
-      const backdropEl =
-        e.target instanceof HTMLElement ? e.target.closest("[data-title-backdrop]") : null;
+      const backdropEl = e.target instanceof HTMLElement ? e.target.closest("[data-title-backdrop]") : null;
       if (backdropEl && currentMeta) {
         const backdropUrl = backdropEl.getAttribute("data-title-backdrop");
         if (backdropUrl) {
@@ -230,13 +246,7 @@ export function ContextMenu() {
         <Item
           key="watched"
           icon={isWatched ? <EyeOff size={14} strokeWidth={2} /> : <CheckCheck size={14} strokeWidth={2} />}
-          label={
-            isWatched
-              ? "Mark as unwatched"
-              : meta.type === "series"
-                ? "Mark all watched"
-                : "Mark as watched"
-          }
+          label={isWatched ? "Mark as unwatched" : meta.type === "series" ? "Mark all watched" : "Mark as watched"}
           onClick={() => {
             if (isWatched) void unmarkMetaWatched(meta);
             else void markMetaWatched(meta, targetImdb);
@@ -513,17 +523,7 @@ function Item({
             : "text-ink hover:bg-raised"
       }`}
     >
-      <span
-        className={
-          disabled
-            ? "text-ink-subtle/40"
-            : accent
-              ? "text-accent"
-              : "text-ink-muted"
-        }
-      >
-        {icon}
-      </span>
+      <span className={disabled ? "text-ink-subtle/40" : accent ? "text-accent" : "text-ink-muted"}>{icon}</span>
       {label}
     </button>
   );

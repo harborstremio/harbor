@@ -1,5 +1,5 @@
-import { extractJsonArray } from "./ai-search";
 import { DEFAULT_AI_MODEL, migrateModelId } from "./ai-models";
+import { extractJsonArray } from "./ai-search";
 
 const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
 
@@ -7,7 +7,7 @@ export type EpisodeRef = { season: number; episode: number };
 export type EpisodeCandidate = EpisodeRef & { name?: string; overview?: string };
 
 const SYSTEM_PROMPT =
-  "You are an expert on television and anime. A viewer describes an episode from vague memory: a plot point, a scene, a quote, a character moment, or a meme. Identify which episode they mean. Lean on your own knowledge of the show first, then ground the answer in the provided list, which holds the exact seasons, episode numbers, and titles that are available (a short synopsis may follow the title, but it is often brief and omits subplots, so trust your own knowledge of the show when the synopsis does not mention the detail). Reply with ONLY a JSON array (no prose, no markdown) of up to 5 episodes, most likely first, each {\"season\": number, \"episode\": number}. Only return season/episode pairs that appear in the list. If nothing plausibly matches, reply with [].";
+  'You are an expert on television and anime. A viewer describes an episode from vague memory: a plot point, a scene, a quote, a character moment, or a meme. Identify which episode they mean. Lean on your own knowledge of the show first, then ground the answer in the provided list, which holds the exact seasons, episode numbers, and titles that are available (a short synopsis may follow the title, but it is often brief and omits subplots, so trust your own knowledge of the show when the synopsis does not mention the detail). Reply with ONLY a JSON array (no prose, no markdown) of up to 5 episodes, most likely first, each {"season": number, "episode": number}. Only return season/episode pairs that appear in the list. If nothing plausibly matches, reply with [].';
 
 export async function aiFindEpisodes(
   key: string,
@@ -22,8 +22,7 @@ export async function aiFindEpisodes(
     .map((e) => `s${e.season}e${e.episode}: ${e.name ?? ""}${e.overview ? ` - ${e.overview}` : ""}`)
     .join("\n");
   const titlesOnly = episodes.map((e) => `s${e.season}e${e.episode}: ${e.name ?? ""}`).join("\n");
-  const catalog =
-    withOverview.length <= 24000 ? withOverview : titlesOnly.slice(0, 48000);
+  const catalog = withOverview.length <= 24000 ? withOverview : titlesOnly.slice(0, 48000);
   const res = await fetch(OPENROUTER, {
     method: "POST",
     headers: {

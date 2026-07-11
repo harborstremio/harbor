@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import { fetchMalAvatar } from "@/lib/mal/profile";
 import { useMal } from "@/lib/mal/provider";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { useEffect } from "react";
 
 export function MalAvatarSync() {
   const { settings, update } = useSettings();

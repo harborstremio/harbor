@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import type { AnilistMedia, AnilistMediaEntry } from "./types";
 
 export function anilistMediaToMeta(m: AnilistMedia): Meta | null {

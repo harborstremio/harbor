@@ -1,7 +1,7 @@
-import { Check, Loader2, Share2 } from "lucide-react";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import type { EngineStats } from "@/lib/torrent/engine-stats";
+import { Check, Loader2, Share2 } from "lucide-react";
 
 function fmtSpeed(bps: number): string {
   if (bps >= 1024 ** 2) return `${(bps / 1024 ** 2).toFixed(1)} MB/s`;
@@ -9,13 +9,7 @@ function fmtSpeed(bps: number): string {
   return "0 KB/s";
 }
 
-export function P2pStatusChip({
-  stats,
-  visible,
-}: {
-  stats: EngineStats | null | undefined;
-  visible: boolean;
-}) {
+export function P2pStatusChip({ stats, visible }: { stats: EngineStats | null | undefined; visible: boolean }) {
   const { settings } = useSettings();
   const t = useT();
   if (!visible || !stats || !settings.playerP2pChip) return null;
@@ -45,7 +39,9 @@ export function P2pStatusChip({
           <span>{stats.peerSearchRunning ? t("Finding peers") : t("Connecting")}</span>
         ) : (
           <>
-            <span>{peers} {peers === 1 ? t("peer") : t("peers")}</span>
+            <span>
+              {peers} {peers === 1 ? t("peer") : t("peers")}
+            </span>
             <span className="text-white/25">|</span>
             <span>{fmtSpeed(stats.downloadSpeed)}</span>
             {pct != null && (

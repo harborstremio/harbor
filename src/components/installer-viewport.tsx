@@ -1,13 +1,14 @@
+import { HarborLoader } from "@/components/harbor-loader";
+import { installFromUrl } from "@/lib/addon-store";
+import { isAdultText } from "@/lib/addons-store/adult-filter";
+import { clearPendingDeepLink } from "@/lib/deep-link";
+import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { isLinuxDesktop, isWeb } from "@/lib/platform";
+import { openUrl } from "@/lib/window";
 import { ArrowUpRight, ClipboardCopy, ExternalLink, RotateCw, Sparkles, X } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { installFromUrl } from "@/lib/addon-store";
-import { isAdultText } from "@/lib/addons-store/adult-filter";
-import { pushActivityHint } from "@/lib/discord/activity-hint";
-import { clearPendingDeepLink } from "@/lib/deep-link";
-import { isLinuxDesktop, isWeb } from "@/lib/platform";
-import { openUrl } from "@/lib/window";
-import { HarborLoader } from "@/components/harbor-loader";
+
 import { InstallOverlay } from "./installer-viewport/install-overlay";
 
 const EVENT = "harbor:open-installer";
@@ -23,17 +24,13 @@ export function openInstallerViewport(url: string, title?: string, logo?: string
     void import("@tauri-apps/api/core").then(({ invoke }) => {
       invoke("browser_open", { url }).catch(() => {
         window.__harborInstallerOpen = true;
-        window.dispatchEvent(
-          new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }),
-        );
+        window.dispatchEvent(new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }));
       });
     });
     return;
   }
   window.__harborInstallerOpen = true;
-  window.dispatchEvent(
-    new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }),
-  );
+  window.dispatchEvent(new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }));
 }
 
 export function InstallerViewportRoot() {
@@ -106,8 +103,7 @@ function InstallerViewport({
   }, []);
 
   useEffect(() => {
-    if (isAdultText(url, title))
-      return pushActivityHint({ details: "Setting up an addon", state: "Addon setup" });
+    if (isAdultText(url, title)) return pushActivityHint({ details: "Setting up an addon", state: "Addon setup" });
     const label =
       phase.kind === "installing"
         ? `Installing ${title}`
@@ -152,9 +148,7 @@ function InstallerViewport({
         const logo = result.addon.manifest.logo ?? null;
         const id = result.addon.manifest.id;
         setPhase({ kind: "success", name, logo });
-        window.dispatchEvent(
-          new CustomEvent("harbor:addons-changed", { detail: { id, installed: true } }),
-        );
+        window.dispatchEvent(new CustomEvent("harbor:addons-changed", { detail: { id, installed: true } }));
         successTimerRef.current = window.setTimeout(() => {
           onClose();
         }, 2000);
@@ -178,8 +172,7 @@ function InstallerViewport({
   submitRef.current = submit;
 
   useEffect(() => {
-    const isBusy = () =>
-      phaseRef.current.kind === "installing" || phaseRef.current.kind === "success";
+    const isBusy = () => phaseRef.current.kind === "installing" || phaseRef.current.kind === "success";
 
     const onMessage = (e: MessageEvent) => {
       if (isBusy()) return;
@@ -305,12 +298,9 @@ function InstallerViewport({
         )}
         {blocked && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
-            <p className="text-[14px] font-semibold text-ink">
-              {title} won&apos;t load inside Harbor.
-            </p>
+            <p className="text-[14px] font-semibold text-ink">{title} won&apos;t load inside Harbor.</p>
             <p className="max-w-[44ch] text-[12.5px] text-ink-muted">
-              Open it in a regular browser, set it up there, then come back and paste the install
-              link below.
+              Open it in a regular browser, set it up there, then come back and paste the install link below.
             </p>
             <button
               type="button"
@@ -331,9 +321,7 @@ function InstallerViewport({
           referrerPolicy="strict-origin-when-cross-origin"
           allow="clipboard-write; clipboard-read; encrypted-media; fullscreen"
         />
-        {(phase.kind === "installing" || phase.kind === "success") && (
-          <InstallOverlay phase={phase} logo={logo} />
-        )}
+        {(phase.kind === "installing" || phase.kind === "success") && <InstallOverlay phase={phase} logo={logo} />}
       </div>
 
       <footer className="flex shrink-0 flex-col gap-2.5 border-t border-white/10 bg-canvas/72 px-5 py-3.5 backdrop-blur-md">

@@ -1,7 +1,7 @@
 import type { Dispatch, RefObject, SetStateAction } from "react";
+
 import type { RoomEvent, RoomSnapshot } from "./client";
 import type { ParticipantLocation, PlayInvite, RoomCommand, SyncState } from "./protocol";
-import type { LastInviteMeta } from "./room-derive";
 import type {
   ChatMessage,
   IncomingDraw,
@@ -11,6 +11,7 @@ import type {
   IncomingSummon,
   RemoteCursor,
 } from "./provider-types";
+import type { LastInviteMeta } from "./room-derive";
 
 const CHAT_HISTORY_LIMIT = 200;
 
@@ -99,7 +100,15 @@ export function applyRoomEvent(e: RoomEvent, sinks: RoomEventSinks): void {
   } else if (e.kind === "cursor") {
     setCursorMap((cur) => {
       const next = new Map(cur);
-      next.set(e.from, { from: e.from, name: e.name, x: e.x, y: e.y, visible: e.visible, path: e.path, updatedAt: Date.now() });
+      next.set(e.from, {
+        from: e.from,
+        name: e.name,
+        x: e.x,
+        y: e.y,
+        visible: e.visible,
+        path: e.path,
+        updatedAt: Date.now(),
+      });
       return next;
     });
     setPresenceMap((cur) => {

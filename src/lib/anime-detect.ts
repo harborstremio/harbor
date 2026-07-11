@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from "react";
 import { meta as fetchMeta } from "@/lib/cinemeta";
+import { useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "harbor.anime.detected.v1";
 

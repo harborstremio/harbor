@@ -1,3 +1,5 @@
+import { useT } from "@/lib/i18n";
+import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import {
   ArrowLeft,
   Captions,
@@ -12,8 +14,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
-import { useT } from "@/lib/i18n";
+
 import { fmtTime } from "./transport/transport-utils";
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
@@ -95,7 +96,12 @@ export function TransportKids({
           <span className="w-[68px] shrink-0 font-mono text-[17px] font-bold tabular-nums text-white">
             {fmtTime(snap.positionSec)}
           </span>
-          <KidsSeekBar position={snap.positionSec} duration={snap.durationSec} buffered={snap.bufferedSec} onSeek={onSeek} />
+          <KidsSeekBar
+            position={snap.positionSec}
+            duration={snap.durationSec}
+            buffered={snap.bufferedSec}
+            onSeek={onSeek}
+          />
           <span className="w-[68px] shrink-0 text-end font-mono text-[17px] font-bold tabular-nums text-white">
             {fmtTime(snap.durationSec)}
           </span>

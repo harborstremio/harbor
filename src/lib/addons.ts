@@ -1,6 +1,7 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
-import type { Meta } from "./cinemeta";
+
 import { fetchManifestAt, filterEnabled, loadInstalled } from "./addon-store";
+import type { Meta } from "./cinemeta";
 
 const STREMIO_API = "https://api.strem.io/api";
 const MAX_ROWS = 24;
@@ -12,9 +13,7 @@ export type CatalogDef = {
   extra?: Array<{ name: string; isRequired?: boolean; options?: string[] }>;
 };
 
-export type AddonResource =
-  | string
-  | { name: string; types?: string[]; idPrefixes?: string[] };
+export type AddonResource = string | { name: string; types?: string[]; idPrefixes?: string[] };
 
 export type Addon = {
   manifest: {
@@ -60,14 +59,12 @@ export function addonAccepts(addon: Addon, resource: string, type: string, id: s
   const m = addon.manifest;
   const resources = m.resources ?? [];
   const specific = resources.filter(
-    (r): r is { name: string; types?: string[]; idPrefixes?: string[] } =>
-      typeof r === "object" && r.name === resource,
+    (r): r is { name: string; types?: string[]; idPrefixes?: string[] } => typeof r === "object" && r.name === resource,
   );
   if (specific.length > 0) {
     return specific.some((r) => {
       const typeOk = Array.isArray(r.types) && r.types.includes(type);
-      const idOk =
-        !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
+      const idOk = !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
       return typeOk && idOk;
     });
   }
@@ -234,9 +231,7 @@ export function torboxAddonFor(tbKey: string): Addon | null {
 
 export function withDebridKeys(addons: Addon[], keys: DebridKeySet): Addon[] {
   const config = torrentioConfigFor(keys);
-  const torrentioCount = addons.filter(
-    (a) => a.manifest.id === "com.stremio.torrentio.addon",
-  ).length;
+  const torrentioCount = addons.filter((a) => a.manifest.id === "com.stremio.torrentio.addon").length;
   return addons.map((a) => {
     if (a.manifest.id !== "com.stremio.torrentio.addon") return a;
     if (torrentioCount > 1) return a;
@@ -394,11 +389,7 @@ export function createAddonCatalogFetcher(
   };
 }
 
-const TMDB_PROVIDER_ID_PATTERNS: RegExp[] = [
-  /^com\.aio\.metadata$/i,
-  /tmdb/i,
-  /^com\.stremio\.streaming-catalogs$/i,
-];
+const TMDB_PROVIDER_ID_PATTERNS: RegExp[] = [/^com\.aio\.metadata$/i, /tmdb/i, /^com\.stremio\.streaming-catalogs$/i];
 
 export function hasTmdbProviderAddon(addons: Addon[]): boolean {
   return addons.some((a) => {

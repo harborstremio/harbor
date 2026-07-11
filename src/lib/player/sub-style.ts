@@ -1,5 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import type { Settings } from "@/lib/settings";
+import { invoke } from "@tauri-apps/api/core";
 
 function clamp(n: number, lo: number, hi: number): number {
   if (!Number.isFinite(n)) return lo;
@@ -66,9 +66,5 @@ export async function applySubStyle(
     ["sub-bold", s.subBold ? "yes" : "no"],
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
-  await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
-  );
+  await Promise.all(props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})));
 }

@@ -1,15 +1,9 @@
-import { GalleryHorizontal, LayoutGrid, List } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { GalleryHorizontal, LayoutGrid, List } from "lucide-react";
 
 type Layout = "list" | "strip" | "grid";
 
-export function EpisodeLayoutToggle({
-  value,
-  onChange,
-}: {
-  value: Layout;
-  onChange: (v: Layout) => void;
-}) {
+export function EpisodeLayoutToggle({ value, onChange }: { value: Layout; onChange: (v: Layout) => void }) {
   const t = useT();
   const options: { key: Layout; label: string; icon: typeof List }[] = [
     { key: "list", label: t("List view"), icon: List },

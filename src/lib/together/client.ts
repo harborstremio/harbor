@@ -1,3 +1,4 @@
+import { diagnoseRelayFailure, type RoomEvent, type RoomSnapshot } from "./client-types";
 import {
   WT_PROTO,
   type ClientMessage,
@@ -10,7 +11,6 @@ import {
   type SummonTarget,
   type SyncState,
 } from "./protocol";
-import { diagnoseRelayFailure, type RoomEvent, type RoomSnapshot } from "./client-types";
 
 export type { ClientState, RoomEvent, RoomSnapshot } from "./client-types";
 
@@ -242,7 +242,14 @@ export class TogetherClient {
     this.sendNow({ t: "cursor", room: this.room, clientId: this.clientId, x, y, visible, path });
   }
 
-  sendDraw(strokeId: string, phase: "start" | "point" | "end" | "clear", path: string, x?: number, y?: number, color?: string): void {
+  sendDraw(
+    strokeId: string,
+    phase: "start" | "point" | "end" | "clear",
+    path: string,
+    x?: number,
+    y?: number,
+    color?: string,
+  ): void {
     if (!this.room) return;
     if (this.ws?.readyState !== WebSocket.OPEN) return;
     this.sendNow({ t: "draw", room: this.room, clientId: this.clientId, strokeId, phase, x, y, color, path });
@@ -353,15 +360,9 @@ export class TogetherClient {
         if (msg.state) {
           this.emit({ kind: "incoming-state", state: msg.state });
           const stateAuthorPresent =
-            !!msg.state.updatedBy &&
-            msg.participants.some((p) => p.id === msg.state!.updatedBy);
-          if (
-            msg.state.mediaId &&
-            msg.state.updatedBy !== this.clientId &&
-            stateAuthorPresent
-          ) {
-            const hostName =
-              msg.participants.find((p) => p.id === msg.state!.updatedBy)?.name ?? "Host";
+            !!msg.state.updatedBy && msg.participants.some((p) => p.id === msg.state!.updatedBy);
+          if (msg.state.mediaId && msg.state.updatedBy !== this.clientId && stateAuthorPresent) {
+            const hostName = msg.participants.find((p) => p.id === msg.state!.updatedBy)?.name ?? "Host";
             this.emit({
               kind: "invite",
               from: msg.state.updatedBy,
@@ -430,8 +431,7 @@ export class TogetherClient {
         return;
       }
       case "participant-left": {
-        const leftName =
-          msg.name ?? this.snapshot.participants.find((p) => p.id === msg.clientId)?.name ?? "Someone";
+        const leftName = msg.name ?? this.snapshot.participants.find((p) => p.id === msg.clientId)?.name ?? "Someone";
         this.emit({ kind: "participant-left", clientId: msg.clientId, name: leftName });
         this.update({
           participants: this.snapshot.participants.filter((p) => p.id !== msg.clientId),
@@ -440,9 +440,7 @@ export class TogetherClient {
       }
       case "participant-ready":
         this.update({
-          participants: this.snapshot.participants.map((p) =>
-            p.id === msg.clientId ? { ...p, ready: msg.ready } : p,
-          ),
+          participants: this.snapshot.participants.map((p) => (p.id === msg.clientId ? { ...p, ready: msg.ready } : p)),
         });
         return;
       case "participant-profile":
@@ -476,7 +474,15 @@ export class TogetherClient {
         this.emit({ kind: "summon", from: msg.from, name: msg.name, target: msg.target, at: msg.at });
         return;
       case "cursor":
-        this.emit({ kind: "cursor", from: msg.from, name: msg.name, x: msg.x, y: msg.y, visible: msg.visible, path: msg.path });
+        this.emit({
+          kind: "cursor",
+          from: msg.from,
+          name: msg.name,
+          x: msg.x,
+          y: msg.y,
+          visible: msg.visible,
+          path: msg.path,
+        });
         return;
       case "draw":
         this.emit({

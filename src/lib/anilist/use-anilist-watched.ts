@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { useAnilist } from "@/lib/anilist/provider";
 import { fetchListEntry } from "@/lib/anilist/mutations";
+import { useAnilist } from "@/lib/anilist/provider";
 import { resolveAnilistMediaId } from "@/lib/anilist/sync";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { useEffect, useState } from "react";
 
 export type AnilistWatched = { watchedKeys: Set<string>; completed: boolean };
 
@@ -22,12 +22,9 @@ export function useAnilistWatched(harborId: string, episodes: KitsuEpisode[]): A
       const info = await fetchListEntry(mediaId).catch(() => null);
       if (cancelled || !info?.entry) return;
       const { status, progress } = info.entry;
-      const sorted = [...episodes].sort(
-        (a, b) => (a.seasonNumber || 1) - (b.seasonNumber || 1) || a.number - b.number,
-      );
+      const sorted = [...episodes].sort((a, b) => (a.seasonNumber || 1) - (b.seasonNumber || 1) || a.number - b.number);
       const total = sorted.length;
-      const watchedCount =
-        status === "COMPLETED" ? total : Math.max(0, Math.min(progress, total));
+      const watchedCount = status === "COMPLETED" ? total : Math.max(0, Math.min(progress, total));
       const watchedKeys = new Set<string>();
       for (let i = 0; i < watchedCount; i++) {
         const ep = sorted[i];

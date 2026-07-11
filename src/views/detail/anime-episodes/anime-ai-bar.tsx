@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Loader2, X } from "lucide-react";
-import type { AiProvider } from "@/lib/ai-models";
-import { ProviderLogo } from "@/components/ai-provider-logo";
 import { AiExampleHint } from "@/components/ai-example-hint";
+import { ProviderLogo } from "@/components/ai-provider-logo";
+import type { AiProvider } from "@/lib/ai-models";
 import { useT } from "@/lib/i18n";
+import { Loader2, X } from "lucide-react";
+import { useState } from "react";
 
 export function AnimeAiBar({
   provider,

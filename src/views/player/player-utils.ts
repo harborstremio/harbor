@@ -1,7 +1,7 @@
+import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
+import type { PlayerBridge } from "@/lib/player/bridge";
 import { createHtml5Bridge } from "@/lib/player/html5";
 import { createMpvBridge, probeMpv, type MpvRect } from "@/lib/player/mpv";
-import type { PlayerBridge } from "@/lib/player/bridge";
-import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
 
 export const SYNC_DRIFT_TOLERANCE_S = 0.6;
 export const SYNC_SUPPRESS_MS = 1400;
@@ -34,9 +34,7 @@ export function embedFlags(
 ): { mpvEmbedWindowsActive: boolean; stageBg: string } {
   const embedOn = engine === "mpv" && mpvEmbed;
   const mpvEmbedWindowsActive =
-    embedOn &&
-    typeof navigator !== "undefined" &&
-    navigator.userAgent.toLowerCase().includes("windows");
+    embedOn && typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("windows");
   const hasFrame = videoWidth > 0 && videoHeight > 0;
   const macShowing = embedOn && isMacDesktop() && hasFrame;
   const linuxShowing = embedOn && isLinuxDesktop() && hasFrame;
@@ -71,14 +69,17 @@ export async function pickBridge(
   if (want === "mpv") {
     const probe = await probeMpv();
     if (probe.available) return { bridge: createMpvBridge(mpvOpts), engine: "mpv" };
-    console.warn("[harbor] mpv requested but libmpv probe failed; falling back to in-webview html5 decode (high memory)");
+    console.warn(
+      "[harbor] mpv requested but libmpv probe failed; falling back to in-webview html5 decode (high memory)",
+    );
     return { bridge: createHtml5Bridge(), engine: "html5" };
   }
   const isDesktop = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   if (isDesktop || notWebReady) {
     const probe = await probeMpv();
     if (probe.available) return { bridge: createMpvBridge(mpvOpts), engine: "mpv" };
-    if (isDesktop) console.warn("[harbor] desktop libmpv probe failed; falling back to in-webview html5 decode (high memory)");
+    if (isDesktop)
+      console.warn("[harbor] desktop libmpv probe failed; falling back to in-webview html5 decode (high memory)");
   }
   return { bridge: createHtml5Bridge(), engine: "html5" };
 }

@@ -1,12 +1,21 @@
-import { useEffect, useRef, type RefObject } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackBuffered, getPlaybackPosition } from "@/lib/player/playback-clock";
-import type { PartialSyncState } from "@/lib/together/provider";
 import type { RoomSnapshot } from "@/lib/together/client";
 import type { SourceDescriptor, SyncState } from "@/lib/together/protocol";
-import type { PlayerSrc } from "@/lib/view";
 import type { RoomCommand } from "@/lib/together/protocol";
-import { HOST_HEARTBEAT_MS, SEEK_APPLY_DEBOUNCE_MS, SYNC_DRIFT_TOLERANCE_S, SYNC_MAX_AGE_S, SYNC_PLAY_LOOKAHEAD_S, SYNC_SEEK_JUMP_S, SYNC_SUPPRESS_MS } from "../player-utils";
+import type { PartialSyncState } from "@/lib/together/provider";
+import type { PlayerSrc } from "@/lib/view";
+import { useEffect, useRef, type RefObject } from "react";
+
+import {
+  HOST_HEARTBEAT_MS,
+  SEEK_APPLY_DEBOUNCE_MS,
+  SYNC_DRIFT_TOLERANCE_S,
+  SYNC_MAX_AGE_S,
+  SYNC_PLAY_LOOKAHEAD_S,
+  SYNC_SEEK_JUMP_S,
+  SYNC_SUPPRESS_MS,
+} from "../player-utils";
 
 type ForeignNotice = { title: string | null; from: string };
 
@@ -206,9 +215,7 @@ export function useRoomSync(params: {
       }
       const livePos = getPlaybackPosition();
       const ageS = Math.min(SYNC_MAX_AGE_S, Math.max(0, (Date.now() - state.updatedAt) / 1000));
-      let target = state.playing
-        ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S
-        : state.positionSeconds;
+      let target = state.playing ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S : state.positionSeconds;
       if (durationRef.current > 0) {
         target = Math.min(target, Math.max(0, durationRef.current - 0.25));
       }
@@ -219,8 +226,7 @@ export function useRoomSync(params: {
         if (drift < SYNC_SEEK_JUMP_S) {
           const buffered = getPlaybackBuffered();
           const playing = snap.status === "playing";
-          const nearEof =
-            snap.durationSec > 0 && livePos + buffered >= snap.durationSec - 0.5;
+          const nearEof = snap.durationSec > 0 && livePos + buffered >= snap.durationSec - 0.5;
           if (!playing || (buffered < 2.0 && !nearEof)) {
             if (state.playing !== playing) {
               if (state.playing && !playing) b.play().catch(() => {});
@@ -253,9 +259,7 @@ export function useRoomSync(params: {
       if (state.updatedAt < lastAppliedStateAtRef.current) return;
       lastAppliedStateAtRef.current = state.updatedAt;
       const ageS = Math.min(SYNC_MAX_AGE_S, Math.max(0, (Date.now() - state.updatedAt) / 1000));
-      let target = state.playing
-        ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S
-        : state.positionSeconds;
+      let target = state.playing ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S : state.positionSeconds;
       if (durationRef.current > 0) {
         target = Math.min(target, Math.max(0, durationRef.current - 0.25));
       }
@@ -334,7 +338,15 @@ export function useRoomSync(params: {
       bridgeRef.current?.seek(seed.positionSeconds);
     }
     if (snap.status === "playing") bridgeRef.current?.pause();
-  }, [inRoom, hasStarted, snap.status, isHost, roomSnapshot.started, roomSnapshot.syncState, roomSnapshot.hostClientId]);
+  }, [
+    inRoom,
+    hasStarted,
+    snap.status,
+    isHost,
+    roomSnapshot.started,
+    roomSnapshot.syncState,
+    roomSnapshot.hostClientId,
+  ]);
 
   const lobbySeededRef = useRef(false);
   useEffect(() => {
@@ -357,7 +369,17 @@ export function useRoomSync(params: {
       source: hostSourceRef.current ?? undefined,
       guestPick: guestPickRef.current || undefined,
     });
-  }, [inRoom, isHost, hasStarted, snap.durationSec, publishState, src.meta.id, src.meta.name, src.meta.poster, src.episode]);
+  }, [
+    inRoom,
+    isHost,
+    hasStarted,
+    snap.durationSec,
+    publishState,
+    src.meta.id,
+    src.meta.name,
+    src.meta.poster,
+    src.episode,
+  ]);
 
   useEffect(() => {
     if (!inRoom || isHost || hasStarted) return;
@@ -375,9 +397,7 @@ export function useRoomSync(params: {
     if (!b) return;
     initialSyncDoneRef.current = true;
     const ageS = Math.min(SYNC_MAX_AGE_S, Math.max(0, (Date.now() - state.updatedAt) / 1000));
-    let target = state.playing
-      ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S
-      : state.positionSeconds;
+    let target = state.playing ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S : state.positionSeconds;
     if (durationRef.current > 0) {
       target = Math.min(target, Math.max(0, durationRef.current - 0.25));
     }

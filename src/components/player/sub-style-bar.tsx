@@ -1,10 +1,11 @@
+import { useT } from "@/lib/i18n";
+import { closeStyleBar, useStyleBarOpen } from "@/lib/player/sub-presets";
+import { useSettings } from "@/lib/settings";
 import { X } from "lucide-react";
 import { useEffect } from "react";
-import { useSettings } from "@/lib/settings";
-import { closeStyleBar, useStyleBarOpen } from "@/lib/player/sub-presets";
-import { useT } from "@/lib/i18n";
-import { BoldToggle, ColorRow, FontMenu, SizeStepper } from "./sub-style-bar/controls";
+
 import { AdvancedMenu } from "./sub-style-bar/advanced-menu";
+import { BoldToggle, ColorRow, FontMenu, SizeStepper } from "./sub-style-bar/controls";
 import { LooksCluster } from "./sub-style-bar/looks-cluster";
 
 const IDLE_MS = 7000;
@@ -57,7 +58,11 @@ export function SubStyleBar() {
         className="pointer-events-auto flex max-w-[calc(100vw-56px)] flex-wrap items-center justify-center gap-2 rounded-[16px] border border-edge bg-elevated px-2 py-2 shadow-[0_18px_44px_-22px_rgba(0,0,0,0.85)]"
       >
         <div className={GROUP}>
-          <FontMenu value={settings.subFontFamily} fonts={settings.customFonts} onChange={(f) => update({ subFontFamily: f })} />
+          <FontMenu
+            value={settings.subFontFamily}
+            fonts={settings.customFonts}
+            onChange={(f) => update({ subFontFamily: f })}
+          />
           <span aria-hidden className="h-6 w-px bg-edge-soft" />
           <SizeStepper value={settings.subFontSize} onChange={(n) => update({ subFontSize: clamp(n, 16, 120) })} />
           <span aria-hidden className="h-6 w-px bg-edge-soft" />

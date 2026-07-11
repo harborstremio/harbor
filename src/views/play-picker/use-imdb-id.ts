@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
 import { narrowMediaType, isAddonNativeMeta, type Meta } from "@/lib/cinemeta";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { kitsuToImdb } from "@/lib/providers/anime-mapping";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
+import { useEffect, useState } from "react";
+
 import { cinemetaImdbFallback } from "./picker-utils";
 
 export type ResolvedImdb = { id: string | null; verified: boolean };
@@ -53,11 +54,9 @@ export function useImdbId(meta: Meta, tmdbKey: string | undefined): ResolvedImdb
           return;
         }
       }
-      const fallback = await cinemetaImdbFallback(
-        meta.name,
-        narrowMediaType(meta.type),
-        meta.releaseInfo,
-      ).catch(() => null);
+      const fallback = await cinemetaImdbFallback(meta.name, narrowMediaType(meta.type), meta.releaseInfo).catch(
+        () => null,
+      );
       set(fallback ? { id: fallback, verified: false } : UNRESOLVED);
     })();
     return () => {

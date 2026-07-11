@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import {
   castLoad,
   castPause,
@@ -12,6 +11,8 @@ import {
   type TranscodeProfile,
 } from "@/lib/cast";
 import type { PlayerBridge } from "@/lib/player/bridge";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+
 import type { CastErrorInfo } from "../cast-error-modal";
 
 type LoadParams = {

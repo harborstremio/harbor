@@ -1,11 +1,12 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { MetaAwardsCorner } from "../meta-awards-corner";
 import { ThumbsDock } from "./thumbs-dock";
 import { FADE_MS, upsizeTmdb } from "./types";
@@ -46,7 +47,7 @@ export function BigCardStack({
     let cancelled = false;
     const indices = new Set<number>();
     for (let i = -2; i <= 2; i++) {
-      indices.add(((active + i) % items.length + items.length) % items.length);
+      indices.add((((active + i) % items.length) + items.length) % items.length);
     }
     const pending = items.filter((m, i) => indices.has(i) && !(m.id in logos));
     if (pending.length === 0) return;
@@ -158,12 +159,7 @@ export function BigCardStack({
             }}
           >
             {src && shouldMount && (
-              <img
-                src={src}
-                alt=""
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              <img src={src} alt="" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
             )}
           </div>
         );
@@ -259,4 +255,3 @@ function TitlePlate({ title, logo }: { title: string; logo?: string }) {
     </div>
   );
 }
-

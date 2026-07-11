@@ -1,6 +1,6 @@
-import { Clock } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import {
   episodeFromVideoId,
   library,
@@ -10,8 +10,10 @@ import {
 } from "@/lib/stremio";
 import { fetchWatchedHistory, type HistoryItem } from "@/lib/trakt/history";
 import { useTrakt } from "@/lib/trakt/provider";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+import { Clock } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { HistoryEpisodeCard } from "./history-episode-card";
 import {
   applyFilter,
   countByType,
@@ -24,7 +26,6 @@ import {
   type TypeKey,
   type WatchlistMerged,
 } from "./shared";
-import { HistoryEpisodeCard } from "./history-episode-card";
 
 export type HistoryEntry = WatchlistMerged & {
   season?: number;
@@ -116,8 +117,8 @@ export function HistoryTab() {
       return next;
     });
   }, []);
-  const [view, setView] = useState<HistoryView>(
-    () => (localStorage.getItem("harbor.history.view") === "episodes" ? "episodes" : "posters"),
+  const [view, setView] = useState<HistoryView>(() =>
+    localStorage.getItem("harbor.history.view") === "episodes" ? "episodes" : "posters",
   );
   const setViewPersist = useCallback((next: HistoryView) => {
     setView(next);
@@ -165,18 +166,14 @@ export function HistoryTab() {
             <>
               <HistoryViewToggle view={view} onChange={setViewPersist} />
               <SortControl />
-              {settings.librarySort === "recent" && (
-                <ViewModeToggle flat={flat} onToggle={toggleFlat} />
-              )}
+              {settings.librarySort === "recent" && <ViewModeToggle flat={flat} onToggle={toggleFlat} />}
             </>
           }
         />
       )}
       <div className="flex items-center justify-between">
         <span className="text-[12px] text-ink-muted">
-          {merged.length === 1
-            ? t("{n} item", { n: merged.length })
-            : t("{n} items", { n: merged.length })}
+          {merged.length === 1 ? t("{n} item", { n: merged.length }) : t("{n} items", { n: merged.length })}
           {traktConnected && traktStatus === "loading" ? t(" · Syncing Trakt…") : ""}
         </span>
       </div>
@@ -225,13 +222,7 @@ function ViewModeToggle({ flat, onToggle }: { flat: boolean; onToggle: () => voi
   );
 }
 
-function HistoryViewToggle({
-  view,
-  onChange,
-}: {
-  view: HistoryView;
-  onChange: (v: HistoryView) => void;
-}) {
+function HistoryViewToggle({ view, onChange }: { view: HistoryView; onChange: (v: HistoryView) => void }) {
   const t = useT();
   return (
     <div className="flex items-center gap-1 rounded-full bg-elevated/40 p-0.5 ring-1 ring-edge-soft/60">
@@ -285,11 +276,7 @@ function filterHistory(items: LibraryItem[]): LibraryItem[] {
   return items
     .filter((i) => !i.removed || i.temp)
     .filter((i) => i.state?.flaggedWatched === 1 || (i.state?.timeOffset ?? 0) > 0)
-    .sort(
-      (a, b) =>
-        Date.parse(b.state?.lastWatched ?? b._mtime) -
-        Date.parse(a.state?.lastWatched ?? a._mtime),
-    );
+    .sort((a, b) => Date.parse(b.state?.lastWatched ?? b._mtime) - Date.parse(a.state?.lastWatched ?? a._mtime));
 }
 
 function episodeOf(i: LibraryItem): { season: number; episode: number } | null {
@@ -341,7 +328,7 @@ function mergeHistory(stremio: LibraryItem[], trakt: HistoryItem[]): HistoryEntr
       meta: {
         id,
         type: h.type === "movie" ? "movie" : "series",
-        name: h.type === "movie" ? h.title : (h.showImdb ? "" : h.title),
+        name: h.type === "movie" ? h.title : h.showImdb ? "" : h.title,
       },
       date: parseTs(h.watchedAt),
       progress: 0,

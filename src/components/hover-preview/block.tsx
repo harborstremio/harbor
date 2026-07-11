@@ -1,8 +1,9 @@
-import { ArrowUpRight, Bookmark, BookmarkCheck, Play, Star } from "lucide-react";
-import { useMemo, type ReactNode } from "react";
 import type { PreviewData } from "@/lib/hover-preview/preview-data";
 import { tmdbImdbCached } from "@/lib/providers/tmdb";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
+import { ArrowUpRight, Bookmark, BookmarkCheck, Play, Star } from "lucide-react";
+import { useMemo, type ReactNode } from "react";
+
 import { ImdbIcon } from "../icons/imdb-icon";
 import { MalLogo } from "../icons/mal-logo";
 
@@ -56,7 +57,13 @@ function WatchlistToggle({ data }: { data: PreviewData }) {
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.stopPropagation();
-        toggleWatchlist({ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster, imdbId: alt ?? undefined });
+        toggleWatchlist({
+          id: meta.id,
+          type: meta.type,
+          name: meta.name,
+          poster: meta.poster,
+          imdbId: alt ?? undefined,
+        });
       }}
       className="flex h-7 w-7 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 hover:bg-raised hover:text-ink"
     >

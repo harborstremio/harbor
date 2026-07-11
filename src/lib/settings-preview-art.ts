@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { meta, topMovies, topSeries } from "@/lib/cinemeta";
 import { fetchAnilistTrendingAnime } from "@/lib/anilist/browse";
+import { meta, topMovies, topSeries } from "@/lib/cinemeta";
+import { useEffect, useState } from "react";
 
 export type PreviewArt = {
   posters: string[];
@@ -15,9 +15,7 @@ async function pickStills(): Promise<string[]> {
   const series = await topSeries();
   for (const s of series.slice(0, 4)) {
     const full = await meta("series", s.id);
-    const thumbs = (full?.videos ?? [])
-      .map((v) => v.thumbnail)
-      .filter((x): x is string => !!x);
+    const thumbs = (full?.videos ?? []).map((v) => v.thumbnail).filter((x): x is string => !!x);
     if (thumbs.length >= 2) return thumbs.slice(0, 6);
   }
   return [];
@@ -31,8 +29,14 @@ async function load(): Promise<PreviewArt> {
   ]);
   const posterOf = (m: { poster?: string }) => m.poster;
   return {
-    posters: movies.map(posterOf).filter((x): x is string => !!x).slice(0, 8),
-    anime: anime.map(posterOf).filter((x): x is string => !!x).slice(0, 6),
+    posters: movies
+      .map(posterOf)
+      .filter((x): x is string => !!x)
+      .slice(0, 8),
+    anime: anime
+      .map(posterOf)
+      .filter((x): x is string => !!x)
+      .slice(0, 6),
     stills,
   };
 }

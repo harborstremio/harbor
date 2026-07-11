@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { Meta } from "@/lib/cinemeta";
 import { ARABIC_ROWS } from "@/lib/arabic";
+import type { Meta } from "@/lib/cinemeta";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const MAX_RAIL_PAGES = 8;
 const MIN_PAGE_YIELD = 4;

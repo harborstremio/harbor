@@ -1,8 +1,8 @@
-import { useEffect, useRef, useSyncExternalStore } from "react";
-import { WifiOff } from "lucide-react";
 import { useDownloads } from "@/lib/download/downloads-store";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { WifiOff } from "lucide-react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 
 function subscribe(cb: () => void) {
   window.addEventListener("online", cb);
@@ -14,7 +14,11 @@ function subscribe(cb: () => void) {
 }
 
 export function useOnline(): boolean {
-  return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true,
+  );
 }
 
 export function OfflineBanner() {

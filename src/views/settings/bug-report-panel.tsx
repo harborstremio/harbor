@@ -1,6 +1,3 @@
-import { AtSign, Github, User } from "lucide-react";
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/lib/auth";
 import {
   collectDiagnostics,
@@ -9,14 +6,18 @@ import {
   type Diagnostics,
   type Severity,
 } from "@/lib/bug-report";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { Section } from "./shared";
+import { useSettings } from "@/lib/settings";
+import { invoke } from "@tauri-apps/api/core";
+import { AtSign, Github, User } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { ContributorCard } from "./bug-report/contributor-card";
 import { DiagnosticsCard } from "./bug-report/diagnostics-card";
 import { FileDrop } from "./bug-report/file-drop";
 import { SeverityPicker } from "./bug-report/severity-picker";
 import { SuccessCard } from "./bug-report/success-card";
+import { Section } from "./shared";
 
 export function BugReportPanel() {
   const t = useT();
@@ -48,7 +49,8 @@ export function BugReportPanel() {
       hasRpdb: !!settings.rpdbKey,
       hasTrakt: !!settings.traktAccessToken,
       hasStremio: !!auth.authKey,
-      debridCount: [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(Boolean).length,
+      debridCount: [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(Boolean)
+        .length,
       addonCount: 0,
       iptvCount: settings.iptvPlaylists.length,
     }).then((d) => {
@@ -167,21 +169,27 @@ export function BugReportPanel() {
 
       <Section
         title={t("Screenshots and recordings")}
-        subtitle={t("Drop a clip of the bug if you can. A 5-second screen recording usually says more than five paragraphs.")}
+        subtitle={t(
+          "Drop a clip of the bug if you can. A 5-second screen recording usually says more than five paragraphs.",
+        )}
       >
         <FileDrop files={files} onChange={setFiles} />
       </Section>
 
       <Section
         title={t("Player log")}
-        subtitle={t("If a stream or the video player misbehaves, export the player log and attach it above. It saves to your Downloads folder.")}
+        subtitle={t(
+          "If a stream or the video player misbehaves, export the player log and attach it above. It saves to your Downloads folder.",
+        )}
       >
         <ExportLogButton />
       </Section>
 
       <Section
         title={t("Credit (optional)")}
-        subtitle={t("Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.")}
+        subtitle={t(
+          "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.",
+        )}
       >
         <div className="flex flex-col divide-y divide-edge overflow-hidden rounded-xl border border-edge bg-canvas focus-within:border-ink-subtle sm:flex-row sm:divide-y-0 sm:divide-x">
           <CreditField
@@ -231,7 +239,11 @@ export function BugReportPanel() {
 
       <div className="sticky bottom-3 z-10 flex items-center justify-end gap-3 rounded-2xl border border-edge-soft bg-elevated/85 px-5 py-3 backdrop-blur">
         <span className="me-auto text-[11.5px] text-ink-subtle">
-          {canSubmit ? t("Ready to send") : summary.trim().length < 6 ? t("Summary needs at least 6 characters") : t("Preparing…")}
+          {canSubmit
+            ? t("Ready to send")
+            : summary.trim().length < 6
+              ? t("Summary needs at least 6 characters")
+              : t("Preparing…")}
         </span>
         <button
           type="button"
@@ -298,15 +310,7 @@ function ExportLogButton() {
   );
 }
 
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
@@ -333,9 +337,7 @@ function CreditField({
 }) {
   return (
     <label className="flex h-11 flex-1 items-center gap-2 px-3.5 transition-colors hover:bg-elevated/40">
-      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-ink-subtle">
-        {icon}
-      </span>
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center text-ink-subtle">{icon}</span>
       <input
         type="text"
         value={value}

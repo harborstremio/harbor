@@ -1,5 +1,5 @@
-import { Captions, CaptionsOff, Loader2, Scissors, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Captions, CaptionsOff, Loader2, Scissors, X } from "lucide-react";
 
 export function ClipChooser({
   open,

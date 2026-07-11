@@ -1,7 +1,5 @@
-import { AlertTriangle, Check, Eraser, Loader2, Play, RotateCw, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import {
   torrentEngineHardReset,
   torrentEngineRestart,
@@ -9,6 +7,9 @@ import {
   torrentEngineStatus as engineStatus,
   type EngineStatus,
 } from "@/lib/torrent/local-engine";
+import { AlertTriangle, Check, Eraser, Loader2, Play, RotateCw, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { settingsAnchor, ToggleRow } from "../shared";
 
 type SelfTestResult = Awaited<ReturnType<typeof engineSelfTest>>;
@@ -99,7 +100,10 @@ export function LocalEngineSection() {
   const udpBlocked = !!udpStep && !udpStep.ok && !!httpsStep && httpsStep.ok;
 
   return (
-    <section id={settingsAnchor("Local engine")} className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
+    <section
+      id={settingsAnchor("Local engine")}
+      className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Local engine")}</h2>
@@ -136,21 +140,27 @@ export function LocalEngineSection() {
         <div className="flex flex-col gap-1.5">
           <p className="text-[12px] leading-relaxed text-danger">{status.last_error}</p>
           <p className="text-[12px] leading-relaxed text-ink-subtle">
-            {t("If streams stop loading, hit Clear & restart below to wipe the engine and start it fresh on a new port.")}
+            {t(
+              "If streams stop loading, hit Clear & restart below to wipe the engine and start it fresh on a new port.",
+            )}
           </p>
         </div>
       )}
 
       <ToggleRow
         label={t("Show P2P status overlay")}
-        sub={t("Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.")}
+        sub={t(
+          "Peers, speed and progress chip on the player during torrent playback. Turn off to keep the player clean.",
+        )}
         value={settings.playerP2pChip}
         onChange={(v) => update({ playerP2pChip: v })}
       />
 
       <ToggleRow
         label={t("Download the whole file while streaming")}
-        sub={t("Keeps fetching the full torrent in the background, even when paused, so you can pre-buffer big remuxes and scrub a finished file with no re-downloading. Uses more bandwidth and disk; cleaned up when you switch or close like normal.")}
+        sub={t(
+          "Keeps fetching the full torrent in the background, even when paused, so you can pre-buffer big remuxes and scrub a finished file with no re-downloading. Uses more bandwidth and disk; cleaned up when you switch or close like normal.",
+        )}
         value={settings.torrentFullDownload}
         onChange={(v) => update({ torrentFullDownload: v })}
       />
@@ -162,11 +172,7 @@ export function LocalEngineSection() {
           disabled={busy || strictRemote}
           className="flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60 disabled:hover:scale-100"
         >
-          {running ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : (
-            <Play size={14} strokeWidth={2.4} />
-          )}
+          {running ? <Loader2 size={15} className="animate-spin" /> : <Play size={14} strokeWidth={2.4} />}
           {running ? t("Running self-test") : t("Run self-test")}
         </button>
         <button
@@ -175,11 +181,7 @@ export function LocalEngineSection() {
           disabled={busy}
           className="flex h-10 items-center gap-2 rounded-lg border border-edge-soft px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
         >
-          {restarting ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : (
-            <RotateCw size={14} strokeWidth={2.4} />
-          )}
+          {restarting ? <Loader2 size={15} className="animate-spin" /> : <RotateCw size={14} strokeWidth={2.4} />}
           {restarting ? t("Restarting") : t("Restart engine")}
         </button>
         <button
@@ -188,18 +190,16 @@ export function LocalEngineSection() {
           disabled={busy}
           className="flex h-10 items-center gap-2 rounded-lg border border-edge-soft px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:border-danger/50 hover:text-danger disabled:opacity-60"
         >
-          {clearing ? (
-            <Loader2 size={15} className="animate-spin" />
-          ) : (
-            <Eraser size={14} strokeWidth={2.4} />
-          )}
+          {clearing ? <Loader2 size={15} className="animate-spin" /> : <Eraser size={14} strokeWidth={2.4} />}
           {clearing ? t("Clearing") : t("Clear & restart")}
         </button>
       </div>
 
       {strictRemote && (
         <p className="text-[12px] leading-relaxed text-accent/85">
-          {t("Self-test is disabled while strict remote streaming is on. It downloads a test torrent over peer-to-peer on this machine.")}
+          {t(
+            "Self-test is disabled while strict remote streaming is on. It downloads a test torrent over peer-to-peer on this machine.",
+          )}
         </p>
       )}
 
@@ -214,11 +214,7 @@ export function LocalEngineSection() {
                 result.pass ? "bg-emerald-500/15 text-emerald-400" : "bg-danger/15 text-danger"
               }`}
             >
-              {result.pass ? (
-                <Check size={12} strokeWidth={2.8} />
-              ) : (
-                <X size={12} strokeWidth={2.8} />
-              )}
+              {result.pass ? <Check size={12} strokeWidth={2.8} /> : <X size={12} strokeWidth={2.8} />}
               {result.pass ? t("Pass") : t("Fail")}
             </span>
           </div>
@@ -249,7 +245,9 @@ export function LocalEngineSection() {
           </ul>
           {udpBlocked && (
             <p className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-[12px] leading-relaxed text-amber-300/90">
-              {t("Your network blocks UDP, so DHT is offline, but HTTPS trackers are reachable over TCP. Streams can still find peers, they may just take a little longer to start.")}
+              {t(
+                "Your network blocks UDP, so DHT is offline, but HTTPS trackers are reachable over TCP. Streams can still find peers, they may just take a little longer to start.",
+              )}
             </p>
           )}
         </div>

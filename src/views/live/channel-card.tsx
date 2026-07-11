@@ -1,17 +1,15 @@
-import { useState } from "react";
-import { Info, Pin, Tv } from "lucide-react";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { useFavorites } from "@/lib/iptv/favorites";
 import { togglePin, usePinnedOrder } from "@/lib/iptv/pins";
 import type { EpgProgram, IptvChannel } from "@/lib/iptv/types";
-import { useT } from "@/lib/i18n";
-import { HoverTooltip } from "@/components/hover-tooltip";
+import { Info, Pin, Tv } from "lucide-react";
+import { useState } from "react";
+
 import { FavoriteButton } from "./favorite-button";
 
-function formatRemaining(
-  t: (key: string, vars?: Record<string, string | number>) => string,
-  ms: number,
-): string {
+function formatRemaining(t: (key: string, vars?: Record<string, string | number>) => string, ms: number): string {
   const totalMin = Math.ceil(ms / 60_000);
   if (totalMin >= 60) {
     const h = Math.floor(totalMin / 60);
@@ -54,8 +52,7 @@ export function ChannelCard({
     current && now && current.endMs > current.startMs
       ? Math.max(0, Math.min(1, (now - current.startMs) / (current.endMs - current.startMs)))
       : null;
-  const timeLeft =
-    current && now && current.endMs > now ? formatRemaining(t, current.endMs - now) : null;
+  const timeLeft = current && now && current.endMs > now ? formatRemaining(t, current.endMs - now) : null;
   return (
     <div
       data-scroll-anchor={`channel-${channel.id}`}
@@ -64,9 +61,7 @@ export function ChannelCard({
         containIntrinsicSize: posterUrl ? "200px 240px" : "200px 170px",
       }}
       className={`group relative flex w-full flex-col items-stretch overflow-hidden rounded-2xl border bg-elevated transition-colors duration-150 ${
-        active
-          ? "border-ink/45 bg-raised"
-          : "border-edge-soft/55 hover:border-edge/85 hover:bg-raised"
+        active ? "border-ink/45 bg-raised" : "border-edge-soft/55 hover:border-edge/85 hover:bg-raised"
       }`}
     >
       <button
@@ -134,11 +129,7 @@ export function ChannelCard({
                 <div dir="auto" className="min-w-0 flex-1 truncate text-[12.5px] leading-tight text-ink-muted">
                   {current.title}
                 </div>
-                {timeLeft && (
-                  <span className="shrink-0 text-[10.5px] font-medium text-ink-subtle">
-                    {timeLeft}
-                  </span>
-                )}
+                {timeLeft && <span className="shrink-0 text-[10.5px] font-medium text-ink-subtle">{timeLeft}</span>}
               </div>
               {progress != null && (
                 <div className="mt-1 h-[3px] w-full overflow-hidden rounded-full bg-canvas/55">
@@ -185,11 +176,7 @@ export function ChannelCard({
         >
           <Pin size={13} strokeWidth={2.2} className={isChannelPinned ? "fill-current" : ""} />
         </button>
-        <FavoriteButton
-          active={isFav}
-          onToggle={() => favorites.toggle(channel)}
-          size={14}
-        />
+        <FavoriteButton active={isFav} onToggle={() => favorites.toggle(channel)} size={14} />
       </div>
     </div>
   );

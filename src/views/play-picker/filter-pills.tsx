@@ -1,4 +1,5 @@
 import { Languages, Zap } from "lucide-react";
+
 import { abbreviateLanguages, normalizeLangCode } from "./picker-utils";
 
 export function CachedFilterPill({
@@ -39,9 +40,7 @@ export function LanguageFilterPill({
   onToggle: () => void;
   isAnime: boolean;
 }) {
-  const display = isAnime
-    ? languages
-    : languages.filter((l) => normalizeLangCode(l) !== "ja");
+  const display = isAnime ? languages : languages.filter((l) => normalizeLangCode(l) !== "ja");
   const label = abbreviateLanguages(display);
   return (
     <button

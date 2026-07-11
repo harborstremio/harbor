@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useTogether, type ChatMessage } from "@/lib/together/provider";
 import { useView } from "@/lib/view";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const VISIBLE_MS = 5500;
 const MAX_TOASTS = 3;
@@ -93,10 +93,7 @@ function ChatBubble({
         </span>
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span
-          className="text-[11px] font-medium"
-          style={{ color: color ?? undefined }}
-        >
+        <span className="text-[11px] font-medium" style={{ color: color ?? undefined }}>
           {msg.name}
         </span>
         <p className="break-words text-[12.5px] leading-snug text-ink">{msg.text}</p>

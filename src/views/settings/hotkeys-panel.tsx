@@ -1,5 +1,3 @@
-import { Keyboard, RotateCcw, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import {
   HOTKEYS,
   HOTKEY_MAP,
@@ -11,9 +9,12 @@ import {
   type HotkeyId,
   type HotkeyScope,
 } from "@/lib/hotkeys";
+import { useT } from "@/lib/i18n";
 import { SEEK_STEP_OPTIONS } from "@/lib/seek-step";
 import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+import { Keyboard, RotateCcw, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { Section, ToggleRow } from "./shared";
 
 export function HotkeysPanel() {
@@ -51,7 +52,10 @@ export function HotkeysPanel() {
       if (isModifierOnly(e)) return;
       const binding = eventToBinding(e);
       const dupe = HOTKEYS.find(
-        (h) => h.id !== capturing && h.scope === HOTKEY_MAP[capturing].scope && effectiveBinding(h.id, overrides) === binding,
+        (h) =>
+          h.id !== capturing &&
+          h.scope === HOTKEY_MAP[capturing].scope &&
+          effectiveBinding(h.id, overrides) === binding,
       );
       setBinding(capturing, binding);
       setConflict(dupe ? dupe.id : null);
@@ -67,7 +71,9 @@ export function HotkeysPanel() {
     <>
       <div className="flex items-center justify-between">
         <p className="text-[13px] text-ink-subtle">
-          {t("Click any binding to rebind it. Press Esc while capturing to cancel. Letters ignore Shift (so K and Shift+K trigger the same action).")}
+          {t(
+            "Click any binding to rebind it. Press Esc while capturing to cancel. Letters ignore Shift (so K and Shift+K trigger the same action).",
+          )}
         </p>
         {overrideCount > 0 && (
           <button
@@ -83,13 +89,17 @@ export function HotkeysPanel() {
       <Section title={t("Behavior")} subtitle={t("How keys behave during playback.")}>
         <ToggleRow
           label={t("Esc exits fullscreen first")}
-          sub={t("When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.")}
+          sub={t(
+            "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.",
+          )}
           value={settings.playerEscExitsFullscreen}
           onChange={(v) => update({ playerEscExitsFullscreen: v })}
         />
         <ToggleRow
           label={t("Ask before leaving")}
-          sub={t("When Esc would close the player, show a quick confirm first. You can tick \"Don't ask me again\" in that prompt to always leave on Esc.")}
+          sub={t(
+            'When Esc would close the player, show a quick confirm first. You can tick "Don\'t ask me again" in that prompt to always leave on Esc.',
+          )}
           value={settings.playerConfirmLeave}
           onChange={(v) => update({ playerConfirmLeave: v })}
         />
@@ -112,7 +122,11 @@ export function HotkeysPanel() {
           subgroups.set(g, arr);
         }
         return (
-          <Section key={scope} title={t(scope)} subtitle={scope === "Player" ? t("Inside the playback view.") : t("Anywhere in Harbor.")}>
+          <Section
+            key={scope}
+            title={t(scope)}
+            subtitle={scope === "Player" ? t("Inside the playback view.") : t("Anywhere in Harbor.")}
+          >
             <div className="flex flex-col gap-6">
               {Array.from(subgroups.entries()).map(([groupName, items]) => (
                 <div key={groupName} className="flex flex-col gap-1.5">
@@ -196,9 +210,7 @@ function SeekStepPicker({
 }) {
   return (
     <div className="grid min-w-0 grid-cols-[76px_minmax(0,1fr)] items-center gap-2 rounded-lg border border-edge-soft bg-elevated/55 p-1.5">
-      <span className="ps-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="ps-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</span>
       <div className="grid min-w-0 grid-cols-6 gap-1 rounded-md bg-canvas/45 p-0.5">
         {SEEK_STEP_OPTIONS.map((seconds) => {
           const selected = seconds === value;
@@ -209,9 +221,7 @@ function SeekStepPicker({
               aria-pressed={selected}
               onClick={() => onChange(seconds)}
               className={`h-7 min-w-0 rounded-[6px] px-1 font-mono text-[11.5px] font-bold tabular-nums transition-colors ${
-                selected
-                  ? "bg-ink text-canvas shadow-sm"
-                  : "text-ink-muted hover:bg-raised hover:text-ink"
+                selected ? "bg-ink text-canvas shadow-sm" : "text-ink-muted hover:bg-raised hover:text-ink"
               }`}
             >
               {seconds}s
@@ -223,15 +233,7 @@ function SeekStepPicker({
   );
 }
 
-function ReadOnlyHotkeyRow({
-  label,
-  description,
-  binding,
-}: {
-  label: string;
-  description: string;
-  binding: string;
-}) {
+function ReadOnlyHotkeyRow({ label, description, binding }: { label: string; description: string; binding: string }) {
   const t = useT();
   return (
     <div className="flex items-center gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
@@ -298,11 +300,7 @@ function HotkeyRow({
             <Keyboard size={12} strokeWidth={2.4} className="me-1.5 inline-block" />
             {t("Press a key…")}
           </span>
-          <button
-            onClick={onStartCapture}
-            className="hidden"
-            aria-hidden
-          />
+          <button onClick={onStartCapture} className="hidden" aria-hidden />
         </div>
       ) : (
         <div className="flex items-center gap-1.5">

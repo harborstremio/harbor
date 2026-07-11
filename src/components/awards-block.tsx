@@ -1,8 +1,9 @@
-import { Fragment, useState } from "react";
 import { tmdbPersonIdByName, tmdbPersonIdCached } from "@/lib/providers/tmdb";
+import { type AwardEntry, type AwardType } from "@/lib/providers/wikidata";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { type AwardEntry, type AwardType } from "@/lib/providers/wikidata";
+import { Fragment, useState } from "react";
+
 import { AwardLogo, laurelColorFor } from "./icons/award-logo";
 import { Laurel } from "./icons/laurel";
 
@@ -43,9 +44,7 @@ export function AwardsBlock({ awards }: { awards: AwardEntry[] }) {
     groups.set(a.type, arr);
   }
   if (groups.size === 0) return null;
-  const sorted = [...groups.entries()].sort(
-    (a, b) => TYPE_ORDER[a[0]] - TYPE_ORDER[b[0]],
-  );
+  const sorted = [...groups.entries()].sort((a, b) => TYPE_ORDER[a[0]] - TYPE_ORDER[b[0]]);
 
   return (
     <div id="awards-section" className="scroll-mt-24 border-t border-edge-soft pt-14">
@@ -74,10 +73,7 @@ function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] 
   return (
     <section className="grid gap-7 lg:grid-cols-[240px_1fr] lg:gap-14">
       <header className="flex flex-row items-center gap-5 lg:flex-col lg:items-start lg:gap-5">
-        <span
-          className="shrink-0 text-accent"
-          style={tint ? { color: tint } : undefined}
-        >
+        <span className="shrink-0 text-accent" style={tint ? { color: tint } : undefined}>
           {totalWins > 0 ? (
             <Laurel size={88}>
               <AwardLogo type={type} size={32} />
@@ -105,13 +101,10 @@ function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] 
           <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
             {totalWins > 0 && (
               <>
-                <span className="text-accent">{totalWins}</span>{" "}
-                {totalWins === 1 ? "Win" : "Wins"}
+                <span className="text-accent">{totalWins}</span> {totalWins === 1 ? "Win" : "Wins"}
               </>
             )}
-            {totalWins > 0 && totalNoms > 0 && (
-              <span className="mx-2.5 opacity-40">·</span>
-            )}
+            {totalWins > 0 && totalNoms > 0 && <span className="mx-2.5 opacity-40">·</span>}
             {totalNoms > 0 && (
               <>
                 {totalNoms} {totalNoms === 1 ? "Nomination" : "Nominations"}
@@ -130,11 +123,7 @@ function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] 
         {wins.length > 0 && (
           <ul className="grid grid-cols-1 gap-x-10 gap-y-0 xl:grid-cols-2">
             {wins.map((e, i) => (
-              <EntryRow
-                key={`w-${e.year ?? ""}-${e.category}-${e.recipient ?? ""}-${i}`}
-                entry={e}
-                won
-              />
+              <EntryRow key={`w-${e.year ?? ""}-${e.category}-${e.recipient ?? ""}-${i}`} entry={e} won />
             ))}
           </ul>
         )}
@@ -142,17 +131,11 @@ function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] 
         {noms.length > 0 && (
           <div className="flex flex-col gap-2">
             {wins.length > 0 && (
-              <h5 className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">
-                Also Nominated
-              </h5>
+              <h5 className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">Also Nominated</h5>
             )}
             <ul className="grid grid-cols-1 gap-x-10 gap-y-0 xl:grid-cols-2">
               {noms.map((e, i) => (
-                <EntryRow
-                  key={`n-${e.year ?? ""}-${e.category}-${e.recipient ?? ""}-${i}`}
-                  entry={e}
-                  won={false}
-                />
+                <EntryRow key={`n-${e.year ?? ""}-${e.category}-${e.recipient ?? ""}-${i}`} entry={e} won={false} />
               ))}
             </ul>
           </div>
@@ -189,17 +172,11 @@ function EntryRow({ entry, won }: { entry: AwardEntry; won: boolean }) {
   const recipients = entry.recipients ?? (entry.recipient ? [entry.recipient] : []);
   return (
     <li className="flex items-baseline gap-4 border-b border-edge-soft/30 py-2.5 text-[13px]">
-      <span
-        className={`w-11 shrink-0 font-semibold tabular-nums ${
-          won ? "text-accent" : "text-ink-subtle"
-        }`}
-      >
+      <span className={`w-11 shrink-0 font-semibold tabular-nums ${won ? "text-accent" : "text-ink-subtle"}`}>
         {entry.year ?? "–"}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="font-medium leading-tight text-ink">
-          {entry.category}
-        </span>
+        <span className="font-medium leading-tight text-ink">{entry.category}</span>
         {recipients.length > 0 && (
           <span className="text-[12px] leading-tight text-ink-subtle">
             {recipients.map((name, i) => (
@@ -247,4 +224,3 @@ function PersonLink({ name }: { name: string }) {
     </button>
   );
 }
-

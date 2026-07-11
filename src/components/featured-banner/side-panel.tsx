@@ -1,11 +1,12 @@
-import { Star } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { pickRandom } from "@/lib/feed/tags";
+import { useLiveImdbRating } from "@/lib/live-imdb";
 import { tmdbMovieImages } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
-import { useLiveImdbRating } from "@/lib/live-imdb";
+import { Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import { ImdbIcon } from "../icons/imdb-icon";
 import type { LightboxState } from "./types";
 
@@ -52,11 +53,7 @@ export function SidePanel({
     return Array.from({ length: 4 }, (_, i) => sample[i] ?? fallbackBackdrop);
   }, [stills, fallbackBackdrop]);
 
-  const lightboxImages = stills.length > 0
-    ? stills
-    : fallbackBackdrop
-      ? [fallbackBackdrop]
-      : [];
+  const lightboxImages = stills.length > 0 ? stills : fallbackBackdrop ? [fallbackBackdrop] : [];
 
   const openAt = (tileSrc: string | undefined) => {
     if (!tileSrc || lightboxImages.length === 0) return;
@@ -67,9 +64,7 @@ export function SidePanel({
   return (
     <aside className="flex flex-col gap-3 self-start rounded-2xl border border-edge-soft bg-elevated/35 p-4">
       <div className="flex flex-col gap-1">
-        <h4 className="line-clamp-1 font-display text-[19px] font-medium tracking-tight text-ink">
-          {meta.name}
-        </h4>
+        <h4 className="line-clamp-1 font-display text-[19px] font-medium tracking-tight text-ink">{meta.name}</h4>
         <span className="text-[12px] uppercase tracking-[0.16em] text-ink-subtle">
           {String(activeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
         </span>
@@ -84,11 +79,7 @@ export function SidePanel({
           />
         ))}
       </div>
-      {description && (
-        <p className="text-[12.5px] leading-snug text-ink-muted line-clamp-3">
-          {description}
-        </p>
-      )}
+      {description && <p className="text-[12.5px] leading-snug text-ink-muted line-clamp-3">{description}</p>}
       {live.value && (
         <div className="mt-auto flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-2.5 py-1 text-[12px] font-semibold text-ink self-start">
           {live.isImdb ? (
@@ -104,27 +95,14 @@ export function SidePanel({
   );
 }
 
-function Still({
-  src,
-  alt,
-  onClick,
-}: {
-  src: string | undefined;
-  alt: string;
-  onClick?: () => void;
-}) {
+function Still({ src, alt, onClick }: { src: string | undefined; alt: string; onClick?: () => void }) {
   if (!src) {
     return <div className="aspect-[16/9] rounded-md bg-elevated/45" />;
   }
   if (!onClick) {
     return (
       <div className="relative aspect-[16/9] overflow-hidden rounded-md border border-edge-soft">
-        <img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        <img src={src} alt={alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
       </div>
     );
   }

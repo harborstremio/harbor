@@ -5,9 +5,7 @@ export function Credit({ label, people }: { label: string; people: PersonRef[] }
   const { openPerson } = useView();
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{label}</span>
       <span className="text-[15px] leading-snug text-ink">
         {people.map((p, i) => {
           const resolved = p.id > 0;

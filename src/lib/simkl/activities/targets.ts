@@ -1,21 +1,10 @@
-import type { SimklTarget } from "../types";
 import type { WatchlistStatus } from "../list-status";
-import {
-  getLocalCache,
-  indexItem,
-  pruneItem,
-  saveLocalCache,
-  type RawIds,
-  type SimklCacheItem,
-} from "./store";
+import type { SimklTarget } from "../types";
+import { getLocalCache, indexItem, pruneItem, saveLocalCache, type RawIds, type SimklCacheItem } from "./store";
 
 function targetIds(target: SimklTarget): RawIds | undefined {
   const ids =
-    target.kind === "episode"
-      ? target.show.ids
-      : target.kind === "anime-episode"
-        ? target.anime.ids
-        : target.ids;
+    target.kind === "episode" ? target.show.ids : target.kind === "anime-episode" ? target.anime.ids : target.ids;
   return ids as RawIds;
 }
 

@@ -1,6 +1,5 @@
-import { Film, Maximize, Minimize, Plus, Save, Tv, Users, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { renderControl, type ControlContext } from "@/components/player/transport/control-renderer";
+import { RenderedStremioControl, type StremioRenderCtx } from "@/components/player/transport/control-renderer-stremio";
 import {
   CONTROL_META,
   type ControlVariant,
@@ -11,12 +10,11 @@ import {
   type ThemeId,
 } from "@/lib/player-chrome";
 import type { LayoutProfile } from "@/lib/player-chrome-profiles";
-import { renderControl, type ControlContext } from "@/components/player/transport/control-renderer";
-import {
-  RenderedStremioControl,
-  type StremioRenderCtx,
-} from "@/components/player/transport/control-renderer-stremio";
 import { setPlaybackClock } from "@/lib/player/playback-clock";
+import { Film, Maximize, Minimize, Plus, Save, Tv, Users, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { DefaultLayout, FauxBackdrop, StremioLayout, TopRow } from "./editor-chrome";
 import { buildDefaultCtx, buildStremioCtx, type PlayerMode } from "./editor-mock-ctx";
 import { EditorPanels } from "./editor-panels";
@@ -95,8 +93,7 @@ export function EditorOverlay({
   const [mode, setMode] = useState<PlayerMode>("normal");
   const previewBg = usePreviewBackdrop();
   const [previewStates, setPreviewStates] = useState<Partial<Record<PlayerControlId, string>>>({});
-  const setPreviewState = (id: PlayerControlId, state: string) =>
-    setPreviewStates((cur) => ({ ...cur, [id]: state }));
+  const setPreviewState = (id: PlayerControlId, state: string) => setPreviewStates((cur) => ({ ...cur, [id]: state }));
   const handleSetMode = (m: PlayerMode) => {
     setMode(m);
     onSelect(null);
@@ -168,23 +165,31 @@ export function EditorOverlay({
     [config.controls],
   );
 
-  const ctx = useMemo(
-    () => {
-      const opts = {
-        mid,
-        compact,
-        tight,
-        mode,
-        customIcons: config.customIcons,
-        controlVariants,
-        timeFormat: config.options.timeFormat,
-        volumeStyle: config.options.volumeStyle,
-        previewStates,
-      };
-      return theme === "stremio" ? buildStremioCtx(opts) : buildDefaultCtx(opts);
-    },
-    [theme, mid, compact, tight, mode, config.customIcons, controlVariants, config.options.timeFormat, config.options.volumeStyle, previewStates],
-  );
+  const ctx = useMemo(() => {
+    const opts = {
+      mid,
+      compact,
+      tight,
+      mode,
+      customIcons: config.customIcons,
+      controlVariants,
+      timeFormat: config.options.timeFormat,
+      volumeStyle: config.options.volumeStyle,
+      previewStates,
+    };
+    return theme === "stremio" ? buildStremioCtx(opts) : buildDefaultCtx(opts);
+  }, [
+    theme,
+    mid,
+    compact,
+    tight,
+    mode,
+    config.customIcons,
+    controlVariants,
+    config.options.timeFormat,
+    config.options.volumeStyle,
+    previewStates,
+  ]);
 
   const renderOne = (id: PlayerControlId) => {
     if (theme === "stremio") return <RenderedStremioControl id={id} ctx={ctx as StremioRenderCtx} />;
@@ -282,13 +287,7 @@ export function EditorOverlay({
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <FauxBackdrop width={winSize.w} height={winSize.h} sizeLabel={sizeLabel} bg={previewBg} />
 
-        <TopRow
-          theme={theme}
-          config={config}
-          selectedId={selectedId}
-          onSelect={selectControl}
-          renderOne={renderOne}
-        />
+        <TopRow theme={theme} config={config} selectedId={selectedId} onSelect={selectControl} renderOne={renderOne} />
 
         <EditorPanels
           config={config}
@@ -394,13 +393,21 @@ function HiddenTray({
 function ModeSwitch({ mode, onChange }: { mode: PlayerMode; onChange: (m: PlayerMode) => void }) {
   return (
     <div className="flex h-11 items-center gap-0.5 rounded-full border border-white/10 bg-white/4 p-1">
-      <ModePill active={mode === "normal"} onClick={() => onChange("normal")} icon={<Film size={13} strokeWidth={2.4} />}>
+      <ModePill
+        active={mode === "normal"}
+        onClick={() => onChange("normal")}
+        icon={<Film size={13} strokeWidth={2.4} />}
+      >
         Normal
       </ModePill>
       <ModePill active={mode === "live"} onClick={() => onChange("live")} icon={<Tv size={13} strokeWidth={2.4} />}>
         Live TV
       </ModePill>
-      <ModePill active={mode === "together"} onClick={() => onChange("together")} icon={<Users size={13} strokeWidth={2.4} />}>
+      <ModePill
+        active={mode === "together"}
+        onClick={() => onChange("together")}
+        icon={<Users size={13} strokeWidth={2.4} />}
+      >
         Together
       </ModePill>
     </div>

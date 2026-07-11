@@ -1,6 +1,6 @@
-import { useEffect, useSyncExternalStore } from "react";
-import { useSettings } from "@/lib/settings";
 import { customHoverVersion, getCustomHover, subscribeCustomHovers } from "@/lib/custom-hover";
+import { useSettings } from "@/lib/settings";
+import { useEffect, useSyncExternalStore } from "react";
 
 const STYLE_ID = "harbor-custom-hover-css";
 

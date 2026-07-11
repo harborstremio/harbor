@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
-import { usePlaybackDownloadedGated, usePlaybackPositionGated } from "@/lib/player/playback-clock";
-import { fmtTime } from "./transport-utils";
 import type { TimeFormat } from "@/lib/player-chrome";
+import { usePlaybackDownloadedGated, usePlaybackPositionGated } from "@/lib/player/playback-clock";
+import type { ReactNode } from "react";
+
+import { fmtTime } from "./transport-utils";
 
 function CachedDot({ active }: { active: boolean }): ReactNode {
   const downloaded = usePlaybackDownloadedGated(active);
@@ -99,8 +100,7 @@ export function TimeEnd({
   const fmt: TimeFormat = timeFormat ?? "start-end";
   if (fmt === "elapsed-only") return null;
   const duration = durationSec ?? 0;
-  const text =
-    fmt === "remaining" ? `-${fmtTime(Math.max(0, duration - positionSec))}` : fmtTime(duration);
+  const text = fmt === "remaining" ? `-${fmtTime(Math.max(0, duration - positionSec))}` : fmtTime(duration);
   const cls =
     "inline-flex shrink-0 items-center font-mono text-[13px] tabular-nums text-white/65 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]";
   if (onCycle) {

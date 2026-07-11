@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Tv } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import type { IptvChannel } from "@/lib/iptv/types";
 import { MultiPlayer } from "@/views/multiview/multi-player";
+import { RotateCcw, Tv } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { fmtLeft } from "./now-format";
 import { hydrationKey, type NowItem } from "./use-live-home";
 
@@ -33,10 +34,8 @@ export function LiveHero({
 
   const activeIdx = Math.min(idx, items.length - 1);
   const active = items[activeIdx];
-  const hydrated = active ? hydrations.get(hydrationKey(active)) ?? null : null;
-  const heroArt = active
-    ? hydrated?.background || active.current?.iconUrl || active.channel.logo || null
-    : null;
+  const hydrated = active ? (hydrations.get(hydrationKey(active)) ?? null) : null;
+  const heroArt = active ? hydrated?.background || active.current?.iconUrl || active.channel.logo || null : null;
 
   useEffect(() => {
     if (paused || playing || items.length < 2) return;
@@ -75,10 +74,7 @@ export function LiveHero({
         />
       ))}
       {channel.url && (
-        <div
-          className="absolute inset-0 transition-opacity duration-500"
-          style={{ opacity: playing ? 1 : 0 }}
-        >
+        <div className="absolute inset-0 transition-opacity duration-500" style={{ opacity: playing ? 1 : 0 }}>
           <MultiPlayer
             key={channel.id}
             url={channel.url}
@@ -159,15 +155,7 @@ function ChannelBug({ logo }: { logo: string }) {
   );
 }
 
-function HeroBackdrop({
-  item,
-  hydrated,
-  visible,
-}: {
-  item: NowItem;
-  hydrated: Meta | null;
-  visible: boolean;
-}) {
+function HeroBackdrop({ item, hydrated, visible }: { item: NowItem; hydrated: Meta | null; visible: boolean }) {
   const [artErr, setArtErr] = useState(false);
   const [logoErr, setLogoErr] = useState(false);
   const backdrop = hydrated?.background || item.current?.iconUrl || null;

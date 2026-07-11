@@ -1,7 +1,7 @@
-import { Blocks, Check, ChevronRight } from "lucide-react";
-import type { AddonHit } from "@/lib/search-addon-index";
 import { useT } from "@/lib/i18n";
+import type { AddonHit } from "@/lib/search-addon-index";
 import { useView } from "@/lib/view";
+import { Blocks, Check, ChevronRight } from "lucide-react";
 
 export function AddonHits({ hits, onClose }: { hits: AddonHit[]; onClose: () => void }) {
   const { openAddonDetail } = useView();
@@ -40,11 +40,12 @@ export function AddonHits({ hits, onClose }: { hits: AddonHit[]; onClose: () => 
                   </span>
                 )}
               </div>
-              {a.blurb && (
-                <span className="line-clamp-1 text-[12.5px] leading-snug text-ink-subtle">{a.blurb}</span>
-              )}
+              {a.blurb && <span className="line-clamp-1 text-[12.5px] leading-snug text-ink-subtle">{a.blurb}</span>}
             </div>
-            <ChevronRight size={18} className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+            <ChevronRight
+              size={18}
+              className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+            />
           </button>
         ))}
       </div>

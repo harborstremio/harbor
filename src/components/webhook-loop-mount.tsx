@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { proactiveStorageCleanup } from "@/lib/storage-recovery";
 import { runWebhookTick } from "@/lib/webhook-engine";
+import { useEffect, useRef } from "react";
 
 const TICK_INTERVAL_MS = 30 * 60 * 1000;
 const INITIAL_DELAY_MS = 90 * 1000;
@@ -65,7 +65,7 @@ export function WebhookLoopMount() {
           return null;
         }
       })();
-      const last = raw ? (JSON.parse(raw) as { at?: number }).at ?? 0 : 0;
+      const last = raw ? ((JSON.parse(raw) as { at?: number }).at ?? 0) : 0;
       if (Date.now() - last > TICK_INTERVAL_MS) void tick();
     };
     window.addEventListener("focus", onFocus);

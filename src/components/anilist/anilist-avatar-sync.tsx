@@ -1,7 +1,7 @@
-import { useEffect } from "react";
 import { useAnilist } from "@/lib/anilist/provider";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { useEffect } from "react";
 
 export function AnilistAvatarSync() {
   const { settings } = useSettings();

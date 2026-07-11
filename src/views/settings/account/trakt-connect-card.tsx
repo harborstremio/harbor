@@ -1,30 +1,19 @@
-import { ArrowRight, Check, Copy, ExternalLink, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import traktLogo from "@/assets/trakt.png";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import {
-  fetchTraktUser,
-  pollDeviceToken,
-  requestDeviceCode,
-  type DeviceCode,
-} from "@/lib/trakt";
+import { fetchTraktUser, pollDeviceToken, requestDeviceCode, type DeviceCode } from "@/lib/trakt";
 import { setSession } from "@/lib/trakt/session";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { ArrowRight, Check, Copy, ExternalLink, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { DocsCode } from "../relay-docs";
 import { ExtLink } from "../shared";
 
 function TraktBadge() {
   return (
-    <span
-      className="flex h-10 w-[64px] shrink-0 items-center justify-center rounded-md bg-white px-2 ring-1 ring-edge-soft"
-    >
-      <img
-        src={traktLogo}
-        alt="Trakt"
-        draggable={false}
-        className="h-3.5 w-auto object-contain"
-      />
+    <span className="flex h-10 w-[64px] shrink-0 items-center justify-center rounded-md bg-white px-2 ring-1 ring-edge-soft">
+      <img src={traktLogo} alt="Trakt" draggable={false} className="h-3.5 w-auto object-contain" />
     </span>
   );
 }
@@ -67,11 +56,7 @@ export function TraktConnectCard() {
         setPhase("error");
         return;
       }
-      const r = await pollDeviceToken(
-        settings.traktClientId,
-        settings.traktClientSecret,
-        code.device_code,
-      );
+      const r = await pollDeviceToken(settings.traktClientId, settings.traktClientSecret, code.device_code);
       if (cancelled) return;
       if (r.status === "ok") {
         const expiresAt = Date.now() + r.token.expires_in * 1000;
@@ -155,9 +140,7 @@ export function TraktConnectCard() {
           </div>
         </div>
         <div className="flex items-center justify-center gap-3 rounded-xl border border-edge-soft bg-elevated/60 py-4">
-          <span className="font-mono text-[28px] font-bold tracking-[0.4em] text-ink">
-            {code?.user_code ?? ""}
-          </span>
+          <span className="font-mono text-[28px] font-bold tracking-[0.4em] text-ink">{code?.user_code ?? ""}</span>
           <button
             onClick={copy}
             className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
@@ -233,19 +216,14 @@ export function TraktConnectCard() {
         )}
       </div>
       {error && (
-        <div className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-[12px] text-danger">
-          {error}
-        </div>
+        <div className="rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-[12px] text-danger">{error}</div>
       )}
       {phase === "configuring" && !connected && (
         <div className="flex flex-col gap-3 border-t border-edge-soft/60 pt-3">
           <p className="text-[12.5px] text-ink-muted">
             Register a Trakt app at{" "}
-            <ExtLink href="https://trakt.tv/oauth/applications/new">
-              trakt.tv/oauth/applications/new
-            </ExtLink>
-            . For the redirect URI use <DocsCode>urn:ietf:wg:oauth:2.0:oob</DocsCode>. Paste the
-            credentials it gives you below.
+            <ExtLink href="https://trakt.tv/oauth/applications/new">trakt.tv/oauth/applications/new</ExtLink>. For the
+            redirect URI use <DocsCode>urn:ietf:wg:oauth:2.0:oob</DocsCode>. Paste the credentials it gives you below.
           </p>
           <div className="flex flex-col gap-2">
             <input

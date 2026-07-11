@@ -1,9 +1,10 @@
-import { Layers, Plus } from "lucide-react";
-import { useState } from "react";
-import { MAX_LISTS, useCustomLists } from "@/lib/custom-lists";
-import { useT } from "@/lib/i18n";
 import { CreateListModal } from "@/components/lists/create-list-modal";
 import { ListCard } from "@/components/lists/list-card";
+import { MAX_LISTS, useCustomLists } from "@/lib/custom-lists";
+import { useT } from "@/lib/i18n";
+import { Layers, Plus } from "lucide-react";
+import { useState } from "react";
+
 import { ListDetail } from "./list-detail";
 
 export function MyListsTab() {
@@ -40,22 +41,14 @@ export function MyListsTab() {
       {lists.length === 0 ? (
         <EmptyLists onCreate={() => setCreating(true)} />
       ) : (
-        <div
-          className="grid gap-5"
-          style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}
-        >
+        <div className="grid gap-5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
           {lists.map((l) => (
             <ListCard key={l.id} list={l} onOpen={setSelectedListId} />
           ))}
         </div>
       )}
 
-      {creating && (
-        <CreateListModal
-          onClose={() => setCreating(false)}
-          onCreated={(id) => setSelectedListId(id)}
-        />
-      )}
+      {creating && <CreateListModal onClose={() => setCreating(false)} onCreated={(id) => setSelectedListId(id)} />}
     </section>
   );
 }

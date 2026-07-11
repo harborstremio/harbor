@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { tmdbDiscover } from "@/lib/providers/tmdb/tmdb-catalogs";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const CYCLE_MS = 7000;
 const IMAGE_OPACITY = 0.45;

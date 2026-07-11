@@ -1,20 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { AwardDetailModal } from "@/components/award-detail-modal";
 import { BackToTop } from "@/components/back-to-top";
 import { Poster } from "@/components/poster";
-import {
-  creditToMeta,
-  tmdbPerson,
-  tmdbPersonCached,
-  type PersonDetail,
-} from "@/lib/providers/tmdb";
-import { AwardDetailModal } from "@/components/award-detail-modal";
-import { awardSummary, type AwardType, useAwards } from "@/lib/providers/wikidata";
 import { mergeBundledPersonAwards } from "@/lib/awards-history";
+import { useT } from "@/lib/i18n";
+import { creditToMeta, tmdbPerson, tmdbPersonCached, type PersonDetail } from "@/lib/providers/tmdb";
+import { awardSummary, type AwardType, useAwards } from "@/lib/providers/wikidata";
 import { useRankings } from "@/lib/rankings";
 import { useSettings } from "@/lib/settings";
 import { useTopRankModal, type TopRankDept } from "@/lib/top-rank-modal";
 import { useScrollMemory, useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { AwardLaurelStrip } from "./person/award-laurel-strip";
 import { Bio } from "./person/bio";
 import { FilmRow } from "./person/film-row";
@@ -43,10 +39,7 @@ export function PersonView({ personId }: { personId: number }) {
   const scrollRef = useRef<HTMLElement>(null);
   const personRank = rank(personId, person?.knownForDepartment ?? "Acting");
   const liveAwards = useAwards(person?.imdbId ?? undefined);
-  const awardEntries = useMemo(
-    () => mergeBundledPersonAwards(liveAwards, person?.name),
-    [liveAwards, person?.name],
-  );
+  const awardEntries = useMemo(() => mergeBundledPersonAwards(liveAwards, person?.name), [liveAwards, person?.name]);
   const awardChips = useMemo(() => awardSummary(awardEntries), [awardEntries]);
   const [openAward, setOpenAward] = useState<{ type: AwardType; anchor: DOMRect } | null>(null);
   const openAwardEntries = useMemo(
@@ -79,7 +72,10 @@ export function PersonView({ personId }: { personId: number }) {
     () => (person ? dedupe(person.cast).sort((a, b) => b.popularity - a.popularity) : []),
     [person],
   );
-  const sortedCrew = useMemo(() => (person ? person.crew.slice().sort((a, b) => b.popularity - a.popularity) : []), [person]);
+  const sortedCrew = useMemo(
+    () => (person ? person.crew.slice().sort((a, b) => b.popularity - a.popularity) : []),
+    [person],
+  );
 
   const knownFor = useMemo(() => {
     if (!person) return [];
@@ -100,29 +96,23 @@ export function PersonView({ personId }: { personId: number }) {
   const producing = dedupe(sortedCrew.filter((c) => PRODUCER_JOBS.has(c.job ?? "")));
   const otherCrew = dedupe(
     sortedCrew.filter(
-      (c) =>
-        !DIRECTOR_JOBS.has(c.job ?? "") &&
-        !WRITER_JOBS.has(c.job ?? "") &&
-        !PRODUCER_JOBS.has(c.job ?? ""),
+      (c) => !DIRECTOR_JOBS.has(c.job ?? "") && !WRITER_JOBS.has(c.job ?? "") && !PRODUCER_JOBS.has(c.job ?? ""),
     ),
   );
 
-  const photo = person?.profilePath
-    ? `https://image.tmdb.org/t/p/h632${person.profilePath}`
-    : undefined;
+  const photo = person?.profilePath ? `https://image.tmdb.org/t/p/h632${person.profilePath}` : undefined;
   const backdrop = knownFor.find((c) => c.background)?.background;
 
   const age = person?.birthday ? calcAge(person.birthday, person.deathday) : null;
 
   return (
-    <main
-      ref={scrollRef}
-      className="absolute inset-0 z-40 overflow-y-auto bg-canvas"
-    >
-
+    <main ref={scrollRef} className="absolute inset-0 z-40 overflow-y-auto bg-canvas">
       <div className="relative isolate">
         {backdrop && (
-          <div aria-hidden className="harbor-bleed-stremio pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70vh] overflow-hidden">
+          <div
+            aria-hidden
+            className="harbor-bleed-stremio pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70vh] overflow-hidden"
+          >
             <div
               className="absolute inset-0 scale-110"
               style={{
@@ -167,18 +157,13 @@ export function PersonView({ personId }: { personId: number }) {
             </h1>
 
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-[14px] text-ink-muted">
-              {person?.birthday && (
-                <BirthdayLink birthday={person.birthday} age={age} />
-              )}
+              {person?.birthday && <BirthdayLink birthday={person.birthday} age={age} />}
               {person?.deathday && <span>{t("Died {date}", { date: fmtDate(person.deathday) })}</span>}
               {person?.placeOfBirth && <PlaceLink place={person.placeOfBirth} />}
             </div>
 
             {awardChips.length > 0 && (
-              <AwardLaurelStrip
-                chips={awardChips}
-                onOpen={(type, rect) => setOpenAward({ type, anchor: rect })}
-              />
+              <AwardLaurelStrip chips={awardChips} onOpen={(type, rect) => setOpenAward({ type, anchor: rect })} />
             )}
 
             {person?.biography && (
@@ -193,13 +178,9 @@ export function PersonView({ personId }: { personId: number }) {
       </div>
 
       <div className="relative z-10 flex flex-col gap-14 px-12 pb-24 pt-6">
-        {loading && (
-          <div className="h-[260px] animate-pulse rounded-2xl border border-edge-soft bg-elevated/30" />
-        )}
+        {loading && <div className="h-[260px] animate-pulse rounded-2xl border border-edge-soft bg-elevated/30" />}
 
-        {knownFor.length > 0 && (
-          <FilmRow title={t("Known For")} credits={knownFor} showRole={false} />
-        )}
+        {knownFor.length > 0 && <FilmRow title={t("Known For")} credits={knownFor} showRole={false} />}
         {movies.length > 0 && <FilmRow title={t("Movies · {n}", { n: movies.length })} credits={movies} showRole />}
         {shows.length > 0 && <FilmRow title={t("TV Shows · {n}", { n: shows.length })} credits={shows} showRole />}
         {directing.length > 0 && <FilmRow title={t("Directing")} credits={directing} showRole />}

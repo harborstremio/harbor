@@ -1,8 +1,9 @@
+import { useT } from "@/lib/i18n";
+import type { Participant } from "@/lib/together/protocol";
+import type { ChatMessage } from "@/lib/together/provider";
 import { Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { ChatMessage } from "@/lib/together/provider";
-import type { Participant } from "@/lib/together/protocol";
-import { useT } from "@/lib/i18n";
+
 import { Avatar } from "./avatar";
 
 export function ChatPanel({
@@ -45,8 +46,8 @@ export function ChatPanel({
         {chat.map((m, i) => {
           const self = m.from === clientId;
           const peer = participants.find((p) => p.id === m.from);
-          const avatarSrc = self ? selfAvatar : peer?.avatar ?? null;
-          const color = self ? selfColor : peer?.color ?? null;
+          const avatarSrc = self ? selfAvatar : (peer?.avatar ?? null);
+          const color = self ? selfColor : (peer?.color ?? null);
           return (
             <div key={`${m.at}-${i}`} className="flex items-start gap-2">
               <Avatar name={m.name} src={avatarSrc} color={color} size={18} />

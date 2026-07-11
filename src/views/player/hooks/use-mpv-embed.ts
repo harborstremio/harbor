@@ -1,7 +1,7 @@
-import { useEffect } from "react";
 import { modalOverlayClose, modalOverlaySync } from "@/lib/modal-overlay";
 import { isLinuxDesktop } from "@/lib/platform";
 import type { Settings } from "@/lib/settings";
+import { useEffect } from "react";
 
 export function useMpvEmbed(params: { engine: "html5" | "mpv"; settings: Settings }) {
   const { engine, settings } = params;

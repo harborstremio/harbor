@@ -1,6 +1,6 @@
+import { openUrl } from "@/lib/window";
 import { Check, ExternalLink, KeyRound, X } from "lucide-react";
 import { useEffect } from "react";
-import { openUrl } from "@/lib/window";
 
 const STEPS: { title: string; body: string; callout?: boolean }[] = [
   {
@@ -51,9 +51,7 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
               <KeyRound size={18} strokeWidth={2.2} />
             </span>
             <div className="flex flex-col">
-              <h2 className="font-display text-[20px] font-medium tracking-tight text-ink">
-                Get your free TMDB key
-              </h2>
+              <h2 className="font-display text-[20px] font-medium tracking-tight text-ink">Get your free TMDB key</h2>
               <p className="text-[12.5px] text-ink-muted">About 30 seconds. No payment, ever.</p>
             </div>
           </div>
@@ -78,9 +76,8 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
                   <div className="mt-1 flex items-start gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3.5 py-3">
                     <Check size={15} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
                     <p className="text-[12.5px] leading-relaxed text-ink">
-                      For Application URL, type any address at all, like https://harbor.app or
-                      http://localhost. TMDB never visits it. The only thing you actually need is the
-                      API key.
+                      For Application URL, type any address at all, like https://harbor.app or http://localhost. TMDB
+                      never visits it. The only thing you actually need is the API key.
                     </p>
                   </div>
                 )}

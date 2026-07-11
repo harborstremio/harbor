@@ -1,8 +1,8 @@
-import { kitsuToMal, kitsuToTvdb } from "@/lib/providers/anime-mapping";
-import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import { fillerEpisodes } from "@/lib/anime-fillers";
-import { fetchTvdbThumbs } from "@/lib/providers/anime-tvdb-thumbs";
 import { meta as fetchCinemetaMeta } from "@/lib/cinemeta";
+import { kitsuToMal, kitsuToTvdb } from "@/lib/providers/anime-mapping";
+import { fetchTvdbThumbs } from "@/lib/providers/anime-tvdb-thumbs";
+import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import type { Settings } from "@/lib/settings";
 
@@ -44,24 +44,17 @@ async function enrichCinemetaThumbs(episodes: KitsuEpisode[], imdbId: string | n
     if (ep.thumbnail) continue;
     const season = ep.imdbSeason ?? ep.seasonNumber ?? 1;
     const epNum = ep.imdbEpisode ?? ep.number;
-    const hit =
-      bySeasonEpisode.get(`${season}:${epNum}`) ?? byAbsolute.get(ep.absoluteNumber ?? ep.number);
+    const hit = bySeasonEpisode.get(`${season}:${epNum}`) ?? byAbsolute.get(ep.absoluteNumber ?? ep.number);
     if (hit) ep.thumbnail = hit;
   }
 }
 
-async function enrichTvdbThumbs(
-  episodes: KitsuEpisode[],
-  settings: Settings,
-  kitsuId: number,
-): Promise<void> {
+async function enrichTvdbThumbs(episodes: KitsuEpisode[], settings: Settings, kitsuId: number): Promise<void> {
   if (!settings.tvdbKey) return;
   if (episodes.every((ep) => ep.thumbnail)) return;
   const tvdbId = await kitsuToTvdb(kitsuId).catch(() => null);
   if (!tvdbId) return;
-  const seasons = Array.from(
-    new Set(episodes.map((ep) => ep.imdbSeason ?? ep.seasonNumber ?? 1)),
-  );
+  const seasons = Array.from(new Set(episodes.map((ep) => ep.imdbSeason ?? ep.seasonNumber ?? 1)));
   const index = await fetchTvdbThumbs(settings.tvdbKey, tvdbId, seasons).catch(() => null);
   if (!index) return;
   for (const ep of episodes) {

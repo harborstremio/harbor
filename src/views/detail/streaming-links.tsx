@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useT } from "@/lib/i18n";
 import { animeStreamerInfo } from "@/lib/providers/anime-streamer";
 import type { KitsuStreamer } from "@/lib/providers/kitsu";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { useState } from "react";
 
 export function StreamingLinks({ streamers }: { streamers: KitsuStreamer[] }) {
   const t = useT();
@@ -16,9 +16,7 @@ export function StreamingLinks({ streamers }: { streamers: KitsuStreamer[] }) {
   if (unique.length === 0) return null;
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
-        {t("Watch on")}
-      </p>
+      <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{t("Watch on")}</p>
       <div className="flex flex-wrap gap-2.5">
         {unique.map((s) => (
           <StreamingLinkChip key={`${s.id}-${s.url}`} streamer={s} />
@@ -50,10 +48,7 @@ function StreamingLinkChip({ streamer }: { streamer: KitsuStreamer }) {
           style={{ maxWidth: 110 }}
         />
       ) : (
-        <span
-          className="text-[13.5px] font-semibold tracking-tight"
-          style={{ color: info.brandColor }}
-        >
+        <span className="text-[13.5px] font-semibold tracking-tight" style={{ color: info.brandColor }}>
           {streamer.service}
         </span>
       )}

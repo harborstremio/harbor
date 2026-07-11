@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { ArrowUpCircle, Check, Download, Loader2, RefreshCw, RotateCw, X } from "lucide-react";
 import {
   closeUpdatePanel,
   downloadUpdate,
@@ -8,6 +6,8 @@ import {
   checkForUpdate,
   useUpdate,
 } from "@/lib/updater/use-update";
+import { ArrowUpCircle, Check, Download, Loader2, RefreshCw, RotateCw, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function mb(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
@@ -51,9 +51,7 @@ export function UpdateCard() {
                       ? "Update failed"
                       : "Update available"}
             </span>
-            {u.version && (
-              <span className="text-[12.5px] text-ink-subtle">Harbor {u.version}</span>
-            )}
+            {u.version && <span className="text-[12.5px] text-ink-subtle">Harbor {u.version}</span>}
           </div>
           {u.status !== "installing" && u.status !== "downloading" && (
             <button

@@ -1,5 +1,6 @@
-import { Transport } from "@/components/player/transport";
 import { MinimalShell } from "@/components/player/shells/minimal-shell";
+import { Transport } from "@/components/player/transport";
+
 import type { PlayerShellMeta } from "./types";
 
 export const PLAYER_SHELLS: PlayerShellMeta[] = [

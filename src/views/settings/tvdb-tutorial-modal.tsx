@@ -1,10 +1,10 @@
-import { Check, ExternalLink, KeyRound, X } from "lucide-react";
-import { useEffect } from "react";
-import { openUrl } from "@/lib/window";
 import tvdb1 from "@/assets/tvdb-guide/tvdb1.png";
 import tvdb2 from "@/assets/tvdb-guide/tvdb2.png";
 import tvdb3 from "@/assets/tvdb-guide/tvdb3.png";
 import tvdb4 from "@/assets/tvdb-guide/tvdb4.png";
+import { openUrl } from "@/lib/window";
+import { Check, ExternalLink, KeyRound, X } from "lucide-react";
+import { useEffect } from "react";
 
 const STEPS: { title: string; body: string; img: string; callout?: boolean }[] = [
   {
@@ -82,8 +82,8 @@ export function TvdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
                   <div className="mt-1 flex items-start gap-2 rounded-xl border border-accent/30 bg-accent/10 px-3.5 py-3">
                     <Check size={15} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
                     <p className="text-[12.5px] leading-relaxed text-ink">
-                      Ignore the paid tiers. Personal use is free, you are not a company. Just pick the
-                      first option and keep going.
+                      Ignore the paid tiers. Personal use is free, you are not a company. Just pick the first option and
+                      keep going.
                     </p>
                   </div>
                 )}

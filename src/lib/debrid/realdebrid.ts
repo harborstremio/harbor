@@ -1,5 +1,6 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
+
 import {
   hashFromMagnet,
   magnetFromHash,
@@ -66,10 +67,7 @@ export function createRealDebrid(apiKey: string): DebridStore {
     };
   }
 
-  async function cacheCheckBatch(
-    _batch: string[],
-    _signal: AbortSignal,
-  ): Promise<DebridResult<CacheMap>> {
+  async function cacheCheckBatch(_batch: string[], _signal: AbortSignal): Promise<DebridResult<CacheMap>> {
     return { ok: true, data: {} };
   }
 
@@ -98,7 +96,10 @@ export function createRealDebrid(apiKey: string): DebridStore {
     let effIdx = fileIdx;
     const ensureIdx = (files: RdFile[]): number | undefined => {
       if (effIdx == null && hint) {
-        const mi = matchEpisodeFileIndex(files.map((f) => f.path), hint);
+        const mi = matchEpisodeFileIndex(
+          files.map((f) => f.path),
+          hint,
+        );
         if (mi >= 0) effIdx = mi;
       }
       return effIdx;
@@ -275,15 +276,18 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   }
   if (res.status === 401 || res.status === 403) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     const errMsg = (body as RdErrorBody)?.error ?? "";
     const code = /subscription|premium/i.test(errMsg) ? "not-premium" : "unauthorized";
     return { ok: false, code, status: res.status, raw: body };
   }
   if (res.status === 402) return { ok: false, code: "not-premium", status: 402 };
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
-  if (res.status === 503 || res.status === 504)
-    return { ok: false, code: "upstream-unavailable", status: res.status };
+  if (res.status === 503 || res.status === 504) return { ok: false, code: "upstream-unavailable", status: res.status };
   if (res.status === 204) return { ok: true, data: undefined as unknown as T };
   if (!res.ok) {
     let body: unknown;

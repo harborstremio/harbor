@@ -1,6 +1,6 @@
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 export function CollapseToggle({ collapsed }: { collapsed: boolean }) {
   const { update } = useSettings();

@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { DEFAULT_KID, type KidConfig } from "@/lib/profiles";
+import { useState } from "react";
 
 const TOGGLE_DOODLES: { src: string; pos: string; flip?: boolean; hover?: boolean }[] = [
   { src: "lilwhale1", pos: "bottom-1 right-4 h-16", flip: true },
@@ -22,9 +22,7 @@ export function KidToggle({
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       className={`relative overflow-hidden rounded-2xl border p-4 transition-all duration-500 ${
-        on
-          ? "border-[#6bc5ca]/60 shadow-[0_14px_36px_-14px_rgba(15,82,119,0.7)]"
-          : "border-edge-soft bg-canvas/40"
+        on ? "border-[#6bc5ca]/60 shadow-[0_14px_36px_-14px_rgba(15,82,119,0.7)]" : "border-edge-soft bg-canvas/40"
       }`}
     >
       {on && (

@@ -1,4 +1,5 @@
 import awardsData from "@/data/awards.json";
+
 import type { AwardCategory } from "./awards-catalog";
 import type { AwardEntry, AwardType } from "./providers/wikidata";
 
@@ -23,10 +24,7 @@ type RawData = Record<string, Record<string, { name: string; entries: RawEntry[]
 
 const data = awardsData as RawData;
 
-export function readAwardHistory(
-  awardType: AwardType,
-  categories: AwardCategory[],
-): CategoryHistory[] {
+export function readAwardHistory(awardType: AwardType, categories: AwardCategory[]): CategoryHistory[] {
   const bucket = data[awardType] ?? {};
   return categories
     .map((cat) => {

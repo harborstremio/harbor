@@ -85,9 +85,8 @@ function sanitizeConfig(input: unknown, theme: ThemeId): PlayerChromeConfig {
   const panels: Partial<Record<PanelId, PanelConfig>> = {};
   for (const pid of PANELS) {
     const stored = partial.panels?.[pid];
-    const corner: PanelCorner = stored && PANEL_CORNERS.includes(stored.corner)
-      ? stored.corner
-      : PANEL_META[pid].defaultCorner;
+    const corner: PanelCorner =
+      stored && PANEL_CORNERS.includes(stored.corner) ? stored.corner : PANEL_META[pid].defaultCorner;
     panels[pid] = { corner, hidden: !!stored?.hidden };
   }
   return {
@@ -159,7 +158,8 @@ function writeDb(db: ProfileDb): SaveResult {
     if (name === "QuotaExceededError" || name === "NS_ERROR_DOM_QUOTA_REACHED") {
       return {
         ok: false,
-        error: "Your browser's storage is full. Remove custom icons or delete profiles to free up space, then try again.",
+        error:
+          "Your browser's storage is full. Remove custom icons or delete profiles to free up space, then try again.",
       };
     }
     return {
@@ -227,9 +227,7 @@ export function setActiveProfile(theme: ThemeId, profileId: string): SaveResult 
 function dedupeProfileName(db: ProfileDb, theme: ThemeId, baseName: string, excludeId?: string): string {
   const trimmed = baseName.trim() || "Untitled";
   const existing = new Set(
-    db.profiles
-      .filter((p) => p.themeId === theme && p.id !== excludeId)
-      .map((p) => p.name.toLowerCase()),
+    db.profiles.filter((p) => p.themeId === theme && p.id !== excludeId).map((p) => p.name.toLowerCase()),
   );
   if (!existing.has(trimmed.toLowerCase())) return trimmed;
   for (let i = 2; i < 1000; i++) {
@@ -315,16 +313,10 @@ export function exportProfileJson(profileId: string): string | null {
   const db = readProfileDb();
   const p = db.profiles.find((x) => x.id === profileId);
   if (!p) return null;
-  return JSON.stringify(
-    { harborProfileVersion: 1, name: p.name, themeId: p.themeId, config: p.config },
-    null,
-    2,
-  );
+  return JSON.stringify({ harborProfileVersion: 1, name: p.name, themeId: p.themeId, config: p.config }, null, 2);
 }
 
-export function importProfileJson(
-  text: string,
-): { ok: true; profile: LayoutProfile } | { ok: false; error: string } {
+export function importProfileJson(text: string): { ok: true; profile: LayoutProfile } | { ok: false; error: string } {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);

@@ -1,16 +1,17 @@
-import { Check, ChevronDown, Loader2, Plus, Save, Search as SearchIcon } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { Flag } from "@/components/flag";
-import { useAuth } from "@/lib/auth";
 import type { Addon } from "@/lib/addons";
+import { useAuth } from "@/lib/auth";
 import { useContextMenu } from "@/lib/context-menu";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { languageName } from "@/lib/subtitles/language";
 import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
 import { searchSubtitles } from "@/lib/subtitles/search";
 import type { SubResult } from "@/lib/subtitles/types";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Loader2, Plus, Save, Search as SearchIcon } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import type { SubtitleMenuProps } from "./types";
 import { isVeryNewRelease } from "./utils";
 
@@ -83,7 +84,7 @@ export function SearchSection(props: SubtitleMenuProps) {
       };
 
       // Log search attempt for debugging (will appear in terminal)
-      console.log('[SUBTITLES SEARCH] Starting with:', {
+      console.log("[SUBTITLES SEARCH] Starting with:", {
         hasImdbId: !!metaImdbId,
         addonsCount: addons?.length ?? 0,
         providers: searchOpts.providers,
@@ -93,11 +94,14 @@ export function SearchSection(props: SubtitleMenuProps) {
       const r = await searchSubtitles(searchQuery, searchOpts);
 
       // Log results by source (will appear in terminal)
-      const bySource = r.reduce((acc, sub) => {
-        acc[sub.source] = (acc[sub.source] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      console.log('[SUBTITLES SEARCH] Complete:', {
+      const bySource = r.reduce(
+        (acc, sub) => {
+          acc[sub.source] = (acc[sub.source] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+      console.log("[SUBTITLES SEARCH] Complete:", {
         total: r.length,
         bySource,
         addonResults: bySource.addon || 0,
@@ -223,9 +227,7 @@ function LangGroup({
         className="flex w-full items-center gap-2 bg-canvas/40 px-4 py-2 text-start transition-colors hover:bg-canvas/60"
       >
         <Flag language={lang} size="sm" showLabel={false} />
-        <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
-          {lang}
-        </span>
+        <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">{lang}</span>
         <span className="text-[11px] tabular-nums text-ink-subtle">{items.length}</span>
         <ChevronDown
           size={14}
@@ -233,23 +235,12 @@ function LangGroup({
           className={`ms-auto shrink-0 text-ink-subtle transition-transform duration-200 ${open ? "" : "-rotate-90"}`}
         />
       </button>
-      {open &&
-        items.slice(0, 30).map((r) => (
-          <ResultRow key={r.id} result={r} lang={lang} onAdd={() => onAdd(r)} />
-        ))}
+      {open && items.slice(0, 30).map((r) => <ResultRow key={r.id} result={r} lang={lang} onAdd={() => onAdd(r)} />)}
     </div>
   );
 }
 
-function ResultRow({
-  result,
-  lang,
-  onAdd,
-}: {
-  result: SubResult;
-  lang: string;
-  onAdd: () => void | Promise<boolean>;
-}) {
+function ResultRow({ result, lang, onAdd }: { result: SubResult; lang: string; onAdd: () => void | Promise<boolean> }) {
   const t = useT();
   const { open } = useContextMenu();
   const [busy, setBusy] = useState(false);
@@ -305,18 +296,17 @@ function ResultRow({
   };
 
   // Enhanced source display with color coding
-  const sourceColor = {
-    addon: "text-blue-400",
-    opensubtitles: "text-emerald-400",
-    wyzie: "text-purple-400",
-    jimaku: "text-amber-400",
-  }[result.source] || "text-ink-subtle";
+  const sourceColor =
+    {
+      addon: "text-blue-400",
+      opensubtitles: "text-emerald-400",
+      wyzie: "text-purple-400",
+      jimaku: "text-amber-400",
+    }[result.source] || "text-ink-subtle";
 
   return (
     <div
-      onContextMenu={(e) =>
-        open(e, { kind: "subtitle", label: result.title || lang, download })
-      }
+      onContextMenu={(e) => open(e, { kind: "subtitle", label: result.title || lang, download })}
       className={`group flex w-full items-start gap-3 px-4 py-2.5 transition-colors duration-300 ${
         added ? "bg-emerald-400/12" : "hover:bg-canvas/60"
       }`}
@@ -326,17 +316,9 @@ function ResultRow({
           {adding ? (
             <Loader2 size={14} className="animate-spin text-ink-subtle" />
           ) : added ? (
-            <Check
-              size={15}
-              strokeWidth={2.6}
-              className="text-emerald-400 animate-in zoom-in-50 duration-200"
-            />
+            <Check size={15} strokeWidth={2.6} className="text-emerald-400 animate-in zoom-in-50 duration-200" />
           ) : (
-            <Plus
-              size={14}
-              strokeWidth={2.4}
-              className="text-ink-subtle transition-colors group-hover:text-ink"
-            />
+            <Plus size={14} strokeWidth={2.4} className="text-ink-subtle transition-colors group-hover:text-ink" />
           )}
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -391,8 +373,9 @@ function ResultRow({
             void download();
           }
         }}
-        className={`mt-0.5 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors ${saved ? "text-accent" : "text-ink-subtle hover:bg-elevated hover:text-ink"
-          }`}
+        className={`mt-0.5 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors ${
+          saved ? "text-accent" : "text-ink-subtle hover:bg-elevated hover:text-ink"
+        }`}
       >
         {busy ? (
           <Loader2 size={13} className="animate-spin" />
@@ -418,10 +401,9 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`flex h-7 items-center rounded-full px-2.5 text-[11.5px] font-semibold transition-colors ${active
-          ? "bg-elevated text-ink ring-1 ring-edge"
-          : "bg-raised text-ink-muted hover:bg-elevated/80"
-        }`}
+      className={`flex h-7 items-center rounded-full px-2.5 text-[11.5px] font-semibold transition-colors ${
+        active ? "bg-elevated text-ink ring-1 ring-edge" : "bg-raised text-ink-muted hover:bg-elevated/80"
+      }`}
     >
       {children}
     </button>

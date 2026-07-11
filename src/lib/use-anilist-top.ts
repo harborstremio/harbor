@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { fetchAnilistTopAnime, fetchAnilistTrendingAnime } from "@/lib/anilist/browse";
 import type { Meta } from "@/lib/cinemeta";
+import { useEffect, useState } from "react";
 
 const cache: Record<string, Meta[]> = {};
 const inflight: Record<string, Promise<Meta[]> | undefined> = {};

@@ -1,5 +1,5 @@
-import { apiUrl, xtreamFetch, type XtreamCreds } from "./xtream";
 import type { IptvChannel } from "./types";
+import { apiUrl, xtreamFetch, type XtreamCreds } from "./xtream";
 
 type CategoryRow = { category_id: string; category_name?: string };
 type VodRow = {
@@ -84,7 +84,7 @@ export async function fetchXtreamVod(creds: XtreamCreds, baseId: string): Promis
       tvgId: null,
       name: r.name?.trim() || `Movie ${r.stream_id}`,
       logo: r.stream_icon?.trim() || null,
-      group: r.category_id ? cats.get(String(r.category_id)) ?? null : null,
+      group: r.category_id ? (cats.get(String(r.category_id)) ?? null) : null,
       url: buildVodUrl(creds, r.stream_id, r.container_extension),
       catchupSource: null,
       durationSec: null,
@@ -108,16 +108,14 @@ export async function fetchXtreamSeries(creds: XtreamCreds, baseId: string): Pro
   const perSeries = await mapLimit(series, 6, async (s): Promise<IptvChannel[]> => {
     if (!s || s.series_id == null) return [];
     const seriesName = s.name?.trim() || `Series ${s.series_id}`;
-    const group = s.category_id ? cats.get(String(s.category_id)) ?? null : null;
+    const group = s.category_id ? (cats.get(String(s.category_id)) ?? null) : null;
     const cover = s.cover?.trim() || null;
     const cacheKey = `${baseId}::${s.series_id}`;
     let info = seriesInfoCache.get(cacheKey);
     if (!info) {
       if (throttled) return [];
       try {
-        info = (await xtreamFetch(
-          apiUrl(creds, "get_series_info", { series_id: String(s.series_id) }),
-        )) as SeriesInfo;
+        info = (await xtreamFetch(apiUrl(creds, "get_series_info", { series_id: String(s.series_id) }))) as SeriesInfo;
       } catch (e) {
         if (/HTTP (?:429|403)/.test(String(e))) throttled = true;
         return [];
@@ -152,10 +150,7 @@ export async function fetchXtreamSeries(creds: XtreamCreds, baseId: string): Pro
   return perSeries.flat();
 }
 
-export async function fetchXtreamVodAndSeries(
-  creds: XtreamCreds,
-  baseId: string,
-): Promise<IptvChannel[]> {
+export async function fetchXtreamVodAndSeries(creds: XtreamCreds, baseId: string): Promise<IptvChannel[]> {
   const [vod, series] = await Promise.all([
     fetchXtreamVod(creds, baseId).catch(() => [] as IptvChannel[]),
     fetchXtreamSeries(creds, baseId).catch(() => [] as IptvChannel[]),

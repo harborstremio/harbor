@@ -1,35 +1,36 @@
-import { Check, ChevronRight, Library, Sparkles, Star, TrendingUp } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import adultIcon from "@/assets/category/adult.svg";
+import animeIcon from "@/assets/category/anime.svg";
+import catalogsIcon from "@/assets/category/catalogs.svg";
+import livetvIcon from "@/assets/category/livetv.svg";
+import sportsIcon from "@/assets/category/sports.svg";
+import streamsIcon from "@/assets/category/streams.svg";
+import subtitlesIcon from "@/assets/category/subtitles.svg";
+import toolsIcon from "@/assets/category/tools.svg";
+import { AddonsMosaicBackdrop } from "@/components/addons-mosaic-backdrop";
 import { AgeGateModal } from "@/components/age-gate-modal";
 import { HarborLoader } from "@/components/harbor-loader";
-import { useScrollMemory, useView } from "@/lib/view";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
-import { AddonsMosaicBackdrop } from "@/components/addons-mosaic-backdrop";
+import { fetchManifestAt, installAddon, installFromUrl, loadInstalled, uninstallAddon } from "@/lib/addon-store";
 import { CURATED_RAILS, heroEntry } from "@/lib/addons-store/curated";
-import { useAddonsCatalog, buildRail, type ResolvedAddon } from "@/lib/addons-store/store";
-import { useCategories } from "@/lib/providers/stremio-addons";
-import { prefetchTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
 import { relatedAddons, recommendedAddons } from "@/lib/addons-store/recommend";
 import { loadDisplayOrder } from "@/lib/addons-store/reorder";
-import { fetchManifestAt, installAddon, installFromUrl, loadInstalled, uninstallAddon } from "@/lib/addon-store";
+import { useAddonsCatalog, buildRail, type ResolvedAddon } from "@/lib/addons-store/store";
 import { useAuth } from "@/lib/auth";
-import streamsIcon from "@/assets/category/streams.svg";
-import catalogsIcon from "@/assets/category/catalogs.svg";
-import subtitlesIcon from "@/assets/category/subtitles.svg";
-import animeIcon from "@/assets/category/anime.svg";
-import sportsIcon from "@/assets/category/sports.svg";
-import livetvIcon from "@/assets/category/livetv.svg";
-import toolsIcon from "@/assets/category/tools.svg";
-import adultIcon from "@/assets/category/adult.svg";
+import { useT } from "@/lib/i18n";
+import { prefetchTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
+import { useCategories } from "@/lib/providers/stremio-addons";
+import { useSettings } from "@/lib/settings";
+import { useScrollMemory, useView } from "@/lib/view";
+import { Check, ChevronRight, Library, Sparkles, Star, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { AddByUrlBar } from "./addons/add-by-url-bar";
 import { AddonDetail } from "./addons/addon-detail";
-import { AddonInstallModal } from "./addons/install-modal";
-import { OrganizeAddonsPage } from "./addons/organize/page";
 import { consumeAddonsTab, type Tab, type ToastInfo } from "./addons/addons-types";
 import { BrowsePane } from "./addons/browse-pane";
 import { DiscoverPane } from "./addons/discover-pane";
+import { AddonInstallModal } from "./addons/install-modal";
 import { InstalledPane } from "./addons/installed-pane";
+import { OrganizeAddonsPage } from "./addons/organize/page";
 import { SearchBar } from "./addons/search-bar";
 import { Toaster } from "./addons/toaster";
 
@@ -71,9 +72,7 @@ export function AddonsView() {
     const requested = consumeAddonsTab();
     if (requested) setTab(requested);
     void prefetchTopAddonLogos();
-    void import("@/lib/providers/stremio-addons-index").then((m) =>
-      m.ensureCommunityIndex().catch(() => undefined),
-    );
+    void import("@/lib/providers/stremio-addons-index").then((m) => m.ensureCommunityIndex().catch(() => undefined));
   }, []);
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [browseMode, setBrowseMode] = useState<BrowseModeId>("top");
@@ -136,9 +135,12 @@ export function AddonsView() {
     setToast({ kind, text, addon });
     toastTimerRef.current = window.setTimeout(() => setToast(null), kind === "error" ? 5000 : 3000);
   };
-  useEffect(() => () => {
-    if (toastTimerRef.current != null) window.clearTimeout(toastTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (toastTimerRef.current != null) window.clearTimeout(toastTimerRef.current);
+    },
+    [],
+  );
 
   const hero = useMemo(() => {
     const h = heroEntry();
@@ -168,8 +170,7 @@ export function AddonsView() {
       .filter((r) => r.installed)
       .sort(
         (a, b) =>
-          (rank.get(a.transportUrl) ?? Number.MAX_SAFE_INTEGER) -
-          (rank.get(b.transportUrl) ?? Number.MAX_SAFE_INTEGER),
+          (rank.get(a.transportUrl) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.transportUrl) ?? Number.MAX_SAFE_INTEGER),
       );
   }, [allAddons]);
   const trimmedQuery = query.trim();
@@ -217,11 +218,7 @@ export function AddonsView() {
       refetch();
       showToast(
         "ok",
-        result.replaced
-          ? t("Updated")
-          : result.syncedToStremio
-            ? t("Installed")
-            : t("Installed locally"),
+        result.replaced ? t("Updated") : result.syncedToStremio ? t("Installed") : t("Installed locally"),
         {
           id: result.addon.manifest.id,
           name: result.addon.manifest.name,
@@ -296,9 +293,7 @@ export function AddonsView() {
                     key={tabId}
                     onClick={() => setTab(tabId)}
                     className={`flex h-12 items-center gap-2 rounded-full px-4 text-[14px] font-semibold transition-colors ${
-                      active
-                        ? "bg-ink text-canvas"
-                        : "text-ink-muted hover:bg-elevated hover:text-ink"
+                      active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-elevated hover:text-ink"
                     }`}
                   >
                     <Check size={15} strokeWidth={2.6} className={active ? "" : "text-accent"} />
@@ -320,9 +315,7 @@ export function AddonsView() {
                     if (tabId === "browse") setCategoryFilter(null);
                   }}
                   className={`flex h-12 items-center rounded-full px-5 text-[14px] font-semibold transition-colors ${
-                    active
-                      ? "bg-ink text-canvas"
-                      : "text-ink-muted hover:bg-elevated hover:text-ink"
+                    active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-elevated hover:text-ink"
                   }`}
                 >
                   {tabId === "discover" ? t("Discover") : t("Browse")}
@@ -333,7 +326,9 @@ export function AddonsView() {
                   <div key={tabId} className="group relative">
                     {btn}
                     <div className="pointer-events-none invisible absolute start-0 top-full z-50 mt-2 w-80 rounded-xl border border-edge-soft bg-elevated/95 px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted opacity-0 shadow-xl backdrop-blur-md transition duration-150 group-hover:visible group-hover:opacity-100">
-                      {t("Curated for popularity and reliability. No paid placements. Install anything else by URL on the Browse tab.")}
+                      {t(
+                        "Curated for popularity and reliability. No paid placements. Install anything else by URL on the Browse tab.",
+                      )}
                     </div>
                   </div>
                 );
@@ -346,7 +341,12 @@ export function AddonsView() {
               <SearchBar value={query} onChange={setQuery} />
             </div>
             <div className="min-w-0 flex-[1.4]">
-              <AddByUrlBar onSubmit={async (raw) => { setInstallModal({ kind: "install", url: raw }); }} compact />
+              <AddByUrlBar
+                onSubmit={async (raw) => {
+                  setInstallModal({ kind: "install", url: raw });
+                }}
+                compact
+              />
             </div>
             <button
               onClick={() => {
@@ -369,7 +369,16 @@ export function AddonsView() {
                 }`}
               >
                 {settings.showAdultAddons && (
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" className="text-canvas">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    className="text-canvas"
+                  >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
@@ -409,22 +418,24 @@ export function AddonsView() {
                 >
                   {t("All")}
                 </button>
-                {saCategories.filter((c) => settings.showAdultAddons || c.slug !== "nsfw").map((c) => {
-                  const active = categoryFilter === c.slug;
-                  return (
-                    <button
-                      key={c.slug}
-                      onClick={() => setCategoryFilter(c.slug)}
-                      className={`flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${
-                        active
-                          ? "bg-ink text-canvas"
-                          : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated/70 hover:text-ink"
-                      }`}
-                    >
-                      <span>{c.name}</span>
-                    </button>
-                  );
-                })}
+                {saCategories
+                  .filter((c) => settings.showAdultAddons || c.slug !== "nsfw")
+                  .map((c) => {
+                    const active = categoryFilter === c.slug;
+                    return (
+                      <button
+                        key={c.slug}
+                        onClick={() => setCategoryFilter(c.slug)}
+                        className={`flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${
+                          active
+                            ? "bg-ink text-canvas"
+                            : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated/70 hover:text-ink"
+                        }`}
+                      >
+                        <span>{c.name}</span>
+                      </button>
+                    );
+                  })}
                 <span aria-hidden className="mx-1 h-6 w-px shrink-0 bg-edge-soft" />
                 {BROWSE_MODES.map((m) => {
                   const active = browseMode === m.id;
@@ -534,9 +545,7 @@ export function AddonsView() {
           onClose={() => setReorderOpen(false)}
           onSaved={(scope) => {
             setReorderOpen(false);
-            window.dispatchEvent(
-              new CustomEvent("harbor:addons-changed", { detail: { reordered: true } }),
-            );
+            window.dispatchEvent(new CustomEvent("harbor:addons-changed", { detail: { reordered: true } }));
             showToast(
               "ok",
               scope === "cloud"
@@ -584,9 +593,7 @@ function RemoteOrLocalDetail({
     setRemote(null);
     setFailed(false);
     (async () => {
-      const { communityFor, ensureCommunityIndex } = await import(
-        "@/lib/providers/stremio-addons-index"
-      );
+      const { communityFor, ensureCommunityIndex } = await import("@/lib/providers/stremio-addons-index");
       await ensureCommunityIndex().catch(() => undefined);
       const community = communityFor(addonDetailId);
       if (!community) {
@@ -621,9 +628,7 @@ function RemoteOrLocalDetail({
   const recs = useMemo(() => {
     if (!resolved) return { related: [] as ResolvedAddon[], recommended: [] as ResolvedAddon[] };
     const related = relatedAddons(resolved, allAddons, 8);
-    const exclude = new Set(
-      related.map((r) => r.manifest?.id ?? r.curated?.id ?? r.transportUrl),
-    );
+    const exclude = new Set(related.map((r) => r.manifest?.id ?? r.curated?.id ?? r.transportUrl));
     exclude.add(addonDetailId);
     const recommended = recommendedAddons(resolved, allAddons, installedIds, exclude, 8);
     return { related, recommended };

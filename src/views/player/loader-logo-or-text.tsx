@@ -1,12 +1,6 @@
 import { useState } from "react";
 
-export function LoaderLogoOrText({
-  logo,
-  fallbackText,
-}: {
-  logo: string | null;
-  fallbackText: string;
-}) {
+export function LoaderLogoOrText({ logo, fallbackText }: { logo: string | null; fallbackText: string }) {
   const [failed, setFailed] = useState(false);
   if (!logo || failed) {
     return (

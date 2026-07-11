@@ -1,5 +1,5 @@
-import { fetchXtreamShortEpg, type XtreamCreds } from "./xtream";
 import type { EpgIndex, EpgProgram, IptvChannel } from "./types";
+import { fetchXtreamShortEpg, type XtreamCreds } from "./xtream";
 
 function streamIdOf(ch: IptvChannel): string | null {
   const m = ch.id.match(/::xt::(\d+)$/);

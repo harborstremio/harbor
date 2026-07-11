@@ -108,10 +108,7 @@ export async function tmdbTvUpcoming(
   return { name: tv.name ?? "", poster: poster(tv.poster_path), isAnime, episodes };
 }
 
-export async function tmdbMovieRelease(
-  key: string,
-  movieId: number,
-): Promise<TmdbMovieRelease | null> {
+export async function tmdbMovieRelease(key: string, movieId: number): Promise<TmdbMovieRelease | null> {
   const m = await get<{
     title?: string;
     poster_path?: string | null;

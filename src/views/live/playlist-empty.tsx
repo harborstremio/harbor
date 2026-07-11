@@ -1,27 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarRange,
-  Clock,
-  Globe2,
-  Grid2x2,
-  Radio,
-  ShieldCheck,
-  Tv,
-} from "lucide-react";
 import { useT } from "@/lib/i18n";
-import {
-  EMPTY_FORM,
-  type PlaylistFormValue,
-  type PlaylistKind,
-} from "./source-picker/playlist-form";
+import { ArrowLeft, ArrowRight, CalendarRange, Clock, Globe2, Grid2x2, Radio, ShieldCheck, Tv } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-export function PlaylistEmpty({
-  onSave,
-}: {
-  onSave: (entry: PlaylistFormValue) => void;
-}) {
+import { EMPTY_FORM, type PlaylistFormValue, type PlaylistKind } from "./source-picker/playlist-form";
+
+export function PlaylistEmpty({ onSave }: { onSave: (entry: PlaylistFormValue) => void }) {
   const [stage, setStage] = useState<"intro" | "form">("intro");
   return stage === "intro" ? (
     <Intro onContinue={() => setStage("form")} />
@@ -36,9 +19,7 @@ function Intro({ onContinue }: { onContinue: () => void }) {
     <div className="relative flex min-h-full flex-col px-12 py-20">
       <div className="mx-auto flex w-full max-w-[820px] flex-1 flex-col justify-center gap-14">
         <header className="flex flex-col gap-6">
-          <span className="text-[11px] font-bold uppercase tracking-[0.42em] text-ink-subtle">
-            {t("Live TV")}
-          </span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.42em] text-ink-subtle">{t("Live TV")}</span>
           <h1
             className="font-display text-[60px] font-medium leading-[1.02] tracking-tight text-ink"
             style={{ fontFamily: '"Fraunces", "Iowan Old Style", "Georgia", serif' }}
@@ -92,20 +73,10 @@ function Intro({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-function Feature({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
+function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
     <div className="flex gap-4">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-muted">
-        {icon}
-      </span>
+      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-muted">{icon}</span>
       <div className="flex flex-col gap-1.5">
         <h3 className="text-[14.5px] font-semibold text-ink">{title}</h3>
         <p className="text-[13px] leading-relaxed text-ink-muted">{body}</p>
@@ -142,13 +113,7 @@ const KIND_META: KindMeta[] = [
   },
 ];
 
-function Form({
-  onBack,
-  onSave,
-}: {
-  onBack: () => void;
-  onSave: (entry: PlaylistFormValue) => void;
-}) {
+function Form({ onBack, onSave }: { onBack: () => void; onSave: (entry: PlaylistFormValue) => void }) {
   const t = useT();
   const [name, setName] = useState("");
   const [kind, setKind] = useState<PlaylistKind>("m3u");
@@ -174,11 +139,7 @@ function Form({
   const canSave = (() => {
     if (kind === "m3u") return /^https?:\/\//i.test(url.trim());
     if (kind === "xtream") {
-      return (
-        /^https?:\/\//i.test(server.trim()) &&
-        username.trim().length > 0 &&
-        password.trim().length > 0
-      );
+      return /^https?:\/\//i.test(server.trim()) && username.trim().length > 0 && password.trim().length > 0;
     }
     return /^https?:\/\//i.test(epgUrl.trim());
   })();
@@ -257,9 +218,7 @@ function Form({
                   }`}
                   aria-hidden
                 >
-                  {selected && (
-                    <span className="block h-full w-full rounded-full border-2 border-canvas" />
-                  )}
+                  {selected && <span className="block h-full w-full rounded-full border-2 border-canvas" />}
                 </span>
               </button>
             );
@@ -398,22 +357,12 @@ function defaultName(kind: PlaylistKind): string {
   return "My playlist";
 }
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-2">
       <span className="flex items-baseline gap-2 text-[11.5px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
         {label}
-        {hint && (
-          <span className="font-normal normal-case tracking-normal text-ink-subtle/60">{hint}</span>
-        )}
+        {hint && <span className="font-normal normal-case tracking-normal text-ink-subtle/60">{hint}</span>}
       </span>
       {children}
     </label>

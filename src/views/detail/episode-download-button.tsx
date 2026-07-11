@@ -1,9 +1,9 @@
-import { ArrowDownToLine, Check, Pause, Play, RotateCw } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
-import { activeDownloadFor, cancelDownload, pauseDownload, resumeDownload, useDownloads } from "@/lib/download/downloads-store";
+import { activeDownloadFor, pauseDownload, resumeDownload, useDownloads } from "@/lib/download/downloads-store";
+import { useT } from "@/lib/i18n";
 import { findLocalEpisodeByIds, findLocalMovie } from "@/lib/local-library";
 import { useView, type PlayEpisode } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { ArrowDownToLine, Check, Pause, Play, RotateCw } from "lucide-react";
 
 export function EpisodeDownloadButton({
   meta,
@@ -105,10 +105,7 @@ export function EpisodeDownloadButton({
       style={{ width: dim, height: dim }}
     >
       {showProgress && (
-        <svg
-          viewBox={`0 0 ${dim} ${dim}`}
-          className="absolute inset-0 -rotate-90"
-        >
+        <svg viewBox={`0 0 ${dim} ${dim}`} className="absolute inset-0 -rotate-90">
           <circle
             cx={dim / 2}
             cy={dim / 2}
@@ -137,9 +134,7 @@ export function EpisodeDownloadButton({
       {paused && <Play size={isBar ? 20 : dim * 0.46} strokeWidth={2.2} />}
       {done && <Check size={20} strokeWidth={2.6} />}
       {failed && <RotateCw size={20} strokeWidth={2.2} />}
-      {!downloading && !paused && !done && !failed && (
-        <ArrowDownToLine size={20} strokeWidth={2} />
-      )}
+      {!downloading && !paused && !done && !failed && <ArrowDownToLine size={20} strokeWidth={2} />}
     </button>
   );
 }

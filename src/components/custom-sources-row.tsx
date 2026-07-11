@@ -1,6 +1,7 @@
+import type { SourceRow } from "@/lib/custom-sources";
+
 import { Row } from "./row";
 import { SourceFolderCard } from "./source-folder-card";
-import type { SourceRow } from "@/lib/custom-sources";
 
 export function CustomSourcesRow({
   sourceRow,

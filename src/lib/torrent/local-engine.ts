@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+
 import { stopFullDownload } from "./full-download";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -85,15 +86,10 @@ export async function torrentEngineAdd(
 
 export async function torrentEngineSelect(infoHash: string, fileIdx: number): Promise<void> {
   if (!isTauri) return;
-  await invoke("torrent_engine_select", { infoHash, fileIdx }).catch((e) =>
-    console.warn("[engine] select failed", e),
-  );
+  await invoke("torrent_engine_select", { infoHash, fileIdx }).catch((e) => console.warn("[engine] select failed", e));
 }
 
-export async function torrentEngineStats(
-  infoHash: string,
-  fileIdx: number | null,
-): Promise<TorrentEngineStats | null> {
+export async function torrentEngineStats(infoHash: string, fileIdx: number | null): Promise<TorrentEngineStats | null> {
   if (!isTauri) return null;
   try {
     return await invoke<TorrentEngineStats>("torrent_engine_stats", { infoHash, fileIdx });
@@ -171,4 +167,3 @@ export async function torrentEngineSetOptions(
     console.warn("[engine] set options failed", e),
   );
 }
-

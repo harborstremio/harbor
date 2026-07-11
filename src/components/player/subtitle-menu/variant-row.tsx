@@ -1,11 +1,11 @@
-import { Check, Sparkles } from "lucide-react";
-import type { TrackInfo } from "@/lib/player/bridge";
 import { useContextMenu } from "@/lib/context-menu";
+import { useT } from "@/lib/i18n";
+import type { TrackInfo } from "@/lib/player/bridge";
+import { useImportedSubs } from "@/lib/player/imported-subs";
 import { isImageSubTrack } from "@/lib/player/sub-format";
 import { languageName } from "@/lib/subtitles/language";
 import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
-import { useImportedSubs } from "@/lib/player/imported-subs";
-import { useT } from "@/lib/i18n";
+import { Check, Sparkles } from "lucide-react";
 
 function subExt(track: TrackInfo): string {
   const fromName = track.externalFilename?.match(/\.([a-z0-9]+)$/i)?.[1];
@@ -16,15 +16,7 @@ function subExt(track: TrackInfo): string {
   return "srt";
 }
 
-export function VariantRow({
-  track,
-  selected,
-  onPick,
-}: {
-  track: TrackInfo;
-  selected: boolean;
-  onPick: () => void;
-}) {
+export function VariantRow({ track, selected, onPick }: { track: TrackInfo; selected: boolean; onPick: () => void }) {
   const tr = useT();
   const { open } = useContextMenu();
   const imported = useImportedSubs();
@@ -37,8 +29,7 @@ export function VariantRow({
   const sourceLabel = isImported ? tr("Imported") : track.external ? tr("External") : tr("Embedded");
   const codec = track.codec?.toUpperCase();
   const release = pickReleaseHint(track);
-  const titleText =
-    track.title?.trim() || (track.external ? tr("External subtitle") : tr("Embedded track"));
+  const titleText = track.title?.trim() || (track.external ? tr("External subtitle") : tr("Embedded track"));
   const langName = track.lang ? languageName(track.lang) : tr("Unknown");
 
   return (
@@ -85,9 +76,7 @@ export function VariantRow({
             </span>
           )}
         </div>
-        {release && (
-          <p className="truncate font-mono text-[10.5px] leading-snug text-ink-muted">{release}</p>
-        )}
+        {release && <p className="truncate font-mono text-[10.5px] leading-snug text-ink-muted">{release}</p>}
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10.5px] text-ink-subtle">
           <span className="font-semibold uppercase tracking-[0.1em]">{langName}</span>
           <span aria-hidden>·</span>

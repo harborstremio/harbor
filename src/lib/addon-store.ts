@@ -1,7 +1,8 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
-import { readActiveStremioAuthKey } from "./auth";
+
 import { setUserAddons, userAddons, type Addon } from "./addons";
 import { applyOrderToItems } from "./addons-store/reorder";
+import { readActiveStremioAuthKey } from "./auth";
 
 const STORAGE_KEY = "harbor.installed-addons";
 const SEEDED_KEY = "harbor.addons.seeded.v1";
@@ -208,9 +209,7 @@ export function findHostnameMatch(transportUrl: string): InstalledAddon | null {
   return loadInstalled().find((a) => transportHost(a.transportUrl) === host) ?? null;
 }
 
-export type AddonUrlParse =
-  | { kind: "ok"; url: string }
-  | { kind: "error"; message: string };
+export type AddonUrlParse = { kind: "ok"; url: string } | { kind: "error"; message: string };
 
 export function parseAddonUrl(input: string): AddonUrlParse {
   let raw = input.trim();
@@ -237,7 +236,8 @@ function validateManifest(m: unknown): { ok: true; manifest: Addon["manifest"] }
   if (!m || typeof m !== "object") return { ok: false, error: "Manifest is not a JSON object." };
   const obj = m as Record<string, unknown>;
   if (typeof obj.id !== "string" || obj.id.length === 0) return { ok: false, error: "Manifest is missing an `id`." };
-  if (typeof obj.name !== "string" || obj.name.length === 0) return { ok: false, error: "Manifest is missing a `name`." };
+  if (typeof obj.name !== "string" || obj.name.length === 0)
+    return { ok: false, error: "Manifest is missing a `name`." };
   return { ok: true, manifest: obj as Addon["manifest"] };
 }
 
@@ -272,10 +272,7 @@ export async function installAddon(id: string, transportUrl: string): Promise<Ad
   return addon;
 }
 
-export async function installFromUrl(
-  rawUrl: string,
-  options: { replaceId?: string } = {},
-): Promise<InstallResult> {
+export async function installFromUrl(rawUrl: string, options: { replaceId?: string } = {}): Promise<InstallResult> {
   const parsed = parseAddonUrl(rawUrl);
   if (parsed.kind === "error") throw new Error(parsed.message);
   const manifest = await fetchManifestAt(parsed.url);
@@ -340,9 +337,7 @@ export async function fetchInstalledAddons(): Promise<Addon[]> {
     }
     try {
       const manifest = await fetchManifestAt(entry.transportUrl);
-      const updated = loadInstalled().map((e) =>
-        e.id === entry.id ? { ...e, manifest } : e,
-      );
+      const updated = loadInstalled().map((e) => (e.id === entry.id ? { ...e, manifest } : e));
       saveInstalled(updated);
       return { manifest, transportUrl: entry.transportUrl };
     } catch {

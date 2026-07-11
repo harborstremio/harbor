@@ -61,11 +61,7 @@ export function isStreamDead(s: StreamLike): boolean {
   return false;
 }
 
-export function markStreamDead(
-  s: StreamLike,
-  reason: string,
-  ttlMs?: number,
-): void {
+export function markStreamDead(s: StreamLike, reason: string, ttlMs?: number): void {
   const id = streamFingerprint(s);
   if (!id) return;
   const m = load();
@@ -105,9 +101,7 @@ export function shouldFlagAsStub(opts: {
   return true;
 }
 
-export function filterDead<T extends StreamLike>(
-  streams: T[],
-): T[] {
+export function filterDead<T extends StreamLike>(streams: T[]): T[] {
   return streams.filter((s) => !isStreamDead(s));
 }
 

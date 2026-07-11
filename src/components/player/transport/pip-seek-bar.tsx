@@ -1,13 +1,7 @@
-import { useRef, useState } from "react";
 import { usePlaybackPosition, usePlaybackBuffered } from "@/lib/player/playback-clock";
+import { useRef, useState } from "react";
 
-export function PipSeekBar({
-  durationSec,
-  onSeek,
-}: {
-  durationSec: number;
-  onSeek: (s: number) => void;
-}) {
+export function PipSeekBar({ durationSec, onSeek }: { durationSec: number; onSeek: (s: number) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [scrub, setScrub] = useState<number | null>(null);
   const position = usePlaybackPosition();

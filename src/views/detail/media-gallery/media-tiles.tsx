@@ -1,5 +1,5 @@
-import { Download, ImagePlus, Play } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { Download, ImagePlus, Play } from "lucide-react";
 
 export type GalleryVideo = { ytId: string; name: string; type: string };
 

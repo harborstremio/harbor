@@ -1,4 +1,5 @@
 import type { Episode, Season } from "@/lib/providers/tmdb";
+
 import { tvdbEpisodesByType, tvdbSeasonNames, tvdbSeriesByRemote, type TvdbEpisode } from "./tvdb";
 import { readOrderCache, writeOrderCache } from "./tvdb-order-cache";
 
@@ -57,12 +58,7 @@ export async function fetchTvdbOrderBySeriesId(
   return result;
 }
 
-async function build(
-  apiKey: string,
-  seriesId: number,
-  seasonType: string,
-  lang?: string,
-): Promise<TvdbOrder | null> {
+async function build(apiKey: string, seriesId: number, seasonType: string, lang?: string): Promise<TvdbOrder | null> {
   const slug = seasonType === "aired" ? "default" : seasonType;
   const nameTypeSlug = seasonType === "aired" ? "official" : seasonType;
   const [defaultEps, names] = await Promise.all([
@@ -71,9 +67,7 @@ async function build(
   ]);
   const altEps = slug === "default" ? defaultEps : await tvdbEpisodesByType(apiKey, seriesId, slug);
   if (altEps.length === 0) return null;
-  const transAlt: TvdbEpisode[] = lang
-    ? await tvdbEpisodesByType(apiKey, seriesId, slug, lang).catch(() => [])
-    : [];
+  const transAlt: TvdbEpisode[] = lang ? await tvdbEpisodesByType(apiKey, seriesId, slug, lang).catch(() => []) : [];
   const transById = new Map(transAlt.map((e) => [e.id, e] as const));
 
   const canonical = new Map<number, { season: number; episode: number }>();
@@ -116,10 +110,7 @@ async function build(
     .map((n) => ({
       id: n,
       seasonNumber: n,
-      name:
-        seasonType === "absolute"
-          ? "All Episodes"
-          : names.get(n) || (n === 0 ? "Specials" : `Season ${n}`),
+      name: seasonType === "absolute" ? "All Episodes" : names.get(n) || (n === 0 ? "Specials" : `Season ${n}`),
       overview: "",
       posterPath: null,
       episodeCount: bySeason.get(n)!.length,

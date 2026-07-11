@@ -87,11 +87,7 @@ export function tmdbSearchCollectionId(key: string, query: string): Promise<numb
 }
 
 async function runSearch(key: string, query: string): Promise<number | null> {
-  const raw = await get<{ results?: Array<{ id: number; name?: string }> }>(
-    key,
-    "search/collection",
-    { query },
-  );
+  const raw = await get<{ results?: Array<{ id: number; name?: string }> }>(key, "search/collection", { query });
   const results = raw?.results ?? [];
   if (results.length === 0) return null;
   const want = normName(query);
@@ -123,9 +119,6 @@ export async function tmdbSearchCollections(
   return { hits, totalPages: Math.min(raw?.total_pages ?? 0, 500) };
 }
 
-export function tmdbCollectionsFeed(
-  key: string,
-  page: number,
-): Promise<{ hits: CollectionHit[]; totalPages: number }> {
+export function tmdbCollectionsFeed(key: string, page: number): Promise<{ hits: CollectionHit[]; totalPages: number }> {
   return tmdbSearchCollections(key, "collection", page);
 }

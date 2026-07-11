@@ -2,17 +2,15 @@ import type { SubCue } from "./parser";
 
 export function toSrt(cues: SubCue[]): string {
   const sorted = [...cues].sort((a, b) => a.start - b.start);
-  const blocks = sorted.map((cue, i) =>
-    `${i + 1}\n${formatSrtTime(cue.start)} --> ${formatSrtTime(cue.end)}\n${cue.text}`,
+  const blocks = sorted.map(
+    (cue, i) => `${i + 1}\n${formatSrtTime(cue.start)} --> ${formatSrtTime(cue.end)}\n${cue.text}`,
   );
   return blocks.join("\n\n") + "\n";
 }
 
 export function toVtt(cues: SubCue[]): string {
   const sorted = [...cues].sort((a, b) => a.start - b.start);
-  const blocks = sorted.map(
-    (cue) => `${formatVttTime(cue.start)} --> ${formatVttTime(cue.end)}\n${cue.text}`,
-  );
+  const blocks = sorted.map((cue) => `${formatVttTime(cue.start)} --> ${formatVttTime(cue.end)}\n${cue.text}`);
   return `WEBVTT\n\n${blocks.join("\n\n")}\n`;
 }
 

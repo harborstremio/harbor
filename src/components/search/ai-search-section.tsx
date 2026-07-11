@@ -1,12 +1,13 @@
-import { useEffect } from "react";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 import { keyForProvider, modelLabelFor, providerForModel } from "@/lib/ai-models";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useEffect } from "react";
+
+import { AiPicksHeader } from "./ai-search/ai-picks-header";
 import { AiResultList } from "./ai-search/ai-result-list";
-import { useAiSuggest } from "./ai-search/use-ai-suggest";
 import { AiSuggestButton } from "./ai-search/ai-suggest-button";
 import { AiThinking } from "./ai-search/ai-thinking";
-import { AiPicksHeader } from "./ai-search/ai-picks-header";
+import { useAiSuggest } from "./ai-search/use-ai-suggest";
 
 export function AiSearchSection({
   query,
@@ -23,8 +24,7 @@ export function AiSearchSection({
   const t = useT();
   const { status, results, error, ranQuery, run } = useAiSuggest(query, runSignal);
 
-  const active =
-    status === "loading" || (status === "done" && ranQuery === query && results.length > 0);
+  const active = status === "loading" || (status === "done" && ranQuery === query && results.length > 0);
   useEffect(() => {
     onActive?.(active);
     return () => onActive?.(false);
@@ -58,9 +58,7 @@ export function AiSearchSection({
           onClick={run}
           className="animate-ai-entrance flex w-full flex-col gap-1 rounded-2xl border border-danger/40 bg-danger/10 px-5 py-3 text-start transition-colors hover:bg-danger/15"
         >
-          <span className="text-[13px] font-semibold text-ink">
-            {t("AI search failed. Tap to retry.")}
-          </span>
+          <span className="text-[13px] font-semibold text-ink">{t("AI search failed. Tap to retry.")}</span>
           <span className="line-clamp-2 text-[12px] text-ink-muted">{error}</span>
         </button>
       )}

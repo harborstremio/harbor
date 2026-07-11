@@ -1,6 +1,7 @@
+import { useT } from "@/lib/i18n";
 import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
+
 import {
   COUNTRY_OPTIONS,
   LANGUAGE_OPTIONS,

@@ -1,17 +1,17 @@
-import { ChevronRight, Info, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { MetaAwardsCorner } from "@/components/meta-awards-corner";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
-import { tmdbLogo, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
+import { useT } from "@/lib/i18n";
 import { useImdbRating } from "@/lib/imdb-rating";
+import { tmdbLogo, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
-import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { smartPlayEpisode } from "@/lib/smart-play";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
-import { useT } from "@/lib/i18n";
+import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useView } from "@/lib/view";
 import { observe, usePageVisible } from "@/lib/visibility";
+import { ChevronRight, Info, Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const ROTATE_MS = 11000;
 const EASE_OUT = "cubic-bezier(0.32, 0.72, 0.24, 1)";
@@ -23,13 +23,7 @@ function rubberBand(distance: number, dim: number, c = 0.55): number {
   return (1 - 1 / (distance / dim / c + 1)) * dim * c;
 }
 
-export function CinemaHero({
-  slides,
-  eyebrow = "Featured film",
-}: {
-  slides: Meta[];
-  eyebrow?: string;
-}) {
+export function CinemaHero({ slides, eyebrow = "Featured film" }: { slides: Meta[]; eyebrow?: string }) {
   const t = useT();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -125,9 +119,7 @@ export function CinemaHero({
   };
 
   if (slides.length === 0) {
-    return (
-      <section className="harbor-bleed-stremio relative h-[78vh] min-h-[640px] animate-pulse bg-elevated/30" />
-    );
+    return <section className="harbor-bleed-stremio relative h-[78vh] min-h-[640px] animate-pulse bg-elevated/30" />;
   }
 
   const trackTransform = `translate3d(calc(${-active * 100}% + ${offset}px), 0, 0)`;
@@ -164,13 +156,7 @@ export function CinemaHero({
             const shouldMount = distance <= 1 || dragging;
             return (
               <div key={m.id} className="relative h-full w-full shrink-0">
-                {shouldMount ? (
-                  <CinemaSlide
-                    meta={m}
-                    active={i === active && !dragging}
-                    eyebrow={eyebrow}
-                  />
-                ) : null}
+                {shouldMount ? <CinemaSlide meta={m} active={i === active && !dragging} eyebrow={eyebrow} /> : null}
               </div>
             );
           })}
@@ -194,15 +180,7 @@ export function CinemaHero({
   );
 }
 
-function CinemaSlide({
-  meta,
-  active,
-  eyebrow,
-}: {
-  meta: Meta;
-  active: boolean;
-  eyebrow: string;
-}) {
+function CinemaSlide({ meta, active, eyebrow }: { meta: Meta; active: boolean; eyebrow: string }) {
   const t = useT();
   const { settings } = useSettings();
   const { openMeta, openPicker } = useView();
@@ -310,10 +288,7 @@ function CinemaSlide({
   }, [trailerInfo]);
 
   return (
-    <div
-      aria-hidden={!active}
-      className="relative h-full w-full"
-    >
+    <div aria-hidden={!active} className="relative h-full w-full">
       {bg && (
         <img
           src={bg}
@@ -347,9 +322,7 @@ function CinemaSlide({
 
       <div className="relative flex h-full items-end pb-28 ps-20 pe-20">
         <div className="flex max-w-[640px] flex-col gap-5">
-          <span className="text-[11px] font-bold uppercase tracking-[0.42em] text-ink-subtle">
-            {t(eyebrow)}
-          </span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.42em] text-ink-subtle">{t(eyebrow)}</span>
           <CinemaTitlePlate
             name={meta.name}
             logo={logo}
@@ -373,14 +346,10 @@ function CinemaSlide({
               </span>
             )}
             {meta.genres && meta.genres.length > 0 && <Dot />}
-            {meta.genres && meta.genres.length > 0 && (
-              <span>{meta.genres.slice(0, 3).join(" · ")}</span>
-            )}
+            {meta.genres && meta.genres.length > 0 && <span>{meta.genres.slice(0, 3).join(" · ")}</span>}
           </div>
           {description && (
-            <p className="line-clamp-2 max-w-[560px] text-[15.5px] leading-relaxed text-ink-muted">
-              {description}
-            </p>
+            <p className="line-clamp-2 max-w-[560px] text-[15.5px] leading-relaxed text-ink-muted">{description}</p>
           )}
           <div className="mt-2 flex items-center gap-3">
             <button

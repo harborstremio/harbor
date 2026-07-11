@@ -1,8 +1,8 @@
-import { useEffect } from "react";
 import { setPlaybackPresence } from "@/lib/discord/presence";
-import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
+import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerSrc } from "@/lib/view";
+import { useEffect } from "react";
 
 export function usePlaybackPresence(params: {
   src: PlayerSrc;
@@ -19,8 +19,7 @@ export function usePlaybackPresence(params: {
       return;
     }
     if (src.meta.id?.startsWith("iptv:")) return;
-    const year =
-      typeof src.meta.releaseInfo === "string" ? src.meta.releaseInfo.slice(0, 4) : undefined;
+    const year = typeof src.meta.releaseInfo === "string" ? src.meta.releaseInfo.slice(0, 4) : undefined;
     const epLabel =
       season != null && episode != null
         ? `S${src.episode?.imdbSeason ?? season} E${src.episode?.imdbEpisode ?? episode}`
@@ -76,14 +75,7 @@ export function usePlaybackPresence(params: {
       positionSec: 0,
       durationSec: 0,
     });
-  }, [
-    liveGuideOpen,
-    snap.status,
-    src.meta.id,
-    src.meta.name,
-    src.meta.poster,
-    src.liveProgram,
-  ]);
+  }, [liveGuideOpen, snap.status, src.meta.id, src.meta.name, src.meta.poster, src.liveProgram]);
 
   useEffect(() => () => setPlaybackPresence(null), []);
 }

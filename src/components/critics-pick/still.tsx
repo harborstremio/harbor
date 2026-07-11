@@ -1,12 +1,4 @@
-export function Still({
-  src,
-  alt,
-  onClick,
-}: {
-  src: string | undefined;
-  alt: string;
-  onClick?: () => void;
-}) {
+export function Still({ src, alt, onClick }: { src: string | undefined; alt: string; onClick?: () => void }) {
   if (!src) return <div className="aspect-[16/9] rounded-md bg-elevated/45" />;
   if (!onClick) {
     return (

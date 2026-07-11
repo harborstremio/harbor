@@ -1,12 +1,12 @@
-import { Check, ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { Poster, usePosterChain } from "@/components/poster";
+import { useT } from "@/lib/i18n";
 import { malAnimeToMeta } from "@/lib/mal/to-meta";
 import type { MalListEntry, MalListStatus } from "@/lib/mal/types";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
 
 const STATUS_LABELS: Record<MalListStatus, string> = {
   watching: "Watching",
@@ -16,13 +16,7 @@ const STATUS_LABELS: Record<MalListStatus, string> = {
   plan_to_watch: "Plan to Watch",
 };
 
-const STATUS_ORDER: MalListStatus[] = [
-  "watching",
-  "completed",
-  "on_hold",
-  "dropped",
-  "plan_to_watch",
-];
+const STATUS_ORDER: MalListStatus[] = ["watching", "completed", "on_hold", "dropped", "plan_to_watch"];
 
 export function MalEntryCard({
   entry,
@@ -64,12 +58,7 @@ export function MalEntryCard({
         onClick={open}
         className="relative aspect-[2/3] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4)] transition-transform duration-200 group-hover:scale-[1.02]"
       >
-        <Poster
-          src={poster.src}
-          onError={poster.onError}
-          seed={String(m.id)}
-          className="h-full w-full"
-        />
+        <Poster src={poster.src} onError={poster.onError} seed={String(m.id)} className="h-full w-full" />
         <span
           role="button"
           aria-label={t("Remove from MyAnimeList")}

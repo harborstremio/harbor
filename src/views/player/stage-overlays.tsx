@@ -1,18 +1,18 @@
 import { Anime4kIndicator } from "@/components/player/anime4k-indicator";
-import { SvpIndicator } from "@/components/player/svp-indicator";
+import { ContentAdvisoryToast } from "@/components/player/content-advisory-toast";
 import { StatsOverlay } from "@/components/player/stats-overlay";
 import { SubStyleBar } from "@/components/player/sub-style-bar";
 import { SubSyncBar } from "@/components/player/sub-sync-bar";
 import { SubtitleOverlay } from "@/components/player/subtitle-overlay";
+import { SvpIndicator } from "@/components/player/svp-indicator";
 import {
   VolumeIndicator,
   type VolumeHudPosition,
   type VolumeIndicatorState,
 } from "@/components/player/volume-indicator";
+import { useT } from "@/lib/i18n";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
-import { ContentAdvisoryToast } from "@/components/player/content-advisory-toast";
-import { useT } from "@/lib/i18n";
 
 export function StageOverlays({
   snap,
@@ -60,8 +60,7 @@ export function StageOverlays({
       {!pipMode && <SvpIndicator engine={engine} chromeVisible={chromeVisible} suppressed={topVolumeShowing} />}
       {holdSpeedActive && !pipMode && (
         <div className="pointer-events-none absolute left-1/2 top-8 z-30 flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-canvas/85 px-3.5 py-1.5 text-[13px] font-semibold text-ink backdrop-blur-md">
-          {snap.rate}x
-          <span className="font-normal text-ink-muted">{t("speed")}</span>
+          {snap.rate}x<span className="font-normal text-ink-muted">{t("speed")}</span>
         </div>
       )}
       {!holdSpeedActive && !pipMode && (
@@ -81,12 +80,7 @@ export function StageOverlays({
           {subDropToast}
         </div>
       )}
-      {!pipMode && (
-        <ContentAdvisoryToast
-          categories={contentAdvisory.categories}
-          playKey={contentAdvisory.playKey}
-        />
-      )}
+      {!pipMode && <ContentAdvisoryToast categories={contentAdvisory.categories} playKey={contentAdvisory.playKey} />}
       {!pipMode && <SubStyleBar />}
       {!pipMode && (
         <SubSyncBar

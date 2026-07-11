@@ -1,10 +1,4 @@
-import {
-  getNativeRssMB,
-  getRamTier,
-  startNativeMemory,
-  subscribeNativeMemory,
-  type RamTier,
-} from "./native-memory";
+import { getNativeRssMB, getRamTier, startNativeMemory, subscribeNativeMemory, type RamTier } from "./native-memory";
 import { pulseWebviewMemoryLow } from "./webview-memory";
 
 type Evictor = (aggressive: boolean) => void;

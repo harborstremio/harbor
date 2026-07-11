@@ -48,11 +48,7 @@ export function isAddonNativeMeta(meta: Meta): boolean {
   if (meta.type === "tv" || meta.type === "channel") return true;
   if (!meta.addonOrigin) return false;
   const id = meta.id || "";
-  const resolvable =
-    /^tt\d/.test(id) ||
-    id.startsWith("tmdb:") ||
-    id.startsWith("kitsu:") ||
-    id.startsWith("mal:");
+  const resolvable = /^tt\d/.test(id) || id.startsWith("tmdb:") || id.startsWith("kitsu:") || id.startsWith("mal:");
   return !resolvable;
 }
 
@@ -70,11 +66,9 @@ function cinemetaTopPath(type: "movie" | "series", genre?: string, skip = 0): st
   return parts.join("/");
 }
 
-export const topMovies = (genre?: string, skip = 0) =>
-  catalog(cinemetaTopPath("movie", genre, skip));
+export const topMovies = (genre?: string, skip = 0) => catalog(cinemetaTopPath("movie", genre, skip));
 
-export const topSeries = (genre?: string, skip = 0) =>
-  catalog(cinemetaTopPath("series", genre, skip));
+export const topSeries = (genre?: string, skip = 0) => catalog(cinemetaTopPath("series", genre, skip));
 
 export async function meta(type: "movie" | "series", id: string): Promise<Meta | null> {
   const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);

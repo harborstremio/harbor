@@ -1,5 +1,3 @@
-import { RotateCcw } from "lucide-react";
-import { useState } from "react";
 import {
   NAV_ITEMS,
   effectiveNavOrder,
@@ -12,6 +10,9 @@ import {
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import type { ThemeLayout } from "@/lib/theme";
+import { RotateCcw } from "lucide-react";
+import { useState } from "react";
+
 import { NavRow } from "./nav-editor/nav-row";
 
 const ICON_ONLY: ReadonlySet<ThemeLayout> = new Set(["minui"]);
@@ -26,8 +27,7 @@ export function NavEditor({ layout }: { layout: ThemeLayout }) {
   const byId = new Map<string, NavItem>(NAV_ITEMS.map((it) => [it.id, it]));
   const rows = effectiveNavOrder(cfg).map((id) => byId.get(id)!);
   const renamable = !ICON_ONLY.has(layout);
-  const hasChanges =
-    cfg.order.length > 0 || cfg.hidden.length > 0 || Object.keys(cfg.renamed).length > 0;
+  const hasChanges = cfg.order.length > 0 || cfg.hidden.length > 0 || Object.keys(cfg.renamed).length > 0;
 
   const commitDrop = (targetId: string, pos: "before" | "after") => {
     if (dragId && dragId !== targetId) {

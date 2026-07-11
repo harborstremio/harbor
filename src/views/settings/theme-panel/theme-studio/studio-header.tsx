@@ -32,12 +32,8 @@ export function StudioHeader({
         <PanelRightClose size={18} strokeWidth={2.2} className="dir-icon" />
       </button>
       <div className="flex min-w-0 flex-1 flex-col px-1">
-        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
-          Theme studio
-        </span>
-        <span className="truncate text-[14px] font-semibold text-ink">
-          {name || "Untitled theme"}
-        </span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-subtle">Theme studio</span>
+        <span className="truncate text-[14px] font-semibold text-ink">{name || "Untitled theme"}</span>
       </div>
       <div className="flex items-center">
         <button

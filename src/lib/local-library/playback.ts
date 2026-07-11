@@ -1,8 +1,8 @@
 import type { Meta } from "@/lib/cinemeta";
 import { findLocalEpisodeByIds, findLocalMovie, type LocalEntry } from "@/lib/local-library";
 import { episodeLabel } from "@/lib/local-library/player-src";
-import { readResumeMs } from "@/lib/resume";
 import { openWatchLocalConfirm } from "@/lib/player/watch-local-confirm";
+import { readResumeMs } from "@/lib/resume";
 
 export type LocalPlaybackMode = "ask" | "local" | "stream";
 

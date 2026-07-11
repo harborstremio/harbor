@@ -1,3 +1,5 @@
+import type { Meta } from "@/lib/cinemeta";
+import { topMovies, topSeries } from "@/lib/cinemeta";
 import { get } from "@/lib/providers/tmdb/tmdb-client";
 import {
   movieMeta,
@@ -6,13 +8,9 @@ import {
   type RawMovie,
   type RawSeries,
 } from "@/lib/providers/tmdb/tmdb-meta-mappers";
-import type { Meta } from "@/lib/cinemeta";
-import { topMovies, topSeries } from "@/lib/cinemeta";
 import { watchlistAllIds } from "@/lib/watchlist";
 
-type TrendingItem =
-  | (RawMovie & { media_type: "movie" })
-  | (RawSeries & { media_type: "tv" });
+type TrendingItem = (RawMovie & { media_type: "movie" }) | (RawSeries & { media_type: "tv" });
 
 const RECENT_KEY = "harbor.surprise.recent.v1";
 const RECENT_TTL_MS = 14 * 24 * 60 * 60 * 1000;
@@ -57,11 +55,7 @@ function shuffleInPlace<T>(arr: T[]): T[] {
   return arr;
 }
 
-async function fetchTmdb(
-  key: string,
-  path: string,
-  params: Record<string, string> = {},
-): Promise<TrendingItem[]> {
+async function fetchTmdb(key: string, path: string, params: Record<string, string> = {}): Promise<TrendingItem[]> {
   try {
     const data = await get<Page<TrendingItem>>(key, path, { ...params });
     return data?.results ?? [];
@@ -105,10 +99,7 @@ async function topAffinityGenres(tmdbKey: string): Promise<number[]> {
     .map(([id]) => id);
 }
 
-export async function surpriseMe(
-  tmdbKey: string,
-  opts: { excludeGenres?: number[] } = {},
-): Promise<Meta | null> {
+export async function surpriseMe(tmdbKey: string, opts: { excludeGenres?: number[] } = {}): Promise<Meta | null> {
   const excludeGenreSet = new Set(opts.excludeGenres ?? []);
   const recent = recentIdSet();
   const owned = new Set(watchlistAllIds());

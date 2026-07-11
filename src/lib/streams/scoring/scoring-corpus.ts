@@ -16,10 +16,7 @@ export function computeCorpusStats(streams: ParsedStream[], opts: ScoreOptions):
   const isTheater = (s: ParsedStream) =>
     s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC";
   const isWebish = (s: ParsedStream) =>
-    s.source === "WEB-DL" ||
-    s.source === "WEBRip" ||
-    s.source === "BluRay" ||
-    s.source === "BDRip";
+    s.source === "WEB-DL" || s.source === "WEBRip" || s.source === "BluRay" || s.source === "BDRip";
 
   const tracked = streams.filter(isTracked);
   const trustedTrackedCount = tracked.length;

@@ -1,13 +1,13 @@
+import { adultContentHidden, isAdultAnime } from "@/lib/addons-store/adult-filter";
 import type { Meta } from "@/lib/cinemeta";
 import { score, topEntries } from "@/lib/discover/affinity";
 import { profileFromMeta } from "@/lib/discover/profile";
 import { getStore } from "@/lib/discover/store";
-import { dayIndex, mixSeed, mulberry32 } from "@/lib/feed/tags";
 import { hashStr } from "@/lib/feed/daily-rows-types";
 import { getDownvotedIds, getUpvotedIds } from "@/lib/feed/preferences";
+import { dayIndex, mixSeed, mulberry32 } from "@/lib/feed/tags";
 import { recentlyPlayed, watchTitleKey } from "@/lib/playback-history";
 import { animeFranchiseKey, stripFranchiseSuffix } from "@/lib/providers/jikan";
-import { adultContentHidden, isAdultAnime } from "@/lib/addons-store/adult-filter";
 import type { LibraryItem } from "@/lib/stremio";
 
 export const ANIME_GENRE_TO_JIKAN: Record<string, number> = {
@@ -29,13 +29,7 @@ export const ANIME_GENRE_TO_JIKAN: Record<string, number> = {
   Psychological: 40,
 };
 
-export type PickSource =
-  | "sequel"
-  | "rec"
-  | "genre"
-  | "new"
-  | "airing"
-  | "top";
+export type PickSource = "sequel" | "rec" | "genre" | "new" | "airing" | "top";
 
 const SOURCE_BASE: Record<PickSource, number> = {
   sequel: 100,
@@ -158,12 +152,7 @@ function rotationNoise(franchiseKey: string, seed: number): number {
   return mulberry32(mixSeed(seed, hashStr(franchiseKey)))();
 }
 
-export function scorePick(
-  m: Meta,
-  source: PickSource,
-  recsIndex = 0,
-  recsLen = 0,
-): number {
+export function scorePick(m: Meta, source: PickSource, recsIndex = 0, recsLen = 0): number {
   let base = SOURCE_BASE[source];
   if (source === "rec" && recsLen > 0) base += Math.max(0, recsLen - recsIndex) * 0.5;
   if (source === "genre") {
@@ -177,11 +166,7 @@ export function scorePick(
 
 export type PickEntry = { meta: Meta; score: number };
 
-export function rankPicks(
-  byFranchise: Map<string, PickEntry>,
-  seed: number,
-  limit: number,
-): Meta[] {
+export function rankPicks(byFranchise: Map<string, PickEntry>, seed: number, limit: number): Meta[] {
   return Array.from(byFranchise.entries())
     .sort((a, b) => {
       if (b[1].score !== a[1].score) return b[1].score - a[1].score;

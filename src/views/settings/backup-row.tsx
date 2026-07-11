@@ -1,8 +1,8 @@
+import { applyBackup, backupKeyCount, downloadBackup, parseBackup, type Backup } from "@/lib/backup";
+import { useT } from "@/lib/i18n";
 import { Check, Download, Upload } from "lucide-react";
 import { useRef, useState, type ChangeEvent } from "react";
 import { createPortal } from "react-dom";
-import { applyBackup, backupKeyCount, downloadBackup, parseBackup, type Backup } from "@/lib/backup";
-import { useT } from "@/lib/i18n";
 
 export function BackupRow() {
   const t = useT();
@@ -53,28 +53,22 @@ export function BackupRow() {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <input
-        ref={fileRef}
-        type="file"
-        accept=".harbx,application/json,.json"
-        onChange={onFile}
-        className="hidden"
-      />
+      <input ref={fileRef} type="file" accept=".harbx,application/json,.json" onChange={onFile} className="hidden" />
 
       <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-[14px] font-medium text-ink">{t("Export everything")}</span>
           <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Saves your whole Harbor setup to one file: theme, home layout, settings, addons, profiles, watchlist, player layouts, watch progress, and more. Your Stremio sign-in is left out on purpose.")}
+            {t(
+              "Saves your whole Harbor setup to one file: theme, home layout, settings, addons, profiles, watchlist, player layouts, watch progress, and more. Your Stremio sign-in is left out on purpose.",
+            )}
           </span>
         </div>
         <button
           type="button"
           onClick={doExport}
           className={`flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3.5 text-[12.5px] font-semibold transition-all ${
-            exported
-              ? "bg-accent/15 text-accent"
-              : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
+            exported ? "bg-accent/15 text-accent" : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
           }`}
         >
           {exported ? <Check size={14} strokeWidth={2.6} /> : <Download size={14} strokeWidth={2.4} />}
@@ -86,7 +80,9 @@ export function BackupRow() {
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="text-[14px] font-medium text-ink">{t("Restore from a backup")}</span>
           <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Loads a backup file and replaces your current setup with it. Perfect for a new computer. Your Stremio sign-in on this device stays as is.")}
+            {t(
+              "Loads a backup file and replaces your current setup with it. Perfect for a new computer. Your Stremio sign-in on this device stays as is.",
+            )}
           </span>
         </div>
         <button
@@ -140,7 +136,10 @@ function RestoreConfirm({
       >
         <h2 className="text-[17px] font-semibold tracking-tight text-ink">{t("Restore this backup?")}</h2>
         <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-muted">
-          {t("This replaces your current Harbor setup (theme, home layout, settings, addons, profiles, and more) with the {n} saved entries in this file. Your Stremio sign-in stays as is. Harbor reloads when it finishes.", { n: String(backupKeyCount(backup)) })}
+          {t(
+            "This replaces your current Harbor setup (theme, home layout, settings, addons, profiles, and more) with the {n} saved entries in this file. Your Stremio sign-in stays as is. Harbor reloads when it finishes.",
+            { n: String(backupKeyCount(backup)) },
+          )}
         </p>
         <p className="mt-2 text-[12px] text-ink-subtle">
           {t("Saved {when} from Harbor {app}.", { when, app: backup.app })}

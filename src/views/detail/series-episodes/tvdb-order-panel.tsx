@@ -1,8 +1,9 @@
+import { useT } from "@/lib/i18n";
+import type { TvdbSeasonTypeOption } from "@/lib/providers/tvdb";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { TvdbSeasonTypeOption } from "@/lib/providers/tvdb";
-import { useT } from "@/lib/i18n";
+
 import type { PickerItem } from "./season-arc-picker";
 
 type MenuPos = { right: number; top?: number; bottom?: number; maxH: number };
@@ -20,8 +21,7 @@ function isOngoing(to?: string): boolean {
   if (Number.isNaN(d.getTime())) return false;
   const now = new Date();
   return (
-    d.getFullYear() > now.getFullYear() ||
-    (d.getFullYear() === now.getFullYear() && d.getMonth() >= now.getMonth())
+    d.getFullYear() > now.getFullYear() || (d.getFullYear() === now.getFullYear() && d.getMonth() >= now.getMonth())
   );
 }
 
@@ -90,11 +90,7 @@ export function TvdbOrderPanel({
     const up = below < 300 && above > below;
     const maxH = Math.min(0.6 * window.innerHeight, up ? above : below);
     const right = Math.max(margin, window.innerWidth - r.right);
-    setMenu(
-      up
-        ? { right, bottom: window.innerHeight - r.top + 8, maxH }
-        : { right, top: r.bottom + 8, maxH },
-    );
+    setMenu(up ? { right, bottom: window.innerHeight - r.top + 8, maxH } : { right, top: r.bottom + 8, maxH });
   };
 
   const pick = (key: string) => {
@@ -127,8 +123,7 @@ export function TvdbOrderPanel({
             {orderTypes.length > 1 && (
               <div className="flex flex-wrap items-center gap-1 border-b border-edge-soft/60 p-2">
                 {orderTypes.map((o) => {
-                  const on =
-                    o.value === activeType || (activeType === "official" && o.value === "aired");
+                  const on = o.value === activeType || (activeType === "official" && o.value === "aired");
                   return (
                     <button
                       key={o.value}

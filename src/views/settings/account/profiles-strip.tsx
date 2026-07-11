@@ -1,7 +1,7 @@
-import { Plus } from "lucide-react";
-import { useProfiles } from "@/lib/profiles";
-import { useT } from "@/lib/i18n";
 import { ProfileTile } from "@/components/profile-picker/profile-tile";
+import { useT } from "@/lib/i18n";
+import { useProfiles } from "@/lib/profiles";
+import { Plus } from "lucide-react";
 
 export function ProfilesStrip() {
   const t = useT();
@@ -38,7 +38,9 @@ export function ProfilesStrip() {
       </div>
       {solo ? (
         <p className="max-w-md text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Add a profile for someone else and everyone keeps their own Continue Watching, watch history, and progress.")}
+          {t(
+            "Add a profile for someone else and everyone keeps their own Continue Watching, watch history, and progress.",
+          )}
         </p>
       ) : (
         <button

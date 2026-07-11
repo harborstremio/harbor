@@ -1,16 +1,17 @@
-import { useState } from "react";
-import { useView } from "@/lib/view";
-import type { SourceFolder } from "@/lib/custom-sources";
-import { useAuth } from "@/lib/auth";
 import { createAddonCatalogFetcher, gatherCatalogAddons } from "@/lib/addons";
-import { Pencil, X } from "lucide-react";
-import { createPortal } from "react-dom";
-import { EditFolderImagesModal } from "./edit-folder-images-modal";
+import { useAuth } from "@/lib/auth";
+import type { SourceFolder } from "@/lib/custom-sources";
 import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
 import { tmdbDiscover, tmdbCollection } from "@/lib/providers/tmdb";
-import { fetchTraktList } from "@/lib/trakt/lists";
+import { useSettings } from "@/lib/settings";
 import { hydrateTraktItems } from "@/lib/trakt/hydrate";
+import { fetchTraktList } from "@/lib/trakt/lists";
+import { useView } from "@/lib/view";
+import { Pencil, X } from "lucide-react";
+import { useState } from "react";
+import { createPortal } from "react-dom";
+
+import { EditFolderImagesModal } from "./edit-folder-images-modal";
 
 export function SourceFolderCard({
   folder,
@@ -143,142 +144,149 @@ export function SourceFolderCard({
         onClick={handleClick}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-      onFocus={() => setHover(true)}
-      onBlur={() => setHover(false)}
-      disabled={loading}
-      className={`group/card relative ${aspectRatio} w-full flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-edge-soft bg-surface text-start shadow-[0_4px_18px_-10px_rgba(0,0,0,0.5)] ring-1 ring-inset ring-white/0 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-edge hover:ring-white/15 disabled:opacity-50`}
-    >
-      {folder.coverImageUrl && (
-        <img
-          src={folder.coverImageUrl}
-          alt=""
-          loading="lazy"
-          draggable={false}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-            hover && folder.focusGifUrl ? "opacity-0" : "opacity-100"
-          }`}
+        onFocus={() => setHover(true)}
+        onBlur={() => setHover(false)}
+        disabled={loading}
+        className={`group/card relative ${aspectRatio} w-full flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl border border-edge-soft bg-surface text-start shadow-[0_4px_18px_-10px_rgba(0,0,0,0.5)] ring-1 ring-inset ring-white/0 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-edge hover:ring-white/15 disabled:opacity-50`}
+      >
+        {folder.coverImageUrl && (
+          <img
+            src={folder.coverImageUrl}
+            alt=""
+            loading="lazy"
+            draggable={false}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+              hover && folder.focusGifUrl ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        )}
+
+        {folder.focusGifUrl && (
+          <img
+            src={folder.focusGifUrl}
+            alt=""
+            loading="lazy"
+            draggable={false}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+              hover ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        )}
+
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-black/15 transition-colors duration-300 group-hover/card:bg-black/0"
         />
-      )}
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-transparent" />
 
-      {folder.focusGifUrl && (
-        <img
-          src={folder.focusGifUrl}
-          alt=""
-          loading="lazy"
-          draggable={false}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-            hover ? "opacity-100" : "opacity-0"
-          }`}
-        />
-      )}
+        {!folder.hideTitle && (
+          <h3 className="absolute inset-x-4 bottom-3.5 font-display text-[21px] font-medium leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)]">
+            {folder.title}
+          </h3>
+        )}
 
-      <div aria-hidden className="absolute inset-0 bg-black/15 transition-colors duration-300 group-hover/card:bg-black/0" />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-transparent" />
+        {editMode && sourceId && onEditFolderImages && (
+          <div
+            className="absolute end-3 top-3 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditModalOpen(true);
+            }}
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition-colors hover:bg-accent">
+              <Pencil className="h-4 w-4" />
+            </div>
+          </div>
+        )}
+      </button>
 
-      {!folder.hideTitle && (
-        <h3 className="absolute inset-x-4 bottom-3.5 font-display text-[21px] font-medium leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)]">
-          {folder.title}
-        </h3>
-      )}
+      {errorAddon &&
+        createPortal(
+          <div
+            className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setErrorAddon(null);
+            }}
+          >
+            <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
+              <div className="flex items-start justify-between gap-4">
+                <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Addon not installed")}</h2>
+                <button
+                  onClick={() => setErrorAddon(null)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas/40 text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="text-center text-ink-muted">
+                <p className="mb-4 text-[15px]">
+                  {t("This section depends on the addon")}{" "}
+                  <strong className="text-ink" dir="ltr">
+                    {errorAddon}
+                  </strong>
+                  .
+                </p>
+                <p className="mb-6 text-[15px] leading-relaxed">
+                  {t("You must install this addon in your Stremio account first so Harbor can fetch its works.")}
+                </p>
+                <button
+                  onClick={() => setErrorAddon(null)}
+                  className="w-full rounded-full bg-accent px-6 py-2.5 font-medium text-white shadow-sm transition-opacity hover:opacity-90"
+                >
+                  {t("OK")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {missingTmdbKey &&
+        createPortal(
+          <div
+            className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setMissingTmdbKey(false);
+            }}
+          >
+            <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
+              <div className="flex items-start justify-between gap-4">
+                <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Missing TMDB Key")}</h2>
+                <button
+                  onClick={() => setMissingTmdbKey(false)}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas/40 text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="text-center text-ink-muted">
+                <p className="mb-4 text-[15px]">{t("This section relies on TMDB discovery features.")}</p>
+                <p className="mb-6 text-[15px] leading-relaxed">
+                  {t("Please add your TMDB API key in the Library & Metadata settings to view this folder.")}
+                </p>
+                <button
+                  onClick={() => setMissingTmdbKey(false)}
+                  className="w-full rounded-full bg-accent px-6 py-2.5 font-medium text-white shadow-sm transition-opacity hover:opacity-90"
+                >
+                  {t("OK")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {editMode && sourceId && onEditFolderImages && (
-        <div
-          className="absolute end-3 top-3 z-10"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsEditModalOpen(true);
+        <EditFolderImagesModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          initialCover={folder.coverImageUrl}
+          initialGif={folder.focusGifUrl}
+          onSave={(cover, gif) => {
+            onEditFolderImages(sourceId, folder.id, cover, gif);
           }}
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition-colors hover:bg-accent">
-            <Pencil className="h-4 w-4" />
-          </div>
-        </div>
+        />
       )}
-    </button>
-
-    {errorAddon && createPortal(
-      <div
-        className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setErrorAddon(null);
-        }}
-      >
-        <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Addon not installed")}</h2>
-            <button
-              onClick={() => setErrorAddon(null)}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas/40 text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
-            >
-              <X size={16} />
-            </button>
-          </div>
-          <div className="text-center text-ink-muted">
-            <p className="mb-4 text-[15px]">
-              {t("This section depends on the addon")} <strong className="text-ink" dir="ltr">{errorAddon}</strong>.
-            </p>
-            <p className="mb-6 text-[15px] leading-relaxed">
-              {t("You must install this addon in your Stremio account first so Harbor can fetch its works.")}
-            </p>
-            <button
-              onClick={() => setErrorAddon(null)}
-              className="w-full rounded-full bg-accent px-6 py-2.5 font-medium text-white shadow-sm transition-opacity hover:opacity-90"
-            >
-              {t("OK")}
-            </button>
-          </div>
-        </div>
-      </div>,
-      document.body,
-    )}
-
-    {missingTmdbKey && createPortal(
-      <div
-        className="pointer-events-auto fixed inset-0 z-[120] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setMissingTmdbKey(false);
-        }}
-      >
-        <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
-          <div className="flex items-start justify-between gap-4">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Missing TMDB Key")}</h2>
-            <button
-              onClick={() => setMissingTmdbKey(false)}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas/40 text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
-            >
-              <X size={16} />
-            </button>
-          </div>
-          <div className="text-center text-ink-muted">
-            <p className="mb-4 text-[15px]">
-              {t("This section relies on TMDB discovery features.")}
-            </p>
-            <p className="mb-6 text-[15px] leading-relaxed">
-              {t("Please add your TMDB API key in the Library & Metadata settings to view this folder.")}
-            </p>
-            <button
-              onClick={() => setMissingTmdbKey(false)}
-              className="w-full rounded-full bg-accent px-6 py-2.5 font-medium text-white shadow-sm transition-opacity hover:opacity-90"
-            >
-              {t("OK")}
-            </button>
-          </div>
-        </div>
-      </div>,
-      document.body,
-    )}
-
-    {editMode && sourceId && onEditFolderImages && (
-      <EditFolderImagesModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        initialCover={folder.coverImageUrl}
-        initialGif={folder.focusGifUrl}
-        onSave={(cover, gif) => {
-          onEditFolderImages(sourceId, folder.id, cover, gif);
-        }}
-      />
-    )}
     </>
   );
 }

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+
+import { updateCachedRatingByTarget, getCachedRatingByTarget } from "./activities";
 import { simklRequest } from "./client";
 import type { SimklIds, SimklTarget } from "./types";
-import { updateCachedRatingByTarget, getCachedRatingByTarget } from "./activities";
 
 export { getCachedRatingByTarget };
 
@@ -18,18 +19,14 @@ interface SimklDetailResponse {
 }
 
 function detailPathFor(type: string | undefined, simklId: number): string {
-  return type === "movie"
-    ? `/movies/${simklId}`
-    : type === "anime"
-      ? `/anime/${simklId}`
-      : `/tv/${simklId}`;
+  return type === "movie" ? `/movies/${simklId}` : type === "anime" ? `/anime/${simklId}` : `/tv/${simklId}`;
 }
 
 async function resolveScoreByImdb(imdbId: string): Promise<number | null> {
-  const results = await simklRequest<SimklSearchIdItem[]>(
-    `/search/id?imdb=${encodeURIComponent(imdbId)}`,
-    { method: "GET", authed: false },
-  );
+  const results = await simklRequest<SimklSearchIdItem[]>(`/search/id?imdb=${encodeURIComponent(imdbId)}`, {
+    method: "GET",
+    authed: false,
+  });
   if (!Array.isArray(results) || results.length === 0) return null;
 
   const item = results[0];
@@ -46,9 +43,7 @@ async function resolveScoreByImdb(imdbId: string): Promise<number | null> {
   return detail.ratings?.simkl?.rating ?? null;
 }
 
-export function useSimklCommunityRating(
-  imdbId: string | null,
-): { rating: number | null; loading: boolean } {
+export function useSimklCommunityRating(imdbId: string | null): { rating: number | null; loading: boolean } {
   const [rating, setRating] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -279,11 +274,7 @@ function getRatingPayload(target: SimklTarget): { key: string; ids: SimklIds } {
   const isAnime = target.kind === "anime" || target.kind === "anime-episode";
 
   const ids =
-    target.kind === "episode"
-      ? target.show.ids
-      : target.kind === "anime-episode"
-        ? target.anime.ids
-        : target.ids;
+    target.kind === "episode" ? target.show.ids : target.kind === "anime-episode" ? target.anime.ids : target.ids;
 
   const key = isMovie ? "movies" : isAnime ? "anime" : "shows";
   return { key, ids };

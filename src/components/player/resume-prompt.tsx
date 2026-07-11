@@ -1,6 +1,6 @@
-import { Play, RotateCcw } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
+import { Play, RotateCcw } from "lucide-react";
 
 const KID_BUBBLES = [10, 24, 40, 55, 70, 84, 93];
 
@@ -39,12 +39,7 @@ export function ResumePrompt({
           ))}
         </div>
         <div className="curfew-bob pointer-events-none absolute bottom-[12%] left-[9%]">
-          <img
-            src="/kids/doodles/liloctored.png"
-            alt=""
-            draggable={false}
-            className="h-24 w-auto opacity-85"
-          />
+          <img src="/kids/doodles/liloctored.png" alt="" draggable={false} className="h-24 w-auto opacity-85" />
         </div>
         <img
           src="/kids/doodles/lilpurpocto.png"
@@ -55,9 +50,7 @@ export function ResumePrompt({
         <h2 className="relative line-clamp-2 max-w-4xl font-display text-[clamp(36px,6vw,64px)] font-bold leading-none tracking-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.4)]">
           {title}
         </h2>
-        <p className="relative mt-5 text-[22px] font-bold text-white/90">
-          {t("Where do you want to start?")}
-        </p>
+        <p className="relative mt-5 text-[22px] font-bold text-white/90">{t("Where do you want to start?")}</p>
         <div className="relative mt-10 flex flex-col items-center gap-5 sm:flex-row">
           <button
             onClick={onResume}
@@ -84,9 +77,7 @@ export function ResumePrompt({
         <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
           {t("Pick up where you left off")}
         </p>
-        <h2 className="mt-3 line-clamp-2 font-display text-[24px] font-semibold leading-tight text-ink">
-          {title}
-        </h2>
+        <h2 className="mt-3 line-clamp-2 font-display text-[24px] font-semibold leading-tight text-ink">{title}</h2>
         <p className="mt-2 text-[13.5px] text-ink-muted">
           {t("{watched} of {total} watched ({pct}%).", {
             watched: formatTime(resumeSec),

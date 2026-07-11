@@ -1,9 +1,9 @@
-import { ArrowRight, X } from "lucide-react";
 import tmdbLogo from "@/assets/addon-logos/tmdb.png";
 import { useT } from "@/lib/i18n";
 import { useOnboarding } from "@/lib/onboarding";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { ArrowRight, X } from "lucide-react";
 
 const KEY = "tmdb-nudge";
 
@@ -17,12 +17,7 @@ export function TmdbNudge({ suppress }: { suppress?: boolean } = {}) {
 
   return (
     <div className="group animate-nudge-in flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/95 px-5 py-4 backdrop-blur-md shadow-[0_18px_50px_-20px_rgba(0,0,0,0.6)]">
-      <img
-        src={tmdbLogo}
-        alt="TMDB"
-        className="h-10 w-10 shrink-0 rounded-full object-cover"
-        draggable={false}
-      />
+      <img src={tmdbLogo} alt="TMDB" className="h-10 w-10 shrink-0 rounded-full object-cover" draggable={false} />
       <div className="min-w-0 flex-1">
         <p className="text-[13.5px] font-medium text-ink">{t("Add a TMDB key for the full Harbor")}</p>
         <p className="text-[12.5px] text-ink-subtle">

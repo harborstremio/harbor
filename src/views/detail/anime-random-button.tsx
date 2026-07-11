@@ -1,9 +1,9 @@
-import { Shuffle } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { Shuffle } from "lucide-react";
 
 export function AnimeRandomButton({ meta, episodes }: { meta: Meta; episodes: KitsuEpisode[] }) {
   const t = useT();

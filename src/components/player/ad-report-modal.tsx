@@ -1,8 +1,9 @@
+import type { AdRange } from "@/lib/ad-report/submit";
+import { useT } from "@/lib/i18n";
+import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { HelpCircle, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { usePlaybackPosition } from "@/lib/player/playback-clock";
-import { useT } from "@/lib/i18n";
-import type { AdRange } from "@/lib/ad-report/submit";
+
 import { AboutPanel } from "./ad-report-modal/about-panel";
 import { RangeRow } from "./ad-report-modal/range-row";
 
@@ -27,8 +28,7 @@ export function AdReportModal({
     const start = Math.max(0, Math.round(position));
     setRanges((r) => [...r, { startSec: start, endSec: start + 30 }]);
   };
-  const updateRange = (i: number, next: AdRange) =>
-    setRanges((r) => r.map((x, idx) => (idx === i ? next : x)));
+  const updateRange = (i: number, next: AdRange) => setRanges((r) => r.map((x, idx) => (idx === i ? next : x)));
   const removeRange = (i: number) => setRanges((r) => r.filter((_, idx) => idx !== i));
 
   const valid = ranges.length > 0 && ranges.every((r) => r.endSec > r.startSec);
@@ -42,10 +42,7 @@ export function AdReportModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[200] grid place-items-center bg-black/60 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[200] grid place-items-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -85,7 +82,9 @@ export function AdReportModal({
           ) : (
             <>
               <p className="text-[12.5px] leading-relaxed text-ink-muted">
-                {t("Play to where the ad starts and add it, then play to the end and tap Now. You can also type the times. Add more than one if there are several.")}
+                {t(
+                  "Play to where the ad starts and add it, then play to the end and tap Now. You can also type the times. Add more than one if there are several.",
+                )}
               </p>
               {ranges.length > 0 && (
                 <div className="flex flex-col gap-2">
@@ -109,12 +108,8 @@ export function AdReportModal({
                 <Plus size={16} strokeWidth={2.2} />
                 {t("Add an ad starting at the current time")}
               </button>
-              {status === "error" && (
-                <p className="text-[12px] text-danger">{t("Could not send. Try again.")}</p>
-              )}
-              {status === "sent" && (
-                <p className="text-[12px] text-accent">{t("Thanks. Sent for review.")}</p>
-              )}
+              {status === "error" && <p className="text-[12px] text-danger">{t("Could not send. Try again.")}</p>}
+              {status === "sent" && <p className="text-[12px] text-accent">{t("Thanks. Sent for review.")}</p>}
               <button
                 type="button"
                 onClick={submit}

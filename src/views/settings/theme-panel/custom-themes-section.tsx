@@ -1,11 +1,3 @@
-import { AlertCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { ActiveBanner } from "./custom-themes-section/active-banner";
-import { ExportBlock } from "./custom-themes-section/export-block";
-import { HeroCards } from "./custom-themes-section/hero-cards";
-import { LibraryBrowser } from "./custom-themes-section/library-browser";
-import type { LibraryEntry } from "./custom-themes-section/library-grid";
-import { ThemeStudio } from "./theme-studio";
 import {
   getCustomThemes,
   parseThemeJson,
@@ -14,11 +6,10 @@ import {
   subscribeCustomThemes,
   type CustomTheme,
 } from "@/lib/custom-themes";
+import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { downloadText } from "@/lib/download-text";
-import { importForeignTheme } from "@/lib/theme-import";
 import { isHarborStyleName, parseHarborStyle, serializeHarborStyle } from "@/lib/harborstyle";
 import { useSettings } from "@/lib/settings";
-import { pushActivityHint } from "@/lib/discord/activity-hint";
 import {
   FEATURED_CUSTOM_THEMES,
   getThemeById,
@@ -27,6 +18,16 @@ import {
   type ActiveThemeId,
   type ThemePreset,
 } from "@/lib/theme";
+import { importForeignTheme } from "@/lib/theme-import";
+import { AlertCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+import { ActiveBanner } from "./custom-themes-section/active-banner";
+import { ExportBlock } from "./custom-themes-section/export-block";
+import { HeroCards } from "./custom-themes-section/hero-cards";
+import { LibraryBrowser } from "./custom-themes-section/library-browser";
+import type { LibraryEntry } from "./custom-themes-section/library-grid";
+import { ThemeStudio } from "./theme-studio";
 
 export function CustomThemesSection() {
   const { settings, update } = useSettings();
@@ -95,8 +96,7 @@ export function CustomThemesSection() {
   const pickImportFile = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept =
-      ".harborstyle,.json,.txt,.harbortheme.json,.yaml,.yml,.ini,.xml,application/json,text/plain";
+    input.accept = ".harborstyle,.json,.txt,.harbortheme.json,.yaml,.yml,.ini,.xml,application/json,text/plain";
     input.onchange = () => {
       const f = input.files?.[0];
       if (f) importFile(f);
@@ -104,8 +104,7 @@ export function CustomThemesSection() {
     input.click();
   };
 
-  const activate = (id: string) =>
-    activateTheme(id, getThemeById(id)?.navCustomization);
+  const activate = (id: string) => activateTheme(id, getThemeById(id)?.navCustomization);
 
   const remove = (id: string) => {
     removeCustomTheme(id);
@@ -129,12 +128,7 @@ export function CustomThemesSection() {
   };
 
   if (studioOpen) {
-    return (
-      <ThemeStudio
-        seed={activeTheme ?? undefined}
-        onClose={() => setStudioOpen(false)}
-      />
-    );
+    return <ThemeStudio seed={activeTheme ?? undefined} onClose={() => setStudioOpen(false)} />;
   }
 
   if (libraryOpen) {
@@ -159,9 +153,7 @@ export function CustomThemesSection() {
       <ActiveBanner
         theme={activeTheme}
         onExport={() => activeTheme && showExport(activeTheme.id)}
-        onCustomize={() =>
-          window.dispatchEvent(new CustomEvent("harbor:open-theme-editor"))
-        }
+        onCustomize={() => window.dispatchEvent(new CustomEvent("harbor:open-theme-editor"))}
       />
 
       <HeroCards

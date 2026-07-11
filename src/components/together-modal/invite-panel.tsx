@@ -1,7 +1,8 @@
+import { useT } from "@/lib/i18n";
+import { buildInviteUrl } from "@/lib/together/invite";
 import { Check } from "lucide-react";
 import { useMemo, useState } from "react";
-import { buildInviteUrl } from "@/lib/together/invite";
-import { useT } from "@/lib/i18n";
+
 import { LinkGlyph } from "./link-glyph";
 
 export function InvitePanel({

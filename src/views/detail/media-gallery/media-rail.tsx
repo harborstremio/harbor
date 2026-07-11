@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function MediaRail({ children }: { children: React.ReactNode }) {
   const trackRef = useRef<HTMLDivElement>(null);

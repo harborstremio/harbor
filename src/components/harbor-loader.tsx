@@ -1,9 +1,9 @@
-import lottie, { type AnimationItem } from "lottie-web";
-import { useCallback, useEffect, useRef, useState } from "react";
-import whiteBoat from "@/assets/lottie/addons-boat-white.json";
 import darkBoat from "@/assets/lottie/addons-boat-dark.json";
+import whiteBoat from "@/assets/lottie/addons-boat-white.json";
 import harborBoat from "@/assets/lottie/harbor-loader.json";
 import { prefetchTopAddonLogos, prefetchedTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
+import lottie, { type AnimationItem } from "lottie-web";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Size = "sm" | "md" | "lg" | "xl";
 
@@ -119,11 +119,7 @@ export function HarborLoader({
   return (
     <div className={`flex flex-col items-center justify-center gap-2 ${className}`}>
       <div ref={ref} className={SIZE_CLASS[size]} aria-hidden />
-      {caption && (
-        <p className="mt-1 text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
-          {caption}
-        </p>
-      )}
+      {caption && <p className="mt-1 text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">{caption}</p>}
     </div>
   );
 }

@@ -1,11 +1,12 @@
-import { Bookmark, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { Poster, usePosterChain } from "@/components/poster";
 import { narrowMediaType, type Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
-import { useT } from "@/lib/i18n";
+import { Bookmark, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { hydrateLibraryMeta } from "./hydrate-meta";
 
 export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () => void }) {
@@ -67,11 +68,7 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
     display.type === "series" ? "series" : "movie",
   );
   return (
-    <div
-      ref={cardRef}
-      className="group relative flex flex-col gap-2 text-start"
-      onMouseLeave={() => setConfirm(false)}
-    >
+    <div ref={cardRef} className="group relative flex flex-col gap-2 text-start" onMouseLeave={() => setConfirm(false)}>
       <div
         role="button"
         tabIndex={0}
@@ -126,9 +123,7 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
         <p className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent">
           {display.name || meta.id}
         </p>
-        {display.releaseInfo && (
-          <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">{display.releaseInfo}</p>
-        )}
+        {display.releaseInfo && <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">{display.releaseInfo}</p>}
       </button>
     </div>
   );

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { fetchMalList, readCachedMalList } from "@/lib/mal/lists";
 import { deleteListEntry, saveListEntry } from "@/lib/mal/mutations";
 import { useMal } from "@/lib/mal/provider";
 import type { MalListEntry, MalListStatus } from "@/lib/mal/types";
-import { useT } from "@/lib/i18n";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { MalEntryCard } from "./mal-entry-card";
 import { FilterBar, Grid, type TypeKey } from "./shared";
 
@@ -130,9 +131,7 @@ export function MalTab() {
       try {
         await deleteListEntry(entry.anime.id);
       } catch {
-        setEntries((prev) =>
-          prev.some((e) => e.anime.id === entry.anime.id) ? prev : [...prev, entry],
-        );
+        setEntries((prev) => (prev.some((e) => e.anime.id === entry.anime.id) ? prev : [...prev, entry]));
       } finally {
         setBusyFor(entry.anime.id, false);
       }

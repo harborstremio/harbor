@@ -1,5 +1,6 @@
 import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import { tmdbDiscover, tmdbMovieRow, tmdbSeriesRow, tmdbTrending } from "@/lib/providers/tmdb";
+
 import { DECADES, LANGUAGES, MOVIE_GENRES, dailySeed, pickRandom, shuffle } from "./tags";
 
 export type FeedItem = {
@@ -52,9 +53,7 @@ export async function extendPool(tmdbKey: string, page: number): Promise<FeedIte
     tmdbMovieRow(tmdbKey, "top_rated", "US", page + 2).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
     tmdbSeriesRow(tmdbKey, "top_rated", page + 2).then((m) => label(m, TAG_SERIES, "top_rated_series")),
     ...genres.map((g) =>
-      tmdbDiscover(tmdbKey, "movie", { ...genreParams(g), page: String(page) }).then((m) =>
-        label(m, g, `genre_${g}`),
-      ),
+      tmdbDiscover(tmdbKey, "movie", { ...genreParams(g), page: String(page) }).then((m) => label(m, g, `genre_${g}`)),
     ),
     ...decades.map((d) =>
       tmdbDiscover(tmdbKey, "movie", { ...decadeParams(d.from, d.to), page: String(page) }).then((m) =>
@@ -89,18 +88,14 @@ async function buildTmdbPool(key: string): Promise<FeedItem[]> {
     tmdbDiscover(key, "movie", hiddenGemParams("2")).then((m) => label(m, TAG_HIDDEN_GEM, "hidden_gems")),
     tmdbDiscover(key, "movie", acclaimedParams()).then((m) => label(m, TAG_ACCLAIMED, "acclaimed")),
     tmdbDiscover(key, "movie", cultParams()).then((m) => label(m, TAG_CULT, "cult_classics")),
-    ...genres.map((g) =>
-      tmdbDiscover(key, "movie", genreParams(g)).then((m) => label(m, g, `genre_${g}`)),
-    ),
+    ...genres.map((g) => tmdbDiscover(key, "movie", genreParams(g)).then((m) => label(m, g, `genre_${g}`))),
     ...decades.map((d) =>
       tmdbDiscover(key, "movie", decadeParams(d.from, d.to)).then((m) =>
         label(m, `From the ${d.label}`, `decade_${d.label}`),
       ),
     ),
     ...languages.map((l) =>
-      tmdbDiscover(key, "movie", languageParams(l.code)).then((m) =>
-        label(m, l.label, `lang_${l.code}`),
-      ),
+      tmdbDiscover(key, "movie", languageParams(l.code)).then((m) => label(m, l.label, `lang_${l.code}`)),
     ),
   ];
 

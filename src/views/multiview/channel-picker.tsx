@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Link2, Loader2, Search, Star, Tv, X } from "lucide-react";
-import { useFavorites } from "@/lib/iptv/favorites";
 import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
-import { findCurrent } from "@/lib/iptv/xmltv";
+import { useFavorites } from "@/lib/iptv/favorites";
 import type { EpgIndex, IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
+import { findCurrent } from "@/lib/iptv/xmltv";
 import type { SlotChannel } from "@/lib/multiview/store";
 import { ChannelCard } from "@/views/live/channel-card";
+import { ChevronDown, Link2, Loader2, Search, Star, Tv, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const ALL = "__ALL__";
 const FAVS = "__FAVS__";
@@ -70,8 +70,7 @@ export function ChannelPicker({
     return scopedChannels.filter((c) => {
       if (groupKey === FAVS && !favorites.has(c.id)) return false;
       if (groupKey !== ALL && groupKey !== FAVS && c.group !== groupKey) return false;
-      if (s && !c.name.toLowerCase().includes(s) && !(c.group ?? "").toLowerCase().includes(s))
-        return false;
+      if (s && !c.name.toLowerCase().includes(s) && !(c.group ?? "").toLowerCase().includes(s)) return false;
       return true;
     });
   }, [scopedChannels, q, groupKey, favorites]);
@@ -90,16 +89,9 @@ export function ChannelPicker({
     <div className="fixed inset-0 z-[300] flex animate-[mvpicker-in_180ms_ease-out] flex-col bg-canvas">
       <style>{MVPICKER_KEYFRAMES}</style>
       <header className="flex shrink-0 items-center gap-3 border-b border-edge-soft/60 px-7 py-4">
-        <span className="font-display text-[18px] font-medium tracking-tight text-ink">
-          Add to tile {slot + 1}
-        </span>
+        <span className="font-display text-[18px] font-medium tracking-tight text-ink">Add to tile {slot + 1}</span>
         {sources.length > 1 && (
-          <PlaylistDropdown
-            sources={sources}
-            playlists={playlists}
-            value={playlistId}
-            onChange={setPlaylistId}
-          />
+          <PlaylistDropdown sources={sources} playlists={playlists} value={playlistId} onChange={setPlaylistId} />
         )}
         <div className="flex h-11 min-w-[260px] flex-1 items-center gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated px-4">
           <Search size={15} strokeWidth={2} className="text-ink-subtle" />
@@ -108,9 +100,7 @@ export function ChannelPicker({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={
-              showLoading
-                ? "Loading channels…"
-                : `Search ${scopedChannels.length.toLocaleString()} channels`
+              showLoading ? "Loading channels…" : `Search ${scopedChannels.length.toLocaleString()} channels`
             }
             className="flex-1 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-subtle/60"
           />
@@ -147,13 +137,7 @@ export function ChannelPicker({
               />
               <div className="my-2 h-px bg-edge-soft/40" />
               {groups.map((g) => (
-                <RailItem
-                  key={g}
-                  k={g}
-                  label={g}
-                  active={groupKey === g}
-                  onClick={() => setGroupKey(g)}
-                />
+                <RailItem key={g} k={g} label={g} active={groupKey === g} onClick={() => setGroupKey(g)} />
               ))}
             </>
           )}
@@ -282,9 +266,7 @@ function PlaylistDropdown({
   }, [open]);
 
   const activeLabel =
-    value === ALL_PLAYLISTS
-      ? "All playlists"
-      : sources.find((s) => s.id === value)?.name ?? "Playlist";
+    value === ALL_PLAYLISTS ? "All playlists" : (sources.find((s) => s.id === value)?.name ?? "Playlist");
 
   return (
     <div ref={wrapRef} className="relative">

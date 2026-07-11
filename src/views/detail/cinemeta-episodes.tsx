@@ -1,15 +1,16 @@
+import { EpisodeWatchedMenu, type WatchedMenuTarget } from "@/components/episode-watched-menu";
+import { Poster } from "@/components/poster";
+import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
+import { getLastSeason, setLastSeason } from "@/lib/last-season";
+import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
+import { manualWatchedState, manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
+import { lastPlayedEpisode } from "@/lib/resume";
+import { useSettings } from "@/lib/settings";
 import { Check, ChevronDown, Play } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import type { Meta } from "@/lib/cinemeta";
-import { EpisodeWatchedMenu, type WatchedMenuTarget } from "@/components/episode-watched-menu";
-import { manualWatchedState, manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
-import { getLastSeason, setLastSeason } from "@/lib/last-season";
-import { lastPlayedEpisode } from "@/lib/resume";
-import { Poster } from "@/components/poster";
-import { useSettings } from "@/lib/settings";
-import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
-import { useT } from "@/lib/i18n";
+
 import { EpisodeDownloadButton } from "./episode-download-button";
 
 type Translator = (key: string, vars?: Record<string, string | number>) => string;
@@ -26,13 +27,7 @@ function pickDefaultSeason(metaId: string, seasons: number[]): number {
   return real[real.length - 1] ?? seasons[seasons.length - 1] ?? 1;
 }
 
-export function CinemetaEpisodes({
-  meta,
-  videos,
-}: {
-  meta: Meta;
-  videos: NonNullable<Meta["videos"]>;
-}) {
+export function CinemetaEpisodes({ meta, videos }: { meta: Meta; videos: NonNullable<Meta["videos"]> }) {
   const t = useT();
   useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const [watchedMenu, setWatchedMenu] = useState<WatchedMenuTarget | null>(null);
@@ -56,7 +51,7 @@ export function CinemetaEpisodes({
       .sort(([a], [b]) => a - b)
       .map(([s, eps]) => ({
         seasonNumber: s,
-        episodes: eps.slice().sort((a, b) => ((a.episode ?? a.number) ?? 0) - ((b.episode ?? b.number) ?? 0)),
+        episodes: eps.slice().sort((a, b) => (a.episode ?? a.number ?? 0) - (b.episode ?? b.number ?? 0)),
       }));
     if (flat.length > 0 && numbered.length === 0) {
       flat.sort((a, b) => (a.released ?? "").localeCompare(b.released ?? ""));
@@ -77,7 +72,10 @@ export function CinemetaEpisodes({
   );
 
   const [active, setActive] = useState<number>(() =>
-    pickDefaultSeason(meta.id, grouped.map((g) => g.seasonNumber)),
+    pickDefaultSeason(
+      meta.id,
+      grouped.map((g) => g.seasonNumber),
+    ),
   );
   const userPickedRef = useRef(false);
 
@@ -87,7 +85,12 @@ export function CinemetaEpisodes({
 
   useEffect(() => {
     if (userPickedRef.current) return;
-    setActive(pickDefaultSeason(meta.id, grouped.map((g) => g.seasonNumber)));
+    setActive(
+      pickDefaultSeason(
+        meta.id,
+        grouped.map((g) => g.seasonNumber),
+      ),
+    );
   }, [meta.id, grouped.length]);
 
   if (grouped.length === 0) return null;
@@ -187,12 +190,7 @@ export function CinemetaEpisodeRow({
         className="flex min-w-0 flex-1 gap-6 text-start"
       >
         <div className="relative w-[200px] shrink-0 overflow-hidden rounded-lg">
-          <Poster
-            src={ep.thumbnail}
-            seed={ep.id ?? `${meta.id}-${ep.season}-${epNumber}`}
-            ratio="landscape"
-            lazy
-          />
+          <Poster src={ep.thumbnail} seed={ep.id ?? `${meta.id}-${ep.season}-${epNumber}`} ratio="landscape" lazy />
           <div className="absolute inset-0 flex items-center justify-center bg-canvas/40 opacity-0 transition-opacity group-hover:opacity-100">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-canvas">
               <Play size={18} fill="currentColor" />
@@ -271,11 +269,7 @@ function SeasonDropdown({
     const up = below < 240 && above > below;
     const maxH = Math.max(160, Math.min(0.6 * window.innerHeight, up ? above : below));
     const right = Math.max(margin, window.innerWidth - r.right);
-    setMenu(
-      up
-        ? { right, bottom: window.innerHeight - r.top + 8, maxH }
-        : { right, top: r.bottom + 8, maxH },
-    );
+    setMenu(up ? { right, bottom: window.innerHeight - r.top + 8, maxH } : { right, top: r.bottom + 8, maxH });
   };
 
   return (
@@ -287,10 +281,7 @@ function SeasonDropdown({
         className="flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-canvas/90 ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-canvas"
       >
         <span>{seasonLabel(t, active)}</span>
-        <ChevronDown
-          size={15}
-          className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown size={15} className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {menu &&
         createPortal(
@@ -311,9 +302,7 @@ function SeasonDropdown({
                       setMenu(null);
                     }}
                     className={`flex w-full items-center px-4 py-2.5 text-start text-[13.5px] transition-colors ${
-                      isActive
-                        ? "bg-ink/10 text-ink"
-                        : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+                      isActive ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
                     }`}
                   >
                     {seasonLabel(t, s)}

@@ -1,4 +1,5 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+
 import { REFRESH_THRESHOLD_SEC } from "./config";
 import type { TraktSession } from "./types";
 
@@ -38,7 +39,11 @@ function read(): TraktSession | null {
     const settingsRaw = activeProfileIsPrimary() ? localStorage.getItem("harbor.settings") : null;
     if (settingsRaw) {
       const s = JSON.parse(settingsRaw);
-      if (typeof s?.traktAccessToken === "string" && typeof s?.traktRefreshToken === "string" && typeof s?.traktExpiresAt === "number") {
+      if (
+        typeof s?.traktAccessToken === "string" &&
+        typeof s?.traktRefreshToken === "string" &&
+        typeof s?.traktExpiresAt === "number"
+      ) {
         const now = Date.now();
         const expiresInSec = Math.floor((s.traktExpiresAt - now) / 1000);
         const session: TraktSession = {

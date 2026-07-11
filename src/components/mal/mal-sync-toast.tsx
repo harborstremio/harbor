@@ -1,6 +1,6 @@
+import { subscribeSync, type SyncEvent } from "@/lib/mal/sync";
 import { Check, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { subscribeSync, type SyncEvent } from "@/lib/mal/sync";
 
 export function MalSyncToast() {
   const [event, setEvent] = useState<SyncEvent | null>(null);
@@ -31,11 +31,7 @@ export function MalSyncToast() {
       <div className="harbor-together-pill flex items-center gap-2.5 rounded-full border border-edge bg-surface/98 py-2 ps-2.5 pe-4 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.75)] animate-popover-in">
         <span
           className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-            good
-              ? "bg-emerald-400/15 text-emerald-300"
-              : syncing
-                ? "text-ink-muted"
-                : "bg-amber-400/15 text-amber-300"
+            good ? "bg-emerald-400/15 text-emerald-300" : syncing ? "text-ink-muted" : "bg-amber-400/15 text-amber-300"
           }`}
         >
           {syncing ? (

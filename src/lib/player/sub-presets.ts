@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from "react";
 import type { Settings } from "@/lib/settings";
+import { useSyncExternalStore } from "react";
 
 export type SubPreset = {
   id: string;

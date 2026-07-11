@@ -1,16 +1,8 @@
 import { FormatBadge, streamBadges } from "@/components/format-badge";
-import type { ScoredStream } from "@/lib/streams/types";
 import { useT } from "@/lib/i18n";
+import type { ScoredStream } from "@/lib/streams/types";
 
-export function StreamPill({
-  stream,
-  cached,
-  onPick,
-}: {
-  stream: ScoredStream;
-  cached: boolean;
-  onPick: () => void;
-}) {
+export function StreamPill({ stream, cached, onPick }: { stream: ScoredStream; cached: boolean; onPick: () => void }) {
   const t = useT();
   void cached;
   const headline = stream.name?.trim() || stream.parsedTitle || stream.title || stream.addonName || t("Source");
@@ -26,15 +18,9 @@ export function StreamPill({
           {badges.slice(0, 3).map((k) => (
             <FormatBadge key={k} kind={k} size="sm" />
           ))}
-          <p className="min-w-0 whitespace-pre-line text-[13px] font-semibold leading-snug text-ink">
-            {headline}
-          </p>
+          <p className="min-w-0 whitespace-pre-line text-[13px] font-semibold leading-snug text-ink">{headline}</p>
         </div>
-        {description && (
-          <p className="whitespace-pre-line text-[12px] leading-snug text-ink-muted">
-            {description}
-          </p>
-        )}
+        {description && <p className="whitespace-pre-line text-[12px] leading-snug text-ink-muted">{description}</p>}
       </div>
     </button>
   );

@@ -1,6 +1,6 @@
-import { Pencil, RotateCcw, Save, Undo2 } from "lucide-react";
-import type { ThemeId } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
+import type { ThemeId } from "@/lib/player-chrome";
+import { Pencil, RotateCcw, Save, Undo2 } from "lucide-react";
 
 export function EditLayoutCard({
   theme,
@@ -34,7 +34,8 @@ export function EditLayoutCard({
               {visibleCount} {t("visible")}
             </>
           )}
-          {hiddenCount > 0 ? t(", {hiddenCount} hidden", { hiddenCount: String(hiddenCount) }) : ""} {t("on the {themeName} theme.", { themeName: themeName })}
+          {hiddenCount > 0 ? t(", {hiddenCount} hidden", { hiddenCount: String(hiddenCount) }) : ""}{" "}
+          {t("on the {themeName} theme.", { themeName: themeName })}
         </p>
       </div>
       <button
@@ -71,9 +72,7 @@ export function ThemeTabs({ value, onChange }: { value: ThemeId; onChange: (v: T
             }`}
           >
             <span className="text-[13.5px] font-semibold">{t.label}</span>
-            <span className={`text-[11.5px] ${selected ? "text-ink-muted" : "text-ink-subtle"}`}>
-              {t.sub}
-            </span>
+            <span className={`text-[11.5px] ${selected ? "text-ink-muted" : "text-ink-subtle"}`}>{t.sub}</span>
           </button>
         );
       })}
@@ -103,9 +102,7 @@ export function FooterBar({
         type="button"
         onClick={onResetAll}
         className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12.5px] font-semibold transition-colors ${
-          confirmingReset
-            ? "bg-danger text-white"
-            : "text-ink-muted hover:bg-raised hover:text-ink"
+          confirmingReset ? "bg-danger text-white" : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         <RotateCcw size={12.5} strokeWidth={2.4} />

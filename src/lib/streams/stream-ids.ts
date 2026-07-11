@@ -19,10 +19,13 @@ export function buildStreamIds(
   if (!episode && defaultVideoId) push(defaultVideoId);
 
   const animeMeta = /^(kitsu|mal|anilist|anidb):/.test(metaId) || episode?.kitsuStreamId != null;
-  const mappedImdb =
-    episode?.imdbSeason != null && episode?.imdbEpisode != null ? (episode.imdbId ?? imdbId) : null;
+  const mappedImdb = episode?.imdbSeason != null && episode?.imdbEpisode != null ? (episode.imdbId ?? imdbId) : null;
   if (mappedImdb && mappedImdb.startsWith("tt")) {
-    push(omitEpisode ? `${mappedImdb}:${episode!.imdbSeason}` : `${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
+    push(
+      omitEpisode
+        ? `${mappedImdb}:${episode!.imdbSeason}`
+        : `${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`,
+    );
   }
 
   if (episode?.kitsuStreamId) {
@@ -32,12 +35,14 @@ export function buildStreamIds(
   } else if ((metaId.startsWith("kitsu:") || metaId.startsWith("mal:")) && !episode) {
     push(metaId);
   } else if (metaId.startsWith("tt") && episode) {
-    if (!animeMeta) push(omitEpisode ? `${metaId}:${episode.season}` : `${metaId}:${episode.season}:${episode.episode}`);
+    if (!animeMeta)
+      push(omitEpisode ? `${metaId}:${episode.season}` : `${metaId}:${episode.season}:${episode.episode}`);
   } else if (metaId.startsWith("tt") && !episode) {
     push(metaId);
   } else if (metaId.startsWith("tmdb:")) {
     if (episode) {
-      if (!animeMeta) push(omitEpisode ? `${metaId}:${episode.season}` : `${metaId}:${episode.season}:${episode.episode}`);
+      if (!animeMeta)
+        push(omitEpisode ? `${metaId}:${episode.season}` : `${metaId}:${episode.season}:${episode.episode}`);
     } else {
       push(metaId);
     }
@@ -48,7 +53,8 @@ export function buildStreamIds(
 
   if (imdbId && imdbId.startsWith("tt")) {
     if (!episode) push(imdbId);
-    else if (!animeMeta) push(omitEpisode ? `${imdbId}:${episode.season}` : `${imdbId}:${episode.season}:${episode.episode}`);
+    else if (!animeMeta)
+      push(omitEpisode ? `${imdbId}:${episode.season}` : `${imdbId}:${episode.season}:${episode.episode}`);
   }
 
   return out;

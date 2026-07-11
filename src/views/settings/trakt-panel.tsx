@@ -1,12 +1,13 @@
-import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { TraktDeviceModal } from "@/components/trakt/trakt-device-modal";
+import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { fetchTraktAvatar } from "@/lib/trakt/profile";
 import { useTrakt } from "@/lib/trakt/provider";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Section, ToggleRow } from "./shared";
 import { WatchlistSync } from "./trakt-panel/watchlist-sync";
 
@@ -59,11 +60,11 @@ export function TraktPanel() {
       {!isConnected ? (
         <section className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
           <div className="flex flex-col gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">
-              {t("Connect your Trakt account")}
-            </h2>
+            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Connect your Trakt account")}</h2>
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.")}
+              {t(
+                "Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.",
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -103,9 +104,7 @@ export function TraktPanel() {
                 </span>
               )}
               <div className="flex flex-col gap-0.5">
-                <span className="text-[14px] font-medium text-ink">
-                  {username ? `@${username}` : t("Connected")}
-                </span>
+                <span className="text-[14px] font-medium text-ink">{username ? `@${username}` : t("Connected")}</span>
                 <span className="text-[12px] text-ink-subtle">
                   {t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
                 </span>
@@ -113,9 +112,7 @@ export function TraktPanel() {
             </div>
             {username && (
               <button
-                onClick={() =>
-                  openUrl(`https://trakt.tv/users/${encodeURIComponent(username)}`)
-                }
+                onClick={() => openUrl(`https://trakt.tv/users/${encodeURIComponent(username)}`)}
                 className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Open profile")}
@@ -129,14 +126,7 @@ export function TraktPanel() {
               sub={t("Wear your Trakt profile picture across Harbor instead of the default.")}
               value={settings.useTraktAvatar}
               onChange={toggleTraktAvatar}
-              leading={
-                <img
-                  src={traktAvatar}
-                  alt=""
-                  draggable={false}
-                  className="h-9 w-9 rounded-full object-cover"
-                />
-              }
+              leading={<img src={traktAvatar} alt="" draggable={false} className="h-9 w-9 rounded-full object-cover" />}
             />
           )}
           {!confirmDisconnect ? (
@@ -182,16 +172,15 @@ export function TraktPanel() {
       {isConnected && (
         <Section
           title={t("Move your watchlist")}
-          subtitle={t("Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.")}
+          subtitle={t(
+            "Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.",
+          )}
         >
           <WatchlistSync />
         </Section>
       )}
 
-      <Section
-        title={t("Comments")}
-        subtitle={t("Community comments from Trakt that appear on movie and show pages.")}
-      >
+      <Section title={t("Comments")} subtitle={t("Community comments from Trakt that appear on movie and show pages.")}>
         <ToggleRow
           label={t("Show comments on detail pages")}
           sub={t("Turn on to show the Trakt comments section on movies, shows, and episodes.")}

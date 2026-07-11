@@ -1,9 +1,10 @@
 import { EpisodePanel } from "@/components/player/episode-panel";
 import { ResumePrompt } from "@/components/player/resume-prompt";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import type { PanelCorner } from "@/lib/player-chrome";
 import type { PlayEpisode } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+
 import { HeaderWarning, NoAudioWarning } from "./header-warning";
 
 export function PanelsLayer({
@@ -114,9 +115,7 @@ export function PanelsLayer({
       )}
 
       {showHeaderWarning && <HeaderWarning onPickAnother={onPickAnother} />}
-      {showNoAudioWarning && (
-        <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />
-      )}
+      {showNoAudioWarning && <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />}
     </>
   );
 }

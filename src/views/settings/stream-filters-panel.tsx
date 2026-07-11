@@ -1,8 +1,9 @@
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
 import { Filter, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
-import { summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+
 import { FilterBuilder } from "../play-picker/filter-builder";
 import { Section } from "./shared";
 
@@ -22,8 +23,7 @@ export function StreamFiltersPanel() {
     setBuilding(false);
   };
 
-  const rename = (id: string, name: string) =>
-    persist(filters.map((f) => (f.id === id ? { ...f, name } : f)));
+  const rename = (id: string, name: string) => persist(filters.map((f) => (f.id === id ? { ...f, name } : f)));
 
   const remove = (id: string) => persist(filters.filter((f) => f.id !== id));
 
@@ -35,7 +35,9 @@ export function StreamFiltersPanel() {
   return (
     <Section
       title={t("Saved stream filters")}
-      subtitle={t("Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.")}
+      subtitle={t(
+        "Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.",
+      )}
     >
       <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-5">
         <div className="flex items-center justify-between gap-3">

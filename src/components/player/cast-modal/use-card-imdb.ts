@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
+import { useEffect, useState } from "react";
 
 const ttCache = new Map<string, string | null>();
 const scoreCache = new Map<string, string | null>();

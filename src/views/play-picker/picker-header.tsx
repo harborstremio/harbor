@@ -1,8 +1,8 @@
-import { ChevronDown, ChevronLeft, RefreshCw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import type { PlayEpisode } from "@/lib/view";
+import { ChevronDown, ChevronLeft, RefreshCw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function PickerHeader({
   meta,
@@ -48,7 +48,8 @@ export function PickerHeader({
       {episode ? (
         <>
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-            {meta.name} · Season {episode.imdbSeason ?? episode.season} · Episode {String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
+            {meta.name} · Season {episode.imdbSeason ?? episode.season} · Episode{" "}
+            {String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
           </p>
           <h1 className="font-display text-[64px] font-medium leading-[0.96] tracking-tight text-ink">
             {episode.name || `Episode ${episode.episode}`}
@@ -63,9 +64,7 @@ export function PickerHeader({
               {meta.genres?.length ? ` · ${meta.genres.slice(0, 2).join(" · ")}` : ""}
             </p>
           )}
-          <h1 className="font-display text-[68px] font-medium leading-[0.96] tracking-tight text-ink">
-            {meta.name}
-          </h1>
+          <h1 className="font-display text-[68px] font-medium leading-[0.96] tracking-tight text-ink">{meta.name}</h1>
         </>
       )}
     </header>
@@ -87,10 +86,7 @@ function CollapsibleOverview({ text }: { text: string }) {
   }, [text, expanded]);
   return (
     <div className="mt-2 max-w-2xl">
-      <p
-        ref={ref}
-        className={`text-[14.5px] leading-relaxed text-ink-muted ${expanded ? "" : "line-clamp-2"}`}
-      >
+      <p ref={ref} className={`text-[14.5px] leading-relaxed text-ink-muted ${expanded ? "" : "line-clamp-2"}`}>
         {text}
       </p>
       {(truncated || expanded) && (

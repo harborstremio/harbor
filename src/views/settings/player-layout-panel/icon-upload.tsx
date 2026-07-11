@@ -6,7 +6,8 @@ const WARN_BYTES = Math.floor(MAX_BYTES * 0.8);
 const MIN_DIM = 16;
 const MAX_DIM = 512;
 
-const SVG_STRIP = /<script[\s\S]*?<\/script>|\son\w+="[^"]*"|\son\w+='[^']*'|\s(?:xlink:href|href)="(?:javascript:|data:text\/html)[^"]*"/gi;
+const SVG_STRIP =
+  /<script[\s\S]*?<\/script>|\son\w+="[^"]*"|\son\w+='[^']*'|\s(?:xlink:href|href)="(?:javascript:|data:text\/html)[^"]*"/gi;
 
 export function IconUpload({
   currentUrl,
@@ -31,14 +32,7 @@ export function IconUpload({
     );
   }
   if (states && states.length > 0) {
-    return (
-      <MultiStateUpload
-        states={states}
-        onUpload={onUpload}
-        onReset={onReset}
-        onApplyToAll={onApplyToAll}
-      />
-    );
+    return <MultiStateUpload states={states} onUpload={onUpload} onReset={onReset} onApplyToAll={onApplyToAll} />;
   }
   return <SingleUpload currentUrl={currentUrl} onUpload={onUpload} onReset={onReset} />;
 }
@@ -66,7 +60,9 @@ function SingleUpload({
       return;
     }
     if (file.size > MAX_BYTES) {
-      window.alert(`Icon must be under ${Math.round(MAX_BYTES / 1024)} KB. Yours is ${Math.round(file.size / 1024)} KB.`);
+      window.alert(
+        `Icon must be under ${Math.round(MAX_BYTES / 1024)} KB. Yours is ${Math.round(file.size / 1024)} KB.`,
+      );
       return;
     }
     setBusy(true);
@@ -101,13 +97,7 @@ function SingleUpload({
         void handleFile(e.dataTransfer.files?.[0]);
       }}
     >
-      <Thumb
-        currentUrl={currentUrl}
-        busy={busy}
-        dragOver={dragOver}
-        warning={warning}
-        label={label}
-      />
+      <Thumb currentUrl={currentUrl} busy={busy} dragOver={dragOver} warning={warning} label={label} />
       <PickButton onPick={(f) => void handleFile(f)} busy={busy} />
       {currentUrl && <ResetButton onClick={onReset} />}
     </div>
@@ -242,9 +232,7 @@ function ResetButton({ onClick }: { onClick: () => void }) {
 }
 
 function Spinner() {
-  return (
-    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />
-  );
+  return <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white/80" />;
 }
 
 function readAsDataURL(file: File): Promise<string> {

@@ -1,4 +1,5 @@
 import { Check, X } from "lucide-react";
+
 import type { ToastInfo } from "./addons-types";
 
 export function Toaster({ toast }: { toast: ToastInfo | null }) {
@@ -20,9 +21,7 @@ export function Toaster({ toast }: { toast: ToastInfo | null }) {
         </span>
         <span className="text-[12.5px] font-medium text-ink">
           {toast.text}
-          {toast.addon && (
-            <span className="text-ink-muted"> · {toast.addon.name}</span>
-          )}
+          {toast.addon && <span className="text-ink-muted"> · {toast.addon.name}</span>}
         </span>
       </div>
     </div>

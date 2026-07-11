@@ -1,9 +1,8 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
-import { dwarn } from "@/lib/debug";
-import { hasUncachedMarker } from "./cached";
 import { magnetFromHash, type DebridResult, type DebridStore, type DirectLink } from "@/lib/debrid/types";
-import { lastEngineAddError, torrentEngineAdd, torrentEngineSelect } from "@/lib/torrent/local-engine";
+import { dwarn } from "@/lib/debug";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { fullDownloadEnabled, startFullDownload } from "@/lib/torrent/full-download";
+import { lastEngineAddError, torrentEngineAdd, torrentEngineSelect } from "@/lib/torrent/local-engine";
 import {
   directTorrentEnabled,
   engineP2pEligible,
@@ -12,8 +11,10 @@ import {
   trackersFromSources,
   type TorrentFile,
 } from "@/lib/torrent/stremio-stream";
-import type { ParsedStream, ScoredStream } from "./types";
+
+import { hasUncachedMarker } from "./cached";
 import { matchEpisodeFileIndex, type EpisodeHint } from "./episode-file";
+import type { ParsedStream, ScoredStream } from "./types";
 
 export type ResolveResult =
   | { ok: true; data: DirectLink; via: string }
@@ -239,18 +240,10 @@ export async function resolveViaDebrids(
   return { ok: false, code: tried[tried.length - 1]?.code ?? "all-debrids-failed", tried };
 }
 
-
-async function tryLocalEngine(
-  stream: ParsedStream | ScoredStream,
-  hint?: EpisodeHint,
-): Promise<DirectLink | null> {
+async function tryLocalEngine(stream: ParsedStream | ScoredStream, hint?: EpisodeHint): Promise<DirectLink | null> {
   if (!stream.infoHash || !localTorrentAllowed()) return null;
   const addIdx = typeof stream.fileIdx === "number" && stream.fileIdx >= 0 ? stream.fileIdx : undefined;
-  const added = await torrentEngineAdd(
-    magnetFromHash(stream.infoHash),
-    trackersFromSources(stream.sources),
-    addIdx,
-  );
+  const added = await torrentEngineAdd(magnetFromHash(stream.infoHash), trackersFromSources(stream.sources), addIdx);
   if (!added || added.files.length === 0) return null;
   const filename = stream.behaviorHints?.filename ?? stream.behaviorHints?.fileName ?? null;
   let chosenIdx = stream.fileIdx;
@@ -271,10 +264,7 @@ async function tryLocalEngine(
   };
 }
 
-async function tryTorrentEngine(
-  stream: ParsedStream | ScoredStream,
-  hint?: EpisodeHint,
-): Promise<DirectLink | null> {
+async function tryTorrentEngine(stream: ParsedStream | ScoredStream, hint?: EpisodeHint): Promise<DirectLink | null> {
   return tryLocalEngine(stream, hint);
 }
 
@@ -288,7 +278,10 @@ function engineFailureCode(): string {
 function selectEngineFileIdx(files: TorrentFile[], season?: number | null, episode?: number | null): number {
   const vids = files.filter(isVideoFile);
   const pool = vids.length > 0 ? vids : files;
-  const mi = matchEpisodeFileIndex(pool.map((f) => f.name), { season: season ?? null, episode: episode ?? null });
+  const mi = matchEpisodeFileIndex(
+    pool.map((f) => f.name),
+    { season: season ?? null, episode: episode ?? null },
+  );
   if (mi >= 0) return pool[mi].idx;
   const largest = pool.reduce((a, b) => (b.length > a.length ? b : a));
   return largest.idx;

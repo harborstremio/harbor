@@ -1,9 +1,9 @@
-import streamsIcon from "@/assets/category/streams.svg";
-import catalogsIcon from "@/assets/category/catalogs.svg";
-import subtitlesIcon from "@/assets/category/subtitles.svg";
 import animeIcon from "@/assets/category/anime.svg";
-import sportsIcon from "@/assets/category/sports.svg";
+import catalogsIcon from "@/assets/category/catalogs.svg";
 import livetvIcon from "@/assets/category/livetv.svg";
+import sportsIcon from "@/assets/category/sports.svg";
+import streamsIcon from "@/assets/category/streams.svg";
+import subtitlesIcon from "@/assets/category/subtitles.svg";
 import { useT } from "@/lib/i18n";
 
 const CATEGORY_TILES: Array<{
@@ -13,12 +13,48 @@ const CATEGORY_TILES: Array<{
   accent: string;
   icon: string;
 }> = [
-  { cat: "http+streams", title: "Streaming", blurb: "Where your video comes from", accent: "from-amber-500/40 to-orange-600/30", icon: streamsIcon },
-  { cat: "metadata", title: "Catalogs", blurb: "Posters, ratings, lists", accent: "from-blue-500/40 to-indigo-600/30", icon: catalogsIcon },
-  { cat: "subtitles", title: "Subtitles", blurb: "Captions in your language", accent: "from-violet-500/40 to-fuchsia-600/30", icon: subtitlesIcon },
-  { cat: "anime", title: "Anime", blurb: "Kitsu, MAL, season-aware", accent: "from-rose-500/40 to-pink-600/30", icon: animeIcon },
-  { cat: "torrents", title: "Torrents", blurb: "P2P sources, debrid-ready", accent: "from-emerald-500/40 to-teal-600/30", icon: sportsIcon },
-  { cat: "live+tv", title: "Live TV", blurb: "OTA channels + IPTV", accent: "from-cyan-500/40 to-sky-600/30", icon: livetvIcon },
+  {
+    cat: "http+streams",
+    title: "Streaming",
+    blurb: "Where your video comes from",
+    accent: "from-amber-500/40 to-orange-600/30",
+    icon: streamsIcon,
+  },
+  {
+    cat: "metadata",
+    title: "Catalogs",
+    blurb: "Posters, ratings, lists",
+    accent: "from-blue-500/40 to-indigo-600/30",
+    icon: catalogsIcon,
+  },
+  {
+    cat: "subtitles",
+    title: "Subtitles",
+    blurb: "Captions in your language",
+    accent: "from-violet-500/40 to-fuchsia-600/30",
+    icon: subtitlesIcon,
+  },
+  {
+    cat: "anime",
+    title: "Anime",
+    blurb: "Kitsu, MAL, season-aware",
+    accent: "from-rose-500/40 to-pink-600/30",
+    icon: animeIcon,
+  },
+  {
+    cat: "torrents",
+    title: "Torrents",
+    blurb: "P2P sources, debrid-ready",
+    accent: "from-emerald-500/40 to-teal-600/30",
+    icon: sportsIcon,
+  },
+  {
+    cat: "live+tv",
+    title: "Live TV",
+    blurb: "OTA channels + IPTV",
+    accent: "from-cyan-500/40 to-sky-600/30",
+    icon: livetvIcon,
+  },
 ];
 
 export function CategoryGrid({ onCategorySelect }: { onCategorySelect: (cat: string) => void }) {
@@ -55,9 +91,7 @@ export function CategoryGrid({ onCategorySelect }: { onCategorySelect: (cat: str
               }`}
             />
             <div className="relative flex flex-1 flex-col justify-end p-5">
-              <h4 className="font-display text-[20px] font-medium tracking-tight text-ink">
-                {t(tile.title)}
-              </h4>
+              <h4 className="font-display text-[20px] font-medium tracking-tight text-ink">{t(tile.title)}</h4>
               <p className="text-[12px] text-ink-muted">{t(tile.blurb)}</p>
             </div>
           </div>

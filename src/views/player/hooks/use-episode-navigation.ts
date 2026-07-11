@@ -1,19 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import type { PlayInvite } from "@/lib/together/protocol";
-import type { PlayerSrc, PlayEpisode } from "@/lib/view";
 import type { Meta } from "@/lib/cinemeta";
-import type { Settings } from "@/lib/settings";
 import type { DebridStore } from "@/lib/debrid/types";
-import { fetchAdjacentEpisodes } from "@/lib/series-episodes";
 import { findLocalEpisode, localShowEpisodes } from "@/lib/local-library";
 import { isLocalUrl } from "@/lib/player/local-url";
+import { fetchAdjacentEpisodes } from "@/lib/series-episodes";
+import type { Settings } from "@/lib/settings";
+import type { PlayInvite } from "@/lib/together/protocol";
+import type { PlayerSrc, PlayEpisode } from "@/lib/view";
 import { localPlayerSrc } from "@/views/library/local-tab/show-group";
+import { useCallback, useEffect, useState } from "react";
 
-type OpenPicker = (
-  meta: Meta,
-  episode?: PlayEpisode,
-  opts?: { autoPlay?: boolean; attempt?: number },
-) => void;
+type OpenPicker = (meta: Meta, episode?: PlayEpisode, opts?: { autoPlay?: boolean; attempt?: number }) => void;
 
 export function useEpisodeNavigation(params: {
   src: PlayerSrc;
@@ -60,11 +56,9 @@ export function useEpisodeNavigation(params: {
         const localNext = i >= 0 && i < eps.length - 1 ? eps[i + 1] : null;
         setAdjacent({
           prev:
-            r.prev ??
-            (localPrev ? { season: localPrev.season as number, episode: localPrev.episode as number } : null),
+            r.prev ?? (localPrev ? { season: localPrev.season as number, episode: localPrev.episode as number } : null),
           next:
-            r.next ??
-            (localNext ? { season: localNext.season as number, episode: localNext.episode as number } : null),
+            r.next ?? (localNext ? { season: localNext.season as number, episode: localNext.episode as number } : null),
         });
         return;
       }

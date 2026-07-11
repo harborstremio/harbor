@@ -1,10 +1,10 @@
-import { ArrowDownToLine, Check, X } from "lucide-react";
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
 import { BetaTag } from "@/components/beta-tag";
 import { useT } from "@/lib/i18n";
 import { installerUrl, type VersionEntry } from "@/lib/updater/versions";
 import { openUrl } from "@/lib/window";
+import { ArrowDownToLine, Check, X } from "lucide-react";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 const RELEASES_URL = "https://github.com/harborstremio/harbor/releases";
 
@@ -60,9 +60,7 @@ export function VersionNotesModal({
           {entry.notes ? (
             <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-ink-muted">{entry.notes}</p>
           ) : (
-            <p className="text-[13px] text-ink-subtle">
-              {t("No notes were published for this build.")}
-            </p>
+            <p className="text-[13px] text-ink-subtle">{t("No notes were published for this build.")}</p>
           )}
         </div>
 

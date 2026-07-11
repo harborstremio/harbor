@@ -1,17 +1,12 @@
-import { useMemo } from "react";
 import type { BrowseCatalog } from "@/lib/catalog-browse";
+import { useMemo } from "react";
 
 export type AddonGroup = { name: string; logo?: string; cats: BrowseCatalog[] };
 export type AddonRef = { name: string; logo?: string; count: number };
 
 export type CatalogFilters = { query: string; typeFilter: string; addonFilter: string };
 
-export function useCatalogList(
-  catalogs: BrowseCatalog[],
-  filters: CatalogFilters,
-  pinned: string[],
-  hidden: string[],
-) {
+export function useCatalogList(catalogs: BrowseCatalog[], filters: CatalogFilters, pinned: string[], hidden: string[]) {
   const types = useMemo(() => {
     const seen = new Set<string>();
     const out: string[] = [];

@@ -1,11 +1,7 @@
 import type { ParsedStream, ScoreReason } from "../types";
 import type { ScoreOptions } from "./scoring-types";
 
-export function bitrateBudgetPenalty(
-  s: ParsedStream,
-  opts: ScoreOptions,
-  cached: boolean,
-): ScoreReason {
+export function bitrateBudgetPenalty(s: ParsedStream, opts: ScoreOptions, cached: boolean): ScoreReason {
   const budget = opts.bandwidthMbps;
   if (budget == null || budget <= 0) return { signal: "bitrate-ok", delta: 0 };
   const headroom = budget * 0.8;

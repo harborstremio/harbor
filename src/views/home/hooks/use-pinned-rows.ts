@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
 import { usePinnedCatalogs } from "@/lib/pinned-catalogs";
 import { buildPinnedCatalogRows, pinnedRowKey } from "@/lib/pinned-catalogs-rows";
 import { useAnilistAnimeRails } from "@/lib/use-anilist-anime-rails";
-import { useMalAnimeRails } from "@/lib/use-mal-anime-rails";
 import { useAnilistTrending, useAnilistTop } from "@/lib/use-anilist-top";
+import { useMalAnimeRails } from "@/lib/use-mal-anime-rails";
+import { useEffect, useMemo, useState } from "react";
+
 import type { HomeRow } from "../home-types";
 
 export function usePinnedRows(): HomeRow[] {
@@ -34,7 +35,15 @@ export function usePinnedRows(): HomeRow[] {
   const extraMap = useMemo(() => {
     const m = new Map<string, HomeRow>();
     if (trendingMetas.length > 0) {
-      m.set("trending", { key: "", type: "series", name: "", metas: trendingMetas, page: 1, hasMore: false, noDedup: true });
+      m.set("trending", {
+        key: "",
+        type: "series",
+        name: "",
+        metas: trendingMetas,
+        page: 1,
+        hasMore: false,
+        noDedup: true,
+      });
     }
     if (topMetas.length > 0) {
       m.set("top100", { key: "", type: "series", name: "", metas: topMetas, page: 1, hasMore: false, noDedup: true });

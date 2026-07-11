@@ -1,4 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnilistApiError } from "@/lib/anilist/client";
+import { useAnilist } from "@/lib/anilist/provider";
+import { isAuthenticated, subscribeSession } from "@/lib/anilist/session";
+import { resolveAnilistMediaId } from "@/lib/anilist/sync";
+import {
+  createThread,
+  deleteThreadComment,
+  fetchThreadComments,
+  fetchThreads,
+  postThreadComment,
+  toggleCommentLike,
+  type AnilistThread,
+  type AnilistThreadComment,
+} from "@/lib/anilist/threads";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useView } from "@/lib/view";
+import { openUrl } from "@/lib/window";
 import {
   ArrowLeft,
   ChevronRight,
@@ -12,24 +29,7 @@ import {
   Eye,
   Lock,
 } from "lucide-react";
-import { useT } from "@/lib/i18n";
-import { useAnilist } from "@/lib/anilist/provider";
-import { resolveAnilistMediaId } from "@/lib/anilist/sync";
-import { isAuthenticated, subscribeSession } from "@/lib/anilist/session";
-import {
-  createThread,
-  deleteThreadComment,
-  fetchThreadComments,
-  fetchThreads,
-  postThreadComment,
-  toggleCommentLike,
-  type AnilistThread,
-  type AnilistThreadComment,
-} from "@/lib/anilist/threads";
-import { AnilistApiError } from "@/lib/anilist/client";
-import { useView } from "@/lib/view";
-import { useSettings } from "@/lib/settings";
-import { openUrl } from "@/lib/window";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 function extractAnilistError(e: unknown, fallback: string): string {
   if (e instanceof AnilistApiError) {
@@ -78,8 +78,7 @@ function sanitizeHtml(html: string): string {
       const value = attr.value.replace(/\s+/g, "").toLowerCase();
       if (
         name.startsWith("on") ||
-        ((name === "href" || name === "src" || name === "xlink:href") &&
-          /^(javascript|data|vbscript):/.test(value))
+        ((name === "href" || name === "src" || name === "xlink:href") && /^(javascript|data|vbscript):/.test(value))
       ) {
         el.removeAttribute(attr.name);
       }
@@ -104,14 +103,7 @@ function HtmlContent({ html, className }: { html: string; className?: string }) 
     }
   }, []);
 
-  return (
-    <div
-      className={className}
-      dir="auto"
-      dangerouslySetInnerHTML={{ __html: safe }}
-      onClick={handleClick}
-    />
-  );
+  return <div className={className} dir="auto" dangerouslySetInnerHTML={{ __html: safe }} onClick={handleClick} />;
 }
 
 function Avatar({ src, name, size = "sm" }: { src: string | null; name: string; size?: "sm" | "md" }) {
@@ -122,7 +114,9 @@ function Avatar({ src, name, size = "sm" }: { src: string | null; name: string; 
 
   if (error || !src) {
     return (
-      <div className={`flex ${dim} shrink-0 items-center justify-center rounded-full bg-ink-muted/20 ${font} font-semibold text-ink-muted`}>
+      <div
+        className={`flex ${dim} shrink-0 items-center justify-center rounded-full bg-ink-muted/20 ${font} font-semibold text-ink-muted`}
+      >
         {initial}
       </div>
     );
@@ -191,7 +185,11 @@ function CommentRow({
               liked ? "text-red-400" : "text-ink-muted hover:text-red-400"
             } ${!connected ? "cursor-not-allowed opacity-50" : ""}`}
           >
-            {liking ? <Loader2 size={12} className="animate-spin" /> : <Heart size={12} fill={liked ? "currentColor" : "none"} />}
+            {liking ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : (
+              <Heart size={12} fill={liked ? "currentColor" : "none"} />
+            )}
             {likeCount}
           </button>
           {comment.user.id === ownerId && (
@@ -218,13 +216,7 @@ function CommentRow({
   );
 }
 
-function ThreadRow({
-  thread,
-  onOpen,
-}: {
-  thread: AnilistThread;
-  onOpen: (thread: AnilistThread) => void;
-}) {
+function ThreadRow({ thread, onOpen }: { thread: AnilistThread; onOpen: (thread: AnilistThread) => void }) {
   return (
     <button
       onClick={() => onOpen(thread)}
@@ -241,9 +233,13 @@ function ThreadRow({
           <span>·</span>
           <span>{timeAgo(thread.createdAt)}</span>
           <span>·</span>
-          <span className="flex items-center gap-1"><MessageCircle size={11} /> {thread.replyCount}</span>
+          <span className="flex items-center gap-1">
+            <MessageCircle size={11} /> {thread.replyCount}
+          </span>
           <span>·</span>
-          <span className="flex items-center gap-1"><Eye size={11} /> {thread.viewCount}</span>
+          <span className="flex items-center gap-1">
+            <Eye size={11} /> {thread.viewCount}
+          </span>
         </div>
       </div>
       <ChevronRight size={16} className="shrink-0 text-ink-muted" />
@@ -306,23 +302,28 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
         if (cancelled) return;
         setResolving(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [harborId]);
 
-  const loadThreads = useCallback(async (p: number) => {
-    if (!mediaId) return;
-    const { threads: data, hasNextPage } = await fetchThreads(mediaId, p, THREADS_PAGE_SIZE);
-    if (p === 1) {
-      setThreads(data);
-    } else {
-      setThreads((prev) => {
-        const ids = new Set(prev.map((x) => x.id));
-        return [...prev, ...data.filter((x) => !ids.has(x.id))];
-      });
-    }
-    setHasMore(hasNextPage);
-    setPage(p);
-  }, [mediaId]);
+  const loadThreads = useCallback(
+    async (p: number) => {
+      if (!mediaId) return;
+      const { threads: data, hasNextPage } = await fetchThreads(mediaId, p, THREADS_PAGE_SIZE);
+      if (p === 1) {
+        setThreads(data);
+      } else {
+        setThreads((prev) => {
+          const ids = new Set(prev.map((x) => x.id));
+          return [...prev, ...data.filter((x) => !ids.has(x.id))];
+        });
+      }
+      setHasMore(hasNextPage);
+      setPage(p);
+    },
+    [mediaId],
+  );
 
   useEffect(() => {
     if (!mediaId || !authed) {
@@ -334,8 +335,12 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
     let cancelled = false;
     loadThreads(1)
       .catch(() => {})
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [mediaId, authed, loadThreads]);
 
   const loadMore = useCallback(async () => {
@@ -510,9 +515,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
               rows={3}
               className="mb-2 w-full resize-none rounded-lg bg-raised px-3 py-2 text-[13px] text-ink outline-none ring-1 ring-edge placeholder:text-ink-muted/50 focus:ring-2 focus:ring-ink/20"
             />
-            {threadError && (
-              <p className="mb-2 text-[12px] text-red-400">{threadError}</p>
-            )}
+            {threadError && <p className="mb-2 text-[12px] text-red-400">{threadError}</p>}
             <div className="flex gap-2">
               <button
                 onClick={handleCreateThread}
@@ -527,7 +530,12 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
                 {t("Create thread")}
               </button>
               <button
-                onClick={() => { setShowNewThread(false); setThreadTitle(""); setThreadBody(""); setThreadError(null); }}
+                onClick={() => {
+                  setShowNewThread(false);
+                  setThreadTitle("");
+                  setThreadBody("");
+                  setThreadError(null);
+                }}
                 className="rounded-lg px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
               >
                 {t("Cancel")}
@@ -541,7 +549,10 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
             <div className="mb-4 rounded-xl bg-elevated/60 p-4 ring-1 ring-edge">
               <h3 className="text-[16px] font-semibold text-ink">{activeThread.title}</h3>
               {activeThread.bodyHtml && (
-                <HtmlContent html={activeThread.bodyHtml} className="mt-1.5 text-[13px] leading-relaxed text-ink-muted" />
+                <HtmlContent
+                  html={activeThread.bodyHtml}
+                  className="mt-1.5 text-[13px] leading-relaxed text-ink-muted"
+                />
               )}
               <div className="mt-2 flex items-center gap-2 text-[11px] text-ink-muted">
                 <Avatar src={activeThread.user.avatar} name={activeThread.user.name} size="sm" />
@@ -592,9 +603,7 @@ export function AnilistComments({ harborId }: { harborId: string | null }) {
                     </button>
                   </div>
                 </div>
-                {postError && (
-                  <p className="mt-2 text-[12px] text-red-400">{postError}</p>
-                )}
+                {postError && <p className="mt-2 text-[12px] text-red-400">{postError}</p>}
               </div>
             )}
 

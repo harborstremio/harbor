@@ -1,6 +1,6 @@
 import { filterChannelsForDisplay } from "./divider-filter";
-import { loadFromShape } from "./ingest/load";
 import { detectProviderShape } from "./ingest/detect";
+import { loadFromShape } from "./ingest/load";
 import type { IptvChannel, IptvPlaylist, IptvPlaylistSource } from "./types";
 import { clearSeriesInfoCache } from "./xtream-vod";
 
@@ -47,10 +47,7 @@ export function clearPlaylistCache(id?: string) {
   notify();
 }
 
-export async function loadPlaylist(
-  src: IptvPlaylistSource,
-  opts?: { force?: boolean },
-): Promise<IptvPlaylist> {
+export async function loadPlaylist(src: IptvPlaylistSource, opts?: { force?: boolean }): Promise<IptvPlaylist> {
   const existing = cache.get(src.id);
   if (!opts?.force && existing && Date.now() - existing.fetchedAt < CACHE_TTL_MS) {
     return existing;

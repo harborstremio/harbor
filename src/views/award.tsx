@@ -1,5 +1,3 @@
-import { LayoutGrid, List } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { laurelColorFor } from "@/components/icons/award-logo";
 import { AWARD_CATALOG } from "@/lib/awards-catalog";
@@ -11,10 +9,13 @@ import {
   type AwardPeople,
 } from "@/lib/awards/award-page";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import type { AwardType } from "@/lib/providers/wikidata";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { LayoutGrid, List } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { AwardHero } from "./award/award-hero";
 import { AwardList } from "./award/award-list";
 import { FilmGrid } from "./award/film-grid";
@@ -130,9 +131,7 @@ export function AwardView({ awardType }: { awardType: AwardType }) {
         <section className="flex max-w-3xl flex-col gap-3">
           <p className="text-[16.5px] leading-[1.65] text-ink-muted">{meta.description}</p>
           {meta.tagline && (
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
-              {meta.tagline}
-            </p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{meta.tagline}</p>
           )}
         </section>
 
@@ -159,7 +158,12 @@ export function AwardView({ awardType }: { awardType: AwardType }) {
               tint={tint}
             />
             <PeopleRail title={t("Celebrated actors")} people={people.actors} loading={loadingPeople} tint={tint} />
-            <PeopleRail title={t("Acclaimed directors")} people={people.directors} loading={loadingPeople} tint={tint} />
+            <PeopleRail
+              title={t("Acclaimed directors")}
+              people={people.directors}
+              loading={loadingPeople}
+              tint={tint}
+            />
             <PeopleRail title={t("Honored writers")} people={people.writers} loading={loadingPeople} tint={tint} />
             {isEmpty && (
               <p className="rounded-2xl border border-edge-soft bg-elevated/30 p-6 text-[14px] leading-relaxed text-ink-muted">
@@ -174,15 +178,7 @@ export function AwardView({ awardType }: { awardType: AwardType }) {
   );
 }
 
-function ModeToggle({
-  mode,
-  onSelect,
-  tint,
-}: {
-  mode: AwardMode;
-  onSelect: (m: AwardMode) => void;
-  tint: string;
-}) {
+function ModeToggle({ mode, onSelect, tint }: { mode: AwardMode; onSelect: (m: AwardMode) => void; tint: string }) {
   const t = useT();
   return (
     <div className="flex w-fit items-center gap-1 self-start rounded-full border border-edge-soft bg-elevated/40 p-1">

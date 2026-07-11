@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { FeedShelf } from "@/components/feed-shelf";
 import type { Meta } from "@/lib/cinemeta";
 import type { RailDef } from "@/lib/feed";
-import { FeedShelf } from "@/components/feed-shelf";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { useEffect } from "react";
 
 export function Rail({
   railId,

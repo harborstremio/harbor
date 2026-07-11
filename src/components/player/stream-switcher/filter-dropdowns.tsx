@@ -1,7 +1,8 @@
-import { Boxes, ChevronDown, Disc3, Gauge } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { useT } from "@/lib/i18n";
+import { Boxes, ChevronDown, Disc3, Gauge } from "lucide-react";
+
 import { QUALITY_BADGE, QUALITY_LABEL, type QualityKey } from "./quality";
 
 export function AddonFilterMenu({
@@ -221,9 +222,7 @@ export function QualityFilterMenu({
           <FormatBadge kind={QUALITY_BADGE[qualityFilter as Exclude<QualityKey, "all">]} size="sm" />
         )}
         <span className="max-w-[120px] truncate">
-          {qualityFilter === "all"
-            ? t("Any quality")
-            : QUALITY_LABEL[qualityFilter as Exclude<QualityKey, "all">]}
+          {qualityFilter === "all" ? t("Any quality") : QUALITY_LABEL[qualityFilter as Exclude<QualityKey, "all">]}
         </span>
         <ChevronDown
           size={12}

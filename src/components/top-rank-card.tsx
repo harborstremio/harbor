@@ -1,19 +1,15 @@
-import { Bookmark } from "lucide-react";
-import { memo, useMemo } from "react";
 import { awardSourceMeta, findTopAward, parseAwardYear } from "@/lib/anime-awards";
 import type { Meta } from "@/lib/cinemeta";
 import { useContextMenu } from "@/lib/context-menu";
-import {
-  hoverPreviewBlur,
-  hoverPreviewEnter,
-  hoverPreviewFocus,
-  hoverPreviewLeave,
-} from "@/lib/hover-preview/store";
+import { hoverPreviewBlur, hoverPreviewEnter, hoverPreviewFocus, hoverPreviewLeave } from "@/lib/hover-preview/store";
 import { useT } from "@/lib/i18n";
 import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
+import { Bookmark } from "lucide-react";
+import { memo, useMemo } from "react";
+
 import { Poster, usePosterChain } from "./poster";
 
 function AwardDot({ name, year }: { name: string; year?: number }) {
@@ -58,12 +54,7 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
   const resolvedImdb = useTmdbImdbId(meta.id);
   const altIds = useMemo(() => [resolvedImdb], [resolvedImdb]);
   const inWatchlist = useInWatchlist(meta.id, altIds);
-  const poster = usePosterChain(
-    settings.rpdbKey,
-    meta.id,
-    meta.poster,
-    meta.type === "series" ? "series" : "movie",
-  );
+  const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
   return (
     <button
       onClick={() => openMeta(meta)}
@@ -101,9 +92,7 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
         {inWatchlist && <WatchlistDot />}
         <AwardDot name={meta.name} year={parseAwardYear(meta.releaseInfo)} />
       </div>
-      <p className="absolute bottom-0 end-0 w-[63%] truncate text-[12px] text-ink-subtle">
-        {meta.name}
-      </p>
+      <p className="absolute bottom-0 end-0 w-[63%] truncate text-[12px] text-ink-subtle">{meta.name}</p>
     </button>
   );
 });
@@ -115,12 +104,7 @@ export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta:
   const resolvedImdb = useTmdbImdbId(meta.id);
   const altIds = useMemo(() => [resolvedImdb], [resolvedImdb]);
   const inWatchlist = useInWatchlist(meta.id, altIds);
-  const poster = usePosterChain(
-    settings.rpdbKey,
-    meta.id,
-    meta.poster,
-    meta.type === "series" ? "series" : "movie",
-  );
+  const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
   return (
     <button
       onClick={() => openMeta(meta)}
@@ -157,9 +141,7 @@ export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta:
         {inWatchlist && <WatchlistDot />}
         <AwardDot name={meta.name} year={parseAwardYear(meta.releaseInfo)} />
       </div>
-      <p className="absolute bottom-0 end-0 w-[63%] truncate text-[12px] text-ink-subtle">
-        {meta.name}
-      </p>
+      <p className="absolute bottom-0 end-0 w-[63%] truncate text-[12px] text-ink-subtle">{meta.name}</p>
     </button>
   );
 });

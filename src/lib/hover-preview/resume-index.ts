@@ -1,6 +1,6 @@
 import type { Meta } from "../cinemeta";
-import { lastPlayedEpisode, readResumeEntry } from "../resume";
 import { tmdbImdbCached } from "../providers/tmdb";
+import { lastPlayedEpisode, readResumeEntry } from "../resume";
 import { episodeFromVideoId, type LibraryItem } from "../stremio";
 import { FRESH_FRACTION, RESUME_MEMO_TTL_MS } from "./timing";
 
@@ -21,8 +21,7 @@ export function publishResumeStates(items: LibraryItem[]): void {
     const dur = item.state?.duration ?? 0;
     const off = item.state?.timeOffset ?? 0;
     const kitsuThreeSeg =
-      /^(kitsu|mal|anilist|anidb):/.test(item._id) &&
-      (item.state?.video_id ?? "").split(":").length === 3;
+      /^(kitsu|mal|anilist|anidb):/.test(item._id) && (item.state?.video_id ?? "").split(":").length === 3;
     const ep =
       item.state?.season && item.state?.episode
         ? { season: item.state.season, episode: item.state.episode }

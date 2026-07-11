@@ -41,15 +41,11 @@ export function placePanel(
     else left = Math.max(edgeInset, Math.min(cx - panelW / 2, window.innerWidth - panelW - edgeInset));
     left = Math.round(left);
   } else {
-    left = Math.round(
-      Math.max(edgeInset, Math.min(cx - panelW / 2, window.innerWidth - panelW - edgeInset)),
-    );
+    left = Math.round(Math.max(edgeInset, Math.min(cx - panelW / 2, window.innerWidth - panelW - edgeInset)));
   }
   const maxTop = window.innerHeight - panelH - GUTTER_PX;
   const top = Math.round(
-    maxTop < topInset
-      ? Math.max(GUTTER_PX, maxTop)
-      : Math.max(topInset, Math.min(cy - panelH / 2, maxTop)),
+    maxTop < topInset ? Math.max(GUTTER_PX, maxTop) : Math.max(topInset, Math.min(cy - panelH / 2, maxTop)),
   );
   return { left, top, originX: Math.round(cx - left), originY: Math.round(cy - top) };
 }

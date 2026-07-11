@@ -1,13 +1,7 @@
-import { fetchAdjacentEpisodes } from "@/lib/series-episodes";
 import type { Meta } from "@/lib/cinemeta";
-import {
-  episodeFromVideoId,
-  isAnimeCwItem,
-  isCwMember,
-  libraryMetaType,
-  type LibraryItem,
-} from "@/lib/stremio";
 import { isCwDismissed } from "@/lib/cw-dismiss";
+import { fetchAdjacentEpisodes } from "@/lib/series-episodes";
+import { episodeFromVideoId, isAnimeCwItem, isCwMember, libraryMetaType, type LibraryItem } from "@/lib/stremio";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
@@ -79,9 +73,7 @@ export async function resurfaceCandidates(
       };
       nx = await fetchAdjacentEpisodes(meta, cur, { tmdbKey: opts.tmdbKey })
         .then((adj) =>
-          adj.next && resurfaceAired(adj.next.airDate)
-            ? { season: adj.next.season, episode: adj.next.episode }
-            : null,
+          adj.next && resurfaceAired(adj.next.airDate) ? { season: adj.next.season, episode: adj.next.episode } : null,
         )
         .catch(() => null);
       cache.set(key, { next: nx, t: now });

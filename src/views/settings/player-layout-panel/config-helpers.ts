@@ -6,13 +6,10 @@ import {
   type PlayerControlId,
   type PlayerSlot,
 } from "@/lib/player-chrome";
+
 import { SLOTS, visibleInSlot } from "./panel-utils";
 
-export function moveControlSlot(
-  config: PlayerChromeConfig,
-  id: PlayerControlId,
-  dir: -1 | 1,
-): PlayerChromeConfig {
+export function moveControlSlot(config: PlayerChromeConfig, id: PlayerControlId, dir: -1 | 1): PlayerChromeConfig {
   const current = config.controls.find((c) => c.id === id);
   if (!current) return config;
   const cursor = SLOTS.indexOf(current.slot);
@@ -22,17 +19,11 @@ export function moveControlSlot(
   const trailingOrder = nextTrailingOrder(config, nextSlot);
   return {
     ...config,
-    controls: config.controls.map((c) =>
-      c.id === id ? { ...c, slot: nextSlot, order: trailingOrder } : c,
-    ),
+    controls: config.controls.map((c) => (c.id === id ? { ...c, slot: nextSlot, order: trailingOrder } : c)),
   };
 }
 
-export function moveControlOrder(
-  config: PlayerChromeConfig,
-  id: PlayerControlId,
-  dir: -1 | 1,
-): PlayerChromeConfig {
+export function moveControlOrder(config: PlayerChromeConfig, id: PlayerControlId, dir: -1 | 1): PlayerChromeConfig {
   const peers = visibleInSlot(config, requireSlot(config, id));
   const idx = peers.findIndex((c) => c.id === id);
   if (idx < 0) return config;

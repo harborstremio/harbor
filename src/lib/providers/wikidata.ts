@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { lruSet } from "../cache";
 
 const CACHE_MAX = 300;
@@ -176,9 +177,7 @@ function parseRows(data: any, result: "won" | "nominated"): AwardEntry[] {
     const date = r.date?.value;
     const year = date ? new Date(date).getFullYear() : undefined;
     const workTitle =
-      typeof r.workLabel?.value === "string" && !r.workLabel.value.startsWith("http")
-        ? r.workLabel.value
-        : undefined;
+      typeof r.workLabel?.value === "string" && !r.workLabel.value.startsWith("http") ? r.workLabel.value : undefined;
     const workImdb = typeof r.workImdb?.value === "string" ? r.workImdb.value : undefined;
     const key = `${awardName}|${category ?? ""}|${year ?? ""}|${result}|${workImdb ?? workTitle ?? ""}`;
     let bucket = map.get(key);

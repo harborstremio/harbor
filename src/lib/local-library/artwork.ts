@@ -1,6 +1,6 @@
-import { fetchMovieAssets } from "@/lib/providers/tmdb/tmdb-images";
-import { imageLangRank } from "@/lib/providers/tmdb/tmdb-image-lang";
 import { IMG } from "@/lib/providers/tmdb/tmdb-client";
+import { imageLangRank } from "@/lib/providers/tmdb/tmdb-image-lang";
+import { fetchMovieAssets } from "@/lib/providers/tmdb/tmdb-images";
 
 export type ArtworkPaths = { poster?: string; logo?: string; backdrop?: string };
 

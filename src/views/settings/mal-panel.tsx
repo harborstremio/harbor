@@ -1,12 +1,13 @@
-import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { MalConnectModal } from "@/components/mal/mal-connect-modal";
+import { useT } from "@/lib/i18n";
 import { fetchMalAvatar } from "@/lib/mal/profile";
 import { useMal } from "@/lib/mal/provider";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Section, ToggleRow } from "./shared";
 
 export function MalPanel() {
@@ -58,9 +59,7 @@ export function MalPanel() {
       {!isConnected ? (
         <section className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
           <div className="flex flex-col gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">
-              {t("Connect your MyAnimeList account")}
-            </h2>
+            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Connect your MyAnimeList account")}</h2>
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
               {t("Sync your MyAnimeList watch progress and list as you finish episodes.")}
             </p>
@@ -84,13 +83,12 @@ export function MalPanel() {
           </div>
         </section>
       ) : (
-        <Section
-          title={t("Connected")}
-          subtitle={t("Harbor keeps your MyAnimeList watch progress in sync.")}
-        >
+        <Section title={t("Connected")} subtitle={t("Harbor keeps your MyAnimeList watch progress in sync.")}>
           <ToggleRow
             label={t("Sync watch progress")}
-            sub={t("Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.")}
+            sub={t(
+              "Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.",
+            )}
             value={settings.malAutoSync}
             onChange={(v) => update({ malAutoSync: v })}
           />
@@ -100,14 +98,7 @@ export function MalPanel() {
               sub={t("Set your MyAnimeList profile picture as your Harbor avatar.")}
               value={settings.useMalAvatar}
               onChange={toggleMalAvatar}
-              leading={
-                <img
-                  src={malAvatar}
-                  alt=""
-                  draggable={false}
-                  className="h-9 w-9 rounded-full object-cover"
-                />
-              }
+              leading={<img src={malAvatar} alt="" draggable={false} className="h-9 w-9 rounded-full object-cover" />}
             />
           )}
           <div className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
@@ -116,9 +107,7 @@ export function MalPanel() {
                 <Check size={16} strokeWidth={2.4} />
               </span>
               <div className="flex flex-col gap-0.5">
-                <span className="text-[14px] font-medium text-ink">
-                  {userName || t("Connected")}
-                </span>
+                <span className="text-[14px] font-medium text-ink">{userName || t("Connected")}</span>
                 <span className="text-[12px] text-ink-subtle">
                   {t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
                 </span>
@@ -126,9 +115,7 @@ export function MalPanel() {
             </div>
             {userName && (
               <button
-                onClick={() =>
-                  openUrl(`https://myanimelist.net/profile/${encodeURIComponent(userName)}`)
-                }
+                onClick={() => openUrl(`https://myanimelist.net/profile/${encodeURIComponent(userName)}`)}
                 className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Open profile")}

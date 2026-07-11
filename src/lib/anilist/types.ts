@@ -14,13 +14,7 @@ export type AnilistViewer = {
   siteUrl: string | null;
 };
 
-export type MediaListStatus =
-  | "CURRENT"
-  | "PLANNING"
-  | "COMPLETED"
-  | "DROPPED"
-  | "PAUSED"
-  | "REPEATING";
+export type MediaListStatus = "CURRENT" | "PLANNING" | "COMPLETED" | "DROPPED" | "PAUSED" | "REPEATING";
 
 export type AnilistMedia = {
   id: number;

@@ -1,17 +1,17 @@
-import crunchyrollData from "@/data/crunchyroll-awards.json";
-import taafData from "@/data/taaf-awards.json";
-import jmafData from "@/data/japan-media-arts-awards.json";
-import kobeData from "@/data/animation-kobe-awards.json";
-import rAnimeData from "@/data/r-anime-awards.json";
-import crunchyrollIcon from "@/assets/awards/crunchyroll-awards.png";
+import kobeIcon from "@/assets/awards/animation-kobe.svg";
 import crunchyrollIconFull from "@/assets/awards/crunchyroll-awards-full.png";
-import taafIcon from "@/assets/awards/taaf.png";
-import taafIconSmall from "@/assets/awards/taaf-icon.png";
+import crunchyrollIcon from "@/assets/awards/crunchyroll-awards.png";
 import jmafIcon from "@/assets/awards/japan-media-arts.webp";
 import jmafIconSmall from "@/assets/awards/jmaf-icon.png";
-import kobeIcon from "@/assets/awards/animation-kobe.svg";
 import rAnimeIcon from "@/assets/awards/r-anime-awards.png";
 import rAnimeIconSmall from "@/assets/awards/r-anime-icon.png";
+import taafIconSmall from "@/assets/awards/taaf-icon.png";
+import taafIcon from "@/assets/awards/taaf.png";
+import kobeData from "@/data/animation-kobe-awards.json";
+import crunchyrollData from "@/data/crunchyroll-awards.json";
+import jmafData from "@/data/japan-media-arts-awards.json";
+import rAnimeData from "@/data/r-anime-awards.json";
+import taafData from "@/data/taaf-awards.json";
 import { animeFranchiseKey, stripFranchiseSuffix } from "@/lib/providers/jikan";
 
 export type AwardSourceId = "crunchyroll" | "taaf" | "jmaf" | "r_anime" | "animation_kobe";
@@ -109,7 +109,7 @@ export type AnimeAwardCategory = {
 };
 
 export function readAnimeAwardSource(source: AwardSourceId): {
-  meta: typeof SOURCE_META[AwardSourceId];
+  meta: (typeof SOURCE_META)[AwardSourceId];
   categories: AnimeAwardCategory[];
   years: number[];
 } {
@@ -247,7 +247,10 @@ export function findTopAward(animeName: string, releaseYear?: number): AwardWin 
   return wins[0] ?? null;
 }
 
-export function groupWinsBySource(animeName: string, releaseYear?: number): Array<{
+export function groupWinsBySource(
+  animeName: string,
+  releaseYear?: number,
+): Array<{
   source: AwardSourceId;
   wins: AwardWin[];
 }> {
@@ -268,10 +271,7 @@ export function groupWinsBySource(animeName: string, releaseYear?: number): Arra
   }
   return Array.from(map.entries())
     .map(([source, w]) => ({ source, wins: w }))
-    .sort(
-      (a, b) =>
-        SOURCE_META[b.source].prestige - SOURCE_META[a.source].prestige,
-    );
+    .sort((a, b) => SOURCE_META[b.source].prestige - SOURCE_META[a.source].prestige);
 }
 
 export function uniqueWinnerFranchisesAcrossSources(): Map<string, AwardWin> {

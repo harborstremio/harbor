@@ -1,5 +1,5 @@
-import { Search, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Search, X } from "lucide-react";
 
 export function EpisodeSearch({
   query,
@@ -13,11 +13,7 @@ export function EpisodeSearch({
   const t = useT();
   return (
     <div className="relative flex items-center">
-      <Search
-        size={15}
-        strokeWidth={2.2}
-        className="pointer-events-none absolute start-3.5 text-ink-subtle"
-      />
+      <Search size={15} strokeWidth={2.2} className="pointer-events-none absolute start-3.5 text-ink-subtle" />
       <input
         type="text"
         value={query}

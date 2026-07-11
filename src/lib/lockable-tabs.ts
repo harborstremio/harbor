@@ -12,16 +12,7 @@ export type LockableTab =
 export type LockableTabMeta = {
   key: LockableTab;
   label: string;
-  iconKey:
-    | "discover"
-    | "movies"
-    | "shows"
-    | "anime"
-    | "sports"
-    | "liveTv"
-    | "calendar"
-    | "library"
-    | "addons";
+  iconKey: "discover" | "movies" | "shows" | "anime" | "sports" | "liveTv" | "calendar" | "library" | "addons";
 };
 
 export const LOCKABLE_TABS: LockableTabMeta[] = [

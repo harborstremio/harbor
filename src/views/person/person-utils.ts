@@ -1,14 +1,6 @@
 import type { PersonCredit } from "@/lib/providers/tmdb";
 
-export const WRITER_JOBS = new Set([
-  "Writer",
-  "Screenplay",
-  "Story",
-  "Teleplay",
-  "Author",
-  "Novel",
-  "Original Story",
-]);
+export const WRITER_JOBS = new Set(["Writer", "Screenplay", "Story", "Teleplay", "Author", "Novel", "Original Story"]);
 export const PRODUCER_JOBS = new Set(["Producer", "Executive Producer"]);
 export const DIRECTOR_JOBS = new Set(["Director"]);
 

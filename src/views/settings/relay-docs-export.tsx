@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { Check, FolderOpen, X } from "lucide-react";
 import { saveTextFileWithPath } from "@/lib/download-text";
+import { Check, FolderOpen, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function DownloadMenu({
   docsRef,
@@ -31,9 +31,7 @@ export function DownloadMenu({
       return;
     }
     const isTxt = kind === "txt";
-    const content = isTxt
-      ? buildTxt(root)
-      : JSON.stringify(buildJson(root), null, 2);
+    const content = isTxt ? buildTxt(root) : JSON.stringify(buildJson(root), null, 2);
     setBusy(true);
     try {
       const { path } = await saveTextFileWithPath(

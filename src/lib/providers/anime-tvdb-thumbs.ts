@@ -5,11 +5,7 @@ export type TvdbThumbIndex = {
   byAbsolute: Map<number, string>;
 };
 
-export async function fetchTvdbThumbs(
-  apiKey: string,
-  seriesId: number,
-  seasons: number[],
-): Promise<TvdbThumbIndex> {
+export async function fetchTvdbThumbs(apiKey: string, seriesId: number, seasons: number[]): Promise<TvdbThumbIndex> {
   const bySeasonEpisode = new Map<string, string>();
   const byAbsolute = new Map<number, string>();
 

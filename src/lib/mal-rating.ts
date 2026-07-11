@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { kitsuToMal } from "@/lib/providers/anime-mapping";
+import { useEffect, useState } from "react";
 
 const JIKAN = "https://api.jikan.moe/v4";
 const CACHE_KEY = "harbor.malscorecache";

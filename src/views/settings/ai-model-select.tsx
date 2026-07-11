@@ -1,8 +1,8 @@
+import { ProviderLogo } from "@/components/ai-provider-logo";
+import { AiModel, PROVIDER_NAME } from "@/lib/ai-models";
+import { useT } from "@/lib/i18n";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
-import { AiModel, PROVIDER_NAME } from "@/lib/ai-models";
-import { ProviderLogo } from "@/components/ai-provider-logo";
 
 export function AiModelSelect({
   value,
@@ -46,9 +46,7 @@ export function AiModelSelect({
               </span>
             </>
           ) : (
-            <span className="flex-1 truncate font-mono text-[12px] text-ink-muted">
-              {value || t("Choose a model")}
-            </span>
+            <span className="flex-1 truncate font-mono text-[12px] text-ink-muted">{value || t("Choose a model")}</span>
           )}
           <ChevronDown
             size={14}
@@ -72,9 +70,7 @@ export function AiModelSelect({
                 >
                   <ProviderLogo provider={m.provider} />
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className={`truncate text-[13px] text-ink ${sel ? "font-semibold" : ""}`}>
-                      {m.label}
-                    </span>
+                    <span className={`truncate text-[13px] text-ink ${sel ? "font-semibold" : ""}`}>{m.label}</span>
                     <span className="flex flex-wrap items-center gap-1">
                       {m.recommended && (
                         <span className="shrink-0 rounded-[5px] bg-accent/15 px-1.5 py-px text-[9px] font-bold uppercase tracking-wide text-accent">

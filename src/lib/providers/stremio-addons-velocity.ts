@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { ensureCommunityIndex, getCommunityIndex, type SACommunity } from "./stremio-addons-index";
 
 const STORAGE_KEY = "harbor.stremio-addons.velocity.v1";
@@ -76,10 +77,7 @@ export function computeMovers(limit = 8): MoverEntry[] {
   const persisted = readPersisted();
   if (persisted.snapshots.length < 2) return [];
   const earliest = persisted.snapshots[0];
-  const windowDays = Math.max(
-    1,
-    Math.round((Date.now() - earliest.fetchedAt) / ONE_DAY_MS),
-  );
+  const windowDays = Math.max(1, Math.round((Date.now() - earliest.fetchedAt) / ONE_DAY_MS));
   const out: MoverEntry[] = [];
   for (const entry of idx.byManifestId.values()) {
     const prior = earliest.stars[entry.uuid];

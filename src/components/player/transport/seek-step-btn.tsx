@@ -1,8 +1,9 @@
-import { RotateCcw, RotateCw } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { SEEK_STEP_OPTIONS, sanitizeSeekStep } from "@/lib/seek-step";
 import { useSettings } from "@/lib/settings";
+import { RotateCcw, RotateCw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { Tooltip } from "./tooltip";
 
 export function SeekStepBtn({
@@ -102,9 +103,7 @@ export function SeekStepBtn({
           }`}
         >
           <Icon size={32} strokeWidth={1.8} />
-          <span className="absolute font-mono text-[10.5px] font-bold tabular-nums leading-none">
-            {seconds}
-          </span>
+          <span className="absolute font-mono text-[10.5px] font-bold tabular-nums leading-none">{seconds}</span>
         </button>
       </Tooltip>
       {pickerOpen && (
@@ -121,9 +120,7 @@ export function SeekStepBtn({
                   type="button"
                   onClick={() => commitChoice(s)}
                   className={`flex h-10 w-12 items-center justify-center rounded-full font-mono text-[12px] font-bold tabular-nums transition-colors ${
-                    isSel
-                      ? "bg-elevated text-ink ring-1 ring-edge"
-                      : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
+                    isSel ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
                   }`}
                   aria-label={t("{word} {n} seconds", { word, n: s })}
                 >

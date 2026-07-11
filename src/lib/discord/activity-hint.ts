@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+
 import type { BrowsePresence } from "./presence";
 
 type Entry = { id: number; hint: BrowsePresence };

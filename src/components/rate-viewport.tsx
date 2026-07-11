@@ -1,7 +1,7 @@
+import { openUrl } from "@/lib/window";
 import { ArrowUpRight, ExternalLink, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { openUrl } from "@/lib/window";
 
 export function RateViewport({
   url,
@@ -65,9 +65,7 @@ export function RateViewport({
           <span className="truncate text-[10.5px] font-bold uppercase tracking-[0.22em] text-accent">
             Rate · powered by stremio-addons.net
           </span>
-          <span className="hidden truncate text-[12.5px] font-medium text-ink-muted sm:inline">
-            · {title}
-          </span>
+          <span className="hidden truncate text-[12.5px] font-medium text-ink-muted sm:inline">· {title}</span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -104,8 +102,8 @@ export function RateViewport({
               stremio-addons.net blocks embedding from outside their site.
             </p>
             <p className="max-w-[40ch] text-[12.5px] text-ink-muted">
-              That&apos;s the correct security posture: it stops other sites from impersonating
-              the rating UI. Use the button below to rate in your browser.
+              That&apos;s the correct security posture: it stops other sites from impersonating the rating UI. Use the
+              button below to rate in your browser.
             </p>
             <button
               type="button"

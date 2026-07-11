@@ -1,19 +1,20 @@
-import { ChevronLeft, X } from "lucide-react";
-import { useCallback, useMemo } from "react";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { HarborLoader } from "@/components/harbor-loader";
 import { useAuth } from "@/lib/auth";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import type { ScoredStream } from "@/lib/streams/types";
 import { hasCachedMarker } from "@/lib/streams/cached";
+import type { ScoredStream } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
 import { useAddons } from "@/views/play-picker/use-addons";
 import { useImdbId } from "@/views/play-picker/use-imdb-id";
 import { usePipelineResult } from "@/views/play-picker/use-pipeline-result";
 import { useStreamIds } from "@/views/play-picker/use-stream-ids";
-import { useT } from "@/lib/i18n";
+import { ChevronLeft, X } from "lucide-react";
+import { useCallback, useMemo } from "react";
+
 import { AddonGroup } from "./addon-group";
 
 export function StreamsView({
@@ -100,9 +101,7 @@ export function StreamsView({
           <ChevronLeft size={20} strokeWidth={2.2} />
         </button>
         <div className="min-w-0 flex-1">
-          <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-            {epLabel}
-          </p>
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">{epLabel}</p>
           <h2 className="mt-0.5 truncate font-display text-[18px] font-semibold leading-tight text-ink">
             {episode.name ?? t("Episode {n}", { n: episode.episode })}
           </h2>

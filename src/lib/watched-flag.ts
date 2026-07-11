@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+
 import { isMovieWatchedLocal, subscribeMovieWatched } from "./movie-watched";
 
 const KEY = "harbor.watchedFlag.v1";

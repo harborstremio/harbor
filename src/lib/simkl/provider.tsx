@@ -1,23 +1,9 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  completeAuthorization,
-  pollForToken,
-  requestPin,
-  type PollHandle,
-  type PollResult,
-} from "./device-auth";
-import { getSession, setSession, subscribeSession } from "./session";
-import { stremioIdToSimklTarget } from "./ids";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+import { completeAuthorization, pollForToken, requestPin, type PollHandle, type PollResult } from "./device-auth";
 import { addToHistory } from "./history";
+import { stremioIdToSimklTarget } from "./ids";
+import { getSession, setSession, subscribeSession } from "./session";
 import type { SimklPin, SimklSession, SimklTarget } from "./types";
 
 export type ConnectState =
@@ -39,10 +25,7 @@ type Value = {
   cancelConnect: () => void;
   disconnect: () => void;
   markWatched: (args: WatchArgs) => Promise<void>;
-  resolveTarget: (
-    metaId: string,
-    episode?: { season: number; episode: number },
-  ) => SimklTarget | null;
+  resolveTarget: (metaId: string, episode?: { season: number; episode: number }) => SimklTarget | null;
 };
 
 const Ctx = createContext<Value | null>(null);
@@ -101,13 +84,10 @@ export function SimklProvider({ children }: { children: ReactNode }) {
     setConnectState({ kind: "idle" });
   }, []);
 
-  const resolveTarget = useCallback(
-    (metaId: string, episode?: { season: number; episode: number }) => {
-      const r = stremioIdToSimklTarget(metaId, episode);
-      return r.ok ? r.target : null;
-    },
-    [],
-  );
+  const resolveTarget = useCallback((metaId: string, episode?: { season: number; episode: number }) => {
+    const r = stremioIdToSimklTarget(metaId, episode);
+    return r.ok ? r.target : null;
+  }, []);
 
   const markWatched = useCallback(
     async (args: WatchArgs) => {

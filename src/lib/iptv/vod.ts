@@ -39,7 +39,10 @@ export function isExternalPlaylistId(id: string): boolean {
 }
 
 function norm(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 function numberFallbackEpisodes(episodes: VodEpisode[]): void {
@@ -51,10 +54,7 @@ function numberFallbackEpisodes(episodes: VodEpisode[]): void {
   });
 }
 
-export function buildVodLibrary(
-  playlists: Iterable<IptvPlaylist>,
-  names: Map<string, string>,
-): VodLibrary {
+export function buildVodLibrary(playlists: Iterable<IptvPlaylist>, names: Map<string, string>): VodLibrary {
   const movies: VodMovie[] = [];
   const movieSeen = new Set<string>();
   const seriesMap = new Map<string, VodSeries>();

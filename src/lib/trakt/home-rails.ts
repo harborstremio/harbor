@@ -1,12 +1,10 @@
+import type { HomeRow } from "@/views/home/home-types";
+
 import { fetchUpcomingEpisodes } from "./calendar";
 import { hydrateTraktItems } from "./hydrate";
-import {
-  fetchMovieRecommendations,
-  fetchShowRecommendations,
-} from "./recommendations";
+import { fetchMovieRecommendations, fetchShowRecommendations } from "./recommendations";
 import type { TraktItem } from "./types";
 import { fetchWatchlist } from "./watchlist";
-import type { HomeRow } from "@/views/home/home-types";
 
 const PER_RAIL = 24;
 
@@ -27,13 +25,12 @@ export async function buildTraktHomeRows(tmdbKey: string): Promise<HomeRow[]> {
     })),
   );
 
-  const [watchlistMetas, upcomingMetas, recMovieMetas, recShowMetas] =
-    await Promise.all([
-      hydrateTraktItems(watchlist.slice(0, PER_RAIL), tmdbKey),
-      hydrateTraktItems(upcomingItems.slice(0, PER_RAIL), tmdbKey),
-      hydrateTraktItems(movieRecs.slice(0, PER_RAIL), tmdbKey),
-      hydrateTraktItems(showRecs.slice(0, PER_RAIL), tmdbKey),
-    ]);
+  const [watchlistMetas, upcomingMetas, recMovieMetas, recShowMetas] = await Promise.all([
+    hydrateTraktItems(watchlist.slice(0, PER_RAIL), tmdbKey),
+    hydrateTraktItems(upcomingItems.slice(0, PER_RAIL), tmdbKey),
+    hydrateTraktItems(movieRecs.slice(0, PER_RAIL), tmdbKey),
+    hydrateTraktItems(showRecs.slice(0, PER_RAIL), tmdbKey),
+  ]);
 
   const rows: HomeRow[] = [];
   const pager = (items: TraktItem[]) => async (page: number) => {

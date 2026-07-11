@@ -107,9 +107,7 @@ export function ToggleRow({
       onClick={onToggle}
       disabled={disabled}
       className={`flex items-center gap-3 rounded-xl border px-4 py-3.5 text-start transition-colors ${
-        disabled
-          ? "cursor-not-allowed border-edge-soft/40 opacity-60"
-          : "border-edge-soft hover:border-edge"
+        disabled ? "cursor-not-allowed border-edge-soft/40 opacity-60" : "border-edge-soft hover:border-edge"
       }`}
     >
       {icon && <span className="text-ink-muted">{icon}</span>}

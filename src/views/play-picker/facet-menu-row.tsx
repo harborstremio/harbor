@@ -1,7 +1,8 @@
-import { Check, ChevronDown, Pencil, Plus } from "lucide-react";
-import { useState } from "react";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+import { Check, ChevronDown, Pencil, Plus } from "lucide-react";
+import { useState } from "react";
+
 import { facetBadge } from "./filter-builder/badge-maps";
 import type { FacetDim, FacetOption } from "./stream-facets";
 
@@ -185,11 +186,7 @@ function MenuItem({
       )}
       <span className="flex-1 truncate">{label}</span>
       <span className="text-[11.5px] text-ink-subtle">{count}</span>
-      <Check
-        size={13}
-        strokeWidth={2.6}
-        className={selected ? "text-ink" : "invisible"}
-      />
+      <Check size={13} strokeWidth={2.6} className={selected ? "text-ink" : "invisible"} />
     </button>
   );
 }

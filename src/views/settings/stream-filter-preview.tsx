@@ -1,4 +1,3 @@
-import { Check, ShieldCheck } from "lucide-react";
 import cometLogo from "@/assets/addon-logos/comet.png";
 import eztvLogo from "@/assets/addon-logos/eztv.png";
 import mediafusionLogo from "@/assets/addon-logos/mediafusion.png";
@@ -6,6 +5,7 @@ import tpbLogo from "@/assets/addon-logos/thepiratebay.png";
 import torrentioLogo from "@/assets/addon-logos/torrentio.png";
 import ytsLogo from "@/assets/addon-logos/yts.png";
 import { useT } from "@/lib/i18n";
+import { Check, ShieldCheck } from "lucide-react";
 
 type Level = "strict" | "balanced" | "off";
 type Reason = "clean" | "cam" | "mismatch" | "oversized" | "malware";
@@ -26,11 +26,21 @@ const REASON_LABEL: Record<Exclude<Reason, "clean">, string> = {
 };
 
 const STREAMS: Array<{ logo: string; badges: string[]; name: string; reason: Reason }> = [
-  { logo: torrentioLogo, badges: ["2160p", "HDR", "Atmos"], name: "Dune.Part.Two.2024.2160p.WEB-DL.x265-NTb", reason: "clean" },
+  {
+    logo: torrentioLogo,
+    badges: ["2160p", "HDR", "Atmos"],
+    name: "Dune.Part.Two.2024.2160p.WEB-DL.x265-NTb",
+    reason: "clean",
+  },
   { logo: ytsLogo, badges: ["1080p"], name: "Dune.Part.Two.2024.1080p.BluRay.x264-PiGNUS", reason: "clean" },
   { logo: tpbLogo, badges: ["CAM"], name: "Dune.Part.Two.2024.HDCAM.c1nem4", reason: "cam" },
   { logo: cometLogo, badges: ["1080p"], name: "Dune.Part.One.2021.1080p.WEBRip-OUTDATED", reason: "mismatch" },
-  { logo: mediafusionLogo, badges: ["2160p", "REMUX"], name: "Dune.Part.Two.2024.REMUX.2160p.94GB", reason: "oversized" },
+  {
+    logo: mediafusionLogo,
+    badges: ["2160p", "REMUX"],
+    name: "Dune.Part.Two.2024.REMUX.2160p.94GB",
+    reason: "oversized",
+  },
   { logo: eztvLogo, badges: ["EXE"], name: "Dune2_HD_Player_setup.exe", reason: "malware" },
 ];
 
@@ -50,7 +60,9 @@ function Badge({ label }: { label: string }) {
             ? "bg-fuchsia-500/15 text-fuchsia-300 ring-fuchsia-500/30"
             : "bg-elevated text-ink-muted ring-edge-soft";
   return (
-    <span className={`flex h-5 shrink-0 items-center rounded-[5px] px-1.5 text-[9.5px] font-bold tracking-wide ring-1 ${tone}`}>
+    <span
+      className={`flex h-5 shrink-0 items-center rounded-[5px] px-1.5 text-[9.5px] font-bold tracking-wide ring-1 ${tone}`}
+    >
       {label}
     </span>
   );

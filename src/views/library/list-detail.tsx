@@ -1,9 +1,10 @@
-import { ArrowLeft, Layers, X } from "lucide-react";
+import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
 import { MAX_ITEMS, removeFromList, useList, type ListItem } from "@/lib/custom-lists";
 import { relativeTime } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
-import { PickCard } from "@/components/pick-card";
+import { ArrowLeft, Layers, X } from "lucide-react";
+
 import { AddTitleSearch } from "./list-detail/add-title-search";
 import { ListSettingsMenu } from "./list-detail/list-settings-menu";
 import { Grid } from "./shared";
@@ -72,7 +73,7 @@ function EmptyList() {
       <Layers size={26} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[15px] font-semibold text-ink">{t("Nothing here yet")}</h2>
       <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-        {t("Add titles with the search above, or hit \"Add to list\" on any movie or show's page.")}
+        {t('Add titles with the search above, or hit "Add to list" on any movie or show\'s page.')}
       </p>
     </div>
   );

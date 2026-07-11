@@ -1,19 +1,16 @@
-import { useEffect, useMemo } from "react";
-import { sortChannelsByGroupRelevance, sortGroupsByRelevance } from "@/lib/iptv/group-relevance";
-import { arabicAwareMatch } from "@/lib/iptv/rtl";
-import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
-import {
-  filterChannelsByRegion,
-  promoteTopChannelsToFront,
-  rowsForRegion,
-} from "@/lib/iptv/top-networks";
-import type { IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
-import { useChannelFilter } from "./use-channel-filter";
-import { usePinnedOrder } from "@/lib/iptv/pins";
-import { useChannelStatsVersion } from "@/lib/iptv/channel-stats";
 import { applyUserChannelOrder, applyUserGroupOrder } from "@/lib/iptv/channel-order";
+import { useChannelStatsVersion } from "@/lib/iptv/channel-stats";
+import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
 import { useGroupPrefs } from "@/lib/iptv/group-order";
+import { sortChannelsByGroupRelevance, sortGroupsByRelevance } from "@/lib/iptv/group-relevance";
+import { usePinnedOrder } from "@/lib/iptv/pins";
+import { arabicAwareMatch } from "@/lib/iptv/rtl";
+import { filterChannelsByRegion, promoteTopChannelsToFront, rowsForRegion } from "@/lib/iptv/top-networks";
+import type { IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
 import { isLiveChannel } from "@/lib/iptv/vod-classify";
+import { useEffect, useMemo } from "react";
+
+import { useChannelFilter } from "./use-channel-filter";
 
 type Favorites = ReturnType<typeof useFavorites>;
 type ViewMode = "home" | "grid" | "guide" | "multiview";
@@ -29,17 +26,13 @@ export function useChannelPipeline(params: {
   allPlaylists: Map<string, IptvPlaylist>;
   allSources: IptvPlaylistSource[];
 }) {
-  const { playlist, region, preferredLanguages, mode, group, query, favorites, allPlaylists, allSources } =
-    params;
+  const { playlist, region, preferredLanguages, mode, group, query, favorites, allPlaylists, allSources } = params;
   const inFavorites = group === FAVORITES_GROUP_KEY;
   const langKey = preferredLanguages.join(",");
   const sourceId = playlist?.id ?? "";
   const groupPrefs = useGroupPrefs(sourceId);
 
-  const liveChannels = useMemo(
-    () => (playlist?.channels ?? []).filter(isLiveChannel),
-    [playlist?.channels],
-  );
+  const liveChannels = useMemo(() => (playlist?.channels ?? []).filter(isLiveChannel), [playlist?.channels]);
   const sortedChannels = useMemo(
     () => sortChannelsByGroupRelevance(liveChannels, region, preferredLanguages),
     [liveChannels, region, langKey],
@@ -64,18 +57,12 @@ export function useChannelPipeline(params: {
     () => sortGroupsByRelevance(liveGroups, region, preferredLanguages),
     [liveGroups, region, langKey],
   );
-  const userGroups = useMemo(
-    () => applyUserGroupOrder(sortedGroups, groupPrefs),
-    [sortedGroups, groupPrefs],
-  );
+  const userGroups = useMemo(() => applyUserGroupOrder(sortedGroups, groupPrefs), [sortedGroups, groupPrefs]);
 
   const topRows = useMemo(() => rowsForRegion(region), [region]);
   const showTopRows = mode === "grid" && group === null && !query.trim() && topRows.length > 0;
 
-  const regionChannels = useMemo(
-    () => filterChannelsByRegion(shownChannels, region),
-    [shownChannels, region],
-  );
+  const regionChannels = useMemo(() => filterChannelsByRegion(shownChannels, region), [shownChannels, region]);
 
   const orderedChannels = useMemo(() => {
     if (mode !== "guide") return shownChannels;
@@ -148,5 +135,15 @@ export function useChannelPipeline(params: {
     return m;
   }, [shownChannels]);
 
-  return { sortedGroups: userGroups, topRows, showTopRows, regionChannels, shownChannels, mvChannels, visible, counts, groupLogos };
+  return {
+    sortedGroups: userGroups,
+    topRows,
+    showTopRows,
+    regionChannels,
+    shownChannels,
+    mvChannels,
+    visible,
+    counts,
+    groupLogos,
+  };
 }

@@ -57,7 +57,11 @@ export function isValidSourceRow(data: any): data is SourceRow {
     if (hasCatalogSources) {
       for (const source of folder.catalogSources!) {
         if (!source || typeof source !== "object") return false;
-        if (typeof source.addonId !== "string" || typeof source.type !== "string" || typeof source.catalogId !== "string") {
+        if (
+          typeof source.addonId !== "string" ||
+          typeof source.type !== "string" ||
+          typeof source.catalogId !== "string"
+        ) {
           return false;
         }
       }

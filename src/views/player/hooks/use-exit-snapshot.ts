@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef, type RefObject } from "react";
-import { captureFrame, captureMpvFrame, saveSnapshot } from "@/lib/snapshots";
-import { useSettings } from "@/lib/settings";
-import { trickplayGet } from "@/lib/trickplay";
-import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerStatus } from "@/lib/player/bridge";
-import type { PlayerSrc } from "@/lib/view";
+import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import { useSettings } from "@/lib/settings";
+import { captureFrame, captureMpvFrame, saveSnapshot } from "@/lib/snapshots";
 import { cloudWriteId } from "@/lib/stremio";
+import { trickplayGet } from "@/lib/trickplay";
+import type { PlayerSrc } from "@/lib/view";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 
 const CACHE_MS = 12000;
 const WARM_MS = 4000;
@@ -40,10 +40,19 @@ export function useExitSnapshot(params: {
   resolvedImdbVerified: boolean;
   seekPreviewEnabled: boolean;
 }) {
-  const { src, engine, status, durationSec, videoMountRef, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled } = params;
+  const { src, engine, status, durationSec, videoMountRef, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled } =
+    params;
   const { settings } = useSettings();
   const fullQuality = settings.cwSnapshotFullQuality;
-  const latest = useRef({ src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality });
+  const latest = useRef({
+    src,
+    engine,
+    durationSec,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    seekPreviewEnabled,
+    fullQuality,
+  });
   latest.current = { src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality };
   const lastGoodRef = useRef<Cached | null>(null);
   const capturedKeyRef = useRef<string | null>(null);
@@ -85,10 +94,7 @@ export function useExitSnapshot(params: {
       return;
     }
     const budget = lastGoodRef.current ? EXIT_GRAB_MS : GRAB_FULL_MS;
-    const fresh = await Promise.race([
-      grabFrame(true),
-      new Promise<null>((r) => setTimeout(() => r(null), budget)),
-    ]);
+    const fresh = await Promise.race([grabFrame(true), new Promise<null>((r) => setTimeout(() => r(null), budget))]);
     if (fresh && latest.current.src.meta.id === s.meta.id) {
       lastGoodRef.current = { img: fresh, id };
     }

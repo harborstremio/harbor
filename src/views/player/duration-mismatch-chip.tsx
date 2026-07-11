@@ -1,8 +1,9 @@
-import { X } from "lucide-react";
-import { useState } from "react";
+import { useT } from "@/lib/i18n";
 import type { SourceDescriptor } from "@/lib/together/protocol";
 import { formatRuntime } from "@/lib/together/source-descriptor";
-import { useT } from "@/lib/i18n";
+import { X } from "lucide-react";
+import { useState } from "react";
+
 import { DURATION_MISMATCH_S } from "./player-utils";
 
 export function DurationMismatchChip(props: {

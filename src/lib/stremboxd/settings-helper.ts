@@ -1,5 +1,6 @@
-import { encodeStremboxdConfig, type StremboxdPublicConfig } from "./config";
 import type { LetterboxdSettings } from "@/lib/settings/types";
+
+import { encodeStremboxdConfig, type StremboxdPublicConfig } from "./config";
 
 export function buildStremboxdConfig(settings: LetterboxdSettings): string {
   const selected = new Set(settings.selectedCatalogs);

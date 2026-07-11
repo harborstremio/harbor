@@ -1,9 +1,9 @@
-import { ArrowRight, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useTogether } from "@/lib/together/provider";
 import { useView } from "@/lib/view";
-import type { Meta } from "@/lib/cinemeta";
+import { ArrowRight, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const AUTO_JOIN_MS = 4000;
 const TICK_MS = 60;
@@ -99,9 +99,7 @@ export function TogetherInviteToast() {
           </span>
           <span className="flex items-center gap-2 truncate text-[13.5px] font-semibold text-ink">
             <span className="max-w-[280px] truncate">{invite.mediaTitle}</span>
-            {subtitle && (
-              <span className="font-mono text-[11px] tracking-[0.1em] text-ink-subtle">{subtitle}</span>
-            )}
+            {subtitle && <span className="font-mono text-[11px] tracking-[0.1em] text-ink-subtle">{subtitle}</span>}
           </span>
         </div>
 

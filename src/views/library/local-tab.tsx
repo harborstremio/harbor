@@ -1,5 +1,5 @@
-import { AlertTriangle, CheckSquare, FolderPlus, HardDrive, Loader2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { confirmDialog } from "@/lib/dialog";
+import { useT } from "@/lib/i18n";
 import {
   addLocalEntries,
   localEntryToMeta,
@@ -10,20 +10,21 @@ import {
   useLocalLibrary,
   type LocalEntry,
 } from "@/lib/local-library";
-import { clearSidecarCache, countNfoFor } from "@/lib/local-library/sidecars";
 import { exportMovie, exportSeries, type ExportSizes } from "@/lib/local-library/export";
-import { confirmDialog } from "@/lib/dialog";
+import { clearSidecarCache, countNfoFor } from "@/lib/local-library/sidecars";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
-import { FilterBar, Grid, type TypeKey } from "./shared";
-import { groupLocal, ShowGroupCard } from "./local-tab/show-group";
-import { ScanModeModal, type ScanMode } from "./local-tab/scan-mode-modal";
-import { IdentifyModal, type IdentifyResolution } from "./local-tab/identify-modal";
+import { AlertTriangle, CheckSquare, FolderPlus, HardDrive, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { type LocalCardProps } from "./local-tab/card-actions";
+import { IdentifyModal, type IdentifyResolution } from "./local-tab/identify-modal";
 import { OwnedCard } from "./local-tab/movie-card";
-import { BulkBar, SortMenu, sortGroups, type LocalSortKey, type SortDir } from "./local-tab/toolbar";
 import { buildNfoEntry, buildTmdbEntry, type ScannedFile } from "./local-tab/scan";
+import { ScanModeModal, type ScanMode } from "./local-tab/scan-mode-modal";
+import { groupLocal, ShowGroupCard } from "./local-tab/show-group";
+import { BulkBar, SortMenu, sortGroups, type LocalSortKey, type SortDir } from "./local-tab/toolbar";
+import { FilterBar, Grid, type TypeKey } from "./shared";
 
 type PendingScan = { folder: string; files: ScannedFile[]; nfoCount: number };
 type Tr = (key: string, vars?: Record<string, string | number>) => string;
@@ -100,9 +101,7 @@ export function LocalTab() {
           const f = files[i];
           const parsed = parseFilename(f.filename);
           const built =
-            mode === "nfo"
-              ? await buildNfoEntry(f, parsed, tmdbKey)
-              : await buildTmdbEntry(f, parsed, tmdbKey);
+            mode === "nfo" ? await buildNfoEntry(f, parsed, tmdbKey) : await buildTmdbEntry(f, parsed, tmdbKey);
           entries.push(built);
           setProgress({ found: i + 1, total: files.length });
         }
@@ -179,7 +178,11 @@ export function LocalTab() {
         const res = await exportSeries(key, eps, exportSizes);
         if (res.ok) {
           ok += 1;
-          if (res.localArt) updateLocalEntries(eps.map((e) => e.id), { localArt: res.localArt });
+          if (res.localArt)
+            updateLocalEntries(
+              eps.map((e) => e.id),
+              { localArt: res.localArt },
+            );
         } else {
           fail += 1;
           reason = reason ?? res.reason;
@@ -192,9 +195,7 @@ export function LocalTab() {
 
   const onExportOne = useCallback(
     async (entryOrList: LocalEntry | LocalEntry[]) => {
-      const list = (Array.isArray(entryOrList) ? entryOrList : [entryOrList]).filter(
-        (e) => e.tmdbId != null,
-      );
+      const list = (Array.isArray(entryOrList) ? entryOrList : [entryOrList]).filter((e) => e.tmdbId != null);
       if (list.length === 0) {
         setToast(t("Identify this title before exporting."));
         return;
@@ -229,9 +230,7 @@ export function LocalTab() {
   const bulkDelete = useCallback(async () => {
     if (selected.size === 0) return;
     const n = selected.size;
-    const ok = await confirmDialog(
-      t("Remove {n} items from your library? Files on your disk are not deleted.", { n }),
-    );
+    const ok = await confirmDialog(t("Remove {n} items from your library? Files on your disk are not deleted.", { n }));
     if (!ok) return;
     selected.forEach((id) => removeLocalEntry(id));
     exitSelect();
@@ -283,10 +282,7 @@ export function LocalTab() {
       return true;
     });
   }, [items, type, query]);
-  const groups = useMemo(
-    () => sortGroups(groupLocal(visible), sortKey, sortDir),
-    [visible, sortKey, sortDir],
-  );
+  const groups = useMemo(() => sortGroups(groupLocal(visible), sortKey, sortDir), [visible, sortKey, sortDir]);
 
   const openFirstReview = useCallback(() => {
     if (reviewGroups[0]) setIdentify(reviewGroups[0]);
@@ -363,19 +359,12 @@ export function LocalTab() {
         counts={counts}
         trailing={
           <div className="ms-auto flex items-center gap-2">
-            <SortMenu
-              sortKey={sortKey}
-              setSortKey={setSortKey}
-              sortDir={sortDir}
-              setSortDir={setSortDir}
-            />
+            <SortMenu sortKey={sortKey} setSortKey={setSortKey} sortDir={sortDir} setSortDir={setSortDir} />
             <button
               type="button"
               onClick={() => (selectMode ? exitSelect() : setSelectMode(true))}
               className={`flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[12.5px] font-semibold transition-colors ${
-                selectMode
-                  ? "bg-ink text-canvas"
-                  : "bg-raised text-ink-muted hover:bg-elevated hover:text-ink"
+                selectMode ? "bg-ink text-canvas" : "bg-raised text-ink-muted hover:bg-elevated hover:text-ink"
               }`}
             >
               <CheckSquare size={13} strokeWidth={2.2} />
@@ -387,11 +376,7 @@ export function LocalTab() {
               disabled={busy}
               className="flex h-9 items-center gap-1.5 rounded-full bg-raised px-3.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-wait disabled:opacity-60"
             >
-              {busy ? (
-                <Loader2 size={13} className="animate-spin" />
-              ) : (
-                <FolderPlus size={13} strokeWidth={2.2} />
-              )}
+              {busy ? <Loader2 size={13} className="animate-spin" /> : <FolderPlus size={13} strokeWidth={2.2} />}
               {busy ? scanLabel(progress, t) : t("Add folder")}
             </button>
           </div>
@@ -430,9 +415,7 @@ export function LocalTab() {
           : t("{shown} of {total} files from your computer", { shown: visible.length, total: items.length })}
       </span>
       {error && (
-        <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">
-          {error}
-        </p>
+        <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">{error}</p>
       )}
       {groups.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-6 py-10 text-center text-[13px] text-ink-muted">
@@ -476,7 +459,9 @@ function EmptyOwned({
       <div className="flex flex-col gap-1.5">
         <h2 className="text-[18px] font-semibold text-ink">{t("Add files from your computer")}</h2>
         <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.")}
+          {t(
+            "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.",
+          )}
         </p>
       </div>
       <button
@@ -489,9 +474,7 @@ function EmptyOwned({
         {busy ? scanLabel(progress, t) : t("Choose folder")}
       </button>
       {error && (
-        <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">
-          {error}
-        </p>
+        <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">{error}</p>
       )}
     </div>
   );

@@ -1,7 +1,7 @@
-import { Crown } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { SourceDescriptor } from "@/lib/together/protocol";
 import { formatBytes, formatRuntime } from "@/lib/together/source-descriptor";
+import { Crown } from "lucide-react";
 
 function Chip({ label }: { label: string }) {
   return (
@@ -11,13 +11,7 @@ function Chip({ label }: { label: string }) {
   );
 }
 
-export function HostSourceBanner({
-  source,
-  compact = false,
-}: {
-  source: SourceDescriptor;
-  compact?: boolean;
-}) {
+export function HostSourceBanner({ source, compact = false }: { source: SourceDescriptor; compact?: boolean }) {
   const t = useT();
   return (
     <div
@@ -32,9 +26,7 @@ export function HostSourceBanner({
         <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-accent">
           {t("Host is watching")}
         </span>
-        <span className="truncate text-[12.5px] font-medium text-ink">
-          {source.title ?? t("Unknown release")}
-        </span>
+        <span className="truncate text-[12.5px] font-medium text-ink">{source.title ?? t("Unknown release")}</span>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         {source.resolution && <Chip label={source.resolution} />}

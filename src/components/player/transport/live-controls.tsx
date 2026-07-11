@@ -1,11 +1,8 @@
-import { useRef, useState } from "react";
-import { useSettings } from "@/lib/settings";
-import {
-  usePlaybackPosition,
-  usePlaybackPositionGated,
-  usePlaybackBufferedGated,
-} from "@/lib/player/playback-clock";
 import { useT } from "@/lib/i18n";
+import { usePlaybackPosition, usePlaybackPositionGated, usePlaybackBufferedGated } from "@/lib/player/playback-clock";
+import { useSettings } from "@/lib/settings";
+import { useRef, useState } from "react";
+
 import { SeekBarVisual } from "./seek-bar-visual";
 
 const LIVE_BEHIND_THRESHOLD_SEC = 30;
@@ -23,13 +20,7 @@ export function LiveBadge() {
   );
 }
 
-export function GoToLive({
-  durationSec,
-  onSeek,
-}: {
-  durationSec: number;
-  onSeek: (sec: number) => void;
-}) {
+export function GoToLive({ durationSec, onSeek }: { durationSec: number; onSeek: (sec: number) => void }) {
   const t = useT();
   const position = usePlaybackPosition();
   const offset = Math.max(0, durationSec - position - LIVE_NEAR_EDGE_PAD_SEC);
@@ -44,9 +35,7 @@ export function GoToLive({
       title={t("Jump to live edge")}
     >
       {t("Go to live")}{" "}
-      <span className="ms-0.5 font-mono lowercase tracking-normal text-white/55">
-        · {behindLabel}
-      </span>
+      <span className="ms-0.5 font-mono lowercase tracking-normal text-white/55">· {behindLabel}</span>
     </button>
   );
 }
@@ -80,9 +69,7 @@ export function LiveSeekBar({
   const buffered = usePlaybackBufferedGated(active);
   const dur = durationSec;
 
-  const rawOffset = scrub != null
-    ? Math.max(0, dur - scrub)
-    : Math.max(0, dur - position - LIVE_NEAR_EDGE_PAD_SEC);
+  const rawOffset = scrub != null ? Math.max(0, dur - scrub) : Math.max(0, dur - position - LIVE_NEAR_EDGE_PAD_SEC);
   const pct = Math.max(0, Math.min(1, 1 - rawOffset / LIVE_WINDOW_SEC)) * 100;
 
   const bufferOffset = Math.max(0, dur - (position + buffered) - LIVE_NEAR_EDGE_PAD_SEC);
@@ -110,9 +97,8 @@ export function LiveSeekBar({
     setScrub(null);
   };
 
-  const hoverPct = hover != null
-    ? Math.max(0, Math.min(1, 1 - Math.max(0, dur - hover) / LIVE_WINDOW_SEC)) * 100
-    : null;
+  const hoverPct =
+    hover != null ? Math.max(0, Math.min(1, 1 - Math.max(0, dur - hover) / LIVE_WINDOW_SEC)) * 100 : null;
   const hoverLabel = hover != null ? formatRewindLabel(Math.max(0, dur - hover), t) : null;
 
   return (

@@ -1,8 +1,8 @@
-import { useCallback } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
 import { useTogether } from "@/lib/together/provider";
 import { useView, type PlayEpisode } from "@/lib/view";
+import { useCallback } from "react";
 
 export function useCastModalPlay() {
   const { exitPlayer, openPicker } = useView();
@@ -15,13 +15,6 @@ export function useCastModalPlay() {
       exitPlayer();
       openPicker(m, ep, { autoPlay: settings.instantPlay, resume: true });
     },
-    [
-      exitPlayer,
-      openPicker,
-      settings.instantPlay,
-      snapshot.state,
-      snapshot.participants.length,
-      claimHost,
-    ],
+    [exitPlayer, openPicker, settings.instantPlay, snapshot.state, snapshot.participants.length, claimHost],
   );
 }

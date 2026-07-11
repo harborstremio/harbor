@@ -1,5 +1,6 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { CalendarItem } from "@/lib/calendar";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
+
 import { SIMKL_APP_NAME, SIMKL_APP_VERSION, SIMKL_CLIENT_ID } from "./config";
 
 export type SimklCdnItem = {
@@ -39,11 +40,7 @@ function mapCdnItem(item: SimklCdnItem, type: "tv" | "movie", isAnime: boolean):
   const tmdbId = item.ids?.tmdb ? String(item.ids.tmdb) : null;
   const id =
     item.ids?.imdb ??
-    (tmdbId
-      ? type === "movie"
-        ? `tmdb:movie:${tmdbId}`
-        : `tmdb:tv:${tmdbId}`
-      : `simkl:${item.ids?.simkl_id}`);
+    (tmdbId ? (type === "movie" ? `tmdb:movie:${tmdbId}` : `tmdb:tv:${tmdbId}`) : `simkl:${item.ids?.simkl_id}`);
 
   let name = item.title;
   if (type === "tv" && item.episode?.season !== undefined && item.episode?.episode !== undefined) {

@@ -1,7 +1,8 @@
+import { useT } from "@/lib/i18n";
+import { openUrl } from "@/lib/window";
 import { Check, ExternalLink, Eye, Key, Lock } from "lucide-react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+
 import { HoverPreviewCard } from "./setting-preview";
 
 export type SectionId =
@@ -48,7 +49,13 @@ export function ExtLink({ href, children }: { href: string; children: React.Reac
 }
 
 export function settingsAnchor(title: string): string {
-  return "set-" + title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-+|-+$)/g, "");
+  return (
+    "set-" +
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-+|-+$)/g, "")
+  );
 }
 
 export function Section({
@@ -61,7 +68,10 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={settingsAnchor(title)} className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
+    <section
+      id={settingsAnchor(title)}
+      className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+    >
       <div className="flex flex-col gap-1">
         <h2 className="text-[19px] font-medium tracking-tight text-ink">{title}</h2>
         {subtitle && <p className="text-[13.5px] leading-relaxed text-ink-muted">{subtitle}</p>}
@@ -129,9 +139,7 @@ export function KeyField({
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-            {label}
-          </label>
+          <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</label>
           {badge && (
             <span className="rounded-full bg-accent/15 px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent">
               {badge}
@@ -150,9 +158,7 @@ export function KeyField({
       </div>
       <div
         className={`flex h-14 items-center gap-3 rounded-2xl border bg-elevated px-4 transition-all ${
-          focused
-            ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
-            : "border-edge hover:border-edge"
+          focused ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]" : "border-edge hover:border-edge"
         }`}
       >
         {iconSrc ? (
@@ -164,12 +170,7 @@ export function KeyField({
               <img src={iconSrc} alt="" draggable={false} className="h-full w-full object-contain" />
             </span>
           ) : (
-            <img
-              src={iconSrc}
-              alt=""
-              draggable={false}
-              className="h-7 w-7 shrink-0 rounded-md object-contain"
-            />
+            <img src={iconSrc} alt="" draggable={false} className="h-7 w-7 shrink-0 rounded-md object-contain" />
           )
         ) : (
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle ring-1 ring-edge-soft">
@@ -239,9 +240,7 @@ export function KeyField({
             onClick={onSave}
             disabled={!showSave && !saved}
             className={`relative flex h-10 items-center justify-center overflow-hidden rounded-xl px-4 text-[13.5px] font-semibold transition-all ${
-              saved
-                ? "bg-accent/15 text-accent"
-                : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
+              saved ? "bg-accent/15 text-accent" : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
             }`}
           >
             <span
@@ -301,9 +300,12 @@ export function ToggleRow({
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
     setHover(false);
   };
-  useEffect(() => () => {
-    if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
+    },
+    [],
+  );
   return (
     <button
       ref={btnRef}
@@ -314,12 +316,14 @@ export function ToggleRow({
       onBlur={closePreview}
       disabled={locked}
       className={`relative flex items-center justify-between gap-4 rounded-xl border bg-canvas/40 px-4 py-3 text-start transition-colors ${
-        locked
-          ? "cursor-not-allowed border-edge-soft/40 opacity-60"
-          : "border-edge-soft hover:border-edge"
+        locked ? "cursor-not-allowed border-edge-soft/40 opacity-60" : "border-edge-soft hover:border-edge"
       }`}
     >
-      {preview && <HoverPreviewCard open={hover} anchorRef={btnRef}>{preview}</HoverPreviewCard>}
+      {preview && (
+        <HoverPreviewCard open={hover} anchorRef={btnRef}>
+          {preview}
+        </HoverPreviewCard>
+      )}
       <div className="flex min-w-0 flex-1 items-center gap-3.5">
         <span className={`relative ${locked ? "saturate-50 opacity-70" : ""}`}>
           {leading}
@@ -333,9 +337,7 @@ export function ToggleRow({
           <span className="text-[14px] font-medium text-ink">{label}</span>
           {subText && (
             <span
-              className={`text-[12.5px] ${
-                lockReason ? "text-accent/85" : note ? "text-ink-muted" : "text-ink-subtle"
-              }`}
+              className={`text-[12.5px] ${lockReason ? "text-accent/85" : note ? "text-ink-muted" : "text-ink-subtle"}`}
             >
               {subText}
             </span>
@@ -343,17 +345,10 @@ export function ToggleRow({
         </div>
       </div>
       <span className="flex shrink-0 items-center gap-2.5">
-        {preview && (
-          <Eye
-            size={13}
-            className={`transition-colors ${hover ? "text-accent" : "text-ink-subtle/55"}`}
-          />
-        )}
+        {preview && <Eye size={13} className={`transition-colors ${hover ? "text-accent" : "text-ink-subtle/55"}`} />}
         <span
           aria-hidden
-          className={`relative h-6 w-10 rounded-full transition-colors ${
-            effective ? "bg-ink" : "bg-edge"
-          }`}
+          className={`relative h-6 w-10 rounded-full transition-colors ${effective ? "bg-ink" : "bg-edge"}`}
         >
           <span
             className={`absolute start-[2px] top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
@@ -384,9 +379,7 @@ export function Segmented<T extends string>({
           type="button"
           onClick={() => onChange(o.value)}
           className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
-            value === o.value
-              ? "bg-ink text-canvas"
-              : "text-ink-muted hover:bg-raised hover:text-ink"
+            value === o.value ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
           }`}
         >
           {t(o.label)}

@@ -1,10 +1,11 @@
-import { useMemo } from "react";
 import { AvatarDock } from "@/components/player/avatar-dock";
 import { ChatOverlay } from "@/components/player/chat-overlay";
 import type { PanelCorner } from "@/lib/player-chrome";
 import type { RoomSnapshot } from "@/lib/together/client";
-import type { ChatMessage } from "@/lib/together/provider";
 import type { ParticipantLocation, SourceDescriptor, SyncState } from "@/lib/together/protocol";
+import type { ChatMessage } from "@/lib/together/provider";
+import { useMemo } from "react";
+
 import { DurationMismatchChip } from "./duration-mismatch-chip";
 import { ForeignNoticeBox } from "./foreign-notice-box";
 import { WaitingForRoom } from "./waiting-for-room";
@@ -78,10 +79,7 @@ export function RoomLayer({
   foreignNotice: { title: string | null; from: string } | null;
   onDismissForeign: () => void;
 }) {
-  const everyoneReady = useMemo(
-    () => participants.length > 0 && participants.every((p) => p.ready),
-    [participants],
-  );
+  const everyoneReady = useMemo(() => participants.length > 0 && participants.every((p) => p.ready), [participants]);
   const notReady = useMemo(() => participants.filter((p) => !p.ready), [participants]);
   return (
     <>
@@ -138,9 +136,7 @@ export function RoomLayer({
         />
       )}
 
-      {foreignNotice && (
-        <ForeignNoticeBox title={foreignNotice.title} onDismiss={onDismissForeign} />
-      )}
+      {foreignNotice && <ForeignNoticeBox title={foreignNotice.title} onDismiss={onDismissForeign} />}
     </>
   );
 }

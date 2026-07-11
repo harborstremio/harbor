@@ -1,7 +1,8 @@
-import { Radio, Users, X } from "lucide-react";
-import { useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { ScoredStream } from "@/lib/streams/types";
+import { Radio, Users, X } from "lucide-react";
+import { useState } from "react";
+
 import { formatSize, streamSummaryParts } from "./picker-utils";
 
 export function P2pConfirmModal({
@@ -35,8 +36,8 @@ export function P2pConfirmModal({
           Stream this via peer-to-peer?
         </h1>
         <p className="max-w-xl text-[14.5px] leading-relaxed text-white/75">
-          This source isn&apos;t cached on your debrid, so Harbor would pull it directly from peers.
-          It can take a moment to start and may buffer on low-seed torrents.
+          This source isn&apos;t cached on your debrid, so Harbor would pull it directly from peers. It can take a
+          moment to start and may buffer on low-seed torrents.
         </p>
         <div className="flex max-w-xl flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3.5">
           <span className="line-clamp-2 font-mono text-[13px] text-white/90">{title}</span>

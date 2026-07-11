@@ -17,22 +17,10 @@ export function DesktopOnlyBlock({ children }: { children: ReactNode }) {
 }
 
 export function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-      {children}
-    </span>
-  );
+  return <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{children}</span>;
 }
 
-export function SubField({
-  label,
-  value,
-  children,
-}: {
-  label: string;
-  value?: string;
-  children: React.ReactNode;
-}) {
+export function SubField({ label, value, children }: { label: string; value?: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">

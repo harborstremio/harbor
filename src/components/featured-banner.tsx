@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { observe, usePageVisible } from "@/lib/visibility";
+import { useEffect, useRef, useState } from "react";
+
 import { BigCardStack } from "./featured-banner/big-card-stack";
 import { Lightbox } from "./featured-banner/lightbox";
 import { SidePanel } from "./featured-banner/side-panel";
@@ -54,12 +55,7 @@ export function FeaturedBanner({ items }: { items: Meta[] }) {
 
       <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-4">
         <BigCardStack items={items} active={safeActive} onPrev={goPrev} onNext={goNext} />
-        <SidePanel
-          meta={current}
-          activeIndex={safeActive}
-          total={items.length}
-          onOpenLightbox={setLightbox}
-        />
+        <SidePanel meta={current} activeIndex={safeActive} total={items.length} onOpenLightbox={setLightbox} />
       </div>
 
       <Dots count={items.length} active={safeActive} onJump={setActive} />

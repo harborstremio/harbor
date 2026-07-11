@@ -1,13 +1,7 @@
 import type { Meta } from "../cinemeta";
 import { createDismissListeners } from "./dismiss-listeners";
 import { assemblePreviewData, type PreviewArt, type PreviewAssembly } from "./preview-data";
-import {
-  DATA_GRACE_MS,
-  DWELL_MS,
-  FETCH_INTENT_MS,
-  LEAVE_GRACE_MS,
-  MORPH_SETTLE_MS,
-} from "./timing";
+import { DATA_GRACE_MS, DWELL_MS, FETCH_INTENT_MS, LEAVE_GRACE_MS, MORPH_SETTLE_MS } from "./timing";
 
 export { publishResumeStates } from "./resume-index";
 export type { AnchorRect, HoverGates, HoverPreviewSnapshot, PreviewPayload } from "./store-types";

@@ -1,11 +1,5 @@
+import { GENRE_MOVIE_TO_TV, GENRE_TV_TO_MOVIE, LANGUAGES, MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import { COUNTRIES } from "@/views/calendar/custom-bar/constants";
-import {
-  GENRE_MOVIE_TO_TV,
-  GENRE_TV_TO_MOVIE,
-  LANGUAGES,
-  MOVIE_GENRES,
-  TV_GENRES,
-} from "@/lib/feed/tags";
 
 export type GenreFilters = {
   yearFrom: string;
@@ -85,11 +79,7 @@ export function genreIdFor(name: string, mediaType: "movie" | "tv"): number {
   return (mediaType === "movie" ? MOVIE_GENRES : TV_GENRES)[name] ?? 0;
 }
 
-export function remapGenre(
-  name: string,
-  id: number,
-  toType: "movie" | "tv",
-): { name: string; id: number } {
+export function remapGenre(name: string, id: number, toType: "movie" | "tv"): { name: string; id: number } {
   const set = toType === "movie" ? MOVIE_GENRES : TV_GENRES;
   const direct = set[name];
   if (direct != null) return { name, id: direct };
@@ -103,9 +93,7 @@ export function remapGenre(
 }
 
 export function hasActiveFilters(f: GenreFilters): boolean {
-  return Boolean(
-    f.yearFrom || f.yearTo || f.minRating || f.minVotes || f.language || f.country || f.sort,
-  );
+  return Boolean(f.yearFrom || f.yearTo || f.minRating || f.minVotes || f.language || f.country || f.sort);
 }
 
 export function initialBrowsePage(f: GenreFilters): number {
@@ -127,11 +115,7 @@ export function buildDiscoverParams(
 ): Record<string, string> {
   const dateField = mediaType === "movie" ? "primary_release_date" : "first_air_date";
   const sortBy =
-    f.sort === "rating"
-      ? "vote_average.desc"
-      : f.sort === "newest"
-        ? `${dateField}.desc`
-        : "popularity.desc";
+    f.sort === "rating" ? "vote_average.desc" : f.sort === "newest" ? `${dateField}.desc` : "popularity.desc";
   const cal = f.minRating ? RATING_CALIBRATION[f.minRating] : null;
   const voteFloor = Math.max(Number(f.minVotes || 0), cal?.votes ?? 0, 40);
   const params: Record<string, string> = {

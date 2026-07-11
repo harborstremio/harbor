@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
+import { useTmdbImdbId } from "@/lib/providers/tmdb";
+import { useEffect, useState } from "react";
 
 export type LiveImdb = { value: string | undefined; isImdb: boolean };
 

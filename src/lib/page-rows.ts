@@ -62,11 +62,7 @@ export function togglePageRowHidden(c: PageRowCustomization, key: string): PageR
   return { ...c, hidden: has ? c.hidden.filter((k) => k !== key) : [...c.hidden, key] };
 }
 
-export function renamePageRow(
-  c: PageRowCustomization,
-  key: string,
-  label: string,
-): PageRowCustomization {
+export function renamePageRow(c: PageRowCustomization, key: string, label: string): PageRowCustomization {
   const trimmed = label.trim();
   const renamed = { ...c.renamed };
   if (!trimmed) delete renamed[key];

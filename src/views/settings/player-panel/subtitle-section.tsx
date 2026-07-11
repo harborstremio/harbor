@@ -1,8 +1,9 @@
+import godfatherStill from "@/assets/godfather-offer.svg";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import godfatherStill from "@/assets/godfather-offer.svg";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+
 import { ColorPopoverTrigger } from "../color-picker";
 import { ToggleRow } from "../shared";
 import { Label, SubField, previewFamily } from "./internals";
@@ -24,9 +25,19 @@ export function SubtitleStylePanel() {
   ];
 
   const assModes: Array<{ id: "no" | "scale" | "force"; label: string; sub: string }> = [
-    { id: "no", label: t("Keep original"), sub: t("Styled (ASS) subs keep their own fonts, colors, and effects. Truest to the release.") },
+    {
+      id: "no",
+      label: t("Keep original"),
+      sub: t("Styled (ASS) subs keep their own fonts, colors, and effects. Truest to the release."),
+    },
     { id: "scale", label: t("Resize only"), sub: t("Keep the original look but apply your size and position.") },
-    { id: "force", label: t("Use my style"), sub: t("Force your font, size, and color onto styled subs. Use this for Arabic or any subs showing boxes. Can affect karaoke and signs.") },
+    {
+      id: "force",
+      label: t("Use my style"),
+      sub: t(
+        "Force your font, size, and color onto styled subs. Use this for Arabic or any subs showing boxes. Can affect karaoke and signs.",
+      ),
+    },
   ];
 
   const isDefault =
@@ -205,7 +216,9 @@ export function SubtitleStylePanel() {
                 type="button"
                 onClick={() => update({ subAlignX: a.id })}
                 className={`flex h-10 items-center justify-center rounded-xl border text-[12.5px] font-semibold transition-colors ${
-                  sel ? "border-ink bg-elevated text-ink" : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
+                  sel
+                    ? "border-ink bg-elevated text-ink"
+                    : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
                 }`}
               >
                 {a.label}
@@ -349,7 +362,10 @@ function SubtitlePreview() {
       style={{ backgroundImage: `url(${godfatherStill})` }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent" />
-      <div className={`absolute inset-x-0 flex ${justify} px-[6%]`} style={{ bottom: `${settings.subMarginY}%`, opacity: settings.subOpacity }}>
+      <div
+        className={`absolute inset-x-0 flex ${justify} px-[6%]`}
+        style={{ bottom: `${settings.subMarginY}%`, opacity: settings.subOpacity }}
+      >
         <div style={boxStyle}>
           <div
             style={{
@@ -363,7 +379,7 @@ function SubtitlePreview() {
               textAlign: align as "left" | "center" | "right",
             }}
           >
-                  I&apos;m gonna make him an offer he can&apos;t refuse.
+            I&apos;m gonna make him an offer he can&apos;t refuse.
           </div>
         </div>
       </div>
@@ -379,7 +395,8 @@ const PRESET_FONTS: Array<{ id: "inter" | "system" | "rounded" | "serif" | "arab
   { id: "arabic", label: "Arabic" },
 ];
 
-const FONT_ACCEPT = ".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2,application/x-font-ttf,application/x-font-otf,application/font-woff,application/font-woff2";
+const FONT_ACCEPT =
+  ".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2,application/x-font-ttf,application/x-font-otf,application/font-woff,application/font-woff2";
 const MAX_FONT_BYTES = 4 * 1024 * 1024;
 
 function FontPicker() {

@@ -53,14 +53,7 @@ export function DiscoverIcon({ active = false }: { active?: boolean }) {
 
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <circle
-        cx="12"
-        cy="12"
-        r="9"
-        stroke="currentColor"
-        strokeWidth="1.65"
-        fill="none"
-      />
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.65" fill="none" />
       <g ref={needleRef}>
         <path
           d="M 12 4 L 15.2 16.5 L 12 13.8 L 8.8 16.5 Z"

@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { detectSource } from "@/lib/lists/detect";
 import { sourceLabel } from "@/lib/lists/types";
-import { useT } from "@/lib/i18n";
+import { useMemo, useState } from "react";
+
 import { SOURCE_DOT } from "./source-dot";
 
 export function AddListForm({

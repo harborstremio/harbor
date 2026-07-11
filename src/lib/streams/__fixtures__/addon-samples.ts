@@ -188,7 +188,8 @@ export const ADDON_SAMPLES: Sample[] = [
     note: "AUDIT_PART3 AIOStreams torbox template (Instant) marker",
     raw: {
       name: "TorBox\n(Instant) (1080p)",
-      description: "Quality: 1080p\nName: Movie.2024.1080p.WEB-DL\nSize: 4 GB | Source: yts | Type: Torrent | Seeders: 432",
+      description:
+        "Quality: 1080p\nName: Movie.2024.1080p.WEB-DL\nSize: 4 GB | Source: yts | Type: Torrent | Seeders: 432",
       url: "https://torbox.app/api/play/abc123",
       addonId: "community.aiostreams",
       addonName: "AIOStreams",
@@ -229,7 +230,11 @@ export const ADDON_SAMPLES: Sample[] = [
       name: "Easynews+\n1080p",
       description: "The.Movie.2024.1080p.BluRay.x264-GROUP.mkv\n🕛 1h 58m\n📦 4.2 GB",
       url: "https://easynews.com/dl/abcdef.mkv",
-      behaviorHints: { videoSize: 4509715660, fileName: "The.Movie.2024.1080p.BluRay.x264-GROUP", bingeGroup: "Easynews+-1080p" },
+      behaviorHints: {
+        videoSize: 4509715660,
+        fileName: "The.Movie.2024.1080p.BluRay.x264-GROUP",
+        bingeGroup: "Easynews+-1080p",
+      },
       addonId: "community.easynews",
       addonName: "Easynews+",
     } as Stream,

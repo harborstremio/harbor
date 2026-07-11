@@ -1,5 +1,5 @@
-import { Play } from "lucide-react";
 import type { SyncState } from "@/lib/together/protocol";
+import { Play } from "lucide-react";
 
 export function ReturnToVideo({ media, onReturn }: { media: SyncState; onReturn: () => void }) {
   return (
@@ -9,23 +9,14 @@ export function ReturnToVideo({ media, onReturn }: { media: SyncState; onReturn:
     >
       <div className="relative h-12 w-8 shrink-0 overflow-hidden rounded-md bg-canvas/60 ring-1 ring-edge-soft/60">
         {media.posterUrl ? (
-          <img
-            src={media.posterUrl}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            draggable={false}
-          />
+          <img src={media.posterUrl} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-canvas to-elevated" />
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
-          Now watching
-        </span>
-        <span className="truncate text-[13px] font-semibold text-ink">
-          {media.mediaTitle ?? "Untitled"}
-        </span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">Now watching</span>
+        <span className="truncate text-[13px] font-semibold text-ink">{media.mediaTitle ?? "Untitled"}</span>
         {media.episode && (
           <span className="font-mono text-[10.5px] tracking-[0.1em] text-ink-subtle">
             S{media.episode.imdbSeason ?? media.episode.season} · E

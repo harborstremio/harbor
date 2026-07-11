@@ -1,8 +1,8 @@
+import { useT } from "@/lib/i18n";
+import { useSettings, type Settings } from "@/lib/settings";
 import { ChevronDown, Minus, Plus, Settings2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useSettings, type Settings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
@@ -99,10 +99,16 @@ export function AdvancedMenu() {
               )}
               <Row label={t("Position")}>
                 <div className="flex items-center gap-1">
-                  <IconBtn label={t("Raise subtitles")} onClick={() => update({ subMarginY: clamp(settings.subMarginY + 2, 0, 100) })}>
+                  <IconBtn
+                    label={t("Raise subtitles")}
+                    onClick={() => update({ subMarginY: clamp(settings.subMarginY + 2, 0, 100) })}
+                  >
                     <ChevronDown size={15} className="rotate-180" />
                   </IconBtn>
-                  <IconBtn label={t("Lower subtitles")} onClick={() => update({ subMarginY: clamp(settings.subMarginY - 2, 0, 100) })}>
+                  <IconBtn
+                    label={t("Lower subtitles")}
+                    onClick={() => update({ subMarginY: clamp(settings.subMarginY - 2, 0, 100) })}
+                  >
                     <ChevronDown size={15} />
                   </IconBtn>
                 </div>
@@ -138,7 +144,9 @@ export function AdvancedMenu() {
                     overrideOn ? "bg-accent" : "bg-edge"
                   }`}
                 >
-                  <span className={`h-4 w-4 rounded-full bg-white transition-transform ${overrideOn ? "translate-x-4" : ""}`} />
+                  <span
+                    className={`h-4 w-4 rounded-full bg-white transition-transform ${overrideOn ? "translate-x-4" : ""}`}
+                  />
                 </span>
               </button>
             </div>

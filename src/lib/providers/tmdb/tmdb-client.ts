@@ -1,4 +1,5 @@
 import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
+
 import { imageRequestLang } from "./tmdb-image-lang";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -71,10 +72,7 @@ async function tmdbHttpFetch(url: string): Promise<Response> {
   return await fetch(url, init);
 }
 
-async function fetchTmdbOnce<T>(
-  url: string,
-  path: string,
-): Promise<{ status: number; data: T | null }> {
+async function fetchTmdbOnce<T>(url: string, path: string): Promise<{ status: number; data: T | null }> {
   const res = await tmdbHttpFetch(url);
   if (!res.ok) {
     const body = await readJsonBody(res, path).catch(() => "");
@@ -91,11 +89,7 @@ async function fetchTmdbOnce<T>(
   }
 }
 
-export async function get<T>(
-  key: string,
-  path: string,
-  params: Record<string, string> = {},
-): Promise<T | null> {
+export async function get<T>(key: string, path: string, params: Record<string, string> = {}): Promise<T | null> {
   if (!key) return null;
   const url = new URL(`${TMDB}/${path}`);
   url.searchParams.set("api_key", key);

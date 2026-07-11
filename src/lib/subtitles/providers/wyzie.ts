@@ -1,5 +1,5 @@
-import type { SubResult, SubSearchQuery } from "../types";
 import { normalizeLang } from "../language";
+import type { SubResult, SubSearchQuery } from "../types";
 
 const ENDPOINT = "https://sub.wyzie.io/search";
 

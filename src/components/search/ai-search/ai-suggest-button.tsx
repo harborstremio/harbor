@@ -1,7 +1,7 @@
-import { ArrowBigUp, CornerDownLeft } from "lucide-react";
-import type { AiProvider } from "@/lib/ai-models";
 import { ProviderLogo } from "@/components/ai-provider-logo";
+import type { AiProvider } from "@/lib/ai-models";
 import { useT } from "@/lib/i18n";
+import { ArrowBigUp, CornerDownLeft } from "lucide-react";
 
 export function AiSuggestButton({
   query,
@@ -23,11 +23,9 @@ export function AiSuggestButton({
         <ProviderLogo provider={provider} size={20} round />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-          {t("AI search")}
-        </span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">{t("AI search")}</span>
         <span className="truncate text-[15px] font-semibold text-ink">
-          {t("Ask AI to find titles for \"{query}\"", { query })}
+          {t('Ask AI to find titles for "{query}"', { query })}
         </span>
       </span>
       <span className="ms-auto flex shrink-0 items-center gap-1 text-accent/85">

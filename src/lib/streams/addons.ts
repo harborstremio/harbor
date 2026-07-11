@@ -1,9 +1,10 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
 import { dlog, dwarn } from "@/lib/debug";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { infoHashFromSources, infoHashFromUrl } from "@/lib/torrent/magnet";
+
 import { isAddonRanked, isStatusOnlyAddon } from "./addon-detect";
 import { hasUncachedMarker } from "./cached";
-import { infoHashFromSources, infoHashFromUrl } from "@/lib/torrent/magnet";
 import type { Stream } from "./types";
 
 const TIMEOUT_MS_FAST = 8000;
@@ -122,16 +123,12 @@ function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
   const m = addon.manifest;
   const resources = m.resources ?? [];
   const streamResources = resources.filter(
-    (r): r is { name: string; types?: string[]; idPrefixes?: string[] } =>
-      typeof r === "object" && r.name === "stream",
+    (r): r is { name: string; types?: string[]; idPrefixes?: string[] } => typeof r === "object" && r.name === "stream",
   );
   if (streamResources.length > 0) {
     return streamResources.some((r) => {
       const typeOk = Array.isArray(r.types) && r.types.includes(type);
-      const idOk =
-        !r.idPrefixes ||
-        r.idPrefixes.length === 0 ||
-        r.idPrefixes.some((p) => id.startsWith(p));
+      const idOk = !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
       return typeOk && idOk;
     });
   }
@@ -143,12 +140,7 @@ function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
   return true;
 }
 
-async function fetchOne(
-  addon: Addon,
-  type: string,
-  id: string,
-  signal: AbortSignal,
-): Promise<Stream[]> {
+async function fetchOne(addon: Addon, type: string, id: string, signal: AbortSignal): Promise<Stream[]> {
   const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
   const url = `${base}/stream/${type}/${id}.json`;
   const limit = timeoutFor(addon);

@@ -15,12 +15,5 @@ export function LogoOrText({
   if (!logo || failed) {
     return <p className={textClass}>{fallbackText}</p>;
   }
-  return (
-    <img
-      src={logo}
-      alt={fallbackText}
-      onError={() => setFailed(true)}
-      className={imgClass}
-    />
-  );
+  return <img src={logo} alt={fallbackText} onError={() => setFailed(true)} className={imgClass} />;
 }

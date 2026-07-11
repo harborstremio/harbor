@@ -1,12 +1,8 @@
-import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
-import {
-  tmdbDetails,
-  tmdbSeasonEpisodes,
-  type TmdbDetail,
-  type Episode,
-} from "@/lib/providers/tmdb/tmdb-details";
 import type { Meta } from "@/lib/cinemeta";
 import type { LocalEntry } from "@/lib/local-library";
+import { tmdbDetails, tmdbSeasonEpisodes, type TmdbDetail, type Episode } from "@/lib/providers/tmdb/tmdb-details";
+import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
+
 import { resolveArtworkPaths, artworkUrl, type ArtworkPaths } from "./artwork";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -54,7 +50,8 @@ function artThumbs(art: ArtworkPaths, sizes: ExportSizes): string[] {
 function genreStudioCountry(detail: TmdbDetail): string[] {
   const out: string[] = [];
   for (const g of detail.genres) out.push(`  <genre>${esc(g)}</genre>`);
-  const studios = detail.kind === "tv" ? [...detail.networks, ...detail.productionCompanies] : detail.productionCompanies;
+  const studios =
+    detail.kind === "tv" ? [...detail.networks, ...detail.productionCompanies] : detail.productionCompanies;
   for (const s of studios) out.push(`  <studio>${esc(s)}</studio>`);
   for (const c of detail.productionCountries) out.push(`  <country>${esc(c)}</country>`);
   return out;
@@ -189,10 +186,7 @@ async function downloadTo(url: string, dest: string): Promise<boolean> {
   }
 }
 
-async function seriesRootDir(
-  path: typeof import("@tauri-apps/api/path"),
-  videoPath: string,
-): Promise<string> {
+async function seriesRootDir(path: typeof import("@tauri-apps/api/path"), videoPath: string): Promise<string> {
   const dir = await path.dirname(videoPath);
   const base = await path.basename(dir);
   if (/^(specials|s\d{1,2}|season[\s._-]*\d{1,2})$/i.test(base)) {
@@ -201,11 +195,7 @@ async function seriesRootDir(
   return dir;
 }
 
-export async function exportMovie(
-  key: string,
-  entry: LocalEntry,
-  sizes: ExportSizes,
-): Promise<ExportResult> {
+export async function exportMovie(key: string, entry: LocalEntry, sizes: ExportSizes): Promise<ExportResult> {
   try {
     return await exportMovieInner(key, entry, sizes);
   } catch (err) {
@@ -213,11 +203,7 @@ export async function exportMovie(
   }
 }
 
-async function exportMovieInner(
-  key: string,
-  entry: LocalEntry,
-  sizes: ExportSizes,
-): Promise<ExportResult> {
+async function exportMovieInner(key: string, entry: LocalEntry, sizes: ExportSizes): Promise<ExportResult> {
   if (!isTauri) return { ok: false, reason: "not-desktop" };
   if (!key) return { ok: false, reason: "no-tmdb-key" };
   if (entry.tmdbId == null) return { ok: false, reason: "unidentified" };
@@ -257,11 +243,7 @@ async function exportMovieInner(
   return { ok: true, localArt };
 }
 
-export async function exportSeries(
-  key: string,
-  episodes: LocalEntry[],
-  sizes: ExportSizes,
-): Promise<ExportResult> {
+export async function exportSeries(key: string, episodes: LocalEntry[], sizes: ExportSizes): Promise<ExportResult> {
   try {
     return await exportSeriesInner(key, episodes, sizes);
   } catch (err) {
@@ -269,11 +251,7 @@ export async function exportSeries(
   }
 }
 
-async function exportSeriesInner(
-  key: string,
-  episodes: LocalEntry[],
-  sizes: ExportSizes,
-): Promise<ExportResult> {
+async function exportSeriesInner(key: string, episodes: LocalEntry[], sizes: ExportSizes): Promise<ExportResult> {
   if (!isTauri) return { ok: false, reason: "not-desktop" };
   if (!key) return { ok: false, reason: "no-tmdb-key" };
   const head = episodes.find((e) => e.tmdbId != null);

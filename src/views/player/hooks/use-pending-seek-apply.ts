@@ -1,5 +1,5 @@
-import { useEffect, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
+import { useEffect, type RefObject } from "react";
 
 export function usePendingSeekApply(params: {
   pendingSeekSec: number | null;

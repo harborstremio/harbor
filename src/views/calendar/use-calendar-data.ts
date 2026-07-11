@@ -1,10 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  fetchCalendarRange,
-  fetchCustomCalendar,
-  monthRangeISO,
-  type CalendarItem,
-} from "@/lib/calendar";
+import { fetchCalendarRange, fetchCustomCalendar, monthRangeISO, type CalendarItem } from "@/lib/calendar";
 import {
   fetchAnticipatedCalendar,
   fetchLibraryCalendar,
@@ -12,8 +6,9 @@ import {
   fetchSimklPremieresCalendar,
   fetchTraktCalendar,
 } from "@/lib/calendar-sources";
-import type { Settings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
+import type { Settings } from "@/lib/settings";
+import { useEffect, useRef, useState } from "react";
 
 type Args = {
   source: Settings["calendarSource"];
@@ -25,15 +20,7 @@ type Args = {
   month: number;
 };
 
-export function useCalendarData({
-  source,
-  authKey,
-  traktConnected,
-  simklConnected,
-  settings,
-  year,
-  month,
-}: Args) {
+export function useCalendarData({ source, authKey, traktConnected, simklConnected, settings, year, month }: Args) {
   const [items, setItems] = useState<CalendarItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

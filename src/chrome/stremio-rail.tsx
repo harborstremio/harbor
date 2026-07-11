@@ -1,8 +1,6 @@
-import { Lock } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { NAV_ITEMS, applyNavCustomization } from "@/chrome/nav-items";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { NAV_ITEMS, applyNavCustomization } from "@/chrome/nav-items";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
@@ -11,6 +9,8 @@ import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useView, type View } from "@/lib/view";
+import { Lock } from "lucide-react";
+import { useState, type ReactNode } from "react";
 
 export function StremioRail() {
   const { view, setView, chromeHidden } = useView();
@@ -19,8 +19,7 @@ export function StremioRail() {
   const t = useT();
   const [pendingPin, setPendingPin] = useState<View | null>(null);
 
-  const themePreset =
-    settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
+  const themePreset = settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
 
   const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
@@ -37,22 +36,12 @@ export function StremioRail() {
       <aside
         aria-hidden={chromeHidden}
         className={`relative z-[60] flex w-20 shrink-0 flex-col transition-[opacity,transform] duration-[320ms] ease-[cubic-bezier(0.32,0.72,0.24,1)] ${
-          chromeHidden
-            ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0"
-            : "translate-x-0 opacity-100"
+          chromeHidden ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0" : "translate-x-0 opacity-100"
         }`}
       >
-        <div
-          data-tauri-drag-region
-          className="flex h-[5.5rem] shrink-0 items-center justify-center text-white/90"
-        >
+        <div data-tauri-drag-region className="flex h-[5.5rem] shrink-0 items-center justify-center text-white/90">
           {customMark ? (
-            <img
-              src={customMark}
-              alt=""
-              draggable={false}
-              className="h-10 w-10 object-contain"
-            />
+            <img src={customMark} alt="" draggable={false} className="h-10 w-10 object-contain" />
           ) : (
             <HarborMark className="h-10 w-10" />
           )}
@@ -67,9 +56,7 @@ export function StremioRail() {
                 {...item}
                 gated={gated}
                 active={active}
-                onClick={() =>
-                  gated ? setPendingPin(item.view) : setView(item.view)
-                }
+                onClick={() => (gated ? setPendingPin(item.view) : setView(item.view))}
               />
             );
           })}
@@ -78,9 +65,7 @@ export function StremioRail() {
           {locked ? (
             <div className="flex h-16 flex-col items-center justify-center gap-1 rounded-xl text-white/35">
               <Lock size={16} />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">
-                {t("chrome.locked")}
-              </span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">{t("chrome.locked")}</span>
             </div>
           ) : (
             <RailAvatar />
@@ -111,11 +96,8 @@ function RailAvatar() {
   const { activeProfile, openPicker } = useProfiles();
   const t = useT();
   const src = activeProfile?.avatar ?? settings.harborAvatar ?? user?.avatar ?? null;
-  const ring = activeProfile?.color
-    ? { boxShadow: `0 0 0 2px ${activeProfile.color}` }
-    : undefined;
-  const label =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const ring = activeProfile?.color ? { boxShadow: `0 0 0 2px ${activeProfile.color}` } : undefined;
+  const label = activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
   return (
     <button
       type="button"
@@ -124,17 +106,9 @@ function RailAvatar() {
       title={label}
       className="group flex h-16 w-full flex-col items-center justify-center gap-1 rounded-xl text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/85"
     >
-      <span
-        className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-elevated"
-        style={ring}
-      >
+      <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-elevated" style={ring}>
         {src ? (
-          <img
-            src={src}
-            alt=""
-            draggable={false}
-            className="h-full w-full object-cover"
-          />
+          <img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
         ) : (
           <CatAvatar className="h-full w-full" />
         )}
@@ -171,9 +145,7 @@ function RailTab({
       aria-label={gated ? t("chrome.lockedRequiresPin", { label: translated }) : translated}
       title={gated ? t("chrome.lockedShort", { label: translated }) : translated}
       className={`group flex h-[4.5rem] w-full flex-col items-center justify-center gap-1.5 rounded-xl transition-colors duration-150 ${
-        active
-          ? "text-accent"
-          : "text-white/35 hover:bg-white/[0.05] hover:text-white/85"
+        active ? "text-accent" : "text-white/35 hover:bg-white/[0.05] hover:text-white/85"
       }`}
     >
       <span className={`relative flex h-7 w-7 items-center justify-center ${gated ? "opacity-70" : ""}`}>

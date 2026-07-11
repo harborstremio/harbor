@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import { meta as fetchCinemetaMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
-import { useOmdbScores } from "@/lib/providers/omdb";
 import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
+import { useOmdbScores } from "@/lib/providers/omdb";
+import { useEffect, useState } from "react";
 
 export function useImdbRating(meta: Meta, resolvedImdb?: string | null): string | undefined {
   const omdb = useOmdbScores(resolvedImdb ?? undefined);
@@ -35,7 +35,5 @@ export function useImdbRating(meta: Meta, resolvedImdb?: string | null): string 
       cancelled = true;
     };
   }, [isImdbId, meta.id, resolvedImdb]);
-  return (
-    harborRating ?? omdb?.imdbRating ?? cinemetaRating ?? (isImdbId ? meta.imdbRating : undefined)
-  );
+  return harborRating ?? omdb?.imdbRating ?? cinemetaRating ?? (isImdbId ? meta.imdbRating : undefined);
 }

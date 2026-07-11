@@ -33,11 +33,7 @@ export function computeSyncMap(anchors: SyncAnchor[]): (t: number) => number {
   return (t: number) => d1 + m * (t - t1);
 }
 
-export function applySync(
-  cues: SubCue[],
-  f: (t: number) => number,
-  extraOffsetSec: number,
-): SubCue[] {
+export function applySync(cues: SubCue[], f: (t: number) => number, extraOffsetSec: number): SubCue[] {
   return cues.map((cue) => {
     const start = round3(Math.max(0, cue.start + f(cue.start) + extraOffsetSec));
     const endCandidate = round3(cue.end + f(cue.end) + extraOffsetSec);
@@ -66,12 +62,7 @@ export function deltaFn(points: SyncPoint[], nudge: number): (t: number) => numb
 
 export type SyncSegment = { startIdx: number; endIdx: number; offsetSec: number };
 
-export function applyLinear(
-  cues: SubCue[],
-  points: SyncPoint[],
-  nudge: number,
-  segments: SyncSegment[],
-): SubCue[] {
+export function applyLinear(cues: SubCue[], points: SyncPoint[], nudge: number, segments: SyncSegment[]): SubCue[] {
   const f = deltaFn(points, nudge);
   return cues.map((cue, i) => {
     let segExtra = 0;

@@ -1,5 +1,6 @@
-import { Cell } from "./cell";
 import { layoutSlotCount, type Layout, type SlotChannel } from "@/lib/multiview/store";
+
+import { Cell } from "./cell";
 
 const GRID: Record<Layout, string> = {
   "1": "grid-cols-1 grid-rows-1",

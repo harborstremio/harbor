@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
 import { useT } from "@/lib/i18n";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
-import { useEpisodeOrder } from "../series-episodes/use-episode-order";
+import { useMemo, useState } from "react";
+
 import type { PickerItem } from "../series-episodes/season-arc-picker";
+import { useEpisodeOrder } from "../series-episodes/use-episode-order";
 import { buildAnimeOrder } from "./anime-order-utils";
 
 export type AnimeOrder = {
@@ -22,10 +23,7 @@ export function useAnimeOrder(
 ): AnimeOrder | null {
   const t = useT();
   const ordering = useEpisodeOrder(imdbId, metaId, provider, seasonType, tvdbKey);
-  const built = useMemo(
-    () => buildAnimeOrder(ordering, episodes, t("Specials")),
-    [ordering, episodes, t],
-  );
+  const built = useMemo(() => buildAnimeOrder(ordering, episodes, t("Specials")), [ordering, episodes, t]);
   const [sel, setSel] = useState<string | null>(null);
   if (!built) return null;
   const activeKey = built.items.some((i) => i.key === sel) ? (sel as string) : built.items[0].key;

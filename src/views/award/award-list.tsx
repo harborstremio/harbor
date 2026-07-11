@@ -1,20 +1,17 @@
-import { ArrowUpRight, Search, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { AWARD_CATALOG } from "@/lib/awards-catalog";
 import { readAwardHistory, type CategoryHistory } from "@/lib/awards-history";
+import { useT } from "@/lib/i18n";
 import { tmdbPersonIdByName } from "@/lib/providers/tmdb";
 import type { AwardType } from "@/lib/providers/wikidata";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { ArrowUpRight, Search, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 export function AwardList({ awardType, tint }: { awardType: AwardType; tint: string }) {
   const t = useT();
   const meta = AWARD_CATALOG[awardType];
-  const history = useMemo(
-    () => readAwardHistory(awardType, meta.categories),
-    [awardType, meta.categories],
-  );
+  const history = useMemo(() => readAwardHistory(awardType, meta.categories), [awardType, meta.categories]);
   const [decade, setDecade] = useState<number | null>(null);
   const [query, setQuery] = useState("");
 
@@ -38,8 +35,7 @@ export function AwardList({ awardType, tint }: { awardType: AwardType; tint: str
           if (decade !== null && (e.year < decade || e.year >= decade + 10)) return false;
           if (q) {
             const matches =
-              e.workTitle.toLowerCase().includes(q) ||
-              e.recipients.some((r) => r.toLowerCase().includes(q));
+              e.workTitle.toLowerCase().includes(q) || e.recipients.some((r) => r.toLowerCase().includes(q));
             if (!matches) return false;
           }
           return true;
@@ -61,14 +57,7 @@ export function AwardList({ awardType, tint }: { awardType: AwardType; tint: str
 
   return (
     <div className="flex flex-col gap-14">
-      <FilterBar
-        decade={decade}
-        decades={decades}
-        onDecade={setDecade}
-        query={query}
-        onQuery={setQuery}
-        tint={tint}
-      />
+      <FilterBar decade={decade} decades={decades} onDecade={setDecade} query={query} onQuery={setQuery} tint={tint} />
 
       {noResults && (
         <p className="rounded-2xl border border-edge-soft bg-elevated/30 p-5 text-[13.5px] text-ink-muted">
@@ -270,9 +259,7 @@ function WinnerRow({
           </span>
         )}
       </div>
-      {workClickable && (
-        <ArrowUpRight size={14} className="dir-icon text-ink-subtle" strokeWidth={2.2} />
-      )}
+      {workClickable && <ArrowUpRight size={14} className="dir-icon text-ink-subtle" strokeWidth={2.2} />}
     </li>
   );
 }
@@ -283,7 +270,10 @@ const TV_CATEGORY_RX =
 type AwardHit = { id: number; type: "movie" | "tv" };
 
 function normTitle(s: string): string {
-  return s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "");
+  return s
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 function tmdbYear(date?: string): number | null {
@@ -306,12 +296,8 @@ async function searchType(
       .slice(0, 6)
       .map((r) => ({
         id: Number(r.id),
-        title: String(
-          type === "movie" ? r.title ?? r.original_title ?? "" : r.name ?? r.original_name ?? "",
-        ),
-        year: tmdbYear(
-          ((type === "movie" ? r.release_date : r.first_air_date) as string) || undefined,
-        ),
+        title: String(type === "movie" ? (r.title ?? r.original_title ?? "") : (r.name ?? r.original_name ?? "")),
+        year: tmdbYear(((type === "movie" ? r.release_date : r.first_air_date) as string) || undefined),
       }))
       .filter((r) => Number.isFinite(r.id) && r.id > 0);
   } catch {
@@ -319,16 +305,8 @@ async function searchType(
   }
 }
 
-async function resolveAwardWork(
-  key: string,
-  title: string,
-  year: number,
-  preferTv: boolean,
-): Promise<AwardHit | null> {
-  const [movies, tvs] = await Promise.all([
-    searchType(key, title, "movie"),
-    searchType(key, title, "tv"),
-  ]);
+async function resolveAwardWork(key: string, title: string, year: number, preferTv: boolean): Promise<AwardHit | null> {
+  const [movies, tvs] = await Promise.all([searchType(key, title, "movie"), searchType(key, title, "tv")]);
   const want = normTitle(title);
   const candidates = [
     ...tvs.map((r) => ({ ...r, type: "tv" as const })),

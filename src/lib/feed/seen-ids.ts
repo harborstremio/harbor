@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useRef, type MutableRefObject } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { createContext, useCallback, useContext, useRef, type MutableRefObject } from "react";
 
 const SeenIdsContext = createContext<MutableRefObject<Map<string, string>> | null>(null);
 

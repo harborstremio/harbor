@@ -1,8 +1,8 @@
-import { Play, Star } from "lucide-react";
-import type { CSSProperties } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { CustomHoverConfig } from "@/lib/custom-hover";
 import { useT } from "@/lib/i18n";
+import { Play, Star } from "lucide-react";
+import type { CSSProperties } from "react";
 
 export function customHoverPosterProps(
   config: CustomHoverConfig,

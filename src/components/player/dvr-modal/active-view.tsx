@@ -1,6 +1,7 @@
-import { CircleStop, FolderOpen } from "lucide-react";
 import type { DvrSession } from "@/lib/dvr/types";
 import { useT } from "@/lib/i18n";
+import { CircleStop, FolderOpen } from "lucide-react";
+
 import { Footer } from "./shared";
 import { formatBytes, formatRemaining } from "./utils";
 
@@ -14,9 +15,7 @@ export function ActiveView({
   onReveal: () => void;
 }) {
   const t = useT();
-  const ratio = session.plannedDurationSec > 0
-    ? Math.min(1, session.elapsedSec / session.plannedDurationSec)
-    : 0;
+  const ratio = session.plannedDurationSec > 0 ? Math.min(1, session.elapsedSec / session.plannedDurationSec) : 0;
   const remaining = Math.max(0, session.plannedDurationSec - session.elapsedSec);
   const isDone = session.state === "done";
   return (
@@ -33,9 +32,7 @@ export function ActiveView({
             </span>
           </div>
           {!isDone && (
-            <span className="font-mono text-[12.5px] tabular-nums text-ink-muted">
-              {formatRemaining(remaining)}
-            </span>
+            <span className="font-mono text-[12.5px] tabular-nums text-ink-muted">{formatRemaining(remaining)}</span>
           )}
         </div>
         {!isDone && (

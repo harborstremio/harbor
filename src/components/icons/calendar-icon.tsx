@@ -1,20 +1,7 @@
 export function CalendarIcon({ active = false }: { active?: boolean }) {
   return (
-    <svg
-      width="26"
-      height="26"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-      style={{ overflow: "visible" }}
-    >
-      <g
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      >
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden style={{ overflow: "visible" }}>
+      <g stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none">
         <path d="M4 7.5 Q4 6.5 5 6.5 L19 6.5 Q20 6.5 20 7.5 L20 19.5 Q20 20.5 19 20.5 L5 20.5 Q4 20.5 4 19.5 Z" />
         <path d="M4 10.25 L20 10.25" />
         <rect x="6.75" y="2.75" width="2.5" height="3.75" rx="1.1" fill="currentColor" stroke="none" />

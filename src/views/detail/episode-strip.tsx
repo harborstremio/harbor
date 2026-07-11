@@ -1,18 +1,19 @@
-import { Check, Eye } from "lucide-react";
-import { EpisodeRatingBadge } from "./episode-rating-badge";
-import { useEffect, useMemo, useState } from "react";
 import { DragStrip } from "@/components/drag-strip";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
+import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
 import type { Episode } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
 import { useView } from "@/lib/view";
-import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
-import { useT } from "@/lib/i18n";
+import { Check, Eye } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+import { EpisodeDownloadButton } from "./episode-download-button";
 import { EpisodeGrid } from "./episode-grid";
 import type { GridEpisode } from "./episode-grid-types";
-import { EpisodeDownloadButton } from "./episode-download-button";
+import { EpisodeRatingBadge } from "./episode-rating-badge";
 import { isUpcomingDate } from "./helpers";
 
 type Progress = { ratio: number; watched: boolean; startedAt: number };
@@ -78,7 +79,18 @@ export function EpisodeStrip({
             }),
         };
       }),
-    [episodes, thumbnailFor, meta, playLocalAware, settings.instantPlay, settings.seasonSourceLock, settings.hdEpisodeImages, t, seriesImdbId, cinemetaVideos],
+    [
+      episodes,
+      thumbnailFor,
+      meta,
+      playLocalAware,
+      settings.instantPlay,
+      settings.seasonSourceLock,
+      settings.hdEpisodeImages,
+      t,
+      seriesImdbId,
+      cinemetaVideos,
+    ],
   );
   const epByNumber = useMemo(() => {
     const m = new Map<number, Episode>();
@@ -194,7 +206,7 @@ function EpisodeStripCard({
             onError={() => setImgIdx((i) => i + 1)}
           />
         </div>
-        
+
         {settings.showEpisodeRating && ratingValue != null && ratingValue > 0 && (
           <div className="pointer-events-none absolute start-2 top-2 z-[6] flex items-center gap-1.5 rounded-md bg-black/55 px-1.5 py-0.5 opacity-0 drop-shadow-md backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
             <EpisodeRatingBadge value={ratingValue} isImdb={ratingIsImdb} />
@@ -202,9 +214,7 @@ function EpisodeStripCard({
         )}
         {settings.showEpisodeDescription && ep.overview && (
           <div className="absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-black/92 via-black/55 to-transparent p-2 pt-10 text-start pointer-events-none opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-            <p className="line-clamp-5 text-[9.5px] leading-[1.35] text-white/95 drop-shadow-md">
-              {ep.overview}
-            </p>
+            <p className="line-clamp-5 text-[9.5px] leading-[1.35] text-white/95 drop-shadow-md">{ep.overview}</p>
           </div>
         )}
 

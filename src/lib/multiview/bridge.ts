@@ -27,12 +27,7 @@ export function multiviewSupported(): boolean {
   return navigator.userAgent.toLowerCase().includes("windows");
 }
 
-export async function mvOpen(
-  slot: number,
-  rect: OpenRect,
-  url: string,
-  userAgent?: string,
-): Promise<void> {
+export async function mvOpen(slot: number, rect: OpenRect, url: string, userAgent?: string): Promise<void> {
   await invoke("multiview_open", {
     args: {
       slot,

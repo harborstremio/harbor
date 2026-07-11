@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import type { StremboxdMeta } from "./types";
 
 export function stremboxdMetaToMeta(m: StremboxdMeta): Meta {

@@ -1,7 +1,8 @@
-import { Bookmark } from "lucide-react";
 import { type Meta } from "@/lib/cinemeta";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { Bookmark } from "lucide-react";
+
 import { WatchlistCard } from "./watchlist-card";
 
 export { WatchlistCard } from "./watchlist-card";
@@ -99,9 +100,7 @@ export function FilterPill({
       type="button"
       onClick={onClick}
       className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-        active
-          ? "bg-ink text-canvas"
-          : "text-ink-muted hover:bg-raised hover:text-ink"
+        active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
       }`}
     >
       {children}
@@ -137,9 +136,7 @@ export function bucketFor(ms: number | null, nowMs: number): { rank: number; lab
   return { rank: 10 + (thisYear - year), label: String(year) };
 }
 
-export function groupByDate<T extends { date: number | null }>(
-  entries: T[],
-): Array<{ label: string; items: T[] }> {
+export function groupByDate<T extends { date: number | null }>(entries: T[]): Array<{ label: string; items: T[] }> {
   const now = Date.now();
   const sorted = [...entries].sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity));
   const groups = new Map<string, { rank: number; label: string; items: T[] }>();
@@ -194,9 +191,7 @@ export function SortControl() {
           type="button"
           onClick={() => update({ librarySort: key })}
           className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors ${
-            settings.librarySort === key
-              ? "bg-ink text-canvas"
-              : "text-ink-muted hover:bg-raised hover:text-ink"
+            settings.librarySort === key ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
           }`}
         >
           {label}
@@ -206,9 +201,7 @@ export function SortControl() {
   );
 }
 
-export function GroupedGrid<
-  T extends { meta: Meta; date: number | null; key: string; stremioId?: string },
->({
+export function GroupedGrid<T extends { meta: Meta; date: number | null; key: string; stremioId?: string }>({
   groups,
   onRemove,
 }: {
@@ -245,7 +238,7 @@ export function EmptyWatchlist({ connected }: { connected: boolean }) {
       <Bookmark size={28} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[16px] font-semibold text-ink">{t("Your watchlist is empty")}</h2>
       <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-        {t("Right-click any title in Harbor or hit \"Add to Watchlist\" on its detail page to save it here.")}
+        {t('Right-click any title in Harbor or hit "Add to Watchlist" on its detail page to save it here.')}
         {connected
           ? t(" Anything you save also syncs to your Trakt account.")
           : t(" Connect Trakt in Settings to sync this list across devices.")}
@@ -258,10 +251,7 @@ export function Grid({ children }: { children: React.ReactNode }) {
   const { settings } = useSettings();
   const base = Math.round(150 * settings.posterScale);
   return (
-    <div
-      className="grid gap-4"
-      style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${base}px, 1fr))` }}
-    >
+    <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${base}px, 1fr))` }}>
       {children}
     </div>
   );

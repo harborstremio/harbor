@@ -1,19 +1,8 @@
-import { Minimize2 } from "lucide-react";
-import { useSettings } from "@/lib/settings";
-
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { Minimize2 } from "lucide-react";
 
-function SubToggle({
-  label,
-  hint,
-  on,
-  onToggle,
-}: {
-  label: string;
-  hint: string;
-  on: boolean;
-  onToggle: () => void;
-}) {
+function SubToggle({ label, hint, on, onToggle }: { label: string; hint: string; on: boolean; onToggle: () => void }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-edge-soft/60 bg-canvas/30 px-3.5 py-2.5">
       <div className="flex min-w-0 flex-1 flex-col">
@@ -56,7 +45,9 @@ export function TrayRow() {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[14px] font-medium text-ink">{t("Close to the system tray")}</span>
           <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Closing the window tucks Harbor into the tray instead of quitting, so it reopens instantly. Right-click the tray icon for quick controls, or pick Quit to exit fully.")}
+            {t(
+              "Closing the window tucks Harbor into the tray instead of quitting, so it reopens instantly. Right-click the tray icon for quick controls, or pick Quit to exit fully.",
+            )}
           </p>
         </div>
         <button

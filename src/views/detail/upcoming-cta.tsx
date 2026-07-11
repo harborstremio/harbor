@@ -1,7 +1,8 @@
-import { CalendarClock } from "lucide-react";
 import { daysFromTodayLocal, formatAirDate } from "@/lib/dates";
-import type { TmdbDetail } from "@/lib/providers/tmdb";
 import { useT } from "@/lib/i18n";
+import type { TmdbDetail } from "@/lib/providers/tmdb";
+import { CalendarClock } from "lucide-react";
+
 import { Tooltip } from "./tooltip";
 
 export function UpcomingCta({ detail, onTry }: { detail: TmdbDetail | null; onTry: () => void }) {

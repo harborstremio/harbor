@@ -1,18 +1,10 @@
-import { useMemo, useState } from "react";
-import { Link2, Search, Unlink, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { getEpgOverride, setEpgOverride } from "@/lib/iptv/epg-map";
 import type { EpgIndex, IptvChannel } from "@/lib/iptv/types";
+import { Link2, Search, Unlink, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
-export function EpgMatchModal({
-  channel,
-  epg,
-  onClose,
-}: {
-  channel: IptvChannel;
-  epg: EpgIndex;
-  onClose: () => void;
-}) {
+export function EpgMatchModal({ channel, epg, onClose }: { channel: IptvChannel; epg: EpgIndex; onClose: () => void }) {
   const t = useT();
   const [query, setQuery] = useState(channel.name);
   const current = getEpgOverride(channel.id);
@@ -96,14 +88,10 @@ export function EpgMatchModal({
               <Link2 size={13} strokeWidth={2} className="shrink-0 text-ink-subtle" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[13px] font-medium text-ink">{e.id}</span>
-                {e.sample && (
-                  <span className="block truncate text-[11.5px] text-ink-subtle">{e.sample}</span>
-                )}
+                {e.sample && <span className="block truncate text-[11.5px] text-ink-subtle">{e.sample}</span>}
               </span>
               {current === e.id && (
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-accent">
-                  {t("Matched")}
-                </span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-accent">{t("Matched")}</span>
               )}
             </button>
           ))}

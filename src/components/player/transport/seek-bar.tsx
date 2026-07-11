@@ -1,14 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { useSettings } from "@/lib/settings";
+import { ThumbPreview } from "@/components/player/thumb-preview";
 import {
   usePlaybackPositionGated,
   usePlaybackBufferedGated,
   usePlaybackDownloadedGated,
   setSeekHovering,
 } from "@/lib/player/playback-clock";
-import { useTrickplayState } from "@/lib/trickplay";
+import { useSettings } from "@/lib/settings";
 import { useSkipSegmentsView } from "@/lib/skip-intro/segment-store";
-import { ThumbPreview } from "@/components/player/thumb-preview";
+import { useTrickplayState } from "@/lib/trickplay";
+import { useEffect, useRef, useState } from "react";
+
 import { SeekBarVisual } from "./seek-bar-visual";
 import { fmtTime } from "./transport-utils";
 
@@ -40,8 +41,7 @@ export function SeekBar({
   const pct = Math.max(0, Math.min(1, value / dur)) * 100;
   const cacheFill = Math.max(0, Math.min(1, (position + buffered) / dur));
   const fullyCached = downloaded >= 0.999;
-  const bufferedPct =
-    fullyCached || settings.seekBarFill === false ? 0 : Math.max(cacheFill, downloaded) * 100;
+  const bufferedPct = fullyCached || settings.seekBarFill === false ? 0 : Math.max(cacheFill, downloaded) * 100;
   const skipSegments = useSkipSegmentsView();
   const segmentSpans = skipSegments
     .filter((s) => s.endSec > s.startSec && durationSec > 0)

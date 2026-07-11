@@ -1,9 +1,9 @@
-import { useEffect, useRef, type RefObject } from "react";
+import type { Meta } from "@/lib/cinemeta";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
-import type { Meta } from "@/lib/cinemeta";
-import type { PlayEpisode, PlayerSrc } from "@/lib/view";
 import { getSleepAtEnd, queueShift, setSleepAtEnd, type QueueItem } from "@/lib/queue";
+import type { PlayEpisode, PlayerSrc } from "@/lib/view";
+import { useEffect, useRef, type RefObject } from "react";
 
 const STUB_MAX_SEC = 150;
 
@@ -50,5 +50,15 @@ export function useQueueAdvance(params: {
       setSleepAtEnd(false);
       exitPlayer();
     }
-  }, [snap.status, snap.errorCode, snap.durationSec, src.url, isLive, queue, startedNearEndRef, openPicker, exitPlayer]);
+  }, [
+    snap.status,
+    snap.errorCode,
+    snap.durationSec,
+    src.url,
+    isLive,
+    queue,
+    startedNearEndRef,
+    openPicker,
+    exitPlayer,
+  ]);
 }

@@ -53,21 +53,14 @@ function mapPremieres(raw: RawPremiere[], isAnime: boolean): SimklPremiere[] {
 }
 
 export async function fetchSimklPremieres(year: number): Promise<SimklPremiere[]> {
-  const list = (path: string) =>
-    simklRequest<RawPremiere[]>(path, { authed: false }).catch(() => [] as RawPremiere[]);
-  const [tv, anime] = await Promise.all([
-    list(`/tv/premieres/${year}`),
-    list(`/anime/premieres/${year}`),
-  ]);
+  const list = (path: string) => simklRequest<RawPremiere[]>(path, { authed: false }).catch(() => [] as RawPremiere[]);
+  const [tv, anime] = await Promise.all([list(`/tv/premieres/${year}`), list(`/anime/premieres/${year}`)]);
   return [...mapPremieres(tv, false), ...mapPremieres(anime, true)];
 }
 
 const idsCache = new Map<number, Promise<SimklResolvedIds | null>>();
 
-export function resolveSimklIds(
-  simklId: number,
-  isAnime: boolean,
-): Promise<SimklResolvedIds | null> {
+export function resolveSimklIds(simklId: number, isAnime: boolean): Promise<SimklResolvedIds | null> {
   const cached = idsCache.get(simklId);
   if (cached) return cached;
   const kind = isAnime ? "anime" : "tv";

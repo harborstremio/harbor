@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Layers } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Layers } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import type { AddonRef } from "./use-catalog-list";
 
 function AddonMark({ addon, size = 20 }: { addon: AddonRef; size?: number }) {
@@ -56,13 +57,12 @@ export function AddonFilterSelect({
             : "border-edge-soft bg-elevated/40 text-ink-muted hover:bg-elevated hover:text-ink"
         }`}
       >
-        {selected ? (
-          <AddonMark addon={selected} size={20} />
-        ) : (
-          <Layers size={17} className="text-ink-subtle" />
-        )}
+        {selected ? <AddonMark addon={selected} size={20} /> : <Layers size={17} className="text-ink-subtle" />}
         <span className="max-w-[180px] truncate">{selected ? selected.name : t("All addons")}</span>
-        <ChevronDown size={15} className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={15}
+          className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute start-0 top-[calc(100%+6px)] z-40 flex max-h-[380px] w-[280px] flex-col overflow-y-auto rounded-2xl border border-edge bg-canvas p-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
@@ -99,15 +99,7 @@ export function AddonFilterSelect({
   );
 }
 
-function Row({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+function Row({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       onClick={onClick}

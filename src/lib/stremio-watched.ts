@@ -25,8 +25,7 @@ export async function decodeWatchedEpisodes(
   } catch {
     return keys;
   }
-  const bit = (i: number) =>
-    i >= 0 && i < bytes.length * 8 && (bytes[i >> 3] & (1 << (i & 7))) !== 0;
+  const bit = (i: number) => i >= 0 && i < bytes.length * 8 && (bytes[i >> 3] & (1 << (i & 7))) !== 0;
   const anchorIdx = videos.findIndex((v) => v.id === anchorVideoId);
   const offset = anchorIdx >= 0 ? anchorLength - anchorIdx - 1 : 0;
   for (let i = 0; i < videos.length; i++) {

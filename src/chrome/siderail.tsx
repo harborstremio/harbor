@@ -1,18 +1,18 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { HarborMark } from "@/components/icons/harbor-mark";
-import { ProfileBlock } from "@/chrome/siderail/profile-block";
-import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
-import { RecordingPill } from "@/chrome/recording-pill";
-import { TogetherButton } from "@/chrome/topbar";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
-import { useSearch } from "@/lib/search-context";
-import { useSettings } from "@/lib/settings";
+import { RecordingPill } from "@/chrome/recording-pill";
+import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
+import { ProfileBlock } from "@/chrome/siderail/profile-block";
+import { TogetherButton } from "@/chrome/topbar";
+import { HarborMark } from "@/components/icons/harbor-mark";
+import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
 import { useParental } from "@/lib/parental";
+import { useSearch } from "@/lib/search-context";
+import { useSettings } from "@/lib/settings";
 import { useView, type View } from "@/lib/view";
-import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { close, minimize, toggleMaximize } from "@/lib/window";
+import { Search } from "lucide-react";
+import { useState } from "react";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -42,9 +42,7 @@ export function SideRail() {
 
   const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
   const primary = items.filter((item) => PRIMARY_IDS.has(item.id) && isVisible(item));
-  const secondary = items.filter(
-    (item) => item.id !== "settings" && !PRIMARY_IDS.has(item.id) && isVisible(item),
-  );
+  const secondary = items.filter((item) => item.id !== "settings" && !PRIMARY_IDS.has(item.id) && isVisible(item));
   const settingsItem = items.find((item) => item.id === "settings");
 
   return (
@@ -57,9 +55,7 @@ export function SideRail() {
       >
         <div
           data-tauri-drag-region
-          className={`relative flex h-20 shrink-0 items-end pb-3.5 ${
-            collapsed ? "justify-center px-3" : "px-7"
-          }`}
+          className={`relative flex h-20 shrink-0 items-end pb-3.5 ${collapsed ? "justify-center px-3" : "px-7"}`}
         >
           <span
             aria-hidden
@@ -87,7 +83,13 @@ export function SideRail() {
         <div className="flex-1 overflow-y-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <nav className="flex flex-col gap-0.5">
             {primary.map((item) => (
-              <RailItem key={item.id} label={item.label} active={view === item.view} collapsed={collapsed} onClick={() => navigate(item)} />
+              <RailItem
+                key={item.id}
+                label={item.label}
+                active={view === item.view}
+                collapsed={collapsed}
+                onClick={() => navigate(item)}
+              />
             ))}
           </nav>
 
@@ -96,7 +98,13 @@ export function SideRail() {
               <GoldRule collapsed={collapsed} />
               <nav className="flex flex-col gap-0.5">
                 {secondary.map((item) => (
-                  <RailItem key={item.id} label={item.label} active={view === item.view} collapsed={collapsed} onClick={() => navigate(item)} />
+                  <RailItem
+                    key={item.id}
+                    label={item.label}
+                    active={view === item.view}
+                    collapsed={collapsed}
+                    onClick={() => navigate(item)}
+                  />
                 ))}
               </nav>
             </>
@@ -106,7 +114,13 @@ export function SideRail() {
             <>
               <GoldRule collapsed={collapsed} />
               <nav className="flex flex-col gap-0.5">
-                <RailItem key={settingsItem.id} label={settingsItem.label} active={view === settingsItem.view} collapsed={collapsed} onClick={() => setView(settingsItem.view)} />
+                <RailItem
+                  key={settingsItem.id}
+                  label={settingsItem.label}
+                  active={view === settingsItem.view}
+                  collapsed={collapsed}
+                  onClick={() => setView(settingsItem.view)}
+                />
               </nav>
             </>
           )}
@@ -220,15 +234,7 @@ function GoldRule({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function WinBtn({
-  onClick,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
+function WinBtn({ onClick, label, children }: { onClick: () => void; label: string; children: React.ReactNode }) {
   return (
     <button
       type="button"

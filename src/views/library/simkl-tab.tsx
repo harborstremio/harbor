@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { useSettings } from "@/lib/settings";
+import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { getLocalCache, syncWatchlistCache, type SimklCacheItem, type SimklCache } from "@/lib/simkl/activities";
 import {
   groupAnimeByFranchise,
@@ -8,7 +8,8 @@ import {
   type AnimeFranchise,
   formatYearRange,
 } from "@/lib/simkl/anime-grouping";
-import type { Meta } from "@/lib/cinemeta";
+import { useEffect, useMemo, useState } from "react";
+
 import {
   FilterBar,
   GroupedGrid,
@@ -228,9 +229,7 @@ export function SimklTab() {
           }
 
           if (!meta.poster) {
-            const fallbackItem = franchise.items.find(
-              (it) => it.poster && cacheItemToMeta(it, cache) !== null,
-            );
+            const fallbackItem = franchise.items.find((it) => it.poster && cacheItemToMeta(it, cache) !== null);
             if (fallbackItem?.poster) {
               meta.poster = `https://simkl.in/posters/${fallbackItem.poster}_m.jpg`;
             }
@@ -376,9 +375,7 @@ export function SimklTab() {
 
       {status === "ready" && visible.length === 0 && (
         <p className="text-[13px] text-ink-muted">
-          {filteredItems.length === 0
-            ? tr("No items found in this section.")
-            : tr("No matches for these filters.")}
+          {filteredItems.length === 0 ? tr("No items found in this section.") : tr("No matches for these filters.")}
         </p>
       )}
 

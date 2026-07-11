@@ -1,11 +1,11 @@
+import { useT } from "@/lib/i18n";
+import type { PanelCorner } from "@/lib/player-chrome";
+import { nameColor } from "@/lib/together/colors";
+import type { Participant } from "@/lib/together/protocol";
+import type { ChatMessage } from "@/lib/together/provider";
+import { useSelfIdentity } from "@/lib/together/use-self-identity";
 import { MessageCircle, Send } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { nameColor } from "@/lib/together/colors";
-import type { PanelCorner } from "@/lib/player-chrome";
-import type { ChatMessage } from "@/lib/together/provider";
-import type { Participant } from "@/lib/together/protocol";
-import { useSelfIdentity } from "@/lib/together/use-self-identity";
-import { useT } from "@/lib/i18n";
 
 const RECENT_WINDOW_MS = 7000;
 const COMPOSE_TIMEOUT_MS = 4500;
@@ -86,8 +86,7 @@ export function ChatOverlay({
     () =>
       recent.map((m, i) => {
         const prev = recent[i - 1];
-        const isContinuation =
-          !!prev && prev.from === m.from && m.at - prev.at < GROUP_GAP_MS;
+        const isContinuation = !!prev && prev.from === m.from && m.at - prev.at < GROUP_GAP_MS;
         return { message: m, isContinuation };
       }),
     [recent],
@@ -209,9 +208,7 @@ function Bubble({
         </span>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/55">
-          {message.name}
-        </span>
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/55">{message.name}</span>
         <span className="break-words text-[13.5px] leading-snug text-white">{message.text}</span>
       </div>
     </div>

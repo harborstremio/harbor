@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ChevronLeft, Delete } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 type Stage = "enter" | "confirm";
 
@@ -99,10 +99,8 @@ export function PinEntry({
     focus();
   };
 
-  const displayTitle =
-    mode === "set" && stage === "confirm" ? t("Confirm your PIN") : title;
-  const displaySub =
-    mode === "set" && stage === "confirm" ? t("Type the same 4-digit PIN again.") : subtitle;
+  const displayTitle = mode === "set" && stage === "confirm" ? t("Confirm your PIN") : title;
+  const displaySub = mode === "set" && stage === "confirm" ? t("Type the same 4-digit PIN again.") : subtitle;
 
   return (
     <div className="flex w-full max-w-[420px] flex-col gap-7 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -118,20 +116,12 @@ export function PinEntry({
         </button>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-          {t("Profile PIN")}
-        </span>
-        <h1 className="font-display text-[28px] font-medium tracking-tight text-ink">
-          {displayTitle}
-        </h1>
+        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">{t("Profile PIN")}</span>
+        <h1 className="font-display text-[28px] font-medium tracking-tight text-ink">{displayTitle}</h1>
         <p className="text-center text-[13.5px] text-ink-muted">{displaySub}</p>
       </div>
 
-      <div
-        className={`flex flex-col items-center gap-5 ${
-          shake ? "animate-[pin-shake_0.34s_ease]" : ""
-        }`}
-      >
+      <div className={`flex flex-col items-center gap-5 ${shake ? "animate-[pin-shake_0.34s_ease]" : ""}`}>
         <button
           type="button"
           onClick={focus}
@@ -181,9 +171,7 @@ export function PinEntry({
         </div>
       </div>
 
-      <p className="text-center text-[11.5px] text-ink-subtle">
-        {t("Type on your keyboard or tap the digits above.")}
-      </p>
+      <p className="text-center text-[11.5px] text-ink-subtle">{t("Type on your keyboard or tap the digits above.")}</p>
       <style>{`
         @keyframes pin-shake {
           0%, 100% { transform: translateX(0); }

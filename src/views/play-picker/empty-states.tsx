@@ -1,15 +1,10 @@
-import { ArrowRight } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import type { Rejection } from "@/lib/streams/trust";
+import { ArrowRight } from "lucide-react";
+
 import { groupRejections } from "./picker-utils";
 
-export function EmptyState({
-  message,
-  action,
-}: {
-  message: string;
-  action?: { label: string; onClick: () => void };
-}) {
+export function EmptyState({ message, action }: { message: string; action?: { label: string; onClick: () => void } }) {
   return (
     <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-edge bg-canvas/70 px-6 py-12 text-center">
       <p className="text-[14px] text-ink-muted">{message}</p>
@@ -82,8 +77,8 @@ export function FilteredOutState({
           Strict filters dropped everything
         </h2>
         <p className="max-w-lg text-[14px] leading-relaxed text-ink-muted">
-          Harbor blocks suspicious files and mismatched releases by default. For older shows
-          and unusual titles this is sometimes too tight.
+          Harbor blocks suspicious files and mismatched releases by default. For older shows and unusual titles this is
+          sometimes too tight.
         </p>
         {groups.length > 0 && (
           <ul className="flex flex-wrap justify-center gap-2 pt-1">
@@ -138,15 +133,11 @@ export function TheatresEmptyState({
       )}
       <div className="absolute inset-0 bg-gradient-to-b from-canvas/60 via-canvas/80 to-canvas" />
       <div className="relative flex flex-col items-center gap-4 px-10 py-14 text-center">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.42em] text-ink-subtle">
-          Not out yet
-        </p>
-        <h2 className="font-display text-[34px] font-medium leading-[1.05] tracking-tight text-ink">
-          {meta.name}
-        </h2>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.42em] text-ink-subtle">Not out yet</p>
+        <h2 className="font-display text-[34px] font-medium leading-[1.05] tracking-tight text-ink">{meta.name}</h2>
         <p className="max-w-md text-[14px] leading-relaxed text-ink-muted">
-          No clean release has surfaced yet. This may be too new. Harbor's filters dropped
-          everything that came back as wrong-movie noise.
+          No clean release has surfaced yet. This may be too new. Harbor's filters dropped everything that came back as
+          wrong-movie noise.
         </p>
         {onShowAll && !showingAll && (
           <button

@@ -1,16 +1,17 @@
-import { Check, Copy, Eye, EyeOff, ExternalLink, Loader2, Settings2, Star, Trash2, TrendingUp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
+import { openInstallerViewport } from "@/components/installer-viewport";
 import { setActiveAddon } from "@/lib/active-addon";
 import { manifestToConfigureUrl, manifestToShareUrl } from "@/lib/addon-store";
 import { categorizeAddon, isAdultAddon, type ResolvedAddon } from "@/lib/addons-store/store";
+import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { useT } from "@/lib/i18n";
+import { isWeb } from "@/lib/platform";
 import { addonSiteUrl, rateOnSiteUrl, risingEntryFor, useRising } from "@/lib/providers/stremio-addons";
 import { useCommunity } from "@/lib/providers/stremio-addons-index";
-import { openInstallerViewport } from "@/components/installer-viewport";
-import { pushActivityHint } from "@/lib/discord/activity-hint";
-import { isWeb } from "@/lib/platform";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { Check, Copy, Eye, EyeOff, ExternalLink, Loader2, Settings2, Star, Trash2, TrendingUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { AddonDescription } from "./addon-description";
 import { AddonDocumentation } from "./addon-documentation";
 import { categoryLabel } from "./addons-types";
@@ -43,8 +44,7 @@ export function AddonDetail({
   const t = useT();
   const m = resolved.manifest;
   const c = resolved.curated;
-  const isConfigurable =
-    m?.behaviorHints?.configurable === true || m?.behaviorHints?.configurationRequired === true;
+  const isConfigurable = m?.behaviorHints?.configurable === true || m?.behaviorHints?.configurationRequired === true;
   const web = isWeb();
   const configureUrl = manifestToConfigureUrl(resolved.transportUrl);
   const stremioShareUrl = manifestToShareUrl(resolved.transportUrl, "stremio");
@@ -106,8 +106,7 @@ export function AddonDetail({
     return () => window.removeEventListener("harbor:addons-changed", onChange);
   }, [m?.id]);
 
-  const installed =
-    optimisticInstalled !== null ? optimisticInstalled : resolved.installed;
+  const installed = optimisticInstalled !== null ? optimisticInstalled : resolved.installed;
 
   const handleInstall = async () => {
     if (busy) return;
@@ -183,12 +182,7 @@ export function AddonDetail({
             className="absolute end-12 top-32 flex items-baseline gap-2 leading-none transition-opacity hover:opacity-80"
             title={t("Rate on stremio-addons.net")}
           >
-            <Star
-              size={22}
-              strokeWidth={2.4}
-              fill="currentColor"
-              className="text-accent harbor-rating-star"
-            />
+            <Star size={22} strokeWidth={2.4} fill="currentColor" className="text-accent harbor-rating-star" />
             <span className="text-[32px] font-semibold tabular-nums leading-none text-ink">
               {community.stars.toLocaleString()}
             </span>
@@ -198,7 +192,12 @@ export function AddonDetail({
           <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
             {c?.tags.includes("official") ? t("Official") : t("Community")} ·{" "}
             {categoryLabel(c?.category ?? categorizeAddon(resolved)) ?? t("Addon")}
-            {m?.id && <> · <span className="font-mono normal-case tracking-normal">{m.id}</span></>}
+            {m?.id && (
+              <>
+                {" "}
+                · <span className="font-mono normal-case tracking-normal">{m.id}</span>
+              </>
+            )}
           </span>
           <h1 className="font-display text-[36px] font-medium leading-tight tracking-tight text-ink">
             {nameOf(resolved)}
@@ -241,7 +240,13 @@ export function AddonDetail({
               </button>
             ) : isConfigurable ? (
               <button
-                onClick={() => openInstallerViewport(configureUrl, nameOf(resolved), resolveAddonLogo(m?.logo, resolved.transportUrl))}
+                onClick={() =>
+                  openInstallerViewport(
+                    configureUrl,
+                    nameOf(resolved),
+                    resolveAddonLogo(m?.logo, resolved.transportUrl),
+                  )
+                }
                 className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
               >
                 <Settings2 size={14} strokeWidth={2.2} />
@@ -265,7 +270,13 @@ export function AddonDetail({
             )}
             {installed && isConfigurable && !busy && (
               <button
-                onClick={() => openInstallerViewport(configureUrl, nameOf(resolved), resolveAddonLogo(m?.logo, resolved.transportUrl))}
+                onClick={() =>
+                  openInstallerViewport(
+                    configureUrl,
+                    nameOf(resolved),
+                    resolveAddonLogo(m?.logo, resolved.transportUrl),
+                  )
+                }
                 className="flex h-11 items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 <Settings2 size={14} strokeWidth={2.2} />
@@ -283,7 +294,11 @@ export function AddonDetail({
               onClick={() => copy("stremio")}
               className="flex h-11 items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
             >
-              {copied === "stremio" ? <Check size={14} strokeWidth={2.4} /> : <ExternalLink size={14} strokeWidth={2.2} />}
+              {copied === "stremio" ? (
+                <Check size={14} strokeWidth={2.4} />
+              ) : (
+                <ExternalLink size={14} strokeWidth={2.2} />
+              )}
               {copied === "stremio" ? t("Copied") : t("stremio:// link")}
             </button>
             {community && (
@@ -335,9 +350,7 @@ export function AddonDetail({
         <div className="mx-auto max-w-5xl">
           {community?.slug && <AddonDocumentation slug={community.slug} />}
           <div className="mb-8 flex items-baseline justify-between gap-4">
-            <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-              {t("Project information")}
-            </h2>
+            <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">{t("Project information")}</h2>
             <span className="text-[10.5px] uppercase tracking-[0.22em] text-ink-subtle">
               {t("Pulled from manifest")}
             </span>
@@ -358,9 +371,7 @@ export function AddonDetail({
             </dl>
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[12px] uppercase tracking-[0.16em] text-ink-subtle">
-                  {t("Manifest URL")}
-                </span>
+                <span className="text-[12px] uppercase tracking-[0.16em] text-ink-subtle">{t("Manifest URL")}</span>
                 <div className="flex items-center gap-1.5">
                   {manifestVisible && (
                     <button
@@ -386,11 +397,7 @@ export function AddonDetail({
                         : t("URLs can carry debrid keys or tokens; reveal when you need to copy")
                     }
                   >
-                    {manifestVisible ? (
-                      <EyeOff size={11} strokeWidth={2.4} />
-                    ) : (
-                      <Eye size={11} strokeWidth={2.4} />
-                    )}
+                    {manifestVisible ? <EyeOff size={11} strokeWidth={2.4} /> : <Eye size={11} strokeWidth={2.4} />}
                     {manifestVisible ? t("Hide") : t("Reveal")}
                   </button>
                 </div>
@@ -402,17 +409,19 @@ export function AddonDetail({
               </div>
               {!manifestVisible && (
                 <p className="text-[11.5px] leading-relaxed text-ink-subtle">
-                  {t("Hidden by default. Manifest paths often carry API keys (debrid tokens, OMDB keys, etc.) you don't want over a shoulder.")}
+                  {t(
+                    "Hidden by default. Manifest paths often carry API keys (debrid tokens, OMDB keys, etc.) you don't want over a shoulder.",
+                  )}
                 </p>
               )}
             </div>
           </div>
           <div className="mt-10 flex flex-col items-center gap-2 border-t border-edge-soft pt-6 text-center">
-            <p className="text-[12px] text-ink-subtle">
-              {t("Stremio addon, packaged into Harbor's catalog.")}
-            </p>
+            <p className="text-[12px] text-ink-subtle">{t("Stremio addon, packaged into Harbor's catalog.")}</p>
             <p className="text-[11.5px] leading-relaxed text-ink-subtle">
-              {t("Version and capabilities come straight from the addon's manifest. Ratings and categories come from the")}{" "}
+              {t(
+                "Version and capabilities come straight from the addon's manifest. Ratings and categories come from the",
+              )}{" "}
               <button
                 type="button"
                 onClick={() => openUrl("https://stremio-addons.net")}
@@ -446,18 +455,9 @@ export function AddonDetail({
   );
 }
 
-function DetailHeaderBackdrop({
-  logo,
-  background,
-}: {
-  logo: string | undefined;
-  background: string | undefined;
-}) {
+function DetailHeaderBackdrop({ logo, background }: { logo: string | undefined; background: string | undefined }) {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-    >
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       <div
         className="absolute inset-0"
         style={{

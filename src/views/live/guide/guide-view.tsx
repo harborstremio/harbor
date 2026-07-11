@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link2, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
-import { useEpgMapVersion } from "@/lib/iptv/epg-map";
 import { channelHasCatchup } from "@/lib/iptv/catchup";
+import { useEpgMapVersion } from "@/lib/iptv/epg-map";
+import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import type { EpgIndex, EpgProgram, IptvChannel } from "@/lib/iptv/types";
+import { Link2, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { useLazyVisible } from "../hooks/use-lazy-visible";
 import { EpgMatchModal } from "./epg-match-modal";
 import { GuideChannelCell } from "./guide-channel-cell";
@@ -131,13 +132,7 @@ export function GuideView({
       <div className="flex flex-col">
         {channels.map((ch, i) => (
           <div key={ch.id} className="flex">
-            <GuideChannelCell
-              channel={ch}
-              onPlay={onPlay}
-              index={i}
-              width={460}
-              current={ch.id === currentChannelId}
-            />
+            <GuideChannelCell channel={ch} onPlay={onPlay} index={i} width={460} current={ch.id === currentChannelId} />
           </div>
         ))}
         {hasMore && (
@@ -197,11 +192,7 @@ export function GuideView({
                 className="absolute end-0 top-0 z-50 h-full w-2.5 cursor-col-resize touch-none transition-colors hover:bg-accent/40 active:bg-accent/60"
               />
             </div>
-            <GuideTimeRuler
-              windowStart={windowStart}
-              windowMinutes={windowMinutes}
-              todayMs={nowMs}
-            />
+            <GuideTimeRuler windowStart={windowStart} windowMinutes={windowMinutes} todayMs={nowMs} />
           </div>
           {channels.map((ch, i) => {
             const programs = programsByChannel.get(ch.id) ?? [];
@@ -244,8 +235,7 @@ export function GuideView({
                   {programs.map((p) => {
                     const clip = clampDuration(p.startMs, p.endMs, windowStart, windowEnd);
                     if (!clip) return null;
-                    const replayable =
-                      p.endMs <= nowMs && !!onPlayCatchup && channelHasCatchup(ch);
+                    const replayable = p.endMs <= nowMs && !!onPlayCatchup && channelHasCatchup(ch);
                     return (
                       <GuideProgramBlock
                         key={`${p.startMs}-${p.endMs}-${p.title}`}
@@ -255,9 +245,7 @@ export function GuideView({
                         rowHeight={ROW_HEIGHT_PX}
                         nowMs={nowMs}
                         replayable={replayable}
-                        onClick={() =>
-                          replayable ? onPlayCatchup!(ch, p) : onPlay(ch)
-                        }
+                        onClick={() => (replayable ? onPlayCatchup!(ch, p) : onPlay(ch))}
                       />
                     );
                   })}
@@ -308,9 +296,7 @@ export function GuideView({
           })}
         </div>
       ) : null}
-      {matchTarget && epg && (
-        <EpgMatchModal channel={matchTarget} epg={epg} onClose={() => setMatchTarget(null)} />
-      )}
+      {matchTarget && epg && <EpgMatchModal channel={matchTarget} epg={epg} onClose={() => setMatchTarget(null)} />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
-import type { SkipSegment } from "./types";
 import { getLocalCache } from "@/lib/simkl/activities";
+
+import type { SkipSegment } from "./types";
 
 const LOCAL_STORAGE_KEY = "harbor.kitsu-to-mal.cache.v1";
 let kitsuToMalCache: Record<number, number | null> = {};
@@ -77,11 +78,7 @@ export async function kitsuToMal(kitsuId: number): Promise<number | null> {
   }
 }
 
-export function fetchAniSkipSegments(
-  malId: number,
-  episode: number,
-  episodeLengthSec = 0,
-): Promise<SkipSegment[]> {
+export function fetchAniSkipSegments(malId: number, episode: number, episodeLengthSec = 0): Promise<SkipSegment[]> {
   const key = `${malId}:${episode}:${Math.round(episodeLengthSec)}`;
   const hit = segmentCache.get(key);
   if (hit) return Promise.resolve(hit);

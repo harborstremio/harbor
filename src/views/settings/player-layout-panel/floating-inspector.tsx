@@ -1,4 +1,3 @@
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Eye, EyeOff, RotateCcw, X } from "lucide-react";
 import {
   CONTROL_META,
   controlStates,
@@ -14,6 +13,8 @@ import {
   type PlayerChromeConfig,
   type PlayerControlId,
 } from "@/lib/player-chrome";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Eye, EyeOff, RotateCcw, X } from "lucide-react";
+
 import { panelConfig } from "./editor-panels";
 import { IconUpload } from "./icon-upload";
 import { slotLimit, SLOT_LABEL, visibleInSlot } from "./panel-utils";
@@ -77,12 +78,8 @@ export function FloatingInspector({
     <div className="pointer-events-none absolute inset-x-0 top-6 z-30 flex flex-col items-center gap-2 px-6">
       <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-2xl border border-white/12 bg-black/85 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
         <div className="flex shrink-0 flex-col items-start justify-center px-3 py-1">
-          <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            {meta.group}
-          </span>
-          <span className="whitespace-nowrap text-[13px] font-semibold text-white">
-            {meta.label}
-          </span>
+          <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">{meta.group}</span>
+          <span className="whitespace-nowrap text-[13px] font-semibold text-white">{meta.label}</span>
         </div>
 
         <Divider />
@@ -190,20 +187,12 @@ export function FloatingInspector({
             variant={control.hidden ? "active" : "default"}
             title={control.hidden ? "Show this control" : "Hide this control"}
           />
-          <IconBtn
-            icon={<RotateCcw size={13} strokeWidth={2.3} />}
-            onClick={onResetControl}
-            title="Reset to default"
-          />
+          <IconBtn icon={<RotateCcw size={13} strokeWidth={2.3} />} onClick={onResetControl} title="Reset to default" />
         </Group>
 
         <Divider />
 
-        <IconBtn
-          icon={<X size={14} strokeWidth={2.3} />}
-          onClick={() => onSelect(null)}
-          title="Deselect"
-        />
+        <IconBtn icon={<X size={14} strokeWidth={2.3} />} onClick={() => onSelect(null)} title="Deselect" />
       </div>
 
       {crowded && (
@@ -218,9 +207,7 @@ export function FloatingInspector({
 function Group({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex shrink-0 flex-col items-center gap-1 px-1.5 py-1">
-      <span className="text-[8.5px] font-semibold uppercase tracking-[0.18em] text-white/35">
-        {label}
-      </span>
+      <span className="text-[8.5px] font-semibold uppercase tracking-[0.18em] text-white/35">{label}</span>
       <div className="flex items-center gap-1">{children}</div>
     </div>
   );
@@ -311,12 +298,8 @@ function PanelInspector({
     <div className="pointer-events-none absolute inset-x-0 top-6 z-40 flex flex-col items-center gap-2 px-6">
       <div className="pointer-events-auto flex max-w-full items-stretch gap-1 overflow-x-auto rounded-2xl border border-white/12 bg-black/85 p-2 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
         <div className="flex shrink-0 flex-col items-start justify-center px-3 py-1">
-          <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">
-            {eyebrow}
-          </span>
-          <span className="whitespace-nowrap text-[13px] font-semibold text-white">
-            {meta.label}
-          </span>
+          <span className="text-[9.5px] font-semibold uppercase tracking-[0.18em] text-white/40">{eyebrow}</span>
+          <span className="whitespace-nowrap text-[13px] font-semibold text-white">{meta.label}</span>
         </div>
 
         <Divider />
@@ -376,11 +359,7 @@ function PanelInspector({
 
         <Divider />
 
-        <IconBtn
-          icon={<X size={14} strokeWidth={2.3} />}
-          onClick={() => onSelect(null)}
-          title="Deselect"
-        />
+        <IconBtn icon={<X size={14} strokeWidth={2.3} />} onClick={() => onSelect(null)} title="Deselect" />
       </div>
     </div>
   );
@@ -392,13 +371,7 @@ const VARIANT_OPTIONS: { value: ControlVariant; label: string }[] = [
   { value: "condensed", label: "Icon" },
 ];
 
-function VariantPicker({
-  value,
-  onChange,
-}: {
-  value: ControlVariant;
-  onChange: (v: ControlVariant) => void;
-}) {
+function VariantPicker({ value, onChange }: { value: ControlVariant; onChange: (v: ControlVariant) => void }) {
   return (
     <div className="flex items-center gap-0.5 rounded-lg bg-white/8 p-0.5">
       {VARIANT_OPTIONS.map((opt) => {

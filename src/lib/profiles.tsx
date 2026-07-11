@@ -1,12 +1,5 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+
 import type { HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
 
@@ -140,13 +133,9 @@ function readSettingsIdentity(): { color: string | null; avatar: string | null }
     if (!raw) return { color: null, avatar: null };
     const parsed = JSON.parse(raw) as { harborColor?: unknown; harborAvatar?: unknown };
     const color =
-      typeof parsed.harborColor === "string" && /^#[0-9a-f]{6}$/i.test(parsed.harborColor)
-        ? parsed.harborColor
-        : null;
+      typeof parsed.harborColor === "string" && /^#[0-9a-f]{6}$/i.test(parsed.harborColor) ? parsed.harborColor : null;
     const avatar =
-      typeof parsed.harborAvatar === "string" && parsed.harborAvatar.length > 0
-        ? parsed.harborAvatar
-        : null;
+      typeof parsed.harborAvatar === "string" && parsed.harborAvatar.length > 0 ? parsed.harborAvatar : null;
     return { color, avatar };
   } catch {
     return { color: null, avatar: null };
@@ -383,31 +372,28 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     setPickerViewState({ kind: "list" });
   }, []);
 
-  const createProfile = useCallback<ProfilesValue["createProfile"]>(
-    ({ name, avatar, color, kid }) => {
-      let created!: Profile;
-      setState((s) => {
-        const primary = s.profiles.find((p) => p.isPrimary) ?? s.profiles[0];
-        created = {
-          id: newId(),
-          name: name.trim().slice(0, 32) || "Profile",
-          avatar: avatar ?? null,
-          color,
-          isPrimary: false,
-          shareStremioWith: primary?.id ?? null,
-          passwordHash: null,
-          hideContent: null,
-          lockedTabs: null,
-          kid: kid ?? null,
-          settingsLinked: true,
-          createdAt: Date.now(),
-        };
-        return { ...s, profiles: [...s.profiles, created] };
-      });
-      return created;
-    },
-    [],
-  );
+  const createProfile = useCallback<ProfilesValue["createProfile"]>(({ name, avatar, color, kid }) => {
+    let created!: Profile;
+    setState((s) => {
+      const primary = s.profiles.find((p) => p.isPrimary) ?? s.profiles[0];
+      created = {
+        id: newId(),
+        name: name.trim().slice(0, 32) || "Profile",
+        avatar: avatar ?? null,
+        color,
+        isPrimary: false,
+        shareStremioWith: primary?.id ?? null,
+        passwordHash: null,
+        hideContent: null,
+        lockedTabs: null,
+        kid: kid ?? null,
+        settingsLinked: true,
+        createdAt: Date.now(),
+      };
+      return { ...s, profiles: [...s.profiles, created] };
+    });
+    return created;
+  }, []);
 
   const updateProfile = useCallback<ProfilesValue["updateProfile"]>((id, patch) => {
     setState((s) => ({
@@ -431,7 +417,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       const profiles = s.profiles
         .filter((p) => p.id !== id)
         .map((p) => (p.shareStremioWith === id ? { ...p, shareStremioWith: null } : p));
-      const activeId = s.activeId === id ? profiles[0]?.id ?? null : s.activeId;
+      const activeId = s.activeId === id ? (profiles[0]?.id ?? null) : s.activeId;
       try {
         localStorage.removeItem(`harbor.auth.${id}`);
         localStorage.removeItem(`harbor.favorites.v1.${id}`);
@@ -509,10 +495,7 @@ export function profileInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function stremioSourceProfileId(
-  active: Profile | null,
-  profiles: Profile[],
-): string | null {
+export function stremioSourceProfileId(active: Profile | null, profiles: Profile[]): string | null {
   if (!active) return null;
   if (!active.shareStremioWith) return active.id;
   const exists = profiles.some((p) => p.id === active.shareStremioWith);

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { topMovies, topSeries } from "@/lib/cinemeta";
+import { useEffect, useState } from "react";
 
 let cachedPool: string[] | null = null;
 let inflight: Promise<string[]> | null = null;

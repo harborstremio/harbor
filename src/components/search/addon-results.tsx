@@ -1,9 +1,9 @@
-import { Blocks, Star } from "lucide-react";
-import type { AddonResultGroup } from "@/lib/search-addons";
-import type { Meta } from "@/lib/cinemeta";
 import { Poster, usePosterChain } from "@/components/poster";
+import type { Meta } from "@/lib/cinemeta";
+import type { AddonResultGroup } from "@/lib/search-addons";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { Blocks, Star } from "lucide-react";
 
 export function AddonResults({ groups, onClose }: { groups: AddonResultGroup[]; onClose: () => void }) {
   if (groups.length === 0) return null;
@@ -51,12 +51,7 @@ function AddonGroup({ group, onClose }: { group: AddonResultGroup; onClose: () =
 function AddonResultRow({ meta, onClose }: { meta: Meta; onClose: () => void }) {
   const { openMeta } = useView();
   const { settings } = useSettings();
-  const poster = usePosterChain(
-    settings.rpdbKey,
-    meta.id,
-    meta.poster,
-    meta.type === "series" ? "series" : "movie",
-  );
+  const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
   return (
     <button
       onClick={() => {
@@ -78,9 +73,7 @@ function AddonResultRow({ meta, onClose }: { meta: Meta; onClose: () => void }) 
         <span className="truncate text-[16px] font-semibold text-ink">{meta.name}</span>
         <div className="flex items-center gap-2 text-[12.5px] text-ink-muted">
           {meta.releaseInfo && <span>{meta.releaseInfo}</span>}
-          {meta.releaseInfo && meta.imdbRating && (
-            <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />
-          )}
+          {meta.releaseInfo && meta.imdbRating && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />}
           {meta.imdbRating && (
             <span className="flex items-center gap-1 text-ink">
               <Star size={11} className="fill-accent text-accent" />
@@ -89,9 +82,7 @@ function AddonResultRow({ meta, onClose }: { meta: Meta; onClose: () => void }) 
           )}
         </div>
         {meta.description && (
-          <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">
-            {meta.description}
-          </span>
+          <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">{meta.description}</span>
         )}
       </div>
     </button>

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
 import type { PreviewPayload } from "@/lib/hover-preview/store";
+import { useEffect, useState } from "react";
+
 import type { PanelPlacement } from "./use-preview-position";
 
 export type Layer = { key: number; payload: PreviewPayload };

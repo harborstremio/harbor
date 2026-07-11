@@ -1,8 +1,9 @@
+import { useT } from "@/lib/i18n";
+import { useProfiles } from "@/lib/profiles";
 import { ChevronDown, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
-import { useProfiles } from "@/lib/profiles";
+
 import { EditorView } from "./editor-view";
 import { PasswordPrompt } from "./password-prompt";
 import { ProfileTile } from "./profile-tile";
@@ -68,26 +69,28 @@ export function ProfilePickerModal() {
             />
           )}
           {pickerView.kind === "create" && <EditorView mode={{ kind: "create" }} onCancel={goList} onDone={goList} />}
-          {pickerView.kind === "edit" && (() => {
-            const target = profiles.find((p) => p.id === pickerView.profileId);
-            if (!target) {
-              return <NotFoundFallback onBack={goList} />;
-            }
-            return <EditorView mode={{ kind: "edit", profile: target }} onCancel={goList} onDone={goList} />;
-          })()}
-          {pickerView.kind === "unlock" && (() => {
-            const target = profiles.find((p) => p.id === pickerView.profileId);
-            if (!target || !target.passwordHash) {
-              return <NotFoundFallback onBack={goList} />;
-            }
-            return (
-              <PasswordPrompt
-                profile={target}
-                onSuccess={() => selectProfile(target.id, { unlocked: true })}
-                onCancel={goList}
-              />
-            );
-          })()}
+          {pickerView.kind === "edit" &&
+            (() => {
+              const target = profiles.find((p) => p.id === pickerView.profileId);
+              if (!target) {
+                return <NotFoundFallback onBack={goList} />;
+              }
+              return <EditorView mode={{ kind: "edit", profile: target }} onCancel={goList} onDone={goList} />;
+            })()}
+          {pickerView.kind === "unlock" &&
+            (() => {
+              const target = profiles.find((p) => p.id === pickerView.profileId);
+              if (!target || !target.passwordHash) {
+                return <NotFoundFallback onBack={goList} />;
+              }
+              return (
+                <PasswordPrompt
+                  profile={target}
+                  onSuccess={() => selectProfile(target.id, { unlocked: true })}
+                  onCancel={goList}
+                />
+              );
+            })()}
         </div>
         {moreBelow && (
           <>
@@ -125,9 +128,7 @@ function ListView({
   return (
     <div className="flex flex-col items-center gap-10">
       <div className="flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-        <h1 className="font-display text-[40px] font-medium tracking-tight text-ink">
-          {t("Who's watching?")}
-        </h1>
+        <h1 className="font-display text-[40px] font-medium tracking-tight text-ink">{t("Who's watching?")}</h1>
         <p className="text-[14px] text-ink-muted">{t("Pick a profile to continue.")}</p>
       </div>
       <div className="flex flex-wrap items-start justify-center gap-x-10 gap-y-8">

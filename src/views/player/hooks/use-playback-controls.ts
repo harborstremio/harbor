@@ -1,9 +1,9 @@
-import { useCallback, type RefObject } from "react";
 import type { CastDeviceInfo } from "@/lib/cast";
+import { writePlayerPrefs } from "@/lib/player-prefs";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
-import { writePlayerPrefs } from "@/lib/player-prefs";
 import type { RoomCommand } from "@/lib/together/protocol";
+import { useCallback, type RefObject } from "react";
 
 export function usePlaybackControls(params: {
   bridgeRef: RefObject<PlayerBridge | null>;

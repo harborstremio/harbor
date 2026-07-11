@@ -1,9 +1,9 @@
-import { Check, ChevronLeft, ExternalLink, Loader2 } from "lucide-react";
-import { useState } from "react";
 import stremioLogo from "@/assets/stremio-wordmark.png";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
+import { Check, ChevronLeft, ExternalLink, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function StremioStep() {
   const { user, signIn } = useAuth();
@@ -27,11 +27,7 @@ export function StremioStep() {
   };
 
   const animClass =
-    direction === "forward"
-      ? "animate-slide-from-right"
-      : direction === "back"
-        ? "animate-slide-from-left"
-        : "";
+    direction === "forward" ? "animate-slide-from-right" : direction === "back" ? "animate-slide-from-left" : "";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,33 +86,13 @@ export function StremioStep() {
           {t("Back")}
         </button>
         <div className="flex justify-center">
-          <img
-            src={stremioLogo}
-            alt="Stremio"
-            className="h-12"
-            style={{ filter: "grayscale(1) invert(1)" }}
-          />
+          <img src={stremioLogo} alt="Stremio" className="h-12" style={{ filter: "grayscale(1) invert(1)" }} />
         </div>
         <div className="flex flex-col gap-3">
-          <FormField
-            label={t("Email")}
-            type="email"
-            value={email}
-            onChange={setEmail}
-            autoFocus
-            disabled={busy}
-          />
-          <FormField
-            label={t("Password")}
-            type="password"
-            value={password}
-            onChange={setPassword}
-            disabled={busy}
-          />
+          <FormField label={t("Email")} type="email" value={email} onChange={setEmail} autoFocus disabled={busy} />
+          <FormField label={t("Password")} type="password" value={password} onChange={setPassword} disabled={busy} />
         </div>
-        {error && (
-          <p className="rounded-lg bg-danger/15 px-3 py-2 text-[13px] text-danger">{error}</p>
-        )}
+        {error && <p className="rounded-lg bg-danger/15 px-3 py-2 text-[13px] text-danger">{error}</p>}
         <button
           type="submit"
           disabled={busy || !email || !password}
@@ -204,9 +180,7 @@ function FormField({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">{label}</span>
       <input
         type={type}
         value={value}
@@ -226,12 +200,7 @@ function StremioAvatar({ src, initial }: { src?: string; initial: string }) {
   const url = !failed ? src || "https://web.stremio.com/images/default_avatar.png" : null;
   if (url) {
     return (
-      <img
-        src={url}
-        alt=""
-        onError={() => setFailed(true)}
-        className="h-10 w-10 rounded-full bg-canvas object-cover"
-      />
+      <img src={url} alt="" onError={() => setFailed(true)} className="h-10 w-10 rounded-full bg-canvas object-cover" />
     );
   }
   return (

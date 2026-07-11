@@ -1,8 +1,8 @@
-import { ExternalLink, Loader2 } from "lucide-react";
-import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { canStremioWebAuth, startStremioWebAuth } from "@/lib/stremio-auth";
+import { ExternalLink, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function StremioWebButton({ onDone, disabled }: { onDone: () => void; disabled?: boolean }) {
   const { signInWithKey } = useAuth();

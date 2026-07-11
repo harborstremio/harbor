@@ -1,4 +1,5 @@
 import { activeProfileId } from "@/lib/active-profile-id";
+
 import type { WatchlistStatus } from "../list-status";
 
 export type SimklCacheItem = {

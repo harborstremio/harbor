@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from "react";
+import type { CustomTheme } from "@/lib/custom-themes";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useView } from "@/lib/view";
-import type { CustomTheme } from "@/lib/custom-themes";
+import { useEffect, useMemo } from "react";
 
 const STYLE_ID = "harbor-custom-css";
 const THEME_STYLE_ID = "harbor-theme-css";

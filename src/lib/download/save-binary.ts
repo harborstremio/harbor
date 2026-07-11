@@ -1,6 +1,6 @@
+import { fetchTrailer, type Quality } from "@/lib/trailer";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
-import { fetchTrailer, type Quality } from "@/lib/trailer";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 

@@ -36,12 +36,8 @@ export const back = (p?: string | null) => (p ? `${IMG}/w780${p}` : undefined);
 export const year = (s?: string) => (s ? s.slice(0, 4) : undefined);
 export const rating = (v?: number) => (v && v > 0 ? v.toFixed(1) : undefined);
 
-const MOVIE_GENRE_NAME = new Map<number, string>(
-  Object.entries(MOVIE_GENRES).map(([name, id]) => [id, name]),
-);
-const TV_GENRE_NAME = new Map<number, string>(
-  Object.entries(TV_GENRES).map(([name, id]) => [id, name]),
-);
+const MOVIE_GENRE_NAME = new Map<number, string>(Object.entries(MOVIE_GENRES).map(([name, id]) => [id, name]));
+const TV_GENRE_NAME = new Map<number, string>(Object.entries(TV_GENRES).map(([name, id]) => [id, name]));
 
 function genresFromIds(ids: number[] | undefined, kind: "movie" | "tv"): string[] | undefined {
   if (!ids || ids.length === 0) return undefined;

@@ -1,29 +1,24 @@
-import { ArrowLeft, Search, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { BackChrome } from "@/chrome/back-chrome";
+import { RecordingPill } from "@/chrome/recording-pill";
+import { DownloadsButton } from "@/components/downloads-popover";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { TogetherPopover } from "@/components/together-modal";
-import { DownloadsButton } from "@/components/downloads-popover";
-import { RecordingPill } from "@/chrome/recording-pill";
-import {
-  effectiveBinding,
-  eventToBinding,
-  formatBindingForDisplay,
-  isTypingTarget,
-} from "@/lib/hotkeys";
+import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
+import { effectiveBinding, eventToBinding, formatBindingForDisplay, isTypingTarget } from "@/lib/hotkeys";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
-import { useTogether } from "@/lib/together/provider";
-import { useSelfIdentity } from "@/lib/together/use-self-identity";
 import { activeLayout } from "@/lib/theme";
 import { useThemePreview } from "@/lib/theme-preview";
-import { useView } from "@/lib/view";
+import { useTogether } from "@/lib/together/provider";
+import { useSelfIdentity } from "@/lib/together/use-self-identity";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
-import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
+import { useView } from "@/lib/view";
 import { close, minimize } from "@/lib/window";
+import { ArrowLeft, Search, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -41,11 +36,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   const sidebarHidden = connecting || view === "settings" || onLiveRoot || topKind === "picker";
   const hideSearch = view === "addons" || connecting || topKind === "picker";
   const sidebarOffset =
-    layout === "stremio"
-      ? "ps-[80px]"
-      : settings.sidebarCollapsed
-        ? "ps-[84px]"
-        : "ps-[84px] lg:ps-[260px]";
+    layout === "stremio" ? "ps-[80px]" : settings.sidebarCollapsed ? "ps-[84px]" : "ps-[84px] lg:ps-[260px]";
   const searchWidth = canGoBack
     ? "w-[14rem] sm:w-[18rem] lg:w-[22rem] xl:w-[24rem]"
     : "w-[14rem] sm:w-[20rem] lg:w-[24rem] xl:w-[28rem] hover:w-[18rem] sm:hover:w-[24rem] lg:hover:w-[28rem] xl:hover:w-[34rem] focus-within:w-[18rem] sm:focus-within:w-[24rem] lg:focus-within:w-[28rem] xl:focus-within:w-[34rem]";
@@ -77,23 +68,15 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
           {onLiveRoot && (
             <div className="flex items-center gap-1.5 text-ink">
               <HarborMark className="h-7 w-7" />
-              <span className="font-display text-[18px] font-semibold leading-none tracking-tight">
-                {t("Live")}
-              </span>
+              <span className="font-display text-[18px] font-semibold leading-none tracking-tight">{t("Live")}</span>
             </div>
           )}
           {!onLiveRoot && !connecting && <BackChrome />}
         </div>
-        <div
-          {...dragProps}
-          className={`min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}
-        >
+        <div {...dragProps} className={`min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}>
           {!hideSearch && !kid && <SearchPill />}
         </div>
-        <div
-          {...dragProps}
-          className="flex h-full min-w-0 items-center justify-end gap-2"
-        >
+        <div {...dragProps} className="flex h-full min-w-0 items-center justify-end gap-2">
           <RecordingPill />
           <DownloadsButton />
           {!onLiveRoot && !kid && <TogetherButton />}
@@ -104,12 +87,20 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
                   <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
                 </svg>
               </Control>
-              <Control label={fullscreen ? t("chrome.restore") : t("chrome.maximize")} onClick={() => void toggleWindowFullscreen()}>
+              <Control
+                label={fullscreen ? t("chrome.restore") : t("chrome.maximize")}
+                onClick={() => void toggleWindowFullscreen()}
+              >
                 <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
                   {fullscreen ? (
                     <>
                       <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
-                      <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" strokeWidth="1.4" fill="none" />
+                      <path
+                        d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        fill="none"
+                      />
                     </>
                   ) : (
                     <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
@@ -125,9 +116,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
           )}
         </div>
       </div>
-      {closeConfirm && (
-        <CloseConfirmKids onConfirm={close} onCancel={() => setCloseConfirm(false)} />
-      )}
+      {closeConfirm && <CloseConfirmKids onConfirm={close} onCancel={() => setCloseConfirm(false)} />}
     </header>
   );
 }
@@ -150,9 +139,7 @@ function CloseConfirmKids({ onConfirm, onCancel }: { onConfirm: () => void; onCa
           style={{ transform: "scaleX(-1)" }}
         />
         <h2 className="relative font-display text-[32px] font-bold">{t("Close Harbor?")}</h2>
-        <p className="relative mt-2 text-[16px] font-medium text-white/85">
-          {t("Ask a grown-up before you close.")}
-        </p>
+        <p className="relative mt-2 text-[16px] font-medium text-white/85">{t("Ask a grown-up before you close.")}</p>
         <div className="relative mt-7 flex gap-4">
           <button
             onClick={onCancel}
@@ -218,8 +205,7 @@ export function TogetherButton({
     : variant === "ghost"
       ? "h-9 w-9 justify-center"
       : "h-11 w-11 justify-center";
-  const sizing =
-    modalOpen && !above ? (live ? "h-14 gap-2 px-3" : "h-14 w-11 justify-center") : idleSize;
+  const sizing = modalOpen && !above ? (live ? "h-14 gap-2 px-3" : "h-14 w-11 justify-center") : idleSize;
   const idleChrome = `border border-transparent ${variant === "ghost" ? "rounded-full" : "rounded-xl"} ${
     live
       ? variant === "ghost"
@@ -236,7 +222,10 @@ export function TogetherButton({
     : idleChrome;
 
   return (
-    <div ref={wrapRef} className={`relative ${modalOpen && !above ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""}`}>
+    <div
+      ref={wrapRef}
+      className={`relative ${modalOpen && !above ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""}`}
+    >
       <button
         aria-label={t("chrome.watchTogether")}
         onClick={() => (modalOpen ? closeModal() : openModal())}
@@ -244,15 +233,13 @@ export function TogetherButton({
       >
         {live ? (
           <>
-            <span className="font-mono text-[11.5px] tracking-[0.22em] text-ink">
-              {snapshot.room}
-            </span>
+            <span className="font-mono text-[11.5px] tracking-[0.22em] text-ink">{snapshot.room}</span>
             <div className="flex -space-x-1.5">
               {visible.map((p) => {
                 const self = p.id === clientId;
                 const fallbackColor = `oklch(0.78 0.13 ${nameHue(p.name)})`;
-                const avatarSrc = self ? selfAvatar : p.avatar ?? null;
-                const color = self ? selfColor ?? fallbackColor : p.color ?? fallbackColor;
+                const avatarSrc = self ? selfAvatar : (p.avatar ?? null);
+                const color = self ? (selfColor ?? fallbackColor) : (p.color ?? fallbackColor);
                 if (avatarSrc) {
                   return (
                     <span
@@ -261,12 +248,7 @@ export function TogetherButton({
                       className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full ring-2 ring-elevated"
                       style={{ boxShadow: `inset 0 0 0 1.5px ${color}` }}
                     >
-                      <img
-                        src={avatarSrc}
-                        alt=""
-                        draggable={false}
-                        className="h-full w-full object-cover"
-                      />
+                      <img src={avatarSrc} alt="" draggable={false} className="h-full w-full object-cover" />
                     </span>
                   );
                 }

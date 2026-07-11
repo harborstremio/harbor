@@ -41,24 +41,29 @@ export function CastingOverlay({
           {connecting && (
             <span className="absolute -bottom-5 left-1/2 -translate-x-1/2">
               <span className="flex gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0s infinite" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.18s infinite" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.36s infinite" }} />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0s infinite" }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.18s infinite" }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.36s infinite" }}
+                />
               </span>
             </span>
           )}
         </div>
         <div className="flex flex-col items-center gap-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink-subtle">
-            {label}
-          </span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink-subtle">{label}</span>
           <span className="text-[28px] font-semibold leading-tight text-ink" style={{ fontFamily: "Fraunces, serif" }}>
             {device.name}
           </span>
           {title && !connecting && (
-            <span className="mt-3 max-w-[28rem] truncate text-[14px] font-medium text-ink-muted">
-              {title}
-            </span>
+            <span className="mt-3 max-w-[28rem] truncate text-[14px] font-medium text-ink-muted">{title}</span>
           )}
         </div>
       </div>

@@ -1,9 +1,10 @@
-import { History, RotateCw } from "lucide-react";
 import { BetaTag } from "@/components/beta-tag";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { currentVersion, type VersionEntry } from "@/lib/updater/versions";
 import { openUrl } from "@/lib/window";
+import { History, RotateCw } from "lucide-react";
+
 import { useVersionHistory } from "./rollback-row/use-version-history";
 import { VersionItem } from "./rollback-row/version-item";
 

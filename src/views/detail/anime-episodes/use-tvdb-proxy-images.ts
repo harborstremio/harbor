@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { fetchTvdbProxyImages, type TvdbImageMap } from "@/lib/providers/tvdb-proxy";
+import { useEffect, useState } from "react";
 
 const LONG_SHOW_MIN = 100;
 

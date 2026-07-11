@@ -1,18 +1,12 @@
-import { Check, Download, Loader2, Upload } from "lucide-react";
-import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { library } from "@/lib/stremio";
-import { readLocalEntries } from "@/lib/watchlist";
 import { useT } from "@/lib/i18n";
-import {
-  fetchTraktWatchlist,
-  planExport,
-  runExport,
-  runImport,
-  type ExportPlan,
-} from "@/lib/trakt/watchlist-sync";
+import { library } from "@/lib/stremio";
 import { TraktApiError } from "@/lib/trakt/client";
 import type { TraktItem } from "@/lib/trakt/types";
+import { fetchTraktWatchlist, planExport, runExport, runImport, type ExportPlan } from "@/lib/trakt/watchlist-sync";
+import { readLocalEntries } from "@/lib/watchlist";
+import { Check, Download, Loader2, Upload } from "lucide-react";
+import { useState } from "react";
 
 function traktErrorMessage(t: ReturnType<typeof useT>, err: unknown): string {
   if (err instanceof TraktApiError) {
@@ -63,7 +57,9 @@ export function WatchlistSync() {
           tone: "warn",
           message:
             plan.skippedAnime > 0
-              ? t("Nothing to send. All {n} watchlist items are anime, which Trakt can't track.", { n: plan.skippedAnime })
+              ? t("Nothing to send. All {n} watchlist items are anime, which Trakt can't track.", {
+                  n: plan.skippedAnime,
+                })
               : t("Your watchlist is empty, nothing to send."),
         });
         return;
@@ -120,9 +116,7 @@ export function WatchlistSync() {
   if (phase.kind === "confirm-export" || phase.kind === "confirm-import") {
     const isExport = phase.kind === "confirm-export";
     const count =
-      phase.kind === "confirm-export"
-        ? phase.plan.movies.length + phase.plan.shows.length
-        : phase.items.length;
+      phase.kind === "confirm-export" ? phase.plan.movies.length + phase.plan.shows.length : phase.items.length;
     return (
       <div className="flex flex-col gap-3 rounded-xl border border-edge bg-canvas/50 p-4">
         <p className="text-[13.5px] leading-relaxed text-ink">
@@ -137,9 +131,7 @@ export function WatchlistSync() {
         )}
         <div className="flex items-center gap-2">
           <button
-            onClick={() =>
-              phase.kind === "confirm-export" ? confirmExport(phase.plan) : confirmImport(phase.items)
-            }
+            onClick={() => (phase.kind === "confirm-export" ? confirmExport(phase.plan) : confirmImport(phase.items))}
             className="flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97]"
           >
             {isExport ? <Upload size={14} strokeWidth={2.2} /> : <Download size={14} strokeWidth={2.2} />}
@@ -196,7 +188,11 @@ export function WatchlistSync() {
         disabled={phase.kind === "loading"}
         className="flex h-11 items-center gap-2 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
       >
-        {loadingDir === "export" ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} strokeWidth={2.2} />}
+        {loadingDir === "export" ? (
+          <Loader2 size={15} className="animate-spin" />
+        ) : (
+          <Upload size={15} strokeWidth={2.2} />
+        )}
         {t("Export to Trakt")}
       </button>
       <button
@@ -204,7 +200,11 @@ export function WatchlistSync() {
         disabled={phase.kind === "loading"}
         className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-50"
       >
-        {loadingDir === "import" ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} strokeWidth={2.2} />}
+        {loadingDir === "import" ? (
+          <Loader2 size={15} className="animate-spin" />
+        ) : (
+          <Download size={15} strokeWidth={2.2} />
+        )}
         {t("Import from Trakt")}
       </button>
     </div>

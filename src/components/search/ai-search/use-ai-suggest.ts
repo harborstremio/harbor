@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { aiSuggest, resolveAiSuggestions, type AiResult } from "@/lib/ai-search";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 import { keyForProvider, providerForModel } from "@/lib/ai-models";
+import { aiSuggest, resolveAiSuggestions, type AiResult } from "@/lib/ai-search";
+import { useT } from "@/lib/i18n";
 import { enrichWithContent } from "@/lib/jina-search";
+import { useSettings } from "@/lib/settings";
+import { useEffect, useRef, useState } from "react";
 
 export type AiStatus = "idle" | "loading" | "done" | "error";
 

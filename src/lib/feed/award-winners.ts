@@ -1,6 +1,6 @@
-import type { Meta } from "@/lib/cinemeta";
 import type { AwardCategory } from "@/lib/awards-catalog";
 import { readAwardHistory } from "@/lib/awards-history";
+import type { Meta } from "@/lib/cinemeta";
 import { tmdbSearchMovie } from "@/lib/providers/tmdb";
 import type { AwardType } from "@/lib/providers/wikidata";
 
@@ -24,7 +24,10 @@ const SOURCES: Array<[AwardType, AwardCategory]> = [
 ];
 
 function normTitle(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function winnerTitles(): Array<{ title: string; year: number }> {

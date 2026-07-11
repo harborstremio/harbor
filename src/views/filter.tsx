@@ -1,15 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { selectSpotlights } from "@/lib/feed/genre-spotlights";
 import { SeenIdsProvider } from "@/lib/feed/seen-ids";
 import { useScrollMemory, type MetaFilter } from "@/lib/view";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { Header } from "./filter/header";
 import { Rails } from "./filter/rails";
-import {
-  SPOTLIGHT_TIMEOUT_MS,
-  SpotlightGateContext,
-  type SpotlightGate,
-} from "./filter/spotlight-gate";
+import { SPOTLIGHT_TIMEOUT_MS, SpotlightGateContext, type SpotlightGate } from "./filter/spotlight-gate";
 
 export function FilterView({ filter }: { filter: MetaFilter }) {
   const scrollRef = useRef<HTMLElement>(null);

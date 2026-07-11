@@ -195,7 +195,12 @@ export async function saveCollectionOrder(
   onStep?.("verifying");
   const readBack = await getUserAddonsRaw(authKey);
   if (readBack == null) return { ok: false, stage: "verify", current: null };
-  if (!sequencesEqual(readBack.map((a) => a.transportUrl), next.map((a) => a.transportUrl))) {
+  if (
+    !sequencesEqual(
+      readBack.map((a) => a.transportUrl),
+      next.map((a) => a.transportUrl),
+    )
+  ) {
     return { ok: false, stage: "verify", current: readBack };
   }
   return { ok: true, items: readBack };

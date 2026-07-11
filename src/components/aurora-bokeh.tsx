@@ -69,8 +69,7 @@ export function AuroraBokeh() {
       <div
         className="absolute inset-0"
         style={{
-          background:
-            "radial-gradient(ellipse 60% 35% at 50% 110%, rgba(255,255,255,0.05), transparent 70%)",
+          background: "radial-gradient(ellipse 60% 35% at 50% 110%, rgba(255,255,255,0.05), transparent 70%)",
         }}
       />
       <style>{`

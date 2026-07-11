@@ -92,11 +92,7 @@ export function savePlayback(
   writeAll(all);
 }
 
-export function readPlayback(
-  metaId: string,
-  season?: number,
-  episode?: number,
-): PlaybackEntry | null {
+export function readPlayback(metaId: string, season?: number, episode?: number): PlaybackEntry | null {
   const all = readAll();
   return all[entryKey(metaId, season, episode)] ?? null;
 }
@@ -145,7 +141,10 @@ export type WatchedSet = { ids: Set<string>; titles: Set<string> };
 
 export function watchTitleKey(name: string | null | undefined): string {
   if (!name) return "";
-  return name.toLowerCase().replace(/\(\d{4}\)/g, "").replace(/[^a-z0-9]+/g, "");
+  return name
+    .toLowerCase()
+    .replace(/\(\d{4}\)/g, "")
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 export function recentlyPlayed(): WatchedSet {
@@ -183,11 +182,6 @@ export function streamMatchesSource(
   e: PlaybackEntry,
 ): boolean {
   const sBinge = s.behaviorHints?.bingeGroup ?? null;
-  if (e.bingeGroup && sBinge) return sBinge === e.bingeGroup;    
-  return (                                                       
-    !!e.addonId &&
-    s.addonId === e.addonId &&
-    e.resolution === s.resolution &&
-    e.source === s.source
-  );
+  if (e.bingeGroup && sBinge) return sBinge === e.bingeGroup;
+  return !!e.addonId && s.addonId === e.addonId && e.resolution === s.resolution && e.source === s.source;
 }

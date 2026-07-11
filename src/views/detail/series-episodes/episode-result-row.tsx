@@ -1,19 +1,11 @@
-import { Play } from "lucide-react";
-import type { Meta } from "@/lib/cinemeta";
 import { Poster } from "@/components/poster";
+import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { Play } from "lucide-react";
 
 type Video = NonNullable<Meta["videos"]>[number];
 
-export function EpisodeResultRow({
-  video,
-  onPlay,
-  index,
-}: {
-  video: Video;
-  onPlay: () => void;
-  index?: number;
-}) {
+export function EpisodeResultRow({ video, onPlay, index }: { video: Video; onPlay: () => void; index?: number }) {
   const t = useT();
   const staggered = index != null;
   return (

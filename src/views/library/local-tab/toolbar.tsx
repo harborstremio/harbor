@@ -1,3 +1,5 @@
+import { useT } from "@/lib/i18n";
+import type { LocalEntry } from "@/lib/local-library";
 import {
   ArrowDownUp,
   ArrowDownWideNarrow,
@@ -10,8 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
-import type { LocalEntry } from "@/lib/local-library";
+
 import type { LocalGroup } from "./show-group";
 
 export type LocalSortKey = "added" | "title" | "year" | "rating" | "runtime";
@@ -35,7 +36,13 @@ export function sortGroups(groups: LocalGroup[], key: LocalSortKey, dir: SortDir
       if (ra !== rb) return ra - rb;
     }
     const pick = (e: LocalEntry, added: number): number | null =>
-      key === "year" ? e.year ?? null : key === "rating" ? e.rating ?? null : key === "runtime" ? e.runtime ?? null : added;
+      key === "year"
+        ? (e.year ?? null)
+        : key === "rating"
+          ? (e.rating ?? null)
+          : key === "runtime"
+            ? (e.runtime ?? null)
+            : added;
     const av = pick(a.entry, a.added);
     const bv = pick(b.entry, b.added);
     if (av == null && bv == null) return 0;

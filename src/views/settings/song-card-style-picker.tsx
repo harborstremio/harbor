@@ -1,4 +1,5 @@
 import { useSettings } from "@/lib/settings";
+
 import { Section, ToggleRow } from "./shared";
 
 type SongCardStyle = "compact" | "cinematic";
@@ -44,9 +45,7 @@ export function SongCardStylePicker() {
                 aria-pressed={active}
                 onClick={() => update({ songCardStyle: o.v })}
                 className={`flex flex-col gap-3 rounded-2xl border p-3 text-left transition-colors ${
-                  active
-                    ? "border-accent bg-accent/10"
-                    : "border-edge-soft bg-canvas/50 hover:border-edge"
+                  active ? "border-accent bg-accent/10" : "border-edge-soft bg-canvas/50 hover:border-edge"
                 }`}
               >
                 <StyleThumb kind={o.v} />

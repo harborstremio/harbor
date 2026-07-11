@@ -1,22 +1,22 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { LogIn, LogOut, Pencil, Search, Settings as SettingsLucide, Users } from "lucide-react";
-import { HarborMark } from "@/components/icons/harbor-mark";
-import { CatAvatar } from "@/components/icons/cat-avatar";
-import { AuthModal } from "@/components/auth-modal";
-import { ParentalPinModal } from "@/components/parental-pin-modal";
+import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
 import { TogetherButton } from "@/chrome/topbar";
+import { AuthModal } from "@/components/auth-modal";
+import { CatAvatar } from "@/components/icons/cat-avatar";
+import { HarborMark } from "@/components/icons/harbor-mark";
+import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useAuth } from "@/lib/auth";
+import { effectiveBinding, eventToBinding, formatBindingForDisplay, isTypingTarget } from "@/lib/hotkeys";
 import { useT } from "@/lib/i18n";
+import { useParental } from "@/lib/parental";
 import { useProfiles } from "@/lib/profiles";
 import { useSearch } from "@/lib/search-context";
-import { effectiveBinding, eventToBinding, formatBindingForDisplay, isTypingTarget } from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
-import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
-import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
-import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { LogIn, LogOut, Pencil, Search, Settings as SettingsLucide, Users } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -29,8 +29,7 @@ export function RoyalTopbar() {
   const [pinFor, setPinFor] = useState<View | null>(null);
   const maxed = useMaximized();
 
-  const themePreset =
-    settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
+  const themePreset = settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
 
   const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
@@ -127,10 +126,7 @@ export function RoyalTopbar() {
           <div className="flex shrink-0 items-center gap-1.5">
             <SearchPill onOpen={() => setSearchOpen(true)} />
             {view !== "live" && <TogetherButton variant="ghost" />}
-            <RoyalProfileMenu
-              onOpenSettings={() => setView("settings")}
-              settingsActive={view === "settings"}
-            />
+            <RoyalProfileMenu onOpenSettings={() => setView("settings")} settingsActive={view === "settings"} />
             {IS_TAURI && !settings.useNativeTitleBar && (
               <div className="ms-0.5 flex items-center gap-1">
                 <WinBtn onClick={minimize} label={t("chrome.minimize")}>
@@ -248,13 +244,7 @@ function WinBtn({
   );
 }
 
-function RoyalProfileMenu({
-  onOpenSettings,
-  settingsActive,
-}: {
-  onOpenSettings: () => void;
-  settingsActive: boolean;
-}) {
+function RoyalProfileMenu({ onOpenSettings, settingsActive }: { onOpenSettings: () => void; settingsActive: boolean }) {
   const { user, signOut } = useAuth();
   const { settings } = useSettings();
   const { profiles, activeProfile, openPicker, selectProfile } = useProfiles();
@@ -272,8 +262,7 @@ function RoyalProfileMenu({
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const name = activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
   const color = activeProfile?.color ?? "#f08032";
   const avatarSrc = activeProfile?.avatar ?? settings.harborAvatar ?? user?.avatar ?? null;
   const otherProfiles = profiles.filter((p) => p.id !== activeProfile?.id);
@@ -306,15 +295,10 @@ function RoyalProfileMenu({
       {open && (
         <div className="harbor-royal-menu absolute end-0 top-[calc(100%+10px)] z-40 w-60 overflow-hidden rounded-[10px] border border-[color-mix(in_srgb,var(--color-accent)_24%,var(--color-edge))] bg-canvas/95 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.85)] backdrop-blur-2xl">
           <div className="border-b border-edge-soft px-4 py-3">
-            <div
-              className="text-[14px] leading-tight text-ink"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
+            <div className="text-[14px] leading-tight text-ink" style={{ fontFamily: "var(--font-display)" }}>
               {name}
             </div>
-            {user?.email && (
-              <div className="truncate pt-0.5 text-[11.5px] text-ink-subtle">{user.email}</div>
-            )}
+            {user?.email && <div className="truncate pt-0.5 text-[11.5px] text-ink-subtle">{user.email}</div>}
           </div>
           {otherProfiles.length > 0 && (
             <div className="flex flex-col gap-0.5 border-b border-edge-soft p-1.5">
@@ -325,7 +309,11 @@ function RoyalProfileMenu({
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => dismiss(() => (p.passwordHash ? openPicker({ kind: "unlock", profileId: p.id }) : selectProfile(p.id)))}
+                  onClick={() =>
+                    dismiss(() =>
+                      p.passwordHash ? openPicker({ kind: "unlock", profileId: p.id }) : selectProfile(p.id),
+                    )
+                  }
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 text-start transition-colors hover:bg-elevated"
                 >
                   <span

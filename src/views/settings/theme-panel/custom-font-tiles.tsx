@@ -1,6 +1,6 @@
+import { useCustomFonts } from "@/lib/custom-fonts";
 import { Check, Loader2, Trash2, Upload } from "lucide-react";
 import { useRef, type ChangeEvent } from "react";
-import { useCustomFonts } from "@/lib/custom-fonts";
 
 export function CustomFontTiles({
   activeId,
@@ -114,21 +114,13 @@ export function CustomFontTiles({
             <Upload size={compact ? 16 : 18} strokeWidth={2.2} />
           )}
         </span>
-        <span className="text-[13px] font-semibold text-ink">
-          {busy ? "Adding font..." : "Upload a font"}
-        </span>
+        <span className="text-[13px] font-semibold text-ink">{busy ? "Adding font..." : "Upload a font"}</span>
         {!busy && <span className="text-[11px] text-ink-subtle">TTF, OTF, WOFF or WOFF2</span>}
       </button>
 
       {error && <p className="col-span-full text-[12px] font-medium text-danger">{error}</p>}
 
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".ttf,.otf,.woff,.woff2,font/*"
-        className="hidden"
-        onChange={onFile}
-      />
+      <input ref={inputRef} type="file" accept=".ttf,.otf,.woff,.woff2,font/*" className="hidden" onChange={onFile} />
     </>
   );
 }

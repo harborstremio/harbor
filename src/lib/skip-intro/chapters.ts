@@ -1,12 +1,7 @@
 import type { Chapter } from "../player/bridge";
 import type { SkipKind, SkipSegment } from "./types";
 
-const INTRO_PATTERNS = [
-  /\b(opening|op)\b/i,
-  /\bintro\b/i,
-  /\bopening\s*credits\b/i,
-  /\btheme\s*song\b/i,
-];
+const INTRO_PATTERNS = [/\b(opening|op)\b/i, /\bintro\b/i, /\bopening\s*credits\b/i, /\btheme\s*song\b/i];
 
 const OUTRO_PATTERNS = [
   /\b(ending|ed)\b/i,

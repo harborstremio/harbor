@@ -1,9 +1,22 @@
-import { ArrowUpToLine, Check, ChevronDown, ChevronUp, Copy, Download, MoreHorizontal, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { confirmDialog } from "@/lib/dialog";
 import { useT } from "@/lib/i18n";
 import type { IptvPlaylistSource } from "@/lib/iptv/types";
+import {
+  ArrowUpToLine,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Download,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { EMPTY_FORM, PlaylistForm, type PlaylistFormValue } from "./source-picker/playlist-form";
 
 type ActionsState = { id: string; copied: boolean };
@@ -73,7 +86,7 @@ export function SourcePicker({
     setActions(null);
   };
 
-  const editing = editingId ? sources.find((s) => s.id === editingId) ?? null : null;
+  const editing = editingId ? (sources.find((s) => s.id === editingId) ?? null) : null;
   const active = sources.find((s) => s.id === activeId);
   const ago = fetchedAt ? formatAgo(Date.now() - fetchedAt, t) : null;
 
@@ -133,9 +146,7 @@ export function SourcePicker({
                           onSelect(s.id);
                           close();
                         }}
-                        onToggleMenu={() =>
-                          setActions(isOpen ? null : { id: s.id, copied: false })
-                        }
+                        onToggleMenu={() => setActions(isOpen ? null : { id: s.id, copied: false })}
                         onCloseMenu={() => setActions(null)}
                         onEdit={() => {
                           setEditingId(s.id);
@@ -259,15 +270,8 @@ function SourceRow({
           isActive ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
-        <button
-          onClick={onSelect}
-          className="flex flex-1 items-center gap-2.5 px-3.5 py-2.5 text-start text-[13.5px]"
-        >
-          <span
-            className={`h-2 w-2 shrink-0 rounded-full ${
-              isActive ? "bg-danger" : "bg-ink-subtle/45"
-            }`}
-          />
+        <button onClick={onSelect} className="flex flex-1 items-center gap-2.5 px-3.5 py-2.5 text-start text-[13.5px]">
+          <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? "bg-danger" : "bg-ink-subtle/45"}`} />
           <span className="truncate">{source.name}</span>
         </button>
         {onMove && total > 1 && (
@@ -306,19 +310,14 @@ function SourceRow({
           }}
           aria-label={t("More for {name}", { name: source.name })}
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-opacity ${
-            isMenuOpen
-              ? "text-ink"
-              : "text-ink-subtle opacity-0 hover:text-ink group-hover:opacity-100"
+            isMenuOpen ? "text-ink" : "text-ink-subtle opacity-0 hover:text-ink group-hover:opacity-100"
           }`}
         >
           <MoreHorizontal size={15} strokeWidth={2} />
         </button>
       </div>
       {isMenuOpen && (
-        <PortalMenu
-          triggerRef={triggerRef}
-          onClose={onCloseMenu}
-        >
+        <PortalMenu triggerRef={triggerRef} onClose={onCloseMenu}>
           {onMoveTop && index > 0 && (
             <MenuItem icon={<ArrowUpToLine size={14} strokeWidth={1.9} />} onClick={onMoveTop}>
               {t("Move to top")}

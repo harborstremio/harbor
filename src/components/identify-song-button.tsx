@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { AudioLines } from "lucide-react";
+import { Tooltip } from "@/components/player/transport/tooltip";
 import { useSettings } from "@/lib/settings";
 import { identifyNowPlaying } from "@/lib/song-id";
-import { Tooltip } from "@/components/player/transport/tooltip";
+import { AudioLines } from "lucide-react";
+import { useState } from "react";
 
 export function IdentifySongButton({
   className,
@@ -40,11 +40,7 @@ export function IdentifySongButton({
           "pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full text-white/90 transition hover:bg-white/15 disabled:opacity-50"
         }
       >
-        <AudioLines
-          size={tight ? 18 : 22}
-          strokeWidth={1.9}
-          className={pending ? "animate-pulse" : undefined}
-        />
+        <AudioLines size={tight ? 18 : 22} strokeWidth={1.9} className={pending ? "animate-pulse" : undefined} />
       </button>
     </Tooltip>
   );

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import type { RoomSnapshot } from "@/lib/together/client";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+
 import { GUEST_ESCAPE_MS, READY_STALE_MS } from "../player-utils";
 
 function sameSet(a: Set<string>, b: Set<string>): boolean {

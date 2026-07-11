@@ -28,10 +28,9 @@ export async function tmdbWatchProviders(
   region: string,
 ): Promise<WatchProvider[]> {
   if (!key || !id) return [];
-  const data = await get<{ results?: Record<string, RegionProviders> }>(
-    key,
-    `${kind}/${id}/watch/providers`,
-  ).catch(() => null);
+  const data = await get<{ results?: Record<string, RegionProviders> }>(key, `${kind}/${id}/watch/providers`).catch(
+    () => null,
+  );
   const results = data?.results;
   if (!results) return [];
   const r = results[(region || "US").toUpperCase()] ?? results.US;

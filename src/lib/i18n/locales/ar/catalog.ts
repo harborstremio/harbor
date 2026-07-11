@@ -51,12 +51,9 @@ const catalog: Record<string, string> = {
   "Show on home": "إظهار في الرئيسية",
   "Hide from home": "إخفاء من الرئيسية",
   "Feature this catalog in the hero carousel": "إبراز هذا الكتالوج في شريط العرض الرئيسي",
-  "Stop feeding the hero carousel (back to automatic)":
-    "إيقاف تغذية شريط العرض الرئيسي (العودة إلى التلقائي)",
-  "Needs artwork-rich titles to feed the hero":
-    "يحتاج إلى عناوين غنية بالصور لتغذية العرض الرئيسي",
-  "Needs at least 10 titles for the Top 10 look":
-    "يحتاج إلى 10 عناوين على الأقل لمظهر أفضل 10",
+  "Stop feeding the hero carousel (back to automatic)": "إيقاف تغذية شريط العرض الرئيسي (العودة إلى التلقائي)",
+  "Needs artwork-rich titles to feed the hero": "يحتاج إلى عناوين غنية بالصور لتغذية العرض الرئيسي",
+  "Needs at least 10 titles for the Top 10 look": "يحتاج إلى 10 عناوين على الأقل لمظهر أفضل 10",
 
   "Customize home": "تخصيص الرئيسية",
   "Home layout": "تخطيط الرئيسية",

@@ -1,2 +1,64 @@
+# Harbor pnpm workspace
+# Root package (.) is the Tauri + React desktop app.
+# Add more entries under packages/* when shared JS packages appear.
+packages:
+  - "."
+  - "packages/*"
+
+# mpegts.js pulls webworkify-webpack from git — needed for stream playback
+blockExoticSubdeps: false
+
 allowBuilds:
   esbuild: true
+
+# Shared versions for every workspace package
+catalog:
+  # Vite+ toolchain
+  vite: npm:@voidzero-dev/vite-plus-core@latest
+  vitest: 4.1.9
+  vite-plus: latest
+  # React
+  react: ^19.1.0
+  react-dom: ^19.1.0
+  "@types/react": ^19.1.8
+  "@types/react-dom": ^19.1.6
+  # Tooling
+  typescript: ~5.8.3
+  # v6 uses Oxc for React Refresh (no Babel/esbuild transform warnings on Vite 8)
+  "@vitejs/plugin-react": ^6.0.3
+  "@tailwindcss/vite": ^4
+  tailwindcss: ^4
+  # Tauri — keep JS major.minor aligned with Cargo `tauri` (2.11.x)
+  "@tauri-apps/api": ~2.11.1
+  "@tauri-apps/cli": ~2.11.4
+  "@tauri-apps/plugin-deep-link": ~2.4.9
+  "@tauri-apps/plugin-dialog": ~2.7.1
+  "@tauri-apps/plugin-fs": ~2.5.1
+  "@tauri-apps/plugin-http": ~2.5.9
+  "@tauri-apps/plugin-opener": ~2.5.4
+  "@tauri-apps/plugin-process": ~2.3.1
+  "@tauri-apps/plugin-updater": ~2.10.1
+  # App deps
+  lucide-react: ^0.460.0
+  hls.js: ^1.6.16
+  "mpegts.js": ^1.8.0
+  "lottie-web": ^5.13.0
+  gifenc: ^1.0.3
+  "parse-torrent-title": ^3.0.1
+  "react-markdown": ^10.1.0
+  "rehype-raw": ^7.0.0
+  "remark-gfm": ^4.0.1
+  cheerio: ^1.2.0
+  "@resvg/resvg-js": ^2.6.2
+
+overrides:
+  vite: "catalog:"
+  vitest: "catalog:"
+
+peerDependencyRules:
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: "*"
+    vitest: "*"

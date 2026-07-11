@@ -1,7 +1,8 @@
-import { useState } from "react";
-import { Tv } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { IptvChannel } from "@/lib/iptv/types";
+import { Tv } from "lucide-react";
+import { useState } from "react";
+
 import { channelNumber, fmtClock } from "./now-format";
 import type { NowItem } from "./use-live-home";
 

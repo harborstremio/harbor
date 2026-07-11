@@ -2,6 +2,7 @@ import { resolveAddonLogo } from "@/components/addon-logo";
 import type { Addon } from "@/lib/addons";
 import { hostOf, type SaveResult, type SaveStep } from "@/lib/addons-store/reorder";
 import { t } from "@/lib/i18n";
+
 import type { OrganizeEntry } from "./section-card";
 
 export type Notice = { tone: "info" | "danger"; text: string; retry?: boolean; reload?: boolean };
@@ -21,9 +22,7 @@ export function urlsOf(items: Array<{ transportUrl: string }>): string[] {
   return items.map((i) => i.transportUrl);
 }
 
-export function entriesOf(
-  items: Array<{ transportUrl: string; manifest?: Addon["manifest"] }>,
-): OrganizeEntry[] {
+export function entriesOf(items: Array<{ transportUrl: string; manifest?: Addon["manifest"] }>): OrganizeEntry[] {
   const seen = new Map<string, number>();
   return items.map((item) => {
     const n = seen.get(item.transportUrl) ?? 0;
@@ -62,7 +61,9 @@ export function noticeFor(result: Exclude<SaveResult, { ok: true }>): Notice {
     case "write":
       return {
         tone: "danger",
-        text: t("Stremio didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again."),
+        text: t(
+          "Stremio didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.",
+        ),
         retry: true,
       };
     case "verify":

@@ -1,7 +1,7 @@
-import { useMemo } from "react";
-import { Shuffle } from "lucide-react";
 import { AVATAR_CATALOG, avatarUrl } from "@/lib/avatars/catalog";
 import { useT } from "@/lib/i18n";
+import { Shuffle } from "lucide-react";
+import { useMemo } from "react";
 
 const ALL_IDS = AVATAR_CATALOG.flatMap((g) => g.items.map((i) => i.id));
 
@@ -38,11 +38,7 @@ export function AvatarFan({
           {picks.map((id, i) => {
             const last = i === picks.length - 1;
             return (
-              <span
-                key={id}
-                className="relative -ms-3 block h-9 w-9 shrink-0 first:ms-0"
-                style={{ zIndex: i }}
-              >
+              <span key={id} className="relative -ms-3 block h-9 w-9 shrink-0 first:ms-0" style={{ zIndex: i }}>
                 <span className="block h-full w-full overflow-hidden rounded-full ring-2 ring-canvas">
                   <img src={avatarUrl(id)} alt="" draggable={false} className="h-full w-full object-cover" />
                 </span>

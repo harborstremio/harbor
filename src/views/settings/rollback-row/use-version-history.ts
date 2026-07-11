@@ -1,10 +1,7 @@
-import { useEffect, useState } from "react";
 import { fetchVersionHistory, type VersionEntry } from "@/lib/updater/versions";
+import { useEffect, useState } from "react";
 
-type State =
-  | { status: "loading" }
-  | { status: "error" }
-  | { status: "ready"; versions: VersionEntry[] };
+type State = { status: "loading" } | { status: "error" } | { status: "ready"; versions: VersionEntry[] };
 
 export function useVersionHistory(enabled: boolean) {
   const [state, setState] = useState<State>({ status: "loading" });

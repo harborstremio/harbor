@@ -1,20 +1,23 @@
-import { Bookmark, Clock, HardDrive, Layers } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import traktLogo from "@/assets/trakt.svg";
-import anilistLogo from "@/assets/anilist.png";
-import simklLogo from "@/assets/simkl.png";
 import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
+import anilistLogo from "@/assets/anilist.png";
 import malLogo from "@/assets/mal.png";
+import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
 import { useAnilist } from "@/lib/anilist/provider";
+import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { useT } from "@/lib/i18n";
 import { useMal } from "@/lib/mal/provider";
 import { useSimkl } from "@/lib/simkl/provider";
+import { useLetterboxd } from "@/lib/stremboxd/provider";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useScrollMemory } from "@/lib/view";
-import { useT } from "@/lib/i18n";
 import { watchlistHas } from "@/lib/watchlist";
-import { useLetterboxd } from "@/lib/stremboxd/provider";
+import { Bookmark, Clock, HardDrive, Layers } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { AnilistTab } from "./library/anilist-tab";
 import { HistoryTab } from "./library/history-tab";
+import { LetterboxdTab } from "./library/letterboxd-tab";
 import { LocalTab } from "./library/local-tab";
 import { MalTab } from "./library/mal-tab";
 import { MyListsTab } from "./library/my-lists-tab";
@@ -22,8 +25,6 @@ import { TabBtn, type Tab } from "./library/shared";
 import { SimklTab } from "./library/simkl-tab";
 import { TraktTab } from "./library/trakt-tab";
 import { WatchlistTab } from "./library/watchlist-tab";
-import { LetterboxdTab } from "./library/letterboxd-tab";
-import { pushActivityHint } from "@/lib/discord/activity-hint";
 
 const LIBRARY_TAB_KEY = "harbor.library.tab";
 
@@ -92,22 +93,19 @@ export function LibraryView({ active }: { active: boolean }) {
           : tab === "lists"
             ? "Browsing their lists"
             : tab === "trakt"
-            ? "Browsing their Trakt library"
-            : tab === "simkl"
-              ? "Browsing their Simkl library"
-              : tab === "letterboxd"
-                ? "Browsing their Letterboxd library"
-              : tab === "mal"
-                ? "Browsing their MyAnimeList library"
-                : "Browsing their Stremio library";
+              ? "Browsing their Trakt library"
+              : tab === "simkl"
+                ? "Browsing their Simkl library"
+                : tab === "letterboxd"
+                  ? "Browsing their Letterboxd library"
+                  : tab === "mal"
+                    ? "Browsing their MyAnimeList library"
+                    : "Browsing their Stremio library";
     return pushActivityHint({ details: label, state: "Library" });
   }, [active, tab]);
 
   return (
-    <main
-      ref={scrollRef}
-      className="flex-1 overflow-y-auto px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28"
-    >
+    <main ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28">
       <div data-tauri-drag-region className="flex flex-col gap-7">
         <Header
           tab={tab}
@@ -154,14 +152,12 @@ function Header({
     <header className="flex flex-col gap-5">
       <div className="flex items-end justify-between gap-6">
         <div className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
-            {t("My library")}
-          </span>
-          <h1 className="font-display text-[44px] font-medium leading-[1.05] text-ink">
-            {t("Your collection.")}
-          </h1>
+          <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">{t("My library")}</span>
+          <h1 className="font-display text-[44px] font-medium leading-[1.05] text-ink">{t("Your collection.")}</h1>
           <p className="text-[14px] leading-snug text-ink-muted">
-            {t("Watchlist is what you've saved for later. History is everything you've watched. Local is files on your computer.")}
+            {t(
+              "Watchlist is what you've saved for later. History is everything you've watched. Local is files on your computer.",
+            )}
           </p>
         </div>
       </div>

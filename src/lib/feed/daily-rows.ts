@@ -1,13 +1,14 @@
+import type { ShelfMeta } from "@/components/feed-shelf";
 import type { Meta } from "@/lib/cinemeta";
 import type { Affinity } from "@/lib/discover/types";
 import type { Settings, StreamingService } from "@/lib/settings";
-import type { ShelfMeta } from "@/components/feed-shelf";
-import { CATALOG, type ExpandedRow } from "./daily-rows-catalog";
+
 import { ANCHOR_AWARDS, ANCHOR_TOP_RATED, ANCHOR_TRENDING, ROTATING_ANCHORS } from "./daily-rows-anchors";
+import { CATALOG, type ExpandedRow } from "./daily-rows-catalog";
 import { fetchRowWithFallback } from "./daily-rows-select";
+import { hashStr } from "./daily-rows-types";
 import { dayIndex, mixSeed, mulberry32 } from "./tags";
 import { fallbackShelves } from "./themes";
-import { hashStr } from "./daily-rows-types";
 
 export type RailDef = {
   id: string;

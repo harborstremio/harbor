@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { useSettings } from "@/lib/settings";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 

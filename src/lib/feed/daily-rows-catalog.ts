@@ -1,12 +1,13 @@
 import type { Affinity } from "@/lib/discover/types";
 import { providerIdsFor, SERVICES } from "@/lib/providers/streaming";
 import type { StreamingService } from "@/lib/settings";
-import { genreToTmdbId } from "./sections";
-import { DECADES, GENRE_MOVIE_TO_TV, LANG_TO_COUNTRY, LANGUAGES, MOVIE_GENRES, TV_GENRES, mixSeed } from "./tags";
-import { normalizedAffinity, weightedPickWithoutReplacement } from "./daily-rows-select";
+
 import { ANCHORS } from "./daily-rows-anchors";
 import { PEOPLE_TEMPLATES } from "./daily-rows-people";
+import { normalizedAffinity, weightedPickWithoutReplacement } from "./daily-rows-select";
 import { LAMBDA, movieGenre, relax, rng, type CatalogEntry, type ExpandedRow } from "./daily-rows-types";
+import { genreToTmdbId } from "./sections";
+import { DECADES, GENRE_MOVIE_TO_TV, LANG_TO_COUNTRY, LANGUAGES, MOVIE_GENRES, TV_GENRES, mixSeed } from "./tags";
 
 export type { CatalogEntry, ExpandedRow } from "./daily-rows-types";
 export { setPersonLabels } from "./daily-rows-people";
@@ -294,12 +295,9 @@ const PARAMETERIZED: CatalogEntry[] = [
     id: "provider",
     dimension: "network",
     eligible: (_affinity, settings) =>
-      !!settings.tmdbKey &&
-      (Object.keys(SERVICES) as StreamingService[]).some((s) => settings.streaming[s]),
+      !!settings.tmdbKey && (Object.keys(SERVICES) as StreamingService[]).some((s) => settings.streaming[s]),
     expand: (affinity, base, settings) => {
-      const enabled = (Object.keys(SERVICES) as StreamingService[]).filter(
-        (s) => settings.streaming[s],
-      );
+      const enabled = (Object.keys(SERVICES) as StreamingService[]).filter((s) => settings.streaming[s]);
       if (enabled.length === 0) return [];
       const svc = weightedPickWithoutReplacement(enabled, () => 1, rng(base, "provider"), 1)[0];
       const service = SERVICES[svc];

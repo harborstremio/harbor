@@ -1,9 +1,10 @@
+import { useT } from "@/lib/i18n";
+import type { EpgProgram } from "@/lib/iptv/types";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
+
 import { formatTimeLabel, PX_PER_MS } from "./guide-utils";
-import type { EpgProgram } from "@/lib/iptv/types";
 
 const HIDE_DELAY_MS = 150;
 const SHOW_DELAY_MS = 280;
@@ -32,10 +33,13 @@ export function GuideProgramBlock({
   const hideTimerRef = useRef<number | null>(null);
   const showTimerRef = useRef<number | null>(null);
 
-  useEffect(() => () => {
-    if (hideTimerRef.current != null) clearTimeout(hideTimerRef.current);
-    if (showTimerRef.current != null) clearTimeout(showTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (hideTimerRef.current != null) clearTimeout(hideTimerRef.current);
+      if (showTimerRef.current != null) clearTimeout(showTimerRef.current);
+    },
+    [],
+  );
 
   const isPast = program.endMs <= nowMs;
   const isLive = !isPast && program.startMs <= nowMs && nowMs < program.endMs;
@@ -141,7 +145,8 @@ export function GuideProgramBlock({
                   {t("Replay")}
                 </span>
               ) : (
-                isPast && !isLive && (
+                isPast &&
+                !isLive && (
                   <span className="ms-auto rounded-full bg-canvas/55 px-1.5 py-px text-[8.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
                     {t("Ended")}
                   </span>

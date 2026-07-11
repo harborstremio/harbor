@@ -1,5 +1,3 @@
-import { ArrowLeft, Clock, Compass, ListTree, Loader2, Shuffle, Sparkles, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AddonsIcon } from "@/components/icons/addons-icon";
 import { AnimeIcon } from "@/components/icons/anime-icon";
 import { CalendarIcon } from "@/components/icons/calendar-icon";
@@ -10,6 +8,8 @@ import { LiveTvIcon } from "@/components/icons/live-tv-icon";
 import { MoviesIcon } from "@/components/icons/movies-icon";
 import { TvIcon } from "@/components/icons/tv-icon";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
+import { ArrowLeft, Clock, Compass, ListTree, Loader2, Shuffle, Sparkles, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TV_GENRE_FOR_MOVIE: Record<string, number> = {
   Action: 10759,
@@ -25,18 +25,18 @@ const TV_GENRE_FOR_MOVIE: Record<string, number> = {
   War: 10768,
   Family: 10751,
 };
-import { useParental } from "@/lib/parental";
+import { PickCard } from "@/components/pick-card";
+import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import type { LockableTab } from "@/lib/lockable-tabs";
+import { useParental } from "@/lib/parental";
+import { SERVICES, providerIdsFor } from "@/lib/providers/streaming";
+import { tmdbDiscover } from "@/lib/providers/tmdb";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
-import { surpriseMe } from "@/lib/surprise-me";
-import { tmdbDiscover } from "@/lib/providers/tmdb";
-import { SERVICES, providerIdsFor } from "@/lib/providers/streaming";
 import type { StreamingService } from "@/lib/settings";
+import { surpriseMe } from "@/lib/surprise-me";
 import { useView, type View } from "@/lib/view";
-import type { LockableTab } from "@/lib/lockable-tabs";
-import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
-import { PickCard } from "@/components/pick-card";
 
 type Jump = {
   view: View;
@@ -81,8 +81,7 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const enabledServices: StreamingService[] = useMemo(
-    () =>
-      (Object.keys(settings.streaming) as StreamingService[]).filter((s) => settings.streaming[s]),
+    () => (Object.keys(settings.streaming) as StreamingService[]).filter((s) => settings.streaming[s]),
     [settings.streaming],
   );
 
@@ -118,7 +117,8 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
     if (!genreBrowse) return;
     if (loading) return;
     const cinemetaOnly = !settings.tmdbKey;
-    const needMovies = wantMovies && !movieDone && moviePage <= MAX_PAGES && (cinemetaOnly || typeof movieId === "number");
+    const needMovies =
+      wantMovies && !movieDone && moviePage <= MAX_PAGES && (cinemetaOnly || typeof movieId === "number");
     const needSeries = wantSeries && !tvDone && tvPage <= MAX_PAGES && (cinemetaOnly || typeof tvId === "number");
     if (!needMovies && !needSeries) return;
     setLoading(true);
@@ -220,10 +220,7 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
     return () => io.disconnect();
   }, [genreBrowse, items.length, loadMore, movieDone, tvDone, wantMovies, wantSeries]);
 
-  const exhausted =
-    items.length > 0 &&
-    (!wantMovies || movieDone) &&
-    (!wantSeries || tvDone);
+  const exhausted = items.length > 0 && (!wantMovies || movieDone) && (!wantSeries || tvDone);
 
   const visibleJumps = JUMP_TARGETS.filter((j) => !hiddenTabs[j.parentalKey]);
   const visibleGenres = Object.keys(MOVIE_GENRES).filter((name) => {
@@ -263,12 +260,8 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
             <ArrowLeft size={13} strokeWidth={2.4} className="dir-icon" />
             {t("Back")}
           </button>
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">
-            {t("Browsing")}
-          </span>
-          <h3 className="font-display text-[22px] font-medium tracking-tight text-ink">
-            {genreBrowse}
-          </h3>
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">{t("Browsing")}</span>
+          <h3 className="font-display text-[22px] font-medium tracking-tight text-ink">{genreBrowse}</h3>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -281,18 +274,11 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
           <FilterPill active={filterTab === "shows"} onClick={() => setFilterTab("shows")}>
             {t("Shows")}
           </FilterPill>
-          {enabledServices.length > 0 && (
-            <span className="mx-1 h-5 w-px bg-edge-soft" aria-hidden />
-          )}
+          {enabledServices.length > 0 && <span className="mx-1 h-5 w-px bg-edge-soft" aria-hidden />}
           {enabledServices.map((s) => {
             const svc = SERVICES[s];
             return (
-              <FilterPill
-                key={s}
-                active={filterTab === s}
-                onClick={() => setFilterTab(s)}
-                accent={svc.tint}
-              >
+              <FilterPill key={s} active={filterTab === s} onClick={() => setFilterTab(s)} accent={svc.tint}>
                 {svc.name}
               </FilterPill>
             );
@@ -307,7 +293,9 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
           <p className="rounded-xl border border-dashed border-edge px-4 py-8 text-center text-[13px] text-ink-subtle">
             {t("No titles found for {genre}", { genre: genreBrowse })}
             {isServiceTab ? ` on ${SERVICES[filterTab as StreamingService].name}` : ""}.{" "}
-            {!settings.tmdbKey && isServiceTab && t("Service-specific browsing needs a TMDB key. Pick All / Movies / Shows to browse via Cinemeta.")}
+            {!settings.tmdbKey &&
+              isServiceTab &&
+              t("Service-specific browsing needs a TMDB key. Pick All / Movies / Shows to browse via Cinemeta.")}
           </p>
         ) : (
           <>
@@ -349,7 +337,9 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
         <section>
           <div className="mb-3 flex items-center justify-between gap-3">
             <h3 className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">
-              <span className="text-ink-muted"><Clock size={13} strokeWidth={2.2} /></span>
+              <span className="text-ink-muted">
+                <Clock size={13} strokeWidth={2.2} />
+              </span>
               {t("Recent searches")}
             </h3>
             <button

@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import { anilistRequest } from "./client";
 import { anilistMediaToMeta } from "./to-meta";
 import type { AnilistMedia } from "./types";
@@ -32,10 +33,7 @@ type RecsResponse = {
   Page: { media: Array<{ id: number; recommendations: { nodes: RecNode[] } | null }> } | null;
 };
 
-export async function fetchAnilistRecommendations(
-  seedIds: number[],
-  excludeIds: Set<number>,
-): Promise<Meta[]> {
+export async function fetchAnilistRecommendations(seedIds: number[], excludeIds: Set<number>): Promise<Meta[]> {
   if (seedIds.length === 0) return [];
   const ids = seedIds.slice(0, 40);
   const data = await anilistRequest<RecsResponse>(RECS_QUERY, { ids }).catch(() => null);

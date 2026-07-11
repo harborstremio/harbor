@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { CalendarRange, Globe2, Tv } from "lucide-react";
 import { useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export type PlaylistKind = "m3u" | "xtream" | "epg";
 
@@ -236,9 +236,7 @@ export function PlaylistForm({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</span>
       {children}
     </label>
   );

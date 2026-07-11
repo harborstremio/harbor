@@ -1,8 +1,6 @@
 declare const __APP_VERSION__: string;
 
-const ENDPOINT =
-  (import.meta.env.VITE_BUG_REPORT_ENDPOINT as string | undefined) ||
-  "https://bugs.harbor.site";
+const ENDPOINT = (import.meta.env.VITE_BUG_REPORT_ENDPOINT as string | undefined) || "https://bugs.harbor.site";
 
 export type Severity = "low" | "normal" | "high" | "critical";
 
@@ -86,8 +84,9 @@ export async function collectDiagnostics(opts: {
   try {
     if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
       const modName = "@tauri-apps/plugin-os";
-      const osMod: { platform?: () => Promise<string>; version?: () => Promise<string> } =
-        await import(/* @vite-ignore */ modName).catch(() => ({}));
+      const osMod: { platform?: () => Promise<string>; version?: () => Promise<string> } = await import(
+        /* @vite-ignore */ modName
+      ).catch(() => ({}));
       try {
         osName = (await osMod.platform?.()) || osName;
       } catch {}
@@ -97,8 +96,7 @@ export async function collectDiagnostics(opts: {
     }
   } catch {}
 
-  const viewport =
-    typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "";
+  const viewport = typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "";
 
   return {
     appVersion: typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "dev",
@@ -147,10 +145,7 @@ export async function submitErrorReport(args: {
   fd.set("os", os);
   fd.set("os_version", osVersion);
   fd.set("ua", ua);
-  fd.set(
-    "viewport",
-    typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "",
-  );
+  fd.set("viewport", typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : "");
   fd.set("locale", typeof navigator !== "undefined" ? navigator.language : "");
   fd.set(
     "diagnostics",
@@ -159,10 +154,7 @@ export async function submitErrorReport(args: {
       code: args.code,
       title: args.title,
       detail: args.detail || null,
-      path:
-        typeof window !== "undefined"
-          ? window.location.pathname + window.location.hash
-          : "",
+      path: typeof window !== "undefined" ? window.location.pathname + window.location.hash : "",
       recentErrors: getRecentErrors().slice(-20),
     }),
   );
@@ -174,10 +166,7 @@ export async function submitErrorReport(args: {
   return (await res.json()) as { id: string };
 }
 
-export async function submitBugReport(
-  input: BugReportInput,
-  diag: Diagnostics,
-): Promise<{ id: string }> {
+export async function submitBugReport(input: BugReportInput, diag: Diagnostics): Promise<{ id: string }> {
   const fd = new FormData();
   fd.set("summary", input.summary);
   fd.set("severity", input.severity);

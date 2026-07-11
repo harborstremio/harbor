@@ -1,7 +1,8 @@
 import type { Meta } from "@/lib/cinemeta";
-import type { FeedItem } from "@/lib/feed";
 import { getStore } from "@/lib/discover/store";
+import type { FeedItem } from "@/lib/feed";
 import { loadStoredSettings } from "@/lib/settings/load";
+
 import { localeWeights } from "./locale";
 
 type Affinity = ReturnType<typeof getStore>["affinity"];

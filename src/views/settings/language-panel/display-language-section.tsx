@@ -1,5 +1,6 @@
-import { useSettings } from "@/lib/settings";
 import { LANGUAGES, setUiLanguage, useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+
 import { Section } from "../shared";
 
 export function DisplayLanguageSection() {
@@ -8,7 +9,9 @@ export function DisplayLanguageSection() {
   return (
     <Section
       title={t("Display language")}
-      subtitle={t("Sets the language of Harbor's own interface: menus, buttons, and labels. Arabic switches the layout to right to left. This is separate from subtitle and metadata languages below.")}
+      subtitle={t(
+        "Sets the language of Harbor's own interface: menus, buttons, and labels. Arabic switches the layout to right to left. This is separate from subtitle and metadata languages below.",
+      )}
     >
       <div className="flex flex-col gap-2.5">
         {LANGUAGES.map((lang) => {

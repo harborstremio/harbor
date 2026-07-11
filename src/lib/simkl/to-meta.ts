@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import type { SimklItem } from "./types";
 
 export function simklItemToMeta(item: SimklItem): Meta | null {
@@ -14,9 +15,7 @@ export function simklItemToMeta(item: SimklItem): Meta | null {
 
 function pickStremioId(item: SimklItem): string | null {
   if (item.ids.tmdb) {
-    return item.type === "movie"
-      ? `tmdb:movie:${item.ids.tmdb}`
-      : `tmdb:tv:${item.ids.tmdb}`;
+    return item.type === "movie" ? `tmdb:movie:${item.ids.tmdb}` : `tmdb:tv:${item.ids.tmdb}`;
   }
   if (item.ids.imdb) return item.ids.imdb;
   return null;

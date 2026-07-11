@@ -49,11 +49,7 @@ export function SeekBarVisual({
     top: "50%",
     transform: "translateY(-50%)",
     backgroundColor: isRainbow || isImage ? undefined : accent,
-    backgroundImage: isRainbow
-      ? RAINBOW_BG
-      : isImage
-      ? `url(${settings.seekBarImage})`
-      : undefined,
+    backgroundImage: isRainbow ? RAINBOW_BG : isImage ? `url(${settings.seekBarImage})` : undefined,
     backgroundRepeat: isImage ? "repeat" : undefined,
     backgroundSize: isImage ? "auto 100%" : undefined,
   };
@@ -62,10 +58,7 @@ export function SeekBarVisual({
 
   return (
     <>
-      <div
-        className="w-full rounded-full bg-white/15 transition-[height] duration-150"
-        style={{ height: trackHeight }}
-      >
+      <div className="w-full rounded-full bg-white/15 transition-[height] duration-150" style={{ height: trackHeight }}>
         {bufferedPct != null && bufferedPct > 0 && (
           <div
             className="h-full rounded-full bg-white"
@@ -76,10 +69,7 @@ export function SeekBarVisual({
           />
         )}
       </div>
-      <div
-        className="absolute overflow-hidden rounded-full transition-[height] duration-150"
-        style={fillStyle}
-      >
+      <div className="absolute overflow-hidden rounded-full transition-[height] duration-150" style={fillStyle}>
         {style === "pinstripe" && <div className="harbor-barberpole absolute inset-0" />}
         {glassOverlay && <div className="absolute inset-0" style={glassOverlay} />}
       </div>
@@ -98,13 +88,7 @@ export function SeekBarVisual({
         />
       ))}
       {shape !== "hidden" && (
-        <SeekDot
-          shape={shape}
-          size={dotSize}
-          leftPct={pct}
-          color={dotColor}
-          image={settings.seekDotImage}
-        />
+        <SeekDot shape={shape} size={dotSize} leftPct={pct} color={dotColor} image={settings.seekDotImage} />
       )}
     </>
   );

@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+
 import {
   emptySnapshot,
   type PlayerBridge,
@@ -167,9 +168,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           const title = t.title as string | undefined;
           const codecDesc = (t["codec-desc"] as string | undefined) || (t.codec as string | undefined);
           const channels = t["demux-channels"] as string | undefined;
-          const channelCount = typeof t["demux-channel-count"] === "number"
-            ? (t["demux-channel-count"] as number)
-            : undefined;
+          const channelCount =
+            typeof t["demux-channel-count"] === "number" ? (t["demux-channel-count"] as number) : undefined;
           const external = t.external === true;
           const externalFilename = t["external-filename"] as string | undefined;
           const forced = t.forced === true;
@@ -307,8 +307,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             suppressEndFileUntil = Date.now() + 1500;
             await invoke("mpv_command", { cmd: ["stop"] });
             await applyHeaderProps(src.headers);
-            const startAt =
-              typeof src.startAtSec === "number" && src.startAtSec > 0 ? src.startAtSec : 0;
+            const startAt = typeof src.startAtSec === "number" && src.startAtSec > 0 ? src.startAtSec : 0;
             const cmd: Array<string | number> = ["loadfile", src.url, "replace", 0, `start=${startAt}`];
             await invoke("mpv_command", { cmd });
             for (const s of src.subtitles ?? []) {

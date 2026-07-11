@@ -1,17 +1,18 @@
-import { ChevronDown, Lock } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { HarborMark } from "@/components/icons/harbor-mark";
+import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
 import { ProfileChip } from "@/chrome/sidebar/profile-chip";
-import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
-import { getThemeById } from "@/lib/theme";
+import { HarborMark } from "@/components/icons/harbor-mark";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
+import { useT } from "@/lib/i18n";
 import { useParental, type LockableTab } from "@/lib/parental";
 import { useActiveKid } from "@/lib/profiles";
+import { useSettings } from "@/lib/settings";
+import { getThemeById } from "@/lib/theme";
 import { useView, type View } from "@/lib/view";
+import { ChevronDown, Lock } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
 import { KidsSidebarDoodles } from "./kids-sidebar-doodles";
-import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
-import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 
 const PRIMARY_IDS = new Set(["home", "discover", "catalogs", "movies", "shows", "kids", "anime", "live", "vod"]);
 
@@ -23,8 +24,7 @@ export function Sidebar() {
   const t = useT();
   const [pendingPinView, setPendingPinView] = useState<View | null>(null);
 
-  const themePreset =
-    settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
+  const themePreset = settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
   const customWordmark = themePreset?.logo?.wordmark ?? null;
   const collapsed = settings.sidebarCollapsed;
@@ -37,9 +37,7 @@ export function Sidebar() {
         className={`relative z-[60] flex w-[72px] shrink-0 flex-col border-e border-edge-soft bg-canvas transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
           collapsed ? "" : "lg:w-60"
         } ${
-          chromeHidden
-            ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0"
-            : "translate-x-0 opacity-100"
+          chromeHidden ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0" : "translate-x-0 opacity-100"
         }`}
       >
         {kid && <KidsSidebarDoodles />}
@@ -94,10 +92,7 @@ export function Sidebar() {
                 }}
               >
                 Harb
-                <span
-                  className="inline-block"
-                  style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-                >
+                <span className="inline-block" style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}>
                   o
                 </span>
                 r
@@ -336,4 +331,3 @@ function NavItem({
     </button>
   );
 }
-

@@ -1,5 +1,6 @@
-import { useMemo } from "react";
 import { useSettings } from "@/lib/settings";
+import { useMemo } from "react";
+
 import { createAllDebrid } from "./alldebrid";
 import { createDebridLink } from "./debridlink";
 import { createPremiumize } from "./premiumize";

@@ -1,10 +1,10 @@
-import { AlertTriangle } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import { setNavGuard } from "@/lib/nav-guard";
 import { useSettings, type Settings } from "@/lib/settings";
 import { changedSettingKeys } from "@/lib/settings/diff";
+import { AlertTriangle } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 /** Settings apply live so previews keep working. This snapshots them on entry
  *  and offers Save (accept the current values) or Reset (restore the snapshot),
@@ -30,10 +30,7 @@ export function SettingsUnsavedChanges({ active }: { active: boolean }) {
     }
   }, [active]);
 
-  const changed = useMemo(
-    () => (snapshot ? changedSettingKeys(settings, snapshot) : []),
-    [settings, snapshot],
-  );
+  const changed = useMemo(() => (snapshot ? changedSettingKeys(settings, snapshot) : []), [settings, snapshot]);
   const dirty = changed.length > 0;
 
   const save = useCallback(() => {

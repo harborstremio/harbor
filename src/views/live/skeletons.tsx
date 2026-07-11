@@ -1,4 +1,5 @@
 import { useT } from "@/lib/i18n";
+
 import {
   CHANNEL_COL_PX,
   PX_PER_MIN,
@@ -46,10 +47,7 @@ export function GuideSkeleton() {
                 {t("Channel")}
               </span>
             </div>
-            <div
-              className="flex border-b border-edge-soft/60"
-              style={{ height: RULER_HEIGHT_PX }}
-            >
+            <div className="flex border-b border-edge-soft/60" style={{ height: RULER_HEIGHT_PX }}>
               {Array.from({ length: slots }).map((_, i) => (
                 <div
                   key={i}
@@ -65,11 +63,7 @@ export function GuideSkeleton() {
             </div>
           </div>
           {Array.from({ length: rows }).map((_, r) => (
-            <div
-              key={r}
-              className="relative flex border-b border-edge-soft/30"
-              style={{ height: ROW_HEIGHT_PX }}
-            >
+            <div key={r} className="relative flex border-b border-edge-soft/30" style={{ height: ROW_HEIGHT_PX }}>
               <div
                 className="flex shrink-0 items-center gap-3 border-e border-edge-soft/40 px-3"
                 style={{ width: CHANNEL_COL_PX }}

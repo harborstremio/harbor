@@ -1,12 +1,12 @@
-import { Check, Plus, Search as SearchIcon, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { emitListToast } from "@/components/lists/list-toast";
+import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
 import { addToList, MAX_ITEMS, type CustomList } from "@/lib/custom-lists";
 import { useT } from "@/lib/i18n";
 import { searchAll, type AnimeHit, type SearchResults } from "@/lib/search";
 import { useSettings } from "@/lib/settings";
-import { emitListToast } from "@/components/lists/list-toast";
-import { Poster } from "@/components/poster";
+import { Check, Plus, Search as SearchIcon, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 function animeToMeta(a: AnimeHit): Meta {
   return {

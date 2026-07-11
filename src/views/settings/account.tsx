@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import stremioWordmark from "@/assets/stremio-wordmark.png";
 import { AuthModal } from "@/components/auth-modal";
+import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
+import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
 import { useAuth } from "@/lib/auth";
+import { avatarUrl } from "@/lib/avatars/catalog";
+import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useTogether } from "@/lib/together/provider";
-import { useT } from "@/lib/i18n";
-import { ColorPicker } from "./color-picker";
-import { Section } from "./shared";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { AvatarRing } from "./account/avatar-ring";
 import { resizeAvatar } from "./account/avatar-utils";
-import { SyncedAddonsCard } from "./account/synced-addons-card";
 import { ProfilesStrip } from "./account/profiles-strip";
-import { StartupDefaults } from "./account/startup-defaults";
 import { SettingsScopeCard } from "./account/settings-scope-card";
-import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
-import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
-import { avatarUrl } from "@/lib/avatars/catalog";
+import { StartupDefaults } from "./account/startup-defaults";
+import { SyncedAddonsCard } from "./account/synced-addons-card";
+import { ColorPicker } from "./color-picker";
+import { Section } from "./shared";
 
 export function AccountStub() {
   const t = useT();
@@ -82,11 +83,7 @@ export function AccountStub() {
       >
         <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
           <div className="flex items-center gap-5">
-            <AvatarRing
-              src={effectiveAvatar}
-              size={88}
-              onClick={() => fileRef.current?.click()}
-            />
+            <AvatarRing src={effectiveAvatar} size={88} onClick={() => fileRef.current?.click()} />
             <input
               ref={fileRef}
               type="file"
@@ -132,9 +129,7 @@ export function AccountStub() {
                     {displayName}
                   </span>
                   {user && (
-                    <span className="text-[13px] text-ink-subtle">
-                      ({user.fullname || user.email.split("@")[0]})
-                    </span>
+                    <span className="text-[13px] text-ink-subtle">({user.fullname || user.email.split("@")[0]})</span>
                   )}
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-subtle">
                     <path
@@ -170,10 +165,7 @@ export function AccountStub() {
                 onClick={() => setAvatarPickerOpen(true)}
                 onRandomize={(id) => pushIdentity({ harborAvatar: avatarUrl(id) })}
               />
-              <ColorPicker
-                value={settings.harborColor}
-                onChange={(c) => pushIdentity({ harborColor: c })}
-              />
+              <ColorPicker value={settings.harborColor} onChange={(c) => pushIdentity({ harborColor: c })} />
             </div>
           </div>
         </div>
@@ -181,7 +173,9 @@ export function AccountStub() {
 
       <Section
         title={t("Profiles")}
-        subtitle={t("Everyone who uses this Harbor gets their own watch history, avatar, color, and optional PIN. Switch anytime.")}
+        subtitle={t(
+          "Everyone who uses this Harbor gets their own watch history, avatar, color, and optional PIN. Switch anytime.",
+        )}
       >
         <div className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
           <ProfilesStrip />
@@ -209,9 +203,7 @@ export function AccountStub() {
                 <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
                   {t("Email")}
                 </span>
-                <span className="truncate font-mono text-[14.5px] text-ink">
-                  {reveal ? user.email : maskedEmail}
-                </span>
+                <span className="truncate font-mono text-[14.5px] text-ink">{reveal ? user.email : maskedEmail}</span>
               </div>
               <button
                 onClick={() => setReveal((v) => !v)}

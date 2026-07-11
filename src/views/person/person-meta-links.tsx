@@ -1,5 +1,6 @@
-import { openInAppBrowser } from "@/lib/window";
 import { useT } from "@/lib/i18n";
+import { openInAppBrowser } from "@/lib/window";
+
 import { fmtDate } from "./person-utils";
 
 export function BirthdayLink({ birthday, age }: { birthday: string; age: number | null }) {

@@ -1,21 +1,14 @@
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ImdbIcon } from "@/components/icons/imdb-icon";
 import type { Meta } from "@/lib/cinemeta";
 import { IMG } from "@/lib/providers/tmdb/tmdb-client";
 import { useMetaWatched } from "@/lib/watched-flag";
-import { ImdbIcon } from "@/components/icons/imdb-icon";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { useCardImdb } from "./use-card-imdb";
 import { useCardPoster } from "./use-card-poster";
 
-export function RailSection({
-  label,
-  count,
-  children,
-}: {
-  label: string;
-  count?: number;
-  children: React.ReactNode;
-}) {
+export function RailSection({ label, count, children }: { label: string; count?: number; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-baseline gap-2 px-1">
@@ -27,7 +20,8 @@ export function RailSection({
   );
 }
 
-const RAIL = "flex gap-3 overflow-x-auto px-0.5 py-2 [scrollbar-width:none] [scroll-snap-type:x_proximity] [&::-webkit-scrollbar]:hidden";
+const RAIL =
+  "flex gap-3 overflow-x-auto px-0.5 py-2 [scrollbar-width:none] [scroll-snap-type:x_proximity] [&::-webkit-scrollbar]:hidden";
 
 function ScrollRail({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -117,12 +111,8 @@ function PersonCard({ person, onOpen }: { person: Person; onOpen?: (p: Person) =
         )}
       </div>
       <div className="flex flex-col gap-0.5 px-0.5">
-        <span className="line-clamp-1 text-[12.5px] font-semibold leading-tight text-white/90">
-          {person.name}
-        </span>
-        {person.role && (
-          <span className="line-clamp-1 text-[11.5px] leading-tight text-white/45">{person.role}</span>
-        )}
+        <span className="line-clamp-1 text-[12.5px] font-semibold leading-tight text-white/90">{person.name}</span>
+        {person.role && <span className="line-clamp-1 text-[11.5px] leading-tight text-white/45">{person.role}</span>}
       </div>
     </>
   );
@@ -148,15 +138,7 @@ export function PeopleRail({ people, onOpen }: { people: Person[]; onOpen?: (p: 
   );
 }
 
-function PosterCard({
-  meta,
-  onOpen,
-  grid,
-}: {
-  meta: Meta;
-  onOpen: (m: Meta) => void;
-  grid?: boolean;
-}) {
+function PosterCard({ meta, onOpen, grid }: { meta: Meta; onOpen: (m: Meta) => void; grid?: boolean }) {
   const watched = useMetaWatched(meta.id, meta.type);
   const { imdb } = useCardImdb(meta);
   const { src, onError } = useCardPoster(meta);

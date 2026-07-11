@@ -1,14 +1,14 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FeedHero } from "@/components/feed-hero";
 import { Poster } from "@/components/poster";
 import { extendPool, getPool, type FeedItem } from "@/lib/feed";
+import { getDownvotedIds, getUpvotedIds } from "@/lib/feed/preferences";
 import { rankByAffinity } from "@/lib/feed/rank";
 import { blockQueueItem, filterQueuePool, shuffleQueuePool, snoozeQueueItem } from "@/lib/feed/skipped";
-import { getDownvotedIds, getUpvotedIds } from "@/lib/feed/preferences";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useInWatchlist } from "@/lib/watchlist";
-import { useT } from "@/lib/i18n";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const LOW_WATER_MARK = 6;
 
@@ -174,9 +174,7 @@ export function QueueView() {
     <main className="min-w-0 flex-1 overflow-hidden pb-12 pt-20">
       <div className="mx-auto flex h-full min-w-0 max-w-[1180px] flex-col gap-5 px-6 sm:px-12">
         <header className="flex shrink-0 items-baseline gap-3">
-          <h1 className="font-display text-[20px] font-medium tracking-tight text-ink">
-            {t("Discovery Queue")}
-          </h1>
+          <h1 className="font-display text-[20px] font-medium tracking-tight text-ink">{t("Discovery Queue")}</h1>
           <span className="text-[12px] uppercase tracking-[0.2em] text-ink-subtle">
             {loading
               ? t("Loading…")
@@ -195,16 +193,8 @@ export function QueueView() {
                 onNotInterested={onNotInterested}
               />
             </div>
-            <NavArrow
-              side="left"
-              disabled={activeIndex === 0 || leaveAnim != null}
-              onClick={onPrev}
-            />
-            <NavArrow
-              side="right"
-              disabled={activeIndex >= pool.length - 1 || leaveAnim != null}
-              onClick={onNext}
-            />
+            <NavArrow side="left" disabled={activeIndex === 0 || leaveAnim != null} onClick={onPrev} />
+            <NavArrow side="right" disabled={activeIndex >= pool.length - 1 || leaveAnim != null} onClick={onNext} />
           </div>
         ) : (
           <div className="flex-1 min-h-[280px] max-h-[600px]">
@@ -222,15 +212,7 @@ export function QueueView() {
   );
 }
 
-function NavArrow({
-  side,
-  disabled,
-  onClick,
-}: {
-  side: "left" | "right";
-  disabled: boolean;
-  onClick: () => void;
-}) {
+function NavArrow({ side, disabled, onClick }: { side: "left" | "right"; disabled: boolean; onClick: () => void }) {
   const t = useT();
   return (
     <button
@@ -259,15 +241,7 @@ function NavArrow({
   );
 }
 
-function Strip({
-  pool,
-  active,
-  onJump,
-}: {
-  pool: FeedItem[];
-  active: number;
-  onJump: (i: number) => void;
-}) {
+function Strip({ pool, active, onJump }: { pool: FeedItem[]; active: number; onJump: (i: number) => void }) {
   const t = useT();
   const stripRef = useRef<HTMLDivElement>(null);
 
@@ -282,9 +256,7 @@ function Strip({
 
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-ink-subtle">
-        {t("Queue")}
-      </span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.24em] text-ink-subtle">{t("Queue")}</span>
       <div
         ref={stripRef}
         className="-m-3 flex gap-3 overflow-x-auto p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

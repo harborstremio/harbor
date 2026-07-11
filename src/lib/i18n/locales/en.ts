@@ -76,26 +76,26 @@ const en: Record<string, string> = {
   "Episode Not Found": "Episode Not Found",
   "Episode information is not available": "Episode information is not available.",
   "Unable to connect": "Unable to connect",
-  "Stills": "Stills",
+  Stills: "Stills",
   "Guest Stars": "Guest Stars",
   "Guest Stars · {n}": "Guest Stars · {n}",
-  "Overview": "Overview",
+  Overview: "Overview",
   "Go Back": "Go Back",
-  "Retry": "Retry",
+  Retry: "Retry",
   "Loading episode details...": "Loading episode details...",
   "View Series": "View Series",
   "Play Episode": "Play Episode",
-  "min": "min",
+  min: "min",
   "Episode {n}": "Episode {n}",
   "{n} min": "{n} min",
   "Unable to load series information": "Unable to load series information",
   "An unexpected error occurred": "An unexpected error occurred",
   "TMDB Rating": "TMDB Rating",
-  "Votes": "Votes",
+  Votes: "Votes",
   "Air Date": "Air Date",
-  "Runtime": "Runtime",
+  Runtime: "Runtime",
 
-  "My": "My",
+  My: "My",
   "Reveal comments": "Reveal comments",
   "Comments are hidden": "Comments are hidden",
   "You haven't commented yet": "You haven't commented yet",
@@ -104,7 +104,8 @@ const en: Record<string, string> = {
   "Open on Trakt": "Open on Trakt",
 
   "AniList Comments": "AniList Comments",
-  "Connect your AniList account to see forum threads and comments.": "Connect your AniList account to see forum threads and comments.",
+  "Connect your AniList account to see forum threads and comments.":
+    "Connect your AniList account to see forum threads and comments.",
   "Connect AniList": "Connect AniList",
   "Could not find this title on AniList.": "Could not find this title on AniList.",
   "New thread": "New thread",
@@ -122,7 +123,8 @@ const en: Record<string, string> = {
   "Loading more": "Loading more",
   "Failed to post comment": "Failed to post comment",
   "Show AniList comments": "Show AniList comments",
-  "Show forum threads and comments from AniList on anime detail pages.": "Show forum threads and comments from AniList on anime detail pages.",
+  "Show forum threads and comments from AniList on anime detail pages.":
+    "Show forum threads and comments from AniList on anime detail pages.",
   "Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.":
     "Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.",
 
@@ -133,9 +135,9 @@ const en: Record<string, string> = {
   "Blurs the hero image and stills on the episode detail page until you click reveal.":
     "Blurs the hero image and stills on the episode detail page until you click reveal.",
 
-  "Likes": "Likes",
-  "Newest": "Newest",
-  "Oldest": "Oldest",
+  Likes: "Likes",
+  Newest: "Newest",
+  Oldest: "Oldest",
   "Contains spoiler": "Contains spoiler",
   "Write a comment...": "Write a comment...",
   "Comments may take a moment to appear on Trakt": "Comments may take a moment to appear on Trakt",
@@ -151,7 +153,7 @@ const en: Record<string, string> = {
   "sports.customize.clearAll": "Clear all",
   "sports.customize.cancel": "Cancel",
   "sports.customize.save": "Save",
-  "Upcoming": "Upcoming",
+  Upcoming: "Upcoming",
 
   "Add Custom Source": "Add Custom Source",
   "Provide a JSON link or paste it directly.": "Provide a JSON link or paste it directly.",
@@ -167,11 +169,13 @@ const en: Record<string, string> = {
   "Focus GIF URL": "Focus GIF URL",
   "Addon not installed": "Addon not installed",
   "This section depends on the addon": "This section depends on the addon",
-  "You must install this addon in your Stremio account first so Harbor can fetch its works.": "You must install this addon in your Stremio account first so Harbor can fetch its works.",
+  "You must install this addon in your Stremio account first so Harbor can fetch its works.":
+    "You must install this addon in your Stremio account first so Harbor can fetch its works.",
   "Missing TMDB Key": "Missing TMDB Key",
   "This section relies on TMDB discovery features.": "This section relies on TMDB discovery features.",
-  "Please add your TMDB API key in the Library & Metadata settings to view this folder.": "Please add your TMDB API key in the Library & Metadata settings to view this folder.",
-  "OK": "OK",
+  "Please add your TMDB API key in the Library & Metadata settings to view this folder.":
+    "Please add your TMDB API key in the Library & Metadata settings to view this folder.",
+  OK: "OK",
   "Loading...": "Loading...",
 };
 

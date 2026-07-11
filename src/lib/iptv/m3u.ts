@@ -155,7 +155,10 @@ function captureVlcOpt(rest: string, attrs: Record<string, string>): void {
   const eq = rest.indexOf("=");
   if (eq < 0) return;
   const key = rest.slice(0, eq).trim().toLowerCase();
-  const val = rest.slice(eq + 1).trim().replace(/^"|"$/g, "");
+  const val = rest
+    .slice(eq + 1)
+    .trim()
+    .replace(/^"|"$/g, "");
   if (!val) return;
   if (key === "http-user-agent") attrs["vlcopt-user-agent"] = val;
   else if (key === "http-referrer") attrs["vlcopt-referrer"] = val;
@@ -211,8 +214,7 @@ export function deriveEpgFromGetPhp(playlistUrl: string): string | null {
 export function deriveEpgUrls(playlistUrl: string): string[] {
   try {
     const u = new URL(playlistUrl);
-    const isXtream =
-      u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
+    const isXtream = u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
     if (!isXtream) return [];
     const username = u.searchParams.get("username");
     const password = u.searchParams.get("password");

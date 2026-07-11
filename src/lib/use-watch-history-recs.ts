@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import {
   animeFranchiseKey,
@@ -7,6 +6,7 @@ import {
   stripFranchiseSuffix,
 } from "@/lib/providers/jikan";
 import type { LibraryItem } from "@/lib/stremio";
+import { useEffect, useMemo, useState } from "react";
 
 const MAL_CACHE_KEY = "harbor.anime.mal_id_by_franchise.v1";
 const REC_CACHE_KEY = "harbor.anime.recs_by_mal.v1";
@@ -84,10 +84,7 @@ async function recsForMalId(malId: number): Promise<Meta[]> {
 
 export function useWatchHistoryRecommendations(cwItems: LibraryItem[]): Meta[] {
   const seeds = useMemo(
-    () =>
-      cwItems
-        .slice(0, 6)
-        .filter((i) => i.name && (i._id.startsWith("kitsu:") || i._id.startsWith("mal:"))),
+    () => cwItems.slice(0, 6).filter((i) => i.name && (i._id.startsWith("kitsu:") || i._id.startsWith("mal:"))),
     [cwItems],
   );
 
@@ -100,9 +97,7 @@ export function useWatchHistoryRecommendations(cwItems: LibraryItem[]): Meta[] {
     }
     let cancelled = false;
     (async () => {
-      const watchedKeys = new Set(
-        seeds.map((s) => animeFranchiseKey(stripFranchiseSuffix(s.name))),
-      );
+      const watchedKeys = new Set(seeds.map((s) => animeFranchiseKey(stripFranchiseSuffix(s.name))));
       const scoreByKey = new Map<string, { meta: Meta; score: number }>();
       for (const item of seeds) {
         if (cancelled) return;

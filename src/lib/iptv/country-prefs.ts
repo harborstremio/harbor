@@ -37,9 +37,7 @@ function update(sourceId: string, fn: (p: CountryPrefs) => CountryPrefs) {
 
 export function toggleCountry(sourceId: string, code: string): void {
   update(sourceId, (p) => ({
-    selected: p.selected.includes(code)
-      ? p.selected.filter((c) => c !== code)
-      : [...p.selected, code],
+    selected: p.selected.includes(code) ? p.selected.filter((c) => c !== code) : [...p.selected, code],
   }));
 }
 

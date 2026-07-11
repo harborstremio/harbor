@@ -1,8 +1,8 @@
-import { memo, useEffect, useRef, useState } from "react";
-import { Play } from "lucide-react";
 import { Poster } from "@/components/poster";
-import { useSettings } from "@/lib/settings";
 import { enrichVod } from "@/lib/iptv/vod-enrich";
+import { useSettings } from "@/lib/settings";
+import { Play } from "lucide-react";
+import { memo, useEffect, useRef, useState } from "react";
 
 type Props = {
   kind: "movie" | "series";
@@ -60,9 +60,7 @@ export const VodCard = memo(function VodCard({ kind, title, year, logo, seed, su
       </Poster>
       <div className="min-w-0">
         <p className="truncate text-[13px] font-medium text-ink">{title}</p>
-        {(subtitle || year) && (
-          <p className="truncate text-[11.5px] text-ink-subtle">{subtitle ?? year}</p>
-        )}
+        {(subtitle || year) && <p className="truncate text-[11.5px] text-ink-subtle">{subtitle ?? year}</p>}
       </div>
     </button>
   );

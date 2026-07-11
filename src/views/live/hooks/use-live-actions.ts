@@ -1,15 +1,15 @@
-import { useCallback } from "react";
-import { save as saveDialog } from "@tauri-apps/plugin-dialog";
-import { writeTextFile } from "@tauri-apps/plugin-fs";
+import type { Meta } from "@/lib/cinemeta";
 import { buildCatchupUrl } from "@/lib/iptv/catchup";
 import { headersFromChannel } from "@/lib/iptv/channel-headers";
 import { recordChannelPlay } from "@/lib/iptv/channel-stats";
 import { buildM3u, suggestExportFilename } from "@/lib/iptv/export";
-import { findCurrent } from "@/lib/iptv/xmltv";
 import type { EpgIndex, EpgProgram, IptvChannel, IptvPlaylist } from "@/lib/iptv/types";
-import type { Meta } from "@/lib/cinemeta";
+import { findCurrent } from "@/lib/iptv/xmltv";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { save as saveDialog } from "@tauri-apps/plugin-dialog";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { useCallback } from "react";
 
 export function synthChannelMeta(ch: IptvChannel): Meta {
   return {

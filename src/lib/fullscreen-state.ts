@@ -102,7 +102,9 @@ async function osWindowFullscreen(): Promise<boolean> {
   if (!isTauri()) return false;
   try {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
-    return await getCurrentWindow().isFullscreen().catch(() => false);
+    return await getCurrentWindow()
+      .isFullscreen()
+      .catch(() => false);
   } catch {
     return false;
   }

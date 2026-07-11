@@ -1,7 +1,8 @@
+import { useT } from "@/lib/i18n";
+import { applyCustomColorsPreview, CustomColors, type FontPairId } from "@/lib/theme";
 import { ArrowLeft, RotateCcw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { applyCustomColorsPreview, CustomColors, type FontPairId } from "@/lib/theme";
-import { useT } from "@/lib/i18n";
+
 import { ColorPopoverTrigger } from "../color-picker";
 
 const COLOR_FIELDS: Array<{ key: keyof CustomColors; label: string; hint: string; group: string }> = [
@@ -81,9 +82,7 @@ export function CustomEditor({
       <div className="flex flex-col gap-5">
         {Object.entries(groups).map(([groupName, fields]) => (
           <div key={groupName} className="flex flex-col gap-3">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">
-              {t(groupName)}
-            </span>
+            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">{t(groupName)}</span>
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               {fields.map((f) => (
                 <ColorRow
@@ -100,7 +99,9 @@ export function CustomEditor({
       </div>
 
       <p className="text-[11.5px] leading-relaxed text-ink-subtle">
-        {t("Live preview is on. Done and Save both keep what you've picked as your Custom theme. Reset reverts the editor to the saved palette.")}
+        {t(
+          "Live preview is on. Done and Save both keep what you've picked as your Custom theme. Reset reverts the editor to the saved palette.",
+        )}
       </p>
     </div>
   );

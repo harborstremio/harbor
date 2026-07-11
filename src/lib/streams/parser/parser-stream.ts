@@ -1,13 +1,12 @@
 import { parse, type DefaultParserResult } from "parse-torrent-title";
+
 import type { DebridSlug, ParsedStream, Stream } from "../types";
-import { mapResolution } from "./parser-resolution";
-import { detectHdr } from "./parser-hdr";
-import { mapCodec } from "./parser-codec";
-import { detectSource } from "./parser-source";
 import { parseAudio } from "./parser-audio";
-import { parseLanguages } from "./parser-language";
 import { parseCacheFlags } from "./parser-cache-flags";
+import { mapCodec } from "./parser-codec";
 import { extractFilenameLine } from "./parser-filename";
+import { detectHdr } from "./parser-hdr";
+import { parseLanguages } from "./parser-language";
 import {
   computeScamScore,
   parseAnimeHash,
@@ -21,15 +20,15 @@ import {
   parseSize,
   parseYearRange,
 } from "./parser-metadata";
+import { mapResolution } from "./parser-resolution";
+import { detectSource } from "./parser-source";
 
 const REMUX_RX = /\bRemux\b/i;
 const HARDCODED_RX = /\b(HC|HARDCODED|HARDSUB)\b/i;
 
 export function parseStream(stream: Stream): ParsedStream {
   const filenameLine = extractFilenameLine(stream);
-  const text = [filenameLine, stream.title, stream.description, stream.name]
-    .filter(Boolean)
-    .join(" ");
+  const text = [filenameLine, stream.title, stream.description, stream.name].filter(Boolean).join(" ");
   const ptt = parse(filenameLine || text) as DefaultParserResult;
 
   const resolution = mapResolution(ptt.resolution);
@@ -44,9 +43,7 @@ export function parseStream(stream: Stream): ParsedStream {
   const inLibrary: Partial<Record<DebridSlug, boolean>> = {};
   const container = parseContainer(stream.behaviorHints?.filename, filenameLine, text);
   const releaseGroup = ptt.group ?? null;
-  const releaseGroupNormalized = releaseGroup
-    ? releaseGroup.toUpperCase().replace(/[^A-Z0-9]/g, "")
-    : null;
+  const releaseGroupNormalized = releaseGroup ? releaseGroup.toUpperCase().replace(/[^A-Z0-9]/g, "") : null;
   const remux = REMUX_RX.test(text);
   const edition = parseEdition(text, ptt);
   const year = ptt.year ?? null;

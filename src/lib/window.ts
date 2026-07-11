@@ -1,13 +1,12 @@
-import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
-import { getCurrentWindow, type Window } from "@tauri-apps/api/window";
-import { invoke } from "@tauri-apps/api/core";
-import { useEffect, useState } from "react";
 import { getWindowFullscreen } from "@/lib/fullscreen-state";
+import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow, type Window } from "@tauri-apps/api/window";
+import { openUrl as tauriOpenUrl } from "@tauri-apps/plugin-opener";
+import { useEffect, useState } from "react";
 
 const win: Window | null = isTauri() ? getCurrentWindow() : null;
 
-const IS_MAC =
-  typeof navigator !== "undefined" && /Mac|iP(hone|ad|od)/.test(navigator.platform || navigator.userAgent);
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iP(hone|ad|od)/.test(navigator.platform || navigator.userAgent);
 
 function isTauri() {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -27,15 +26,7 @@ export const toggleMaximize = async () => {
 
 export const close = () => win?.close();
 
-export type ResizeDir =
-  | "East"
-  | "North"
-  | "NorthEast"
-  | "NorthWest"
-  | "South"
-  | "SouthEast"
-  | "SouthWest"
-  | "West";
+export type ResizeDir = "East" | "North" | "NorthEast" | "NorthWest" | "South" | "SouthEast" | "SouthWest" | "West";
 
 export function startResize(direction: ResizeDir) {
   if (getWindowFullscreen()) return;
@@ -123,8 +114,6 @@ export function openInAppBrowser(url: string, title?: string) {
     return;
   }
   if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent("harbor:open-embed-viewport", { detail: { url, title } }),
-    );
+    window.dispatchEvent(new CustomEvent("harbor:open-embed-viewport", { detail: { url, title } }));
   }
 }

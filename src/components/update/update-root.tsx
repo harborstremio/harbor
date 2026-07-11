@@ -1,6 +1,3 @@
-import { createPortal } from "react-dom";
-import { useEffect } from "react";
-import { ArrowUpCircle, X } from "lucide-react";
 import {
   dismissUpdate,
   openUpdatePanel,
@@ -8,6 +5,10 @@ import {
   updateAvailable,
   useUpdate,
 } from "@/lib/updater/use-update";
+import { ArrowUpCircle, X } from "lucide-react";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+
 import { UpdateCard } from "./update-card";
 
 export function UpdateRoot() {

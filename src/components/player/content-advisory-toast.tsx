@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { Ghost, Heart, Info, MessageSquareWarning, ShieldAlert, Swords, Wine } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export type Advisory = { category: string; severity: string };
 
@@ -61,9 +61,7 @@ export function ContentAdvisoryToast({ categories, playKey }: { categories: Advi
     >
       <div className="mb-2.5 flex items-center gap-1.5 text-ink-subtle">
         <ShieldAlert size={12} strokeWidth={2.2} />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">
-          {t("Content advisory")}
-        </span>
+        <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">{t("Content advisory")}</span>
       </div>
       <ul className="flex flex-col gap-2">
         {rated.map((c) => {
@@ -79,10 +77,7 @@ export function ContentAdvisoryToast({ categories, playKey }: { categories: Advi
               <span className="flex items-center gap-1.5">
                 <span className="flex gap-[3px]">
                   {[1, 2, 3].map((i) => (
-                    <span
-                      key={i}
-                      className={`h-2.5 w-1 rounded-full ${i <= rank ? style.bar : "bg-ink-subtle/25"}`}
-                    />
+                    <span key={i} className={`h-2.5 w-1 rounded-full ${i <= rank ? style.bar : "bg-ink-subtle/25"}`} />
                   ))}
                 </span>
                 <span className={`w-[54px] text-[11px] font-semibold ${style.text}`}>{t(c.severity)}</span>

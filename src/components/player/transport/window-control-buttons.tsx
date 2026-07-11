@@ -1,5 +1,5 @@
-import { Copy, Minus, Square, X } from "lucide-react";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
+import { Copy, Minus, Square, X } from "lucide-react";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 

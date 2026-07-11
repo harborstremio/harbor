@@ -1,15 +1,15 @@
 const sync: Record<string, string> = {
   "Watch together": "المشاهدة معًا",
   "Invite via link": "الدعوة عبر رابط",
-  "Back": "رجوع",
+  Back: "رجوع",
   "Open invite link panel": "فتح لوحة رابط الدعوة",
   "Close invite link panel": "إغلاق لوحة رابط الدعوة",
-  "Invite": "دعوة",
+  Invite: "دعوة",
   "Watch Together needs a relay.": "تحتاج المشاهدة معًا إلى مُرحِّل.",
   "A relay is a tiny Cloudflare Worker that passes play/pause/seek messages between you and your friends. No video data ever touches it. Deploy your own in one click (free tier is plenty), or paste a friend's invite link to use theirs.":
     "المُرحِّل عبارة عن Cloudflare Worker صغير يمرّر رسائل التشغيل/الإيقاف/التقديم بينك وبين أصدقائك. لا تمرّ به أي بيانات فيديو إطلاقًا. انشر مُرحِّلك الخاص بنقرة واحدة (الباقة المجانية تكفي)، أو ألصق رابط دعوة صديق لاستخدام مُرحِّله.",
   "Paste invite link": "ألصق رابط الدعوة",
-  "Join": "انضمام",
+  Join: "انضمام",
   "Your name": "اسمك",
   "Starting…": "جارٍ البدء…",
   "Start a new room": "بدء غرفة جديدة",
@@ -20,19 +20,20 @@ const sync: Record<string, string> = {
   "{n} watching": "{n} يشاهدون",
   "Show cursors": "إظهار المؤشرات",
   "Leave room": "مغادرة الغرفة",
-  "Chat": "الدردشة",
+  Chat: "الدردشة",
   "Say hi.": "ألقِ التحية.",
-  "Message": "رسالة",
-  "Send": "إرسال",
+  Message: "رسالة",
+  Send: "إرسال",
   "Guests pick their own source": "يختار الضيوف مصدرهم الخاص",
   "Prompts guests to choose instead of auto-matching": "يطلب من الضيوف الاختيار بدلًا من المطابقة التلقائية",
   "Harbor's public relay has not rolled out the latest protocol yet.": "لم يطرح مُرحِّل Harbor العام أحدث بروتوكول بعد.",
   "It updates automatically; nothing to do.": "يتحدّث تلقائيًا؛ لا حاجة لفعل شيء.",
-  "Relay outdated. Your self-hosted relay is running an older version.": "المُرحِّل قديم. يعمل مُرحِّلك المستضاف ذاتيًا بإصدار أقدم.",
+  "Relay outdated. Your self-hosted relay is running an older version.":
+    "المُرحِّل قديم. يعمل مُرحِّلك المستضاف ذاتيًا بإصدار أقدم.",
   "Redeploy it to get the latest Watch Together fixes. Harbor's public relay updates on its own.":
     "أعد نشره للحصول على أحدث إصلاحات المشاهدة معًا. يتحدّث مُرحِّل Harbor العام من تلقاء نفسه.",
   "Open relay settings": "فتح إعدادات المُرحِّل",
-  "Dismiss": "تجاهل",
+  Dismiss: "تجاهل",
   "Start a room first.": "ابدأ غرفة أولًا.",
   "Once you're in a room you can copy a link that joins anyone instantly: it sets the relay URL and the room code in one click.":
     "بمجرد أن تكون في غرفة يمكنك نسخ رابط ينضمّ به أي شخص فورًا: فهو يضبط عنوان المُرحِّل ورمز الغرفة بنقرة واحدة.",
@@ -61,23 +62,22 @@ const sync: Record<string, string> = {
   "Ready to save": "جاهز للحفظ",
   "First anchor": "النقطة الأولى",
   "Second anchor": "النقطة الثانية",
-  "editing": "قيد التعديل",
-  "empty": "فارغة",
-  "orig": "الأصلي",
-  "heard": "المسموع",
+  editing: "قيد التعديل",
+  empty: "فارغة",
+  orig: "الأصلي",
+  heard: "المسموع",
   "Save (single anchor)": "حفظ (نقطة واحدة)",
   "Save with one anchor?": "الحفظ بنقطة واحدة؟",
-  "You picked only one anchor. This applies a constant shift (no FPS-drift correction). Continue?": "اخترت نقطة واحدة فقط. سيطبّق ذلك إزاحة ثابتة (بدون تصحيح انحراف معدل الإطارات). هل تريد المتابعة؟",
+  "You picked only one anchor. This applies a constant shift (no FPS-drift correction). Continue?":
+    "اخترت نقطة واحدة فقط. سيطبّق ذلك إزاحة ثابتة (بدون تصحيح انحراف معدل الإطارات). هل تريد المتابعة؟",
   "Discard sync?": "تجاهل المزامنة؟",
   "You have unsaved anchors. They will be lost.": "لديك نقاط مزامنة غير محفوظة. ستُفقد.",
-  "Discard": "تجاهل",
+  Discard: "تجاهل",
   "My Trakt watchlist": "قائمة مشاهدتي على Trakt",
   "Most-anticipated upcoming releases on Trakt": "أكثر الإصدارات القادمة انتظارًا على Trakt",
-  "Saved locally. Connect Trakt in Settings to sync.":
-    "محفوظ محليًا. اربط Trakt في الإعدادات للمزامنة.",
+  "Saved locally. Connect Trakt in Settings to sync.": "محفوظ محليًا. اربط Trakt في الإعدادات للمزامنة.",
   "Connect Trakt in settings first": "اربط Trakt في الإعدادات أولًا",
-  " Anything you save also syncs to your Trakt account.":
-    " أي شيء تحفظه تتم مزامنته أيضًا مع حساب Trakt الخاص بك.",
+  " Anything you save also syncs to your Trakt account.": " أي شيء تحفظه تتم مزامنته أيضًا مع حساب Trakt الخاص بك.",
   " Connect Trakt in Settings to sync this list across devices.":
     " اربط Trakt في الإعدادات لمزامنة هذه القائمة عبر الأجهزة.",
   " · Syncing Trakt…": " · جارٍ مزامنة Trakt…",
@@ -87,7 +87,7 @@ const sync: Record<string, string> = {
     "لا تقع أيٌّ من أكثر إصدارات Trakt القادمة انتظارًا في هذا الشهر. جرّب شهرًا مختلفًا.",
   "Nothing on Trakt this month": "لا شيء على Trakt هذا الشهر",
 
-  "MyAnimeList": "MyAnimeList",
+  MyAnimeList: "MyAnimeList",
   "Add to AniList": "إضافة إلى AniList",
   "Remove from AniList": "إزالة من AniList",
   "Add {title} to AniList": "إضافة {title} إلى AniList",
@@ -111,12 +111,12 @@ const sync: Record<string, string> = {
   "Simkl lists no new shows or anime premiering this month. Try a different month.":
     "لا تُدرج Simkl أي مسلسلات أو أنمي جديدة تُعرض لأول مرة هذا الشهر. جرّب شهرًا مختلفًا.",
   "Your Simkl plan-to-watch list has no episodes airing this month. Switch to All upcoming to browse everything.":
-    "لا تحتوي قائمة \"أنوي مشاهدتها\" على Simkl على حلقات تُبثّ هذا الشهر. بدّل إلى \"كل القادم\" لتصفّح كل شيء.",
+    'لا تحتوي قائمة "أنوي مشاهدتها" على Simkl على حلقات تُبثّ هذا الشهر. بدّل إلى "كل القادم" لتصفّح كل شيء.',
 
-  "IMDb": "IMDb",
-  "Letterboxd": "Letterboxd",
-  "Metacritic": "Metacritic",
-  "MDBList": "MDBList",
+  IMDb: "IMDb",
+  Letterboxd: "Letterboxd",
+  Metacritic: "Metacritic",
+  MDBList: "MDBList",
   "My list": "قائمتي",
   "One list": "قائمة واحدة",
   "Every collection": "كل المجموعات",
@@ -131,37 +131,45 @@ const sync: Record<string, string> = {
   "Bring your lists with you": "اصطحب قوائمك معك",
 
   "Connect your AniList account": "ربط حسابك على AniList",
-  "Show your AniList lists as rails on the Anime page, keep your watch progress in sync as you finish episodes, and use your AniList avatar as your Harbor photo. Free at anilist.co.": "اعرض قوائم AniList الخاصة بك كصفوف في صفحة الأنمي، واحتفظ بمزامنة تقدم المشاهدة عند إكمالك للحلقات، واستخدم صورتك الشخصية على AniList كصورة في Harbor. مجانًا على anilist.co.",
+  "Show your AniList lists as rails on the Anime page, keep your watch progress in sync as you finish episodes, and use your AniList avatar as your Harbor photo. Free at anilist.co.":
+    "اعرض قوائم AniList الخاصة بك كصفوف في صفحة الأنمي، واحتفظ بمزامنة تقدم المشاهدة عند إكمالك للحلقات، واستخدم صورتك الشخصية على AniList كصورة في Harbor. مجانًا على anilist.co.",
   "Connect AniList": "ربط AniList",
   "About AniList": "حول AniList",
-  "Connected": "متصل",
-  "Harbor shows your AniList lists on the Anime page and keeps your progress in sync.": "يعرض Harbor قوائم AniList الخاصة بك في صفحة الأنمي ويُبقي تقدمك متزامنًا.",
-  "Authorized": "مُصرّح",
+  Connected: "متصل",
+  "Harbor shows your AniList lists on the Anime page and keeps your progress in sync.":
+    "يعرض Harbor قوائم AniList الخاصة بك في صفحة الأنمي ويُبقي تقدمك متزامنًا.",
+  Authorized: "مُصرّح",
   "Open profile": "فتح الملف الشخصي",
   "Sync watch progress": "مزامنة تقدم المشاهدة",
-  "Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.": "إكمال حلقة أنمي يحدّث تقدمك على AniList. للتقدم فقط: لا يُنقص أبدًا عددًا لديك بالفعل.",
+  "Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.":
+    "إكمال حلقة أنمي يحدّث تقدمك على AniList. للتقدم فقط: لا يُنقص أبدًا عددًا لديك بالفعل.",
   "Use my AniList avatar as my Harbor avatar": "استخدام صورتي في AniList كصورتي في Harbor",
   "Show your AniList profile picture as your Harbor avatar.": "عرض صورتك الشخصية على AniList كصورتك في Harbor.",
   "Disconnect from AniList": "إلغاء الارتباط بـ AniList",
-  "Disconnect AniList? Your lists will stop showing on the Anime page until you reconnect.": "هل تريد إلغاء ربط AniList؟ ستتوقف قوائمك عن الظهور في صفحة الأنمي حتى تقوم بإعادة الربط.",
-  "Cancel": "إلغاء",
-  "Disconnect": "إلغاء الارتباط",
-  "today": "اليوم",
+  "Disconnect AniList? Your lists will stop showing on the Anime page until you reconnect.":
+    "هل تريد إلغاء ربط AniList؟ ستتوقف قوائمك عن الظهور في صفحة الأنمي حتى تقوم بإعادة الربط.",
+  Cancel: "إلغاء",
+  Disconnect: "إلغاء الارتباط",
+  today: "اليوم",
   "1 day ago": "قبل يوم واحد",
   "{count} days ago": "قبل {count} أيام",
   "1 month ago": "قبل شهر واحد",
   "{count} months ago": "قبل {count} أشهر",
 
   "Connect your Simkl account": "ربط حسابك على Simkl",
-  "Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.": "زامن وتتبع الأفلام والمسلسلات والأنمي عبر كل ما تستخدمه. يقوم Harbor بتعليم ما تكمله كمُشاهَد في Simkl ويُبقي قائمة \"أنوي مشاهدتها\" محدثة. مجانًا على simkl.com.",
+  "Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.":
+    'زامن وتتبع الأفلام والمسلسلات والأنمي عبر كل ما تستخدمه. يقوم Harbor بتعليم ما تكمله كمُشاهَد في Simkl ويُبقي قائمة "أنوي مشاهدتها" محدثة. مجانًا على simkl.com.',
   "Connect Simkl": "ربط Simkl",
   "About Simkl": "حول Simkl",
-  "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.": "سيقوم Harbor بتعليم ما تكمله كمُشاهَد في Simkl ومزامنة قائمة \"أنوي مشاهدتها\" الخاصة بك.",
+  "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.":
+    'سيقوم Harbor بتعليم ما تكمله كمُشاهَد في Simkl ومزامنة قائمة "أنوي مشاهدتها" الخاصة بك.',
   "Authorized on this device": "مُصرّح على هذا الجهاز",
   "Use my Simkl avatar as my Harbor avatar": "استخدام صورتي في Simkl كصورتي في Harbor",
-  "Wear your Simkl profile picture across Harbor instead of the default.": "استخدم صورتك الشخصية على Simkl عبر Harbor بدلًا من الصورة الافتراضية.",
+  "Wear your Simkl profile picture across Harbor instead of the default.":
+    "استخدم صورتك الشخصية على Simkl عبر Harbor بدلًا من الصورة الافتراضية.",
   "Disconnect from Simkl": "إلغاء الارتباط بـ Simkl",
-  "Disconnect Simkl? Syncing will stop until you reconnect.": "هل تريد إلغاء ربط Simkl؟ ستتوقف المزامنة حتى تقوم بإعادة الربط.",
+  "Disconnect Simkl? Syncing will stop until you reconnect.":
+    "هل تريد إلغاء ربط Simkl؟ ستتوقف المزامنة حتى تقوم بإعادة الربط.",
 };
 
 export default sync;

@@ -1,16 +1,11 @@
-import { useEffect, useRef } from "react";
-import { useSimkl } from "./provider";
-import { simklScrobble, buildBody } from "./scrobble";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { useSettings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
-import {
-  SIMKL_API_BASE,
-  SIMKL_APP_NAME,
-  SIMKL_APP_VERSION,
-  SIMKL_CLIENT_ID,
-  SIMKL_WATCHED_RATIO,
-} from "./config";
+import { useEffect, useRef } from "react";
+
+import { SIMKL_API_BASE, SIMKL_APP_NAME, SIMKL_APP_VERSION, SIMKL_CLIENT_ID, SIMKL_WATCHED_RATIO } from "./config";
+import { useSimkl } from "./provider";
+import { simklScrobble, buildBody } from "./scrobble";
 import { getSession } from "./session";
 
 type Snap = {
@@ -144,12 +139,7 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
   }, [enabled]);
 }
 
-function sendBeacon(
-  metaId: string,
-  episode: PlayerSrc["episode"],
-  progress: number,
-  action: "stop" | "pause",
-): void {
+function sendBeacon(metaId: string, episode: PlayerSrc["episode"], progress: number, action: "stop" | "pause"): void {
   const session = getSession();
   if (!session) return;
 

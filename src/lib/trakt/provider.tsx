@@ -1,13 +1,5 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
 import {
   completeAuthorization,
   pollForToken,
@@ -15,18 +7,10 @@ import {
   type PollHandle,
   type PollResult,
 } from "./device-auth";
-import {
-  getSession,
-  setSession,
-  subscribeSession,
-} from "./session";
-import { stremioIdToTraktTarget, type TraktEpisodeRef } from "./ids";
-import {
-  scrobblePause,
-  scrobbleStart,
-  scrobbleStop,
-} from "./scrobble";
 import { pushWatched } from "./history";
+import { stremioIdToTraktTarget, type TraktEpisodeRef } from "./ids";
+import { scrobblePause, scrobbleStart, scrobbleStop } from "./scrobble";
+import { getSession, setSession, subscribeSession } from "./session";
 import type { DeviceCode, TraktSession, TraktTarget } from "./types";
 
 export type ConnectState =
@@ -53,10 +37,7 @@ type Value = {
   cancelConnect: () => void;
   disconnect: () => void;
   scrobble: (action: "start" | "pause" | "stop", args: ScrobbleArgs) => Promise<void>;
-  resolveTarget: (
-    metaId: string,
-    episode?: TraktEpisodeRef,
-  ) => TraktTarget | null;
+  resolveTarget: (metaId: string, episode?: TraktEpisodeRef) => TraktTarget | null;
 };
 
 const Ctx = createContext<Value | null>(null);
@@ -119,13 +100,10 @@ export function TraktProvider({ children }: { children: ReactNode }) {
     setConnectState({ kind: "idle" });
   }, []);
 
-  const resolveTarget = useCallback(
-    (metaId: string, episode?: TraktEpisodeRef) => {
-      const r = stremioIdToTraktTarget(metaId, episode);
-      return r.ok ? r.target : null;
-    },
-    [],
-  );
+  const resolveTarget = useCallback((metaId: string, episode?: TraktEpisodeRef) => {
+    const r = stremioIdToTraktTarget(metaId, episode);
+    return r.ok ? r.target : null;
+  }, []);
 
   const scrobble = useCallback(
     async (action: "start" | "pause" | "stop", args: ScrobbleArgs) => {

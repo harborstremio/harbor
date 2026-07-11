@@ -1,6 +1,7 @@
 import type { Meta } from "@/lib/cinemeta";
 import { topMovies, topSeries } from "@/lib/cinemeta";
 import { tmdbDiscover, tmdbMovieRow, tmdbSeriesRow, tmdbTrending } from "@/lib/providers/tmdb";
+
 import { DECADES, LANGUAGES, MOVIE_GENRES, dailySeed, pickRandom, shuffle } from "./tags";
 
 export type Shelf = {

@@ -1,20 +1,22 @@
-import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { useAuth } from "@/lib/auth";
 import { downloadText } from "@/lib/download-text";
+import { isWindowsDesktop } from "@/lib/platform";
+import { setPlayerActions } from "@/lib/player-actions";
+import { readPlayerVolume } from "@/lib/player-volume";
+import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import { clearImportedSubs } from "@/lib/player/imported-subs";
+import { isAssTrack, isImageSubTrack } from "@/lib/player/sub-format";
+import { useSettings } from "@/lib/settings";
+import { useSimklScrobble } from "@/lib/simkl/scrobble-hook";
+import { isLocalEngineUrl } from "@/lib/stremio-server";
 import { getCuesAnySource } from "@/lib/subtitles/extract";
 import { toSrt } from "@/lib/subtitles/serialize";
-import { isWindowsDesktop } from "@/lib/platform";
-import { isAssTrack, isImageSubTrack } from "@/lib/player/sub-format";
-import { clearImportedSubs } from "@/lib/player/imported-subs";
-import { readPlayerVolume } from "@/lib/player-volume";
-import { setPlayerActions } from "@/lib/player-actions";
-import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
-import { useSettings } from "@/lib/settings";
-import { isLocalEngineUrl } from "@/lib/stremio-server";
-import { useSimklScrobble } from "@/lib/simkl/scrobble-hook";
-import { useTraktScrobble } from "@/lib/trakt/scrobble-hook";
 import { cancelTorrentRemoval, scheduleTorrentRemoval, torrentEngineRemove } from "@/lib/torrent/local-engine";
+import { useTraktScrobble } from "@/lib/trakt/scrobble-hook";
 import type { PlayerSrc } from "@/lib/view";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
+
+import { useAutoSync } from "./use-auto-sync";
 import { useExitSnapshot } from "./use-exit-snapshot";
 import { usePowerInhibit } from "./use-power-inhibit";
 import { useResumeAutosave } from "./use-resume-autosave";
@@ -22,7 +24,6 @@ import { useStremioSync } from "./use-stremio-sync";
 import { useSubDrop } from "./use-sub-drop";
 import { useSubStyleApply } from "./use-sub-style-apply";
 import { useTrackAutoload } from "./use-track-autoload";
-import { useAutoSync } from "./use-auto-sync";
 import { useVideoDownload } from "./use-video-download";
 import { useWebviewMemory } from "./use-webview-memory";
 
@@ -67,11 +68,10 @@ export function usePlayerMedia(params: {
 
   const prevEngineHashRef = useRef<string | null>(null);
   useEffect(() => {
-    const hash = isLocalEngineUrl(src.url) ? src.streamRef?.infoHash ?? null : null;
+    const hash = isLocalEngineUrl(src.url) ? (src.streamRef?.infoHash ?? null) : null;
     const prev = prevEngineHashRef.current;
     const purge = () =>
-      settings.streamCacheRetentionHours === 0 ||
-      (settings.deleteWatchedDownloads && progressRef.current >= 0.9);
+      settings.streamCacheRetentionHours === 0 || (settings.deleteWatchedDownloads && progressRef.current >= 0.9);
     if (prev && prev !== hash) {
       cancelTorrentRemoval(prev);
       void torrentEngineRemove(prev, purge());
@@ -121,19 +121,14 @@ export function usePlayerMedia(params: {
   const subAssOverridden = settings.subAssOverride !== "no" && settings.subAssOverride !== "scale";
   const selectedAssSub = isAssTrack(selectedSubTrack);
   const selectedImageSub = isImageSubTrack(selectedSubTrack);
-  const subAssNative =
-    subEmbed && selectedAssSub && (!subAssOverridden || !selectedSubTrack?.external);
-  const subNativeRender =
-    hdrNativeSurface || subAssNative || (subEmbed && selectedImageSub);
+  const subAssNative = subEmbed && selectedAssSub && (!subAssOverridden || !selectedSubTrack?.external);
+  const subNativeRender = hdrNativeSurface || subAssNative || (subEmbed && selectedImageSub);
   const assNativeActive = selectedAssSub && (subNativeRender || !subEmbed);
   const imageNativeActive = selectedImageSub && (subNativeRender || !subEmbed);
   const mpvMediaReadyForStyle =
     snap.status !== "idle" &&
     snap.status !== "loading" &&
-    (snap.durationSec > 0 ||
-      snap.videoWidth > 0 ||
-      snap.audioTracks.length > 0 ||
-      snap.subtitleTracks.length > 0);
+    (snap.durationSec > 0 || snap.videoWidth > 0 || snap.audioTracks.length > 0 || snap.subtitleTracks.length > 0);
   const suppressHtmlSubs = subAssNative || hdrNativeSurface;
   useSubStyleApply({
     engine,
@@ -173,7 +168,7 @@ export function usePlayerMedia(params: {
     if (!b) return;
     const base = src.episode
       ? `${src.meta.name ?? "Subtitle"} S${src.episode.season}E${src.episode.episode}`
-      : src.meta.name ?? "Subtitle";
+      : (src.meta.name ?? "Subtitle");
     const fileName = `${base.replace(/[\\/:*?"<>|]+/g, " ").trim() || "Subtitle"}.srt`;
     const res = await getCuesAnySource(b, src.url, src.headers);
     if (res.ok && res.source.cues.length > 0) {

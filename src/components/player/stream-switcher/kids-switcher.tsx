@@ -1,6 +1,7 @@
-import { Loader2, Play, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { ScoredStream } from "@/lib/streams/types";
+import { Loader2, Play, X } from "lucide-react";
+
 import { QUALITY_LABEL, qualityKey } from "./quality";
 import { isCurrentStream, streamKey } from "./switcher-row";
 
@@ -48,12 +49,7 @@ export function KidsStreamSwitcher({
           />
         ))}
         <div className="curfew-bob absolute bottom-[8%] left-[7%]">
-          <img
-            src="/kids/doodles/liloctored.png"
-            alt=""
-            draggable={false}
-            className="h-20 w-auto opacity-80"
-          />
+          <img src="/kids/doodles/liloctored.png" alt="" draggable={false} className="h-20 w-auto opacity-80" />
         </div>
         <img
           src="/kids/doodles/lilpurpocto.png"
@@ -80,9 +76,7 @@ export function KidsStreamSwitcher({
         </p>
 
         {options.length === 0 ? (
-          <p className="mt-4 text-[17px] font-bold text-white/85">
-            {t("No videos right now. Ask a grown-up!")}
-          </p>
+          <p className="mt-4 text-[17px] font-bold text-white/85">{t("No videos right now. Ask a grown-up!")}</p>
         ) : (
           <div className="flex w-full flex-col gap-3.5">
             {options.map((s, i) => {

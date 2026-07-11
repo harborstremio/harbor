@@ -1,7 +1,7 @@
-import { ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
 import { useView } from "@/lib/view";
+import { ArrowLeft } from "lucide-react";
 
 export function BackChrome() {
   const { canGoBack, goBack, topKind, chromeHidden } = useView();

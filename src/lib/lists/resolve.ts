@@ -1,10 +1,10 @@
-import type { CustomList, ListItem, ListKeys, ResolveResult } from "./types";
-import { resolveMdblist } from "./sources/mdblist";
-import { resolveTrakt } from "./sources/trakt";
-import { resolveTmdb } from "./sources/tmdb";
-import { resolveLetterboxd } from "./sources/letterboxd";
 import { resolveImdb } from "./sources/imdb";
+import { resolveLetterboxd } from "./sources/letterboxd";
 import { resolveMal } from "./sources/mal";
+import { resolveMdblist } from "./sources/mdblist";
+import { resolveTmdb } from "./sources/tmdb";
+import { resolveTrakt } from "./sources/trakt";
+import type { CustomList, ListItem, ListKeys, ResolveResult } from "./types";
 
 const CAP = 500;
 

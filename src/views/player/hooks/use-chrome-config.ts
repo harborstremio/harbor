@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   PANEL_META,
   PLAYER_CHROME_CHANGED_EVENT,
@@ -6,11 +5,10 @@ import {
   type PanelCorner,
   type PlayerChromeConfig,
 } from "@/lib/player-chrome";
+import { useEffect, useState } from "react";
 
 export function useChromeConfig(chromeTheme: "stremio" | "default") {
-  const [chromeConfig, setChromeConfig] = useState<PlayerChromeConfig>(() =>
-    readPlayerChromeConfig(chromeTheme),
-  );
+  const [chromeConfig, setChromeConfig] = useState<PlayerChromeConfig>(() => readPlayerChromeConfig(chromeTheme));
   useEffect(() => {
     setChromeConfig(readPlayerChromeConfig(chromeTheme));
     const refresh = () => setChromeConfig(readPlayerChromeConfig(chromeTheme));

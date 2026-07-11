@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import { SHORT_PLAYBACK_SEC } from "@/lib/dead-streams";
+import type { DebridStore } from "@/lib/debrid/types";
+import { pinPickerCache, unpinPickerCache } from "@/lib/picker-cache";
+import { savePlayback } from "@/lib/playback-history";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition, usePlaybackFlag } from "@/lib/player/playback-clock";
-import { pinPickerCache, unpinPickerCache } from "@/lib/picker-cache";
 import { readResumeMs } from "@/lib/resume";
-import { SHORT_PLAYBACK_SEC } from "@/lib/dead-streams";
-import { savePlayback } from "@/lib/playback-history";
+import { registerStreamProxy } from "@/lib/stream-proxy";
 import { resolveStream } from "@/lib/streams/resolve";
 import type { ScoredStream } from "@/lib/streams/types";
-import { registerStreamProxy } from "@/lib/stream-proxy";
 import type { PlayerSrc } from "@/lib/view";
-import type { DebridStore } from "@/lib/debrid/types";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 let checkShownThisSession = false;
 
@@ -107,8 +107,7 @@ export function useStreamSwitcher(params: {
       }
       try {
         const current = getPlaybackPosition();
-        const savedSec =
-          readResumeMs(src.meta.id, src.episode?.season, src.episode?.episode) / 1000;
+        const savedSec = readResumeMs(src.meta.id, src.episode?.season, src.episode?.episode) / 1000;
         const curDur = snapRef.current.durationSec;
         const currentIsStub = curDur > 0 && curDur < SHORT_PLAYBACK_SEC;
         const resumeAt = !currentIsStub && current > 5 ? current : savedSec;

@@ -1,15 +1,12 @@
 import { removeStatsForSource } from "./channel-stats";
 import { removeCountryPrefs } from "./country-prefs";
-import { clearEpg } from "./epg-store";
 import { removeEpgOverridesForSource } from "./epg-map";
+import { clearEpg } from "./epg-store";
 import { removeGroupPrefs } from "./group-order";
 import { removePinsForSource } from "./pins";
 import { clearPlaylistCache } from "./store";
 
-export function purgePlaylistState(
-  id: string,
-  removeFavoritesForSource?: (sourceId: string) => void,
-): void {
+export function purgePlaylistState(id: string, removeFavoritesForSource?: (sourceId: string) => void): void {
   if (!id) return;
   clearPlaylistCache(id);
   clearEpg(id);

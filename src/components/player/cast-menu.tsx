@@ -1,7 +1,8 @@
-import { Cast, Loader2, Subtitles, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { discoverCastDevices, type CastDeviceInfo } from "@/lib/cast";
 import { useT } from "@/lib/i18n";
+import { Cast, Loader2, Subtitles, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { CastIcon } from "./cast-icon";
 
 export function CastMenu({
@@ -108,11 +109,7 @@ export function CastMenu({
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="flex items-center gap-1.5 text-[12.5px] font-semibold text-ink">
-                <Subtitles
-                  size={12.5}
-                  strokeWidth={2.4}
-                  className={burnSubsOnTv ? "text-accent" : "text-ink-subtle"}
-                />
+                <Subtitles size={12.5} strokeWidth={2.4} className={burnSubsOnTv ? "text-accent" : "text-ink-subtle"} />
                 {t("Burn in subtitles")}
               </span>
               <span className="text-[11px] leading-snug text-ink-subtle">
@@ -163,7 +160,7 @@ export function CastMenu({
                   )}
                 </span>
                 <span className="truncate text-[11px] text-ink-subtle">
-                  {d.kind === "dlna" ? d.model ?? t("DLNA TV") : d.model || `${d.host}:${d.port}`}
+                  {d.kind === "dlna" ? (d.model ?? t("DLNA TV")) : d.model || `${d.host}:${d.port}`}
                 </span>
               </div>
             </button>

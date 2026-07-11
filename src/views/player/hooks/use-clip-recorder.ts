@@ -1,14 +1,9 @@
+import { captureBaseTitle, captureDir, formatStamp, joinPath, safeName } from "@/lib/player/capture-path";
+import type { PlayerSrc } from "@/lib/view";
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  captureBaseTitle,
-  captureDir,
-  formatStamp,
-  joinPath,
-  safeName,
-} from "@/lib/player/capture-path";
+
 import type { FrameGrabToast } from "./use-frame-grab";
-import type { PlayerSrc } from "@/lib/view";
 
 const CLIP_SECONDS = 30;
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;

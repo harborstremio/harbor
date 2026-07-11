@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from "react";
 import { check } from "@tauri-apps/plugin-updater";
+import { useSyncExternalStore } from "react";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 const DISMISS_KEY = "harbor.update.dismissed";

@@ -1,10 +1,14 @@
+import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 
 const OPTIONS = [
   ["shared", "Share settings with all profiles", "One set of preferences everyone on this Harbor uses."],
-  ["independent", "Use independent settings for this profile", "This profile keeps its own preferences, separate from everyone else."],
+  [
+    "independent",
+    "Use independent settings for this profile",
+    "This profile keeps its own preferences, separate from everyone else.",
+  ],
 ] as const;
 
 export function SettingsScopeCard() {
@@ -31,9 +35,7 @@ export function SettingsScopeCard() {
               type="button"
               onClick={() => setScope(key === "shared")}
               className={`flex items-start gap-3 rounded-lg border p-3 text-start transition-colors ${
-                active
-                  ? "border-ink bg-canvas/60"
-                  : "border-edge-soft bg-canvas/40 hover:border-ink-subtle"
+                active ? "border-ink bg-canvas/60" : "border-edge-soft bg-canvas/40 hover:border-ink-subtle"
               }`}
             >
               <span

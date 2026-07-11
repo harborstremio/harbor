@@ -12,10 +12,7 @@ export type EngineStats = {
   sawData: boolean;
 };
 
-export type StatsFetch =
-  | { kind: "ok"; stats: EngineStats }
-  | { kind: "empty" }
-  | { kind: "down" };
+export type StatsFetch = { kind: "ok"; stats: EngineStats } | { kind: "empty" } | { kind: "down" };
 
 const GENUINE_FAILURE_WINDOW_MS = 22_000;
 const COLD_CONNECT_DEADLINE_MS = 45_000;
@@ -63,8 +60,7 @@ export function parseEngineStats(raw: unknown, prev: EngineStats | null): Engine
   const downloaded = num(o, "downloaded");
   const downloadSpeed = num(o, "downloadSpeed", "speed");
   const streamProgress = num(o, "streamProgress", "progress");
-  const anyNonZero =
-    peers > 0 || unchoked > 0 || downloaded > 0 || downloadSpeed > 0 || streamProgress > 0;
+  const anyNonZero = peers > 0 || unchoked > 0 || downloaded > 0 || downloadSpeed > 0 || streamProgress > 0;
   return {
     peers,
     unchoked,

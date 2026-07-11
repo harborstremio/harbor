@@ -1,22 +1,14 @@
-import { ChevronDown, ChevronLeft, ChevronRight, Play, Tv } from "lucide-react";
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { tmdbSeasonEpisodes, type Episode, type Season } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { ChevronDown, ChevronLeft, ChevronRight, Play, Tv } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const STILL = "https://image.tmdb.org/t/p/w300";
 
-export function KidsEpisodes({
-  meta,
-  tvId,
-  seasons,
-}: {
-  meta: Meta;
-  tvId: number;
-  seasons: Season[];
-}) {
+export function KidsEpisodes({ meta, tvId, seasons }: { meta: Meta; tvId: number; seasons: Season[] }) {
   const t = useT();
   const { settings } = useSettings();
   const { openPicker } = useView();
@@ -51,14 +43,10 @@ export function KidsEpisodes({
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2.5">
         <Tv size={24} strokeWidth={2.4} className="text-[#1f8f88]" />
-        <h2 className="font-display text-[26px] font-extrabold tracking-tight text-[#0e3a43]">
-          {t("Episodes")}
-        </h2>
+        <h2 className="font-display text-[26px] font-extrabold tracking-tight text-[#0e3a43]">{t("Episodes")}</h2>
       </div>
 
-      {seasons.length > 1 && (
-        <SeasonPicker seasons={seasons} season={season} setSeason={setSeason} t={t} />
-      )}
+      {seasons.length > 1 && <SeasonPicker seasons={seasons} season={season} setSeason={setSeason} t={t} />}
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
         {loading
@@ -152,15 +140,7 @@ function SeasonPicker({
   );
 }
 
-function Step({
-  onClick,
-  disabled,
-  children,
-}: {
-  onClick: () => void;
-  disabled: boolean;
-  children: React.ReactNode;
-}) {
+function Step({ onClick, disabled, children }: { onClick: () => void; disabled: boolean; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -187,16 +167,19 @@ function EpisodeCard({
   return (
     <button type="button" onClick={onPlay} className="group flex flex-col gap-2 text-start">
       <div className="relative aspect-video overflow-hidden rounded-2xl bg-surface shadow-[0_12px_28px_-14px_rgba(20,40,60,0.45)] ring-2 ring-white transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_18px_36px_-14px_rgba(20,40,60,0.55)]">
-        {still && (
-          <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
-        )}
+        {still && <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <span className="absolute start-2 top-2 rounded-full bg-black/75 px-2.5 py-1 text-[12px] font-extrabold text-white">
           {t("Ep {n}", { n: ep.episodeNumber })}
         </span>
         {rating && (
           <span className="pointer-events-none absolute bottom-1.5 end-1.5 grid h-9 w-9 place-items-center">
-            <img src="/kids/starbadge.svg" alt="" draggable={false} className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]" />
+            <img
+              src="/kids/starbadge.svg"
+              alt=""
+              draggable={false}
+              className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]"
+            />
             <span className="relative translate-y-[1px] text-[9px] font-extrabold leading-none text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
               {rating}
             </span>

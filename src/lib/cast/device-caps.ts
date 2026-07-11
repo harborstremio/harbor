@@ -216,11 +216,9 @@ export function getDeviceCaps(device: CastDeviceInfo): DeviceCaps {
   if (device.kind === "dlna") {
     if (/fire\s*tv/.test(blob)) return CAPS_FIRE_TV_4K;
     if (/samsung|tizen/.test(blob)) return CAPS_SAMSUNG_DLNA;
-    if (/\b(?:qn|un|gq|ue|qe|ks|ku|mu|ju|hu|eh|tu|au|bu|cu|du|ls)\d{2,3}[a-z]/.test(blob))
-      return CAPS_SAMSUNG_DLNA;
+    if (/\b(?:qn|un|gq|ue|qe|ks|ku|mu|ju|hu|eh|tu|au|bu|cu|du|ls)\d{2,3}[a-z]/.test(blob)) return CAPS_SAMSUNG_DLNA;
     if (/\blg\b|webos|thinq/.test(blob)) return CAPS_LG_DLNA;
-    if (/\boled\d{2,3}|\bnano\d{2,3}|\bqned\d{2,3}|\b(?:ur|uq|up|um)\d{2,3}/.test(blob))
-      return CAPS_LG_DLNA;
+    if (/\boled\d{2,3}|\bnano\d{2,3}|\bqned\d{2,3}|\b(?:ur|uq|up|um)\d{2,3}/.test(blob)) return CAPS_LG_DLNA;
     if (/sony|bravia/.test(blob)) return CAPS_SONY_DLNA;
     if (/\b(?:kd|xbr|xr|kj)-?\d{2,3}/.test(blob)) return CAPS_SONY_DLNA;
     return CAPS_GENERIC_DLNA;
@@ -270,12 +268,7 @@ function detectResolution(s: StreamLike): number {
 }
 
 function noAudioPassthrough(caps: DeviceCaps): boolean {
-  return (
-    !caps.passthroughAc3 &&
-    !caps.passthroughEac3 &&
-    !caps.passthroughDts &&
-    !caps.passthroughTruehd
-  );
+  return !caps.passthroughAc3 && !caps.passthroughEac3 && !caps.passthroughDts && !caps.passthroughTruehd;
 }
 
 const NATIVE_AUDIO_RX = /\b(aac|mp3|opus|vorbis|flac)\b/;
@@ -298,10 +291,7 @@ export function checkStreamCompat(stream: StreamLike, caps: DeviceCaps): CompatV
   return { ok: reasons.length === 0, reasons };
 }
 
-export function pickBestCompatStream<T extends StreamLike>(
-  streams: T[],
-  caps: DeviceCaps,
-): T | null {
+export function pickBestCompatStream<T extends StreamLike>(streams: T[], caps: DeviceCaps): T | null {
   const compat = streams.filter((s) => checkStreamCompat(s, caps).ok);
   if (compat.length === 0) return null;
   return compat.reduce((best, s) => {
@@ -311,10 +301,7 @@ export function pickBestCompatStream<T extends StreamLike>(
   });
 }
 
-export function pickTranscodeProfile(
-  stream: StreamLike,
-  caps: DeviceCaps,
-): TranscodeProfile {
+export function pickTranscodeProfile(stream: StreamLike, caps: DeviceCaps): TranscodeProfile {
   const hay = `${stream.parsedTitle ?? ""} ${stream.title ?? ""} ${stream.resolution ?? ""}`.toLowerCase();
   const isHevc = /\b(hevc|h\.?265|x265)\b/.test(hay);
   const isAv1 = /\bav1\b/.test(hay);
@@ -346,8 +333,7 @@ export function pickTranscodeProfile(
 
   const force_stereo = force_aac && !caps.passthroughEac3 && !caps.passthroughAc3;
 
-  const max_video_kbps =
-    max_height >= 2160 ? 18000 : max_height >= 1080 ? 8000 : 3500;
+  const max_video_kbps = max_height >= 2160 ? 18000 : max_height >= 1080 ? 8000 : 3500;
 
   return { max_height, force_h264, force_aac, force_stereo, max_video_kbps };
 }

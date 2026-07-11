@@ -1,11 +1,12 @@
-import type { ComponentProps } from "react";
 import { ClipChooser } from "@/components/player/clip-chooser";
 import { GifRecordPill } from "@/components/player/gif-record-pill";
 import { QuickTools } from "@/components/player/quick-tools";
 import type { PlayEpisode } from "@/lib/view";
-import { SkipPillContainer } from "./skip-pill-container";
+import type { ComponentProps } from "react";
+
 import type { useClipRecorder } from "./hooks/use-clip-recorder";
 import type { useGifRecorder } from "./hooks/use-gif-recorder";
+import { SkipPillContainer } from "./skip-pill-container";
 
 type SkipProps = ComponentProps<typeof SkipPillContainer>;
 type QuickToolsProps = ComponentProps<typeof QuickTools>;
@@ -74,29 +75,13 @@ export function ToolsLayer({
       )}
 
       {!pipMode && !drawMode && (
-        <QuickTools
-          visible={showChrome}
-          ab={ab}
-          toast={frameGrabToast}
-          gifToast={gif.toast}
-          clipToast={clip.toast}
-        />
+        <QuickTools visible={showChrome} ab={ab} toast={frameGrabToast} gifToast={gif.toast} clipToast={clip.toast} />
       )}
       {!pipMode && !drawMode && (
-        <GifRecordPill
-          state={gif.state}
-          elapsedSec={gif.elapsedSec}
-          onStop={gif.stop}
-          onAbort={gif.abort}
-        />
+        <GifRecordPill state={gif.state} elapsedSec={gif.elapsedSec} onStop={gif.stop} onAbort={gif.abort} />
       )}
       {!pipMode && !drawMode && (
-        <ClipChooser
-          open={clip.chooserOpen}
-          saving={clip.saving}
-          onPick={clip.saveClip}
-          onClose={clip.closeChooser}
-        />
+        <ClipChooser open={clip.chooserOpen} saving={clip.saving} onPick={clip.saveClip} onClose={clip.closeChooser} />
       )}
     </>
   );

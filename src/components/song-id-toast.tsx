@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Music } from "lucide-react";
-import { openUrl } from "@tauri-apps/plugin-opener";
 import { useSettings } from "@/lib/settings";
 import { onSongIdToast, type SongIdToastMsg } from "@/lib/song-id";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { ArrowUpRight, Music } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type SongCardStyle = "compact" | "cinematic";
 
@@ -110,15 +110,7 @@ export function SongIdToast() {
   );
 }
 
-function Vinyl({
-  art,
-  size,
-  listening,
-}: {
-  art?: string;
-  size: string;
-  listening: boolean;
-}) {
+function Vinyl({ art, size, listening }: { art?: string; size: string; listening: boolean }) {
   return (
     <div className={`relative flex-none ${size}`}>
       <div className="absolute inset-0 flex animate-spin items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-neutral-700 via-neutral-900 to-black [animation-duration:6s]">

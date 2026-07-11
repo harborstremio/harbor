@@ -1,14 +1,9 @@
 import { Ban, Search, Upload } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+
 import { CHROME_ICONS } from "./chrome-icons";
 
-export function IconPicker({
-  value,
-  onSelect,
-}: {
-  value?: string;
-  onSelect: (v: string | null) => void;
-}) {
+export function IconPicker({ value, onSelect }: { value?: string; onSelect: (v: string | null) => void }) {
   const [q, setQ] = useState("");
   const [hover, setHover] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -68,20 +63,11 @@ export function IconPicker({
       </div>
 
       <div className="grid max-h-[208px] grid-cols-7 gap-1 overflow-y-auto [scrollbar-width:thin]">
-        <Tile
-          active={!value}
-          onHover={(on) => setHover(on ? "__none" : null)}
-          onClick={() => onSelect(null)}
-        >
+        <Tile active={!value} onHover={(on) => setHover(on ? "__none" : null)} onClick={() => onSelect(null)}>
           <Ban size={16} strokeWidth={2} />
         </Tile>
         {filtered.map(({ id, Icon }) => (
-          <Tile
-            key={id}
-            active={value === id}
-            onHover={(on) => setHover(on ? id : null)}
-            onClick={() => onSelect(id)}
-          >
+          <Tile key={id} active={value === id} onHover={(on) => setHover(on ? id : null)} onClick={() => onSelect(id)}>
             <Icon size={18} strokeWidth={2} />
           </Tile>
         ))}
@@ -92,9 +78,7 @@ export function IconPicker({
         )}
       </div>
 
-      <div className="flex h-5 items-center px-0.5 text-[11.5px] capitalize text-ink-subtle">
-        {caption}
-      </div>
+      <div className="flex h-5 items-center px-0.5 text-[11.5px] capitalize text-ink-subtle">{caption}</div>
     </div>
   );
 }

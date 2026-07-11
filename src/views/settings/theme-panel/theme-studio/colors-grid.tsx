@@ -1,5 +1,6 @@
-import { ColorPopoverTrigger } from "../../color-picker";
 import type { CustomColors } from "@/lib/theme";
+
+import { ColorPopoverTrigger } from "../../color-picker";
 
 const FIELDS: Array<{ key: keyof CustomColors; label: string; hint: string }> = [
   { key: "canvas", label: "Background", hint: "Page base." },
@@ -14,13 +15,7 @@ const FIELDS: Array<{ key: keyof CustomColors; label: string; hint: string }> = 
   { key: "danger", label: "Danger", hint: "Errors, destructive." },
 ];
 
-export function ColorsGrid({
-  colors,
-  onChange,
-}: {
-  colors: CustomColors;
-  onChange: (next: CustomColors) => void;
-}) {
+export function ColorsGrid({ colors, onChange }: { colors: CustomColors; onChange: (next: CustomColors) => void }) {
   return (
     <div className="-mx-1 flex flex-col">
       {FIELDS.map((f) => (

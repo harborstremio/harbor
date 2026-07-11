@@ -1,7 +1,7 @@
+import { loadInstalled } from "./addon-store";
+import { addonAccepts, userAddons, type Addon } from "./addons";
 import { meta as cinemetaMeta, type Meta } from "./cinemeta";
 import { safeFetch as fetch } from "./safe-fetch";
-import { addonAccepts, userAddons, type Addon } from "./addons";
-import { loadInstalled } from "./addon-store";
 
 const ADDON_TIMEOUT_MS = 4000;
 
@@ -20,11 +20,7 @@ function localAddons(): Addon[] {
     .map((a) => ({ manifest: a.manifest!, transportUrl: a.transportUrl }));
 }
 
-export async function resolveMeta(
-  authKey: string | null,
-  type: "movie" | "series",
-  id: string,
-): Promise<Meta | null> {
+export async function resolveMeta(authKey: string | null, type: "movie" | "series", id: string): Promise<Meta | null> {
   const cinemetaPromise = cinemetaMeta(type, id).catch(() => null);
 
   const user = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];

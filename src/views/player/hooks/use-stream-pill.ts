@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
+import { useEffect, useState } from "react";
 
 export function useStreamPill(params: {
   srcUrl: string;

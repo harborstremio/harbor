@@ -1,6 +1,6 @@
+import { useDragScroll } from "@/lib/use-drag-scroll";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDragScroll } from "@/lib/use-drag-scroll";
 
 export function DragStrip({
   children,
@@ -109,15 +109,7 @@ export function DragStrip({
   );
 }
 
-function StripArrow({
-  dir,
-  offset,
-  onClick,
-}: {
-  dir: -1 | 1;
-  offset: string;
-  onClick: () => void;
-}) {
+function StripArrow({ dir, offset, onClick }: { dir: -1 | 1; offset: string; onClick: () => void }) {
   return (
     <button
       type="button"

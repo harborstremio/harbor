@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { lruSet } from "../cache";
 
 const CACHE_MAX = 1500;
@@ -343,10 +344,7 @@ async function performFetch(key: string, imdbId: string, type?: string): Promise
       rtCritics,
       metascore: parsePercent(meta?.Value),
       certifiedFresh:
-        rtCritics != null &&
-        rtCritics >= 75 &&
-        imdbVotes != null &&
-        imdbVotes >= CERTIFIED_FRESH_MIN_VOTES,
+        rtCritics != null && rtCritics >= 75 && imdbVotes != null && imdbVotes >= CERTIFIED_FRESH_MIN_VOTES,
       awards: parseAwards(j.Awards),
       fetchedAt: Date.now(),
     };
@@ -432,8 +430,7 @@ async function performSeasonFetch(
     const eps: Array<{ Episode?: string; imdbRating?: string }> = j.Episodes ?? [];
     for (const e of eps) {
       const num = parseInt(String(e.Episode ?? ""), 10);
-      const rating =
-        e.imdbRating && e.imdbRating !== "N/A" ? parseFloat(e.imdbRating) : NaN;
+      const rating = e.imdbRating && e.imdbRating !== "N/A" ? parseFloat(e.imdbRating) : NaN;
       if (Number.isFinite(num) && Number.isFinite(rating) && rating > 0) {
         out.set(num, rating);
       }
@@ -445,11 +442,7 @@ async function performSeasonFetch(
   }
 }
 
-export async function omdbSeasonRatings(
-  key: string,
-  imdbId?: string,
-  season?: number,
-): Promise<Map<number, number>> {
+export async function omdbSeasonRatings(key: string, imdbId?: string, season?: number): Promise<Map<number, number>> {
   const empty = new Map<number, number>();
   if (!key || !imdbId || !imdbId.startsWith("tt") || !season || season < 1) {
     return empty;

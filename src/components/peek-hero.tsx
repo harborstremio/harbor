@@ -1,15 +1,15 @@
-import { Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { MetaAwardsCorner } from "@/components/meta-awards-corner";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { tmdbLogo, useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useImdbRating } from "@/lib/imdb-rating";
+import { tmdbLogo, useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { smartPlayEpisode } from "@/lib/smart-play";
 import { useView } from "@/lib/view";
 import { observe, usePageVisible } from "@/lib/visibility";
+import { Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const ROTATE_MS = 9500;
 const EASE = "cubic-bezier(0.32, 0.72, 0.24, 1)";
@@ -233,9 +233,7 @@ function PeekSlide({
       className="absolute left-1/2 top-1/2 h-[420px] w-[920px] overflow-hidden rounded-[20px] shadow-[0_28px_60px_-26px_rgba(0,0,0,0.7)]"
       style={{
         transform: `translate(-50%, -50%) translateX(${translatePct}%) scale(${scale})`,
-        transition: dragging
-          ? "none"
-          : `transform 720ms ${EASE}, opacity 720ms ${EASE}`,
+        transition: dragging ? "none" : `transform 720ms ${EASE}, opacity 720ms ${EASE}`,
         opacity,
         zIndex: z,
         maxWidth: `${CENTER_FRACTION * 100}%`,
@@ -279,14 +277,10 @@ function PeekSlide({
               {imdbRating && (
                 <span className="flex items-center gap-1.5 normal-case tracking-normal">
                   <ImdbIcon className="h-[14px] w-auto rounded-[2px] shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
-                  <span className="text-[13px] font-semibold text-white">
-                    {imdbRating}
-                  </span>
+                  <span className="text-[13px] font-semibold text-white">{imdbRating}</span>
                 </span>
               )}
-              {meta.genres && meta.genres.length > 0 && (
-                <span>{meta.genres.slice(0, 2).join(" · ")}</span>
-              )}
+              {meta.genres && meta.genres.length > 0 && <span>{meta.genres.slice(0, 2).join(" · ")}</span>}
             </div>
             <div className="flex items-center gap-2.5 pt-1">
               <button

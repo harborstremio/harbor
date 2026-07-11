@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
-import { AlertTriangle, Check, ChevronDown, ChevronUp, Copy, Tv } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { isHydratableChannel } from "@/lib/iptv/channel-hydration";
 import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import type { EpgIndex, IptvChannel } from "@/lib/iptv/types";
 import { findCurrent } from "@/lib/iptv/xmltv";
+import { AlertTriangle, Check, ChevronDown, ChevronUp, Copy, Tv } from "lucide-react";
+import { useMemo, useState } from "react";
+
 import { ChannelCard } from "./channel-card";
 import { useChannelHydration } from "./hooks/use-channel-hydration";
 import { useLazyVisible } from "./hooks/use-lazy-visible";
@@ -27,15 +28,15 @@ export function ChannelGrid({
 }) {
   const t = useT();
   const { visible, sentinelRef, hasMore } = useLazyVisible(channels, resetKey);
-  const visibleNames = useMemo(
-    () => visible.filter(isHydratableChannel).map((c) => c.name),
-    [visible],
-  );
+  const visibleNames = useMemo(() => visible.filter(isHydratableChannel).map((c) => c.name), [visible]);
   const hydrations = useChannelHydration(visibleNames);
   const tvgIdCounts = useMemo(() => computeTvgIdCounts(channels), [channels]);
   const nowMinute = Math.floor(nowMs / 60_000);
   const nowByChannel = useMemo(() => {
-    const m = new Map<string, { current: ReturnType<typeof findCurrent>["current"]; next: ReturnType<typeof findCurrent>["next"] }>();
+    const m = new Map<
+      string,
+      { current: ReturnType<typeof findCurrent>["current"]; next: ReturnType<typeof findCurrent>["next"] }
+    >();
     for (const ch of visible) {
       const programs = epgProgramsForChannel(ch, epg, tvgIdCounts);
       m.set(ch.id, findCurrent(programs, nowMs));
@@ -163,7 +164,12 @@ function classifyError(raw: string): { title: string; hint: string; raw: string 
       raw,
     };
   }
-  if (lower.includes("inactive") || lower.includes("expired") || lower.includes("banned") || lower.includes("disabled")) {
+  if (
+    lower.includes("inactive") ||
+    lower.includes("expired") ||
+    lower.includes("banned") ||
+    lower.includes("disabled")
+  ) {
     return {
       title: "Account is not active",
       hint: "This Xtream account is expired, banned, or disabled on the provider side. Renew or confirm with your provider.",
@@ -219,7 +225,12 @@ function classifyError(raw: string): { title: string; hint: string; raw: string 
       raw,
     };
   }
-  if (lower.includes("did not respond") || lower.includes("gave up after") || lower.includes("timeout") || lower.includes("timed out")) {
+  if (
+    lower.includes("did not respond") ||
+    lower.includes("gave up after") ||
+    lower.includes("timeout") ||
+    lower.includes("timed out")
+  ) {
     return {
       title: "Server did not respond",
       hint: "The playlist server is down or your network is blocking it. Try again in a few minutes.",

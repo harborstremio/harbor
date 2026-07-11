@@ -1,7 +1,7 @@
-import { useMemo } from "react";
 import { getEpisodeProgress } from "@/lib/episode-progress";
-import { spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
 import type { Episode } from "@/lib/providers/tmdb";
+import { spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
+import { useMemo } from "react";
 
 export function useEpisodeProgressMap({
   episodes,
@@ -56,8 +56,7 @@ export function useEpisodeProgressMap({
       isNextUp: epNumber === nextUpEp,
     });
 
-  const allWatched =
-    episodes.length > 0 && episodes.every((ep) => progressByEp.get(ep.episodeNumber)?.watched);
+  const allWatched = episodes.length > 0 && episodes.every((ep) => progressByEp.get(ep.episodeNumber)?.watched);
 
   return { progressByEp, nextUpEp, spoilerFor, allWatched };
 }

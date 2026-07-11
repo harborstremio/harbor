@@ -1,6 +1,7 @@
 import { type Meta } from "@/lib/cinemeta";
 import { recentlyPlayed } from "@/lib/playback-history";
 import { tmdbDiscover } from "@/lib/providers/tmdb";
+
 import { rotateDaily, type RowSpec } from "../movies/movie-specs";
 
 const KID_MOVIE: Record<string, string> = {
@@ -15,10 +16,7 @@ const KID_TV: Record<string, string> = {
   include_adult: "false",
 };
 
-export async function buildKidsHero(
-  key: string,
-  seen: ReturnType<typeof recentlyPlayed>,
-): Promise<Meta[]> {
+export async function buildKidsHero(key: string, seen: ReturnType<typeof recentlyPlayed>): Promise<Meta[]> {
   const [familyTop, animPop, familyPop] = await Promise.all([
     tmdbDiscover(key, "movie", {
       with_genres: "10751",

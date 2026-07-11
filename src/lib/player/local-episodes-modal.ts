@@ -1,5 +1,5 @@
-import type { LocalEntry } from "@/lib/local-library";
 import type { Meta } from "@/lib/cinemeta";
+import type { LocalEntry } from "@/lib/local-library";
 
 export type LocalEpisodesPayload = {
   title: string;

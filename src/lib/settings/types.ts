@@ -1,7 +1,7 @@
-import type { ThemeSettings } from "@/lib/theme";
-import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
+import type { CustomList } from "@/lib/lists/types";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
+import type { ThemeSettings } from "@/lib/theme";
 
 export type StreamingService =
   | "netflix"
@@ -370,14 +370,7 @@ export type Settings = {
       custom: boolean;
     };
   };
-  calendarSource:
-    | "library"
-    | "all"
-    | "trakt"
-    | "anticipated"
-    | "custom"
-    | "simkl"
-    | "simkl-anticipated";
+  calendarSource: "library" | "all" | "trakt" | "anticipated" | "custom" | "simkl" | "simkl-anticipated";
   simklHomeRailsEnabled: boolean;
   simklUpNextRailEnabled: boolean;
   simklTrendingRailEnabled: boolean;

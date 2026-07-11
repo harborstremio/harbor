@@ -1,6 +1,3 @@
-import { Check, Trash2, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import {
   AUDIO_OPTIONS,
@@ -12,6 +9,10 @@ import {
   summarizeFilter,
   type CustomStreamFilter,
 } from "@/lib/streams/custom-filters";
+import { Check, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { badgeFor, type BadgeDimension } from "./filter-builder/badge-maps";
 
 function MultiPill({

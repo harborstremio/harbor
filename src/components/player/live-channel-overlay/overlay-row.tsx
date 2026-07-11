@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Play, Tv } from "lucide-react";
-import type { EpgProgram, IptvChannel } from "@/lib/iptv/types";
 import { useT } from "@/lib/i18n";
+import type { EpgProgram, IptvChannel } from "@/lib/iptv/types";
+import { Play, Tv } from "lucide-react";
+import { useState } from "react";
 
 export function OverlayChannelRow({
   channel,
@@ -54,19 +54,14 @@ export function OverlayChannelRow({
               {t("On now")}
             </span>
           )}
-          <span className="truncate text-[14.5px] font-semibold text-ink">
-            {channel.name}
-          </span>
+          <span className="truncate text-[14.5px] font-semibold text-ink">{channel.name}</span>
         </div>
         {current ? (
           <>
             <span className="truncate text-[12.5px] text-ink-muted">{current.title}</span>
             {progress != null && (
               <div className="mt-0.5 h-[2px] w-full overflow-hidden rounded-full bg-canvas/55">
-                <div
-                  className="h-full rounded-full bg-danger"
-                  style={{ width: `${progress * 100}%` }}
-                />
+                <div className="h-full rounded-full bg-danger" style={{ width: `${progress * 100}%` }} />
               </div>
             )}
           </>

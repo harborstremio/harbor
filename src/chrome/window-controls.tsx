@@ -1,9 +1,9 @@
-import type { ReactNode } from "react";
-import { close, minimize } from "@/lib/window";
 import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
-import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
+import { close, minimize } from "@/lib/window";
+import type { ReactNode } from "react";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -17,11 +17,19 @@ export function WindowControls() {
       <Ctl label={t("chrome.minimize")} onClick={minimize}>
         <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       </Ctl>
-      <Ctl label={fullscreen ? t("chrome.restore") : t("chrome.maximize")} onClick={() => void toggleWindowFullscreen()}>
+      <Ctl
+        label={fullscreen ? t("chrome.restore") : t("chrome.maximize")}
+        onClick={() => void toggleWindowFullscreen()}
+      >
         {fullscreen ? (
           <>
             <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
-            <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" strokeWidth="1.4" fill="none" />
+            <path
+              d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              fill="none"
+            />
           </>
         ) : (
           <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />

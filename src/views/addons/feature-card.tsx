@@ -2,6 +2,7 @@ import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { AddonStarBadge } from "@/components/addon-star-badge";
 import { CardArtBackdrop } from "@/components/card-art-backdrop";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
+
 import { idOf, nameOf } from "./addons-utils";
 import { InstallPill } from "./install-pill";
 import { TagRow } from "./tag-row";
@@ -52,9 +53,7 @@ export function FeatureCard({
           />
         </div>
         {resolved.manifest?.description && (
-          <p className="line-clamp-3 text-[13px] leading-relaxed text-ink-muted">
-            {resolved.manifest.description}
-          </p>
+          <p className="line-clamp-3 text-[13px] leading-relaxed text-ink-muted">{resolved.manifest.description}</p>
         )}
         <TagRow resolved={resolved} />
       </div>

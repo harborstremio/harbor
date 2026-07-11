@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { useSettings } from "@/lib/settings";
+import { useState } from "react";
 
 function BlurUpBackdrop({ src, forceBlur }: { src: string; forceBlur: boolean }) {
   const [loaded, setLoaded] = useState(false);

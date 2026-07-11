@@ -1,22 +1,21 @@
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { HarborMark } from "@/components/icons/harbor-mark";
+import { ProfileChipCompact } from "@/chrome/cinematic-overlay/profile-chip-compact";
+import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
 import { RecordingPill } from "@/chrome/recording-pill";
 import { TogetherButton } from "@/chrome/topbar";
+import { HarborMark } from "@/components/icons/harbor-mark";
+import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
+import { useParental } from "@/lib/parental";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
-import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
-import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
-import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
-import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
-import { ProfileChipCompact } from "@/chrome/cinematic-overlay/profile-chip-compact";
+import { Search } from "lucide-react";
+import { useState } from "react";
 
-const IS_TAURI =
-  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 export function CinematicOverlay() {
   const { view, setView, chromeHidden } = useView();
@@ -27,10 +26,7 @@ export function CinematicOverlay() {
   const [pinFor, setPinFor] = useState<View | null>(null);
   const maxed = useMaximized();
 
-  const themePreset =
-    settings.theme.preset !== "custom"
-      ? getThemeById(settings.theme.preset)
-      : null;
+  const themePreset = settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
 
   const navigate = (item: NavItem) => {
@@ -41,10 +37,7 @@ export function CinematicOverlay() {
     setView(item.view);
   };
 
-  const navEntries: NavEntry[] = applyNavCustomization(
-    NAV_ITEMS,
-    settings.navCustomization,
-  )
+  const navEntries: NavEntry[] = applyNavCustomization(NAV_ITEMS, settings.navCustomization)
     .filter(
       (item) =>
         item.id !== "settings" &&
@@ -90,10 +83,7 @@ export function CinematicOverlay() {
         }`}
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/85 via-black/45 to-transparent" />
-        <div
-          data-tauri-drag-region
-          className="pointer-events-auto relative flex h-14 w-full items-center gap-2 px-1"
-        >
+        <div data-tauri-drag-region className="pointer-events-auto relative flex h-14 w-full items-center gap-2 px-1">
           <button
             type="button"
             onClick={() => setView("home")}
@@ -101,19 +91,12 @@ export function CinematicOverlay() {
             aria-label={t("chrome.harborHome")}
           >
             {customMark ? (
-              <img
-                src={customMark}
-                alt=""
-                draggable={false}
-                className="h-7 w-7 object-contain"
-              />
+              <img src={customMark} alt="" draggable={false} className="h-7 w-7 object-contain" />
             ) : (
               <HarborMark className="h-7 w-7" />
             )}
             {themePreset?.id === "crunch" && (
-              <span className="font-display text-[22px] font-bold leading-none text-ink">
-                Harbor
-              </span>
+              <span className="font-display text-[22px] font-bold leading-none text-ink">Harbor</span>
             )}
           </button>
 
@@ -128,45 +111,20 @@ export function CinematicOverlay() {
 
           <div className="ms-2 flex shrink-0 items-center gap-1">
             <RecordingPill />
-            {view !== "live" && (
-              <TogetherButton variant="ghost" connectStyle="tab" />
-            )}
-            <IconBtn
-              onClick={() => setSearchOpen(true)}
-              label={t("common.search")}
-              active={false}
-            >
+            {view !== "live" && <TogetherButton variant="ghost" connectStyle="tab" />}
+            <IconBtn onClick={() => setSearchOpen(true)} label={t("common.search")} active={false}>
               <Search size={15} strokeWidth={2.2} />
             </IconBtn>
-            <ProfileChipCompact
-              onOpenSettings={() => setView("settings")}
-              settingsActive={view === "settings"}
-            />
+            <ProfileChipCompact onOpenSettings={() => setView("settings")} settingsActive={view === "settings"} />
             {IS_TAURI && !settings.useNativeTitleBar && (
               <div className="ms-1 flex items-center gap-0.5">
                 <WinBtn onClick={minimize} label={t("chrome.minimize")}>
-                  <path
-                    d="M3 6.5h7"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
+                  <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
                 </WinBtn>
-                <WinBtn
-                  onClick={toggleMaximize}
-                  label={maxed ? t("chrome.restore") : t("chrome.maximize")}
-                >
+                <WinBtn onClick={toggleMaximize} label={maxed ? t("chrome.restore") : t("chrome.maximize")}>
                   {maxed ? (
                     <>
-                      <rect
-                        x="2.5"
-                        y="4.5"
-                        width="6"
-                        height="6"
-                        stroke="currentColor"
-                        strokeWidth="1.4"
-                        rx="1"
-                      />
+                      <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
                       <path
                         d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
                         stroke="currentColor"
@@ -175,24 +133,11 @@ export function CinematicOverlay() {
                       />
                     </>
                   ) : (
-                    <rect
-                      x="3"
-                      y="3"
-                      width="7"
-                      height="7"
-                      stroke="currentColor"
-                      strokeWidth="1.4"
-                      rx="1.2"
-                    />
+                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
                   )}
                 </WinBtn>
                 <WinBtn onClick={close} label={t("common.close")}>
-                  <path
-                    d="M3.5 3.5l6 6M9.5 3.5l-6 6"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
+                  <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
                 </WinBtn>
               </div>
             )}
@@ -235,9 +180,7 @@ function IconBtn({
       aria-label={label}
       title={label}
       className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-        active
-          ? "bg-white/20 text-ink ring-1 ring-white/25"
-          : "text-ink-muted hover:bg-white/12 hover:text-ink"
+        active ? "bg-white/20 text-ink ring-1 ring-white/25" : "text-ink-muted hover:bg-white/12 hover:text-ink"
       }`}
     >
       {children}
@@ -245,15 +188,7 @@ function IconBtn({
   );
 }
 
-function WinBtn({
-  onClick,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
+function WinBtn({ onClick, label, children }: { onClick: () => void; label: string; children: React.ReactNode }) {
   return (
     <button
       type="button"

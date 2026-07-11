@@ -1,8 +1,8 @@
-import en from "./locales/en";
+import { isRtl, LANGUAGES, type UiLanguage } from "./languages";
 import ar from "./locales/ar";
+import en from "./locales/en";
 import pt from "./locales/pt";
 import { getUiLanguage, useUiLanguage } from "./store";
-import { isRtl, LANGUAGES, type UiLanguage } from "./languages";
 
 type Vars = Record<string, string | number>;
 

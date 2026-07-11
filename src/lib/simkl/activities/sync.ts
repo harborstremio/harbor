@@ -1,6 +1,6 @@
 import { simklRequest } from "../client";
-import { getSession } from "../session";
 import type { WatchlistStatus } from "../list-status";
+import { getSession } from "../session";
 import {
   emptyCache,
   getLocalCache,
@@ -60,9 +60,7 @@ interface RawRatingsResponse {
 }
 
 function isStatus(s: string | undefined): s is WatchlistStatus {
-  return (
-    s === "watching" || s === "plantowatch" || s === "hold" || s === "completed" || s === "dropped"
-  );
+  return s === "watching" || s === "plantowatch" || s === "hold" || s === "completed" || s === "dropped";
 }
 
 function getLatestTimestamp(...dates: Array<string | null | undefined>): string | null {
@@ -73,11 +71,7 @@ function getLatestTimestamp(...dates: Array<string | null | undefined>): string 
 
 function parseAndMergeEntry(cache: SimklCache, entry: RawEntry, type: "movie" | "show" | "anime") {
   const node =
-    type === "movie"
-      ? entry.movie
-      : type === "anime"
-        ? entry.anime || entry.show || entry.movie
-        : entry.show;
+    type === "movie" ? entry.movie : type === "anime" ? entry.anime || entry.show || entry.movie : entry.show;
   if (!node || !node.ids || !node.ids.simkl) return;
 
   const simklId = node.ids.simkl;
@@ -120,8 +114,7 @@ function parseAndMergeEntry(cache: SimklCache, entry: RawEntry, type: "movie" | 
     userRating: userRating ?? existing?.userRating ?? null,
     watchedAt: entry.added_to_watchlist_at ?? existing?.watchedAt ?? null,
     watchedEpisodes: watchedEpisodes ?? existing?.watchedEpisodes,
-    poster:
-      (entry.anime?.poster || entry.show?.poster || entry.movie?.poster) ?? existing?.poster ?? null,
+    poster: (entry.anime?.poster || entry.show?.poster || entry.movie?.poster) ?? existing?.poster ?? null,
   };
 
   cache.items[simklIdStr] = item;
@@ -132,11 +125,7 @@ function mergeRatings(cache: SimklCache, ratings: RawRatingsResponse) {
   const mergeList = (list: RawRatingEntry[] | undefined, type: "movie" | "show" | "anime") => {
     for (const entry of list ?? []) {
       const node =
-        type === "movie"
-          ? entry.movie
-          : type === "anime"
-            ? entry.anime || entry.show || entry.movie
-            : entry.show;
+        type === "movie" ? entry.movie : type === "anime" ? entry.anime || entry.show || entry.movie : entry.show;
       if (!node?.ids?.simkl) continue;
       const simklId = node.ids.simkl;
       const simklIdStr = String(simklId);
@@ -166,11 +155,7 @@ function mergeRatings(cache: SimklCache, ratings: RawRatingsResponse) {
 
 function applyActivities(cache: SimklCache, activities: any) {
   const tvShowsRatedAt = activities.shows?.rated_at || activities.tv_shows?.rated_at;
-  const ratingsTimestamp = getLatestTimestamp(
-    activities.movies?.rated_at,
-    tvShowsRatedAt,
-    activities.anime?.rated_at,
-  );
+  const ratingsTimestamp = getLatestTimestamp(activities.movies?.rated_at, tvShowsRatedAt, activities.anime?.rated_at);
   cache.lastSync = activities.all || new Date().toISOString();
   cache.activities = {
     movies: activities.movies?.all ?? null,
@@ -204,9 +189,7 @@ async function bootstrapCache(): Promise<SimklCache> {
     parseAndMergeEntry(cache, entry, "anime");
   }
 
-  const ratingsData = await simklRequest<RawRatingsResponse>("/sync/ratings").catch(
-    () => ({}) as RawRatingsResponse,
-  );
+  const ratingsData = await simklRequest<RawRatingsResponse>("/sync/ratings").catch(() => ({}) as RawRatingsResponse);
   mergeRatings(cache, ratingsData);
 
   const activities = await simklRequest<any>("/sync/activities").catch(() => null);
@@ -240,8 +223,7 @@ async function performDeltaSync(cache: SimklCache, activities: any): Promise<Sim
   }
 
   const moviesRemoved = activities.movies?.removed_from_list;
-  const tvShowsRemoved =
-    activities.shows?.removed_from_list || activities.tv_shows?.removed_from_list;
+  const tvShowsRemoved = activities.shows?.removed_from_list || activities.tv_shows?.removed_from_list;
   const animeRemoved = activities.anime?.removed_from_list;
 
   const isRemovedSinceLastSync = (removedDate: string | null | undefined) => {
@@ -255,15 +237,14 @@ async function performDeltaSync(cache: SimklCache, activities: any): Promise<Sim
     isRemovedSinceLastSync(animeRemoved);
 
   if (hasRemovals) {
-    const idsOnlyData = await simklRequest<RawAllItems>(
-      "/sync/all-items?extended=simkl_ids_only",
-    ).catch(() => ({}) as RawAllItems);
+    const idsOnlyData = await simklRequest<RawAllItems>("/sync/all-items?extended=simkl_ids_only").catch(
+      () => ({}) as RawAllItems,
+    );
 
     const validIds = new Set<number>();
     const addIds = (entries: RawEntry[] | undefined, type: "movie" | "show" | "anime") => {
       for (const e of entries ?? []) {
-        const node =
-          type === "movie" ? e.movie : type === "anime" ? e.anime || e.show || e.movie : e.show;
+        const node = type === "movie" ? e.movie : type === "anime" ? e.anime || e.show || e.movie : e.show;
         if (node?.ids?.simkl) {
           validIds.add(node.ids.simkl);
         }

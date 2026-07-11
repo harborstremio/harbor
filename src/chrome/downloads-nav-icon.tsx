@@ -1,5 +1,5 @@
-import { Download } from "lucide-react";
 import { useActiveDownloadCount } from "@/lib/download/downloads-store";
+import { Download } from "lucide-react";
 
 export function DownloadsNavIcon({ active }: { active: boolean }) {
   const count = useActiveDownloadCount();

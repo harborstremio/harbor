@@ -137,7 +137,9 @@ function buildDumpText(): string {
   lines.push(`  baseline heap: ${baselineHeapMB.toFixed(1)} MB`);
   lines.push(`  current heap:  ${currentHeap.toFixed(1)} MB`);
   lines.push(`  peak heap:     ${peakHeapMB.toFixed(1)} MB`);
-  lines.push(`  delta:         ${(currentHeap - baselineHeapMB >= 0 ? "+" : "")}${(currentHeap - baselineHeapMB).toFixed(1)} MB`);
+  lines.push(
+    `  delta:         ${currentHeap - baselineHeapMB >= 0 ? "+" : ""}${(currentHeap - baselineHeapMB).toFixed(1)} MB`,
+  );
   lines.push(`  dom nodes:     ${dom.nodes}`);
   lines.push(`  images:        ${dom.imgs}`);
   lines.push(`  videos:        ${dom.vids}`);
@@ -230,7 +232,9 @@ function buildDumpText(): string {
   lines.push("  time         duration  label");
   const longTasks = eventsSinceReset.filter((s) => s.kind === "longtask");
   for (const t of longTasks) {
-    lines.push(`  ${formatTime(t.ts)}  ${String((t.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${t.label}`);
+    lines.push(
+      `  ${formatTime(t.ts)}  ${String((t.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${t.label}`,
+    );
   }
   if (longTasks.length === 0) lines.push("  (none — main thread stayed responsive)");
   lines.push("");
@@ -239,7 +243,9 @@ function buildDumpText(): string {
   lines.push("  time         duration  component");
   const slowRenders = eventsSinceReset.filter((s) => s.kind === "render");
   for (const r of slowRenders) {
-    lines.push(`  ${formatTime(r.ts)}  ${String((r.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${r.detail?.componentId ?? r.label}`);
+    lines.push(
+      `  ${formatTime(r.ts)}  ${String((r.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${r.detail?.componentId ?? r.label}`,
+    );
   }
   if (slowRenders.length === 0) lines.push("  (none — every tracked render under 16ms)");
   lines.push("");
@@ -322,7 +328,9 @@ function periodicReport() {
     const lastNav = navStack[navStack.length - 1];
     const since = (Date.now() - lastNav.at) / 1000;
     const heapDeltaSinceNav = heap - lastNav.heap;
-    console.info(`Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`);
+    console.info(
+      `Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`,
+    );
   }
   console.groupEnd();
 }
@@ -374,9 +382,8 @@ function instrumentClicks() {
     (e) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const label = target.getAttribute("aria-label") ||
-        target.textContent?.trim().slice(0, 40) ||
-        target.tagName.toLowerCase();
+      const label =
+        target.getAttribute("aria-label") || target.textContent?.trim().slice(0, 40) || target.tagName.toLowerCase();
       pushSample("click", label);
     },
     { capture: true, passive: true },
@@ -416,7 +423,14 @@ export function recordRender(componentId: string, actualDurationMs: number): voi
   }
 }
 
-export function getRenderReport(): Array<{ id: string; count: number; totalMs: number; maxMs: number; avgMs: number; lastMs: number }> {
+export function getRenderReport(): Array<{
+  id: string;
+  count: number;
+  totalMs: number;
+  maxMs: number;
+  avgMs: number;
+  lastMs: number;
+}> {
   const out: Array<{ id: string; count: number; totalMs: number; maxMs: number; avgMs: number; lastMs: number }> = [];
   for (const [id, t] of renderTimings) {
     out.push({

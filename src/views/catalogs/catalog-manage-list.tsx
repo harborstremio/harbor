@@ -1,8 +1,9 @@
-import { useMemo, type ReactNode } from "react";
-import { ChevronDown, ChevronUp, Eye, EyeOff, Home, Pin, PinOff } from "lucide-react";
 import type { BrowseCatalog } from "@/lib/catalog-browse";
-import { togglePinnedCatalog, useIsPinned } from "@/lib/pinned-catalogs";
 import { useT } from "@/lib/i18n";
+import { togglePinnedCatalog, useIsPinned } from "@/lib/pinned-catalogs";
+import { ChevronDown, ChevronUp, Eye, EyeOff, Home, Pin, PinOff } from "lucide-react";
+import { useMemo, type ReactNode } from "react";
+
 import type { AddonGroup } from "./use-catalog-list";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -48,7 +49,9 @@ export function CatalogManageList({
   return (
     <div className="flex flex-col gap-8">
       <p className="rounded-2xl border border-edge-soft bg-elevated/25 px-5 py-3.5 text-[13px] leading-relaxed text-ink-muted">
-        {t("Pin the catalogs you want up top, hide the ones you never open, and reorder your pinned rails. Your browse view updates instantly.")}
+        {t(
+          "Pin the catalogs you want up top, hide the ones you never open, and reorder your pinned rails. Your browse view updates instantly.",
+        )}
       </p>
 
       {pinnedCats.length > 0 && (
@@ -133,7 +136,12 @@ function ManageRow({
       }`}
     >
       {catalog.addonLogo ? (
-        <img src={catalog.addonLogo} alt="" draggable={false} className="h-7 w-7 shrink-0 rounded-[6px] object-contain" />
+        <img
+          src={catalog.addonLogo}
+          alt=""
+          draggable={false}
+          className="h-7 w-7 shrink-0 rounded-[6px] object-contain"
+        />
       ) : (
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] bg-canvas text-[11px] font-bold text-ink-subtle ring-1 ring-edge-soft">
           {catalog.addonName.charAt(0).toUpperCase()}

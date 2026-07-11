@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function LetterboxdRowMenu({
   canMoveUp,
@@ -45,7 +45,10 @@ export function LetterboxdRowMenu({
       {open && (
         <div className="absolute start-0 top-7 z-50 flex flex-col gap-0.5 rounded-xl border border-edge-soft bg-canvas p-1.5 shadow-xl">
           <button
-            onClick={() => { onMoveUp(); setOpen(false); }}
+            onClick={() => {
+              onMoveUp();
+              setOpen(false);
+            }}
             disabled={!canMoveUp}
             className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent"
           >
@@ -53,7 +56,10 @@ export function LetterboxdRowMenu({
             {t("Move up")}
           </button>
           <button
-            onClick={() => { onMoveDown(); setOpen(false); }}
+            onClick={() => {
+              onMoveDown();
+              setOpen(false);
+            }}
             disabled={!canMoveDown}
             className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent"
           >
@@ -62,7 +68,10 @@ export function LetterboxdRowMenu({
           </button>
           <div className="my-0.5 h-px bg-edge-soft" />
           <button
-            onClick={() => { onToggleHidden(); setOpen(false); }}
+            onClick={() => {
+              onToggleHidden();
+              setOpen(false);
+            }}
             className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-[12.5px] font-medium transition-colors ${
               hidden
                 ? "bg-accent/10 text-accent hover:bg-accent/20"

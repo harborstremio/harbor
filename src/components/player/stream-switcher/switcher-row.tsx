@@ -1,10 +1,10 @@
-import { Loader2, Zap } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
-import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { FlagStack } from "@/components/flag";
 import { FormatBadge, streamBadges } from "@/components/format-badge";
-import type { ScoredStream } from "@/lib/streams/types";
+import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { useT } from "@/lib/i18n";
+import type { ScoredStream } from "@/lib/streams/types";
+import { Loader2, Zap } from "lucide-react";
 
 export function streamKey(s: ScoredStream): string {
   return s.infoHash ?? s.url ?? `${s.addonId}:${s.title ?? ""}`;
@@ -25,7 +25,10 @@ export function isCurrentStream(
 
 const FLAG_EMOJI_RX = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
 function stripFlagEmoji(s: string): string {
-  return s.replace(FLAG_EMOJI_RX, "").replace(/\s{2,}/g, " ").trim();
+  return s
+    .replace(FLAG_EMOJI_RX, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 export function SwitcherRow({
@@ -60,25 +63,14 @@ export function SwitcherRow({
         onClick={onPick}
         disabled={resolving || isCurrent}
         className={`group flex w-full items-center gap-3.5 px-5 py-3 text-start transition-colors ${
-          isCurrent
-            ? "cursor-default bg-canvas/40"
-            : "hover:bg-canvas/55 disabled:cursor-wait disabled:opacity-60"
+          isCurrent ? "cursor-default bg-canvas/40" : "hover:bg-canvas/55 disabled:cursor-wait disabled:opacity-60"
         }`}
       >
-        <AddonLogo
-          addonId={stream.addonId}
-          addonName={addonName}
-          manifestLogo={addonLogo}
-          size="xl"
-        />
+        <AddonLogo addonId={stream.addonId} addonName={addonName} manifestLogo={addonLogo} size="xl" />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="whitespace-pre-line text-[14px] font-semibold leading-snug text-ink">
-            {headline}
-          </p>
+          <p className="whitespace-pre-line text-[14px] font-semibold leading-snug text-ink">{headline}</p>
           {description && (
-            <p className="whitespace-pre-line text-[12.5px] leading-snug text-ink-muted">
-              {description}
-            </p>
+            <p className="whitespace-pre-line text-[12.5px] leading-snug text-ink-muted">{description}</p>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -93,17 +85,13 @@ export function SwitcherRow({
           {match && !isCurrent && (
             <span
               className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] ring-1 ${
-                match === "same"
-                  ? "bg-accent/15 text-accent ring-accent/30"
-                  : "bg-raised text-ink-muted ring-edge-soft"
+                match === "same" ? "bg-accent/15 text-accent ring-accent/30" : "bg-raised text-ink-muted ring-edge-soft"
               }`}
             >
               {match === "same" ? t("Same file") : t("Close match")}
             </span>
           )}
-          {langs.length > 0 && !isCurrent && (
-            <FlagStack languages={langs} size="sm" max={3} />
-          )}
+          {langs.length > 0 && !isCurrent && <FlagStack languages={langs} size="sm" max={3} />}
           {cornerBadges.length > 0 && !isCurrent && (
             <span className="flex items-center gap-1">
               {cornerBadges.map((b) => (

@@ -1,6 +1,6 @@
-import { useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
+import { useSyncExternalStore } from "react";
 
 export type QueueItem = {
   id: string;

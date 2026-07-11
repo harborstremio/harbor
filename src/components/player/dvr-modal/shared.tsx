@@ -1,14 +1,6 @@
 import type { ReactNode } from "react";
 
-export function Section({
-  icon,
-  label,
-  children,
-}: {
-  icon: ReactNode;
-  label: string;
-  children: ReactNode;
-}) {
+export function Section({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-subtle">

@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 const INTERVALS = [
   ["launch", "Every launch"],
@@ -20,7 +20,7 @@ export function StartupDefaults() {
   const interval = settings.profilePromptInterval ?? "launch";
   const defaultId = settings.defaultProfileId ?? "";
   const defaultName = defaultId
-    ? profiles.find((p) => p.id === defaultId)?.name ?? t("Ask each time")
+    ? (profiles.find((p) => p.id === defaultId)?.name ?? t("Ask each time"))
     : t("Ask each time");
   const intervalLabel = t(INTERVALS.find(([v]) => v === interval)?.[1] ?? "Every launch");
 
@@ -37,10 +37,7 @@ export function StartupDefaults() {
             {t("Who's watching: {a} · Default: {b}", { a: intervalLabel, b: defaultName })}
           </span>
         </div>
-        <ChevronDown
-          size={16}
-          className={`shrink-0 text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown size={16} className={`shrink-0 text-ink-muted transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <div className="flex flex-col gap-4 pt-1">

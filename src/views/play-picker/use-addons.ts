@@ -1,13 +1,8 @@
-import { useEffect, useState } from "react";
 import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
-import {
-  torboxAddonFor,
-  userAddons,
-  withDebridKeys,
-  type Addon,
-} from "@/lib/addons";
+import { torboxAddonFor, userAddons, withDebridKeys, type Addon } from "@/lib/addons";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
 import type { useSettings } from "@/lib/settings";
+import { useEffect, useState } from "react";
 
 type Settings = ReturnType<typeof useSettings>["settings"];
 
@@ -16,9 +11,7 @@ function hasAnyResources(a: Addon): boolean {
 }
 
 function declaresStream(a: Addon): boolean {
-  return (a.manifest.resources ?? []).some((r) =>
-    typeof r === "string" ? r === "stream" : r.name === "stream",
-  );
+  return (a.manifest.resources ?? []).some((r) => (typeof r === "string" ? r === "stream" : r.name === "stream"));
 }
 
 async function resolveManifests(addons: Addon[]): Promise<Addon[]> {
@@ -31,7 +24,10 @@ async function resolveManifests(addons: Addon[]): Promise<Addon[]> {
   );
 }
 
-export function useAddons(authKey: string | null, settings: Settings): {
+export function useAddons(
+  authKey: string | null,
+  settings: Settings,
+): {
   addons: Addon[] | null;
   userHasStreamAddons: boolean;
 } {
@@ -78,9 +74,7 @@ export function useAddons(authKey: string | null, settings: Settings): {
       setUserHasStreamAddons(userStreamCount > 0);
       const list = withDebridKeys(merged, debridKeys);
       const existingTorboxIdx = list.findIndex(
-        (a) =>
-          a.manifest.id === "app.torbox.stremio" ||
-          a.transportUrl?.includes("stremio.torbox.app"),
+        (a) => a.manifest.id === "app.torbox.stremio" || a.transportUrl?.includes("stremio.torbox.app"),
       );
       console.info(
         `[picker] authKey=${authKey ? "yes" : "no"} tbKey=${settings.tbKey ? `set(${settings.tbKey.slice(0, 8)}…)` : "EMPTY"} stremioAddons=${stremioAddons.length} installed=${installed.length} merged=${merged.length} userStreamCount=${userStreamCount} hasTorbox=${existingTorboxIdx >= 0} torboxAutoAddable=${!!torbox}`,
@@ -89,9 +83,7 @@ export function useAddons(authKey: string | null, settings: Settings): {
         if (existingTorboxIdx >= 0) {
           const existing = list[existingTorboxIdx];
           if (existing.transportUrl !== torbox.transportUrl) {
-            console.info(
-              `[picker] overriding stale TorBox URL: ${existing.transportUrl} → ${torbox.transportUrl}`,
-            );
+            console.info(`[picker] overriding stale TorBox URL: ${existing.transportUrl} → ${torbox.transportUrl}`);
             list[existingTorboxIdx] = torbox;
           }
         } else {
@@ -99,9 +91,7 @@ export function useAddons(authKey: string | null, settings: Settings): {
           list.push(torbox);
         }
       }
-      console.info(
-        `[picker] final addon list (${list.length}): ${list.map((a) => a.manifest.name).join(", ")}`,
-      );
+      console.info(`[picker] final addon list (${list.length}): ${list.map((a) => a.manifest.name).join(", ")}`);
       setAddons(list);
     })();
     return () => {

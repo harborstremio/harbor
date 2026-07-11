@@ -1,9 +1,4 @@
-import {
-  LocalEngineSection,
-  P2PAdvancedSection,
-  RemoteServerSection,
-  ServerAddressSection,
-} from "./player-panel";
+import { LocalEngineSection, P2PAdvancedSection, RemoteServerSection, ServerAddressSection } from "./player-panel";
 
 export function P2PPanel() {
   return (

@@ -1,15 +1,10 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { needsImdbForPoster, needsTmdbForPoster, rpdbPoster } from "@/lib/providers/rpdb";
-import {
-  tmdbIdFromImdb,
-  tmdbImdbId,
-  useTmdbIdFromImdb,
-  useTmdbImdbId,
-} from "@/lib/providers/tmdb/tmdb-imdb-resolve";
-import { useSettings } from "@/lib/settings";
 import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
-import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
+import { needsImdbForPoster, needsTmdbForPoster, rpdbPoster } from "@/lib/providers/rpdb";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
+import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
+import { tmdbIdFromImdb, tmdbImdbId, useTmdbIdFromImdb, useTmdbImdbId } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
+import { useSettings } from "@/lib/settings";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 
 type Ratio = "portrait" | "landscape" | "wide";
 
@@ -44,8 +39,7 @@ export function useRpdbAltId(
     if (wantImdb && settings.tmdbKey) void tmdbImdbId(settings.tmdbKey, metaId);
     if (wantTmdb && settings.tmdbKey) void tmdbIdFromImdb(settings.tmdbKey, metaId, type);
   }, [wantImdb, wantTmdb, settings.tmdbKey, metaId, type]);
-  const pending =
-    !!settings.tmdbKey && ((wantImdb && imdb === undefined) || (wantTmdb && tmdb === undefined));
+  const pending = !!settings.tmdbKey && ((wantImdb && imdb === undefined) || (wantTmdb && tmdb === undefined));
   let altId: string | undefined;
   if (wantImdb && typeof imdb === "string" && imdb.startsWith("tt")) altId = imdb;
   else if (wantTmdb && typeof tmdb === "string") altId = tmdb;
@@ -95,12 +89,7 @@ function useAnimeRpdbIds(
   return { animeImdb, animeTvdb, animeTmdb };
 }
 
-export function usePosterChain(
-  rpdbKey: string,
-  metaId: string,
-  metaPoster?: string,
-  type?: "movie" | "series",
-) {
+export function usePosterChain(rpdbKey: string, metaId: string, metaPoster?: string, type?: "movie" | "series") {
   const { altId, pending } = useRpdbAltId(rpdbKey, metaId, type);
   const { animeImdb, animeTvdb, animeTmdb } = useAnimeRpdbIds(rpdbKey, metaId);
   const localized = useLocalizedPoster(metaId);
@@ -291,11 +280,7 @@ export function Poster({
           }}
           onError={() => fail(current)}
           className="absolute inset-0 h-full w-full object-cover"
-          style={
-            effect === "off"
-              ? { opacity: 1 }
-              : { opacity: loaded ? 1 : 0, transition: "opacity 300ms ease-out" }
-          }
+          style={effect === "off" ? { opacity: 1 } : { opacity: loaded ? 1 : 0, transition: "opacity 300ms ease-out" }}
         />
       )}
       {children}

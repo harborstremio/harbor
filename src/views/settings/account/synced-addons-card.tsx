@@ -1,11 +1,11 @@
-import { ArrowRight, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { AddonLogo, AddonLogoStack, resolveAddonLogo } from "@/components/addon-logo";
 import type { Addon } from "@/lib/addons";
 import { useAuth } from "@/lib/auth";
-import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
+import { useView } from "@/lib/view";
 import { requestAddonsTab } from "@/views/addons";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function SyncedAddonsCard() {
   const t = useT();
@@ -57,9 +57,7 @@ export function SyncedAddonsCard() {
               {count === 1 ? t("addon synced") : t("addons synced")}
             </span>
           </div>
-          {addons && addons.length > 0 && (
-            <AddonStackPeek addons={addons} max={MAX_VISIBLE} />
-          )}
+          {addons && addons.length > 0 && <AddonStackPeek addons={addons} max={MAX_VISIBLE} />}
         </div>
         <div className="flex items-center gap-2">
           <button

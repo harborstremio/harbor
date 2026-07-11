@@ -58,12 +58,7 @@ export const PANEL_META: Record<
   episodes: { label: "Next-up episodes tab", defaultCorner: "top-right", placementMode: "side" },
 };
 
-export const PANEL_CORNERS: readonly PanelCorner[] = [
-  "top-left",
-  "top-right",
-  "bottom-left",
-  "bottom-right",
-];
+export const PANEL_CORNERS: readonly PanelCorner[] = ["top-left", "top-right", "bottom-left", "bottom-right"];
 
 export type ControlVariant = "auto" | "full" | "condensed";
 
@@ -75,10 +70,7 @@ export type PlayerControlConfig = {
   variant?: ControlVariant;
 };
 
-export const VARIANT_AWARE_CONTROLS: readonly PlayerControlId[] = [
-  "prev-episode",
-  "next-episode",
-];
+export const VARIANT_AWARE_CONTROLS: readonly PlayerControlId[] = ["prev-episode", "next-episode"];
 
 export function isVariantAware(id: PlayerControlId): boolean {
   return VARIANT_AWARE_CONTROLS.includes(id);
@@ -91,7 +83,7 @@ export type CustomIconMap = Record<string, string>;
 
 export const CONTROL_STATES: Partial<Record<PlayerControlId, readonly string[]>> = {
   "play-pause": ["playing", "paused"],
-  "fullscreen": ["fullscreen", "windowed"],
+  fullscreen: ["fullscreen", "windowed"],
   "draw-toggle": ["active", "inactive"],
   cast: ["connected", "idle"],
   dvr: ["recording", "idle"],
@@ -122,11 +114,7 @@ export function iconKey(id: PlayerControlId, state?: string): string {
   return state ? `${id}:${state}` : id;
 }
 
-export function getCustomIcon(
-  map: CustomIconMap | undefined,
-  id: PlayerControlId,
-  state?: string,
-): string | undefined {
+export function getCustomIcon(map: CustomIconMap | undefined, id: PlayerControlId, state?: string): string | undefined {
   if (!map) return undefined;
   if (state) {
     const k = iconKey(id, state);
@@ -263,7 +251,11 @@ export const CONTROL_META: Record<
   pip: { label: "Picture-in-picture", group: "actions", defaultSlot: "bottom-right" },
   cast: { label: "Cast", group: "actions", defaultSlot: "bottom-right" },
   fullscreen: { label: "Fullscreen", group: "transport", defaultSlot: "bottom-right" },
-  "window-controls": { label: "Window buttons (minimize, maximize, close)", group: "actions", defaultSlot: "top-right" },
+  "window-controls": {
+    label: "Window buttons (minimize, maximize, close)",
+    group: "actions",
+    defaultSlot: "top-right",
+  },
 };
 
 export type ThemeId = "default" | "stremio";
@@ -288,10 +280,7 @@ export function resetPlayerChromeConfig(theme: ThemeId): PlayerChromeConfig {
   return baseline;
 }
 
-export function controlsInSlot(
-  config: PlayerChromeConfig,
-  slot: PlayerSlot,
-): PlayerControlConfig[] {
+export function controlsInSlot(config: PlayerChromeConfig, slot: PlayerSlot): PlayerControlConfig[] {
   return config.controls
     .filter((c) => c.slot === slot && !c.hidden)
     .slice()
@@ -302,7 +291,5 @@ export const PLAYER_CHROME_CHANGED_EVENT = "harbor:player-chrome-changed";
 
 export function notifyPlayerChromeChanged(theme: ThemeId): void {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(
-    new CustomEvent(PLAYER_CHROME_CHANGED_EVENT, { detail: { theme } }),
-  );
+  window.dispatchEvent(new CustomEvent(PLAYER_CHROME_CHANGED_EVENT, { detail: { theme } }));
 }

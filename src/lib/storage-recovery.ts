@@ -46,10 +46,7 @@ const PRUNABLE_EXACT = new Set<string>([
   "harbor.playback-history.v1",
 ]);
 
-const PRUNABLE_PREFIXES = [
-  "harbor.libraryNameRepair.v1.",
-  "harbor.anilist.collection.v1.",
-];
+const PRUNABLE_PREFIXES = ["harbor.libraryNameRepair.v1.", "harbor.anilist.collection.v1."];
 
 function isPrunable(key: string): boolean {
   if (PRUNABLE_EXACT.has(key)) return true;

@@ -1,15 +1,15 @@
-import { Lock, LogIn, LogOut, Pencil, Plus, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { AuthModal } from "@/components/auth-modal";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
-import { useT } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
 import { verifyProfilePassword } from "@/lib/profile-password";
 import { useProfiles, type Profile } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import type { User } from "@/lib/stremio";
 import { openUrl } from "@/lib/window";
+import { Lock, LogIn, LogOut, Pencil, Plus, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const STREMIO_REGISTER_URL = "https://www.stremio.com/register";
 
@@ -47,9 +47,7 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
 
   const otherProfiles = profiles.filter((p) => p.id !== activeProfile?.id);
   const kid = !!activeProfile?.kid;
-  const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
-    ? null
-    : settings.harborAvatar;
+  const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/") ? null : settings.harborAvatar;
 
   return (
     <div ref={ref} className="relative">
@@ -99,10 +97,7 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate text-[13.5px] font-medium text-ink">{p.name}</span>
                     {p.isPrimary && (
-                      <span
-                        className="text-[9px] font-bold uppercase tracking-[0.18em]"
-                        style={{ color: p.color }}
-                      >
+                      <span className="text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: p.color }}>
                         {t("profile.primary")}
                       </span>
                     )}
@@ -112,65 +107,65 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
             </div>
           )}
           {!kid && (
-          <div className="flex flex-col">
-            <button
-              onClick={() => {
-                openPicker({ kind: "list" });
-                setMenuOpen(false);
-              }}
-              className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-            >
-              <Users size={14} strokeWidth={2.2} />
-              {t("profile.whoWatching")}
-            </button>
-            {activeProfile && (
+            <div className="flex flex-col">
               <button
                 onClick={() => {
-                  openPicker({ kind: "edit", profileId: activeProfile.id });
+                  openPicker({ kind: "list" });
                   setMenuOpen(false);
                 }}
                 className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
               >
-                <Pencil size={14} strokeWidth={2.2} />
-                {t("profile.editThis")}
+                <Users size={14} strokeWidth={2.2} />
+                {t("profile.whoWatching")}
               </button>
-            )}
-            {activeProfile?.isPrimary && (
-              <button
-                onClick={() => {
-                  openPicker({ kind: "create" });
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <Plus size={14} strokeWidth={2.2} />
-                {t("profile.new")}
-              </button>
-            )}
-            {user ? (
-              <button
-                onClick={() => {
-                  signOut();
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <LogOut size={14} strokeWidth={2.2} />
-                {t("profile.signOut")}
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setAuthOpen(true);
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <LogIn size={14} strokeWidth={2.2} />
-                {t("profile.signIn")}
-              </button>
-            )}
-          </div>
+              {activeProfile && (
+                <button
+                  onClick={() => {
+                    openPicker({ kind: "edit", profileId: activeProfile.id });
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <Pencil size={14} strokeWidth={2.2} />
+                  {t("profile.editThis")}
+                </button>
+              )}
+              {activeProfile?.isPrimary && (
+                <button
+                  onClick={() => {
+                    openPicker({ kind: "create" });
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <Plus size={14} strokeWidth={2.2} />
+                  {t("profile.new")}
+                </button>
+              )}
+              {user ? (
+                <button
+                  onClick={() => {
+                    signOut();
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <LogOut size={14} strokeWidth={2.2} />
+                  {t("profile.signOut")}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setAuthOpen(true);
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <LogIn size={14} strokeWidth={2.2} />
+                  {t("profile.signIn")}
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -210,10 +205,7 @@ function ProfileAvatar({
   const src = profile?.avatar ?? fallbackAvatar ?? user?.avatar ?? null;
   const ringStyle = profile?.color ? { boxShadow: `0 0 0 2px ${profile.color}` } : undefined;
   return (
-    <div
-      className={`${dim} shrink-0 overflow-hidden rounded-full bg-elevated`}
-      style={ringStyle}
-    >
+    <div className={`${dim} shrink-0 overflow-hidden rounded-full bg-elevated`} style={ringStyle}>
       {src ? (
         <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
       ) : (
@@ -223,15 +215,7 @@ function ProfileAvatar({
   );
 }
 
-function SubtitleText({
-  active,
-  profiles,
-  user,
-}: {
-  active: Profile | null;
-  profiles: Profile[];
-  user: User | null;
-}) {
+function SubtitleText({ active, profiles, user }: { active: Profile | null; profiles: Profile[]; user: User | null }) {
   const t = useT();
   if (active?.shareStremioWith) {
     const src = profiles.find((p) => p.id === active.shareStremioWith);

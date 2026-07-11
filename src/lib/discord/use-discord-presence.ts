@@ -1,15 +1,16 @@
-import { useEffect } from "react";
-import { useSettings } from "@/lib/settings";
-import { useView, type MetaFilter } from "@/lib/view";
-import { useTogether } from "@/lib/together/provider";
-import { buildInviteUrl } from "@/lib/together/invite";
-import { SERVICES } from "@/lib/providers/streaming";
-import { awardTypeLabel } from "@/lib/providers/wikidata";
 import { awardSourceMeta } from "@/lib/anime-awards";
-import { tmdbPerson, tmdbPersonCached } from "@/lib/providers/tmdb/tmdb-people";
 import type { Meta } from "@/lib/cinemeta";
-import { configureDiscord, setBrowsePresence, setPartyPresence, type BrowsePresence } from "./presence";
+import { SERVICES } from "@/lib/providers/streaming";
+import { tmdbPerson, tmdbPersonCached } from "@/lib/providers/tmdb/tmdb-people";
+import { awardTypeLabel } from "@/lib/providers/wikidata";
+import { useSettings } from "@/lib/settings";
+import { buildInviteUrl } from "@/lib/together/invite";
+import { useTogether } from "@/lib/together/provider";
+import { useView, type MetaFilter } from "@/lib/view";
+import { useEffect } from "react";
+
 import { useActivityHint } from "./activity-hint";
+import { configureDiscord, setBrowsePresence, setPartyPresence, type BrowsePresence } from "./presence";
 
 const JOIN_BASE = "https://app.harbor.site";
 
@@ -161,17 +162,7 @@ export function useDiscordPresence(): void {
       };
     }
     setBrowsePresence(STATIC_LABELS[topKind] ?? { details: "Browsing Harbor" });
-  }, [
-    topKind,
-    service,
-    meta,
-    awardType,
-    animeAwardSource,
-    filter,
-    personId,
-    settings.tmdbKey,
-    hint,
-  ]);
+  }, [topKind, service, meta, awardType, animeAwardSource, filter, personId, settings.tmdbKey, hint]);
 
   useEffect(() => {
     if (snapshot.state !== "joined" || !snapshot.room) {

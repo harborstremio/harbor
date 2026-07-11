@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
 import type { Meta } from "@/lib/cinemeta";
 import { consumeRecentStubEvent } from "@/lib/dead-streams";
 import { useActiveKid } from "@/lib/profiles";
 import { type PlayEpisode } from "@/lib/view";
+import { useEffect, useState } from "react";
+
 import { LogoOrText } from "./logo-or-text";
 
 export function AutoPlayTransition({
@@ -68,12 +69,7 @@ export function AutoPlayTransition({
             />
           ))}
           <div className="curfew-bob absolute bottom-[14%] left-[10%]">
-            <img
-              src="/kids/doodles/liloctored.png"
-              alt=""
-              draggable={false}
-              className="h-24 w-auto opacity-85"
-            />
+            <img src="/kids/doodles/liloctored.png" alt="" draggable={false} className="h-24 w-auto opacity-85" />
           </div>
           <img
             src="/kids/doodles/lilpurpocto.png"
@@ -98,8 +94,7 @@ export function AutoPlayTransition({
         />
         {episode && (
           <p className="text-[12.5px] font-semibold uppercase tracking-[0.32em] text-white/70">
-            S{episode.imdbSeason ?? episode.season} · E
-            {String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
+            S{episode.imdbSeason ?? episode.season} · E{String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
             {episode.name ? ` · ${episode.name}` : ""}
           </p>
         )}
@@ -113,23 +108,14 @@ export function AutoPlayTransition({
                 : "Connecting"
           }
         />
-        {stubNotice && (
-          <p className="max-w-md text-[13px] leading-relaxed text-amber-200/80">
-            {stubNotice}
-          </p>
-        )}
+        {stubNotice && <p className="max-w-md text-[13px] leading-relaxed text-amber-200/80">{stubNotice}</p>}
       </div>
       <button
         onClick={onCancel}
         className="absolute bottom-10 left-1/2 z-10 flex h-11 -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-black/45 px-6 text-[13.5px] font-medium text-white/75 backdrop-blur-md transition-colors hover:border-white/30 hover:bg-black/60 hover:text-white"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-          <path
-            d="M3.5 3.5l7 7M10.5 3.5l-7 7"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-          />
+          <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
         </svg>
         Cancel
       </button>

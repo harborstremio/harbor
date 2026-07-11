@@ -1,6 +1,7 @@
+import type { CodeLang } from "@/components/code-editor";
 import { BookOpen, Code2 } from "lucide-react";
 import { useState } from "react";
-import type { CodeLang } from "@/components/code-editor";
+
 import { CheatSheet } from "./cheat-sheet";
 
 export function CodeSection({

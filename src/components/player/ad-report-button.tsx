@@ -1,18 +1,19 @@
-import { useState } from "react";
 import { AdSkipIcon } from "@/components/icons/adskip-icon";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
-import type { Meta } from "@/lib/cinemeta";
-import type { PlayerSrc } from "@/lib/view";
 import { submitAdReport, type AdRange } from "@/lib/ad-report/submit";
 import { withinAdWindow } from "@/lib/ad-report/window";
-import { sourceKey } from "@/lib/skip-intro/fingerprint";
-import { activeSegment, type SkipSegment } from "@/lib/skip-intro";
+import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { usePlaybackPosition } from "@/lib/player/playback-clock";
-import { nextEpisodeLead } from "@/views/player/skip-pill-container";
+import { useSettings } from "@/lib/settings";
+import { activeSegment, type SkipSegment } from "@/lib/skip-intro";
+import { sourceKey } from "@/lib/skip-intro/fingerprint";
+import type { PlayerSrc } from "@/lib/view";
 import { shouldShowAdReport } from "@/views/player/should-show-adreport";
-import { AdReportModal } from "./ad-report-modal";
+import { nextEpisodeLead } from "@/views/player/skip-pill-container";
+import { useState } from "react";
+
 import { AdReportFirstTip } from "./ad-report-first-tip";
+import { AdReportModal } from "./ad-report-modal";
 
 export function AdReportButton({
   meta,

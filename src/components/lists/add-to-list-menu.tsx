@@ -1,14 +1,9 @@
+import { AnchoredMenu } from "@/components/anchored-menu";
+import { addToList, toggleInList, useCustomLists, useListsContaining, type ListItemInput } from "@/lib/custom-lists";
+import { useT } from "@/lib/i18n";
 import { Check, Plus } from "lucide-react";
 import { useState, type RefObject } from "react";
-import {
-  addToList,
-  toggleInList,
-  useCustomLists,
-  useListsContaining,
-  type ListItemInput,
-} from "@/lib/custom-lists";
-import { useT } from "@/lib/i18n";
-import { AnchoredMenu } from "@/components/anchored-menu";
+
 import { CreateListModal } from "./create-list-modal";
 import { emitListToast } from "./list-toast";
 
@@ -30,9 +25,7 @@ export function AddToListMenu({
 
   const toggle = (listId: string, name: string) => {
     const nowIn = toggleInList(listId, item);
-    emitListToast(
-      nowIn ? t('Added to "{name}"', { name }) : t('Removed from "{name}"', { name }),
-    );
+    emitListToast(nowIn ? t('Added to "{name}"', { name }) : t('Removed from "{name}"', { name }));
   };
 
   return (
@@ -66,9 +59,7 @@ export function AddToListMenu({
                     {inList && <Check size={13} strokeWidth={2.6} />}
                   </span>
                   <span className="flex-1 truncate">{l.name}</span>
-                  <span className="shrink-0 text-[11px] tabular-nums text-ink-subtle">
-                    {l.items.length}
-                  </span>
+                  <span className="shrink-0 text-[11px] tabular-nums text-ink-subtle">{l.items.length}</span>
                 </button>
               );
             })}

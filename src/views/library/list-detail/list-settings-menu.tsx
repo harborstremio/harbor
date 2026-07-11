@@ -1,18 +1,12 @@
+import { AnchoredMenu } from "@/components/anchored-menu";
+import { emitListToast } from "@/components/lists/list-toast";
+import { deleteList, renameList, type CustomList } from "@/lib/custom-lists";
+import { useT } from "@/lib/i18n";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { deleteList, renameList, type CustomList } from "@/lib/custom-lists";
-import { useT } from "@/lib/i18n";
-import { AnchoredMenu } from "@/components/anchored-menu";
-import { emitListToast } from "@/components/lists/list-toast";
 
-export function ListSettingsMenu({
-  list,
-  onDeleted,
-}: {
-  list: CustomList;
-  onDeleted: () => void;
-}) {
+export function ListSettingsMenu({ list, onDeleted }: { list: CustomList; onDeleted: () => void }) {
   const t = useT();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -140,9 +134,7 @@ function RenameModal({
         onSubmit={submit}
         className="animate-modal-in flex w-[min(92vw,380px)] flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated p-7 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
       >
-        <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-          {t("Rename list")}
-        </h2>
+        <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">{t("Rename list")}</h2>
         <input
           value={name}
           autoFocus
@@ -173,15 +165,7 @@ function RenameModal({
   );
 }
 
-function ConfirmDelete({
-  name,
-  onClose,
-  onConfirm,
-}: {
-  name: string;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
+function ConfirmDelete({ name, onClose, onConfirm }: { name: string; onClose: () => void; onConfirm: () => void }) {
   const t = useT();
 
   useEffect(() => {
@@ -200,9 +184,7 @@ function ConfirmDelete({
         className="animate-modal-in flex w-[min(92vw,380px)] flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated p-7 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
       >
         <div className="flex flex-col gap-1.5">
-          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-            {t("Delete this list?")}
-          </h2>
+          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">{t("Delete this list?")}</h2>
           <p className="text-[13px] leading-snug text-ink-muted">
             {t('"{name}" and everything in it will be removed. This cannot be undone.', { name })}
           </p>

@@ -1,7 +1,7 @@
-import { useEffect, useState, type CSSProperties } from "react";
-import type { AiProvider } from "@/lib/ai-models";
 import { ProviderLogo } from "@/components/ai-provider-logo";
+import type { AiProvider } from "@/lib/ai-models";
 import { useT } from "@/lib/i18n";
+import { useEffect, useState, type CSSProperties } from "react";
 
 function StatusLine({ phrases }: { phrases: string[] }) {
   const [i, setI] = useState(0);

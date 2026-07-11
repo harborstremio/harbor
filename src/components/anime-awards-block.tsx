@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
 import {
   awardSourceMeta,
   findAnyAwardWins,
@@ -7,6 +6,7 @@ import {
   type AwardWin,
 } from "@/lib/anime-awards";
 import { useView } from "@/lib/view";
+import { ArrowUpRight } from "lucide-react";
 
 export function AnimeAwardsBlock({ name, year }: { name: string; year?: number }) {
   const wins = findAnyAwardWins(name, year);
@@ -19,8 +19,8 @@ export function AnimeAwardsBlock({ name, year }: { name: string; year?: number }
       <div className="mb-10 flex items-baseline justify-between gap-4">
         <h3 className="text-[24px] font-medium tracking-tight text-ink">Anime Awards & Recognition</h3>
         <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-          <span className="text-accent">{totalWins}</span> {totalWins === 1 ? "Win" : "Wins"} ·{" "}
-          {groups.length} {groups.length === 1 ? "ceremony" : "ceremonies"}
+          <span className="text-accent">{totalWins}</span> {totalWins === 1 ? "Win" : "Wins"} · {groups.length}{" "}
+          {groups.length === 1 ? "ceremony" : "ceremonies"}
         </span>
       </div>
       <div className="flex flex-col gap-14">
@@ -67,9 +67,7 @@ function SourceGroup({ source, wins }: { source: AwardSourceId; wins: AwardWin[]
             <span className="text-accent">{wins.length}</span> {wins.length === 1 ? "Win" : "Wins"}
           </p>
           {years.length > 0 && (
-            <p className="mt-1 text-[11px] font-medium tabular-nums text-ink-subtle/80">
-              {formatYearSpan(years)}
-            </p>
+            <p className="mt-1 text-[11px] font-medium tabular-nums text-ink-subtle/80">{formatYearSpan(years)}</p>
           )}
           <button
             type="button"

@@ -1,11 +1,11 @@
-import { useEffect } from "react";
 import { useAuth } from "@/lib/auth";
-import { library } from "@/lib/stremio";
-import { fetchWatchlist } from "@/lib/trakt/watchlist";
-import { useTrakt } from "@/lib/trakt/provider";
-import { fetchWatchlist as fetchSimklWatchlist } from "@/lib/simkl/watchlist";
 import { useSimkl } from "@/lib/simkl/provider";
+import { fetchWatchlist as fetchSimklWatchlist } from "@/lib/simkl/watchlist";
+import { library } from "@/lib/stremio";
+import { useTrakt } from "@/lib/trakt/provider";
+import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { setWatchlistAggregate } from "@/lib/watchlist";
+import { useEffect } from "react";
 
 const STORE: { stremio: string[]; trakt: string[]; simkl: string[] } = {
   stremio: [],

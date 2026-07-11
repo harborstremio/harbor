@@ -1,17 +1,18 @@
-import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { SimklDeviceModal } from "@/components/simkl/simkl-device-modal";
+import { clearCalendarSourceCache } from "@/lib/calendar-sources";
+import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { clearAnimeGroupingCache } from "@/lib/simkl/anime-grouping";
+import { clearCalendarCache } from "@/lib/simkl/calendar";
+import { clearHomeRailsCache } from "@/lib/simkl/home-rails";
 import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Section, ToggleRow } from "./shared";
-import { clearCalendarCache } from "@/lib/simkl/calendar";
-import { clearHomeRailsCache } from "@/lib/simkl/home-rails";
-import { clearCalendarSourceCache } from "@/lib/calendar-sources";
-import { clearAnimeGroupingCache } from "@/lib/simkl/anime-grouping";
 
 export function SimklPanel() {
   const t = useT();
@@ -62,11 +63,11 @@ export function SimklPanel() {
       {!isConnected ? (
         <section className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
           <div className="flex flex-col gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">
-              {t("Connect your Simkl account")}
-            </h2>
+            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Connect your Simkl account")}</h2>
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.")}
+              {t(
+                "Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.",
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -128,12 +129,7 @@ export function SimklPanel() {
                 value={settings.useSimklAvatar}
                 onChange={toggleSimklAvatar}
                 leading={
-                  <img
-                    src={simklAvatar}
-                    alt=""
-                    draggable={false}
-                    className="h-9 w-9 rounded-full object-cover"
-                  />
+                  <img src={simklAvatar} alt="" draggable={false} className="h-9 w-9 rounded-full object-cover" />
                 }
               />
             )}
@@ -183,9 +179,15 @@ export function SimklPanel() {
                 onChange={(e) => update({ simklAnimeTitleLanguage: e.target.value as "english" | "romaji" | "native" })}
                 className="h-11 w-full max-w-[340px] rounded-xl border border-edge-soft bg-canvas/40 px-3.5 text-[13.5px] text-ink outline-none transition-colors hover:border-edge focus:border-accent cursor-pointer"
               >
-                <option value="english" className="bg-elevated text-ink">{t("English")}</option>
-                <option value="romaji" className="bg-elevated text-ink">{t("Romaji")}</option>
-                <option value="native" className="bg-elevated text-ink">{t("Native/Japanese")}</option>
+                <option value="english" className="bg-elevated text-ink">
+                  {t("English")}
+                </option>
+                <option value="romaji" className="bg-elevated text-ink">
+                  {t("Romaji")}
+                </option>
+                <option value="native" className="bg-elevated text-ink">
+                  {t("Native/Japanese")}
+                </option>
               </select>
             </div>
             {!confirmDisconnect ? (
@@ -246,10 +248,7 @@ export function SimklPanel() {
             )}
           </Section>
 
-          <Section
-            title={t("Home Rail Settings")}
-            subtitle={t("Choose which Simkl rails appear on your home screen.")}
-          >
+          <Section title={t("Home Rail Settings")} subtitle={t("Choose which Simkl rails appear on your home screen.")}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-2 rounded-xl border border-edge-soft/60 bg-canvas/30 p-4">
                 <h3 className="text-[14px] font-bold text-ink">{t("Movies")}</h3>

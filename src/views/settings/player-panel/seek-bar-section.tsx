@@ -1,13 +1,14 @@
-import { RotateCcw } from "lucide-react";
-import { useRef, useState } from "react";
 import seekPreviewBg from "@/assets/preview/seek-preview.png";
 import { SeekBarVisual } from "@/components/player/transport/seek-bar-visual";
-import { useSettings, type Settings } from "@/lib/settings";
-import { ColorPopoverTrigger } from "../color-picker";
-import { SubField } from "./internals";
-import { ToggleRow } from "../shared";
-import { SeekImageUpload, openSeekImageDialog } from "./seek-image-upload";
 import { useT } from "@/lib/i18n";
+import { useSettings, type Settings } from "@/lib/settings";
+import { RotateCcw } from "lucide-react";
+import { useRef, useState } from "react";
+
+import { ColorPopoverTrigger } from "../color-picker";
+import { ToggleRow } from "../shared";
+import { SubField } from "./internals";
+import { SeekImageUpload, openSeekImageDialog } from "./seek-image-upload";
 
 const STYLES: Array<{ id: "flat" | "glass" | "pinstripe" | "rainbow"; label: string; sub: string }> = [
   { id: "flat", label: "Flat_Style", sub: "Solid fill, no texture. Cleanest baseline." },
@@ -148,7 +149,9 @@ export function SeekBarPanel() {
 
       <ToggleRow
         label={t("Buffer fill")}
-        sub={t("The lighter fill showing how much is buffered or downloaded ahead. It hides automatically once a stream is fully cached (green dot).")}
+        sub={t(
+          "The lighter fill showing how much is buffered or downloaded ahead. It hides automatically once a stream is fully cached (green dot).",
+        )}
         value={settings.seekBarFill !== false}
         onChange={(v) => update({ seekBarFill: v })}
       />
@@ -244,9 +247,7 @@ function PickTile({
       }`}
     >
       <span className={`text-[12.5px] font-semibold ${selected ? "text-ink" : ""}`}>{label}</span>
-      <span className={`text-[10.5px] leading-snug ${selected ? "text-ink-muted" : "text-ink-subtle"}`}>
-        {sub}
-      </span>
+      <span className={`text-[10.5px] leading-snug ${selected ? "text-ink-muted" : "text-ink-subtle"}`}>{sub}</span>
     </button>
   );
 }

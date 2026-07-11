@@ -1,6 +1,7 @@
-import { Play, Star } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { Play, Star } from "lucide-react";
+
 import { ElegantHoverActions } from "./elegant-hover";
 
 export type CardHoverStyle = "none" | "default" | "elegant" | "frosted" | "cinema" | "spotlight" | "custom";
@@ -142,20 +143,22 @@ function SpotlightOverlay({ meta, preview }: { meta: Meta; preview?: boolean }) 
         style={{ boxShadow: "inset 0 0 0 2px rgba(242,196,102,0.85), inset 0 0 34px rgba(242,196,102,0.3)" }}
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 rounded-b-[var(--poster-radius,12px)] bg-gradient-to-t from-black/85 via-black/25 to-transparent px-3 pb-3 pt-9">
-      <span
-        className={`block translate-y-2 text-[13px] font-semibold text-white transition-[transform,opacity] duration-300 ${EASE} ${
-          preview ? "translate-y-0 opacity-100" : "opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
-        }`}
-      >
-        {meta.name}
-      </span>
-      <span
-        className={`mt-1 block transition-opacity duration-300 delay-75 ${
-          preview ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-        }`}
-      >
-        {ratingLine(meta)}
-      </span>
+        <span
+          className={`block translate-y-2 text-[13px] font-semibold text-white transition-[transform,opacity] duration-300 ${EASE} ${
+            preview
+              ? "translate-y-0 opacity-100"
+              : "opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+          }`}
+        >
+          {meta.name}
+        </span>
+        <span
+          className={`mt-1 block transition-opacity duration-300 delay-75 ${
+            preview ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+          }`}
+        >
+          {ratingLine(meta)}
+        </span>
       </div>
     </>
   );

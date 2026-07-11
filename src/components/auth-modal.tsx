@@ -1,9 +1,10 @@
-import { Check, ExternalLink, Eye, EyeOff, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
+import { Check, ExternalLink, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { StremioWebButton } from "./auth-modal/stremio-web-button";
 
 export function AuthModal({ onClose }: { onClose: () => void }) {
@@ -45,9 +46,7 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
         className="animate-modal-in flex w-[min(92vw,400px)] flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated p-7 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
       >
         <div className="flex flex-col items-center gap-2">
-          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-            {t("Login to Stremio")}
-          </h2>
+          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">{t("Login to Stremio")}</h2>
           <p className="text-center text-[13px] leading-snug text-ink-muted">
             {t("Brings in your library, watchlist, and installed addons.")}
           </p>
@@ -64,20 +63,8 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <Field
-            label={t("Email")}
-            type="email"
-            value={email}
-            onChange={setEmail}
-            disabled={busy}
-          />
-          <Field
-            label={t("Password")}
-            type="password"
-            value={password}
-            onChange={setPassword}
-            disabled={busy}
-          />
+          <Field label={t("Email")} type="email" value={email} onChange={setEmail} disabled={busy} />
+          <Field label={t("Password")} type="password" value={password} onChange={setPassword} disabled={busy} />
         </div>
 
         <button
@@ -99,9 +86,7 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
           </span>
         </button>
 
-        {error && (
-          <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>
-        )}
+        {error && <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12.5px] text-danger">{error}</p>}
 
         <button
           type="submit"
@@ -161,9 +146,7 @@ function Field({
   const isPassword = type === "password";
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">{label}</span>
       <div className="relative">
         <input
           type={isPassword && show ? "text" : type}

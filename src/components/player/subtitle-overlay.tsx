@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import { useActiveKid } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   text: string;
@@ -31,7 +31,7 @@ export function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
   const fontColor = settings.subFontColor || "#FFFFFF";
   const align = settings.subAlignX || "center";
   const family = fontFamilyFor(settings.subFontFamily);
-  const style = kid ? "shadow" : settings.subStyle ?? "shadow";
+  const style = kid ? "shadow" : (settings.subStyle ?? "shadow");
   const lines = text.split("\n");
 
   const justify = align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
@@ -52,8 +52,7 @@ export function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
     const borderColor = settings.subBorderColor || "#000000";
     baseTextStyle.textShadow = buildOutline(borderColor, borderSize);
   } else if (style === "shadow") {
-    baseTextStyle.textShadow =
-      "0 1px 2px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.85), 0 0 18px rgba(0,0,0,0.55)";
+    baseTextStyle.textShadow = "0 1px 2px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.85), 0 0 18px rgba(0,0,0,0.55)";
   }
 
   const boxOpacity = clamp(settings.subBoxOpacity, 0, 1);

@@ -1,4 +1,5 @@
 import type { ScoredStream } from "@/lib/streams/types";
+
 import type { SourceDescriptor } from "./protocol";
 import { normalizeResolution } from "./source-descriptor";
 
@@ -33,18 +34,13 @@ export function scoreSourceMatch(c: ScoredStream, host: SourceDescriptor): numbe
       const union = ht.size + ct.size - shared;
       if (union > 0) score += 120 * (shared / union);
     }
-    const group = (c.releaseGroupNormalized || c.releaseGroup || "")
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "");
+    const group = (c.releaseGroupNormalized || c.releaseGroup || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
     if (group && ht.has(group)) score += 40;
   }
   return score;
 }
 
-export function buildMatchScores(
-  streams: ScoredStream[],
-  host: SourceDescriptor,
-): Map<ScoredStream, number> {
+export function buildMatchScores(streams: ScoredStream[], host: SourceDescriptor): Map<ScoredStream, number> {
   const m = new Map<ScoredStream, number>();
   for (const s of streams) m.set(s, scoreSourceMatch(s, host));
   return m;

@@ -33,15 +33,7 @@ export function EmbedViewportRoot() {
   );
 }
 
-function EmbedViewport({
-  url,
-  title,
-  onClose,
-}: {
-  url: string;
-  title: string;
-  onClose: () => void;
-}) {
+function EmbedViewport({ url, title, onClose }: { url: string; title: string; onClose: () => void }) {
   const [loaded, setLoaded] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -85,12 +77,8 @@ function EmbedViewport({
         className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-canvas/60 px-5 text-ink backdrop-blur-md"
       >
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-accent">
-            In-app browser
-          </span>
-          <span className="hidden truncate text-[12.5px] font-medium text-ink-muted sm:inline">
-            · {title}
-          </span>
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-accent">In-app browser</span>
+          <span className="hidden truncate text-[12.5px] font-medium text-ink-muted sm:inline">· {title}</span>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -123,12 +111,9 @@ function EmbedViewport({
         )}
         {blocked && (
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-canvas px-6 text-center">
-            <p className="text-[14px] font-semibold text-ink">
-              {title} blocks embedding from outside its site.
-            </p>
+            <p className="text-[14px] font-semibold text-ink">{title} blocks embedding from outside its site.</p>
             <p className="max-w-[44ch] text-[12.5px] text-ink-muted">
-              That&apos;s a normal security setting. Use the button below to open it in your
-              browser instead.
+              That&apos;s a normal security setting. Use the button below to open it in your browser instead.
             </p>
             <button
               type="button"

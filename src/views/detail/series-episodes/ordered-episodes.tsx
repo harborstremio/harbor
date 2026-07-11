@@ -1,13 +1,14 @@
-import { useMemo, useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { getEpisodeProgress } from "@/lib/episode-progress";
 import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
 import type { Episode } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { spoilerMaskFor } from "@/lib/spoilers";
+import { useMemo, useSyncExternalStore } from "react";
+
 import { EpisodeGridSkeleton } from "../episode-grid-skeleton";
-import { EpisodeRow } from "../series-episode-row";
 import { EpisodeStrip } from "../episode-strip";
+import { EpisodeRow } from "../series-episode-row";
 
 export function OrderedEpisodes({
   meta,
@@ -75,9 +76,7 @@ export function OrderedEpisodes({
         layout={settings.episodeLayout === "grid" ? "grid" : "strip"}
         progressFor={(ep) => progressByKey.get(`${ep.seasonNumber}:${ep.episodeNumber}`)!}
         thumbnailFor={(ep) =>
-          cinemetaVideos?.find(
-            (v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber,
-          )?.thumbnail
+          cinemetaVideos?.find((v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber)?.thumbnail
         }
         spoilerFor={(ep) => {
           const k = `${ep.seasonNumber}:${ep.episodeNumber}`;
@@ -104,9 +103,7 @@ export function OrderedEpisodes({
             meta={meta}
             ep={ep}
             cinemetaThumbnail={
-              cinemetaVideos?.find(
-                (v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber,
-              )?.thumbnail
+              cinemetaVideos?.find((v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber)?.thumbnail
             }
             cinemetaVideos={cinemetaVideos}
             seriesImdbId={seriesImdbId}

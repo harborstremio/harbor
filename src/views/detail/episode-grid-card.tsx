@@ -1,17 +1,18 @@
-import { CalendarDays, Check, Info, Play, RotateCcw } from "lucide-react";
-import { EpisodeDownloadButton } from "./episode-download-button";
-import { useEffect, useRef, useState } from "react";
-import { EpisodeRatingBadge } from "./episode-rating-badge";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
-import { prefetchSegments } from "@/lib/skip-intro";
 import { formatAirDate } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
-import { useView } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
+import { prefetchSegments } from "@/lib/skip-intro";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
+import { useView } from "@/lib/view";
+import { CalendarDays, Check, Info, Play, RotateCcw } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { FillerBadge, UpcomingBadge } from "./badges";
+import { EpisodeDownloadButton } from "./episode-download-button";
 import type { GridEpisode, Progress } from "./episode-grid-types";
+import { EpisodeRatingBadge } from "./episode-rating-badge";
 
 const HOVER_DELAY = 220;
 
@@ -106,7 +107,9 @@ export function EpisodeGridCard({
         </div>
         <div className="flex flex-col gap-0.5 px-0.5">
           <span className="flex items-center gap-1.5">
-            <span className={`line-clamp-2 text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
+            <span
+              className={`line-clamp-2 text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
+            >
               {g.title}
             </span>
             {g.filler && <FillerBadge />}

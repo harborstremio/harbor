@@ -1,7 +1,8 @@
+import { useT } from "@/lib/i18n";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { StatusBadge, TelegramMark, TelegramTutorial, type FieldStatus } from "./webhook-field";
-import { useT } from "@/lib/i18n";
 
 const URL_RE = /^https?:\/\/api\.telegram\.org\/bot([^/]+)\/sendMessage(?:\?chat_id=(.+))?$/;
 
@@ -78,13 +79,7 @@ export function TelegramComposedField({
           onChange={onTokenChange}
           monospace
         />
-        <SubField
-          label={t("Chat ID")}
-          placeholder="123456789"
-          value={chatId}
-          onChange={onChatIdChange}
-          monospace
-        />
+        <SubField label={t("Chat ID")} placeholder="123456789" value={chatId} onChange={onChatIdChange} monospace />
       </div>
       <button
         onClick={onTest}
@@ -116,9 +111,7 @@ function SubField({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</span>
       <input
         type="text"
         value={value}

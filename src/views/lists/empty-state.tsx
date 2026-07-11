@@ -1,6 +1,7 @@
-import { ListPlus } from "lucide-react";
-import { SOURCE_LABELS, type ListSource } from "@/lib/lists/types";
 import { useT } from "@/lib/i18n";
+import { SOURCE_LABELS, type ListSource } from "@/lib/lists/types";
+import { ListPlus } from "lucide-react";
+
 import { AddListForm } from "./add-list-form";
 import { SOURCE_DOT } from "./source-dot";
 
@@ -18,7 +19,9 @@ export function ListsEmptyState({ onAdd }: { onAdd: (ref: string, name?: string)
           {t("Bring your lists with you")}
         </h2>
         <p className="max-w-[420px] text-[14px] leading-relaxed text-ink-muted">
-          {t("Paste a public list from Trakt, MDBList, TMDB, Letterboxd, IMDb, or MyAnimeList. Harbor pulls the titles in and keeps the artwork sharp.")}
+          {t(
+            "Paste a public list from Trakt, MDBList, TMDB, Letterboxd, IMDb, or MyAnimeList. Harbor pulls the titles in and keeps the artwork sharp.",
+          )}
         </p>
         <div className="w-full rounded-xl border border-edge-soft/60 bg-canvas/40 p-1">
           <AddListForm submitLabel={t("Add list")} hideCancel onSubmit={({ ref, name }) => onAdd(ref, name)} />

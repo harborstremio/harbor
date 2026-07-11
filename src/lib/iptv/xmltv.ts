@@ -136,7 +136,9 @@ export async function fetchAndParseXmltv(
     buffer += decoder.decode();
     drainBlocks(buffer, out, channelMeta);
     const totalSec = ((Date.now() - startedAt) / 1000).toFixed(1);
-    console.info(`[epg] parsed ${out.length} programs, ${channelMeta.size} channel defs, ${(received / 1024 / 1024).toFixed(1)}MB in ${totalSec}s from ${url}`);
+    console.info(
+      `[epg] parsed ${out.length} programs, ${channelMeta.size} channel defs, ${(received / 1024 / 1024).toFixed(1)}MB in ${totalSec}s from ${url}`,
+    );
     return { programs: out, channelMeta };
   } finally {
     if (stallTimer) clearTimeout(stallTimer);
@@ -150,11 +152,7 @@ export function parseXmltv(text: string): XmltvParseResult {
   return { programs, channelMeta };
 }
 
-function drainBlocks(
-  buffer: string,
-  out: EpgProgram[],
-  channelMeta: Map<string, EpgChannelMeta>,
-): string {
+function drainBlocks(buffer: string, out: EpgProgram[], channelMeta: Map<string, EpgChannelMeta>): string {
   while (true) {
     const chIdx = buffer.indexOf("<channel ");
     const prIdx = buffer.indexOf("<programme");
@@ -283,7 +281,10 @@ export function indexProgramsByChannel(programs: EpgProgram[]): Map<string, EpgP
   return map;
 }
 
-export function findCurrent(arr: EpgProgram[] | undefined, nowMs: number): {
+export function findCurrent(
+  arr: EpgProgram[] | undefined,
+  nowMs: number,
+): {
   current: EpgProgram | null;
   next: EpgProgram | null;
 } {

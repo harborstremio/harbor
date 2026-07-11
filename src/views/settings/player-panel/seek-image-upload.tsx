@@ -85,9 +85,7 @@ export function SeekImageUpload({
           )}
         </div>
         <div className="flex flex-1 flex-col gap-1">
-          <p className="text-[12.5px] font-medium text-ink">
-            {value ? "Custom image loaded" : emptyTitle}
-          </p>
+          <p className="text-[12.5px] font-medium text-ink">{value ? "Custom image loaded" : emptyTitle}</p>
           <p className="text-[11px] leading-snug text-ink-subtle">{hint}</p>
         </div>
         <button

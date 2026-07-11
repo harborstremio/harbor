@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
-import { cloudWriteId, libraryGetOne, libraryPut, type LibraryItem } from "@/lib/stremio";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition, subscribePlaybackClock } from "@/lib/player/playback-clock";
 import { useProfiles } from "@/lib/profiles";
-import { recordWatchedBy } from "@/lib/watched-by";
+import { cloudWriteId, libraryGetOne, libraryPut, type LibraryItem } from "@/lib/stremio";
 import type { PlayerSrc } from "@/lib/view";
+import { recordWatchedBy } from "@/lib/watched-by";
+import { useEffect, useRef } from "react";
 
 const TICK_MS = 30000;
 const BASE_REFRESH_MS = 30000;
@@ -55,8 +55,7 @@ export function useStremioSync(params: {
       const cid = sessionCidRef.current ?? latestRef.current.canonicalId;
       const base = baseItemRef.current?._id === cid ? baseItemRef.current : null;
       const seeded = base?.state as { video_id?: string; timeOffset?: number } | undefined;
-      const alreadyResumed =
-        seeded?.video_id === vid && (seeded?.timeOffset ?? 0) > MIN_POSITION_SEC * 1000;
+      const alreadyResumed = seeded?.video_id === vid && (seeded?.timeOffset ?? 0) > MIN_POSITION_SEC * 1000;
       if (ak && cid && base && !alreadyResumed) {
         void writeLibraryItem(ak, s, sn, base, cid, 0.001, false, vid).then((mt) => {
           if (mt) lastWrittenMtimesRef.current.add(mt);
@@ -137,15 +136,13 @@ export function useStremioSync(params: {
     const pos = getPlaybackPosition() || lastGoodPosRef.current;
     if (pos < MIN_POSITION_SEC || sn.durationSec <= 0) return;
     const vid = videoIdFor(s, cid);
-    const fresh =
-      withGet || !wroteOnceRef.current ? await libraryGetOne(ak, cid).catch(() => null) : null;
+    const fresh = withGet || !wroteOnceRef.current ? await libraryGetOne(ak, cid).catch(() => null) : null;
     if (fresh) baseItemRef.current = fresh;
     const base = fresh ?? (baseItemRef.current?._id === cid ? baseItemRef.current : null);
     const remoteMs = (base?.state?.timeOffset ?? 0) as number;
     const remoteMtimeStr = (base as { _mtime?: string } | null)?._mtime ?? "";
     const remoteMtime = Date.parse(remoteMtimeStr);
-    const remoteVid =
-      ((base?.state as Record<string, unknown> | undefined)?.video_id as string | undefined) ?? cid;
+    const remoteVid = ((base?.state as Record<string, unknown> | undefined)?.video_id as string | undefined) ?? cid;
     const ourMs = Math.floor(pos * 1000);
     if (
       !lastWrittenMtimesRef.current.has(remoteMtimeStr) &&
@@ -315,15 +312,12 @@ async function writeLibraryItem(
   const prevTimesWatched = typeof baseState.timesWatched === "number" ? baseState.timesWatched : 0;
   const prevTimeWatched = typeof baseState.timeWatched === "number" ? baseState.timeWatched : 0;
   const prevOverall = typeof baseState.overallTimeWatched === "number" ? baseState.overallTimeWatched : 0;
-  const prevWatched =
-    typeof baseState.watched === "string" && baseState.watched.length > 0 ? baseState.watched : null;
-  const prevLastVidReleased =
-    typeof baseState.lastVidReleased === "string" ? baseState.lastVidReleased : null;
+  const prevWatched = typeof baseState.watched === "string" && baseState.watched.length > 0 ? baseState.watched : null;
+  const prevLastVidReleased = typeof baseState.lastVidReleased === "string" ? baseState.lastVidReleased : null;
   const prevFlagged = typeof baseState.flaggedWatched === "number" ? baseState.flaggedWatched : 0;
   const effPrevFlagged = videoChanged ? 0 : prevFlagged;
   const priorDuration = typeof baseState.duration === "number" ? baseState.duration : 0;
-  const durationShrunk =
-    !src.episode && priorDuration > 0 && durationMs > 0 && durationMs < priorDuration * 0.7;
+  const durationShrunk = !src.episode && priorDuration > 0 && durationMs > 0 && durationMs < priorDuration * 0.7;
   const playedReal = snap.status !== "error" && !durationShrunk;
   const nowFlagged = durationMs > 0 && watchedRatio > 0.7 && playedReal;
   const creditsReset = isTerminal && watchedRatio > CREDITS_RATIO && !src.episode && playedReal;
@@ -342,8 +336,7 @@ async function writeLibraryItem(
     noNotif: baseState.noNotif === true,
   };
 
-  const baseBehaviorHints =
-    (baseRecord?.behaviorHints as StremioBehaviorHints | null | undefined) ?? null;
+  const baseBehaviorHints = (baseRecord?.behaviorHints as StremioBehaviorHints | null | undefined) ?? null;
   const behaviorHints: StremioBehaviorHints = {
     defaultVideoId: baseBehaviorHints?.defaultVideoId ?? null,
     featuredVideoId: baseBehaviorHints?.featuredVideoId ?? null,
@@ -353,8 +346,7 @@ async function writeLibraryItem(
   const baseCtime = typeof baseRecord?._ctime === "string" ? (baseRecord._ctime as string) : null;
   const ctime = baseCtime ?? now;
 
-  const metaPoster =
-    typeof src.meta.poster === "string" && src.meta.poster.length > 0 ? src.meta.poster : null;
+  const metaPoster = typeof src.meta.poster === "string" && src.meta.poster.length > 0 ? src.meta.poster : null;
   const basePoster = typeof base?.poster === "string" && base.poster.length > 0 ? base.poster : null;
   const baseType = base?.type === "series" || base?.type === "movie" ? base.type : null;
   let removed = base ? base.removed === true : true;
@@ -364,7 +356,7 @@ async function writeLibraryItem(
   const item: StremioLibraryItem = {
     _id: canonicalId,
     name,
-    type: src.episode ? "series" : baseType ?? (isSeries ? "series" : "movie"),
+    type: src.episode ? "series" : (baseType ?? (isSeries ? "series" : "movie")),
     poster: metaPoster ?? basePoster,
     posterShape: pickPosterShape(baseRecord?.posterShape),
     removed,

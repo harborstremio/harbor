@@ -1,7 +1,7 @@
-import { Check, ChevronLeft, Loader2, Lock, Link2, ShieldCheck, Trash2, Unlock, User as UserIcon } from "lucide-react";
-import { useRef, useState } from "react";
-import traktLogo from "@/assets/trakt.svg";
 import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
+import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
+import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
 import { AddonsIcon } from "@/components/icons/addons-icon";
 import { AnimeIcon } from "@/components/icons/anime-icon";
 import { CalendarIcon } from "@/components/icons/calendar-icon";
@@ -11,6 +11,10 @@ import { LiveTvIcon } from "@/components/icons/live-tv-icon";
 import { MoviesIcon } from "@/components/icons/movies-icon";
 import { SportsIcon } from "@/components/icons/sports-icon";
 import { TvIcon } from "@/components/icons/tv-icon";
+import { fetchAnilistAvatar } from "@/lib/anilist/profile";
+import { useAnilist } from "@/lib/anilist/provider";
+import { avatarUrl } from "@/lib/avatars/catalog";
+import { useT } from "@/lib/i18n";
 import {
   anyTabLocked,
   DEFAULT_HIDDEN,
@@ -19,28 +23,19 @@ import {
   type LockableTab,
   type LockableTabMeta,
 } from "@/lib/lockable-tabs";
-import {
-  nextProfileColor,
-  useProfiles,
-  type KidConfig,
-  type Profile,
-  type ProfileColor,
-} from "@/lib/profiles";
-import { useT } from "@/lib/i18n";
 import { hashProfilePassword, verifyProfilePassword } from "@/lib/profile-password";
-import { fetchTraktAvatar } from "@/lib/trakt/profile";
-import { useTrakt } from "@/lib/trakt/provider";
-import { fetchAnilistAvatar } from "@/lib/anilist/profile";
-import { useAnilist } from "@/lib/anilist/provider";
+import { nextProfileColor, useProfiles, type KidConfig, type Profile, type ProfileColor } from "@/lib/profiles";
+import { useSettings } from "@/lib/settings";
 import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
-import { useSettings } from "@/lib/settings";
+import { fetchTraktAvatar } from "@/lib/trakt/profile";
+import { useTrakt } from "@/lib/trakt/provider";
 import { AvatarRing } from "@/views/settings/account/avatar-ring";
 import { resizeAvatar } from "@/views/settings/account/avatar-utils";
-import { AvatarFan } from "@/components/avatar-picker/avatar-fan";
-import { AvatarCatalogModal } from "@/components/avatar-picker/avatar-catalog-modal";
-import { avatarUrl } from "@/lib/avatars/catalog";
 import { ColorPicker } from "@/views/settings/color-picker";
+import { Check, ChevronLeft, Loader2, Lock, Link2, ShieldCheck, Trash2, Unlock, User as UserIcon } from "lucide-react";
+import { useRef, useState } from "react";
+
 import { KidToggle } from "./kid-toggle";
 import { KidsSetupPanel } from "./kids-setup-panel";
 import { PinEntry } from "./pin-entry";
@@ -62,8 +57,7 @@ export function EditorView({
   onCancel: () => void;
   onDone: () => void;
 }) {
-  const { profiles, activeProfile, createProfile, updateProfile, deleteProfile, selectProfile } =
-    useProfiles();
+  const { profiles, activeProfile, createProfile, updateProfile, deleteProfile, selectProfile } = useProfiles();
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: anilistConnected, avatar: anilistAvatar } = useAnilist();
   const { isConnected: simklConnected } = useSimkl();
@@ -85,17 +79,11 @@ export function EditorView({
   const [avatarSource, setAvatarSource] = useState<
     "trakt" | "anilist" | "simkl" | "upload" | "builtin" | "removed" | null
   >(null);
-  const [color, setColor] = useState<ProfileColor>(
-    editing?.color ?? nextProfileColor(profiles),
-  );
-  const [shareWith, setShareWith] = useState<string | null>(
-    editing ? editing.shareStremioWith : primary?.id ?? null,
-  );
+  const [color, setColor] = useState<ProfileColor>(editing?.color ?? nextProfileColor(profiles));
+  const [shareWith, setShareWith] = useState<string | null>(editing ? editing.shareStremioWith : (primary?.id ?? null));
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [draftPin, setDraftPin] = useState<string | null>(null);
-  const [draftLockedTabs, setDraftLockedTabs] = useState<HiddenTabs | null>(
-    editing?.lockedTabs ?? null,
-  );
+  const [draftLockedTabs, setDraftLockedTabs] = useState<HiddenTabs | null>(editing?.lockedTabs ?? null);
   const [draftKid, setDraftKid] = useState<KidConfig | null>(editing?.kid ?? null);
   const [draftParentPin, setDraftParentPin] = useState<string | null>(null);
   const [subView, setSubView] = useState<SubView>({ kind: "main" });
@@ -426,15 +414,9 @@ export function EditorView({
                 setAvatarSource("builtin");
               }}
             />
-            {traktAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{traktAvatarError}</p>
-            )}
-            {anilistAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{anilistAvatarError}</p>
-            )}
-            {simklAvatarError && (
-              <p className="text-[11.5px] text-amber-200/85">{simklAvatarError}</p>
-            )}
+            {traktAvatarError && <p className="text-[11.5px] text-amber-200/85">{traktAvatarError}</p>}
+            {anilistAvatarError && <p className="text-[11.5px] text-amber-200/85">{anilistAvatarError}</p>}
+            {simklAvatarError && <p className="text-[11.5px] text-amber-200/85">{simklAvatarError}</p>}
           </div>
         </div>
         <div className="border-t border-edge-soft/60 pt-4">
@@ -500,8 +482,10 @@ export function EditorView({
           >
             {t("common.cancel")}
           </button>
-          {editing && !isPrimary && canEditAdvanced && (
-            !confirmingDelete ? (
+          {editing &&
+            !isPrimary &&
+            canEditAdvanced &&
+            (!confirmingDelete ? (
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(true)}
@@ -531,8 +515,7 @@ export function EditorView({
                   {t("common.confirm")}
                 </button>
               </div>
-            )
-          )}
+            ))}
         </div>
         <button
           type="button"
@@ -562,9 +545,7 @@ function BlockedView({ onBack }: { onBack: () => void }) {
   const t = useT();
   return (
     <div className="flex flex-col items-center gap-4">
-      <p className="text-[14px] text-ink-muted">
-        {t("Only the primary profile can edit other profiles.")}
-      </p>
+      <p className="text-[14px] text-ink-muted">{t("Only the primary profile can edit other profiles.")}</p>
       <button
         type="button"
         onClick={onBack}
@@ -588,8 +569,7 @@ function SecurityRow({
   const t = useT();
   const lockedCount = lockedTabs ? Object.values(lockedTabs).filter(Boolean).length : 0;
   const pinLabel = locked ? t("PIN on") : t("PIN off");
-  const tabsLabel =
-    lockedCount === 0 ? t("no tab locks") : t("{n} tabs locked", { n: lockedCount });
+  const tabsLabel = lockedCount === 0 ? t("no tab locks") : t("{n} tabs locked", { n: lockedCount });
   return (
     <button
       type="button"
@@ -604,11 +584,7 @@ function SecurityRow({
               : "bg-canvas/60 text-ink-muted ring-edge-soft"
           }`}
         >
-          {locked || lockedCount > 0 ? (
-            <Lock size={14} strokeWidth={2.4} />
-          ) : (
-            <Unlock size={14} strokeWidth={2.2} />
-          )}
+          {locked || lockedCount > 0 ? <Lock size={14} strokeWidth={2.4} /> : <Unlock size={14} strokeWidth={2.2} />}
         </span>
         <div className="flex flex-col gap-0.5">
           <span className="text-[13.5px] font-semibold text-ink">{t("Security")}</span>
@@ -659,12 +635,8 @@ function SecurityView({
         <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
           {t("Profile security")}
         </span>
-        <h1 className="font-display text-[28px] font-medium tracking-tight text-ink">
-          {t("PIN & sidebar locks")}
-        </h1>
-        <p className="text-center text-[13.5px] text-ink-muted">
-          {t("Pick a PIN and which sidebar tabs require it.")}
-        </p>
+        <h1 className="font-display text-[28px] font-medium tracking-tight text-ink">{t("PIN & sidebar locks")}</h1>
+        <p className="text-center text-[13.5px] text-ink-muted">{t("Pick a PIN and which sidebar tabs require it.")}</p>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -678,11 +650,7 @@ function SecurityView({
                     : "bg-canvas/60 text-ink-muted ring-edge-soft"
                 }`}
               >
-                {locked ? (
-                  <Lock size={14} strokeWidth={2.4} />
-                ) : (
-                  <Unlock size={14} strokeWidth={2.2} />
-                )}
+                {locked ? <Lock size={14} strokeWidth={2.4} /> : <Unlock size={14} strokeWidth={2.2} />}
               </span>
               <div className="flex flex-col gap-0.5">
                 <span className="text-[13.5px] font-semibold text-ink">{t("PIN")}</span>
@@ -771,9 +739,7 @@ function ShareOption({
       type="button"
       onClick={onClick}
       className={`flex items-start gap-3 rounded-xl border px-3.5 py-3 text-start transition-colors ${
-        active
-          ? "border-ink/40 bg-canvas/60"
-          : "border-edge-soft hover:border-edge hover:bg-canvas/40"
+        active ? "border-ink/40 bg-canvas/60" : "border-edge-soft hover:border-edge hover:bg-canvas/40"
       }`}
     >
       <span
@@ -844,12 +810,8 @@ function TabsView({
         <span className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
           {t("Sidebar access")}
         </span>
-        <h1 className="font-display text-[24px] font-medium tracking-tight text-ink">
-          {t("Lock sidebar tabs")}
-        </h1>
-        <p className="text-center text-[12.5px] text-ink-muted">
-          {t("Locks only activate once a PIN is set.")}
-        </p>
+        <h1 className="font-display text-[24px] font-medium tracking-tight text-ink">{t("Lock sidebar tabs")}</h1>
+        <p className="text-center text-[12.5px] text-ink-muted">{t("Locks only activate once a PIN is set.")}</p>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pe-1">
         {LOCKABLE_TABS.map((tab) => (
@@ -858,9 +820,7 @@ function TabsView({
             type="button"
             onClick={() => toggle(tab.key)}
             className={`flex shrink-0 items-center justify-between gap-3 rounded-xl border px-4 py-2.5 text-start transition-colors ${
-              tabs[tab.key]
-                ? "border-ink/40 bg-canvas/60"
-                : "border-edge-soft hover:border-edge hover:bg-canvas/40"
+              tabs[tab.key] ? "border-ink/40 bg-canvas/60" : "border-edge-soft hover:border-edge hover:bg-canvas/40"
             }`}
           >
             <div className="flex items-center gap-3">
@@ -872,9 +832,7 @@ function TabsView({
                 {tabs[tab.key] && <Check size={12} strokeWidth={3} />}
               </span>
               <span
-                className={`flex h-6 w-6 items-center justify-center ${
-                  tabs[tab.key] ? "text-ink" : "text-ink-muted"
-                }`}
+                className={`flex h-6 w-6 items-center justify-center ${tabs[tab.key] ? "text-ink" : "text-ink-muted"}`}
               >
                 <TabIcon iconKey={tab.iconKey} />
               </span>

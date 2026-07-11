@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import type { TraktItem } from "./types";
 
 export function traktItemToMeta(item: TraktItem): Meta | null {
@@ -14,9 +15,7 @@ export function traktItemToMeta(item: TraktItem): Meta | null {
 
 function pickStremioId(item: TraktItem): string | null {
   if (item.ids.tmdb) {
-    return item.type === "movie"
-      ? `tmdb:movie:${item.ids.tmdb}`
-      : `tmdb:tv:${item.ids.tmdb}`;
+    return item.type === "movie" ? `tmdb:movie:${item.ids.tmdb}` : `tmdb:tv:${item.ids.tmdb}`;
   }
   if (item.ids.imdb) return item.ids.imdb;
   return null;

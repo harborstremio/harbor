@@ -1,6 +1,6 @@
-import { Sparkles, Star } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useCommunity } from "@/lib/providers/stremio-addons-index";
+import { Sparkles, Star } from "lucide-react";
 
 const NEW_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
 

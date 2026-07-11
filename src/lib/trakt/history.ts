@@ -37,9 +37,7 @@ export async function fetchWatchedHistory(limit = 200): Promise<HistoryItem[]> {
       ids: { imdb?: string; tmdb?: number };
     };
   };
-  const rows = await traktRequest<Raw[]>(`/sync/history?limit=${limit}`).catch(
-    () => [] as Raw[],
-  );
+  const rows = await traktRequest<Raw[]>(`/sync/history?limit=${limit}`).catch(() => [] as Raw[]);
   return rows.map((r) => {
     if (r.type === "movie" && r.movie) {
       return {
@@ -82,9 +80,7 @@ export async function pushWatched(target: TraktTarget): Promise<boolean> {
           shows: [
             {
               ids: target.show.ids,
-              seasons: [
-                { number: target.season, episodes: [{ number: target.number }] },
-              ],
+              seasons: [{ number: target.season, episodes: [{ number: target.number }] }],
             },
           ],
         },

@@ -48,14 +48,19 @@ export function setPickerCache(
 ): void {
   if (result.picker.all.length === 0) return;
   const stripped: StoredResult = { picker: result.picker, rejected: result.rejected.slice(0, 60) };
-  lruSet(cache, entryKey(meta, episode), {
-    meta,
-    episode,
-    result: stripped,
-    fetchedAt: Date.now(),
-    configHash,
-    complete,
-  }, MAX_ENTRIES);
+  lruSet(
+    cache,
+    entryKey(meta, episode),
+    {
+      meta,
+      episode,
+      result: stripped,
+      fetchedAt: Date.now(),
+      configHash,
+      complete,
+    },
+    MAX_ENTRIES,
+  );
   notify();
 }
 
@@ -86,11 +91,7 @@ registerEvictable("picker-cache", (aggressive) => {
   if (changed) notify();
 });
 
-export function getPickerCache(
-  meta: Meta,
-  episode: PlayEpisode | undefined,
-  configHash: string,
-): Entry | null {
+export function getPickerCache(meta: Meta, episode: PlayEpisode | undefined, configHash: string): Entry | null {
   const key = entryKey(meta, episode);
   const e = cache.get(key);
   if (!e) return null;

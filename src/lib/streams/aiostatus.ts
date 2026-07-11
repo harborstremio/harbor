@@ -1,8 +1,9 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
 import { dlog, dwarn } from "@/lib/debug";
-import type { DebridSlug } from "./types";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
+
 import { isStatusOnlyAddon } from "./addon-detect";
+import type { DebridSlug } from "./types";
 
 const SERVICE_NAME_TO_SLUG: Record<string, DebridSlug> = {
   premiumize: "pm",
@@ -59,10 +60,7 @@ type StatusStream = {
   description?: string;
 };
 
-export async function fetchAioStatusHealth(
-  addons: Addon[],
-  signal?: AbortSignal,
-): Promise<AioStatusSnapshot | null> {
+export async function fetchAioStatusHealth(addons: Addon[], signal?: AbortSignal): Promise<AioStatusSnapshot | null> {
   const status = addons.find(isStatusOnlyAddon);
   if (!status) {
     dlog(`[aiostatus] no AIOStatus addon detected`);
@@ -194,10 +192,7 @@ function parseStatusRow(slug: DebridSlug, stream: StatusStream): ServiceHealth {
   return { slug, ...parseStatus(stream) };
 }
 
-async function tryStreamFallback(
-  base: string,
-  signal?: AbortSignal,
-): Promise<Map<DebridSlug, ServiceHealth>> {
+async function tryStreamFallback(base: string, signal?: AbortSignal): Promise<Map<DebridSlug, ServiceHealth>> {
   const out = new Map<DebridSlug, ServiceHealth>();
   const probes = [
     { type: "movie", id: "tt0111161" },

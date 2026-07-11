@@ -1,16 +1,17 @@
-import { Check, Play } from "lucide-react";
 import { Poster } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
 import { formatAirDate } from "@/lib/dates";
 import { formatRelativeWatched } from "@/lib/episode-progress";
+import { useT } from "@/lib/i18n";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { Check, Play } from "lucide-react";
+
 import { FillerBadge, UpcomingBadge } from "../badges";
-import { EpisodeRatingBadge } from "../episode-rating-badge";
 import { EpisodeDownloadButton } from "../episode-download-button";
+import { EpisodeRatingBadge } from "../episode-rating-badge";
 import { isUpcomingDate } from "../helpers";
 
 export function AnimeEpisodeRow({
@@ -54,9 +55,7 @@ export function AnimeEpisodeRow({
     <div
       data-ep={ep.number}
       data-no-card-ring
-      onContextMenu={(e) =>
-        onContextMenu?.(e, ep.seasonNumber || 1, ep.number, progress.watched, ep.sourceMetaId)
-      }
+      onContextMenu={(e) => onContextMenu?.(e, ep.seasonNumber || 1, ep.number, progress.watched, ep.sourceMetaId)}
       className="group flex gap-6 rounded-2xl px-4 py-5 transition-colors hover:bg-elevated/30"
     >
       <button
@@ -65,7 +64,14 @@ export function AnimeEpisodeRow({
       >
         <div className="relative w-[200px] shrink-0">
           <div className={spoiler?.thumb ? `overflow-hidden rounded-lg ${SPOILER_THUMB_CLASS}` : undefined}>
-            <Poster src={ep.thumbnail ?? undefined} seed={String(ep.id)} ratio="landscape" className="rounded-lg" lazy fallbacks={[ep.thumbnailFallback, meta.background]} />
+            <Poster
+              src={ep.thumbnail ?? undefined}
+              seed={String(ep.id)}
+              ratio="landscape"
+              className="rounded-lg"
+              lazy
+              fallbacks={[ep.thumbnailFallback, meta.background]}
+            />
           </div>
           <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-canvas/40 opacity-0 transition-opacity group-hover:opacity-100">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-canvas">
@@ -87,7 +93,10 @@ export function AnimeEpisodeRow({
           )}
           {progress.ratio > 0.01 && (
             <div className="absolute inset-x-1 bottom-1 h-[3px] overflow-hidden rounded-full bg-black/55">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(2, progress.ratio * 100)}%` }} />
+              <div
+                className="h-full rounded-full bg-accent"
+                style={{ width: `${Math.max(2, progress.ratio * 100)}%` }}
+              />
             </div>
           )}
         </div>

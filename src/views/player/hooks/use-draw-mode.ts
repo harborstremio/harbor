@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import type { Stroke } from "@/components/player/draw-canvas";
 import { nameColor } from "@/lib/together/colors";
 import type { IncomingDraw } from "@/lib/together/provider";
+import { useEffect, useState } from "react";
 
 const STROKE_GC_MS = 9500;
 

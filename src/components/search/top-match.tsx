@@ -1,16 +1,11 @@
-import { Play, Star } from "lucide-react";
 import type { SearchResults } from "@/lib/search";
-import { ResultPoster } from "./result-poster";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useView } from "@/lib/view";
+import { Play, Star } from "lucide-react";
 
-export function TopMatch({
-  match,
-  onClose,
-}: {
-  match: NonNullable<SearchResults["topMatch"]>;
-  onClose: () => void;
-}) {
+import { ResultPoster } from "./result-poster";
+
+export function TopMatch({ match, onClose }: { match: NonNullable<SearchResults["topMatch"]>; onClose: () => void }) {
   const { openMeta } = useView();
   const yearTxt = match.meta.releaseInfo ?? "";
   const rating = match.voteAverage && match.voteAverage > 0 ? match.voteAverage.toFixed(1) : null;
@@ -44,17 +39,11 @@ export function TopMatch({
         className="group flex w-full items-stretch gap-7 p-7 text-start transition-transform duration-200 hover:scale-[1.005] active:scale-[0.995]"
       >
         <div className="relative w-[180px] shrink-0 overflow-hidden rounded-2xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)] ring-1 ring-edge-soft">
-          <ResultPoster
-            id={match.meta.id}
-            poster={match.meta.poster}
-            className="block h-full w-full"
-          />
+          <ResultPoster id={match.meta.id} poster={match.meta.poster} className="block h-full w-full" />
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[11.5px] font-semibold uppercase tracking-[0.22em] text-accent">
-            Top match
-          </span>
+          <span className="text-[11.5px] font-semibold uppercase tracking-[0.22em] text-accent">Top match</span>
           <h2
             className="mt-1.5 text-[clamp(32px,3.4vw,52px)] font-medium leading-[1.02] tracking-tight text-ink"
             style={{ fontFamily: "var(--font-display, 'Fraunces')" }}
@@ -80,9 +69,7 @@ export function TopMatch({
             )}
           </div>
           {synopsis && (
-            <p className="mt-4 line-clamp-3 max-w-[60ch] text-[14.5px] leading-relaxed text-ink-muted">
-              {synopsis}
-            </p>
+            <p className="mt-4 line-clamp-3 max-w-[60ch] text-[14.5px] leading-relaxed text-ink-muted">{synopsis}</p>
           )}
           <div className="mt-6 inline-flex h-12 max-w-max items-center gap-2 self-start rounded-full bg-ink px-6 text-[14.5px] font-semibold text-canvas shadow-[0_8px_24px_-8px_rgba(255,255,255,0.25)] transition-all group-hover:bg-ink group-hover:shadow-[0_10px_28px_-6px_rgba(255,255,255,0.4)]">
             <Play size={15} className="fill-current" strokeWidth={0} />

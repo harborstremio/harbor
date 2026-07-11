@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import type { Addon } from "@/lib/addons";
 import { fetchCommunityAddons } from "@/lib/addons-store/community";
 import { registerEvictable } from "@/lib/maintenance";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
-import type { Addon } from "@/lib/addons";
+import { useEffect, useState } from "react";
 
 const API_BASE = "https://stremio-addons.net/api/v0";
 const SITE = "https://stremio-addons.net";
@@ -91,7 +91,10 @@ function buildQuery(params: ListParams): string {
 }
 
 function slugifyId(id: string): string {
-  return id.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return id
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function addonToSA(a: Addon): SAAddon {
@@ -144,8 +147,7 @@ function applyListParams(all: SAAddon[], params: ListParams): ListResult {
   }
   if (params.nsfw === "exclude") {
     filtered = filtered.filter((a) => {
-      const bh = (a.manifest as { behaviorHints?: { adult?: boolean } } | undefined)
-        ?.behaviorHints;
+      const bh = (a.manifest as { behaviorHints?: { adult?: boolean } } | undefined)?.behaviorHints;
       return !bh?.adult;
     });
   }

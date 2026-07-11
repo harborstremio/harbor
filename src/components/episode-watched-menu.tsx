@@ -1,6 +1,3 @@
-import { Check, Eye, EyeOff } from "lucide-react";
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
 import {
   recordManualWatchedMeta,
   setManualWatched,
@@ -11,6 +8,9 @@ import {
 import { markEpisodesWatched, unmarkEpisodeWatched } from "@/lib/simkl/history";
 import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
 import { useSimkl } from "@/lib/simkl/provider";
+import { Check, Eye, EyeOff } from "lucide-react";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export type WatchedMenuTarget = {
   x: number;
@@ -99,9 +99,7 @@ export function EpisodeWatchedMenu({
               recordManualWatchedMeta(metaId, meta);
               if (allEpisodes && allEpisodes.length > 0) {
                 const upTo = allEpisodes.filter(
-                  (e) =>
-                    e.season < target.season ||
-                    (e.season === target.season && e.episode <= target.episode),
+                  (e) => e.season < target.season || (e.season === target.season && e.episode <= target.episode),
                 );
                 setManualWatchedMany(metaId, upTo, true);
               } else {
@@ -121,15 +119,7 @@ export function EpisodeWatchedMenu({
   );
 }
 
-function Item({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-}) {
+function Item({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
     <button
       role="menuitem"

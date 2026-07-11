@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { useMal } from "@/lib/mal/provider";
 import { fetchMalList } from "@/lib/mal/lists";
+import { useMal } from "@/lib/mal/provider";
 import type { MalListEntry, MalListGroup, MalListStatus } from "@/lib/mal/types";
+import { useEffect, useState } from "react";
 
 export type MalRail = { key: string; title: string; metas: Meta[] };
 
@@ -54,9 +54,7 @@ export function useMalAnimeRails(): MalRail[] {
       for (const rail of RAIL_ORDER) {
         let entries = rail.statuses.flatMap((s) => entriesByStatus.get(s) ?? []);
         if (rail.key === "watching" || rail.key === "completed") {
-          entries = [...entries].sort(
-            (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-          );
+          entries = [...entries].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
         }
         const metas = entries.map(malEntryToMeta).filter((m): m is Meta => m != null);
         if (metas.length >= MIN_PER_RAIL) out.push({ key: rail.key, title: rail.title, metas });

@@ -1,7 +1,8 @@
 import { dinfo, dwarn } from "@/lib/debug";
 import { safeFetch } from "@/lib/safe-fetch";
-import type { SubResult, SubSearchQuery } from "../types";
+
 import { normalizeLang } from "../language";
+import type { SubResult, SubSearchQuery } from "../types";
 
 const ENDPOINTS = [
   "https://opensubtitles.stremio.homes",

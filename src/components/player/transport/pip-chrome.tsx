@@ -1,10 +1,11 @@
-import { PauseCircle, PlayCircle } from "lucide-react";
-import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
-import { Tooltip } from "./tooltip";
+import type { PlayerSnapshot } from "@/lib/player/bridge";
+import { PauseCircle, PlayCircle } from "lucide-react";
+
 import { PipIconBtn, PipStepBtn } from "./pip-controls";
 import { PipSeekBar } from "./pip-seek-bar";
 import { PipVolume } from "./pip-volume";
+import { Tooltip } from "./tooltip";
 
 export function PipChrome({
   snap,
@@ -43,11 +44,7 @@ export function PipChrome({
   const muted = snap.muted || snap.volume === 0;
   return (
     <>
-      <div
-        data-tauri-drag-region
-        aria-hidden
-        className="absolute inset-0 z-10"
-      />
+      <div data-tauri-drag-region aria-hidden className="absolute inset-0 z-10" />
       <div
         aria-hidden
         onPointerDown={(e) => {
@@ -83,7 +80,16 @@ export function PipChrome({
             className="pointer-events-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/95 backdrop-blur-md transition-colors hover:bg-black/85"
             aria-label={t("Exit Picture in Picture")}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M3 9V5a2 2 0 0 1 2-2h4" />
               <path d="M21 9V5a2 2 0 0 0-2-2h-4" />
               <path d="M3 15v4a2 2 0 0 0 2 2h4" />
@@ -117,7 +123,16 @@ export function PipChrome({
             onClick={() => onSeekStep(-30)}
             stepText="30s"
             icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M3 12a9 9 0 1 0 3-6.7" />
                 <polyline points="3 4 3 10 9 10" />
               </svg>
@@ -130,11 +145,7 @@ export function PipChrome({
               aria-label={playing ? t("Pause") : t("Play")}
               className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/14 text-white transition-[background-color,transform] hover:bg-white/24 active:scale-95"
             >
-              {playing ? (
-                <PauseCircle size={26} strokeWidth={1.5} />
-              ) : (
-                <PlayCircle size={26} strokeWidth={1.5} />
-              )}
+              {playing ? <PauseCircle size={26} strokeWidth={1.5} /> : <PlayCircle size={26} strokeWidth={1.5} />}
             </button>
           </Tooltip>
           <PipStepBtn
@@ -142,7 +153,16 @@ export function PipChrome({
             onClick={() => onSeekStep(30)}
             stepText="30s"
             icon={
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <path d="M21 12a9 9 0 1 1-3-6.7" />
                 <polyline points="21 4 21 10 15 10" />
               </svg>

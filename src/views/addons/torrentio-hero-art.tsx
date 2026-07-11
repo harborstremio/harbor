@@ -1,9 +1,7 @@
-import { useEffect, useState } from "react";
 import torrentioBannerLogo from "@/assets/addon-logos/torrentio.png";
-import {
-  getCinemetaPosterCache,
-  loadCinemetaPosters,
-} from "./cinemeta-posters";
+import { useEffect, useState } from "react";
+
+import { getCinemetaPosterCache, loadCinemetaPosters } from "./cinemeta-posters";
 
 const POSTER_SLOTS = 18;
 
@@ -37,10 +35,7 @@ export function TorrentioHeroArt() {
           }}
         >
           {tiles.map((url, i) => (
-            <div
-              key={`${url}-${i}`}
-              className="overflow-hidden rounded-md bg-elevated/30"
-            >
+            <div key={`${url}-${i}`} className="overflow-hidden rounded-md bg-elevated/30">
               <img
                 src={url}
                 alt=""
@@ -76,12 +71,7 @@ export function TorrentioHeroArt() {
                 "0 36px 80px -20px rgba(0,0,0,0.95), 0 0 0 1px color-mix(in oklab, var(--color-accent) 35%, transparent)",
             }}
           >
-            <img
-              src={torrentioBannerLogo}
-              alt=""
-              draggable={false}
-              className="h-[120px] w-[120px] object-contain"
-            />
+            <img src={torrentioBannerLogo} alt="" draggable={false} className="h-[120px] w-[120px] object-contain" />
           </div>
         </div>
       </div>

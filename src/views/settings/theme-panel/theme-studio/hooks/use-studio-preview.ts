@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import type { ThemeLayout } from "@/lib/theme";
 import { setThemePreview } from "@/lib/theme-preview";
 import { useView } from "@/lib/view";
+import { useEffect, useState } from "react";
 
 export function useStudioPreview(layout: ThemeLayout, bokeh: boolean) {
   const { setView } = useView();

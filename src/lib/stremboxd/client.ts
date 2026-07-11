@@ -1,5 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
-import { STREMBOXD_BASE } from "./config";
+
 import {
   getCachedCatalog,
   getCachedManifest,
@@ -8,6 +8,7 @@ import {
   setCachedManifest,
   setCachedMeta,
 } from "./cache";
+import { STREMBOXD_BASE } from "./config";
 import type {
   LetterboxdFilm,
   LetterboxdFilmRating,
@@ -155,26 +156,15 @@ export async function fetchStremboxdManifest(configSegment: string): Promise<Str
   return new StremboxdClient(configSegment).getManifest();
 }
 
-export async function fetchStremboxdCatalog(
-  configSegment: string,
-  catalogId: string,
-  skip = 0,
-): Promise<CatalogPage> {
+export async function fetchStremboxdCatalog(configSegment: string, catalogId: string, skip = 0): Promise<CatalogPage> {
   return new StremboxdClient(configSegment).getCatalog(catalogId, skip);
 }
 
-export async function fetchStremboxdMeta(
-  configSegment: string,
-  imdbId: string,
-): Promise<StremboxdMeta | null> {
+export async function fetchStremboxdMeta(configSegment: string, imdbId: string): Promise<StremboxdMeta | null> {
   return new StremboxdClient(configSegment).getMeta(imdbId);
 }
 
-export async function fetchFullModeCatalog(
-  userId: string,
-  catalogId: string,
-  skip = 0,
-): Promise<CatalogPage> {
+export async function fetchFullModeCatalog(userId: string, catalogId: string, skip = 0): Promise<CatalogPage> {
   const key = `full:${userId}:${catalogId}:${skip}`;
   const cached = getCachedCatalog<CatalogPage>(key);
   if (cached) return cached;
@@ -188,9 +178,7 @@ export async function fetchFullModeManifest(userId: string): Promise<StremboxdMa
   const key = `full-manifest:${userId}`;
   const cached = getCachedManifest<StremboxdManifest>(key);
   if (cached) return cached;
-  const manifest = await asJson<StremboxdManifest>(
-    await fetch(`${STREMBOXD_BASE}/stremio/${userId}/manifest.json`),
-  );
+  const manifest = await asJson<StremboxdManifest>(await fetch(`${STREMBOXD_BASE}/stremio/${userId}/manifest.json`));
   setCachedManifest(key, manifest);
   return manifest;
 }
@@ -227,7 +215,7 @@ export type LetterboxdReview = {
 // Accept-Language and a Referer hint to improve pass-through.
 async function fetchWithCloudflareBypass(url: string): Promise<Response> {
   const headers: Record<string, string> = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
   };
   try {
@@ -326,11 +314,7 @@ export async function fetchLetterboxdReviewsDirect(
       : "";
     const avatarImg = art.querySelector("a.avatar img") as HTMLImageElement | null;
     const avatarSrc = avatarImg?.getAttribute("src") ?? "";
-    const avatar = avatarSrc
-      ? avatarSrc.startsWith("http")
-        ? avatarSrc
-        : `https://letterboxd.com${avatarSrc}`
-      : null;
+    const avatar = avatarSrc ? (avatarSrc.startsWith("http") ? avatarSrc : `https://letterboxd.com${avatarSrc}`) : null;
 
     const ratingSvg = art.querySelector(".inline-rating svg") as SVGSVGElement | null;
     const rating = ratingSvg?.getAttribute("aria-label") ?? null;
@@ -351,10 +335,7 @@ export async function fetchLetterboxdReviewsDirect(
 // Fetch friends' reviews — uses letterboxd.com/{username}/friends/film/{slug}/reviews/
 // which returns 200 (unlike /by/activity/ which is 403'd by Cloudflare).
 // Requires the user's Letterboxd username + the film slug.
-export async function fetchLetterboxdFriendsReviews(
-  username: string,
-  imdbId: string,
-): Promise<LetterboxdReview[]> {
+export async function fetchLetterboxdFriendsReviews(username: string, imdbId: string): Promise<LetterboxdReview[]> {
   // First resolve the film slug from the IMDb redirect page
   const url = `https://letterboxd.com/imdb/${imdbId}/`;
   let html: string;
@@ -407,13 +388,13 @@ export async function fetchLetterboxdFriendsReviews(
     const authorLink = art.querySelector("a.avatar") as HTMLAnchorElement | null;
     const authorPath = authorLink?.getAttribute("href") ?? "";
     const authorUrl = authorPath
-      ? authorPath.startsWith("http") ? authorPath : `https://letterboxd.com${authorPath}`
+      ? authorPath.startsWith("http")
+        ? authorPath
+        : `https://letterboxd.com${authorPath}`
       : "";
     const avatarImg = art.querySelector("a.avatar img") as HTMLImageElement | null;
     const avatarSrc = avatarImg?.getAttribute("src") ?? "";
-    const avatar = avatarSrc
-      ? avatarSrc.startsWith("http") ? avatarSrc : `https://letterboxd.com${avatarSrc}`
-      : null;
+    const avatar = avatarSrc ? (avatarSrc.startsWith("http") ? avatarSrc : `https://letterboxd.com${avatarSrc}`) : null;
     const ratingSvg = art.querySelector(".inline-rating svg") as SVGSVGElement | null;
     const rating = ratingSvg?.getAttribute("aria-label") ?? null;
     const lang = bodyEl.getAttribute("lang") ?? null;
@@ -487,7 +468,11 @@ export async function validateStremboxdConfig(
     return { ok: true, catalogs: manifest.catalogs.length, hasWatchlist };
   } catch (e) {
     if (e instanceof StremboxdApiError) {
-      return { ok: false, reason: "invalid", message: e.status === 400 ? "Invalid configuration." : `Stremboxd error (${e.status}).` };
+      return {
+        ok: false,
+        reason: "invalid",
+        message: e.status === 400 ? "Invalid configuration." : `Stremboxd error (${e.status}).`,
+      };
     }
     return { ok: false, reason: "network", message: "Could not reach Stremboxd. Check your connection." };
   }

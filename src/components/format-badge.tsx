@@ -1,19 +1,15 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { AlertTriangle, Info } from "lucide-react";
-import { useT } from "@/lib/i18n";
-import badge1080i from "@/assets/badges/1080i.png";
-import badge1080p from "@/assets/badges/1080p_fhd.webp";
 import badge2kQhd from "@/assets/badges/2k_qhd.png";
-import badge360p240p from "@/assets/badges/360p_240p.png";
-import badge480p from "@/assets/badges/480p.png";
-import badge576pPal from "@/assets/badges/576p_pal.png";
 import badge3d from "@/assets/badges/3d.webp";
 import badge4kUhd from "@/assets/badges/4k_uhd.webp";
 import badge51 from "@/assets/badges/5_1.webp";
-import badge720p from "@/assets/badges/720p_hd.webp";
 import badge71 from "@/assets/badges/7_1.webp";
 import badge8k from "@/assets/badges/8k.png";
+import badge360p240p from "@/assets/badges/360p_240p.png";
+import badge480p from "@/assets/badges/480p.png";
+import badge576pPal from "@/assets/badges/576p_pal.png";
+import badge720p from "@/assets/badges/720p_hd.webp";
+import badge1080i from "@/assets/badges/1080i.png";
+import badge1080p from "@/assets/badges/1080p_fhd.webp";
 import badgeAac from "@/assets/badges/aac.png";
 import badgeAc3 from "@/assets/badges/ac3.png";
 import badgeAtmos from "@/assets/badges/atmos.webp";
@@ -65,7 +61,11 @@ import badgeUnknown from "@/assets/badges/unknown.png";
 import badgeWebdl from "@/assets/badges/webdl.png";
 import badgeWebrip from "@/assets/badges/webrip.png";
 import badgeWp from "@/assets/badges/wp.png";
+import { useT } from "@/lib/i18n";
 import type { ParsedStream, ScoredStream } from "@/lib/streams/types";
+import { AlertTriangle, Info } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export type BadgeKind =
   | "8k"
@@ -339,13 +339,7 @@ const QUALITY_NOTES: Partial<Record<BadgeKind, QualityNote>> = {
   },
 };
 
-export function FormatBadge({
-  kind,
-  size = "md",
-}: {
-  kind: BadgeKind;
-  size?: BadgeSize;
-}) {
+export function FormatBadge({ kind, size = "md" }: { kind: BadgeKind; size?: BadgeSize }) {
   const note = QUALITY_NOTES[kind];
   const scale = SCALE_UP[kind] ?? 1;
   const w = Math.round(WIDTH[size] * scale);
@@ -374,13 +368,7 @@ export function FormatBadge({
 const TOOLTIP_WIDTH = 280;
 const TOOLTIP_GAP = 8;
 
-function BadgeWithTooltip({
-  note,
-  children,
-}: {
-  note: QualityNote;
-  children: React.ReactNode;
-}) {
+function BadgeWithTooltip({ note, children }: { note: QualityNote; children: React.ReactNode }) {
   const t = useT();
   const wrapRef = useRef<HTMLSpanElement>(null);
   const [open, setOpen] = useState(false);
@@ -394,8 +382,7 @@ function BadgeWithTooltip({
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const desiredHeight = 120;
-    const place: "above" | "below" =
-      rect.top - desiredHeight - TOOLTIP_GAP > 12 ? "above" : "below";
+    const place: "above" | "below" = rect.top - desiredHeight - TOOLTIP_GAP > 12 ? "above" : "below";
     const top = place === "above" ? rect.top - TOOLTIP_GAP - desiredHeight : rect.bottom + TOOLTIP_GAP;
     let left = rect.left + rect.width / 2 - TOOLTIP_WIDTH / 2;
     left = Math.max(12, Math.min(left, vw - TOOLTIP_WIDTH - 12));
@@ -423,19 +410,21 @@ function BadgeWithTooltip({
       className="relative inline-flex shrink-0 items-center cursor-help outline-none"
     >
       {children}
-      {open && pos &&
+      {open &&
+        pos &&
         createPortal(
           <div
             style={{
               top: pos.top,
               left: pos.left,
               width: TOOLTIP_WIDTH,
-              background:
-                "linear-gradient(var(--color-elevated), var(--color-elevated)), var(--color-canvas)",
+              background: "linear-gradient(var(--color-elevated), var(--color-elevated)), var(--color-canvas)",
             }}
             className="pointer-events-none fixed z-[145] flex flex-col gap-1.5 rounded-xl border border-edge px-3.5 py-3 text-start shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
           >
-            <span className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] ${accent}`}>
+            <span
+              className={`flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] ${accent}`}
+            >
               {note.tone === "warn" ? (
                 <AlertTriangle size={11} strokeWidth={2.4} />
               ) : (
@@ -470,11 +459,7 @@ export type QualityConfidence = "labeled" | "unverified" | "unlabeled";
 
 export function qualityConfidence(s: ParsedStream | ScoredStream): QualityConfidence {
   const nothingDetected =
-    s.resolution === "SD" &&
-    s.source === "Other" &&
-    s.codec === "Other" &&
-    !s.hdrFormat &&
-    s.audio.codec === "Other";
+    s.resolution === "SD" && s.source === "Other" && s.codec === "Other" && !s.hdrFormat && s.audio.codec === "Other";
   if (nothingDetected) return "unlabeled";
   const reasons = "reasons" in s ? s.reasons : null;
   const flagged = reasons?.some(

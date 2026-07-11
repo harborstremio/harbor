@@ -12,11 +12,7 @@ export type DurationChoice = {
 
 type Translate = (key: string, vars?: Record<string, string | number>) => string;
 
-export function buildChoices(
-  current: EpgProgram | null,
-  next: EpgProgram | null,
-  t: Translate,
-): DurationChoice[] {
+export function buildChoices(current: EpgProgram | null, next: EpgProgram | null, t: Translate): DurationChoice[] {
   const now = Date.now();
   const out: DurationChoice[] = [];
   if (current && current.endMs > now) {
@@ -47,7 +43,11 @@ export function buildChoices(
         kind: "next",
         durationSec: sec + Math.max(0, Math.round((next.startMs - now) / 1000)),
         label: t("Just the next show: {title}", { title: next.title }),
-        caption: t("{start} to {end} · {dur}", { start: formatClock(next.startMs), end: formatClock(next.endMs), dur: formatMinutes(sec) }),
+        caption: t("{start} to {end} · {dur}", {
+          start: formatClock(next.startMs),
+          end: formatClock(next.endMs),
+          dur: formatMinutes(sec),
+        }),
         programTitle: next.title,
       });
     }

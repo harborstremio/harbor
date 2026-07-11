@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import type { Meta } from "@/lib/cinemeta";
-import { useAnilist } from "@/lib/anilist/provider";
 import { fetchMediaListCollection, readCachedCollection } from "@/lib/anilist/lists";
+import { useAnilist } from "@/lib/anilist/provider";
 import { fetchAnilistRecommendations } from "@/lib/anilist/recommendations";
 import { anilistEntryToMeta } from "@/lib/anilist/to-meta";
 import type { AnilistListGroup, MediaListStatus } from "@/lib/anilist/types";
+import type { Meta } from "@/lib/cinemeta";
+import { useEffect, useState } from "react";
 
 export type AnilistRail = { key: string; title: string; metas: Meta[] };
 
@@ -52,9 +52,7 @@ export function useAnilistAnimeRails(): AnilistRail[] {
       const excludeIds = new Set<number>();
       for (const g of groups) for (const e of g.entries) excludeIds.add(e.media.id);
 
-      const seedIds = SEED_STATUSES.flatMap((s) =>
-        (entriesByStatus.get(s) ?? []).map((e) => e.media.id),
-      );
+      const seedIds = SEED_STATUSES.flatMap((s) => (entriesByStatus.get(s) ?? []).map((e) => e.media.id));
       const recs = seedIds.length > 0 ? await fetchAnilistRecommendations(seedIds, excludeIds) : [];
       if (cancelled) return;
       setRails(

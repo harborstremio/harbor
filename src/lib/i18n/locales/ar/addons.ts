@@ -86,8 +86,8 @@ const addons: Record<string, string> = {
   "Click to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.":
     "انقر لفتح صفحة إعداد {name} في متصفّح Harbor المدمج. اختر خياراتك. عند النقر على تثبيت في صفحتها، يلتقط Harbor الرابط تلقائيًا ويحدّث الإضافة.",
   "Open setup page": "فتح صفحة الإعداد",
-  "Heads-up: a few addons (like AIOStatus) don't pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their \"Import from URL\" field to restore your settings.":
-    "تنبيه: بعض الإضافات (مثل AIOStatus) لا تُملأ مسبقًا من الرابط. إذا حُمّل النموذج فارغًا، فالصق رابط الـ manifest الحالي في حقل \"الاستيراد من رابط\" لاستعادة إعداداتك.",
+  'Heads-up: a few addons (like AIOStatus) don\'t pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their "Import from URL" field to restore your settings.':
+    'تنبيه: بعض الإضافات (مثل AIOStatus) لا تُملأ مسبقًا من الرابط. إذا حُمّل النموذج فارغًا، فالصق رابط الـ manifest الحالي في حقل "الاستيراد من رابط" لاستعادة إعداداتك.',
   "Or paste the install link manually": "أو الصق رابط التثبيت يدويًا",
   Read: "قراءة",
   Continue: "متابعة",
@@ -105,8 +105,7 @@ const addons: Record<string, string> = {
   addon: "إضافة",
   "Hang tight, won't be a sec.": "تمهّل، لن يطول الأمر.",
   "is now using your new configuration.": "يستخدم الآن تهيئتك الجديدة.",
-  "is ready. Open Discover or hit Play on a title to use it.":
-    "جاهزة. افتح الاكتشاف أو اضغط تشغيل على عنوان لاستخدامها.",
+  "is ready. Open Discover or hit Play on a title to use it.": "جاهزة. افتح الاكتشاف أو اضغط تشغيل على عنوان لاستخدامها.",
 
   "Rate on stremio-addons.net": "قيّم على stremio-addons.net",
   "Opening stremio-addons.net in your browser to sign in and rate":
@@ -146,8 +145,7 @@ const addons: Record<string, string> = {
   "Stremio addon, packaged into Harbor's catalog.": "إضافة Stremio، مُدمجة في كتالوج Harbor.",
   "Version and capabilities come straight from the addon's manifest. Ratings and categories come from the":
     "يأتي الإصدار والإمكانات مباشرة من manifest الإضافة. وتأتي التقييمات والفئات من",
-  "community API. Star, browse, and contribute on their site.":
-    "واجهة برمجة المجتمع. قيّم وتصفّح وساهم على موقعهم.",
+  "community API. Star, browse, and contribute on their site.": "واجهة برمجة المجتمع. قيّم وتصفّح وساهم على موقعهم.",
   "More like this": "أعمال مشابهة",
   "Recommended for you": "موصى به لك",
 
@@ -194,8 +192,7 @@ const addons: Record<string, string> = {
   "Sign in to Stremio to organize the addons synced to your account.":
     "سجّل الدخول إلى Stremio لتنظيم الإضافات المتزامنة مع حسابك.",
   "Good to know": "جدير بالمعرفة",
-  "Number 1 gets asked first for streams when you press Play.":
-    "يُسأل رقم 1 أولًا عن البثوث عند الضغط على تشغيل.",
+  "Number 1 gets asked first for streams when you press Play.": "يُسأل رقم 1 أولًا عن البثوث عند الضغط على تشغيل.",
   "The order also decides which addon's rows win on your Home screen.":
     "يحدّد الترتيب أيضًا صفوف أي إضافة تفوز في شاشتك الرئيسية.",
   "Nothing changes until you press Save. Leaving this page discards edits.":
@@ -251,8 +248,7 @@ const addons: Record<string, string> = {
   "Loading…": "جارٍ التحميل…",
   "Untitled addon": "إضافة بلا عنوان",
   "Paste manifest URL or stremio:// link": "الصق رابط الـ manifest أو رابط //:stremio",
-  "Install from URL: paste any manifest or stremio:// link":
-    "التثبيت من رابط: الصق أي manifest أو رابط //:stremio",
+  "Install from URL: paste any manifest or stremio:// link": "التثبيت من رابط: الصق أي manifest أو رابط //:stremio",
   "Click below to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.":
     "انقر أدناه لفتح صفحة إعداد {name}. اختر خياراتك، ثم انسخ رابط التثبيت الذي تمنحك إياه والصقه أدناه لتحديث الإضافة.",
   "Click below to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.":
@@ -267,8 +263,7 @@ const addons: Record<string, string> = {
   "No subscription needed. Quality varies.": "لا يتطلب اشتراكًا. تتفاوت الجودة.",
   "Anime done right": "أنمي بشكل صحيح",
   "Kitsu IDs, fansub-friendly, season-aware.": "معرّفات Kitsu، متوافقة مع ترجمات المعجبين، مدركة للمواسم.",
-  "Proper search across providers, foreign-language coverage.":
-    "بحث دقيق عبر المزوّدين، وتغطية للّغات الأجنبية.",
+  "Proper search across providers, foreign-language coverage.": "بحث دقيق عبر المزوّدين، وتغطية للّغات الأجنبية.",
   "Better posters, ratings, episode info.": "ملصقات وتقييمات ومعلومات حلقات أفضل.",
   "Sports & live TV": "الرياضة والبث التلفزيوني المباشر",
   "Live streams that actually work.": "بثوث مباشرة تعمل فعلًا.",

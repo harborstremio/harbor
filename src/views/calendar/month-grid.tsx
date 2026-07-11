@@ -1,5 +1,6 @@
 import type { CalendarItem } from "@/lib/calendar";
 import { useT } from "@/lib/i18n";
+
 import { CalendarChip } from "./calendar-chip";
 import type { Cell } from "./types";
 import { orderedWeekdayNames } from "./utils";
@@ -25,10 +26,7 @@ export function MonthGrid({
     <div className="flex flex-col gap-2">
       <div className="grid grid-cols-7 gap-2">
         {weekdays.map((d) => (
-          <div
-            key={d}
-            className="px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-subtle"
-          >
+          <div key={d} className="px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
             {t(d)}
           </div>
         ))}

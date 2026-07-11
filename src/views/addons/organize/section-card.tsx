@@ -1,8 +1,9 @@
-import { ArrowDown, ArrowUp, ChevronsUp, GripVertical } from "lucide-react";
-import type { HTMLAttributes, ReactNode } from "react";
 import { AddonLogo } from "@/components/addon-logo";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { useT } from "@/lib/i18n";
+import { ArrowDown, ArrowUp, ChevronsUp, GripVertical } from "lucide-react";
+import type { HTMLAttributes, ReactNode } from "react";
+
 import type { DragList } from "./use-drag-list";
 
 export type OrganizeEntry = {

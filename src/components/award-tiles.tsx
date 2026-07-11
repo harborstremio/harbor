@@ -3,6 +3,7 @@ import { Laurel } from "@/components/icons/laurel";
 import { useT } from "@/lib/i18n";
 import type { AwardType } from "@/lib/providers/wikidata";
 import { useView } from "@/lib/view";
+
 import { Row } from "./row";
 
 const AWARDS: Array<{ type: AwardType; name: string; sub: string }> = [
@@ -48,10 +49,7 @@ function AwardTile({ type, name, sub }: { type: AwardType; name: string; sub: st
           background: `radial-gradient(ellipse at 50% 32%, oklch(from ${tint} 0.5 calc(c * 0.7) h / 0.22), transparent 62%)`,
         }}
       />
-      <div
-        className="absolute inset-x-0 top-0 flex h-[62%] items-center justify-center"
-        style={{ color: tint }}
-      >
+      <div className="absolute inset-x-0 top-0 flex h-[62%] items-center justify-center" style={{ color: tint }}>
         <span className="opacity-95 drop-shadow-[0_4px_24px_rgba(0,0,0,0.45)] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:scale-[1.06]">
           <Laurel size={96}>
             <AwardLogo type={type} size={32} />

@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+
 import { MAX_SLOTS } from "./bridge";
 
 export type Layout = "1" | "2" | "3" | "2x2";
@@ -26,9 +27,7 @@ export function layoutSlotCount(l: Layout): number {
 }
 
 export function useMultiviewStore() {
-  const [slots, setSlots] = useState<(SlotChannel | null)[]>(() =>
-    Array.from({ length: MAX_SLOTS }, () => null),
-  );
+  const [slots, setSlots] = useState<(SlotChannel | null)[]>(() => Array.from({ length: MAX_SLOTS }, () => null));
   const [layout, setLayoutState] = useState<Layout>(initialLayout);
   const [audioFocus, setAudioFocus] = useState(0);
 

@@ -1,22 +1,16 @@
-import { Check, Download, ExternalLink, Key, Loader2, Search, Trash2, X, Zap } from "lucide-react";
-import { useEffect, useState } from "react";
 import { AddonLogo } from "@/components/addon-logo";
 import { Flag } from "@/components/flag";
-import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
 import { ServiceLogo } from "@/components/service-logo";
-import {
-  cometKeyFromUrl,
-  installAddon,
-  isInstalled,
-  transportUrlFor,
-  uninstallAddon,
-} from "@/lib/addon-store";
-import { openUrl } from "@/lib/window";
+import { cometKeyFromUrl, installAddon, isInstalled, transportUrlFor, uninstallAddon } from "@/lib/addon-store";
 import { useSettings, type StreamingService } from "@/lib/settings";
+import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
+import { openUrl } from "@/lib/window";
+import { Check, Download, ExternalLink, Key, Loader2, Search, Trash2, X, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export function pickDebridForAddon(s: ReturnType<typeof useSettings>["settings"]):
-  | { service: string; key: string; label: string }
-  | null {
+export function pickDebridForAddon(
+  s: ReturnType<typeof useSettings>["settings"],
+): { service: string; key: string; label: string } | null {
   if (s.tbKey) return { service: "torbox", key: s.tbKey, label: "TorBox" };
   if (s.rdKey) return { service: "realdebrid", key: s.rdKey, label: "Real-Debrid" };
   if (s.adKey) return { service: "alldebrid", key: s.adKey, label: "AllDebrid" };
@@ -322,7 +316,6 @@ export function LanguagesPicker({
   );
 }
 
-
 export function ServiceCard({
   service,
   active,
@@ -337,9 +330,7 @@ export function ServiceCard({
       onClick={onToggle}
       aria-pressed={active}
       className={`relative flex h-20 items-center justify-center overflow-hidden rounded-xl border px-4 transition-all ${
-        active
-          ? "border-ink-subtle/50 bg-raised opacity-100"
-          : "border-edge-soft bg-canvas opacity-55 hover:opacity-90"
+        active ? "border-ink-subtle/50 bg-raised opacity-100" : "border-edge-soft bg-canvas opacity-55 hover:opacity-90"
       }`}
     >
       <ServiceLogo service={service} height={26} />

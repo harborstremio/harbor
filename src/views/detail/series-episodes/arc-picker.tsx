@@ -1,8 +1,8 @@
+import { useT } from "@/lib/i18n";
+import type { StoryArc } from "@/lib/providers/tmdb";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
-import type { StoryArc } from "@/lib/providers/tmdb";
 
 type MenuPos = { right: number; top?: number; bottom?: number; maxH: number };
 
@@ -79,11 +79,7 @@ export function ArcPicker({
     const up = below < 240 && above > below;
     const maxH = Math.max(160, Math.min(0.6 * window.innerHeight, up ? above : below));
     const right = Math.max(margin, window.innerWidth - r.right);
-    setMenu(
-      up
-        ? { right, bottom: window.innerHeight - r.top + 8, maxH }
-        : { right, top: r.bottom + 8, maxH },
-    );
+    setMenu(up ? { right, bottom: window.innerHeight - r.top + 8, maxH } : { right, top: r.bottom + 8, maxH });
   };
 
   return (

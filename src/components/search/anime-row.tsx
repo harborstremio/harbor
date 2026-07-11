@@ -1,10 +1,10 @@
-import { Sparkles, Star } from "lucide-react";
 import { usePosterChain } from "@/components/poster";
-import type { AnimeHit } from "@/lib/search";
+import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import type { AnimeHit } from "@/lib/search";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import type { Meta } from "@/lib/cinemeta";
+import { Sparkles, Star } from "lucide-react";
 
 export function AnimeRow({ items, onClose }: { items: AnimeHit[]; onClose: () => void }) {
   const { openMeta } = useView();
@@ -75,11 +75,7 @@ function AnimeRowItem({ hit, onOpen }: { hit: AnimeHit; onOpen: (hit: AnimeHit) 
             </span>
           )}
         </span>
-        {hit.overview && (
-          <span className="line-clamp-2 text-[12px] leading-snug text-ink-muted">
-            {hit.overview}
-          </span>
-        )}
+        {hit.overview && <span className="line-clamp-2 text-[12px] leading-snug text-ink-muted">{hit.overview}</span>}
       </span>
     </button>
   );

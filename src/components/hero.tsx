@@ -1,19 +1,19 @@
-import { memo, useEffect, useRef, useState } from "react";
-import { Check, Play, Plus, TrendingUp } from "lucide-react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { MetaAwardsCorner } from "@/components/meta-awards-corner";
 import { RtBadge } from "@/components/rt-badge";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { omdbPrefetch, useOmdbScores } from "@/lib/providers/omdb";
 import { useImdbRating } from "@/lib/imdb-rating";
+import { omdbPrefetch, useOmdbScores } from "@/lib/providers/omdb";
 import { tmdbImdbId, tmdbLogo, tmdbMovieImages, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
-import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
+import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useView } from "@/lib/view";
 import { usePageVisible } from "@/lib/visibility";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
+import { Check, Play, Plus, TrendingUp } from "lucide-react";
+import { memo, useEffect, useRef, useState } from "react";
 
 export const Hero = memo(function Hero({
   meta,
@@ -219,16 +219,22 @@ export const Hero = memo(function Hero({
           {rank && (
             <div className="mb-5 inline-flex items-center gap-1.5 self-start rounded-md bg-canvas/85 px-2.5 py-1 text-[12px] font-semibold text-ink">
               <TrendingUp size={12} className="text-accent" />
-              <span>
-                {t("#{position} in {label} Today", { position: rank.position, label: t(rank.label) })}
-              </span>
+              <span>{t("#{position} in {label} Today", { position: rank.position, label: t(rank.label) })}</span>
             </div>
           )}
-          <HeroTitlePlate name={meta.name} logo={logo} loaded={logoLoaded} resolved={logoResolved} onLoad={() => setLogoLoaded(true)} onError={() => { setLogo(undefined); setLogoResolved(true); }} />
+          <HeroTitlePlate
+            name={meta.name}
+            logo={logo}
+            loaded={logoLoaded}
+            resolved={logoResolved}
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => {
+              setLogo(undefined);
+              setLogoResolved(true);
+            }}
+          />
           {description && (
-            <p className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted">
-              {description}
-            </p>
+            <p className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted">{description}</p>
           )}
           <div className="mt-6 flex flex-wrap items-center gap-x-8 gap-y-2 text-[14px]">
             {meta.releaseInfo && <Stat label={t("Year")} value={meta.releaseInfo} />}

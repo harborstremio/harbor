@@ -29,10 +29,7 @@ type GroupDetail = {
 const groupIdCache = new Map<number, { id: string; name: string } | null>();
 const arcsCache = new Map<string, StoryArc[]>();
 
-export async function tmdbEpisodeGroups(
-  key: string,
-  tvId: number,
-): Promise<{ id: string; name: string } | null> {
+export async function tmdbEpisodeGroups(key: string, tvId: number): Promise<{ id: string; name: string } | null> {
   if (groupIdCache.has(tvId)) return groupIdCache.get(tvId) ?? null;
   const data = await get<GroupsList>(key, `tv/${tvId}/episode_groups`);
   const arcs = (data?.results ?? []).filter((r) => r.type === 5);

@@ -1,5 +1,6 @@
-import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { useMemo } from "react";
+
 import { EmptyState, FilteredOutState, NoSourcesState, TheatresEmptyState } from "./empty-states";
 import type { usePipelineResult } from "./use-pipeline-result";
 
@@ -86,21 +87,27 @@ export function PickerEmptyLadder({
           isAnime={meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:")}
         />
       )}
-      {addonsSettled && streamIds && streamIds.length > 0 && allCount === 0 && debridCount > 0 && rawCount > 0 && isStillInTheatres && (
-        <TheatresEmptyState
-          meta={meta}
-          onShowAll={onShowAll}
-          showingAll={forceShowAll}
-        />
-      )}
-      {addonsSettled && streamIds && streamIds.length > 0 && allCount === 0 && debridCount > 0 && rawCount > 0 && !isStillInTheatres && (
-        <FilteredOutState
-          rawCount={rawCount}
-          rejected={result?.rejected ?? []}
-          strictMode={strictMode || !forceShowAll}
-          onSearchWider={onSearchWider}
-        />
-      )}
+      {addonsSettled &&
+        streamIds &&
+        streamIds.length > 0 &&
+        allCount === 0 &&
+        debridCount > 0 &&
+        rawCount > 0 &&
+        isStillInTheatres && <TheatresEmptyState meta={meta} onShowAll={onShowAll} showingAll={forceShowAll} />}
+      {addonsSettled &&
+        streamIds &&
+        streamIds.length > 0 &&
+        allCount === 0 &&
+        debridCount > 0 &&
+        rawCount > 0 &&
+        !isStillInTheatres && (
+          <FilteredOutState
+            rawCount={rawCount}
+            rejected={result?.rejected ?? []}
+            strictMode={strictMode || !forceShowAll}
+            onSearchWider={onSearchWider}
+          />
+        )}
 
       {pipelineDone && allCount > 0 && allCount <= 2 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] px-5 py-3.5 text-[13px] text-ink">

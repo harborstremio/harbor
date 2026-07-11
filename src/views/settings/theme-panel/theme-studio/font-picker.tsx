@@ -1,5 +1,6 @@
-import { Check } from "lucide-react";
 import { FONT_PAIRS, type FontPairId } from "@/lib/theme";
+import { Check } from "lucide-react";
+
 import { CustomFontTiles } from "../custom-font-tiles";
 
 export function FontPicker({
@@ -29,10 +30,7 @@ export function FontPicker({
             }`}
           >
             <div className="flex items-baseline justify-between gap-3">
-              <span
-                className="truncate text-[22px] leading-tight"
-                style={{ fontFamily: p.display, fontWeight: 600 }}
-              >
+              <span className="truncate text-[22px] leading-tight" style={{ fontFamily: p.display, fontWeight: 600 }}>
                 Harbor
               </span>
               {active && (
@@ -44,19 +42,12 @@ export function FontPicker({
             <span className="truncate text-[13.5px] text-ink-muted" style={{ fontFamily: p.sans }}>
               Pick up an episode
             </span>
-            <span className="mt-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-              {p.name}
-            </span>
+            <span className="mt-1 text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{p.name}</span>
           </button>
         );
       })}
 
-      <CustomFontTiles
-        compact
-        activeId={customValue}
-        onSelect={onPickCustom}
-        onClear={() => onPickPair(pairValue)}
-      />
+      <CustomFontTiles compact activeId={customValue} onSelect={onPickCustom} onClear={() => onPickPair(pairValue)} />
     </div>
   );
 }

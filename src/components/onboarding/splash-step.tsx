@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { Poster } from "@/components/poster";
 import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const SPLASH_DURATION_MS = 2600;
 
@@ -18,9 +18,7 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
       .then(([m, s]) => {
         if (cancelled) return;
         const all: Meta[] = [...m, ...s];
-        const urls = all
-          .map((x) => x.poster)
-          .filter((p): p is string => !!p);
+        const urls = all.map((x) => x.poster).filter((p): p is string => !!p);
         for (let i = urls.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [urls[i], urls[j]] = [urls[j], urls[i]];
@@ -63,10 +61,7 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
           <HarborMark className="h-[1em] w-[1em] shrink-0" />
           <span style={{ transform: "translateY(0.04em)" }}>
             Harb
-            <span
-              className="inline-block"
-              style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-            >
+            <span className="inline-block" style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}>
               o
             </span>
             r

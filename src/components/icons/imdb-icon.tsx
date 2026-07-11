@@ -1,12 +1,6 @@
 export function ImdbIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 64 32"
-      className={className}
-      aria-label="IMDb"
-      role="img"
-      preserveAspectRatio="xMidYMid meet"
-    >
+    <svg viewBox="0 0 64 32" className={className} aria-label="IMDb" role="img" preserveAspectRatio="xMidYMid meet">
       <rect width="64" height="32" rx="5" fill="#F5C518" />
       <text
         x="32"

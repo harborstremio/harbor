@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import type { PlayEpisode } from "@/lib/view";
 import { buildStreamIds } from "@/lib/streams/stream-ids";
+import type { PlayEpisode } from "@/lib/view";
+import { useEffect, useState } from "react";
 
 export function useStreamIds(
   meta: Meta,

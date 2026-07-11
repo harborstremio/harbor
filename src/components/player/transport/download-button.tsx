@@ -1,7 +1,8 @@
+import { useT } from "@/lib/i18n";
+import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
 import { CircleCheck, Download, TriangleAlert, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
-import { useT } from "@/lib/i18n";
+
 import { BigButton } from "./big-button";
 import { Tooltip } from "./tooltip";
 
@@ -13,13 +14,7 @@ type Props = {
   onReset: () => void;
 };
 
-export function DownloadButton({
-  status,
-  onStart,
-  onCancel,
-  onReveal,
-  onReset,
-}: Props) {
+export function DownloadButton({ status, onStart, onCancel, onReveal, onReset }: Props) {
   const t = useT();
   useEffect(() => {
     if (status.kind !== "done") return;
@@ -103,13 +98,7 @@ function Dot({ delay }: { delay: number }) {
   );
 }
 
-function ProgressRing({
-  ratio,
-  indeterminate,
-}: {
-  ratio: number;
-  indeterminate: boolean;
-}) {
+function ProgressRing({ ratio, indeterminate }: { ratio: number; indeterminate: boolean }) {
   const r = 20;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - Math.max(0, Math.min(1, ratio)));
@@ -187,10 +176,7 @@ function formatBytes(b: number): string {
   return `${(b / 1024 / 1024 / 1024).toFixed(2)} GB`;
 }
 
-function formatEta(
-  s: number,
-  t: (key: string, vars?: Record<string, string | number>) => string,
-): string {
+function formatEta(s: number, t: (key: string, vars?: Record<string, string | number>) => string): string {
   if (s < 60) return t("{s}s left", { s });
   if (s < 3600) return t("{m}m left", { m: Math.round(s / 60) });
   const h = Math.floor(s / 3600);

@@ -1,6 +1,7 @@
-import { getSession, subscribeSession } from "./session";
-import { fetchMediaListCollection } from "./lists";
 import { kitsuToAnilist, kitsuToMal } from "@/lib/providers/anime-mapping";
+
+import { fetchMediaListCollection } from "./lists";
+import { getSession, subscribeSession } from "./session";
 
 type Entry = { count: number };
 type Index = { byAnilist: Map<number, Entry>; byMal: Map<number, Entry> };
@@ -23,7 +24,7 @@ async function buildIndex(): Promise<Index> {
     for (const e of group.entries) {
       if (e.media.format === "MOVIE") continue;
       const total = e.media.episodes ?? undefined;
-      const raw = e.status === "COMPLETED" ? total ?? e.progress : e.progress;
+      const raw = e.status === "COMPLETED" ? (total ?? e.progress) : e.progress;
       const count = total != null ? Math.min(raw, total) : raw;
       if (count <= 0) continue;
       const entry: Entry = { count };

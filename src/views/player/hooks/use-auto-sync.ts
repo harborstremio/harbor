@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
-import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
-import { fetchAndParse, type SubCue } from "@/lib/subtitles/parser";
-import { applySync } from "@/lib/subtitles/text-sync";
-import { toSrt, toVtt } from "@/lib/subtitles/serialize";
 import { estimateSubtitleOffset, type AutoSyncResult } from "@/lib/subtitles/auto-sync";
+import { fetchAndParse, type SubCue } from "@/lib/subtitles/parser";
+import { toSrt, toVtt } from "@/lib/subtitles/serialize";
+import { applySync } from "@/lib/subtitles/text-sync";
+import type { PlayerSrc } from "@/lib/view";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 export type AutoSyncStatus = "idle" | "analyzing" | "synced" | "declined" | "error";
 
@@ -62,15 +62,7 @@ export function useAutoSync(params: {
     return () => {
       cancelled = true;
     };
-  }, [
-    settings.subtitleAutoSync,
-    engine,
-    src.url,
-    src.headers,
-    snap.subtitleTracks,
-    snap.durationSec,
-    bridgeRef,
-  ]);
+  }, [settings.subtitleAutoSync, engine, src.url, src.headers, snap.subtitleTracks, snap.durationSec, bridgeRef]);
 
   return status;
 }
@@ -109,12 +101,7 @@ function formatOf(b: PlayerBridge): "srt" | "vtt" {
   return /\.vtt(\?|#|$)/i.test(url) ? "vtt" : "srt";
 }
 
-async function applyResult(
-  b: PlayerBridge,
-  cues: SubCue[],
-  r: AutoSyncResult,
-  fmt: "srt" | "vtt",
-) {
+async function applyResult(b: PlayerBridge, cues: SubCue[], r: AutoSyncResult, fmt: "srt" | "vtt") {
   if (Math.abs(r.offsetSec) < 0.25 && Math.abs(r.ratio - 1) < 0.003) return;
   const shift = (t: number) => r.offsetSec + (r.ratio - 1) * t;
   const finalCues = applySync(cues, shift, 0);

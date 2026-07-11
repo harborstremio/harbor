@@ -1,13 +1,8 @@
+import { anime4kDir, downloadAnime4k } from "@/lib/anime4k";
+import { anime4kChain, ANIME4K_MODES, type Anime4kMode, type Anime4kTier } from "@/lib/player/anime4k-modes";
+import { useSettings } from "@/lib/settings";
 import { Check, Download, Loader2, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { anime4kDir, downloadAnime4k } from "@/lib/anime4k";
-import {
-  anime4kChain,
-  ANIME4K_MODES,
-  type Anime4kMode,
-  type Anime4kTier,
-} from "@/lib/player/anime4k-modes";
-import { useSettings } from "@/lib/settings";
 
 export function Anime4kShaderList() {
   const { settings, update } = useSettings();
@@ -57,12 +52,15 @@ export function Anime4kShaderList() {
     update({ playerAnime4kTier: t, playerAnime4kShaders: anime4kChain(folder, mode, t) });
 
   return (
-    <div id="set-anime4k-presets" className="scroll-mt-28 flex flex-col gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-4 py-4">
+    <div
+      id="set-anime4k-presets"
+      className="scroll-mt-28 flex flex-col gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-4 py-4"
+    >
       <div className="flex flex-col gap-0.5">
         <span className="text-[14px] font-semibold text-ink">Anime4K presets</span>
         <span className="text-[12.5px] leading-snug text-ink-subtle">
-          GPU shaders that sharpen lines and clean up gradients on anime as it plays. Pick a mode,
-          Harbor handles the shaders.
+          GPU shaders that sharpen lines and clean up gradients on anime as it plays. Pick a mode, Harbor handles the
+          shaders.
         </span>
       </div>
 

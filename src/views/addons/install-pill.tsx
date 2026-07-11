@@ -1,7 +1,8 @@
-import { Check, Loader2, Plus, Settings2, X } from "lucide-react";
-import { useState } from "react";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
+import { Check, Loader2, Plus, Settings2, X } from "lucide-react";
+import { useState } from "react";
+
 import { withMinDuration } from "./addons-utils";
 
 const MIN_INSTALL_FEEDBACK_MS = 650;

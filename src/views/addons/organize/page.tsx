@@ -1,7 +1,5 @@
-import { ArrowLeft, ChevronDown, History, Info, Loader2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getUserAddonsRaw, type Addon } from "@/lib/addons";
 import { loadInstalled, reorderInstalled, type InstalledAddon } from "@/lib/addon-store";
+import { getUserAddonsRaw, type Addon } from "@/lib/addons";
 import {
   applyOrderToItems,
   loadBackups,
@@ -13,19 +11,18 @@ import {
   type AddonOrderBackup,
   type SaveStep,
 } from "@/lib/addons-store/reorder";
+import { useT } from "@/lib/i18n";
 import { pushOverlayPin } from "@/lib/overlay-pin";
 import { useSearch } from "@/lib/search-context";
-import { useT } from "@/lib/i18n";
+import { ArrowLeft, ChevronDown, History, Info, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { BackupsPanel } from "./backups-card";
 import { OrganizeList, SectionCard, SkeletonRows } from "./section-card";
-import { entriesOf, noticeFor, stepLabel as stepLabelFor, urlsOf, type Notice } from "./utils";
 import { useDragList } from "./use-drag-list";
+import { entriesOf, noticeFor, stepLabel as stepLabelFor, urlsOf, type Notice } from "./utils";
 
-type Phase =
-  | { kind: "loading" }
-  | { kind: "loadError" }
-  | { kind: "ready" }
-  | { kind: "saving"; step: SaveStep };
+type Phase = { kind: "loading" } | { kind: "loadError" } | { kind: "ready" } | { kind: "saving"; step: SaveStep };
 
 export function OrganizeAddonsPage({
   authKey,
@@ -81,12 +78,8 @@ export function OrganizeAddonsPage({
 
   useEffect(() => pushOverlayPin(), []);
 
-  const cloudDrag = useDragList(workingCloud.length, (from, to) =>
-    setWorkingCloud((l) => moveItem(l, from, to)),
-  );
-  const deviceDrag = useDragList(workingDevice.length, (from, to) =>
-    setWorkingDevice((l) => moveItem(l, from, to)),
-  );
+  const cloudDrag = useDragList(workingCloud.length, (from, to) => setWorkingCloud((l) => moveItem(l, from, to)));
+  const deviceDrag = useDragList(workingDevice.length, (from, to) => setWorkingDevice((l) => moveItem(l, from, to)));
 
   const search = useSearch();
   const escBlockRef = useRef(false);
@@ -94,10 +87,7 @@ export function OrganizeAddonsPage({
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     escBlockRef.current =
-      search.open ||
-      phase.kind === "saving" ||
-      cloudDrag.dragIndex != null ||
-      deviceDrag.dragIndex != null;
+      search.open || phase.kind === "saving" || cloudDrag.dragIndex != null || deviceDrag.dragIndex != null;
     backupsOpenRef.current = backupsOpen;
     onCloseRef.current = onClose;
   });
@@ -148,12 +138,8 @@ export function OrganizeAddonsPage({
     try {
       if (cloudDirty && authKey) {
         setPhase({ kind: "saving", step: "checking" });
-        const result = await saveCollectionOrder(
-          authKey,
-          baselineCloud,
-          workingCloud,
-          backedUpRef.current,
-          (step) => setPhase({ kind: "saving", step }),
+        const result = await saveCollectionOrder(authKey, baselineCloud, workingCloud, backedUpRef.current, (step) =>
+          setPhase({ kind: "saving", step }),
         );
         if (!result.ok) {
           if (result.stage === "write" || result.stage === "verify") backedUpRef.current = true;
@@ -198,7 +184,9 @@ export function OrganizeAddonsPage({
     setBackupsOpen(false);
     setNotice({
       tone: "info",
-      text: t("Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save."),
+      text: t(
+        "Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save.",
+      ),
     });
   };
 
@@ -226,7 +214,9 @@ export function OrganizeAddonsPage({
               {t("Organize addons")}
             </h1>
             <p className="hidden truncate text-[13px] text-ink-muted sm:block">
-              {t("The order decides who answers first when you press Play. Drag, use the arrows, or jump anything straight to the top.")}
+              {t(
+                "The order decides who answers first when you press Play. Drag, use the arrows, or jump anything straight to the top.",
+              )}
             </p>
           </div>
           {showBackups && (
@@ -423,8 +413,12 @@ export function OrganizeAddonsPage({
                     <li>{t("Number 1 gets asked first for streams when you press Play.")}</li>
                     <li>{t("The order also decides which addon's rows win on your Home screen.")}</li>
                     <li>{t("Nothing changes until you press Save. Leaving this page discards edits.")}</li>
-                    <li>{t("The Backups button at the top keeps your last five orders. One click restores any of them.")}</li>
-                    <li>{t("Harbor double-checks with Stremio after saving, so a half-written order can't slip through.")}</li>
+                    <li>
+                      {t("The Backups button at the top keeps your last five orders. One click restores any of them.")}
+                    </li>
+                    <li>
+                      {t("Harbor double-checks with Stremio after saving, so a half-written order can't slip through.")}
+                    </li>
                   </ul>
                 </section>
               </div>

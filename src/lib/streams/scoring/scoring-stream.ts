@@ -14,11 +14,7 @@ import {
 } from "./scoring-size";
 import type { CorpusStats, ScoreOptions } from "./scoring-types";
 
-export function scoreStream(
-  s: ParsedStream,
-  opts: ScoreOptions,
-  corpus?: CorpusStats,
-): ScoredStream {
+export function scoreStream(s: ParsedStream, opts: ScoreOptions, corpus?: CorpusStats): ScoredStream {
   const reasons: ScoreReason[] = [];
   let score = 0;
 
@@ -79,20 +75,12 @@ export function scoreStream(
     reasons.push({ signal: "zero-seeders-soft", delta: -8 });
   }
 
-  const expectedYear = opts.releaseDate
-    ? parseInt(opts.releaseDate.slice(0, 4), 10)
-    : null;
-  if (
-    expectedYear != null &&
-    Number.isFinite(expectedYear) &&
-    s.year != null
-  ) {
+  const expectedYear = opts.releaseDate ? parseInt(opts.releaseDate.slice(0, 4), 10) : null;
+  if (expectedYear != null && Number.isFinite(expectedYear) && s.year != null) {
     const diff = Math.abs(s.year - expectedYear);
     if (diff !== 0) {
       const releaseMs = opts.releaseDate ? Date.parse(opts.releaseDate) : NaN;
-      const daysFromRelease = Number.isFinite(releaseMs)
-        ? Math.abs(Date.now() - releaseMs) / 86_400_000
-        : Infinity;
+      const daysFromRelease = Number.isFinite(releaseMs) ? Math.abs(Date.now() - releaseMs) / 86_400_000 : Infinity;
       const isRecent = daysFromRelease < 365;
       if (diff === 1) {
         const delta = isRecent ? -75 : -18;

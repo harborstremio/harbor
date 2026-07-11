@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, ImagePlus, X } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { ChevronLeft, ChevronRight, Download, ImagePlus, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 export function MediaLightbox({
   images,
@@ -18,10 +18,7 @@ export function MediaLightbox({
   const [i, setI] = useState(index);
   const [open, setOpen] = useState(false);
 
-  const go = useCallback(
-    (dir: -1 | 1) => setI((p) => (p + dir + images.length) % images.length),
-    [images.length],
-  );
+  const go = useCallback((dir: -1 | 1) => setI((p) => (p + dir + images.length) % images.length), [images.length]);
 
   useEffect(() => {
     const r = requestAnimationFrame(() => setOpen(true));

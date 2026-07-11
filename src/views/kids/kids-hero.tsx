@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { tmdbLogo } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { useEffect, useMemo, useState } from "react";
 
 export function KidsHero({ featured }: { featured: Meta[] }) {
   const t = useT();
@@ -34,9 +34,7 @@ export function KidsHero({ featured }: { featured: Meta[] }) {
 
       <div className="relative flex h-full flex-col items-center justify-end gap-5 px-8 pb-[17vh]">
         <div className="flex flex-col items-center gap-1 text-center">
-          <span className="text-[12px] font-bold uppercase tracking-[0.42em] text-ink-muted">
-            {t("Just for kids")}
-          </span>
+          <span className="text-[12px] font-bold uppercase tracking-[0.42em] text-ink-muted">{t("Just for kids")}</span>
           <h1
             className="text-[clamp(34px,4.8vw,56px)] font-bold leading-[1.0] tracking-tight text-ink"
             style={{ fontFamily: '"Fredoka", "Baloo 2", system-ui, sans-serif' }}
@@ -47,24 +45,14 @@ export function KidsHero({ featured }: { featured: Meta[] }) {
         <div className="flex w-full flex-nowrap items-end justify-center gap-3.5">
           {cards.length === 0
             ? Array.from({ length: 5 }).map((_, i) => <KidsHeroSkeleton key={i} />)
-            : cards.map((m, i) => (
-                <KidsHeroCard key={m.id} meta={m} index={i} onOpen={() => openMeta(m)} />
-              ))}
+            : cards.map((m, i) => <KidsHeroCard key={m.id} meta={m} index={i} onOpen={() => openMeta(m)} />)}
         </div>
       </div>
     </section>
   );
 }
 
-function KidsHeroCard({
-  meta,
-  index,
-  onOpen,
-}: {
-  meta: Meta;
-  index: number;
-  onOpen: () => void;
-}) {
+function KidsHeroCard({ meta, index, onOpen }: { meta: Meta; index: number; onOpen: () => void }) {
   const { settings } = useSettings();
   const art = upsizeCard(meta.background) || meta.poster;
   const [logo, setLogo] = useState<string | undefined>(meta.logo);
@@ -93,12 +81,7 @@ function KidsHeroCard({
       className="kids-card group relative h-[120px] min-w-0 max-w-[212px] flex-1 basis-[212px] overflow-hidden rounded-[22px] bg-surface shadow-[0_16px_40px_-14px_rgba(20,40,60,0.45)] ring-2 ring-white transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_24px_50px_-14px_rgba(20,40,60,0.55)] active:scale-[0.98]"
     >
       {art && (
-        <img
-          src={art}
-          alt={meta.name}
-          draggable={false}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        <img src={art} alt={meta.name} draggable={false} className="absolute inset-0 h-full w-full object-cover" />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
       {logo ? (

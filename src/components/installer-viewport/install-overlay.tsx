@@ -1,7 +1,7 @@
+import installBoat from "@/assets/lottie/install-boat-white.json";
 import lottie, { type AnimationItem } from "lottie-web";
 import { Check } from "lucide-react";
 import { useEffect, useRef } from "react";
-import installBoat from "@/assets/lottie/install-boat-white.json";
 
 export type OverlayPhase =
   | { kind: "installing"; name: string | null }
@@ -54,7 +54,7 @@ function InstallBoat({ logo }: { logo: string | null }) {
 
 export function InstallOverlay({ phase, logo }: { phase: OverlayPhase; logo: string | null }) {
   const installing = phase.kind === "installing";
-  const name = phase.kind === "success" ? phase.name : phase.name ?? "Resolving manifest";
+  const name = phase.kind === "success" ? phase.name : (phase.name ?? "Resolving manifest");
   const cargoLogo = logo ?? (phase.kind === "success" ? phase.logo : null);
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-canvas/92 backdrop-blur-xl animate-in fade-in duration-200">
@@ -62,9 +62,7 @@ export function InstallOverlay({ phase, logo }: { phase: OverlayPhase; logo: str
         <InstallBoat logo={cargoLogo} />
         <div className="flex flex-col items-center gap-1.5">
           {installing ? (
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.26em] text-accent">
-              Installing
-            </span>
+            <span className="text-[10.5px] font-bold uppercase tracking-[0.26em] text-accent">Installing</span>
           ) : (
             <span className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.26em] text-emerald-400">
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-white">

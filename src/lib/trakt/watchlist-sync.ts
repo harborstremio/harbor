@@ -1,7 +1,8 @@
 import { saveStremioBookmark } from "@/lib/stremio";
+
 import { traktRequest } from "./client";
-import { fetchWatchlist } from "./watchlist";
 import type { TraktIds, TraktItem } from "./types";
+import { fetchWatchlist } from "./watchlist";
 
 const CHUNK = 100;
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -65,10 +66,7 @@ export async function runExport(plan: ExportPlan): Promise<ExportResult> {
     try {
       const res = await traktRequest<WatchlistPostResponse>("/sync/watchlist", { method: "POST", body });
       synced +=
-        (res.added?.movies ?? 0) +
-        (res.added?.shows ?? 0) +
-        (res.existing?.movies ?? 0) +
-        (res.existing?.shows ?? 0);
+        (res.added?.movies ?? 0) + (res.added?.shows ?? 0) + (res.existing?.movies ?? 0) + (res.existing?.shows ?? 0);
     } catch (e) {
       console.error("[trakt] export chunk failed", e);
       if (firstErr == null) firstErr = e;

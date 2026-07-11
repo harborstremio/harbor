@@ -1,6 +1,7 @@
-import { useSettings } from "@/lib/settings";
-import { isWindowsDesktop } from "@/lib/platform";
 import { useT } from "@/lib/i18n";
+import { isWindowsDesktop } from "@/lib/platform";
+import { useSettings } from "@/lib/settings";
+
 import { DisplayPanelSelector } from "./display-panel-selector";
 
 type HdrMode = "sdr" | "hdrWindow" | "hdrEmbedded";
@@ -14,10 +15,7 @@ const MODE_FLAGS: Record<
   hdrEmbedded: { playerHdrToSdr: false, playerHdrOpaqueWindow: false, playerHdrStage: "auto" },
 };
 
-function deriveMode(s: {
-  playerHdrToSdr: boolean;
-  playerHdrOpaqueWindow: boolean;
-}): HdrMode {
+function deriveMode(s: { playerHdrToSdr: boolean; playerHdrOpaqueWindow: boolean }): HdrMode {
   if (s.playerHdrOpaqueWindow) return "hdrWindow";
   if (s.playerHdrToSdr) return "sdr";
   return "hdrEmbedded";
@@ -44,21 +42,23 @@ export function HdrModePicker() {
     {
       id: "hdrWindow",
       label: t("True HDR, separate window"),
-      sub: t("Plays HDR in its own window so Windows shows real HDR and the SDR brightness slider stops dimming it. The most reliable way to get true HDR."),
+      sub: t(
+        "Plays HDR in its own window so Windows shows real HDR and the SDR brightness slider stops dimming it. The most reliable way to get true HDR.",
+      ),
     },
     {
       id: "hdrEmbedded",
       label: t("True HDR, embedded"),
-      sub: t("Keeps HDR inside Harbor with the controls floating above the video. Subtitles render on the video. If the control bar does not appear, press Esc or use separate window."),
+      sub: t(
+        "Keeps HDR inside Harbor with the controls floating above the video. Subtitles render on the video. If the control bar does not appear, press Esc or use separate window.",
+      ),
       experimental: true,
     },
   ];
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {t("HDR")}
-      </span>
+      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("HDR")}</span>
       <div className="flex flex-col gap-2.5">
         {options.map((o) => {
           const selected = current === o.id;
@@ -119,7 +119,9 @@ export function HdrModePicker() {
               </span>
             </div>
             <span className="text-[12.5px] leading-snug text-ink-muted">
-              {t("Upconverts SDR video to HDR on an Nvidia RTX GPU (turn on RTX Video HDR in the Nvidia app; needs GPU decode). Experimental. Off if you use SVP.")}
+              {t(
+                "Upconverts SDR video to HDR on an Nvidia RTX GPU (turn on RTX Video HDR in the Nvidia app; needs GPU decode). Experimental. Off if you use SVP.",
+              )}
             </span>
           </div>
           <span

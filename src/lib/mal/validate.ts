@@ -1,5 +1,5 @@
-import { getSession, setSession } from "./session";
 import { ensureRefreshed } from "./auth";
+import { getSession, setSession } from "./session";
 
 let inflight: Promise<void> | null = null;
 

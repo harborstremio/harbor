@@ -1,9 +1,10 @@
-import { useCallback } from "react";
-import { useSettings, type Settings } from "@/lib/settings";
-import { clearPlaylistCache } from "@/lib/iptv/store";
 import { clearEpg } from "@/lib/iptv/epg-store";
-import { purgePlaylistState } from "@/lib/iptv/source-cleanup";
 import { useFavorites } from "@/lib/iptv/favorites";
+import { purgePlaylistState } from "@/lib/iptv/source-cleanup";
+import { clearPlaylistCache } from "@/lib/iptv/store";
+import { useSettings, type Settings } from "@/lib/settings";
+import { useCallback } from "react";
+
 import { buildXtreamUrls, type PlaylistFormValue } from "../source-picker/playlist-form";
 
 type StoredPlaylist = Settings["iptvPlaylists"][number];

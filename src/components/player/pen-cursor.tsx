@@ -21,20 +21,8 @@ export function PenCursor({ tint, size = 36 }: { tint: string; size?: number }) 
         strokeWidth="1.4"
         strokeLinejoin="round"
       />
-      <path
-        d="M 16 38 Q 16 34 20 34 L 26 34"
-        fill="none"
-        stroke="#222"
-        strokeWidth="1.2"
-        opacity="0.55"
-      />
-      <path
-        d="M 24 44 L 24 52"
-        fill="none"
-        stroke="#222"
-        strokeWidth="1.2"
-        opacity="0.55"
-      />
+      <path d="M 16 38 Q 16 34 20 34 L 26 34" fill="none" stroke="#222" strokeWidth="1.2" opacity="0.55" />
+      <path d="M 24 44 L 24 52" fill="none" stroke="#222" strokeWidth="1.2" opacity="0.55" />
     </svg>
   );
 }

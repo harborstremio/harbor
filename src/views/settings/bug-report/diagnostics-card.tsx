@@ -1,6 +1,6 @@
+import type { Diagnostics } from "@/lib/bug-report";
 import { ChevronDown, ChevronUp, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import type { Diagnostics } from "@/lib/bug-report";
 
 export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
   const [open, setOpen] = useState(false);
@@ -26,9 +26,7 @@ export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
           <span className="text-[12px] font-semibold text-ink">What gets sent</span>
           <span className="truncate text-[11.5px] text-ink-subtle">{compact}</span>
         </div>
-        <span className="ms-auto text-ink-subtle">
-          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </span>
+        <span className="ms-auto text-ink-subtle">{open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</span>
       </button>
       {open && (
         <div className="border-t border-edge-soft/55 px-4 py-3">

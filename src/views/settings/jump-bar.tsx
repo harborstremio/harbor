@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import type { SectionId } from "./shared";
 
 type Item = { id: string; title: string };

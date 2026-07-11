@@ -1,8 +1,8 @@
+import { useT } from "@/lib/i18n";
+import type { AioService, AioStatusSnapshot } from "@/lib/streams/aiostatus";
 import { X } from "lucide-react";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
-import type { AioService, AioStatusSnapshot } from "@/lib/streams/aiostatus";
 
 const PALETTE: Record<AioService["status"], { dot: string; text: string }> = {
   expired: { dot: "bg-rose-300", text: "text-rose-200" },
@@ -11,13 +11,7 @@ const PALETTE: Record<AioService["status"], { dot: string; text: string }> = {
   unknown: { dot: "bg-ink-subtle", text: "text-ink-subtle" },
 };
 
-export function AioStatusModal({
-  snapshot,
-  onClose,
-}: {
-  snapshot: AioStatusSnapshot;
-  onClose: () => void;
-}) {
+export function AioStatusModal({ snapshot, onClose }: { snapshot: AioStatusSnapshot; onClose: () => void }) {
   const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -28,10 +22,7 @@ export function AioStatusModal({
   }, [onClose]);
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-6"
-      onMouseDown={onClose}
-    >
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6" onMouseDown={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         role="dialog"
@@ -67,9 +58,7 @@ export function AioStatusModal({
         </header>
         <div className="flex-1 overflow-y-auto p-2">
           {snapshot.services.length === 0 ? (
-            <p className="px-3 py-10 text-center text-[13px] text-ink-muted">
-              {t("No services reported.")}
-            </p>
+            <p className="px-3 py-10 text-center text-[13px] text-ink-muted">{t("No services reported.")}</p>
           ) : (
             <ul className="flex flex-col gap-0.5">
               {snapshot.services.map((s) => (
@@ -106,9 +95,7 @@ function ServiceRow({ service }: { service: AioService }) {
       <span className={`flex shrink-0 items-center gap-1.5 text-[11.5px] font-semibold ${pal.text}`}>
         <span className={`h-1.5 w-1.5 rounded-full ${pal.dot}`} />
         {label}
-        {service.quotaUsedPercent != null && (
-          <span className="text-ink-subtle">· {service.quotaUsedPercent}%</span>
-        )}
+        {service.quotaUsedPercent != null && <span className="text-ink-subtle">· {service.quotaUsedPercent}%</span>}
       </span>
     </li>
   );

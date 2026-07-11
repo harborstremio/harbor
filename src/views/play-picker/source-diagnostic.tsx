@@ -1,9 +1,9 @@
-import { ChevronDown } from "lucide-react";
-import { useMemo, useState } from "react";
 import { useDebridClients } from "@/lib/debrid/registry";
+import { hasCachedMarker } from "@/lib/streams/cached";
 import type { PipelineResult } from "@/lib/streams/pipeline";
 import type { Stream } from "@/lib/streams/types";
-import { hasCachedMarker } from "@/lib/streams/cached";
+import { ChevronDown } from "lucide-react";
+import { useMemo, useState } from "react";
 
 export function SourceDiagnostic({
   result,
@@ -25,10 +25,7 @@ export function SourceDiagnostic({
   }, [result]);
   const totalRaw = counts.reduce((a, [, n]) => a + n, 0);
   const cachedTotal = result.picker.all.filter(
-    (s) =>
-      s.url != null ||
-      debrids.some((d) => s.cached[d.slug] || s.inLibrary[d.slug]) ||
-      hasCachedMarker(s),
+    (s) => s.url != null || debrids.some((d) => s.cached[d.slug] || s.inLibrary[d.slug]) || hasCachedMarker(s),
   ).length;
   const sourceWord = counts.length === 1 ? "source" : "sources";
   return (
@@ -40,12 +37,10 @@ export function SourceDiagnostic({
       >
         <span className="font-semibold text-ink-muted">{cachedTotal} cached</span>
         <span className="text-ink-subtle/40">·</span>
-        <span>{totalRaw} found across {counts.length} {sourceWord}</span>
-        <ChevronDown
-          size={13}
-          strokeWidth={2}
-          className={`transition-transform ${expanded ? "rotate-180" : ""}`}
-        />
+        <span>
+          {totalRaw} found across {counts.length} {sourceWord}
+        </span>
+        <ChevronDown size={13} strokeWidth={2} className={`transition-transform ${expanded ? "rotate-180" : ""}`} />
       </button>
       {expanded && (
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 ps-1 text-[11px] text-ink-subtle/70">

@@ -1,13 +1,6 @@
 export function LiveTvIcon({ active = false }: { active?: boolean }) {
   return (
-    <svg
-      width="34"
-      height="18"
-      viewBox="0 0 38 18"
-      fill="none"
-      aria-hidden
-      style={{ direction: "ltr" }}
-    >
+    <svg width="34" height="18" viewBox="0 0 38 18" fill="none" aria-hidden style={{ direction: "ltr" }}>
       <rect
         x="1.25"
         y="1.25"

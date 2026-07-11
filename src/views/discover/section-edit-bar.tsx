@@ -1,15 +1,7 @@
-import { Eye, EyeOff } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Eye, EyeOff } from "lucide-react";
 
-export function SectionEditBar({
-  name,
-  hidden,
-  onToggle,
-}: {
-  name: string;
-  hidden: boolean;
-  onToggle: () => void;
-}) {
+export function SectionEditBar({ name, hidden, onToggle }: { name: string; hidden: boolean; onToggle: () => void }) {
   const t = useT();
   return (
     <div className="mb-2 flex items-center gap-1.5 rounded-xl border border-edge-soft bg-canvas/60 px-2 py-1.5">

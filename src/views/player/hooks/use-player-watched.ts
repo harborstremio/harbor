@@ -1,15 +1,15 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { getEpisodeProgress } from "@/lib/episode-progress";
 import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
+import { resolveMeta } from "@/lib/meta-resource";
 import { loadSimklWatchedMap, simklWatchedForId } from "@/lib/simkl/list-status";
 import { useSimkl } from "@/lib/simkl/provider";
-import { resolveMeta } from "@/lib/meta-resource";
 import { libraryGetOne } from "@/lib/stremio";
 import { decodeWatchedEpisodes } from "@/lib/stremio-watched";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
 import { useTrakt } from "@/lib/trakt/provider";
 import type { PlayEpisode } from "@/lib/view";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 export function usePlayerWatched(params: {
   meta: Meta;

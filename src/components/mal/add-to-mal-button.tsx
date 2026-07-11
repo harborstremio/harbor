@@ -1,16 +1,11 @@
-import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import malLogo from "@/assets/mal.png";
 import { AnchoredMenu } from "@/components/anchored-menu";
-import {
-  deleteListEntry,
-  fetchListEntry,
-  resolveMalMediaId,
-  saveListEntry,
-} from "@/lib/mal/mutations";
+import { useT } from "@/lib/i18n";
+import { deleteListEntry, fetchListEntry, resolveMalMediaId, saveListEntry } from "@/lib/mal/mutations";
 import { useMal } from "@/lib/mal/provider";
 import type { MalListStatus } from "@/lib/mal/types";
-import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const STATUS_LABELS: Record<MalListStatus, string> = {
   watching: "Watching",
@@ -20,13 +15,7 @@ const STATUS_LABELS: Record<MalListStatus, string> = {
   dropped: "Dropped",
 };
 
-const STATUS_ORDER: MalListStatus[] = [
-  "watching",
-  "plan_to_watch",
-  "completed",
-  "on_hold",
-  "dropped",
-];
+const STATUS_ORDER: MalListStatus[] = ["watching", "plan_to_watch", "completed", "on_hold", "dropped"];
 
 export function AddToMalButton({ harborId, title }: { harborId: string; title: string }) {
   const t = useT();
@@ -119,10 +108,7 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
       >
         <img src={malLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
         {t(STATUS_LABELS[status])}
-        <ChevronDown
-          size={16}
-          className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`}
-        />
+        <ChevronDown size={16} className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`} />
       </button>
       <AnchoredMenu anchorRef={btnRef} open={menuOpen} onClose={() => setMenuOpen(false)} width={224}>
         <div className="overflow-hidden rounded-2xl border border-edge bg-raised py-1.5 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)]">

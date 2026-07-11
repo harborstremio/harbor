@@ -1,6 +1,7 @@
 import { lruSet } from "@/lib/cache";
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Meta } from "@/lib/cinemeta";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
+
 import { extractTitleFromChannelName } from "./channel-title";
 
 const CINEMETA = "https://v3-cinemeta.strem.io";
@@ -90,17 +91,10 @@ export function hydrateChannel(channelName: string): Promise<Meta | null> {
   return promise;
 }
 
-async function doHydrate(
-  query: string,
-  preferType: "movie" | "series" | null,
-): Promise<Meta | null> {
+async function doHydrate(query: string, preferType: "movie" | "series" | null): Promise<Meta | null> {
   const encoded = encodeURIComponent(query);
   const types: Array<"series" | "movie"> =
-    preferType === "series"
-      ? ["series", "movie"]
-      : preferType === "movie"
-        ? ["movie", "series"]
-        : ["series", "movie"];
+    preferType === "series" ? ["series", "movie"] : preferType === "movie" ? ["movie", "series"] : ["series", "movie"];
   for (const type of types) {
     try {
       const res = await fetch(`${CINEMETA}/catalog/${type}/top/search=${encoded}.json`);
@@ -117,10 +111,7 @@ async function doHydrate(
   return null;
 }
 
-async function fetchFullMeta(
-  type: "movie" | "series",
-  id: string,
-): Promise<Meta | null> {
+async function fetchFullMeta(type: "movie" | "series", id: string): Promise<Meta | null> {
   try {
     const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
     if (!res.ok) return null;

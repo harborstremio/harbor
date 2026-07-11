@@ -27,9 +27,6 @@ export function addonKey(r: ResolvedAddon): string {
 }
 
 export async function withMinDuration<T>(promise: Promise<T> | T, minMs: number): Promise<T> {
-  const [result] = await Promise.all([
-    Promise.resolve(promise),
-    new Promise<void>((r) => setTimeout(r, minMs)),
-  ]);
+  const [result] = await Promise.all([Promise.resolve(promise), new Promise<void>((r) => setTimeout(r, minMs))]);
   return result;
 }

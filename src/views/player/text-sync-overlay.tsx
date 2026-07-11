@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { Check, Loader2, RotateCcw, Scissors, Search, X } from "lucide-react";
+import { useT } from "@/lib/i18n";
+import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { findActiveCue } from "@/lib/subtitles/parser";
 import { deltaFn } from "@/lib/subtitles/text-sync";
-import { usePlaybackPosition } from "@/lib/player/playback-clock";
-import { useT } from "@/lib/i18n";
+import { Check, Loader2, RotateCcw, Scissors, Search, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import type { useTextSync } from "./hooks/use-text-sync";
 import { TextSyncList } from "./text-sync-list";
 
@@ -50,7 +51,9 @@ export function TextSyncOverlay({
     : api.pointCount === 0
       ? t("Find the line you hear right now, then Sync from here. Everything shifts to match.")
       : api.pointCount === 1
-        ? t("Set. If the subtitles drift later on, play ahead and Sync from here again at a later line to fix the drift.")
+        ? t(
+            "Set. If the subtitles drift later on, play ahead and Sync from here again at a later line to fix the drift.",
+          )
         : t("Drift correction is on (2 points). Fine-tune with the buttons, or fix a stray section.");
 
   return (
@@ -171,9 +174,7 @@ export function TextSyncOverlay({
                 className="flex items-center gap-1.5 border-t border-edge-soft/50 px-6 py-2.5 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
               >
                 <RotateCcw size={13} />
-                {api.segments.length > 0
-                  ? t("{n} section fixes. Reset all", { n: api.segments.length })
-                  : t("Reset")}
+                {api.segments.length > 0 ? t("{n} section fixes. Reset all", { n: api.segments.length }) : t("Reset")}
               </button>
             )}
 

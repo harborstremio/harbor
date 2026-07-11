@@ -1,4 +1,5 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+
 import type { MalSession } from "./types";
 
 const BASE_KEY = "harbor.mal.session.v1";

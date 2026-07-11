@@ -1,13 +1,8 @@
-import {
-  DEFAULT_THEME,
-  FONT_PAIRS,
-  isKnownPreset,
-  type CustomColors,
-  type ThemeSettings,
-} from "@/lib/theme";
-import { languageName } from "@/lib/subtitles/language";
-import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
+import { sanitizeSeekStep } from "@/lib/seek-step";
+import { languageName } from "@/lib/subtitles/language";
+import { DEFAULT_THEME, FONT_PAIRS, isKnownPreset, type CustomColors, type ThemeSettings } from "@/lib/theme";
+
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -56,7 +51,8 @@ export function sanitizeTheme(t: Partial<ThemeSettings> | undefined): ThemeSetti
   const isCustom = t.preset === "custom";
   const fontOk = typeof t.fontPair === "string" && t.fontPair in FONT_PAIRS;
   const dimOk = typeof t.backgroundDim === "number" && t.backgroundDim >= 0 && t.backgroundDim <= 1;
-  const imgOk = t.backgroundImage == null || (typeof t.backgroundImage === "string" && t.backgroundImage.length < 3_000_000);
+  const imgOk =
+    t.backgroundImage == null || (typeof t.backgroundImage === "string" && t.backgroundImage.length < 3_000_000);
   const customColors = sanitizeCustomColors(t.customColors);
   const preset: ThemeSettings["preset"] = isPreset
     ? (t.preset as ThemeSettings["preset"])
@@ -171,9 +167,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         ...(parsed.letterboxd ?? {}),
       },
       preferredSubLangs: (parsed.preferredSubLangs ?? DEFAULT.preferredSubLangs).map(languageName),
-      preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map(
-        languageName,
-      ),
+      preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map(languageName),
       castAlwaysTranscode: parsed.castAlwaysTranscode ?? DEFAULT.castAlwaysTranscode,
       showMalBadge: parsed.showMalBadge ?? DEFAULT.showMalBadge,
       badgePlacement:
@@ -190,10 +184,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       traktRefreshToken: parsed.traktRefreshToken ?? DEFAULT.traktRefreshToken,
       traktExpiresAt: parsed.traktExpiresAt ?? DEFAULT.traktExpiresAt,
       traktUsername: parsed.traktUsername ?? DEFAULT.traktUsername,
-      seekBackStepSec: sanitizeSeekStep(
-        parsed.seekBackStepSec ?? legacySeekStep("back"),
-        DEFAULT.seekBackStepSec,
-      ),
+      seekBackStepSec: sanitizeSeekStep(parsed.seekBackStepSec ?? legacySeekStep("back"), DEFAULT.seekBackStepSec),
       seekForwardStepSec: sanitizeSeekStep(
         parsed.seekForwardStepSec ?? legacySeekStep("forward"),
         DEFAULT.seekForwardStepSec,
@@ -210,9 +201,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       customCalendar: {
         ...DEFAULT.customCalendar,
         ...(parsed.customCalendar ?? {}),
-        trackedPeople: Array.isArray(parsed.customCalendar?.trackedPeople)
-          ? parsed.customCalendar.trackedPeople
-          : [],
+        trackedPeople: Array.isArray(parsed.customCalendar?.trackedPeople) ? parsed.customCalendar.trackedPeople : [],
         genres: Array.isArray(parsed.customCalendar?.genres) ? parsed.customCalendar.genres : [],
         watchProviders: Array.isArray(parsed.customCalendar?.watchProviders)
           ? parsed.customCalendar.watchProviders
@@ -227,14 +216,14 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         },
       },
       webhookRules: Array.isArray(parsed.webhookRules) ? parsed.webhookRules : [],
-      customStreamFilters: Array.isArray(parsed.customStreamFilters) ? parsed.customStreamFilters : DEFAULT.customStreamFilters,
+      customStreamFilters: Array.isArray(parsed.customStreamFilters)
+        ? parsed.customStreamFilters
+        : DEFAULT.customStreamFilters,
       animeFavoriteGenres: Array.isArray(parsed.animeFavoriteGenres)
         ? parsed.animeFavoriteGenres.filter((g): g is number => typeof g === "number")
         : DEFAULT.animeFavoriteGenres,
       animePicksDismissedAt:
-        typeof parsed.animePicksDismissedAt === "number"
-          ? parsed.animePicksDismissedAt
-          : DEFAULT.animePicksDismissedAt,
+        typeof parsed.animePicksDismissedAt === "number" ? parsed.animePicksDismissedAt : DEFAULT.animePicksDismissedAt,
       animeAnilistRowsHidden: Array.isArray(parsed.animeAnilistRowsHidden)
         ? parsed.animeAnilistRowsHidden.filter((k): k is string => typeof k === "string")
         : DEFAULT.animeAnilistRowsHidden,

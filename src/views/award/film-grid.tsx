@@ -1,8 +1,8 @@
-import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, type RefObject } from "react";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { ChevronDown } from "lucide-react";
+import { useEffect, useRef, type RefObject } from "react";
 
 const GRID = "grid grid-cols-3 gap-x-4 gap-y-8 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6";
 const PREVIEW = 18;
@@ -37,11 +37,7 @@ export function FilmGrid({
   const canViewAll = !expanded && total > PREVIEW && films.length > 0;
   return (
     <section className="flex flex-col gap-7">
-      <Header
-        title={t("Winning films & shows")}
-        count={skeleton ? null : total}
-        tint={tint}
-      />
+      <Header title={t("Winning films & shows")} count={skeleton ? null : total} tint={tint} />
       <div className={GRID}>
         {skeleton
           ? Array.from({ length: PREVIEW }).map((_, i) => <PosterSkeleton key={i} />)
@@ -101,15 +97,7 @@ function PosterSkeleton() {
   return <div className="aspect-[2/3] animate-pulse rounded-xl bg-elevated/40" />;
 }
 
-export function Header({
-  title,
-  count,
-  tint,
-}: {
-  title: string;
-  count: number | null;
-  tint: string;
-}) {
+export function Header({ title, count, tint }: { title: string; count: number | null; tint: string }) {
   const t = useT();
   return (
     <div className="flex items-baseline justify-between gap-4">

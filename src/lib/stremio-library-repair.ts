@@ -54,7 +54,10 @@ function normalizeItem(raw: unknown): Record<string, unknown> | null {
   const id = asString(r._id);
   if (!id) return null;
   const srcState = (r.state && typeof r.state === "object" ? r.state : {}) as Record<string, unknown>;
-  const srcHints = (r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}) as Record<string, unknown>;
+  const srcHints = (r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}) as Record<
+    string,
+    unknown
+  >;
   return {
     _id: id,
     name: asString(r.name) ?? "",

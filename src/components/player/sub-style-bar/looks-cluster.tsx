@@ -1,9 +1,9 @@
+import { useT } from "@/lib/i18n";
+import { loadSubPresets, saveSubPresets, snapshotSub, type SubPreset } from "@/lib/player/sub-presets";
+import { type Settings } from "@/lib/settings";
 import { Check, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { type Settings } from "@/lib/settings";
-import { loadSubPresets, saveSubPresets, snapshotSub, type SubPreset } from "@/lib/player/sub-presets";
-import { useT } from "@/lib/i18n";
 
 function styleMatches(s: Settings, p: SubPreset): boolean {
   const v = snapshotSub(s);
@@ -118,7 +118,9 @@ export function LooksCluster({ settings, update }: { settings: Settings; update:
               }`}
             >
               {p.name}
-              {isSel && dirty && <span aria-label={t("unsaved changes")} className="h-1.5 w-1.5 rounded-full bg-amber-400" />}
+              {isSel && dirty && (
+                <span aria-label={t("unsaved changes")} className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              )}
             </button>
           </PresetTip>
         );

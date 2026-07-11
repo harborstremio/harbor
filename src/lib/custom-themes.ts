@@ -1,4 +1,13 @@
-import { FONT_PAIRS, type ChromeConfig, type ChromeNavId, type FontPairId, type ThemePreset, type ThemeButtonStyle, type ThemeCardStyle, type ThemeLayout } from "./theme";
+import {
+  FONT_PAIRS,
+  type ChromeConfig,
+  type ChromeNavId,
+  type FontPairId,
+  type ThemePreset,
+  type ThemeButtonStyle,
+  type ThemeCardStyle,
+  type ThemeLayout,
+} from "./theme";
 
 const STORAGE_KEY = "harbor.custom-themes.v1";
 const PREFIX = "user:";
@@ -65,7 +74,18 @@ function isCustomTheme(t: unknown): t is CustomTheme {
   return true;
 }
 
-const LAYOUTS = new Set<ThemeLayout>(["sidebar", "topdock", "rail", "stremio", "minui", "dracula", "nord", "forest", "royal", "custom"]);
+const LAYOUTS = new Set<ThemeLayout>([
+  "sidebar",
+  "topdock",
+  "rail",
+  "stremio",
+  "minui",
+  "dracula",
+  "nord",
+  "forest",
+  "royal",
+  "custom",
+]);
 const CARDS = new Set<ThemeCardStyle>(["flat", "glass", "stremio", "minui", "crunch", "noir", "custom"]);
 const BUTTONS = new Set<ThemeButtonStyle>(["flat", "glossy", "minui", "crunch", "noir", "custom"]);
 const asLayout = (v: unknown): ThemeLayout | undefined =>
@@ -318,7 +338,8 @@ export function getStarterTemplate(): string {
         dim: 0,
       },
       logo: {
-        wordmark: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMjQiPjx0ZXh0IHg9IjAiIHk9IjE4IiBmb250LWZhbWlseT0iJ0ZyYXVuY2VzJyxzZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iI2U4ZWJmMiI+TXkgVGhlbWU8L3RleHQ+PC9zdmc+",
+        wordmark:
+          "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMjQiPjx0ZXh0IHg9IjAiIHk9IjE4IiBmb250LWZhbWlseT0iJ0ZyYXVuY2VzJyxzZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iI2U4ZWJmMiI+TXkgVGhlbWU8L3RleHQ+PC9zdmc+",
         mark: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiM3YjVjZmYiLz48L3N2Zz4=",
       },
       css: "/* Optional: extra CSS layered on top. Targets work like a regular stylesheet. */\n.harbor-cinema-badge { color: #7b5cff; border-color: rgba(123,92,255,0.35); }",

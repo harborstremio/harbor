@@ -1,8 +1,9 @@
-import { RotateCcw, SlidersHorizontal } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { CROP_PRESETS } from "@/views/player/hooks/use-video-fill";
 import { PICTURE_KEYS, PICTURE_TEMPLATES, TweakSlider, useTweaks } from "@/views/settings/mpv-panel/dials";
-import { useT } from "@/lib/i18n";
+import { RotateCcw, SlidersHorizontal } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { useMenuSide } from "../menu-side";
 import { Tooltip } from "./tooltip";
 
@@ -55,7 +56,9 @@ export function AspectMenu({
         </button>
       </Tooltip>
       {open && (
-        <div className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex max-h-[70vh] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-y-auto rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}>
+        <div
+          className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex max-h-[70vh] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-y-auto rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}
+        >
           <div className="p-3">
             <div className="flex items-center justify-between px-1 pb-2">
               <span className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
@@ -86,11 +89,62 @@ export function AspectMenu({
               ))}
             </div>
             <div className="mt-2 flex flex-col">
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="brightness" label={t("Brightness")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="contrast" label={t("Contrast")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="saturation" label={t("Saturation")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="gamma" label={t("Gamma")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="sharpen" label={t("Sharpen")} min={0} max={2} step={0.05} def={0} fmt={(v) => v.toFixed(2)} />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="brightness"
+                label={t("Brightness")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="contrast"
+                label={t("Contrast")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="saturation"
+                label={t("Saturation")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="gamma"
+                label={t("Gamma")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="sharpen"
+                label={t("Sharpen")}
+                min={0}
+                max={2}
+                step={0.05}
+                def={0}
+                fmt={(v) => v.toFixed(2)}
+              />
             </div>
           </div>
           <div className="border-t border-edge-soft/60 p-2">

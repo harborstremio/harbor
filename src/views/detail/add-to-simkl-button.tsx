@@ -1,10 +1,9 @@
-import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import simklLogo from "@/assets/simkl.png";
 import { AnchoredMenu } from "@/components/anchored-menu";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { SimklApiError } from "@/lib/simkl/client";
 import { resolveSimklTarget } from "@/lib/simkl/ids";
-import { useSimkl } from "@/lib/simkl/provider";
 import {
   clearSimklStatus,
   loadSimklStatusMap,
@@ -15,9 +14,11 @@ import {
   statusForId,
   type WatchlistStatus,
 } from "@/lib/simkl/list-status";
+import { useSimkl } from "@/lib/simkl/provider";
 import type { SimklTarget } from "@/lib/simkl/types";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { SimklRatingPicker } from "./simkl-rating-picker";
 
 type Translator = (key: string, vars?: Record<string, string | number>) => string;
@@ -153,17 +154,9 @@ export function AddToSimklButton({
           >
             <img src={simklLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
             {t(SIMKL_STATUS_LABELS[status])}
-            <ChevronDown
-              size={16}
-              className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`}
-            />
+            <ChevronDown size={16} className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`} />
           </button>
-          <AnchoredMenu
-            anchorRef={btnRef}
-            open={menuOpen}
-            onClose={() => setMenuOpen(false)}
-            width={256}
-          >
+          <AnchoredMenu anchorRef={btnRef} open={menuOpen} onClose={() => setMenuOpen(false)} width={256}>
             <div className="overflow-hidden rounded-2xl border border-edge bg-raised py-1.5 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)]">
               {order.map((s) => (
                 <button

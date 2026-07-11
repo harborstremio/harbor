@@ -1,7 +1,7 @@
-import { useEffect } from "react";
 import { effectiveBinding, eventToBinding, isTypingTarget } from "@/lib/hotkeys";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
+import { useEffect } from "react";
 
 export function SearchHotkey() {
   const { setOpen } = useSearch();

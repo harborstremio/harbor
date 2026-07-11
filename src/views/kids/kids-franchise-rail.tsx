@@ -1,8 +1,9 @@
-import { ArrowRight } from "lucide-react";
 import { Row } from "@/components/row";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { ArrowRight } from "lucide-react";
+
 import { dropUnreleased } from "./kids-filter";
 import { franchiseFetcher, KIDS_FRANCHISES, type Franchise } from "./kids-franchises";
 

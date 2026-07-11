@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { Info, Play, Tv } from "lucide-react";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useFavorites } from "@/lib/iptv/favorites";
 import type { IptvChannel } from "@/lib/iptv/types";
-import { HoverTooltip } from "@/components/hover-tooltip";
+import { Info, Play, Tv } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { FavoriteButton } from "../favorite-button";
 import { CHANNEL_COL_PX, ROW_HEIGHT_PX } from "./guide-utils";
 
@@ -44,11 +45,7 @@ export function GuideChannelCell({
     >
       {current && <span className="pointer-events-none absolute inset-0 bg-accent/[0.08]" />}
       {current && <span className="pointer-events-none absolute inset-y-0 start-0 w-[3px] bg-accent" />}
-      <HoverTooltip
-        label={displayName}
-        sublabel={channel.group}
-        className="flex min-w-0 flex-1"
-      >
+      <HoverTooltip label={displayName} sublabel={channel.group} className="flex min-w-0 flex-1">
         <button
           onClick={() => onPlay(channel)}
           className="flex w-full min-w-0 items-center gap-2.5 py-2 text-start transition-opacity hover:opacity-85"
@@ -84,17 +81,11 @@ export function GuideChannelCell({
             )}
           </div>
           <div className="flex min-w-0 flex-1 flex-col">
-            <span
-              dir="auto"
-              className={`truncate text-[13px] font-semibold ${current ? "text-accent" : "text-ink"}`}
-            >
+            <span dir="auto" className={`truncate text-[13px] font-semibold ${current ? "text-accent" : "text-ink"}`}>
               {displayName}
             </span>
             {current ? (
-              <span
-                dir="auto"
-                className="flex items-center gap-1 truncate text-[11px] font-semibold text-accent"
-              >
+              <span dir="auto" className="flex items-center gap-1 truncate text-[11px] font-semibold text-accent">
                 <Play size={9} fill="currentColor" strokeWidth={0} className="shrink-0" />
                 <span className="truncate">
                   {t("Now playing")}
@@ -109,12 +100,7 @@ export function GuideChannelCell({
           </div>
         </button>
       </HoverTooltip>
-      <FavoriteButton
-        active={isFav}
-        onToggle={() => favorites.toggle(channel)}
-        size={15}
-        variant="inline"
-      />
+      <FavoriteButton active={isFav} onToggle={() => favorites.toggle(channel)} size={15} variant="inline" />
       {hydrated && onInfo && (
         <button
           onClick={() => onInfo(hydrated)}

@@ -188,7 +188,7 @@ const LEET_MAP: Record<string, string> = {
   "7": "t",
   "8": "b",
   "@": "a",
-  "$": "s",
+  $: "s",
   "!": "i",
 };
 
@@ -246,9 +246,7 @@ export function isAdultAnime(meta: { name?: string; genres?: string[] }): boolea
   return isAdultText(meta.name);
 }
 
-export function debugMatchAdult(
-  ...fields: Array<string | undefined | null>
-): string | null {
+export function debugMatchAdult(...fields: Array<string | undefined | null>): string | null {
   const normalized = fields.map((f) => normalize(f ?? "")).join(" ");
   for (const term of SUBSTRING_TERMS) {
     if (normalized.includes(term)) return `substring:${term}`;

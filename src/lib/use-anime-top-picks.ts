@@ -1,4 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  animeSeedGenres,
+  buildExclusion,
+  dayIndex,
+  finishedFranchises,
+  pageFor,
+  rankPicks,
+  recordShownPicks,
+  scorePick,
+  type PickEntry,
+  type PickSource,
+} from "@/lib/anime-top-picks-utils";
 import type { Meta } from "@/lib/cinemeta";
 import { subscribe as subscribeTaste } from "@/lib/discover/store";
 import { getDownvotedIds, getUpvotedIds, subscribePrefs } from "@/lib/feed/preferences";
@@ -15,18 +26,7 @@ import {
 import { kitsuRelated, parseKitsuId } from "@/lib/providers/kitsu";
 import type { LibraryItem } from "@/lib/stremio";
 import { malIdForItem } from "@/lib/use-watch-history-recs";
-import {
-  animeSeedGenres,
-  buildExclusion,
-  dayIndex,
-  finishedFranchises,
-  pageFor,
-  rankPicks,
-  recordShownPicks,
-  scorePick,
-  type PickEntry,
-  type PickSource,
-} from "@/lib/anime-top-picks-utils";
+import { useEffect, useRef, useState } from "react";
 
 const CAP = 24;
 const SEQUEL_ROLES = new Set(["sequel", "side_story", "parent_story", "spinoff", "spin_off"]);
@@ -115,9 +115,7 @@ export function useAnimeTopPicks(input: {
       const watched = recentlyPlayed();
       if (watched.ids.size === 0 && watched.titles.size === 0) return;
       setPicks((prev) => {
-        const next = prev.filter(
-          (m) => !watched.ids.has(m.id) && !watched.titles.has(watchTitleKey(m.name)),
-        );
+        const next = prev.filter((m) => !watched.ids.has(m.id) && !watched.titles.has(watchTitleKey(m.name)));
         return next.length === prev.length ? prev : next;
       });
     };
@@ -156,9 +154,7 @@ export function useAnimeTopPicks(input: {
       const [airing, fresh, ...genreLists] = await Promise.all([
         jikanTopAiring(pageFor("airing", pageSeed)).catch(() => [] as Meta[]),
         jikanNewReleases(pageFor("new", pageSeed)).catch(() => [] as Meta[]),
-        ...genres.map((id) =>
-          jikanByGenre(id, pageFor(`g${id}`, pageSeed)).catch(() => [] as Meta[]),
-        ),
+        ...genres.map((id) => jikanByGenre(id, pageFor(`g${id}`, pageSeed)).catch(() => [] as Meta[])),
       ]);
       if (cancelled) return;
       const recs = watchHistoryRecs;

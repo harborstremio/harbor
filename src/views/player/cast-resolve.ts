@@ -1,3 +1,4 @@
+import { isFfmpegPresent, type CastDeviceInfo, type TranscodeProfile } from "@/lib/cast";
 import {
   checkStreamCompat,
   getDeviceCaps,
@@ -5,7 +6,6 @@ import {
   pickTranscodeProfile,
   type DeviceCaps,
 } from "@/lib/cast/device-caps";
-import { isFfmpegPresent, type CastDeviceInfo, type TranscodeProfile } from "@/lib/cast";
 import { useDebridClients } from "@/lib/debrid/registry";
 import { peekPickerCache } from "@/lib/picker-cache";
 import { registerStreamProxy } from "@/lib/stream-proxy";

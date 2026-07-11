@@ -1,7 +1,7 @@
+import { useT } from "@/lib/i18n";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
 
 export function Lightbox({
   images,
@@ -47,10 +47,7 @@ export function Lightbox({
       aria-label={t("{title} image viewer", { title })}
       onClick={onClose}
     >
-      <div
-        className="absolute start-8 top-8 flex flex-col gap-1"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="absolute start-8 top-8 flex flex-col gap-1" onClick={(e) => e.stopPropagation()}>
         <span className="font-display text-[18px] font-medium tracking-tight text-ink">{title}</span>
         <span className="text-[12px] uppercase tracking-[0.18em] text-ink-subtle">
           {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
@@ -101,10 +98,7 @@ export function Lightbox({
         className="max-h-[86vh] max-w-[90vw] rounded-xl border border-edge-soft object-contain shadow-2xl"
       />
       {total > 1 && (
-        <div
-          className="absolute inset-x-0 bottom-8 flex justify-center gap-1.5"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="absolute inset-x-0 bottom-8 flex justify-center gap-1.5" onClick={(e) => e.stopPropagation()}>
           {images.map((_, i) => (
             <button
               key={i}

@@ -1,18 +1,13 @@
+import { useT } from "@/lib/i18n";
+import { franchiseTags, type FranchiseEntry } from "@/lib/providers/anime-detail";
+import { useView } from "@/lib/view";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { franchiseTags, type FranchiseEntry } from "@/lib/providers/anime-detail";
-import { useT } from "@/lib/i18n";
-import { useView } from "@/lib/view";
+
 import { UpcomingBadge } from "../badges";
 
-export function AnimeSeasonPicker({
-  franchise,
-  currentId,
-}: {
-  franchise: FranchiseEntry[];
-  currentId: string;
-}) {
+export function AnimeSeasonPicker({ franchise, currentId }: { franchise: FranchiseEntry[]; currentId: string }) {
   const t = useT();
   const { openMeta } = useView();
   const [menu, setMenu] = useState<{ right: number; top?: number; bottom?: number; maxH: number } | null>(null);
@@ -54,11 +49,7 @@ export function AnimeSeasonPicker({
     const up = below < 260 && above > below;
     const maxH = Math.max(160, Math.min(0.6 * window.innerHeight, up ? above : below));
     const right = Math.max(margin, window.innerWidth - r.right);
-    setMenu(
-      up
-        ? { right, bottom: window.innerHeight - r.top + 8, maxH }
-        : { right, top: r.bottom + 8, maxH },
-    );
+    setMenu(up ? { right, bottom: window.innerHeight - r.top + 8, maxH } : { right, top: r.bottom + 8, maxH });
   };
 
   if (!current) return null;

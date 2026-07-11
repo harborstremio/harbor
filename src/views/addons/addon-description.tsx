@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function AddonDescription({ text }: { text: string }) {
   const t = useT();
@@ -28,12 +28,7 @@ export function AddonDescription({ text }: { text: string }) {
 
   return (
     <div className="max-w-2xl">
-      <p
-        ref={ref}
-        className={`text-[14px] leading-relaxed text-ink-muted ${
-          expanded ? "" : "line-clamp-3"
-        }`}
-      >
+      <p ref={ref} className={`text-[14px] leading-relaxed text-ink-muted ${expanded ? "" : "line-clamp-3"}`}>
         {text}
       </p>
       {showToggle && (

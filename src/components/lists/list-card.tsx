@@ -1,16 +1,10 @@
-import { Layers } from "lucide-react";
+import { Poster, posterPlate } from "@/components/poster";
 import type { CustomList } from "@/lib/custom-lists";
 import { relativeTime } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
-import { Poster, posterPlate } from "@/components/poster";
+import { Layers } from "lucide-react";
 
-export function ListCard({
-  list,
-  onOpen,
-}: {
-  list: CustomList;
-  onOpen?: (id: string) => void;
-}) {
+export function ListCard({ list, onOpen }: { list: CustomList; onOpen?: (id: string) => void }) {
   const t = useT();
   const covers = list.items.slice(0, 3);
   const count = list.items.length;
@@ -22,10 +16,7 @@ export function ListCard({
     >
       <div className="relative h-[136px] overflow-hidden bg-canvas">
         {covers.length === 0 ? (
-          <div
-            className="flex h-full w-full items-center justify-center"
-            style={{ background: posterPlate(list.id) }}
-          >
+          <div className="flex h-full w-full items-center justify-center" style={{ background: posterPlate(list.id) }}>
             <Layers size={22} strokeWidth={1.6} className="text-ink-subtle" />
           </div>
         ) : (
@@ -45,13 +36,10 @@ export function ListCard({
       </div>
 
       <div className="flex flex-col gap-1 px-4 pt-3 pb-4">
-        <h3 className="line-clamp-1 font-display text-[16px] font-medium leading-tight text-ink">
-          {list.name}
-        </h3>
+        <h3 className="line-clamp-1 font-display text-[16px] font-medium leading-tight text-ink">{list.name}</h3>
         <p className="text-[12px] text-ink-subtle">
           {count === 1 ? t("1 item") : t("{n} items", { n: count })}
-          {list.updatedAt > 0 &&
-            ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
+          {list.updatedAt > 0 && ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
         </p>
       </div>
     </button>

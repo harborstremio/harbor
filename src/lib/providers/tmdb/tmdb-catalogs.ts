@@ -1,12 +1,6 @@
 import type { Meta } from "../../cinemeta";
 import { get } from "./tmdb-client";
-import {
-  movieMeta,
-  seriesMeta,
-  type Page,
-  type RawMovie,
-  type RawSeries,
-} from "./tmdb-meta-mappers";
+import { movieMeta, seriesMeta, type Page, type RawMovie, type RawSeries } from "./tmdb-meta-mappers";
 
 export async function tmdbMovieRow(
   key: string,
@@ -56,29 +50,17 @@ export async function tmdbTrending(
     page: String(page),
   });
   const results = data?.results ?? [];
-  return type === "movie"
-    ? (results as RawMovie[]).map(movieMeta)
-    : (results as RawSeries[]).map(seriesMeta);
+  return type === "movie" ? (results as RawMovie[]).map(movieMeta) : (results as RawSeries[]).map(seriesMeta);
 }
 
-export async function tmdbDiscover(
-  key: string,
-  type: "movie" | "tv",
-  params: Record<string, string>,
-): Promise<Meta[]> {
+export async function tmdbDiscover(key: string, type: "movie" | "tv", params: Record<string, string>): Promise<Meta[]> {
   if (!key) return [];
   const data = await get<Page<RawMovie | RawSeries>>(key, `discover/${type}`, params);
   const results = data?.results ?? [];
-  return type === "movie"
-    ? (results as RawMovie[]).map(movieMeta)
-    : (results as RawSeries[]).map(seriesMeta);
+  return type === "movie" ? (results as RawMovie[]).map(movieMeta) : (results as RawSeries[]).map(seriesMeta);
 }
 
-export async function tmdbSearchMovie(
-  key: string,
-  query: string,
-  year?: number,
-): Promise<Meta | null> {
+export async function tmdbSearchMovie(key: string, query: string, year?: number): Promise<Meta | null> {
   if (!key || !query.trim()) return null;
   const params: Record<string, string> = { query, include_adult: "false" };
   if (year) params.year = String(year);

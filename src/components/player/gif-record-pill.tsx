@@ -1,6 +1,6 @@
-import { Loader2, Square, X } from "lucide-react";
-import type { GifState } from "@/views/player/hooks/use-gif-recorder";
 import { useT } from "@/lib/i18n";
+import type { GifState } from "@/views/player/hooks/use-gif-recorder";
+import { Loader2, Square, X } from "lucide-react";
 
 function fmt(sec: number): string {
   const s = Math.max(0, Math.floor(sec));

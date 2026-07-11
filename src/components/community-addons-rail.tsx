@@ -1,11 +1,11 @@
-import { ArrowUpRight, Check, Loader2, Plus, Star } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import stremioAddonsLogo from "@/assets/stremio-addons-net.png";
 import { ArrowedScrollRow } from "@/components/arrowed-scroll-row";
-import { addonSiteUrl, listAddons, type SAAddon } from "@/lib/providers/stremio-addons";
-import { fetchManifestAt, installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
 import { openInstallerViewport } from "@/components/installer-viewport";
+import { fetchManifestAt, installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
+import { addonSiteUrl, listAddons, type SAAddon } from "@/lib/providers/stremio-addons";
 import { openUrl } from "@/lib/window";
+import { ArrowUpRight, Check, Loader2, Plus, Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 const SITE_NAME = "stremio-addons.net";
 const SITE_URL = "https://stremio-addons.net";
@@ -71,9 +71,7 @@ export function CommunityAddonsRail({
             />
           </button>
           <div className="flex flex-col gap-1">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-accent">
-              Community ratings
-            </span>
+            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-accent">Community ratings</span>
             <h3 className="text-[24px] font-medium tracking-tight text-ink">
               Top on{" "}
               <button
@@ -109,12 +107,7 @@ export function CommunityAddonsRail({
       ) : items.length === 0 ? (
         <EmptyState />
       ) : (
-        <RailScroller
-          items={items}
-          installedIds={installedIds}
-          onChange={onChange}
-          onOpen={onOpen}
-        />
+        <RailScroller items={items} installedIds={installedIds} onChange={onChange} onOpen={onOpen} />
       )}
     </section>
   );
@@ -202,8 +195,7 @@ function CommunityCard({
     if (!m?.id || busy) return;
     setBusy(true);
     try {
-      let hints = (m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } })
-        .behaviorHints;
+      let hints = (m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } }).behaviorHints;
       if (!hints) {
         const full = await fetchManifestAt(addon.manifestUrl).catch(() => null);
         hints = full?.behaviorHints;
@@ -272,9 +264,7 @@ function CommunityCard({
             {name}
           </button>
           {description && (
-            <span className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">
-              {description}
-            </span>
+            <span className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">{description}</span>
           )}
         </div>
         <div className="mt-auto flex items-center justify-between gap-2">

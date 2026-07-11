@@ -1,12 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import { SeekBarVisual } from "@/components/player/transport/seek-bar-visual";
-import {
-  type PlayerChromeConfig,
-  type PlayerControlId,
-  type PlayerSlot,
-  type ThemeId,
-} from "@/lib/player-chrome";
+import { type PlayerChromeConfig, type PlayerControlId, type PlayerSlot, type ThemeId } from "@/lib/player-chrome";
 import { useSettings } from "@/lib/settings";
+import { useEffect, useRef, useState } from "react";
 
 export function TopRow({
   theme,
@@ -28,7 +23,13 @@ export function TopRow({
           <SlotZone slot="top-left" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
         </div>
         <div className="flex items-center gap-1">
-          <SlotZone slot="top-right" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="top-right"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
       </div>
     );
@@ -104,9 +105,7 @@ function CyclingBackdrop({ bg }: { bg: string | null }) {
           src={layer.url}
           alt=""
           className={`absolute inset-0 h-full w-full object-cover opacity-[0.40] ${
-            i === layers.length - 1 && layers.length > 1
-              ? "animate-in fade-in duration-[2200ms] ease-out"
-              : ""
+            i === layers.length - 1 && layers.length > 1 ? "animate-in fade-in duration-[2200ms] ease-out" : ""
           }`}
           style={{ filter: "saturate(1.15)" }}
           draggable={false}
@@ -139,11 +138,23 @@ export function DefaultLayout({
           <LiveSeekRowMock />
         ) : (
           <>
-            <SlotZone slot="seek-leading" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+            <SlotZone
+              slot="seek-leading"
+              config={config}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              renderOne={renderOne}
+            />
             <div className="flex-1">
               <SeekBarPlaceholder />
             </div>
-            <SlotZone slot="seek-trailing" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+            <SlotZone
+              slot="seek-trailing"
+              config={config}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              renderOne={renderOne}
+            />
           </>
         )}
       </div>
@@ -153,13 +164,31 @@ export function DefaultLayout({
         }`}
       >
         <div className="flex min-w-0 items-center gap-2 justify-self-start">
-          <SlotZone slot="bottom-left" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="bottom-left"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
         <div className="flex items-center gap-1.5">
-          <SlotZone slot="bottom-center" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="bottom-center"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
         <div className="flex items-center gap-1.5 justify-self-end">
-          <SlotZone slot="bottom-right" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="bottom-right"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
       </div>
     </>
@@ -179,10 +208,28 @@ export function StremioLayout({ config, selectedId, onSelect, renderOne, isLive 
         )}
       </div>
       <div className="flex items-center gap-1">
-        <SlotZone slot="bottom-left" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
-        <SlotZone slot="bottom-center" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+        <SlotZone
+          slot="bottom-left"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
+        <SlotZone
+          slot="bottom-center"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
         <div className="flex-1" />
-        <SlotZone slot="bottom-right" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+        <SlotZone
+          slot="bottom-right"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
       </div>
     </>
   );
@@ -202,8 +249,7 @@ function LiveSeekRowMock() {
         </div>
       </div>
       <span className="shrink-0 text-[12px] font-semibold uppercase tracking-[0.2em] text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
-        Go to live{" "}
-        <span className="ms-0.5 font-mono lowercase tracking-normal text-white/55">· 24s</span>
+        Go to live <span className="ms-0.5 font-mono lowercase tracking-normal text-white/55">· 24s</span>
       </span>
     </>
   );
@@ -222,12 +268,10 @@ function SlotZone({
   onSelect: (id: PlayerControlId | null) => void;
   renderOne: (id: PlayerControlId) => React.ReactNode;
 }) {
-  const allInSlot = config.controls
-    .filter((c) => c.slot === slot && !c.hidden)
-    .sort((a, b) => a.order - b.order);
+  const allInSlot = config.controls.filter((c) => c.slot === slot && !c.hidden).sort((a, b) => a.order - b.order);
   const items = allInSlot
     .map((c) => ({ c, rendered: renderOne(c.id) }))
-    .filter((x): x is { c: typeof allInSlot[number]; rendered: NonNullable<React.ReactNode> } => x.rendered != null);
+    .filter((x): x is { c: (typeof allInSlot)[number]; rendered: NonNullable<React.ReactNode> } => x.rendered != null);
   if (items.length === 0) return null;
   return (
     <>

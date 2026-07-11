@@ -1,14 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { hdrOverlayClose, hdrOverlayHide, hdrOverlayOpen, onHdrStageDead, onHdrStageReady } from "@/lib/hdr-overlay";
 import { isWindowsDesktop } from "@/lib/platform";
-import {
-  hdrOverlayClose,
-  hdrOverlayHide,
-  hdrOverlayOpen,
-  onHdrStageDead,
-  onHdrStageReady,
-} from "@/lib/hdr-overlay";
 import type { Settings } from "@/lib/settings";
+import { invoke } from "@tauri-apps/api/core";
+import { useEffect, useRef, useState } from "react";
 
 const HDR_GAMMAS = new Set(["pq", "hlg"]);
 const MONITOR_DEBOUNCE_MS = 600;

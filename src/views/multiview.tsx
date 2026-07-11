@@ -1,10 +1,11 @@
+import { pushActivityHint } from "@/lib/discord/activity-hint";
+import type { EpgIndex, IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
+import { useMultiviewStore, type Layout } from "@/lib/multiview/store";
 import { ChevronDown, ChevronUp, Grid2x2, Info, Square, StopCircle, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useMultiviewStore, type Layout } from "@/lib/multiview/store";
-import type { EpgIndex, IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
-import { Grid } from "./multiview/grid";
+
 import { ChannelPicker } from "./multiview/channel-picker";
-import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { Grid } from "./multiview/grid";
 
 const LAYOUTS: { id: Layout; label: string }[] = [
   { id: "1", label: "Single" },
@@ -133,9 +134,8 @@ export function MultiviewView({
         <div className="mx-6 mb-3 flex items-start gap-2.5 rounded-xl border border-edge-soft/60 bg-elevated/30 px-3.5 py-2.5">
           <Info size={13} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
           <p className="flex-1 text-[11.5px] leading-relaxed text-ink-muted">
-            Most IPTV providers cap simultaneous streams per account (commonly 1–2). If a tile
-            drops to "Stream offline" while others play, your provider may be throttling. Try
-            closing a stream and retrying.
+            Most IPTV providers cap simultaneous streams per account (commonly 1–2). If a tile drops to "Stream offline"
+            while others play, your provider may be throttling. Try closing a stream and retrying.
           </p>
           <button
             type="button"

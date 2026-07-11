@@ -1,26 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronRight } from "lucide-react";
 import { Row } from "@/components/row";
 import { useT } from "@/lib/i18n";
-import { computeTvgIdCounts } from "@/lib/iptv/epg-resolver";
-import type { EpgIndex, IptvChannel } from "@/lib/iptv/types";
 import { isHydratableChannel } from "@/lib/iptv/channel-hydration";
 import { flagUrl } from "@/lib/iptv/country-detect";
 import { clearCountries, toggleCountry, useCountryPrefs } from "@/lib/iptv/country-prefs";
+import { computeTvgIdCounts } from "@/lib/iptv/epg-resolver";
 import { useFavorites } from "@/lib/iptv/favorites";
-import { DEFAULT_SPORTS_LEAGUES, LEAGUES } from "@/lib/sports/espn";
+import type { EpgIndex, IptvChannel } from "@/lib/iptv/types";
 import { useSettings } from "@/lib/settings";
+import { DEFAULT_SPORTS_LEAGUES, LEAGUES } from "@/lib/sports/espn";
 import { useView } from "@/lib/view";
+import { ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { useChannelHydration } from "./hooks/use-channel-hydration";
 import { CountryBar } from "./live-home/country-bar";
-import { SportsMarquee } from "./live-home/sports/sports-marquee";
-import { useSports } from "./live-home/use-sports";
 import { GuideCard } from "./live-home/guide-card";
 import { LiveHero } from "./live-home/live-hero";
 import { MoreOnNow } from "./live-home/more-on-now";
 import { NowCard } from "./live-home/now-card";
 import { fmtClock } from "./live-home/now-format";
+import { SportsMarquee } from "./live-home/sports/sports-marquee";
 import { buildNowItem, hydrationKey, useLiveHome, type ChannelRail } from "./live-home/use-live-home";
+import { useSports } from "./live-home/use-sports";
 
 export function LiveHome({
   channels,
@@ -54,9 +55,7 @@ export function LiveHome({
   const countryPrefs = useCountryPrefs(sourceId);
   const tvgCounts = useMemo(() => computeTvgIdCounts(channels), [channels]);
   const { settings, update } = useSettings();
-  const userSportsLeagues = settings.sportsLeagues?.length
-    ? settings.sportsLeagues
-    : DEFAULT_SPORTS_LEAGUES;
+  const userSportsLeagues = settings.sportsLeagues?.length ? settings.sportsLeagues : DEFAULT_SPORTS_LEAGUES;
 
   const saveSportsLeagues = (keys: string[]) => {
     update({ sportsLeagues: keys });
@@ -95,9 +94,7 @@ export function LiveHome({
     <div className="flex flex-col gap-8 pb-12">
       <div className="flex flex-col gap-5">
         <div className="flex items-baseline gap-2.5 ps-[9px]">
-          <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">
-            {t("Your TV")}
-          </h1>
+          <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">{t("Your TV")}</h1>
           <span className="text-[16px] text-ink-subtle">{t("at {time}", { time: fmtClock(nowMs) })}</span>
         </div>
         {spotlight.length > 0 && (
@@ -213,12 +210,7 @@ function RailRow({
   return (
     <Row title={title} shape="landscape" min={300} scrollKey={`live-home:${sourceId}:${rail.key}`}>
       {items.map((it) => (
-        <NowCard
-          key={it.channel.id}
-          item={it}
-          hydrated={hydrations.get(hydrationKey(it)) ?? null}
-          onPlay={onPlay}
-        />
+        <NowCard key={it.channel.id} item={it} hydrated={hydrations.get(hydrationKey(it)) ?? null} onPlay={onPlay} />
       ))}
     </Row>
   );

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { AudioModal, type AudioModalState } from "@/components/popups/audio-modal";
+import { SubtitleModal, type SubtitleModalState } from "@/components/popups/subtitle-modal";
 import { AuthProvider } from "@/lib/auth";
-import { SettingsProvider } from "@/lib/settings";
 import {
   modalOverlayClose,
   modalOverlayEmitAction,
@@ -9,8 +9,8 @@ import {
   onModalState,
   type ModalPayload,
 } from "@/lib/modal-overlay";
-import { AudioModal, type AudioModalState } from "@/components/popups/audio-modal";
-import { SubtitleModal, type SubtitleModalState } from "@/components/popups/subtitle-modal";
+import { SettingsProvider } from "@/lib/settings";
+import { useEffect, useState } from "react";
 
 export function ModalOverlayApp() {
   useEffect(() => {
@@ -70,9 +70,7 @@ function ModalRouter() {
         state={payload.state as SubtitleModalState}
         onSelect={(id) => modalOverlayEmitAction("modal://subtitle/select", { id })}
         onDelay={(sec) => modalOverlayEmitAction("modal://subtitle/delay", { sec })}
-        onAddSubtitle={(url, lang, title) =>
-          modalOverlayEmitAction("modal://subtitle/add", { url, lang, title })
-        }
+        onAddSubtitle={(url, lang, title) => modalOverlayEmitAction("modal://subtitle/add", { url, lang, title })}
         onClose={close}
       />
     );

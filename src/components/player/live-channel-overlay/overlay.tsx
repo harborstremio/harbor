@@ -1,28 +1,22 @@
-import { CalendarRange, List, Loader2, Search, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { CategorySidebar } from "@/views/live/category-sidebar";
-import { GuideView } from "@/views/live/guide/guide-view";
-import {
-  filterChannelsByRegion,
-  promoteTopChannelsToFront,
-  rowsForRegion,
-} from "@/lib/iptv/top-networks";
-import {
-  sortChannelsByGroupRelevance,
-  sortGroupsByRelevance,
-} from "@/lib/iptv/group-relevance";
+import { useT } from "@/lib/i18n";
 import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
+import { sortChannelsByGroupRelevance, sortGroupsByRelevance } from "@/lib/iptv/group-relevance";
 import { getCachedPlaylist } from "@/lib/iptv/store";
-import { findCurrent } from "@/lib/iptv/xmltv";
+import { filterChannelsByRegion, promoteTopChannelsToFront, rowsForRegion } from "@/lib/iptv/top-networks";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
+import { findCurrent } from "@/lib/iptv/xmltv";
+import { useSettings } from "@/lib/settings";
+import { useScrollMemory } from "@/lib/view";
+import { CategorySidebar } from "@/views/live/category-sidebar";
+import { GuideView } from "@/views/live/guide/guide-view";
 import { useAllPlaylists } from "@/views/live/hooks/use-all-playlists";
 import { useChannelFilter } from "@/views/live/hooks/use-channel-filter";
 import { useEpg, useNowTick } from "@/views/live/hooks/use-epg";
 import { useIptvPlaylist } from "@/views/live/hooks/use-iptv-playlist";
-import { useScrollMemory } from "@/lib/view";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+import { CalendarRange, List, Loader2, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { CurrentChannelInfo } from "./current-channel-info";
 import { InlineSourceSwitcher } from "./inline-source-switcher";
 
@@ -57,8 +51,7 @@ export function LiveChannelOverlay({
   const playlist = state.kind === "ready" ? state.playlist : getCachedPlaylist(source.id);
 
   const region = settings.region || "US";
-  const preferredLanguages =
-    settings.preferredLanguages.length > 0 ? settings.preferredLanguages : ["English"];
+  const preferredLanguages = settings.preferredLanguages.length > 0 ? settings.preferredLanguages : ["English"];
 
   const sortedChannels = useMemo(
     () => sortChannelsByGroupRelevance(playlist?.channels ?? [], region, preferredLanguages),
@@ -69,10 +62,7 @@ export function LiveChannelOverlay({
     [playlist?.groups, region, preferredLanguages.join(",")],
   );
   const topRows = useMemo(() => rowsForRegion(region), [region]);
-  const regionChannels = useMemo(
-    () => filterChannelsByRegion(sortedChannels, region),
-    [sortedChannels, region],
-  );
+  const regionChannels = useMemo(() => filterChannelsByRegion(sortedChannels, region), [sortedChannels, region]);
   const orderedChannels = useMemo(() => {
     if (group !== null) return sortedChannels;
     if (query.trim()) return sortedChannels;
@@ -128,13 +118,10 @@ export function LiveChannelOverlay({
     if (!inFavorites) return standardVisible;
     const q = query.trim().toLowerCase();
     if (!q) return favoriteChannels;
-    return favoriteChannels.filter((ch) =>
-      `${ch.name} ${ch.group ?? ""}`.toLowerCase().includes(q),
-    );
+    return favoriteChannels.filter((ch) => `${ch.name} ${ch.group ?? ""}`.toLowerCase().includes(q));
   }, [inFavorites, standardVisible, favoriteChannels, query]);
 
-  const loadingFavorites =
-    inFavorites && stubSources.length > 0 && favoriteChannels.length < favorites.count;
+  const loadingFavorites = inFavorites && stubSources.length > 0 && favoriteChannels.length < favorites.count;
 
   const groupLogos = useMemo(() => {
     const m = new Map<string, string | null>();
@@ -150,10 +137,7 @@ export function LiveChannelOverlay({
     return playlist?.channels.find((c) => c.id === currentChannelId) ?? null;
   }, [currentChannelId, playlist]);
 
-  const tvgIdCounts = useMemo(
-    () => computeTvgIdCounts(playlist?.channels ?? []),
-    [playlist?.channels],
-  );
+  const tvgIdCounts = useMemo(() => computeTvgIdCounts(playlist?.channels ?? []), [playlist?.channels]);
   const currentProgram = useMemo(() => {
     if (!currentChannel) return null;
     const programs = epgProgramsForChannel(currentChannel, epg, tvgIdCounts);
@@ -211,11 +195,7 @@ export function LiveChannelOverlay({
         <CurrentChannelInfo channel={currentChannel} current={currentProgram} now={nowMs} />
       </div>
       <div className="flex shrink-0 items-center gap-2.5 px-6 pt-4 pb-3">
-        <InlineSourceSwitcher
-          sources={sources}
-          selectedId={source.id}
-          onSelect={onSelectSource}
-        />
+        <InlineSourceSwitcher sources={sources} selectedId={source.id} onSelect={onSelectSource} />
         <div className="flex h-11 flex-1 items-center gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated px-3.5">
           <Search size={15} strokeWidth={2} className="text-ink-subtle" />
           <input
@@ -243,7 +223,9 @@ export function LiveChannelOverlay({
         </div>
         <button
           onClick={toggleGuideStyle}
-          title={guideStyle === "timeline" ? t("Switch to channel list (hide program guide)") : t("Switch to program guide")}
+          title={
+            guideStyle === "timeline" ? t("Switch to channel list (hide program guide)") : t("Switch to program guide")
+          }
           aria-label={t("Toggle guide layout")}
           className="flex h-11 shrink-0 items-center gap-2 rounded-xl border border-edge-soft/55 bg-elevated px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
         >
@@ -289,8 +271,8 @@ export function LiveChannelOverlay({
               {inFavorites && favorites.count === 0
                 ? t("No favorites yet. Star a channel to pin it here.")
                 : inFavorites && loadingFavorites
-                ? t("Loading favorites…")
-                : t("No channels match. Try a different category or clear the search.")}
+                  ? t("Loading favorites…")
+                  : t("No channels match. Try a different category or clear the search.")}
             </div>
           )}
         </div>

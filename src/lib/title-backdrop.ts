@@ -1,7 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-
-
 const STORAGE_KEY = "harbor:title-backdrops";
 
 type Store = Record<string, string>;
@@ -25,9 +23,7 @@ function emit() {
 function persist() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
-  } catch {
-    
-  }
+  } catch {}
 }
 
 function subscribe(callback: () => void): () => void {
@@ -37,11 +33,9 @@ function subscribe(callback: () => void): () => void {
   };
 }
 
-
 export function getTitleBackdrop(metaId: string): string | undefined {
   return cache[metaId];
 }
-
 
 export function setTitleBackdrop(metaId: string, url: string): void {
   if (cache[metaId] === url) return;
@@ -58,7 +52,6 @@ export function clearTitleBackdrop(metaId: string): void {
   persist();
   emit();
 }
-
 
 export function useTitleBackdrop(metaId: string | undefined): string | undefined {
   return useSyncExternalStore(

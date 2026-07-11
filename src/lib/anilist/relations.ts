@@ -1,5 +1,6 @@
-import { anilistRequest } from "./client";
 import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
+
+import { anilistRequest } from "./client";
 
 const RELATIONS_QUERY = `query ($id: Int) {
   Media(id: $id, type: ANIME) {
@@ -88,10 +89,7 @@ function toNode(n: RawNode): AnilistFranchiseNode {
     episodes: n.episodes ?? undefined,
     year: n.seasonYear ?? n.startDate?.year ?? undefined,
     startDate: fmtDate(n.startDate),
-    rating:
-      typeof n.averageScore === "number" && n.averageScore > 0
-        ? (n.averageScore / 10).toFixed(1)
-        : undefined,
+    rating: typeof n.averageScore === "number" && n.averageScore > 0 ? (n.averageScore / 10).toFixed(1) : undefined,
     upcoming: n.status === "NOT_YET_RELEASED",
   };
 }

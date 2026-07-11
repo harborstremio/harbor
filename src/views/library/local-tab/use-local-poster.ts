@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { usePosterChain } from "@/components/poster";
-import { fetchMovieAssets } from "@/lib/providers/tmdb/tmdb-images";
-import { imageLangPriority } from "@/lib/providers/tmdb/tmdb-image-lang";
-import { IMG } from "@/lib/providers/tmdb/tmdb-client";
-import { useSettings } from "@/lib/settings";
 import type { LocalEntry } from "@/lib/local-library";
+import { IMG } from "@/lib/providers/tmdb/tmdb-client";
+import { imageLangPriority } from "@/lib/providers/tmdb/tmdb-image-lang";
+import { fetchMovieAssets } from "@/lib/providers/tmdb/tmdb-images";
+import { useSettings } from "@/lib/settings";
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { useEffect, useState } from "react";
 
 function artSrc(value: string): string {
   return /^https?:\/\//i.test(value) ? value : convertFileSrc(value);

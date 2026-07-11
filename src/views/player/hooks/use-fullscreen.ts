@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
 import {
   consumeMarathonReenter,
   enterWindowFullscreen,
@@ -8,6 +7,7 @@ import {
   subscribeFullscreen,
   toggleWindowFullscreen,
 } from "@/lib/fullscreen-state";
+import { useCallback, useEffect, useState } from "react";
 
 export function useFullscreen() {
   const [fullscreen, setFullscreen] = useState(getWindowFullscreen);

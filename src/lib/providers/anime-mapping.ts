@@ -12,8 +12,7 @@ async function preferMainTv(kitsuId: number, type?: string): Promise<number> {
 }
 
 const ARM = "https://relations.yuna.moe/api/ids";
-const ANIME_LIST_URL =
-  "https://raw.githubusercontent.com/Anime-Lists/anime-lists/master/anime-list-master.xml";
+const ANIME_LIST_URL = "https://raw.githubusercontent.com/Anime-Lists/anime-lists/master/anime-list-master.xml";
 
 const ARM_KITSU_KEY = "harbor.armkitsucache";
 const ANIDB_TVDB_KEY = "harbor.anidbtvdbcache";

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { fetchGenreSample } from "@/lib/feed";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
@@ -6,8 +5,10 @@ import { useT } from "@/lib/i18n";
 import { rpdbPoster } from "@/lib/providers/rpdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { Row } from "./row";
+import { useEffect, useState } from "react";
+
 import { Poster } from "./poster";
+import { Row } from "./row";
 
 const GENRE_PALETTE: Record<string, { from: string; to: string; ink: string }> = {
   Action: { from: "oklch(0.40 0.18 25)", to: "oklch(0.18 0.10 20)", ink: "oklch(0.96 0.02 25)" },

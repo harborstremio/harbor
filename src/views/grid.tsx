@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft } from "lucide-react";
 import { BackToTop } from "@/components/back-to-top";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { layoutHasGlobalBack } from "@/lib/theme";
 import { useScrollMemory, useView, type GridSpec } from "@/lib/view";
+import { ArrowLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const PAGE_CAP = 40;
 
@@ -85,16 +85,13 @@ export function GridView({ grid }: { grid: GridSpec }) {
         <>
           <section className="relative h-[66vh] min-h-[460px] w-full overflow-hidden">
             {bgArt ? (
-              <img
-                src={bgArt}
-                alt=""
-                draggable={false}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
+              <img src={bgArt} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
             ) : (
               <div className={`absolute inset-0 bg-gradient-to-br ${hero.grad}`} />
             )}
-            <div className={`pointer-events-none absolute inset-0 bg-gradient-to-tr ${hero.grad} opacity-25 mix-blend-overlay`} />
+            <div
+              className={`pointer-events-none absolute inset-0 bg-gradient-to-tr ${hero.grad} opacity-25 mix-blend-overlay`}
+            />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas via-canvas/35 to-transparent" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/45 via-black/10 to-transparent" />
             <img
@@ -126,9 +123,7 @@ export function GridView({ grid }: { grid: GridSpec }) {
                 <ArrowLeft size={18} strokeWidth={2.2} />
               </button>
             )}
-            <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">
-              {grid.title}
-            </h1>
+            <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">{grid.title}</h1>
             <span className="text-[14px] text-ink-subtle">{metas.length} titles</span>
           </div>
           {body}

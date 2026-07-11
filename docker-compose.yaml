@@ -12,7 +12,7 @@ services:
       # Vite file-watching over a bind mount is unreliable without polling.
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - .:/app                 # live-edit source
-      - /app/node_modules      # keep the image's install (don't let the bind mount hide it)
+      - .:/app # live-edit source
+      - /app/node_modules # keep the image's install (don't let the bind mount hide it)
     tty: true
     stdin_open: true

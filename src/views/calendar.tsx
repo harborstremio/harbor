@@ -1,5 +1,5 @@
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AuthModal } from "@/components/auth-modal";
+import { useAuth } from "@/lib/auth";
 import {
   applyCalendarFilter,
   groupByDate,
@@ -7,21 +7,22 @@ import {
   type CalendarFilter,
   type CalendarItem,
 } from "@/lib/calendar";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useSimkl } from "@/lib/simkl/provider";
+import { library, type LibraryItem } from "@/lib/stremio";
+import { useTrakt } from "@/lib/trakt/provider";
+import { useScrollMemory, useView } from "@/lib/view";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { CalendarSkeleton } from "./calendar/calendar-skeleton";
 import { CustomCalendarBar } from "./calendar/custom-bar";
-import { useCalendarData } from "./calendar/use-calendar-data";
-import { useAuth } from "@/lib/auth";
-import { library, type LibraryItem } from "@/lib/stremio";
-import { useSettings } from "@/lib/settings";
-import { useTrakt } from "@/lib/trakt/provider";
-import { useSimkl } from "@/lib/simkl/provider";
-import { useScrollMemory, useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
-import { AuthModal } from "@/components/auth-modal";
 import { DayModal } from "./calendar/day-modal";
 import { EmptyState, ErrorState, NoKeyState, NotSignedInState } from "./calendar/empty-states";
 import { MonthGrid } from "./calendar/month-grid";
 import { SourceSwitcher } from "./calendar/source-switcher";
+import { useCalendarData } from "./calendar/use-calendar-data";
 import {
   buildLibraryNameSet,
   buildMonthCells,
@@ -127,7 +128,7 @@ export function CalendarView() {
   };
 
   const todayISO = todayLocalISO();
-  const dayModalItems = dayModal ? grouped.get(dayModal) ?? [] : [];
+  const dayModalItems = dayModal ? (grouped.get(dayModal) ?? []) : [];
 
   const showAllControls = source === "all";
   const showPremiereFilters = source === "simkl-anticipated";
@@ -161,9 +162,7 @@ export function CalendarView() {
       <header className="shrink-0 border-b border-edge-soft px-12 pb-5 pt-24">
         <div className="flex items-end justify-between gap-6">
           <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-              {t("Releases")}
-            </span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">{t("Releases")}</span>
             <h1 className="font-display text-[44px] font-medium leading-none tracking-tight text-ink">
               {t("Calendar")}
             </h1>
@@ -226,10 +225,7 @@ export function CalendarView() {
               <div className="flex flex-wrap items-center gap-2">
                 {FILTERS.map((f) => {
                   const active = filter === f.id;
-                  const count =
-                    f.id === "all"
-                      ? filtered.length
-                      : applyCalendarFilter(items, f.id).length;
+                  const count = f.id === "all" ? filtered.length : applyCalendarFilter(items, f.id).length;
                   return (
                     <button
                       key={f.id}
@@ -241,11 +237,7 @@ export function CalendarView() {
                       }`}
                     >
                       {t(f.label)}
-                      <span
-                        className={`text-[11px] tabular-nums ${
-                          active ? "text-canvas/65" : "text-ink-subtle"
-                        }`}
-                      >
+                      <span className={`text-[11px] tabular-nums ${active ? "text-canvas/65" : "text-ink-subtle"}`}>
                         {count}
                       </span>
                     </button>
@@ -261,11 +253,7 @@ export function CalendarView() {
                       : "border border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
                   }`}
                 >
-                  <Star
-                    size={11}
-                    strokeWidth={2.4}
-                    className={watchlistOnly ? "fill-canvas" : ""}
-                  />
+                  <Star size={11} strokeWidth={2.4} className={watchlistOnly ? "fill-canvas" : ""} />
                   {t("Watchlist only")}
                 </button>
               </div>
@@ -277,8 +265,7 @@ export function CalendarView() {
               <div className="flex flex-wrap items-center gap-2">
                 {FILTERS.map((f) => {
                   const active = filter === f.id;
-                  const count =
-                    f.id === "all" ? items.length : applyCalendarFilter(items, f.id).length;
+                  const count = f.id === "all" ? items.length : applyCalendarFilter(items, f.id).length;
                   return (
                     <button
                       key={f.id}
@@ -290,11 +277,7 @@ export function CalendarView() {
                       }`}
                     >
                       {t(f.label)}
-                      <span
-                        className={`text-[11px] tabular-nums ${
-                          active ? "text-canvas/65" : "text-ink-subtle"
-                        }`}
-                      >
+                      <span className={`text-[11px] tabular-nums ${active ? "text-canvas/65" : "text-ink-subtle"}`}>
                         {count}
                       </span>
                     </button>
@@ -306,7 +289,9 @@ export function CalendarView() {
         </nav>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-12 py-8">{body}</div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-12 py-8">
+        {body}
+      </div>
 
       {dayModal && dayModalItems.length > 0 && (
         <DayModal

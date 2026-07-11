@@ -1,5 +1,5 @@
-import { daysFromTodayLocal } from "@/lib/dates";
 import type { Meta } from "@/lib/cinemeta";
+import { daysFromTodayLocal } from "@/lib/dates";
 import type { Episode, Season, TmdbDetail } from "@/lib/providers/tmdb";
 
 export function isUpcomingDate(date: string | null | undefined): boolean {
@@ -12,16 +12,9 @@ export function airedWithinDays(date: string | null | undefined, days: number): 
   return d != null && d <= 0 && d >= -days;
 }
 
-export function isNewSeason(
-  s: Season,
-  lastEpisodeAir?: { seasonNumber: number; airDate: string | null },
-): boolean {
+export function isNewSeason(s: Season, lastEpisodeAir?: { seasonNumber: number; airDate: string | null }): boolean {
   if (airedWithinDays(s.airDate, 30)) return true;
-  if (
-    lastEpisodeAir &&
-    lastEpisodeAir.seasonNumber === s.seasonNumber &&
-    airedWithinDays(lastEpisodeAir.airDate, 7)
-  ) {
+  if (lastEpisodeAir && lastEpisodeAir.seasonNumber === s.seasonNumber && airedWithinDays(lastEpisodeAir.airDate, 7)) {
     return true;
   }
   return false;
@@ -40,13 +33,7 @@ export function isTitleUpcoming(detail: TmdbDetail | null, meta: Meta): boolean 
     const date = detail.kind === "movie" ? detail.releaseDate : detail.firstAirDate;
     if (date) return isUpcomingDate(date);
     const s = (detail.status ?? "").toLowerCase();
-    if (
-      s.includes("upcoming") ||
-      s.includes("unreleased") ||
-      s.includes("tba") ||
-      s === "planned" ||
-      s === "rumored"
-    ) {
+    if (s.includes("upcoming") || s.includes("unreleased") || s.includes("tba") || s === "planned" || s === "rumored") {
       return true;
     }
     return false;

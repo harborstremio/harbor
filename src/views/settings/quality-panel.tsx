@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { listMpvAudioDevices, type MpvAudioDevice } from "@/lib/player/mpv";
+import { useSettings } from "@/lib/settings";
+import { CROP_PRESETS } from "@/views/player/hooks/use-video-fill";
+import { useEffect, useState } from "react";
+
 import { PlayModePanel, PlayerEnginePanel } from "./player-panel";
 import { Section, Segmented, ToggleRow, useSettingsActiveContext } from "./shared";
-import { CROP_PRESETS } from "@/views/player/hooks/use-video-fill";
-import { useT } from "@/lib/i18n";
 
 export function QualityPanel() {
   const t = useT();
@@ -14,14 +15,18 @@ export function QualityPanel() {
     <>
       <Section
         title={t("Play button behavior")}
-        subtitle={t("Choose what happens when you hit Play on a title. Manual gives you full control over quality and source.")}
+        subtitle={t(
+          "Choose what happens when you hit Play on a title. Manual gives you full control over quality and source.",
+        )}
       >
         <PlayModePanel />
       </Section>
 
       <Section
         title={t("Player engine")}
-        subtitle={t("HTML5 plays everything WebView2 supports. mpv handles TrueHD, DTS-HD, AV1, weird containers, and HDR. Auto picks based on the source.")}
+        subtitle={t(
+          "HTML5 plays everything WebView2 supports. mpv handles TrueHD, DTS-HD, AV1, weird containers, and HDR. Auto picks based on the source.",
+        )}
       >
         <PlayerEnginePanel />
       </Section>
@@ -32,7 +37,9 @@ export function QualityPanel() {
       >
         <ToggleRow
           label={t("Show stream quality under the title")}
-          sub={t("Displays the resolution, HDR format and audio (e.g. 4K · Dolby Vision · TrueHD 7.1) under the movie or episode title while playing. Off by default.")}
+          sub={t(
+            "Displays the resolution, HDR format and audio (e.g. 4K · Dolby Vision · TrueHD 7.1) under the movie or episode title while playing. Off by default.",
+          )}
           value={settings.showQualityInfo}
           onChange={(v) => update({ showQualityInfo: v })}
         />
@@ -40,7 +47,9 @@ export function QualityPanel() {
 
       <Section
         title={t("Aspect ratio")}
-        subtitle={t("Default picture shape on the mpv engine. Fit keeps the source as-is with any black bars; the rest stretch or crop to fill, handy for old 4:3 shows on a widescreen TV.")}
+        subtitle={t(
+          "Default picture shape on the mpv engine. Fit keeps the source as-is with any black bars; the rest stretch or crop to fill, handy for old 4:3 shows on a widescreen TV.",
+        )}
       >
         <Segmented
           value={settings.cropMode}
@@ -48,7 +57,9 @@ export function QualityPanel() {
           onChange={(v) => update({ cropMode: v })}
         />
         <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Want to change the ratio mid-playback? The live aspect button is hidden by default to keep the player tidy.")}{" "}
+          {t(
+            "Want to change the ratio mid-playback? The live aspect button is hidden by default to keep the player tidy.",
+          )}{" "}
           <button
             type="button"
             onClick={() => setActive("playerLayout")}
@@ -61,7 +72,9 @@ export function QualityPanel() {
 
       <Section
         title={t("Audio")}
-        subtitle={t("Shape the sound without touching your system EQ. Applies on the mpv engine; the HTML5 engine plays audio untouched.")}
+        subtitle={t(
+          "Shape the sound without touching your system EQ. Applies on the mpv engine; the HTML5 engine plays audio untouched.",
+        )}
       >
         <ToggleRow
           label={t("Normalize loudness")}
@@ -82,7 +95,9 @@ export function QualityPanel() {
             onChange={(v) => update({ audioProfile: v })}
           />
           <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.")}
+            {t(
+              "Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.",
+            )}
           </p>
         </div>
         <AudioOutputRow />
@@ -90,17 +105,23 @@ export function QualityPanel() {
 
       <Section
         title={t("Skip intros & credits")}
-        subtitle={t("Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.")}
+        subtitle={t(
+          "Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.",
+        )}
       >
         <ToggleRow
           label={t("Show the Skip button")}
-          sub={t("Show a Skip Intro / Skip Credits button when Harbor detects one. Turn this off to never show it. You can also tap the X on the button to dismiss a wrong one for the rest of the episode.")}
+          sub={t(
+            "Show a Skip Intro / Skip Credits button when Harbor detects one. Turn this off to never show it. You can also tap the X on the button to dismiss a wrong one for the rest of the episode.",
+          )}
           value={settings.showSkipButton}
           onChange={(v) => update({ showSkipButton: v })}
         />
         <ToggleRow
           label={t("Auto-skip intros")}
-          sub={t("Jump past openings automatically the moment one starts. The Skip button still shows either way, and seeking back into an intro replays it without skipping again.")}
+          sub={t(
+            "Jump past openings automatically the moment one starts. The Skip button still shows either way, and seeking back into an intro replays it without skipping again.",
+          )}
           value={settings.autoSkipIntro}
           onChange={(v) => update({ autoSkipIntro: v })}
         />
@@ -139,14 +160,14 @@ export function QualityPanel() {
 
       <Section
         title={t("Next episode prompt")}
-        subtitle={t("When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.")}
+        subtitle={t(
+          "When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.",
+        )}
       >
         <Segmented
           value={nextEpLeadKey(settings.nextEpisodeLeadSec)}
           options={NEXT_EP_LEADS.map((o) => ({ value: o.value, label: o.label }))}
-          onChange={(v) =>
-            update({ nextEpisodeLeadSec: NEXT_EP_LEADS.find((o) => o.value === v)?.sec ?? -1 })
-          }
+          onChange={(v) => update({ nextEpisodeLeadSec: NEXT_EP_LEADS.find((o) => o.value === v)?.sec ?? -1 })}
         />
         <ToggleRow
           label={t("Auto-play next episode")}
@@ -156,7 +177,9 @@ export function QualityPanel() {
         />
         <ToggleRow
           label={t("Show controls when pausing with keyboard")}
-          sub={t("Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.")}
+          sub={t(
+            "Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.",
+          )}
           value={settings.keyboardPauseShowsControls}
           onChange={(v) => update({ keyboardPauseShowsControls: v })}
         />

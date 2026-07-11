@@ -1,5 +1,6 @@
-import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+
 import { fetchAndParse, parseSubtitle, type SubCue } from "./parser";
 
 export type CueSource = { cues: SubCue[]; format: "srt" | "vtt" };
@@ -22,7 +23,10 @@ export async function resolveReadableUrl(url: string): Promise<string | null> {
 }
 
 export function detectFormatFromUrl(url: string): "srt" | "vtt" {
-  const ext = url.split(/[?#]/)[0].match(/\.([a-z]{2,4})$/i)?.[1]?.toLowerCase();
+  const ext = url
+    .split(/[?#]/)[0]
+    .match(/\.([a-z]{2,4})$/i)?.[1]
+    ?.toLowerCase();
   return ext === "vtt" ? "vtt" : "srt";
 }
 

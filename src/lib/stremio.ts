@@ -1,5 +1,6 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { readResumeEntry } from "@/lib/resume";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
+
 import { isDetectedAnime } from "./anime-detect";
 
 const API = "https://api.strem.io/api";
@@ -42,18 +43,14 @@ export type LibraryItem = {
 };
 
 export function libraryMetaType(t: string): import("@/lib/cinemeta").MetaType {
-  return t === "series" || t === "channel" || t === "tv" || t === "anime" || t === "other"
-    ? t
-    : "movie";
+  return t === "series" || t === "channel" || t === "tv" || t === "anime" || t === "other" ? t : "movie";
 }
 
 export function isAnimeCwItem(i: LibraryItem): boolean {
   return i._id.startsWith("kitsu:") || i._id.startsWith("mal:") || i.isAnime === true || isDetectedAnime(i._id);
 }
 
-export function episodeFromVideoId(
-  videoId: string | undefined | null,
-): { season: number; episode: number } | null {
+export function episodeFromVideoId(videoId: string | undefined | null): { season: number; episode: number } | null {
   if (!videoId) return null;
   const parts = videoId.split(":");
   if (parts.length < 3) return null;
@@ -190,8 +187,7 @@ export async function saveStremioBookmark(
     await libraryPut(authKey, { ...existing, removed: false, temp: false, _mtime: now });
     return;
   }
-  const type =
-    input.type === "series" || input.type === "tv" || input.type === "channel" ? "series" : "movie";
+  const type = input.type === "series" || input.type === "tv" || input.type === "channel" ? "series" : "movie";
   const item = {
     _id: id,
     name: input.name ?? "",
@@ -223,8 +219,7 @@ export async function saveStremioBookmark(
 export async function removeStremioBookmark(authKey: string, id: string): Promise<void> {
   const existing = await libraryGetOne(authKey, id).catch(() => null);
   if (!existing) return;
-  const hasProgress =
-    (existing.state?.timeOffset ?? 0) > 0 || (existing.state?.flaggedWatched ?? 0) > 0;
+  const hasProgress = (existing.state?.timeOffset ?? 0) > 0 || (existing.state?.flaggedWatched ?? 0) > 0;
   await libraryPut(authKey, {
     ...existing,
     removed: true,

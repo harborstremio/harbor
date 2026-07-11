@@ -1,7 +1,8 @@
+import { downloadText } from "@/lib/download-text";
 import { Check, Copy, Download } from "lucide-react";
 import { useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { downloadText } from "@/lib/download-text";
+
 import { SUITE_CHROME } from "./suite-theme";
 
 export function HoverTip({
@@ -45,9 +46,7 @@ export function HoverTip({
               left: tip.x,
               top: tip.y,
               transform:
-                side === "left"
-                  ? "translate(calc(-100% - 10px), -50%)"
-                  : "translate(-50%, calc(-100% - 16px))",
+                side === "left" ? "translate(calc(-100% - 10px), -50%)" : "translate(-50%, calc(-100% - 16px))",
               ...SUITE_CHROME,
             }}
             className="pointer-events-none z-[260] whitespace-nowrap rounded-md border border-edge bg-raised px-2.5 py-1 text-[12px] font-medium text-ink shadow-[0_10px_30px_-10px_rgba(0,0,0,0.7)]"

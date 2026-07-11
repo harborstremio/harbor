@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
-import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
+import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
-import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
-import { useSettings } from "@/lib/settings";
-import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
+import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getLeaveConfirm, openLeaveConfirm } from "@/lib/player/leave-confirm";
+import { useSettings } from "@/lib/settings";
+import { useEffect, useRef, useState, type RefObject } from "react";
+
 import { round2 } from "../player-utils";
 
 export function useKeyboardShortcuts(params: {
@@ -408,7 +409,40 @@ export function useKeyboardShortcuts(params: {
       window.removeEventListener("blur", onBlur);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [closePlayer, togglePip, drawMode, snap.muted, snap.volume, snap.rate, snap.durationSec, snap.subDelaySec, overrides, seekBackStepSec, seekForwardStepSec, seekTo, toggleSwitcher, toggleEpisodePanel, toggleGuide, toggleDvr, toggleSleep, onScreenshot, onGifRecord, onClipRecord, onToggleCrop, onPanscanUp, onPanscanDown, onPrevChannel, onToggleAnime4k, onAnime4kOn, onAnime4kOff, onFrameStep, onVolumeFeedback, settings.playerEscExitsFullscreen, settings.playerConfirmLeave, update]);
+  }, [
+    closePlayer,
+    togglePip,
+    drawMode,
+    snap.muted,
+    snap.volume,
+    snap.rate,
+    snap.durationSec,
+    snap.subDelaySec,
+    overrides,
+    seekBackStepSec,
+    seekForwardStepSec,
+    seekTo,
+    toggleSwitcher,
+    toggleEpisodePanel,
+    toggleGuide,
+    toggleDvr,
+    toggleSleep,
+    onScreenshot,
+    onGifRecord,
+    onClipRecord,
+    onToggleCrop,
+    onPanscanUp,
+    onPanscanDown,
+    onPrevChannel,
+    onToggleAnime4k,
+    onAnime4kOn,
+    onAnime4kOff,
+    onFrameStep,
+    onVolumeFeedback,
+    settings.playerEscExitsFullscreen,
+    settings.playerConfirmLeave,
+    update,
+  ]);
 
   return { holdSpeedActive };
 }

@@ -1,11 +1,8 @@
-import { pickEpisodeTitle, type AniZipMapping } from "@/lib/providers/anizip";
 import type { AnimeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
+import { pickEpisodeTitle, type AniZipMapping } from "@/lib/providers/anizip";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 
-export function buildKitsuEpisodes(
-  addonMeta: AnimeKitsuMeta | null,
-  kitsuRawEpisodes: KitsuEpisode[],
-): KitsuEpisode[] {
+export function buildKitsuEpisodes(addonMeta: AnimeKitsuMeta | null, kitsuRawEpisodes: KitsuEpisode[]): KitsuEpisode[] {
   if (!addonMeta?.videos || addonMeta.videos.length === 0) return kitsuRawEpisodes;
   const kitsuById = new Map<number, KitsuEpisode>();
   for (const ep of kitsuRawEpisodes) kitsuById.set(ep.number, ep);

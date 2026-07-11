@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function resolveStreamLink(stream: { url?: string; externalUrl?: string }): string | null {
   return stream.url ?? stream.externalUrl ?? null;

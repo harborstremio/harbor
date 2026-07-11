@@ -1,4 +1,5 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+
 import type { SimklSession } from "./types";
 
 const BASE_KEY = "harbor.simkl.session.v1";

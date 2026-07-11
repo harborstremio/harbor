@@ -24,9 +24,7 @@ export function formatDayLabel(ms: number, todayMs: number): string {
   const d = new Date(ms);
   const today = new Date(todayMs);
   const sameDay =
-    d.getFullYear() === today.getFullYear() &&
-    d.getMonth() === today.getMonth() &&
-    d.getDate() === today.getDate();
+    d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth() && d.getDate() === today.getDate();
   if (sameDay) return "Today";
   const diff = Math.round((startOfDay(d).getTime() - startOfDay(today).getTime()) / 86_400_000);
   if (diff === 1) return "Tomorrow";
@@ -44,7 +42,12 @@ function startOfDay(d: Date): Date {
   return out;
 }
 
-export function clampDuration(startMs: number, endMs: number, windowStart: number, windowEnd: number): {
+export function clampDuration(
+  startMs: number,
+  endMs: number,
+  windowStart: number,
+  windowEnd: number,
+): {
   visibleStart: number;
   visibleEnd: number;
 } | null {

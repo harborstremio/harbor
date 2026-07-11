@@ -1,5 +1,6 @@
 import type { TrackInfo } from "@/lib/player/bridge";
 import { languageName } from "@/lib/subtitles/language";
+
 import type { Group, SubtitleMenuProps } from "./types";
 
 export function buildOverlayState(props: SubtitleMenuProps) {

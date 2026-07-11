@@ -1,12 +1,13 @@
-import { useCallback, type RefObject } from "react";
+import { exitWindowFullscreenOnPlayerClose } from "@/lib/fullscreen-state";
 import { clearOnePickerCache } from "@/lib/picker-cache";
 import { clearPlayback, readPlayback, savePlayback, streamMatchesEntry } from "@/lib/playback-history";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { saveResumeMs } from "@/lib/resume";
-import { exitWindowFullscreenOnPlayerClose } from "@/lib/fullscreen-state";
 import type { PartialSyncState } from "@/lib/together/provider";
 import { useView, type PlayerSrc, type PlayerStreamRef } from "@/lib/view";
+import { useCallback, type RefObject } from "react";
+
 import { MAX_AUTORETRY_ATTEMPTS } from "../player-utils";
 
 const REMEMBER_MIN_SEC = 30;
@@ -58,12 +59,7 @@ export function usePlayerExit(params: {
     if (Number.isFinite(pos) && pos > 0) {
       saveResumeMs(src.meta.id, pos * 1000, season, episode);
       if (liveStreamRef && pos >= REMEMBER_MIN_SEC) {
-        savePlayback(
-          src.meta.id,
-          { ...liveStreamRef, url: liveUrl || src.url, title: src.meta.name },
-          season,
-          episode,
-        );
+        savePlayback(src.meta.id, { ...liveStreamRef, url: liveUrl || src.url, title: src.meta.name }, season, episode);
       }
     }
     await exitPip();
@@ -82,7 +78,25 @@ export function usePlayerExit(params: {
       clearInvite();
     }
     exitPlayback();
-  }, [captureExitSnapshot, exitPlayback, src.meta.id, src.meta.name, season, episode, inRoom, isHost, notifyHostLeaving, clearInvite, publishState, exitPip, liveStreamRef, liveUrl, src.url, stopCast, castActiveRef]);
+  }, [
+    captureExitSnapshot,
+    exitPlayback,
+    src.meta.id,
+    src.meta.name,
+    season,
+    episode,
+    inRoom,
+    isHost,
+    notifyHostLeaving,
+    clearInvite,
+    publishState,
+    exitPip,
+    liveStreamRef,
+    liveUrl,
+    src.url,
+    stopCast,
+    castActiveRef,
+  ]);
 
   const onStubEject = useCallback(() => {
     const nextAttempt = (src.attempt ?? 0) + 1;
@@ -106,7 +120,19 @@ export function usePlayerExit(params: {
       src.episode,
       instantPlay || inRoom ? { autoPlay: true, attempt: nextAttempt } : { autoPlay: false },
     );
-  }, [src.attempt, src.meta, src.episode, src.streamRef, season, episode, openPicker, instantPlay, inRoom, closePlayer, bridgeRef]);
+  }, [
+    src.attempt,
+    src.meta,
+    src.episode,
+    src.streamRef,
+    season,
+    episode,
+    openPicker,
+    instantPlay,
+    inRoom,
+    closePlayer,
+    bridgeRef,
+  ]);
 
   return { closePlayer, onStubEject };
 }

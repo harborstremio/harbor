@@ -1,5 +1,3 @@
-import { ChevronDown, ChevronUp, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import {
   getCacheReports,
   getSamples,
@@ -9,6 +7,8 @@ import {
   type Sample,
 } from "@/lib/memory-profiler";
 import { getNativeMem, getRamTier } from "@/lib/native-memory";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "harbor.memoryHud.open";
 
@@ -73,11 +73,10 @@ export function MemoryHud() {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="font-bold text-ink">PROFILER</span>
-          <span style={{ color: heapColor }}>
-            {heap.toFixed(1)}MB
-          </span>
+          <span style={{ color: heapColor }}>{heap.toFixed(1)}MB</span>
           <span className="text-ink-subtle">
-            (Δ{delta >= 0 ? "+" : ""}{delta.toFixed(1)} · peak {peak.toFixed(1)})
+            (Δ{delta >= 0 ? "+" : ""}
+            {delta.toFixed(1)} · peak {peak.toFixed(1)})
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -136,11 +135,7 @@ export function MemoryHud() {
           <EventList samples={recent} />
         </>
       )}
-      {toast && (
-        <div className="rounded bg-accent/25 px-2 py-1 text-[10px] font-medium text-accent">
-          {toast}
-        </div>
-      )}
+      {toast && <div className="rounded bg-accent/25 px-2 py-1 text-[10px] font-medium text-accent">{toast}</div>}
     </div>
   );
 }
@@ -210,9 +205,7 @@ function EventList({ samples }: { samples: Sample[] }) {
         .filter((s) => s.kind !== "tick")
         .map((s, i) => (
           <div key={i} className="flex items-baseline justify-between gap-2 text-[10px]">
-            <span className="shrink-0 text-ink-subtle">
-              [{s.kind}]
-            </span>
+            <span className="shrink-0 text-ink-subtle">[{s.kind}]</span>
             <span className="flex-1 truncate text-ink-muted">{s.label}</span>
             <span className="shrink-0 text-ink">{s.heapMB.toFixed(0)}MB</span>
           </div>

@@ -1,7 +1,7 @@
+import type { AdRange } from "@/lib/ad-report/submit";
+import { useT } from "@/lib/i18n";
 import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useT } from "@/lib/i18n";
-import type { AdRange } from "@/lib/ad-report/submit";
 
 function fmt(sec: number): string {
   const s = Math.max(0, Math.round(sec));
@@ -67,9 +67,7 @@ export function RangeRow({
           onUseNow={() => onChange({ ...range, endSec: now() })}
         />
       </div>
-      {invalid && (
-        <p className="text-[11.5px] text-danger">{t("The end time has to be after the start.")}</p>
-      )}
+      {invalid && <p className="text-[11.5px] text-danger">{t("The end time has to be after the start.")}</p>}
     </div>
   );
 }

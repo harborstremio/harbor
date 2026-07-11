@@ -1,16 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
 import { Laurel } from "@/components/icons/laurel";
-import { useSettings } from "@/lib/settings";
 import { IMG } from "@/lib/providers/tmdb/tmdb-client";
-import {
-  tmdbPerson,
-  tmdbPersonCached,
-  type PersonCredit,
-  type PersonDetail,
-} from "@/lib/providers/tmdb/tmdb-people";
+import { tmdbPerson, tmdbPersonCached, type PersonCredit, type PersonDetail } from "@/lib/providers/tmdb/tmdb-people";
 import { awardSummary, useAwards } from "@/lib/providers/wikidata";
+import { useSettings } from "@/lib/settings";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 const CARD_W = 320;
 const CARD_H = 260;
@@ -27,9 +22,7 @@ export function PersonHoverCard({
   onLeave: () => void;
 }) {
   const { settings } = useSettings();
-  const [person, setPerson] = useState<PersonDetail | null>(
-    () => tmdbPersonCached(personId) ?? null,
-  );
+  const [person, setPerson] = useState<PersonDetail | null>(() => tmdbPersonCached(personId) ?? null);
 
   useEffect(() => {
     if (tmdbPersonCached(personId)) {
@@ -76,17 +69,13 @@ export function PersonHoverCard({
           </div>
         )}
         <div className="flex min-w-0 flex-col justify-center gap-0.5">
-          <span className="truncate text-[15px] font-semibold leading-tight text-ink">
-            {person?.name ?? "…"}
-          </span>
+          <span className="truncate text-[15px] font-semibold leading-tight text-ink">{person?.name ?? "…"}</span>
           {person?.knownForDepartment && (
             <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-accent">
               {roleLabel(person.knownForDepartment)}
             </span>
           )}
-          {person && (
-            <span className="text-[12px] text-ink-subtle">{lifeLine(person)}</span>
-          )}
+          {person && <span className="text-[12px] text-ink-subtle">{lifeLine(person)}</span>}
         </div>
       </div>
 
@@ -98,9 +87,7 @@ export function PersonHoverCard({
 
       {knownFor.length > 0 && (
         <div className="flex items-baseline gap-1.5 px-4 pt-2 pb-1 text-[11.5px]">
-          <span className="shrink-0 font-medium uppercase tracking-[0.14em] text-ink-subtle">
-            Known for
-          </span>
+          <span className="shrink-0 font-medium uppercase tracking-[0.14em] text-ink-subtle">Known for</span>
           <span className="truncate text-ink-muted">{knownFor.join(" · ")}</span>
         </div>
       )}

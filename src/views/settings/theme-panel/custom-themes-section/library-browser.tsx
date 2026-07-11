@@ -1,10 +1,11 @@
+import { setCustomThemePreview } from "@/lib/custom-themes";
+import { BETA_THEMES, type ThemePreset } from "@/lib/theme";
+import { clearUnseenDownloads, getUnseenDownloads, subscribeUnseen } from "@/lib/theme-store";
 import { ArrowLeft, Check, Copy, Download, ImagePlus, Loader2, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { setCustomThemePreview } from "@/lib/custom-themes";
-import { BETA_THEMES, type ThemePreset } from "@/lib/theme";
+
 import { BetaThemesCard, BetaThemesModal } from "./beta-themes-modal";
-import { clearUnseenDownloads, getUnseenDownloads, subscribeUnseen } from "@/lib/theme-store";
 import { CommunityPane } from "./community-browser";
 import type { LibraryEntry } from "./library-grid";
 import { fileToPreviewDataUrl } from "./theme-upload/upload-utils";
@@ -56,12 +57,11 @@ export function LibraryBrowser({
   const yours = entries.filter((e) => e.category === "Yours");
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[210] flex flex-col bg-canvas"
-      role="dialog"
-      aria-label="Theme library"
-    >
-      <header data-tauri-drag-region className="flex shrink-0 items-center justify-between gap-4 border-b border-edge-soft bg-surface/40 px-10 py-5">
+    <div className="fixed inset-0 z-[210] flex flex-col bg-canvas" role="dialog" aria-label="Theme library">
+      <header
+        data-tauri-drag-region
+        className="flex shrink-0 items-center justify-between gap-4 border-b border-edge-soft bg-surface/40 px-10 py-5"
+      >
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -107,76 +107,71 @@ export function LibraryBrowser({
           {tab === "community" ? (
             <CommunityPane />
           ) : (
-          <>
-          {featured.length > 0 && (
-            <BrowserSection title="Featured" subtitle="Hand-picked reskins from the Harbor crew.">
-              <BrowserGrid
-                entries={featured}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
+            <>
+              {featured.length > 0 && (
+                <BrowserSection title="Featured" subtitle="Hand-picked reskins from the Harbor crew.">
+                  <BrowserGrid
+                    entries={featured}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
 
-          {BETA_THEMES.length > 0 && (
-            <BrowserSection title="Beta" subtitle="Experimental 1:1 ports of other apps.">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <BetaThemesCard count={BETA_THEMES.length} onClick={() => setBetaOpen(true)} />
-              </div>
-            </BrowserSection>
-          )}
+              {BETA_THEMES.length > 0 && (
+                <BrowserSection title="Beta" subtitle="Experimental 1:1 ports of other apps.">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <BetaThemesCard count={BETA_THEMES.length} onClick={() => setBetaOpen(true)} />
+                  </div>
+                </BrowserSection>
+              )}
 
-          {builtIn.length > 0 && (
-            <BrowserSection title="Built-in" subtitle="Ships with Harbor. Always available.">
-              <BrowserGrid
-                entries={builtIn}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
+              {builtIn.length > 0 && (
+                <BrowserSection title="Built-in" subtitle="Ships with Harbor. Always available.">
+                  <BrowserGrid
+                    entries={builtIn}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
 
-          {templates.length > 0 && (
-            <BrowserSection title="Templates" subtitle="Starting points to remix and save your own.">
-              <BrowserGrid
-                entries={templates}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
+              {templates.length > 0 && (
+                <BrowserSection title="Templates" subtitle="Starting points to remix and save your own.">
+                  <BrowserGrid
+                    entries={templates}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
 
-          {yours.length > 0 && (
-            <BrowserSection title="Your themes" subtitle="Themes you imported or built.">
-              <BrowserGrid
-                entries={yours}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
-          </>
+              {yours.length > 0 && (
+                <BrowserSection title="Your themes" subtitle="Themes you imported or built.">
+                  <BrowserGrid
+                    entries={yours}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
+            </>
           )}
         </div>
       </div>
-      <BetaThemesModal
-        open={betaOpen}
-        activeId={activeId}
-        onActivate={onActivate}
-        onClose={() => setBetaOpen(false)}
-      />
+      <BetaThemesModal open={betaOpen} activeId={activeId} onActivate={onActivate} onClose={() => setBetaOpen(false)} />
     </div>,
     document.body,
   );
@@ -196,15 +191,7 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
   );
 }
 
-function BrowserSection({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) {
+function BrowserSection({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-col">
@@ -340,9 +327,7 @@ function BrowserCard({
             onClick={onActivate}
             disabled={active}
             className={`h-10 flex-1 rounded-xl text-[13px] font-semibold transition-opacity ${
-              active
-                ? "bg-elevated/70 text-ink ring-1 ring-edge"
-                : "bg-ink text-canvas hover:opacity-90"
+              active ? "bg-elevated/70 text-ink ring-1 ring-edge" : "bg-ink text-canvas hover:opacity-90"
             }`}
           >
             {active ? "Active" : "Apply"}

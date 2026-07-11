@@ -146,9 +146,7 @@ export function franchiseFetcher(key: string, f: Franchise): (page: number) => P
     const queries = f.source.queries;
     return async (page) => {
       if (page > 1) return [];
-      const ids = await Promise.all(
-        queries.map((q) => tmdbSearchCollectionId(key, q).catch(() => null)),
-      );
+      const ids = await Promise.all(queries.map((q) => tmdbSearchCollectionId(key, q).catch(() => null)));
       const cols = await Promise.all(
         ids.map((id) => (id ? tmdbCollection(key, id).catch(() => null) : Promise.resolve(null))),
       );

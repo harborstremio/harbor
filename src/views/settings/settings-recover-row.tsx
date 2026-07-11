@@ -1,9 +1,9 @@
-import { History } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { applyLegacyToActive, recoverableLegacyBlob } from "@/lib/settings/profile-store";
 import type { Settings } from "@/lib/settings/types";
-import { useT } from "@/lib/i18n";
+import { History } from "lucide-react";
+import { useMemo, useState } from "react";
 
 const KEY_FIELDS = ["rdKey", "tbKey", "adKey", "pmKey", "dlKey", "tmdbKey", "rpdbKey"] as const;
 
@@ -45,7 +45,9 @@ export function SettingsRecoverRow() {
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[14px] font-medium text-ink">{t("Restore previous settings")}</span>
         <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Updating separated settings per profile, which may have reset your theme and keys. Harbor still has your old setup saved. Bring it back on this profile, then reload.")}
+          {t(
+            "Updating separated settings per profile, which may have reset your theme and keys. Harbor still has your old setup saved. Bring it back on this profile, then reload.",
+          )}
         </span>
       </div>
       <button

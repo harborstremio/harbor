@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import { SongIdToast } from "@/components/song-id-toast";
 import type { Meta } from "@/lib/cinemeta";
 import {
   controlsInSlot,
@@ -10,16 +9,15 @@ import {
   type PlayerSlot,
   type TimeFormat,
 } from "@/lib/player-chrome";
-import { CastModal } from "./cast-modal";
-import { SongIdToast } from "@/components/song-id-toast";
-import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
-import { SeekBar } from "./transport/seek-bar";
-import { LiveBadge, GoToLive, LiveSeekBar } from "./transport/live-controls";
-import {
-  RenderedStremioControl,
-  type StremioRenderCtx,
-} from "./transport/control-renderer-stremio";
+import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import { useView } from "@/lib/view";
+import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
+import { useEffect, useRef, useState } from "react";
+
+import { CastModal } from "./cast-modal";
+import { RenderedStremioControl, type StremioRenderCtx } from "./transport/control-renderer-stremio";
+import { LiveBadge, GoToLive, LiveSeekBar } from "./transport/live-controls";
+import { SeekBar } from "./transport/seek-bar";
 import { useCastModalPlay } from "./use-cast-modal-play";
 
 export type TransportStremioProps = {
@@ -261,9 +259,7 @@ export function TransportStremio(p: TransportStremioProps) {
   };
 
   const renderSlot = (slot: PlayerSlot) =>
-    controlsInSlot(config, slot).map((c) => (
-      <RenderedStremioControl key={c.id} id={c.id} ctx={ctx} />
-    ));
+    controlsInSlot(config, slot).map((c) => <RenderedStremioControl key={c.id} id={c.id} ctx={ctx} />);
 
   return (
     <>
@@ -274,13 +270,9 @@ export function TransportStremio(p: TransportStremioProps) {
           visible ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="pointer-events-auto flex min-w-0 flex-1 items-center gap-3">
-          {renderSlot("top-left")}
-        </div>
+        <div className="pointer-events-auto flex min-w-0 flex-1 items-center gap-3">{renderSlot("top-left")}</div>
         <div className="flex items-center gap-1">
-          <div className="pointer-events-auto flex items-center gap-1">
-            {renderSlot("top-right")}
-          </div>
+          <div className="pointer-events-auto flex items-center gap-1">{renderSlot("top-right")}</div>
         </div>
       </div>
 
@@ -330,9 +322,7 @@ export function TransportStremio(p: TransportStremioProps) {
             setCastModalOpen(false);
             castModalPlay(m, ep);
           }}
-          currentEpisode={
-            season != null && episode != null ? { season, episode } : null
-          }
+          currentEpisode={season != null && episode != null ? { season, episode } : null}
         />
       )}
     </>

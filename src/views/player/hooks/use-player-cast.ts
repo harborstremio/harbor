@@ -1,13 +1,10 @@
-import { useEffect, useMemo, type RefObject } from "react";
 import { useDebridClients } from "@/lib/debrid/registry";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
-import {
-  getPlaybackBuffered,
-  getPlaybackPosition,
-  setPlaybackClock,
-} from "@/lib/player/playback-clock";
+import { getPlaybackBuffered, getPlaybackPosition, setPlaybackClock } from "@/lib/player/playback-clock";
 import type { Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
+import { useEffect, useMemo, type RefObject } from "react";
+
 import { useCastPick } from "./use-cast-pick";
 import { useCastSession } from "./use-cast-session";
 
@@ -47,7 +44,14 @@ export function usePlayerCast(params: {
       getPosition: session.getCastPosition,
       isPlaying: session.isCastPlaying,
     }),
-    [session.castActiveRef, session.playCast, session.pauseCast, session.seekCast, session.getCastPosition, session.isCastPlaying],
+    [
+      session.castActiveRef,
+      session.playCast,
+      session.pauseCast,
+      session.seekCast,
+      session.getCastPosition,
+      session.isCastPlaying,
+    ],
   );
 
   return { ...session, ...pick, sync };

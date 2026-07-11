@@ -1,8 +1,8 @@
-import { Check, Copy, ExternalLink, Loader2, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useTrakt } from "@/lib/trakt/provider";
 import { openUrl } from "@/lib/window";
+import { Check, Copy, ExternalLink, Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function TraktDeviceModal({ onClose }: { onClose: () => void }) {
   const { connectState, beginConnect, cancelConnect } = useTrakt();
@@ -52,9 +52,7 @@ export function TraktDeviceModal({ onClose }: { onClose: () => void }) {
               {t("Connect Trakt")}
             </span>
             <h2 className="text-[20px] font-medium tracking-tight text-ink">
-              {connectState.kind === "success"
-                ? t("Connected")
-                : t("Authorize Harbor on Trakt")}
+              {connectState.kind === "success" ? t("Connected") : t("Authorize Harbor on Trakt")}
             </h2>
           </div>
           <button
@@ -147,11 +145,7 @@ export function TraktDeviceModal({ onClose }: { onClose: () => void }) {
         )}
 
         {connectState.kind === "error" && (
-          <ErrorBox
-            title={t("Couldn't reach Trakt")}
-            message={connectState.message}
-            onRetry={beginConnect}
-          />
+          <ErrorBox title={t("Couldn't reach Trakt")} message={connectState.message} onRetry={beginConnect} />
         )}
       </div>
     </div>
@@ -167,15 +161,7 @@ function Spinner({ label }: { label: string }) {
   );
 }
 
-function ErrorBox({
-  title,
-  message,
-  onRetry,
-}: {
-  title: string;
-  message: string;
-  onRetry: () => void;
-}) {
+function ErrorBox({ title, message, onRetry }: { title: string; message: string; onRetry: () => void }) {
   const t = useT();
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-red-400/25 bg-red-400/8 p-4">

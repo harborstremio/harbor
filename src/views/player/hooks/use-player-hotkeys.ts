@@ -1,6 +1,7 @@
-import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import type { PlayEpisode } from "@/lib/view";
+import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
+
 import { useClipRecorder } from "./use-clip-recorder";
 import { useFrameGrab } from "./use-frame-grab";
 import { useGifRecorder } from "./use-gif-recorder";
@@ -102,8 +103,7 @@ export function usePlayerHotkeys(params: {
     toggleDvr: () => {
       if (liveOverlay.isLive) toggleDvr();
     },
-    toggleSleep: () =>
-      sleep.mode.kind === "off" ? sleep.set({ kind: "end_episode" }) : sleep.cancel(),
+    toggleSleep: () => (sleep.mode.kind === "off" ? sleep.set({ kind: "end_episode" }) : sleep.cancel()),
     onScreenshot: quickToolsEnabled ? () => frameGrab.trigger() : undefined,
     onGifRecord: quickToolsEnabled ? () => gif.toggle() : undefined,
     onClipRecord: quickToolsEnabled ? () => clip.openChooser() : undefined,

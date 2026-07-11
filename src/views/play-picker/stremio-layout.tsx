@@ -1,15 +1,16 @@
-import { ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { addonLogoSrc, resolveAddonLogo } from "@/components/addon-logo";
 import type { Addon } from "@/lib/addons";
-import type { ScoredStream } from "@/lib/streams/types";
-import { StremioRow } from "./stremio-row";
-import { FACET_DIMS, facetOptions, matchesFacets, type FacetState } from "./stream-facets";
-import { addonInstanceKey, buildAddonOptions } from "./picker-utils";
 import { useSettings } from "@/lib/settings";
 import { matchesCustomFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+import type { ScoredStream } from "@/lib/streams/types";
+import { ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import { FacetMenuRow } from "./facet-menu-row";
 import { FilterBuilder } from "./filter-builder";
+import { addonInstanceKey, buildAddonOptions } from "./picker-utils";
+import { FACET_DIMS, facetOptions, matchesFacets, type FacetState } from "./stream-facets";
+import { StremioRow } from "./stremio-row";
 
 export function StremioLayout({
   streams,
@@ -109,10 +110,8 @@ export function StremioLayout({
       return 0;
     });
   }, [customFiltered, facet, filter, addonRank, preserveOrder]);
-  const filterLabel = filter === "all"
-    ? "All"
-    : addonOptions.find((o) => o.id === filter)?.name ?? "All";
-  const filterLogo = filter === "all" ? null : addonLogoMap.get(filter) ?? null;
+  const filterLabel = filter === "all" ? "All" : (addonOptions.find((o) => o.id === filter)?.name ?? "All");
+  const filterLogo = filter === "all" ? null : (addonLogoMap.get(filter) ?? null);
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
@@ -121,19 +120,13 @@ export function StremioLayout({
           className="flex w-full items-center justify-between gap-3 rounded-2xl bg-elevated/60 px-4 py-3 text-start text-[15px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-elevated"
         >
           <div className="flex min-w-0 items-center gap-3">
-            <CircleLogo
-              addonId={filter === "all" ? null : filter}
-              addonName={filterLabel}
-              logo={filterLogo}
-            />
+            <CircleLogo addonId={filter === "all" ? null : filter} addonName={filterLabel} logo={filterLogo} />
             <span className="truncate">{filterLabel}</span>
           </div>
           <ChevronDown
             size={18}
             strokeWidth={2.2}
-            className={`shrink-0 text-ink-muted transition-transform duration-200 ${
-              filterOpen ? "rotate-180" : ""
-            }`}
+            className={`shrink-0 text-ink-muted transition-transform duration-200 ${filterOpen ? "rotate-180" : ""}`}
           />
         </button>
         {filterOpen && (
@@ -162,11 +155,7 @@ export function StremioLayout({
                   filter === opt.id ? "text-ink font-semibold" : "text-ink-muted"
                 }`}
               >
-                <CircleLogo
-                  addonId={opt.id}
-                  addonName={opt.name}
-                  logo={addonLogoMap.get(opt.id) ?? null}
-                />
+                <CircleLogo addonId={opt.id} addonName={opt.name} logo={addonLogoMap.get(opt.id) ?? null} />
                 <span className="flex-1 truncate">{opt.name}</span>
                 <span className="text-[12px] text-ink-subtle">{opt.count}</span>
               </button>
@@ -202,13 +191,7 @@ export function StremioLayout({
           />
         ))}
       </div>
-      {!pipelineDone && (
-        <PendingAddonsPill
-          addons={addons}
-          streams={streams}
-          fallbackCount={loadingAddonCount}
-        />
-      )}
+      {!pipelineDone && <PendingAddonsPill addons={addons} streams={streams} fallbackCount={loadingAddonCount} />}
       <FilterBuilder
         open={builderOpen}
         initial={editingFilter}
@@ -216,9 +199,7 @@ export function StremioLayout({
         onSave={(f) => {
           const exists = customFilters.some((x) => x.id === f.id);
           update({
-            customStreamFilters: exists
-              ? customFilters.map((x) => (x.id === f.id ? f : x))
-              : [...customFilters, f],
+            customStreamFilters: exists ? customFilters.map((x) => (x.id === f.id ? f : x)) : [...customFilters, f],
           });
           setActiveFilterId(f.id);
           setBuilderOpen(false);
@@ -321,24 +302,52 @@ function isInstantText(s: ScoredStream): boolean {
   return /\binstant\b/.test(haystack) || haystack.includes("⚡");
 }
 
-function CircleLogo({
-  addonId,
-  addonName,
-  logo,
-}: {
-  addonId: string | null;
-  addonName: string;
-  logo: string | null;
-}) {
+function CircleLogo({ addonId, addonName, logo }: { addonId: string | null; addonName: string; logo: string | null }) {
   const [remoteFailed, setRemoteFailed] = useState(false);
   if (addonId === null) {
     return (
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-elevated ring-1 ring-edge-soft">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
+          <rect
+            x="3"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="3"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
         </svg>
       </div>
     );

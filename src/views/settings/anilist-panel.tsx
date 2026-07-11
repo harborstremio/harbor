@@ -1,10 +1,11 @@
-import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
-import { useState } from "react";
 import { AnilistConnectModal } from "@/components/anilist/anilist-connect-modal";
 import { useAnilist } from "@/lib/anilist/provider";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { Check, ExternalLink, Link2, LogOut, Trash2 } from "lucide-react";
+import { useState } from "react";
+
 import { Section, ToggleRow } from "./shared";
 
 export function AnilistPanel() {
@@ -19,11 +20,11 @@ export function AnilistPanel() {
       {!isConnected ? (
         <section className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
           <div className="flex flex-col gap-2">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">
-              {t("Connect your AniList account")}
-            </h2>
+            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Connect your AniList account")}</h2>
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Show your AniList lists as rails on the Anime page, keep your watch progress in sync as you finish episodes, and use your AniList avatar as your Harbor photo. Free at anilist.co.")}
+              {t(
+                "Show your AniList lists as rails on the Anime page, keep your watch progress in sync as you finish episodes, and use your AniList avatar as your Harbor photo. Free at anilist.co.",
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -62,9 +63,7 @@ export function AnilistPanel() {
                 </span>
               )}
               <div className="flex flex-col gap-0.5">
-                <span className="text-[14px] font-medium text-ink">
-                  {userName || t("Connected")}
-                </span>
+                <span className="text-[14px] font-medium text-ink">{userName || t("Connected")}</span>
                 <span className="text-[12px] text-ink-subtle">
                   {t("Authorized {when}", { when: sessionAge(t, session?.createdAt) })}
                 </span>
@@ -72,9 +71,7 @@ export function AnilistPanel() {
             </div>
             {userName && (
               <button
-                onClick={() =>
-                  openUrl(`https://anilist.co/user/${encodeURIComponent(userName)}`)
-                }
+                onClick={() => openUrl(`https://anilist.co/user/${encodeURIComponent(userName)}`)}
                 className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Open profile")}
@@ -84,7 +81,9 @@ export function AnilistPanel() {
           </div>
           <ToggleRow
             label={t("Sync watch progress")}
-            sub={t("Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.")}
+            sub={t(
+              "Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.",
+            )}
             value={settings.anilistAutoSync}
             onChange={(v) => update({ anilistAutoSync: v })}
           />
@@ -102,7 +101,9 @@ export function AnilistPanel() {
           />
           <ToggleRow
             label={t("Blur comments by default")}
-            sub={t("Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.")}
+            sub={t(
+              "Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.",
+            )}
             value={!!settings.anilistBlurComments}
             onChange={(on) => update({ anilistBlurComments: on })}
           />

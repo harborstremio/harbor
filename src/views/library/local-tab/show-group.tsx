@@ -1,23 +1,14 @@
-import {
-  AlertTriangle,
-  CheckSquare,
-  Download,
-  Info,
-  ListVideo,
-  RefreshCw,
-  Square,
-  Trash2,
-  Wand2,
-} from "lucide-react";
-import { useState } from "react";
-import { Poster } from "@/components/poster";
-import { removeLocalEntry, type LocalEntry } from "@/lib/local-library";
-import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
 import { LocalBadge } from "@/components/local-badge";
-import { CardIconButton, type LocalCardProps } from "./card-actions";
+import { Poster } from "@/components/poster";
+import { useT } from "@/lib/i18n";
+import { removeLocalEntry, type LocalEntry } from "@/lib/local-library";
 import { episodeLabel, localPlayerSrc } from "@/lib/local-library/player-src";
 import { openLocalEpisodes } from "@/lib/player/local-episodes-modal";
+import { useView } from "@/lib/view";
+import { AlertTriangle, CheckSquare, Download, Info, ListVideo, RefreshCw, Square, Trash2, Wand2 } from "lucide-react";
+import { useState } from "react";
+
+import { CardIconButton, type LocalCardProps } from "./card-actions";
 import { useLocalPoster } from "./use-local-poster";
 
 export { episodeLabel, localPlayerSrc };

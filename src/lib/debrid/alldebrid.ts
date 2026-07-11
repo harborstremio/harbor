@@ -1,6 +1,7 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { dlog, dwarn } from "@/lib/debug";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
+
 import {
   hashFromMagnet,
   magnetFromHash,
@@ -75,15 +76,8 @@ export function createAllDebrid(apiKey: string): DebridStore {
     };
   }
 
-  async function cacheCheckBatch(
-    batch: string[],
-    signal: AbortSignal,
-  ): Promise<DebridResult<CacheMap>> {
-    const r = await postForm<{ magnets: AdInstantEntry[] }>(
-      "/magnet/instant",
-      { "magnets[]": batch },
-      signal,
-    );
+  async function cacheCheckBatch(batch: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
+    const r = await postForm<{ magnets: AdInstantEntry[] }>("/magnet/instant", { "magnets[]": batch }, signal);
     if (!r.ok) {
       dwarn("[ad] cacheCheck batch failed", { code: r.code, status: r.status });
       return { ok: true, data: {} };
@@ -108,9 +102,7 @@ export function createAllDebrid(apiKey: string): DebridStore {
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) Object.assign(merged, r.value.data);
     }
-    dlog(
-      `[ad] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`,
-    );
+    dlog(`[ad] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`);
     return { ok: true, data: merged };
   }
 
@@ -123,11 +115,7 @@ export function createAllDebrid(apiKey: string): DebridStore {
     const fullMagnet = magnetFromHash(magnet);
     const hash = hashFromMagnet(magnet);
 
-    const add = await postForm<{ magnets: AdAddResult[] }>(
-      "/magnet/upload",
-      { "magnets[]": fullMagnet },
-      signal,
-    );
+    const add = await postForm<{ magnets: AdAddResult[] }>("/magnet/upload", { "magnets[]": fullMagnet }, signal);
     if (!add.ok) return add;
     const first = add.data.magnets?.[0];
     if (!first) return { ok: false, code: "no-result", status: 0, raw: add.data };
@@ -136,9 +124,7 @@ export function createAllDebrid(apiKey: string): DebridStore {
     }
     const id = first.id;
 
-    let entry: AdMagnetStatus | null = first.ready
-      ? null
-      : null;
+    let entry: AdMagnetStatus | null = first.ready ? null : null;
     let chosenLink: AdMagnetLink | null = null;
 
     for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
@@ -280,7 +266,11 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
   if (!res.ok && res.status !== 200) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     return { ok: false, code: `http-${res.status}`, status: res.status, raw: body };
   }
   let body: AdEnvelope<T>;
@@ -303,11 +293,12 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
 function pickAdLink(links: AdMagnetLink[], fileIdx: number | undefined, hint?: EpisodeHint): AdMagnetLink | null {
   if (links.length === 0) return null;
   if (fileIdx != null && links[fileIdx]) return links[fileIdx];
-  const videos = links.filter((l) =>
-    VIDEO_EXTS.some((ext) => l.filename.toLowerCase().endsWith(ext)),
-  );
+  const videos = links.filter((l) => VIDEO_EXTS.some((ext) => l.filename.toLowerCase().endsWith(ext)));
   const pool = videos.length > 0 ? videos : links;
-  const mi = matchEpisodeFileIndex(pool.map((l) => l.filename), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((l) => l.filename),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0];
 }

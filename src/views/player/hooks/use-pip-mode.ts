@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 export function usePipMode(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -21,9 +21,7 @@ export function usePipMode(params: {
         try {
           window.dispatchEvent(new Event("resize"));
           window.dispatchEvent(new Event("harbor:mpv-refresh-geom"));
-          void import("@tauri-apps/api/core").then(({ invoke }) =>
-            invoke("hdr_overlay_sync").catch(() => {}),
-          );
+          void import("@tauri-apps/api/core").then(({ invoke }) => invoke("hdr_overlay_sync").catch(() => {}));
         } catch {}
       };
       requestAnimationFrame(fire);

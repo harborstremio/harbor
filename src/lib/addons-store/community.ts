@@ -1,5 +1,5 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
 
 const STREMIO_DIRECTORIES = [
   "https://v3-cinemeta.strem.io/addon_catalog/all/community.json",

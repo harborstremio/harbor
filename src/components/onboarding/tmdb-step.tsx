@@ -1,26 +1,22 @@
-import { Check, ExternalLink, Key, Loader2, X } from "lucide-react";
-import { useState } from "react";
 import tmdbLogo from "@/assets/addon-logos/tmdb.png";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { openUrl } from "@/lib/window";
+import { Check, ExternalLink, Key, Loader2, X } from "lucide-react";
+import { useState } from "react";
 
 export function TmdbStep() {
   const { settings, update } = useSettings();
   const t = useT();
   const [draft, setDraft] = useState(settings.tmdbKey);
-  const [status, setStatus] = useState<"idle" | "checking" | "ok" | "bad">(
-    settings.tmdbKey ? "ok" : "idle",
-  );
+  const [status, setStatus] = useState<"idle" | "checking" | "ok" | "bad">(settings.tmdbKey ? "ok" : "idle");
   const [pulseKey, setPulseKey] = useState(0);
 
   const validate = async () => {
     if (!draft.trim()) return;
     setStatus("checking");
     try {
-      const res = await fetch(
-        `https://api.themoviedb.org/3/configuration?api_key=${encodeURIComponent(draft.trim())}`,
-      );
+      const res = await fetch(`https://api.themoviedb.org/3/configuration?api_key=${encodeURIComponent(draft.trim())}`);
       if (res.ok) {
         await new Promise((r) => setTimeout(r, 460));
         update({ tmdbKey: draft.trim() });
@@ -80,12 +76,7 @@ export function TmdbStep() {
             className="h-12 flex-1 bg-transparent text-[14.5px] text-ink outline-none placeholder:text-ink-subtle/60"
           />
           {status === "ok" && (
-            <Check
-              key={`check-${pulseKey}`}
-              size={16}
-              strokeWidth={2.5}
-              className="animate-done-pop text-accent"
-            />
+            <Check key={`check-${pulseKey}`} size={16} strokeWidth={2.5} className="animate-done-pop text-accent" />
           )}
           {status === "bad" && <X size={16} strokeWidth={2.5} className="animate-done-pop text-danger" />}
         </div>

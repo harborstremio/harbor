@@ -1,13 +1,8 @@
 import still1 from "@/assets/preview/blur1.png";
 import still2 from "@/assets/preview/blur2.png";
-import {
-  SPOILER_TEXT_CLASS,
-  SPOILER_THUMB_CLASS,
-  spoilerMaskFor,
-  type SpoilerMask,
-} from "@/lib/spoilers";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
 
 export function SpoilerPreview() {
   const { settings } = useSettings();
@@ -17,9 +12,7 @@ export function SpoilerPreview() {
   return (
     <div className="mt-1 flex flex-col gap-3 rounded-2xl border border-edge-soft bg-canvas/30 p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-          {t("Preview")}
-        </span>
+        <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">{t("Preview")}</span>
         {active && (
           <span className="flex items-center gap-1.5 text-[11px] text-ink-subtle">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
@@ -48,9 +41,7 @@ export function SpoilerPreview() {
           runtime={51}
           img={still2}
           imgPos="object-center"
-          synopsis={t(
-            "Loyalties shatter as the survivors realize the enemy has been among them all along.",
-          )}
+          synopsis={t("Loyalties shatter as the survivors realize the enemy has been among them all along.")}
         />
       </div>
     </div>
@@ -94,9 +85,7 @@ function PreviewCard({
         </span>
       </div>
       <div className="mt-2.5 flex flex-col gap-0.5 px-0.5">
-        <span className={`text-[13.5px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>
-          {title}
-        </span>
+        <span className={`text-[13.5px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>{title}</span>
         <span className="text-[11.5px] text-ink-subtle">
           E{n} · {t("{n} min", { n: runtime })}
         </span>

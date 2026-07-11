@@ -1,6 +1,6 @@
 import { get } from "./tmdb-client";
-import { pickLogo } from "./tmdb-images";
 import { imageLangParam } from "./tmdb-image-lang";
+import { pickLogo } from "./tmdb-images";
 
 type SearchTvHit = {
   id: number;
@@ -108,11 +108,9 @@ export async function tmdbAnimeLogo(
   const match = await tmdbAnimeMatch(key, name, year, kind);
   if (!match) return null;
   const { id, originalLang } = match;
-  const imgs = await get<{ logos?: any[]; backdrops?: any[] }>(
-    key,
-    `${kind}/${id}/images`,
-    { include_image_language: imageLangParam(originalLang) },
-  );
+  const imgs = await get<{ logos?: any[]; backdrops?: any[] }>(key, `${kind}/${id}/images`, {
+    include_image_language: imageLangParam(originalLang),
+  });
   const logo = pickLogo(imgs?.logos ?? [], originalLang);
   const backdropPath = (imgs?.backdrops ?? [])[0]?.file_path;
   return {

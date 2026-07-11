@@ -5,9 +5,7 @@ import { looksLikeKodi, parseKodi } from "./parse-kodi";
 import { looksLikeSpicetify, parseSpicetify } from "./parse-spicetify";
 import { projectPalette, type PaletteBucket } from "./project-palette";
 
-export type ForeignImport =
-  | { ok: true; themes: CustomTheme[]; format: string }
-  | { ok: false; error: string };
+export type ForeignImport = { ok: true; themes: CustomTheme[]; format: string } | { ok: false; error: string };
 
 const PREFIX = "user:";
 
@@ -67,5 +65,8 @@ export function importForeignTheme(text: string, filename?: string): ForeignImpo
     return { ok: true, themes: [toTheme(bucket)], format: "Kodi" };
   }
 
-  return { ok: false, error: "Unrecognized theme format. Harbor imports its own themes plus Base16, Spicetify, and Kodi color files." };
+  return {
+    ok: false,
+    error: "Unrecognized theme format. Harbor imports its own themes plus Base16, Spicetify, and Kodi color files.",
+  };
 }

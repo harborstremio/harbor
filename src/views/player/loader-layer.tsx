@@ -1,6 +1,7 @@
-import type { ComponentProps } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import type { PlayerSrc } from "@/lib/view";
+import type { ComponentProps } from "react";
+
 import { CinematicPlayerLoader } from "./cinematic-player-loader";
 import { LiveChannelError } from "./live-channel-error";
 import { LocalFileError } from "./local-file-error";
@@ -41,12 +42,7 @@ export function LoaderLayer({
       )}
 
       {isLocalSrc && snap.errorCode != null && (
-        <LocalFileError
-          path={src.url}
-          errorMessage={snap.errorMessage}
-          onBack={onCancel}
-          onRetry={onRetry}
-        />
+        <LocalFileError path={src.url} errorMessage={snap.errorMessage} onBack={onCancel} onRetry={onRetry} />
       )}
 
       {!isLocalSrc && isLiveSrc && snap.errorCode != null && (

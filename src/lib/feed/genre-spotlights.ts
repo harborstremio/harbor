@@ -1,5 +1,5 @@
-import { dayIndex, mixSeed, mulberry32 } from "./tags";
 import { hashStr } from "./daily-rows-types";
+import { dayIndex, mixSeed, mulberry32 } from "./tags";
 
 export type Spotlight = {
   name: string;

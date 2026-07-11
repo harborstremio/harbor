@@ -25,11 +25,7 @@ export function formatPosition(sec: number): string {
 }
 
 export function captureBaseTitle(src: PlayerSrc): string {
-  if (
-    src.episode &&
-    typeof src.episode.season === "number" &&
-    typeof src.episode.episode === "number"
-  ) {
+  if (src.episode && typeof src.episode.season === "number" && typeof src.episode.episode === "number") {
     return `${src.meta.name} S${String(src.episode.season).padStart(2, "0")}E${String(src.episode.episode).padStart(2, "0")}`;
   }
   return src.meta.name;

@@ -1,7 +1,8 @@
-import { ChevronRight } from "lucide-react";
-import { useState } from "react";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
+import { ChevronRight } from "lucide-react";
+import { useState } from "react";
+
 import { addonKey, idOf } from "./addons-utils";
 import { FeatureCard } from "./feature-card";
 import { ListCard } from "./list-card";

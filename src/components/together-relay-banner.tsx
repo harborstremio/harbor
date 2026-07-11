@@ -1,10 +1,10 @@
-import { TriangleAlert, X } from "lucide-react";
-import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useTogether } from "@/lib/together/provider";
 import { isPublicRelay, REQUIRED_RELAY_VERSION } from "@/lib/together/relay-version";
 import { useView } from "@/lib/view";
+import { TriangleAlert, X } from "lucide-react";
+import { useState } from "react";
 
 const DISMISS_KEY = "harbor.relayBannerDismissed";
 

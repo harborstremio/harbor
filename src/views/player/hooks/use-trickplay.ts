@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { isBundledEngineUrl } from "@/lib/stremio-server";
 import { setTrickplayState, trickplaySetUrl, trickplaySpawnEager, trickplayStop } from "@/lib/trickplay";
+import { useEffect } from "react";
 
 export function useTrickplay({ url, enabled, isLive }: { url: string; enabled: boolean; isLive?: boolean }) {
   useEffect(() => {

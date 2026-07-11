@@ -1,10 +1,10 @@
+import { anilistFranchise, type AnilistFranchiseNode } from "@/lib/anilist/relations";
 import type { Meta } from "@/lib/cinemeta";
-import { aniZipByKitsu } from "@/lib/providers/anizip";
 import { buildKitsuEpisodes, mergeAniZipEpisodes } from "@/lib/providers/anime-episode-build";
+import { enrichEpisodes } from "@/lib/providers/anime-episode-enrich";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { kitsuToTvdb, kitsuToImdb, externalToKitsu } from "@/lib/providers/anime-mapping";
-import { anilistFranchise, type AnilistFranchiseNode } from "@/lib/anilist/relations";
-import { enrichEpisodes } from "@/lib/providers/anime-episode-enrich";
+import { aniZipByKitsu } from "@/lib/providers/anizip";
 import { fanartMovie, fanartTv } from "@/lib/providers/fanart";
 import {
   kitsuAnime,
@@ -146,8 +146,9 @@ async function buildFranchise(
   });
 
   const visited = new Set<number>([rootId]);
-  let relatedWave: Promise<{ id: number; related: Awaited<ReturnType<typeof kitsuRelated>> }[]> =
-    Promise.all([kitsuRelated(rootId)]).then(([related]) => [{ id: rootId, related }]);
+  let relatedWave: Promise<{ id: number; related: Awaited<ReturnType<typeof kitsuRelated>> }[]> = Promise.all([
+    kitsuRelated(rootId),
+  ]).then(([related]) => [{ id: rootId, related }]);
   let depth = 0;
 
   while (depth < FRANCHISE_MAX_DEPTH) {
@@ -163,9 +164,7 @@ async function buildFranchise(
     }
     if (newIds.length === 0) break;
     for (const id of newIds) visited.add(id);
-    const nextWave = Promise.all(
-      newIds.map((id) => kitsuRelated(id).then((related) => ({ id, related }))),
-    );
+    const nextWave = Promise.all(newIds.map((id) => kitsuRelated(id).then((related) => ({ id, related }))));
     const animes = await Promise.all(newIds.map((id) => kitsuAnime(id)));
     const alive = new Set<number>();
     for (let i = 0; i < newIds.length; i++) {
@@ -223,16 +222,21 @@ async function buildFranchise(
     (e.startDate ? 2 : 0) +
     ((e.episodeCount ?? 0) > 0 ? 1 : 0);
   const ORD: Record<string, string> = {
-    first: "1", second: "2", third: "3", fourth: "4", fifth: "5", sixth: "6", seventh: "7", eighth: "8",
+    first: "1",
+    second: "2",
+    third: "3",
+    fourth: "4",
+    fifth: "5",
+    sixth: "6",
+    seventh: "7",
+    eighth: "8",
   };
   const norm = (s: string) => {
     let x = s.trim().toLowerCase();
     for (const w in ORD) x = x.replace(new RegExp(`\\b${w}\\b`, "g"), ORD[w]);
     const m = x.match(/(\d+)\s*(?:st|nd|rd|th)?\s*season|season\s*(\d+)/);
-    const num = m ? m[1] ?? m[2] : "";
-    const base = x
-      .replace(/\d+\s*(?:st|nd|rd|th)?\s*season|season\s*\d+/g, " ")
-      .replace(/[^a-z0-9]+/g, "");
+    const num = m ? (m[1] ?? m[2]) : "";
+    const base = x.replace(/\d+\s*(?:st|nd|rd|th)?\s*season|season\s*\d+/g, " ").replace(/[^a-z0-9]+/g, "");
     return num ? `${base}#${num}` : base;
   };
   const byName = new Map<string, FranchiseEntry>();
@@ -264,10 +268,7 @@ export function franchiseTags(franchise: FranchiseEntry[]): FranchiseTag[] {
 
 const FRANCHISE_CAST_CACHE = new Map<string, CastEntry[]>();
 
-export async function animeDetails(
-  settings: Settings,
-  meta: Meta,
-): Promise<AnimeDetailResult | null> {
+export async function animeDetails(settings: Settings, meta: Meta): Promise<AnimeDetailResult | null> {
   let kitsuId = parseKitsuId(meta.id);
   if (kitsuId == null) {
     const ext: Array<[string, string]> = [
@@ -294,9 +295,12 @@ export async function animeDetails(
   const franchisePromise = buildFranchise(kitsuId, anime).catch(() => [] as FranchiseEntry[]);
 
   const slugify = (s: string) =>
-    s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  const effectiveSlugs =
-    anime.genreSlugs.length > 0 ? anime.genreSlugs : anime.genres.map(slugify).filter(Boolean);
+    s
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  const effectiveSlugs = anime.genreSlugs.length > 0 ? anime.genreSlugs : anime.genres.map(slugify).filter(Boolean);
 
   const [kitsuRawEpisodes, characters, related, studios, streamers, genreSimilar, aniZip] = await Promise.all([
     kitsuEpisodes(kitsuId, 100),
@@ -304,9 +308,7 @@ export async function animeDetails(
     kitsuRelated(kitsuId),
     kitsuStudios(kitsuId),
     kitsuStreamingLinks(kitsuId),
-    effectiveSlugs.length > 0
-      ? kitsuSimilarByGenres(effectiveSlugs, kitsuId, 34)
-      : Promise.resolve([] as Meta[]),
+    effectiveSlugs.length > 0 ? kitsuSimilarByGenres(effectiveSlugs, kitsuId, 34) : Promise.resolve([] as Meta[]),
     aniZipByKitsu(kitsuId).catch(() => null),
   ]);
 
@@ -371,7 +373,7 @@ export async function animeDetails(
     rating: meta.imdbRating ?? anime.rating,
     voteCount: anime.popularityRank ?? 0,
     runtime: anime.episodeLength ? `${anime.episodeLength}m` : undefined,
-    status: anime.status ? STATUS_LABELS[anime.status] ?? anime.status : "",
+    status: anime.status ? (STATUS_LABELS[anime.status] ?? anime.status) : "",
     genres: anime.genres,
     originalLanguage: "ja",
     spokenLanguages: ["Japanese"],

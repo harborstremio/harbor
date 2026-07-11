@@ -1,19 +1,17 @@
-import {
-  Check,
-  ChevronDown,
-  Download,
-  Pencil,
-  Plus,
-  RotateCcw,
-  Trash2,
-  Upload,
-} from "lucide-react";
+import type { LayoutProfile } from "@/lib/player-chrome-profiles";
+import { Check, ChevronDown, Download, Pencil, Plus, RotateCcw, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { createPortal } from "react-dom";
-import type { LayoutProfile } from "@/lib/player-chrome-profiles";
 
 type Dialog =
-  | { kind: "input"; title: string; placeholder: string; initial: string; confirmLabel: string; onConfirm: (value: string) => void }
+  | {
+      kind: "input";
+      title: string;
+      placeholder: string;
+      initial: string;
+      confirmLabel: string;
+      onConfirm: (value: string) => void;
+    }
   | { kind: "confirm"; title: string; message: string; confirmLabel: string; danger?: boolean; onConfirm: () => void };
 
 type Props = {
@@ -126,13 +124,7 @@ export function ProfilePicker({
 
   return (
     <div ref={wrapRef} className="relative">
-      <input
-        ref={fileRef}
-        type="file"
-        accept="application/json,.json"
-        onChange={handleImport}
-        className="hidden"
-      />
+      <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleImport} className="hidden" />
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -141,7 +133,11 @@ export function ProfilePicker({
         className="flex h-11 max-w-[200px] items-center gap-2 rounded-full border border-white/15 bg-white/8 ps-4 pe-3 text-[13px] font-medium text-white/90 transition-colors hover:bg-white/15 hover:text-white"
       >
         <span className="truncate">{label}</span>
-        <ChevronDown size={14} strokeWidth={2.3} className={open ? "rotate-180 transition-transform" : "transition-transform"} />
+        <ChevronDown
+          size={14}
+          strokeWidth={2.3}
+          className={open ? "rotate-180 transition-transform" : "transition-transform"}
+        />
       </button>
 
       {open && (
@@ -181,7 +177,11 @@ export function ProfilePicker({
           <div className="my-1 h-px bg-white/8" />
 
           <div className="px-1.5 py-1">
-            <MenuItem icon={<Plus size={14} strokeWidth={2.3} />} label="Save as new profile..." onClick={askSaveAsNew} />
+            <MenuItem
+              icon={<Plus size={14} strokeWidth={2.3} />}
+              label="Save as new profile..."
+              onClick={askSaveAsNew}
+            />
             <MenuItem
               icon={<Pencil size={13} strokeWidth={2.3} />}
               label="Rename current"
@@ -217,11 +217,7 @@ export function ProfilePicker({
                 setOpen(false);
               }}
             />
-            <MenuItem
-              icon={<RotateCcw size={13} strokeWidth={2.3} />}
-              label="Reset to defaults"
-              onClick={askReset}
-            />
+            <MenuItem icon={<RotateCcw size={13} strokeWidth={2.3} />} label="Reset to defaults" onClick={askReset} />
           </div>
         </div>
       )}

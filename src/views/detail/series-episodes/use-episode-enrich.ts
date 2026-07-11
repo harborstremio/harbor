@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
 import type { Episode } from "@/lib/providers/tmdb";
 import { tvdbEpisodes, tvdbSeriesByImdb, type TvdbEpisode } from "@/lib/providers/tvdb";
+import { useEffect, useMemo, useState } from "react";
 
 export function useEpisodeEnrich({
   episodes,
@@ -73,9 +73,7 @@ export function useEpisodeEnrich({
       const tv = tvdbForSeason?.get(ep.episodeNumber);
       if (tv) {
         const overview =
-          tv.overview && tv.overview.trim().length > (next.overview?.trim().length ?? 0)
-            ? tv.overview
-            : next.overview;
+          tv.overview && tv.overview.trim().length > (next.overview?.trim().length ?? 0) ? tv.overview : next.overview;
         next = {
           ...next,
           overview,
@@ -84,8 +82,7 @@ export function useEpisodeEnrich({
           airDate: next.airDate ?? tv.aired ?? null,
         };
       }
-      const imdbRating =
-        harborImdb.get(`${active}:${ep.episodeNumber}`) ?? omdbForSeason?.get(ep.episodeNumber);
+      const imdbRating = harborImdb.get(`${active}:${ep.episodeNumber}`) ?? omdbForSeason?.get(ep.episodeNumber);
       if (imdbRating != null && imdbRating > 0) {
         next = { ...next, imdbRating };
       }

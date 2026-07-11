@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
-import { useT } from "@/lib/i18n";
 
 type DragState = {
   active: boolean;
@@ -12,13 +12,7 @@ type DragState = {
 
 const DRAG_THRESHOLD = 6;
 
-export function ArrowedScrollRow({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function ArrowedScrollRow({ children, className = "" }: { children: ReactNode; className?: string }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState>({
     active: false,
@@ -132,15 +126,7 @@ export function ArrowedScrollRow({
   );
 }
 
-function Arrow({
-  side,
-  visible,
-  onClick,
-}: {
-  side: "left" | "right";
-  visible: boolean;
-  onClick: () => void;
-}) {
+function Arrow({ side, visible, onClick }: { side: "left" | "right"; visible: boolean; onClick: () => void }) {
   const t = useT();
   return (
     <button

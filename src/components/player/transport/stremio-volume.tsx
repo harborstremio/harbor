@@ -1,16 +1,11 @@
+import { useT } from "@/lib/i18n";
+import type { VolumeStyle } from "@/lib/player-chrome";
+import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import { Minus, Plus, Volume2, VolumeX } from "lucide-react";
 import { useRef, useState } from "react";
-import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
-import type { VolumeStyle } from "@/lib/player-chrome";
-import { useT } from "@/lib/i18n";
+
 import { Tooltip } from "./tooltip";
-import {
-  fractionFromValue,
-  NORMAL_FRACTION,
-  valueFromFraction,
-  VOL_MAX,
-  boostColor,
-} from "./transport-utils";
+import { fractionFromValue, NORMAL_FRACTION, valueFromFraction, VOL_MAX, boostColor } from "./transport-utils";
 
 export function StremioVolume({
   snap,
@@ -117,9 +112,7 @@ export function StremioVolume({
         >
           <Minus size={18} strokeWidth={2.3} />
         </button>
-        <span className="min-w-[2.5rem] text-center font-mono text-[13px] tabular-nums text-white/85">
-          {pct}%
-        </span>
+        <span className="min-w-[2.5rem] text-center font-mono text-[13px] tabular-nums text-white/85">{pct}%</span>
         <button
           type="button"
           onClick={() => step(0.05)}

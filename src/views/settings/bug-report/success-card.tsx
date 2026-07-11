@@ -1,13 +1,7 @@
-import { Check, GitPullRequest } from "lucide-react";
 import { openUrl } from "@/lib/window";
+import { Check, GitPullRequest } from "lucide-react";
 
-export function SuccessCard({
-  id,
-  onAnother,
-}: {
-  id: string;
-  onAnother: () => void;
-}) {
+export function SuccessCard({ id, onAnother }: { id: string; onAnother: () => void }) {
   return (
     <section className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-8">
       <div className="flex items-start gap-3.5">
@@ -17,8 +11,8 @@ export function SuccessCard({
         <div className="flex flex-col gap-1.5">
           <h2 className="text-[18px] font-semibold text-ink">Report received</h2>
           <p className="text-[13.5px] text-ink-muted">
-            Tracked as <span className="font-mono text-[12px] text-ink">{id}</span>. If you left a
-            GitHub username, you'll be tagged in the release notes when this lands.
+            Tracked as <span className="font-mono text-[12px] text-ink">{id}</span>. If you left a GitHub username,
+            you'll be tagged in the release notes when this lands.
           </p>
         </div>
       </div>

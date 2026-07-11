@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function EpisodePager({
   page,

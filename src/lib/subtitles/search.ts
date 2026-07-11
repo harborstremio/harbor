@@ -1,10 +1,11 @@
 import type { Addon } from "@/lib/addons";
 import { dinfo, dwarn } from "@/lib/debug";
-import type { SubResult, SubSearchQuery } from "./types";
-import { searchWyzie } from "./providers/wyzie";
+
+import { langScore, normalizeLang } from "./language";
 import { searchAddons } from "./providers/addons";
 import { searchOpenSubtitlesV3 } from "./providers/opensubtitles-v3";
-import { langScore, normalizeLang } from "./language";
+import { searchWyzie } from "./providers/wyzie";
+import type { SubResult, SubSearchQuery } from "./types";
 
 export type SearchOptions = {
   providers?: { wyzie?: boolean; addons?: boolean; opensubtitles?: boolean };
@@ -20,10 +21,7 @@ export type StreamHints = {
   preferHearingImpaired?: boolean;
 };
 
-export async function searchSubtitles(
-  q: SubSearchQuery,
-  opts: SearchOptions,
-): Promise<SubResult[]> {
+export async function searchSubtitles(q: SubSearchQuery, opts: SearchOptions): Promise<SubResult[]> {
   const want = opts.providers ?? {};
   const wyzieOn = want.wyzie === true;
   const addonsOn = want.addons ?? true;
@@ -49,7 +47,8 @@ export async function searchSubtitles(
   return ranked;
 }
 
-const RELEASE_GROUP_RX = /[-.][A-Z0-9]{2,}$|\b(EVO|RARBG|YTS|YIFY|FGT|PSA|TBS|GalaxyRG|GalaxyTV|MeGusta|ION10|EZTV|NTb|FLUX|TEPES|KOGi|SMURF|RZeroX|d3g|TGx)\b/gi;
+const RELEASE_GROUP_RX =
+  /[-.][A-Z0-9]{2,}$|\b(EVO|RARBG|YTS|YIFY|FGT|PSA|TBS|GalaxyRG|GalaxyTV|MeGusta|ION10|EZTV|NTb|FLUX|TEPES|KOGi|SMURF|RZeroX|d3g|TGx)\b/gi;
 
 function extractReleaseGroup(text: string | null | undefined): string | null {
   if (!text) return null;
@@ -105,11 +104,7 @@ function sourcePriority(source: SubResult["source"]): number {
   }
 }
 
-function dedupAndRank(
-  results: SubResult[],
-  preferred: string[],
-  hints?: StreamHints,
-): SubResult[] {
+function dedupAndRank(results: SubResult[], preferred: string[], hints?: StreamHints): SubResult[] {
   const seen = new Set<string>();
   const filtered: SubResult[] = [];
   for (const r of results) {
@@ -123,11 +118,7 @@ function dedupAndRank(
   return interleaved;
 }
 
-function interleaveBySource(
-  list: SubResult[],
-  preferred: string[],
-  hints?: StreamHints,
-): SubResult[] {
+function interleaveBySource(list: SubResult[], preferred: string[], hints?: StreamHints): SubResult[] {
   const buckets = new Map<string, SubResult[]>();
   for (const r of list) {
     const key = r.source;

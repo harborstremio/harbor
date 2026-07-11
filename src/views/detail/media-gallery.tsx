@@ -1,15 +1,16 @@
-import { useCallback, useMemo, useState } from "react";
-import { Check } from "lucide-react";
-import { createPortal } from "react-dom";
 import { saveImageToDisk, saveTrailerToDisk } from "@/lib/download/save-binary";
 import { t } from "@/lib/i18n";
 import type { TmdbDetail } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { resolveTrailerQuality } from "@/lib/trailer";
-import { TrailerOverlay } from "./trailer-overlay";
-import { MediaLightbox } from "./media-lightbox";
+import { Check } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { MediaRail } from "./media-gallery/media-rail";
 import { ImageTile, LogoTile, VideoTile, type GalleryVideo } from "./media-gallery/media-tiles";
+import { MediaLightbox } from "./media-lightbox";
+import { TrailerOverlay } from "./trailer-overlay";
 
 type Tab = "videos" | "backdrops" | "posters" | "logos";
 

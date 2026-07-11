@@ -1,6 +1,6 @@
-import { ListChecks } from "lucide-react";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { ListChecks } from "lucide-react";
 
 export function GuestPickToggle() {
   const { settings, update } = useSettings();

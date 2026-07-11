@@ -1,33 +1,40 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Loader2 } from "lucide-react";
-import { useT } from "@/lib/i18n";
 import { resolveAddonLogo } from "@/components/addon-logo";
-import { torrentEngineStatus } from "@/lib/torrent/local-engine";
+import { HostSourceBanner } from "@/components/host-source-banner";
 import { useAuth } from "@/lib/auth";
 import type { Meta } from "@/lib/cinemeta";
-import { useDebridClients } from "@/lib/debrid/registry";
-import { useTogether } from "@/lib/together/provider";
-import { buildMatchScores, matchBadge, MATCH_CLOSE } from "@/lib/together/source-match";
-import { HostSourceBanner } from "@/components/host-source-banner";
 import { consumeRecentStubEvent } from "@/lib/dead-streams";
+import { useDebridClients } from "@/lib/debrid/registry";
+import { exitWindowFullscreen } from "@/lib/fullscreen-state";
+import { useT } from "@/lib/i18n";
+import { findLocalEpisodeByIds, findLocalMovie } from "@/lib/local-library";
+import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { readPlayback, readLastSeriesPlayback, streamMatchesEntry, streamMatchesSource } from "@/lib/playback-history";
+import { useActiveKid } from "@/lib/profiles";
 import { readSeasonLock } from "@/lib/season-lock";
 import { useSettings } from "@/lib/settings";
-import type { ScoredStream, Tier } from "@/lib/streams/types";
-import { isAddonRanked } from "@/lib/streams/addon-detect";
-import { useView, type PlayEpisode, type PlayerSrc } from "@/lib/view";
 import { prefetchSegments } from "@/lib/skip-intro";
-import { exitWindowFullscreen } from "@/lib/fullscreen-state";
+import { isAddonRanked } from "@/lib/streams/addon-detect";
+import type { ScoredStream, Tier } from "@/lib/streams/types";
+import { useTogether } from "@/lib/together/provider";
+import { buildMatchScores, matchBadge, MATCH_CLOSE } from "@/lib/together/source-match";
+import { torrentEngineStatus } from "@/lib/torrent/local-engine";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
+import { useView, type PlayEpisode, type PlayerSrc } from "@/lib/view";
+import { ArrowUp, Loader2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { AutoExhaustedModal } from "./play-picker/auto-exhausted-modal";
 import { AutoPlayTransition } from "./play-picker/auto-play-transition";
 import { BackdropLayer } from "./play-picker/backdrop-layer";
+import { CachedTip } from "./play-picker/cached-tip";
 import { CinematicLoader } from "./play-picker/cinematic-loader";
 import { DebridDownModal } from "./play-picker/debrid-down-modal";
-import { P2pConfirmModal } from "./play-picker/p2p-confirm-modal";
 import { CachedFilterPill, LanguageFilterPill } from "./play-picker/filter-pills";
-import { PickerEmptyLadder } from "./play-picker/picker-empty-ladder";
+import { LocalStreamCard } from "./play-picker/local-stream-card";
 import { NoSourcesConfiguredModal } from "./play-picker/no-sources-modal";
+import { P2pConfirmModal } from "./play-picker/p2p-confirm-modal";
+import { PickerEmptyLadder } from "./play-picker/picker-empty-ladder";
+import { PickerHeader } from "./play-picker/picker-header";
 import {
   hasCachedMarker,
   hasUncachedMarker,
@@ -36,26 +43,20 @@ import {
   orderByAddonNative,
   streamMatchesLangs,
 } from "./play-picker/picker-utils";
-import { PickerHeader } from "./play-picker/picker-header";
 import { PrimaryCard } from "./play-picker/primary-card";
 import { SourceDiagnostic } from "./play-picker/source-diagnostic";
-import { CachedTip } from "./play-picker/cached-tip";
-import { StremioLayout } from "./play-picker/stremio-layout";
 import { SourceDrawer } from "./play-picker/source-drawer";
+import { StremioLayout } from "./play-picker/stremio-layout";
+import { SubtitleSelectStep } from "./play-picker/subtitle-select-step";
 import { TierStrip } from "./play-picker/tier-strip";
-import { usePickHandler } from "./play-picker/use-pick-handler";
-import { useActiveKid } from "@/lib/profiles";
+import { useAddons } from "./play-picker/use-addons";
 import { useAutoCandidates } from "./play-picker/use-auto-candidates";
 import { useAutoFire } from "./play-picker/use-auto-fire";
-import { useRoomInvite } from "./play-picker/use-room-invite";
-import { useAddons } from "./play-picker/use-addons";
 import { useImdbId } from "./play-picker/use-imdb-id";
+import { usePickHandler } from "./play-picker/use-pick-handler";
 import { usePipelineResult } from "./play-picker/use-pipeline-result";
+import { useRoomInvite } from "./play-picker/use-room-invite";
 import { useStreamIds } from "./play-picker/use-stream-ids";
-import { findLocalEpisodeByIds, findLocalMovie } from "@/lib/local-library";
-import { localPlayerSrc } from "@/lib/local-library/player-src";
-import { LocalStreamCard } from "./play-picker/local-stream-card";
-import { SubtitleSelectStep } from "./play-picker/subtitle-select-step";
 
 const TIER_ORDER: Tier[] = ["4K_DV", "4K_HDR", "4K", "1080p_HDR", "1080p", "720p", "SD", "ROUGH"];
 
@@ -84,14 +85,23 @@ export function PlayPicker({
   const fs = useWindowFullscreen();
   const { authKey } = useAuth();
   const debrids = useDebridClients();
-  const { snapshot: roomSnapshot, sendInvite, claimHost, wasInvitedTo, clientId, hostSource, roomGuestPick, lastInviteProto } = useTogether();
+  const {
+    snapshot: roomSnapshot,
+    sendInvite,
+    claimHost,
+    wasInvitedTo,
+    clientId,
+    hostSource,
+    roomGuestPick,
+    lastInviteProto,
+  } = useTogether();
   const inSession = roomSnapshot.state === "joined";
   const resolvedImdb = useImdbId(meta, settings.tmdbKey);
   useEffect(() => {
     prefetchSegments(meta, episode);
   }, [meta, episode]);
   const imdbId = resolvedImdb.id;
-const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-season");
+  const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-season");
   const localMatch = useMemo(() => {
     const m = meta.id.match(/^tmdb:(?:movie|tv):(\d+)$/);
     const tmdbId = m ? parseInt(m[1], 10) : null;
@@ -149,9 +159,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     }
     return out;
   }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest]);
-  const [langFilter, setLangFilter] = useState(
-    settings.requirePreferredLanguage === true && baseLangs.length > 0,
-  );
+  const [langFilter, setLangFilter] = useState(settings.requirePreferredLanguage === true && baseLangs.length > 0);
   const [cachedOnly, setCachedOnly] = useState(false);
 
   const { inviteKey, canInvite, inviteSentRef, hostSourceForMedia, expectHostSource } = useRoomInvite({
@@ -176,10 +184,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     () => (hostSourceForMedia && result ? buildMatchScores(result.picker.all, hostSourceForMedia) : null),
     [result, hostSourceForMedia],
   );
-  const matchFor = useCallback(
-    (s: ScoredStream) => (hostMatch ? matchBadge(hostMatch.get(s)) : null),
-    [hostMatch],
-  );
+  const matchFor = useCallback((s: ScoredStream) => (hostMatch ? matchBadge(hostMatch.get(s)) : null), [hostMatch]);
 
   const isCached = useCallback(
     (s: ScoredStream) =>
@@ -192,10 +197,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     () => (addons ?? []).some((a) => /mediafusion|comet/i.test(a.manifest?.name ?? "")),
     [addons],
   );
-  const isTorrentioStream = useCallback(
-    (s: ScoredStream) => /torrentio/i.test(s.addonName ?? ""),
-    [],
-  );
+  const isTorrentioStream = useCallback((s: ScoredStream) => /torrentio/i.test(s.addonName ?? ""), []);
 
   const filteredPicker = useMemo(() => {
     if (!result) return null;
@@ -237,9 +239,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     const byTier: Partial<Record<Tier, ScoredStream>> = {};
     for (const s of ranked) if (!byTier[s.tier]) byTier[s.tier] = s;
     const hostBest =
-      hostMatch && ranked.length > 0 && (hostMatch.get(ranked[0]) ?? 0) >= MATCH_CLOSE
-        ? ranked[0]
-        : null;
+      hostMatch && ranked.length > 0 && (hostMatch.get(ranked[0]) ?? 0) >= MATCH_CLOSE ? ranked[0] : null;
     const primaryCandidates = [hostBest, result.picker.primary, ...ranked].filter(
       (s): s is ScoredStream => s != null && all.includes(s),
     );
@@ -247,10 +247,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     return { primary, byTier, all };
   }, [result, langFilter, preferredLangs, cachedOnly, debrids.length, isCached, hostMatch, isAnimeRequest]);
 
-  const anyAddonRanked = useMemo(
-    () => (addons ?? []).some((a) => isAddonRanked(a)),
-    [addons],
-  );
+  const anyAddonRanked = useMemo(() => (addons ?? []).some((a) => isAddonRanked(a)), [addons]);
   const addonOrderMode = settings.streamSort === "addon" || anyAddonRanked;
   const displayStreams = useMemo(() => {
     const all = filteredPicker?.all ?? [];
@@ -269,10 +266,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     return result.picker.all.filter((s) => !isCached(s)).length;
   }, [result, debrids.length, isCached]);
 
-  const populatedTiers = useMemo(
-    () => TIER_ORDER.filter((t) => filteredPicker?.byTier[t]),
-    [filteredPicker],
-  );
+  const populatedTiers = useMemo(() => TIER_ORDER.filter((t) => filteredPicker?.byTier[t]), [filteredPicker]);
 
   useEffect(() => {
     if (!filteredPicker?.primary) return;
@@ -281,11 +275,8 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
 
   const isAnimeMetaId = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
   const previousPlayback = useMemo(
-  () =>
-    settings.rememberLastStream
-      ? readPlayback(meta.id, episode?.season, episode?.episode)
-      : null,
-  [meta.id, episode?.season, episode?.episode, settings.rememberLastStream],
+    () => (settings.rememberLastStream ? readPlayback(meta.id, episode?.season, episode?.episode) : null),
+    [meta.id, episode?.season, episode?.episode, settings.rememberLastStream],
   );
 
   const seasonLock = settings.seasonSourceLock && meta.type === "series" && !isAnimeMetaId;
@@ -296,9 +287,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
   const lastSeriesSource = useMemo(
     () =>
       seasonLockEntry ??
-      (settings.keepSourceNextEpisode && !!autoPlay && meta.type === "series"
-        ? readLastSeriesPlayback(meta.id)
-        : null),
+      (settings.keepSourceNextEpisode && !!autoPlay && meta.type === "series" ? readLastSeriesPlayback(meta.id) : null),
     [seasonLockEntry, meta.id, meta.type, settings.keepSourceNextEpisode, autoPlay],
   );
 
@@ -316,8 +305,8 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     hostSource: hostSourceForMedia,
     prefer1080: !!kidProfile,
     preferPacks: seasonLock,
-    season: !isAnimeMetaId ? episode?.season ?? null : null,
-    episode: !isAnimeMetaId ? episode?.episode ?? null : null,
+    season: !isAnimeMetaId ? (episode?.season ?? null) : null,
+    episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
   });
 
   const autoFiredRef = useRef(false);
@@ -325,8 +314,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
   const [autoAttemptIdx, setAutoAttemptIdx] = useState(0);
   const [autoExhausted, setAutoExhausted] = useState(false);
   const [autoCancelled, setAutoCancelled] = useState(false);
-  const isLiveLikeContent =
-    !!meta.type && !["movie", "series", "anime"].includes(String(meta.type).toLowerCase());
+  const isLiveLikeContent = !!meta.type && !["movie", "series", "anime"].includes(String(meta.type).toLowerCase());
   const autoActive =
     !!((autoPlay && !isLiveLikeContent) || wasInvitedTo(inviteKey)) &&
     !autoCancelled &&
@@ -356,10 +344,10 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
   const currentPick: ScoredStream | null = useMemo(() => {
     if (!filteredPicker) return null;
     if (selectedTier && filteredPicker.byTier[selectedTier]) {
-    return filteredPicker.byTier[selectedTier]!;
-  }
+      return filteredPicker.byTier[selectedTier]!;
+    }
     if (previousMatch) return previousMatch;
-    if (sameSourceMatch) return sameSourceMatch;   
+    if (sameSourceMatch) return sameSourceMatch;
     return filteredPicker.primary;
   }, [filteredPicker, selectedTier, previousMatch, sameSourceMatch]);
 
@@ -384,35 +372,36 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     [settings.subtitlePreselect, isDownload, inSession, openPlayer],
   );
 
-  const { onPlay, onCache, queuedHash, debridDown, resetDebridDown, abortResolve, p2pConfirm, confirmP2p, cancelP2p } = usePickHandler({
-    meta,
-    imdbId,
-    imdbIdVerified: resolvedImdb.verified,
-    episode,
-    attempt,
-    resume,
-    debrids,
-    isCached,
-    seasonLock,
-    p2pAutoConsent,
-    inSession,
-    canInvite,
-    inviteSentRef,
-    sendInvite,
-    claimHost,
-    openPlayer: openPlayerGated,
-    intent,
-    onDownloadStarted: () => setView("downloads"),
-    autoActive,
-    autoAttemptIdx,
-    autoCandidatesLength: autoCandidates.length,
-    autoFiredRef,
-    setAutoAttemptIdx,
-    setAutoExhausted,
-    setFailedStreams,
-    setResolveError,
-    setResolving,
-  });
+  const { onPlay, onCache, queuedHash, debridDown, resetDebridDown, abortResolve, p2pConfirm, confirmP2p, cancelP2p } =
+    usePickHandler({
+      meta,
+      imdbId,
+      imdbIdVerified: resolvedImdb.verified,
+      episode,
+      attempt,
+      resume,
+      debrids,
+      isCached,
+      seasonLock,
+      p2pAutoConsent,
+      inSession,
+      canInvite,
+      inviteSentRef,
+      sendInvite,
+      claimHost,
+      openPlayer: openPlayerGated,
+      intent,
+      onDownloadStarted: () => setView("downloads"),
+      autoActive,
+      autoAttemptIdx,
+      autoCandidatesLength: autoCandidates.length,
+      autoFiredRef,
+      setAutoAttemptIdx,
+      setAutoExhausted,
+      setFailedStreams,
+      setResolveError,
+      setResolving,
+    });
 
   const playManually = useCallback(
     (s: ScoredStream) => {
@@ -422,8 +411,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     [onPlay],
   );
 
-  const rememberedInstant =
-    !!previousMatch && (isCached(previousMatch) || !!previousMatch.url || p2pAutoConsent);
+  const rememberedInstant = !!previousMatch && (isCached(previousMatch) || !!previousMatch.url || p2pAutoConsent);
   const rememberedFiredRef = useRef(false);
   const rememberedHandledFirst =
     !!previousMatch &&
@@ -458,8 +446,8 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
     isTorrentioStream,
     expectHostSource,
     hostSource: hostSourceForMedia,
-    season: !isAnimeMetaId ? episode?.season ?? null : null,
-    episode: !isAnimeMetaId ? episode?.episode ?? null : null,
+    season: !isAnimeMetaId ? (episode?.season ?? null) : null,
+    episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
     autoFiredRef,
     setAutoSettleReady,
     setAutoCancelled,
@@ -467,9 +455,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
   });
 
   const allCount = filteredPicker?.all.length ?? 0;
-  const rawCount =
-    (result?.raw.addon.length ?? 0) +
-    (result?.raw.library.length ?? 0);
+  const rawCount = (result?.raw.addon.length ?? 0) + (result?.raw.library.length ?? 0);
   const addonCount = useMemo(() => {
     if (!filteredPicker) return 0;
     return new Set(filteredPicker.all.map((s) => s.addonId)).size;
@@ -501,27 +487,18 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
 
   const noStreamIds = addonsSettled && (!streamIds || streamIds.length === 0);
   const noDebrids = addonsSettled && !!streamIds && streamIds.length > 0 && debrids.length === 0;
-  const noResults =
-    addonsSettled && !!streamIds && streamIds.length > 0 && allCount === 0 && debrids.length > 0;
+  const noResults = addonsSettled && !!streamIds && streamIds.length > 0 && allCount === 0 && debrids.length > 0;
   const terminalEmpty = noStreamIds || noDebrids || noResults;
   const [stubBanner, setStubBanner] = useState<string | null>(null);
   useEffect(() => {
     const ev = consumeRecentStubEvent(8000);
     if (!ev) return;
-    setStubBanner(
-      "Last source wasn't actually cached on your debrid yet. Pick another from the list.",
-    );
+    setStubBanner("Last source wasn't actually cached on your debrid yet. Pick another from the list.");
     const t = window.setTimeout(() => setStubBanner(null), 6000);
     return () => window.clearTimeout(t);
   }, [streamIds]);
   useEffect(() => {
-    if (
-      autoPlay &&
-      pipelineDone &&
-      autoCandidates.length === 0 &&
-      !autoExhausted &&
-      !autoCancelled
-    ) {
+    if (autoPlay && pipelineDone && autoCandidates.length === 0 && !autoExhausted && !autoCancelled) {
       setAutoExhausted(true);
     }
   }, [autoPlay, pipelineDone, autoCandidates.length, autoExhausted, autoCancelled]);
@@ -550,12 +527,10 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
   const showAutoTransition =
     !resolveError &&
     !isDownload &&
-    ((autoActive && (streamIds === null || loading || autoCandidates.length > 0)) ||
-      resolving != null);
+    ((autoActive && (streamIds === null || loading || autoCandidates.length > 0)) || resolving != null);
   void terminalEmpty;
 
-  const noSourcesConfigured =
-    addons !== null && addons.length === 0 && debrids.length === 0;
+  const noSourcesConfigured = addons !== null && addons.length === 0 && debrids.length === 0;
 
   if (pendingPreselect) {
     return (
@@ -606,13 +581,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
   }
 
   if (debridDown) {
-    return (
-      <DebridDownModal
-        meta={meta}
-        onTryAgain={resetDebridDown}
-        onBack={() => backToDetail()}
-      />
-    );
+    return <DebridDownModal meta={meta} onTryAgain={resetDebridDown} onBack={() => backToDetail()} />;
   }
 
   if (autoExhausted) {
@@ -656,9 +625,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
           </div>
         )}
 
-        {!addonsSettled && (!filteredPicker || filteredPicker.all.length === 0) && (
-          <CinematicLoader meta={meta} />
-        )}
+        {!addonsSettled && (!filteredPicker || filteredPicker.all.length === 0) && <CinematicLoader meta={meta} />}
 
         <PickerEmptyLadder
           meta={meta}
@@ -697,9 +664,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
           />
         ) : (
           <>
-            {!loading && result && (
-              <SourceDiagnostic result={result} debrids={debrids} />
-            )}
+            {!loading && result && <SourceDiagnostic result={result} debrids={debrids} />}
 
             {!loading && currentPick && (
               <PrimaryCard
@@ -711,9 +676,7 @@ const streamIds = useStreamIds(meta, episode, imdbId, intent === "download-seaso
                 onPlay={() => playManually(currentPick)}
                 onCache={() => onCache(currentPick)}
                 resolving={resolving?.stream === currentPick}
-                queued={
-                  currentPick.infoHash != null && queuedHash === currentPick.infoHash
-                }
+                queued={currentPick.infoHash != null && queuedHash === currentPick.infoHash}
                 inSession={inSession}
                 isPreviouslyPlayed={previousMatch === currentPick}
                 match={matchFor(currentPick)}
@@ -813,4 +776,3 @@ function PickerScrollTop({ scrollRef }: { scrollRef: React.RefObject<HTMLElement
     </button>
   );
 }
-

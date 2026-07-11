@@ -1,7 +1,7 @@
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
+import { useT } from "@/lib/i18n";
 import type { TmdbDetail } from "@/lib/providers/tmdb";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
 
 const ANIME_ROW_BY_GENRE: Record<string, string> = {
   Action: "genre-action",
@@ -20,9 +20,7 @@ const ANIME_ROW_BY_GENRE: Record<string, string> = {
 };
 
 function focusAnimeRow(key: string) {
-  window.dispatchEvent(
-    new CustomEvent("harbor:anime-focus-row", { detail: { anchor: `row:${key}` } }),
-  );
+  window.dispatchEvent(new CustomEvent("harbor:anime-focus-row", { detail: { anchor: `row:${key}` } }));
 }
 
 export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isAnime?: boolean }) {
@@ -95,19 +93,13 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
     networkChips.length > 0 ? { label: t("Networks"), kind: "chips", chips: networkChips } : null,
     studioChips.length > 0 ? { label: t("Studio"), kind: "chips", chips: studioChips } : null,
     countryChips.length > 0 ? { label: t("Country"), kind: "chips", chips: countryChips } : null,
-    langChips.length > 0
-      ? { label: t("Original language"), kind: "chips", chips: langChips }
-      : null,
+    langChips.length > 0 ? { label: t("Original language"), kind: "chips", chips: langChips } : null,
     detail.originalTitle && detail.originalTitle !== detail.title
       ? { label: t("Original title"), kind: "text", value: detail.originalTitle }
       : null,
     genreChips.length > 0 ? { label: t("Genres"), kind: "chips", chips: genreChips } : null,
-    fmtMoney(detail.budget) != null
-      ? { label: t("Budget"), kind: "text", value: fmtMoney(detail.budget)! }
-      : null,
-    fmtMoney(detail.revenue) != null
-      ? { label: t("Revenue"), kind: "text", value: fmtMoney(detail.revenue)! }
-      : null,
+    fmtMoney(detail.budget) != null ? { label: t("Budget"), kind: "text", value: fmtMoney(detail.budget)! } : null,
+    fmtMoney(detail.revenue) != null ? { label: t("Revenue"), kind: "text", value: fmtMoney(detail.revenue)! } : null,
     detail.rating
       ? {
           label: t("Rating"),
@@ -126,9 +118,7 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
       <dl className="grid grid-cols-1 gap-x-12 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((row) => (
           <div key={row.label} className="flex flex-col gap-1.5">
-            <dt className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
-              {row.label}
-            </dt>
+            <dt className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{row.label}</dt>
             <dd className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[14.5px] text-ink">
               {row.kind === "text"
                 ? row.value
@@ -141,9 +131,7 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
                       >
                         {c.label}
                       </button>
-                      {i < row.chips.length - 1 && (
-                        <span className="ms-1.5 text-ink-subtle">·</span>
-                      )}
+                      {i < row.chips.length - 1 && <span className="ms-1.5 text-ink-subtle">·</span>}
                     </span>
                   ))}
             </dd>

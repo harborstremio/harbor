@@ -1,5 +1,6 @@
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+
 import { ToggleRow } from "./shared";
 
 function Seg<T extends string>({

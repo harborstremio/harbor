@@ -1,7 +1,7 @@
-import { Bookmark, Check, ListVideo, Play, Sparkles } from "lucide-react";
-import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt, type PreviewArt } from "@/lib/settings-preview-art";
+import { Bookmark, Check, ListVideo, Play, Sparkles } from "lucide-react";
+import type { ReactNode } from "react";
 
 export type HomeRowKind =
   | "all-addon-rows"
@@ -40,11 +40,7 @@ function Panel({ tag, active, children }: { tag: string; active?: boolean; child
         active ? "border-accent/40 bg-accent/[0.07]" : "border-edge-soft/60 bg-canvas/30"
       }`}
     >
-      <div
-        className={`text-[9px] font-bold uppercase tracking-[0.14em] ${
-          active ? "text-accent" : "text-ink-subtle"
-        }`}
-      >
+      <div className={`text-[9px] font-bold uppercase tracking-[0.14em] ${active ? "text-accent" : "text-ink-subtle"}`}>
         {tag}
       </div>
       {children}
@@ -56,9 +52,7 @@ function RailBar({ label, dupe }: { label: string; dupe?: boolean }) {
   return (
     <div
       className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-medium ${
-        dupe
-          ? "bg-accent/15 text-accent ring-1 ring-accent/25"
-          : "bg-canvas/60 text-ink-muted"
+        dupe ? "bg-accent/15 text-accent ring-1 ring-accent/25" : "bg-canvas/60 text-ink-muted"
       }`}
     >
       <span className="h-1 w-1 rounded-full bg-current opacity-60" />
@@ -87,12 +81,7 @@ function MiniPoster({
       }`}
     >
       {img && (
-        <img
-          src={img}
-          alt=""
-          draggable={false}
-          className="absolute inset-0 h-full w-full rounded-[5px] object-cover"
-        />
+        <img src={img} alt="" draggable={false} className="absolute inset-0 h-full w-full rounded-[5px] object-cover" />
       )}
       {badge}
     </div>
@@ -116,9 +105,7 @@ function AllAddonRows() {
           <RailBar label={t("Popular · AIO")} dupe />
         </Panel>
       </div>
-      <Caption>
-        {t("On: addon rails that duplicate the built-ins show too, instead of folding into one.")}
-      </Caption>
+      <Caption>{t("On: addon rails that duplicate the built-ins show too, instead of folding into one.")}</Caption>
     </>
   );
 }
@@ -221,9 +208,7 @@ function CwCard({
   return (
     <div className={`overflow-hidden rounded-md ring-1 ring-edge-soft/60 ${dim ? "opacity-75" : ""}`}>
       <div className="relative h-11 bg-gradient-to-br from-elevated to-canvas">
-        {still && (
-          <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
-        )}
+        {still && <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />}
         <span className="absolute bottom-1 start-1 rounded bg-black/55 px-1 py-0.5 text-[8.5px] font-semibold text-ink">
           {ep}
         </span>

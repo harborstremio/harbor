@@ -1,12 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Tv } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { type NetworkRow, type ResolvedNetwork, resolveNetworks } from "@/lib/iptv/top-networks";
 import type { IptvChannel } from "@/lib/iptv/types";
-import {
-  type NetworkRow,
-  type ResolvedNetwork,
-  resolveNetworks,
-} from "@/lib/iptv/top-networks";
+import { ChevronLeft, ChevronRight, Tv } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const MIN_CARD_WIDTH = 150;
 const GAP = 14;
@@ -211,14 +207,8 @@ function Row({
   };
 
   return (
-    <section
-      ref={containerRef}
-      className="group/row relative flex w-full min-w-0 flex-col gap-2.5"
-      onKeyDown={onKey}
-    >
-      <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-subtle">
-        {t(title)}
-      </h2>
+    <section ref={containerRef} className="group/row relative flex w-full min-w-0 flex-col gap-2.5" onKeyDown={onKey}>
+      <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-ink-subtle">{t(title)}</h2>
       <div className="relative w-full">
         <div
           ref={trackRef}
@@ -266,15 +256,7 @@ function Row({
   );
 }
 
-function NetworkCard({
-  resolved,
-  width,
-  onClick,
-}: {
-  resolved: ResolvedNetwork;
-  width: number;
-  onClick: () => void;
-}) {
+function NetworkCard({ resolved, width, onClick }: { resolved: ResolvedNetwork; width: number; onClick: () => void }) {
   const [errored, setErrored] = useState(false);
   const showLogo = resolved.logoUrl && !errored;
   return (
@@ -284,10 +266,7 @@ function NetworkCard({
       style={{ width, height: CARD_HEIGHT, flex: `0 0 ${width}px` }}
       className="group flex flex-col overflow-hidden rounded-2xl border border-edge-soft/55 bg-elevated text-start transition-colors duration-150 hover:border-edge hover:bg-raised"
     >
-      <div
-        className="flex shrink-0 items-center justify-center bg-surface/70 p-3"
-        style={{ height: LOGO_HEIGHT }}
-      >
+      <div className="flex shrink-0 items-center justify-center bg-surface/70 p-3" style={{ height: LOGO_HEIGHT }}>
         {showLogo ? (
           <img
             src={resolved.logoUrl!}
@@ -302,9 +281,7 @@ function NetworkCard({
         )}
       </div>
       <div className="flex flex-1 items-center px-3">
-        <span className="truncate text-[14px] font-semibold leading-tight text-ink">
-          {resolved.def.displayName}
-        </span>
+        <span className="truncate text-[14px] font-semibold leading-tight text-ink">{resolved.def.displayName}</span>
       </div>
     </button>
   );

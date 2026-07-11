@@ -1,11 +1,12 @@
-import { RefreshCw } from "lucide-react";
-import { useMemo, useRef } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { HarborLoader } from "@/components/harbor-loader";
 import { PickCard } from "@/components/pick-card";
+import { useT } from "@/lib/i18n";
 import { ListResolveError, sourceLabel, type ListSource } from "@/lib/lists/types";
 import { useScrollMemory, useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { RefreshCw } from "lucide-react";
+import { useMemo, useRef } from "react";
+
 import { ListsEmptyState } from "./lists/empty-state";
 import { ListPicker } from "./lists/list-picker";
 import { useCustomLists } from "./lists/use-custom-lists";
@@ -60,7 +61,11 @@ export default function ListsView({ active }: { active: boolean }) {
           {!activeList ? (
             <Notice text={t("Pick a list to view it.")} />
           ) : error ? (
-            <Notice text={errorText(error, t)} onRetry={refresh} onSettings={hasKeyError(error) ? () => openSettings() : undefined} />
+            <Notice
+              text={errorText(error, t)}
+              onRetry={refresh}
+              onSettings={hasKeyError(error) ? () => openSettings() : undefined}
+            />
           ) : loading && items.length === 0 ? (
             <div className="flex justify-center py-16">
               <HarborLoader size="sm" />
@@ -79,7 +84,10 @@ export default function ListsView({ active }: { active: boolean }) {
               </div>
               {items.length > RENDER_CAP && (
                 <p className="mb-4 text-[12.5px] text-ink-subtle">
-                  {t("Showing {shown} of {total}.", { shown: RENDER_CAP.toLocaleString(), total: items.length.toLocaleString() })}
+                  {t("Showing {shown} of {total}.", {
+                    shown: RENDER_CAP.toLocaleString(),
+                    total: items.length.toLocaleString(),
+                  })}
                 </p>
               )}
               <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-8">
@@ -104,10 +112,15 @@ function hasKeyError(error: ListResolveError): boolean {
   return error.reason === "missing-key";
 }
 
-function errorText(error: ListResolveError, t: (key: string, vars?: Record<string, string | number>) => string): string {
+function errorText(
+  error: ListResolveError,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
   switch (error.reason) {
     case "missing-key":
-      return t("This list needs your {key} API key. Add it in Settings, then refresh.", { key: keyLabel(error.source) });
+      return t("This list needs your {key} API key. Add it in Settings, then refresh.", {
+        key: keyLabel(error.source),
+      });
     case "not-found":
       return t("That list is private or doesn't exist. Public lists only.");
     default:
@@ -115,15 +128,7 @@ function errorText(error: ListResolveError, t: (key: string, vars?: Record<strin
   }
 }
 
-function Notice({
-  text,
-  onRetry,
-  onSettings,
-}: {
-  text: string;
-  onRetry?: () => void;
-  onSettings?: () => void;
-}) {
+function Notice({ text, onRetry, onSettings }: { text: string; onRetry?: () => void; onSettings?: () => void }) {
   const t = useT();
   return (
     <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-edge px-6 py-16 text-center">

@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+
 import type { SkipKind, SkipSegment } from "./types";
 
 type RawSpan = { start_ms: number | null; end_ms: number | null };
@@ -22,11 +23,7 @@ function pickId(metaId: string): { tmdb?: string; imdb?: string } | null {
   return null;
 }
 
-function spanToSegment(
-  span: RawSpan,
-  kind: SkipKind,
-  durationSec: number,
-): SkipSegment | null {
+function spanToSegment(span: RawSpan, kind: SkipKind, durationSec: number): SkipSegment | null {
   const startMs = span.start_ms ?? 0;
   const endMs = span.end_ms ?? (durationSec > 0 ? Math.round(durationSec * 1000) : null);
   if (endMs == null) return null;

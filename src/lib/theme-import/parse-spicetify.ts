@@ -17,16 +17,7 @@ const BG_KEYS = [
   "surface0",
   "surface1",
 ];
-const INK_KEYS = [
-  "text",
-  "subtext",
-  "selected-row",
-  "overlay2",
-  "overlay1",
-  "overlay0",
-  "subtext1",
-  "button-disabled",
-];
+const INK_KEYS = ["text", "subtext", "selected-row", "overlay2", "overlay1", "overlay0", "subtext1", "button-disabled"];
 
 export function looksLikeSpicetify(text: string, filename?: string): boolean {
   if (filename && /\.ini$/i.test(filename) && /\[[^\]]+\]/.test(text)) return true;
@@ -79,7 +70,9 @@ function bucketFor(schemeName: string, themeName: string, map: Record<string, st
   const bgAll = present(BG_KEYS);
   if (bgAll.length === 0 || !map.text) return null;
 
-  const light = /latte|light|day|dawn/i.test(schemeName) || (parseColor(map.main ?? bgAll[0]) ? rgbIsLight(parseColor(map.main ?? bgAll[0])!) : false);
+  const light =
+    /latte|light|day|dawn/i.test(schemeName) ||
+    (parseColor(map.main ?? bgAll[0]) ? rgbIsLight(parseColor(map.main ?? bgAll[0])!) : false);
   const ranked = bgAll
     .map((h) => ({ h, rgb: parseColor(h)! }))
     .sort((a, b) => (light ? bLum(b.rgb) - bLum(a.rgb) : bLum(a.rgb) - bLum(b.rgb)));

@@ -1,14 +1,9 @@
-import { AlertCircle, FileVideo, Loader2, Magnet, Play } from "lucide-react";
-import { useMemo, useState } from "react";
 import { awaitCastServerReady } from "@/lib/stremio-server";
 import { parseMagnet } from "@/lib/torrent/magnet";
-import {
-  buildTorrentStreamUrl,
-  createAndListFiles,
-  isVideoFile,
-  type TorrentFile,
-} from "@/lib/torrent/stremio-stream";
+import { buildTorrentStreamUrl, createAndListFiles, isVideoFile, type TorrentFile } from "@/lib/torrent/stremio-stream";
 import { useView, type PlayerSrc } from "@/lib/view";
+import { AlertCircle, FileVideo, Loader2, Magnet, Play } from "lucide-react";
+import { useMemo, useState } from "react";
 
 type Mode = "idle" | "starting" | "picking" | "error";
 
@@ -23,9 +18,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-edge-soft bg-elevated/60 px-5 py-4">
         <AlertCircle size={22} className="shrink-0 text-ink-subtle" />
-        <span className="text-[14px] text-ink-muted">
-          That does not look like a valid magnet link or infohash.
-        </span>
+        <span className="text-[14px] text-ink-muted">That does not look like a valid magnet link or infohash.</span>
       </div>
     );
   }
@@ -110,11 +103,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
         disabled={mode === "starting"}
         className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-ink px-6 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-60"
       >
-        {mode === "starting" ? (
-          <Loader2 size={18} className="animate-spin" />
-        ) : (
-          <Play size={18} fill="currentColor" />
-        )}
+        {mode === "starting" ? <Loader2 size={18} className="animate-spin" /> : <Play size={18} fill="currentColor" />}
         {mode === "starting" ? "Starting" : "Play"}
       </button>
     </div>

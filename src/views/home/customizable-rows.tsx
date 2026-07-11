@@ -1,19 +1,20 @@
-import { ChevronRight } from "lucide-react";
-import { useMemo } from "react";
+import { CustomSourcesRow } from "@/components/custom-sources-row";
 import { LazyMount } from "@/components/lazy-mount";
+import { LetterboxdRowMenu } from "@/components/letterboxd/letterboxd-row-menu";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";
-import { CustomSourcesRow } from "@/components/custom-sources-row";
 import { TopRankCard } from "@/components/top-rank-card";
-import { LetterboxdRowMenu } from "@/components/letterboxd/letterboxd-row-menu";
-import { useLetterboxd } from "@/lib/stremboxd/provider";
-import { useT } from "@/lib/i18n";
 import type { HomeRowCustomization } from "@/lib/home-customization";
-import { useView } from "@/lib/view";
-import type { HomeRow } from "./home-types";
-import { RowControls } from "./row-controls";
+import { useT } from "@/lib/i18n";
 import { watchTitleKey, type WatchedSet } from "@/lib/playback-history";
 import { useSettings } from "@/lib/settings";
+import { useLetterboxd } from "@/lib/stremboxd/provider";
+import { useView } from "@/lib/view";
+import { ChevronRight } from "lucide-react";
+import { useMemo } from "react";
+
+import type { HomeRow } from "./home-types";
+import { RowControls } from "./row-controls";
 
 function metaTitleKey(meta: { id?: string }): string | null {
   const id = meta.id;
@@ -52,7 +53,9 @@ function RowTitle({ row }: { row: HomeRow }) {
   const menu = isLetterboxd ? (
     <LetterboxdRowMenu
       canMoveUp={lb.catalogOrder.indexOf(catalogId) > 0}
-      canMoveDown={lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 && lb.catalogOrder.indexOf(catalogId) !== -1}
+      canMoveDown={
+        lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 && lb.catalogOrder.indexOf(catalogId) !== -1
+      }
       hidden={lb.hiddenCatalogs.includes(catalogId)}
       onMoveUp={() => lb.moveCatalog(catalogId, -1)}
       onMoveDown={() => lb.moveCatalog(catalogId, 1)}
@@ -60,12 +63,17 @@ function RowTitle({ row }: { row: HomeRow }) {
     />
   ) : null;
 
-  if (!row.fetcher) return <>{t(row.name)}{badge}{menu}</>;
+  if (!row.fetcher)
+    return (
+      <>
+        {t(row.name)}
+        {badge}
+        {menu}
+      </>
+    );
   return (
     <button
-      onClick={() =>
-        openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
-      }
+      onClick={() => openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })}
       className="group/see inline-flex items-center gap-1.5 text-ink transition-colors hover:text-ink-muted"
     >
       {t(row.name)}
@@ -86,7 +94,9 @@ function RowTitleExtra({ row }: { row: HomeRow }) {
   return (
     <LetterboxdRowMenu
       canMoveUp={lb.catalogOrder.indexOf(catalogId) > 0}
-      canMoveDown={lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 && lb.catalogOrder.indexOf(catalogId) !== -1}
+      canMoveDown={
+        lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 && lb.catalogOrder.indexOf(catalogId) !== -1
+      }
       hidden={lb.hiddenCatalogs.includes(catalogId)}
       onMoveUp={() => lb.moveCatalog(catalogId, -1)}
       onMoveDown={() => lb.moveCatalog(catalogId, 1)}
@@ -179,11 +189,12 @@ export function CustomizableRows({
         const viewAll = row.fetcher
           ? () => openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
           : undefined;
-        const ranked =
-          (customization.numerals ?? []).includes(row.key) && metas.length >= 10;
+        const ranked = (customization.numerals ?? []).includes(row.key) && metas.length >= 10;
         let rowEl;
         if (row.sourceRow) {
-          rowEl = <CustomSourcesRow sourceRow={row.sourceRow} editMode={editMode} onEditFolderImages={onEditFolderImages} />;
+          rowEl = (
+            <CustomSourcesRow sourceRow={row.sourceRow} editMode={editMode} onEditFolderImages={onEditFolderImages} />
+          );
         } else if (ranked) {
           rowEl = (
             <Row
@@ -215,10 +226,7 @@ export function CustomizableRows({
           );
         }
         return (
-          <div
-            key={row.key}
-            data-scroll-anchor={`row:${row.key}`}
-          >
+          <div key={row.key} data-scroll-anchor={`row:${row.key}`}>
             {editMode && (
               <RowControls
                 name={row.name}

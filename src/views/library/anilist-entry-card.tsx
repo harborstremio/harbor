@@ -1,12 +1,12 @@
-import { Check, ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
-import { useRef, useState } from "react";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { Poster, usePosterChain } from "@/components/poster";
 import { anilistMediaToMeta } from "@/lib/anilist/to-meta";
 import type { AnilistMediaEntry, MediaListStatus } from "@/lib/anilist/types";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Minus, Plus, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
 
 const STATUS_LABELS: Record<MediaListStatus, string> = {
   CURRENT: "Watching",
@@ -17,14 +17,7 @@ const STATUS_LABELS: Record<MediaListStatus, string> = {
   DROPPED: "Dropped",
 };
 
-const STATUS_ORDER: MediaListStatus[] = [
-  "CURRENT",
-  "PLANNING",
-  "COMPLETED",
-  "REPEATING",
-  "PAUSED",
-  "DROPPED",
-];
+const STATUS_ORDER: MediaListStatus[] = ["CURRENT", "PLANNING", "COMPLETED", "REPEATING", "PAUSED", "DROPPED"];
 
 export function AnilistEntryCard({
   entry,
@@ -66,12 +59,7 @@ export function AnilistEntryCard({
         onClick={open}
         className="relative aspect-[2/3] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4)] transition-transform duration-200 group-hover:scale-[1.02]"
       >
-        <Poster
-          src={poster.src}
-          onError={poster.onError}
-          seed={String(m.id)}
-          className="h-full w-full"
-        />
+        <Poster src={poster.src} onError={poster.onError} seed={String(m.id)} className="h-full w-full" />
         <span
           role="button"
           aria-label={t("Remove from AniList")}

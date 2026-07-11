@@ -1,9 +1,10 @@
+import { HoverTooltip } from "@/components/hover-tooltip";
+import { useDvr } from "@/lib/dvr/provider";
+import { useT } from "@/lib/i18n";
+import type { EpgProgram } from "@/lib/iptv/types";
 import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import type { EpgProgram } from "@/lib/iptv/types";
-import { useDvr } from "@/lib/dvr/provider";
-import { HoverTooltip } from "@/components/hover-tooltip";
-import { useT } from "@/lib/i18n";
+
 import { ActiveView } from "./active-view";
 import { NewRecordingView } from "./new-view";
 
@@ -27,9 +28,7 @@ export function DvrModal({
   const { sessions, start, stop, reveal, defaultDir } = useDvr();
   const activeForChannel = useMemo(
     () =>
-      sessions.find(
-        (s) => s.channelName === channelName && (s.state === "recording" || s.state === "done"),
-      ) ?? null,
+      sessions.find((s) => s.channelName === channelName && (s.state === "recording" || s.state === "done")) ?? null,
     [sessions, channelName],
   );
 
@@ -46,7 +45,9 @@ export function DvrModal({
 
   return (
     <div
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       className="fixed inset-0 z-[60] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-200"
     >
       <div

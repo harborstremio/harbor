@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
 import type { PreviewArt, PreviewData } from "@/lib/hover-preview/preview-data";
 import { formatRemaining, type PreviewResume } from "@/lib/hover-preview/resume-index";
 import { BAR_MIN_FRACTION, EASE_OUT, LATE_ART_FADE_MS } from "@/lib/hover-preview/timing";
+import { useEffect, useRef, useState } from "react";
+
 import { posterPlate } from "../poster";
 
 function sameArt(a: PreviewArt, b: PreviewArt): boolean {
@@ -51,7 +52,11 @@ function CrownArt({ art, seed }: { art: PreviewArt; seed: string }) {
   return (
     <div data-stagger="0" className="absolute inset-0">
       {stack.map((item, i) => (
-        <div key={item.key} ref={i === stack.length - 1 && i > 0 ? incomingRef : undefined} className="absolute inset-0">
+        <div
+          key={item.key}
+          ref={i === stack.length - 1 && i > 0 ? incomingRef : undefined}
+          className="absolute inset-0"
+        >
           <ArtImage art={item.art} seed={seed} />
         </div>
       ))}
@@ -60,10 +65,7 @@ function CrownArt({ art, seed }: { art: PreviewArt; seed: string }) {
 }
 
 function StateLine({ resume }: { resume: PreviewResume }) {
-  const epLabel =
-    resume.season != null && resume.episode != null
-      ? `S${resume.season} E${resume.episode}`
-      : null;
+  const epLabel = resume.season != null && resume.episode != null ? `S${resume.season} E${resume.episode}` : null;
   const status = resume.upNext
     ? "Up Next"
     : resume.external || resume.remainingMs == null

@@ -1,4 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
+
 import type { ListItem } from "../types";
 import { ListResolveError } from "../types";
 
@@ -12,13 +13,7 @@ type Row = {
 
 function rowToItem(r: Row): ListItem | null {
   const isShow = r.mediatype === "show" || r.mediatype === "tv";
-  const id = r.imdb_id
-    ? r.imdb_id
-    : r.tmdb_id
-      ? isShow
-        ? `tmdb:tv:${r.tmdb_id}`
-        : `tmdb:movie:${r.tmdb_id}`
-      : null;
+  const id = r.imdb_id ? r.imdb_id : r.tmdb_id ? (isShow ? `tmdb:tv:${r.tmdb_id}` : `tmdb:movie:${r.tmdb_id}`) : null;
   if (!id) return null;
   return {
     id,

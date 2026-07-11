@@ -1,9 +1,10 @@
-import { Info, Zap } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { FormatBadge } from "@/components/format-badge";
 import { useDebridClients } from "@/lib/debrid/registry";
 import type { ScoredStream, Tier } from "@/lib/streams/types";
+import { Info, Zap } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { formatSize, hasCachedMarker, hasUncachedMarker, streamLeadBadge, streamLeadLabel } from "./picker-utils";
 
 export function TierStrip({
@@ -24,9 +25,7 @@ export function TierStrip({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <p className="text-[12px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-          Switch quality
-        </p>
+        <p className="text-[12px] font-bold uppercase tracking-[0.32em] text-ink-subtle">Switch quality</p>
         <QualityDisclaimer />
         {langFilterSlot}
       </div>
@@ -34,8 +33,7 @@ export function TierStrip({
         {tiers.map((t) => {
           const stream = byTier[t]!;
           const isActive = selected === t;
-          const cachedHere =
-            debrids.some((d) => stream.cached[d.slug]) || hasCachedMarker(stream);
+          const cachedHere = debrids.some((d) => stream.cached[d.slug]) || hasCachedMarker(stream);
           const trulyInstantHere =
             (stream.url != null && !stream.infoHash && !hasUncachedMarker(stream)) ||
             debrids.some((d) => stream.inLibrary[d.slug]);
@@ -48,9 +46,7 @@ export function TierStrip({
               key={t}
               onClick={() => onSelect(t)}
               className={`group flex min-h-[56px] items-center gap-3 rounded-[14px] border px-4 py-2.5 text-start transition-[border-color,background-color,opacity] duration-200 ${
-                isActive
-                  ? "border-ink/35 bg-ink/[0.05]"
-                  : "border-edge-soft hover:border-edge hover:bg-canvas/60"
+                isActive ? "border-ink/35 bg-ink/[0.05]" : "border-edge-soft hover:border-edge hover:bg-canvas/60"
               } ${cachedHere ? "" : "opacity-65 hover:opacity-90"}`}
             >
               <FormatBadge kind={badgeKind} size="lg" />
@@ -91,8 +87,7 @@ function QualityDisclaimer() {
     const rect = el.getBoundingClientRect();
     const vw = window.innerWidth;
     const desiredHeight = 168;
-    const place: "above" | "below" =
-      rect.top - desiredHeight - 10 > 12 ? "above" : "below";
+    const place: "above" | "below" = rect.top - desiredHeight - 10 > 12 ? "above" : "below";
     const width = 320;
     const top = place === "above" ? rect.top - 10 - desiredHeight : rect.bottom + 10;
     let left = rect.left + rect.width / 2 - width / 2;
@@ -118,7 +113,8 @@ function QualityDisclaimer() {
       className="inline-flex shrink-0 items-center text-ink-subtle/70 transition-colors hover:text-ink-muted cursor-help outline-none"
     >
       <Info size={13} strokeWidth={2.2} />
-      {open && pos &&
+      {open &&
+        pos &&
         createPortal(
           <div
             style={{ top: pos.top, left: pos.left, width: 320 }}
@@ -129,7 +125,10 @@ function QualityDisclaimer() {
               Quality labels come from addons
             </span>
             <p className="text-[12.5px] leading-snug text-ink-muted">
-              Each row's resolution badge is whatever the addon claimed. Some addons mislabel files: a 1080p or 4K tag on a brand-new theatrical release is often a CAM or TS rebadged. Harbor pushes obvious mismatches down the ranking, but if a top result looks suspicious, scroll the source list or pick the Theater Capture tier instead.
+              Each row's resolution badge is whatever the addon claimed. Some addons mislabel files: a 1080p or 4K tag
+              on a brand-new theatrical release is often a CAM or TS rebadged. Harbor pushes obvious mismatches down the
+              ranking, but if a top result looks suspicious, scroll the source list or pick the Theater Capture tier
+              instead.
             </p>
           </div>,
           document.body,

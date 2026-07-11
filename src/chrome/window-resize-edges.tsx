@@ -1,6 +1,6 @@
 import { useSettings } from "@/lib/settings";
-import { startResize, useMaximized, type ResizeDir } from "@/lib/window";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
+import { startResize, useMaximized, type ResizeDir } from "@/lib/window";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 

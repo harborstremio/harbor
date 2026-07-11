@@ -1,6 +1,7 @@
-import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { useMemo } from "react";
+
 import { CinemetaEpisodeRow } from "../cinemeta-episodes";
 
 export function CinemetaFallback({

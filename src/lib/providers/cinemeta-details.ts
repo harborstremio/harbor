@@ -1,6 +1,7 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { topMovies, topSeries, type Meta } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
+
 import type { CastEntry, TmdbDetail } from "./tmdb/tmdb-details";
 import type { PersonRef } from "./tmdb/tmdb-people";
 
@@ -99,7 +100,12 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
     genres,
     originalLanguage: "",
     spokenLanguages: [],
-    productionCountries: m.country ? m.country.split(",").map((s) => s.trim()).filter(Boolean) : [],
+    productionCountries: m.country
+      ? m.country
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
     productionCompanies: [],
     networks: [],
     productionCompaniesRich: [],
@@ -166,9 +172,7 @@ export async function cinemetaDetails(meta: Meta): Promise<TmdbDetail | null> {
     }
     const primaryGenre = (m.genre ?? m.genres ?? [])[0];
     const relatedFetcher = kind === "movie" ? topMovies : topSeries;
-    const related = primaryGenre
-      ? await relatedFetcher(primaryGenre).catch(() => [] as Meta[])
-      : [];
+    const related = primaryGenre ? await relatedFetcher(primaryGenre).catch(() => [] as Meta[]) : [];
     const filtered = related.filter((r) => r.id !== imdbId).slice(0, 30);
     const out = toDetail(m, kind, filtered);
     detailCache.set(cacheKey, { v: out, t: Date.now() });

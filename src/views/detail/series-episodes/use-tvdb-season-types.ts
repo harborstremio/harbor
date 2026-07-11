@@ -1,9 +1,5 @@
+import { tvdbSeasonTypes, tvdbSeriesByRemote, type TvdbSeasonTypeOption } from "@/lib/providers/tvdb";
 import { useEffect, useState } from "react";
-import {
-  tvdbSeasonTypes,
-  tvdbSeriesByRemote,
-  type TvdbSeasonTypeOption,
-} from "@/lib/providers/tvdb";
 
 export function useTvdbSeasonTypes(
   imdbId: string | null,
@@ -12,12 +8,7 @@ export function useTvdbSeasonTypes(
   enabled: boolean,
 ): TvdbSeasonTypeOption[] {
   const [types, setTypes] = useState<TvdbSeasonTypeOption[]>([]);
-  const remoteId =
-    imdbId && imdbId.startsWith("tt")
-      ? imdbId
-      : metaId.startsWith("tmdb:tv:")
-        ? metaId.slice(8)
-        : null;
+  const remoteId = imdbId && imdbId.startsWith("tt") ? imdbId : metaId.startsWith("tmdb:tv:") ? metaId.slice(8) : null;
 
   useEffect(() => {
     if (!enabled || !tvdbKey || !remoteId) {

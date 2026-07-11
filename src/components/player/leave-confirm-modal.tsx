@@ -1,10 +1,6 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
 import { useT } from "@/lib/i18n";
-import {
-  closeLeaveConfirm,
-  getLeaveConfirm,
-  subscribeLeaveConfirm,
-} from "@/lib/player/leave-confirm";
+import { closeLeaveConfirm, getLeaveConfirm, subscribeLeaveConfirm } from "@/lib/player/leave-confirm";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 export function LeaveConfirmModal() {
   const t = useT();

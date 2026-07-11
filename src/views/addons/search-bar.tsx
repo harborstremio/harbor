@@ -1,5 +1,5 @@
-import { Search } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Search } from "lucide-react";
 
 export function SearchBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const t = useT();

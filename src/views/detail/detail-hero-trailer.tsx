@@ -1,17 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
-import { fetchTrailer, resolveTrailerQuality, trailerSrc, type TrailerInfo } from "@/lib/trailer";
-import { useSettings } from "@/lib/settings";
-import { usePageVisible } from "@/lib/visibility";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { fetchTrailer, resolveTrailerQuality, trailerSrc, type TrailerInfo } from "@/lib/trailer";
+import { usePageVisible } from "@/lib/visibility";
+import { Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-export function DetailHeroTrailer({
-  candidateId,
-  paused = false,
-}: {
-  candidateId: string | null;
-  paused?: boolean;
-}) {
+export function DetailHeroTrailer({ candidateId, paused = false }: { candidateId: string | null; paused?: boolean }) {
   const t = useT();
   const { settings } = useSettings();
   const [info, setInfo] = useState<TrailerInfo | null>(null);

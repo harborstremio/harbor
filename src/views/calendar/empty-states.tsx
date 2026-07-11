@@ -1,20 +1,12 @@
+import type { CalendarFilter } from "@/lib/calendar";
+import { useT } from "@/lib/i18n";
+import type { Settings } from "@/lib/settings";
 import { Calendar as CalendarIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import type { CalendarFilter } from "@/lib/calendar";
-import type { Settings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 
 type Source = Settings["calendarSource"];
 
-function EmptyShell({
-  heading,
-  body,
-  action,
-}: {
-  heading: string;
-  body: string;
-  action?: ReactNode;
-}) {
+function EmptyShell({ heading, body, action }: { heading: string; body: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-8 py-16 text-center">
       <CalendarIcon size={28} strokeWidth={1.6} className="text-ink-subtle" />
@@ -54,9 +46,7 @@ export function NotSignedInState({ onSignIn }: { onSignIn: () => void }) {
   return (
     <EmptyShell
       heading={t("Sign in to see your library calendar")}
-      body={t(
-        "My Library shows upcoming episodes from the shows you've saved on Stremio. Sign in to wire it up.",
-      )}
+      body={t("My Library shows upcoming episodes from the shows you've saved on Stremio. Sign in to wire it up.")}
       action={<ActionButton onClick={onSignIn}>{t("Sign in")}</ActionButton>}
     />
   );
@@ -84,8 +74,7 @@ export function EmptyState({
             : source === "simkl-anticipated"
               ? t("No Simkl premieres this month")
               : t("Nothing this month");
-  const filterKind =
-    filter === "movie" ? t("movies") : filter === "tv" ? t("TV") : t("anime");
+  const filterKind = filter === "movie" ? t("movies") : filter === "tv" ? t("TV") : t("anime");
   const body =
     source === "library"
       ? t(
@@ -96,26 +85,20 @@ export function EmptyState({
             "Trakt has no upcoming releases for your watchlist this month. Past months and dates more than six months out aren't covered by Trakt's calendar feed.",
           )
         : source === "anticipated"
-          ? t(
-              "None of Trakt's most-anticipated upcoming releases land in this month. Try a different month.",
-            )
+          ? t("None of Trakt's most-anticipated upcoming releases land in this month. Try a different month.")
           : source === "simkl"
             ? t(
                 "Your Simkl plan-to-watch list has no episodes airing this month. Switch to All upcoming to browse everything.",
               )
             : source === "simkl-anticipated"
-              ? t(
-                  "Simkl lists no new shows or anime premiering this month. Try a different month.",
-                )
+              ? t("Simkl lists no new shows or anime premiering this month. Try a different month.")
               : watchlistOnly
-            ? t(
-                "Nothing from your library lands this month. Toggle Watchlist off to see all releases.",
-              )
-            : filter === "all"
-              ? t("TMDB has no notable releases for this month and region.")
-              : t("No {kind} releases this month. Try a different filter.", {
-                  kind: filterKind,
-                });
+                ? t("Nothing from your library lands this month. Toggle Watchlist off to see all releases.")
+                : filter === "all"
+                  ? t("TMDB has no notable releases for this month and region.")
+                  : t("No {kind} releases this month. Try a different filter.", {
+                      kind: filterKind,
+                    });
   return <EmptyShell heading={heading} body={body} />;
 }
 

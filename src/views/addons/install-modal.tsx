@@ -1,5 +1,4 @@
-import { Check, Loader2, Settings2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { openInstallerViewport } from "@/components/installer-viewport";
 import {
   fetchManifestAt,
   findHostnameMatch,
@@ -7,10 +6,11 @@ import {
   manifestToConfigureUrl,
   parseAddonUrl,
 } from "@/lib/addon-store";
-import { openInstallerViewport } from "@/components/installer-viewport";
-import { isWeb } from "@/lib/platform";
-import { useT } from "@/lib/i18n";
 import type { Addon } from "@/lib/addons";
+import { useT } from "@/lib/i18n";
+import { isWeb } from "@/lib/platform";
+import { Check, Loader2, Settings2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type Mode =
   | { kind: "install"; url: string }
@@ -33,10 +33,7 @@ export function AddonInstallModal({
 }: {
   mode: Mode;
   onClose: () => void;
-  onInstall: (
-    rawUrl: string,
-    opts: { replaceId?: string },
-  ) => Promise<{ replaced: boolean; addon: Addon } | null>;
+  onInstall: (rawUrl: string, opts: { replaceId?: string }) => Promise<{ replaced: boolean; addon: Addon } | null>;
 }) {
   const t = useT();
   const [pasted, setPasted] = useState(mode.kind === "install" ? mode.url : "");
@@ -181,11 +178,7 @@ export function AddonInstallModal({
           {done ? (
             <SuccessPane manifest={done.manifest} replaced={done.replaced} onClose={onClose} />
           ) : installStage ? (
-            <InstallingPane
-              stages={installStage}
-              manifest={resolved?.manifest ?? null}
-              isUpdate={!!isUpdate}
-            />
+            <InstallingPane stages={installStage} manifest={resolved?.manifest ?? null} isUpdate={!!isUpdate} />
           ) : (
             <>
               {mode.kind === "manage" && (
@@ -246,13 +239,7 @@ export function AddonInstallModal({
               disabled={(!resolved && !pasted.trim()) || loading}
               className="flex h-10 items-center gap-1.5 rounded-full bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {!resolved
-                ? loading
-                  ? t("Reading")
-                  : t("Continue")
-                : isUpdate
-                  ? t("Update")
-                  : t("Install")}
+              {!resolved ? (loading ? t("Reading") : t("Continue")) : isUpdate ? t("Update") : t("Install")}
             </button>
           </footer>
         )}
@@ -285,8 +272,14 @@ function ManageStep1({
       </div>
       <p className="ps-7 text-[12.5px] leading-relaxed text-ink-muted">
         {isWeb()
-          ? t("Click below to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.", { name })
-          : t("Click below to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.", { name })}
+          ? t(
+              "Click below to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.",
+              { name },
+            )
+          : t(
+              "Click below to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.",
+              { name },
+            )}
       </p>
       <button
         type="button"
@@ -297,7 +290,9 @@ function ManageStep1({
         {t("Open setup page")}
       </button>
       <p className="mt-1 ps-7 text-[11.5px] leading-relaxed text-ink-subtle">
-        {t("Heads-up: a few addons (like AIOStatus) don't pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their \"Import from URL\" field to restore your settings.")}
+        {t(
+          'Heads-up: a few addons (like AIOStatus) don\'t pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their "Import from URL" field to restore your settings.',
+        )}
       </p>
     </div>
   );
@@ -373,9 +368,7 @@ function ManifestPreview({
 }) {
   const t = useT();
   const types = manifest.types ?? [];
-  const resources = (manifest.resources ?? []).map((r) =>
-    typeof r === "string" ? r : r.name,
-  );
+  const resources = (manifest.resources ?? []).map((r) => (typeof r === "string" ? r : r.name));
   return (
     <div className="mt-5 flex flex-col gap-4 rounded-xl border border-edge bg-canvas/30 p-4 animate-in fade-in slide-in-from-bottom-1 duration-200">
       <div className="flex items-start gap-4">
@@ -383,9 +376,7 @@ function ManifestPreview({
           {manifest.logo ? (
             <img src={manifest.logo} alt="" className="h-full w-full object-contain" />
           ) : (
-            <span className="text-[22px] font-display text-ink-subtle">
-              {manifest.name.slice(0, 1).toUpperCase()}
-            </span>
+            <span className="text-[22px] font-display text-ink-subtle">{manifest.name.slice(0, 1).toUpperCase()}</span>
           )}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -402,14 +393,15 @@ function ManifestPreview({
               v{manifest.version}
             </span>
           )}
-          {manifest.description && (
-            <p className="text-[13px] leading-relaxed text-ink-muted">{manifest.description}</p>
-          )}
+          {manifest.description && <p className="text-[13px] leading-relaxed text-ink-muted">{manifest.description}</p>}
         </div>
       </div>
       {matchKind === "hostname-match" && replaceName && (
         <p className="rounded-lg bg-amber-300/[0.06] px-3 py-2 text-[12px] leading-relaxed text-amber-200 ring-1 ring-amber-300/20">
-          {t("Looks like a re-configure of {name}. We'll replace the existing entry so you don't end up with two copies.", { name: replaceName })}
+          {t(
+            "Looks like a re-configure of {name}. We'll replace the existing entry so you don't end up with two copies.",
+            { name: replaceName },
+          )}
         </p>
       )}
       {(types.length > 0 || resources.length > 0) && (
@@ -476,11 +468,7 @@ function InstallingPane({
                   : "bg-raised text-ink-subtle ring-1 ring-edge-soft"
               }`}
             >
-              {s.done ? (
-                <Check size={11} strokeWidth={2.6} />
-              ) : (
-                <Loader2 size={10} className="animate-spin" />
-              )}
+              {s.done ? <Check size={11} strokeWidth={2.6} /> : <Loader2 size={10} className="animate-spin" />}
             </span>
             <span className={s.done ? "text-ink" : "text-ink-muted"}>{s.label}</span>
           </li>
@@ -509,9 +497,7 @@ function SuccessPane({
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <h3 className="text-[18px] font-semibold text-ink">
-          {replaced ? t("Updated") : t("Installed")}
-        </h3>
+        <h3 className="text-[18px] font-semibold text-ink">{replaced ? t("Updated") : t("Installed")}</h3>
         {manifest && (
           <p className="text-[13px] text-ink-muted">
             <span className="font-semibold text-ink">{manifest.name}</span>{" "}

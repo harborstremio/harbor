@@ -1,7 +1,7 @@
+import { useT } from "@/lib/i18n";
+import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
-import { useT } from "@/lib/i18n";
 
 export function EditFolderImagesModal({
   isOpen,

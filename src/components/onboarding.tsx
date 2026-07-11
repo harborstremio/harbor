@@ -1,5 +1,3 @@
-import { ArrowRight, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import { DoneStep } from "@/components/onboarding/done-step";
 import { Dots } from "@/components/onboarding/dots";
 import { LayoutStep } from "@/components/onboarding/layout-step";
@@ -11,6 +9,8 @@ import { TmdbStep } from "@/components/onboarding/tmdb-step";
 import { WelcomeStep } from "@/components/onboarding/welcome-step";
 import { useT } from "@/lib/i18n";
 import { useOnboarding } from "@/lib/onboarding";
+import { ArrowRight, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type StepId = "splash" | "welcome" | "layout" | "tmdb" | "stremio" | "streaming" | "subtitles" | "done";
 const STEPS: StepId[] = ["splash", "welcome", "layout", "tmdb", "stremio", "streaming", "subtitles", "done"];
@@ -77,11 +77,7 @@ export function OnboardingModal() {
             </div>
 
             <div className="flex items-center justify-between border-t border-edge-soft bg-canvas/40 px-8 py-5">
-              <Dots
-                count={STEPS.length - 1}
-                active={Math.max(stepIdx - 1, 0)}
-                onJump={(i) => setStepIdx(i + 1)}
-              />
+              <Dots count={STEPS.length - 1} active={Math.max(stepIdx - 1, 0)} onJump={(i) => setStepIdx(i + 1)} />
               <div className="flex items-center gap-2.5">
                 {(step === "tmdb" || step === "stremio" || step === "streaming" || step === "subtitles") && (
                   <button

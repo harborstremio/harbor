@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { kitsuToTvdb } from "@/lib/providers/anime-mapping";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import { tvdbLangFromIso1 } from "@/lib/providers/tvdb";
 import { fetchTvdbOrder, fetchTvdbOrderBySeriesId, type TvdbOrder } from "@/lib/providers/tvdb-order";
+import { useEffect, useState } from "react";
 
 export function useEpisodeOrder(
   imdbId: string | null,
@@ -13,12 +13,7 @@ export function useEpisodeOrder(
   tvdbKey: string,
 ): TvdbOrder | null {
   const [order, setOrder] = useState<TvdbOrder | null>(null);
-  const remoteId =
-    imdbId && imdbId.startsWith("tt")
-      ? imdbId
-      : metaId.startsWith("tmdb:tv:")
-        ? metaId.slice(8)
-        : null;
+  const remoteId = imdbId && imdbId.startsWith("tt") ? imdbId : metaId.startsWith("tmdb:tv:") ? metaId.slice(8) : null;
   const kitsuId = /^(kitsu|mal|anilist|anidb):/.test(metaId) ? parseKitsuId(metaId) : null;
   const active = provider === "tvdb" && !!tvdbKey && (!!remoteId || kitsuId != null);
 

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { safeFetch } from "@/lib/safe-fetch";
+import { useEffect, useState } from "react";
 
 export type MdblistScores = {
   score: number | null;
@@ -46,11 +46,7 @@ function parse(json: ApiShape): MdblistScores {
   };
 }
 
-async function fetchScores(
-  key: string,
-  imdbId: string,
-  type: "movie" | "show",
-): Promise<MdblistScores | null> {
+async function fetchScores(key: string, imdbId: string, type: "movie" | "show"): Promise<MdblistScores | null> {
   try {
     const res = await safeFetch(
       `https://api.mdblist.com/imdb/${type}/${encodeURIComponent(imdbId)}?apikey=${encodeURIComponent(key)}`,

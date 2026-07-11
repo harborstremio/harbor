@@ -1,27 +1,28 @@
+import { AiExampleHint, SEARCH_EXAMPLES } from "@/components/ai-example-hint";
+import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
+import { useT } from "@/lib/i18n";
+import { useSearch } from "@/lib/search-context";
+import { useSettings } from "@/lib/settings";
+import { isMagnetInput, isDirectVideoUrl } from "@/lib/torrent/magnet";
+import { useView } from "@/lib/view";
 import { Search, X, Loader2, CornerDownLeft, CalendarRange, Tag } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
-import { useSearch } from "@/lib/search-context";
-import { useView } from "@/lib/view";
-import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
+
+import { AddonHits } from "./addon-hits";
+import { AddonResults } from "./addon-results";
+import { AiModeButton } from "./ai-mode-button";
+import { AiSearchSection } from "./ai-search-section";
 import { AnimeRow } from "./anime-row";
 import { EmptyState } from "./empty-state";
 import { GuideModal } from "./guide-modal";
 import { LiveTvRow } from "./live-tv-row";
-import { TopMatch } from "./top-match";
-import { PeopleRow } from "./people-row";
-import { MetaList } from "./meta-list";
-import { AddonHits } from "./addon-hits";
-import { AddonResults } from "./addon-results";
 import { MagnetCard } from "./magnet-card";
+import { MetaList } from "./meta-list";
+import { PeopleRow } from "./people-row";
+import { TopMatch } from "./top-match";
 import { UrlCard } from "./url-card";
-import { AiSearchSection } from "./ai-search-section";
-import { AiModeButton } from "./ai-mode-button";
 import { WebSearchButton } from "./web-search-button";
-import { AiExampleHint, SEARCH_EXAMPLES } from "@/components/ai-example-hint";
-import { useSettings } from "@/lib/settings";
-import { isMagnetInput, isDirectVideoUrl } from "@/lib/torrent/magnet";
 
 export function SearchOverlay() {
   const { open, setOpen, query, setQuery, results, status, clear, recordRecent } = useSearch();
@@ -221,9 +222,7 @@ export function SearchOverlay() {
                 )}
               </span>
               <span className="flex flex-col">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-                  {t("Browse")}
-                </span>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">{t("Browse")}</span>
                 <span className="text-[15px] font-semibold text-ink">{results.intent.label}</span>
               </span>
               <CornerDownLeft size={15} className="ms-auto text-ink-subtle" />
@@ -251,9 +250,11 @@ export function SearchOverlay() {
 
           {noResults && !directInput && !aiActive && (
             <div className="flex flex-col items-center gap-3 pt-16 text-center">
-              <span className="text-[17px] font-semibold text-ink">{t("No matches for \"{query}\"", { query: trimmed })}</span>
+              <span className="text-[17px] font-semibold text-ink">
+                {t('No matches for "{query}"', { query: trimmed })}
+              </span>
               <span className="max-w-[44ch] text-[14px] text-ink-muted">
-                {t("Try a different spelling, a person's name, a year like \"1972\", or a genre like \"Horror\".")}
+                {t('Try a different spelling, a person\'s name, a year like "1972", or a genre like "Horror".')}
               </span>
             </div>
           )}

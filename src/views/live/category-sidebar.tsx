@@ -1,8 +1,8 @@
-import { Eye, EyeOff, Layers, Pin, Search, Star, Tv, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { FAVORITES_GROUP_KEY } from "@/lib/iptv/favorites";
 import { toggleGroupHidden, toggleGroupPin, useGroupPrefs } from "@/lib/iptv/group-order";
+import { Eye, EyeOff, Layers, Pin, Search, Star, Tv, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function CategorySidebar({
   groups,
@@ -33,19 +33,13 @@ export function CategorySidebar({
     return groups.filter((g) => g.toLowerCase().includes(q));
   }, [groups, filter]);
   const showFavs = favoritesCount > 0 && !filter;
-  const all: string[] = [
-    ...(showFavs ? [FAVORITES_GROUP_KEY] : []),
-    "__ALL__",
-    ...visibleGroups,
-  ];
+  const all: string[] = [...(showFavs ? [FAVORITES_GROUP_KEY] : []), "__ALL__", ...visibleGroups];
   const activeKey = active ?? "__ALL__";
   const activeIdx = Math.max(0, all.indexOf(activeKey));
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = listRef.current?.querySelector<HTMLButtonElement>(
-      `[data-cat-idx="${activeIdx}"]`,
-    );
+    const el = listRef.current?.querySelector<HTMLButtonElement>(`[data-cat-idx="${activeIdx}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [activeIdx]);
 
@@ -163,10 +157,7 @@ export function CategorySidebar({
           {showHidden && (
             <div className="mt-1 flex max-h-44 flex-col gap-0.5 overflow-y-auto">
               {prefs.hidden.map((g) => (
-                <div
-                  key={g}
-                  className="flex items-center gap-2 rounded-md px-2 py-1 text-[12px] text-ink-subtle"
-                >
+                <div key={g} className="flex items-center gap-2 rounded-md px-2 py-1 text-[12px] text-ink-subtle">
                   <span className="flex-1 truncate">{g}</span>
                   <button
                     onClick={() => toggleGroupHidden(sourceId, g)}
@@ -246,7 +237,9 @@ function CategoryItem({
         </span>
         <span className="flex flex-1 items-center gap-1.5 truncate text-[13px] font-medium">
           {pinned && <Pin size={11} strokeWidth={2.4} className="shrink-0 fill-current text-accent" />}
-          <span dir="auto" className="truncate">{label}</span>
+          <span dir="auto" className="truncate">
+            {label}
+          </span>
         </span>
         <span
           className={`shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-semibold tabular-nums transition-opacity ${

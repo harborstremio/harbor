@@ -1,28 +1,42 @@
-import { Sparkles } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { AnimeGenrePicker } from "@/components/anime-genre-picker";
 import { AnimeHero } from "@/components/anime-hero";
 import { BackToTop } from "@/components/back-to-top";
 import { ContinueCard } from "@/components/continue-card";
-import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { PickCard } from "@/components/pick-card";
 import { Row, ScrollRootContext } from "@/components/row";
 import { AnimeRankCard } from "@/components/top-rank-card";
-import { useAuth } from "@/lib/auth";
 import { createAddonCatalogFetcher, loadAddonRows, normalizeName, type AddonRow } from "@/lib/addons";
-import type { Meta } from "@/lib/cinemeta";
+import { isAdultAnime } from "@/lib/addons-store/adult-filter";
+import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
 import { findTopAward, parseAwardYear, uniqueWinnerFranchisesAcrossSources } from "@/lib/anime-awards";
+import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
+import { useAuth } from "@/lib/auth";
+import type { Meta } from "@/lib/cinemeta";
+import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { publishResumeStates } from "@/lib/hover-preview/store";
 import { useT } from "@/lib/i18n";
+import { clearLocalCw } from "@/lib/local-cw";
+import {
+  dismissManualWatched,
+  manualWatchedLibraryItems,
+  manualWatchedVersion,
+  subscribeManualWatched,
+} from "@/lib/manual-watched";
+import { animeFranchiseKey, stripFranchiseSuffix } from "@/lib/providers/jikan";
+import { useSettings } from "@/lib/settings";
+import { loadSimklWatchedMap, loadSimklStatusMap, type WatchlistStatus } from "@/lib/simkl/list-status";
+import { fetchSimklPlaybackItems } from "@/lib/simkl/playback";
+import { useSimkl } from "@/lib/simkl/provider";
+import { isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
 import { useAnimeTopPicks } from "@/lib/use-anime-top-picks";
 import { useCrunchyrollAwardMetas } from "@/lib/use-crunchyroll-award-metas";
 import { useWatchHistoryRecommendations } from "@/lib/use-watch-history-recs";
-import { AnilistRows } from "./anime/anilist-rows";
-import { MalRows } from "./anime/mal-rows";
-import { useCwAdvance } from "./home/hooks/use-cw-advance";
-import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
+import { useScrollMemory, useView } from "@/lib/view";
+import { Sparkles } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+
 import { AnilistRowControls } from "./anime/anilist-row-controls";
-import { MalRowControls } from "./anime/mal-row-controls";
+import { AnilistRows } from "./anime/anilist-rows";
 import { AnilistTopRow, AnilistTrendingRow } from "./anime/anilist-top-row";
 import {
   EMPTY_ROW,
@@ -36,17 +50,9 @@ import {
   type RowPool,
   type RowState,
 } from "./anime/anime-rows";
-import { animeFranchiseKey, stripFranchiseSuffix } from "@/lib/providers/jikan";
-import { useSettings } from "@/lib/settings";
-import { isAdultAnime } from "@/lib/addons-store/adult-filter";
-import { isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
-import { clearLocalCw } from "@/lib/local-cw";
-import { dismissManualWatched, manualWatchedLibraryItems, manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
-import { fetchSimklPlaybackItems } from "@/lib/simkl/playback";
-import { loadSimklWatchedMap, loadSimklStatusMap, type WatchlistStatus } from "@/lib/simkl/list-status";
-import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
-import { useSimkl } from "@/lib/simkl/provider";
-import { useScrollMemory, useView } from "@/lib/view";
+import { MalRowControls } from "./anime/mal-row-controls";
+import { MalRows } from "./anime/mal-rows";
+import { useCwAdvance } from "./home/hooks/use-cw-advance";
 
 export { isAnimeRow } from "./anime/anime-rows";
 
@@ -240,11 +246,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
         seen.add(i._id);
         return true;
       })
-      .sort(
-        (a, b) =>
-          Date.parse(b.state?.lastWatched ?? b._mtime) -
-          Date.parse(a.state?.lastWatched ?? a._mtime),
-      )
+      .sort((a, b) => Date.parse(b.state?.lastWatched ?? b._mtime) - Date.parse(a.state?.lastWatched ?? a._mtime))
       .slice(0, 20);
   }, [libItems, simklCw, cwVersion, animeDetectVer]);
 
@@ -353,10 +355,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     out.sort((a, b) => b.year - a.year);
     return out;
   }, [rowsByKey, awardWinnerEntries]);
-  const awardWinnerMetas = useMemo<Meta[]>(
-    () => awardWinnersRaw.map((x) => x.meta),
-    [awardWinnersRaw],
-  );
+  const awardWinnerMetas = useMemo<Meta[]>(() => awardWinnersRaw.map((x) => x.meta), [awardWinnersRaw]);
   const awardLookupByMetaId = useMemo(() => {
     const out: Record<string, string> = {};
     for (const x of awardWinnersRaw) out[x.meta.id] = x.lookupName;
@@ -414,11 +413,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
       const key = normalizeName(r.name, "anime");
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push(
-        settings.hideContent.adult
-          ? { ...r, metas: r.metas.filter((m) => !isAdultAnime(m)) }
-          : r,
-      );
+      out.push(settings.hideContent.adult ? { ...r, metas: r.metas.filter((m) => !isAdultAnime(m)) } : r);
     }
     return out;
   }, [addonRows, settings.hideContent.adult]);
@@ -435,9 +430,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   useEffect(() => {
     if (active && !prevActiveRef.current) {
       const fire = () =>
-        window.dispatchEvent(
-          new CustomEvent("harbor:reset-row-scrolls", { detail: { prefix: "anime:" } }),
-        );
+        window.dispatchEvent(new CustomEvent("harbor:reset-row-scrolls", { detail: { prefix: "anime:" } }));
       fire();
       const r1 = requestAnimationFrame(fire);
       const r2 = window.setTimeout(fire, 80);
@@ -477,10 +470,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   }, []);
 
   return (
-    <main
-      ref={scrollCb}
-      className="flex-1 overflow-y-auto px-12 pt-28 pb-14"
-    >
+    <main ref={scrollCb} className="flex-1 overflow-y-auto px-12 pt-28 pb-14">
       <ScrollRootContext.Provider value={scrollEl}>
         <div data-tauri-drag-region className="flex flex-col gap-12">
           {heroMetas.length > 0 && (
@@ -551,9 +541,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                 {!r.ready ? (
                   <RowSkeleton
                     title={
-                      spec.rank
-                        ? t("Top 10 {name}", { name: t(spec.title).replace(/^Top\s*/i, "") })
-                        : t(spec.title)
+                      spec.rank ? t("Top 10 {name}", { name: t(spec.title).replace(/^Top\s*/i, "") }) : t(spec.title)
                     }
                   />
                 ) : spec.rank && r.metas.length >= 10 ? (
@@ -614,9 +602,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
       {showPicker && (
         <AnimeGenrePicker
           initial={favoriteGenres}
-          onSave={(g) =>
-            update({ animeFavoriteGenres: g, animePicksDismissedAt: Date.now() })
-          }
+          onSave={(g) => update({ animeFavoriteGenres: g, animePicksDismissedAt: Date.now() })}
           onClose={() => {
             setShowPicker(false);
             update({ animePicksDismissedAt: Date.now() });
@@ -626,5 +612,3 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     </main>
   );
 }
-
-

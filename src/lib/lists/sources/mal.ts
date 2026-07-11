@@ -1,4 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
+
 import type { ListItem } from "../types";
 import { ListResolveError } from "../types";
 
@@ -51,9 +52,7 @@ export async function resolveMal(ref: string): Promise<ListItem[]> {
   }
   let json: { data?: ListRow[] } | null;
   try {
-    const res = await safeFetch(
-      `https://api.jikan.moe/v4/users/${encodeURIComponent(ref)}/animelist?page=1`,
-    );
+    const res = await safeFetch(`https://api.jikan.moe/v4/users/${encodeURIComponent(ref)}/animelist?page=1`);
     if (res.status === 404) throw new ListResolveError("not-found", "mal");
     if (!res.ok) throw new ListResolveError("network", "mal");
     json = (await res.json().catch(() => null)) as { data?: ListRow[] } | null;

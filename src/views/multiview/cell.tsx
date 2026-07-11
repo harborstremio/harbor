@@ -1,6 +1,7 @@
+import type { SlotChannel } from "@/lib/multiview/store";
 import { AlertTriangle, Loader2, Plus, RefreshCw, Repeat2, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { SlotChannel } from "@/lib/multiview/store";
+
 import { MultiPlayer } from "./multi-player";
 
 export type SlotStatus = "loading" | "playing" | "retrying" | "offline";
@@ -164,8 +165,7 @@ export function Cell({
                 <span className="text-[12px] font-medium text-ink-muted">Stream offline</span>
                 {exhausted && (
                   <p className="max-w-[260px] text-center text-[11px] leading-snug text-ink-subtle">
-                    If multiple streams are running, your IPTV provider may limit concurrent
-                    connections.
+                    If multiple streams are running, your IPTV provider may limit concurrent connections.
                   </p>
                 )}
                 <button
@@ -183,9 +183,7 @@ export function Cell({
             ) : (
               <>
                 <Loader2 size={20} className="animate-spin" />
-                {status === "retrying" && (
-                  <span className="text-[11px] font-medium text-ink-muted">Reconnecting…</span>
-                )}
+                {status === "retrying" && <span className="text-[11px] font-medium text-ink-muted">Reconnecting…</span>}
               </>
             )}
           </div>

@@ -1,16 +1,11 @@
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { createList, MAX_LISTS, useCustomLists } from "@/lib/custom-lists";
 import { useT } from "@/lib/i18n";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { emitListToast } from "./list-toast";
 
-export function CreateListModal({
-  onClose,
-  onCreated,
-}: {
-  onClose: () => void;
-  onCreated?: (id: string) => void;
-}) {
+export function CreateListModal({ onClose, onCreated }: { onClose: () => void; onCreated?: (id: string) => void }) {
   const t = useT();
   const lists = useCustomLists();
   const [name, setName] = useState("");
@@ -44,18 +39,14 @@ export function CreateListModal({
         className="animate-modal-in flex w-[min(92vw,380px)] flex-col gap-5 rounded-2xl border border-edge-soft bg-elevated p-7 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)]"
       >
         <div className="flex flex-col gap-1.5">
-          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-            {t("New list")}
-          </h2>
+          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">{t("New list")}</h2>
           <p className="text-[13px] leading-snug text-ink-muted">
             {t("Group the movies and shows you want to keep close.")}
           </p>
         </div>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">
-            {t("List name")}
-          </span>
+          <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-ink-subtle">{t("List name")}</span>
           <input
             value={name}
             autoFocus

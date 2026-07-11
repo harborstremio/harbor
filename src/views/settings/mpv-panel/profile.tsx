@@ -1,5 +1,5 @@
-import { useSettings, type Settings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings, type Settings } from "@/lib/settings";
 
 const PROFILES: Array<{ id: Settings["mpvQuality"]; label: string; who: string; sub: string }> = [
   {
@@ -36,9 +36,7 @@ export function QualityProfile() {
             type="button"
             onClick={() => update({ mpvQuality: p.id })}
             className={`flex items-start gap-3.5 rounded-2xl border px-5 py-4 text-start transition-colors ${
-              selected
-                ? "border-ink bg-elevated"
-                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
+              selected ? "border-ink bg-elevated" : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
             }`}
           >
             <span

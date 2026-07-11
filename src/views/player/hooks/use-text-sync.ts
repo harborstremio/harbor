@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import { writePlayerPrefs } from "@/lib/player-prefs";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
-import type { SubCue } from "@/lib/subtitles/parser";
 import { getCuesAnySource } from "@/lib/subtitles/extract";
+import type { SubCue } from "@/lib/subtitles/parser";
 import { toSrt, toVtt } from "@/lib/subtitles/serialize";
 import { applyLinear, deltaFn, type SyncPoint, type SyncSegment } from "@/lib/subtitles/text-sync";
-import { writePlayerPrefs } from "@/lib/player-prefs";
+import { invoke } from "@tauri-apps/api/core";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const round3 = (v: number) => Math.round(v * 1000) / 1000;
 

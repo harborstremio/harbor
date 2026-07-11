@@ -1,12 +1,5 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+
 import { stremioSourceProfileId, useProfiles, type Profile } from "./profiles";
 import { getUser, login as apiLogin, type User } from "./stremio";
 
@@ -70,9 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { profiles, activeProfile, updateProfile } = useProfiles();
   const sourceId = stremioSourceProfileId(activeProfile, profiles);
 
-  const [session, setSession] = useState<Session | null>(() =>
-    sourceId ? readProfileSession(sourceId) : null,
-  );
+  const [session, setSession] = useState<Session | null>(() => (sourceId ? readProfileSession(sourceId) : null));
 
   useEffect(() => {
     setSession(sourceId ? readProfileSession(sourceId) : null);

@@ -15,10 +15,7 @@ export async function findCorruptAnimeEntries(authKey: string): Promise<LibraryI
   return items.filter(isCorruptAnimeEntry);
 }
 
-export async function healCorruptAnimeEntries(
-  authKey: string,
-  items: LibraryItem[],
-): Promise<number> {
+export async function healCorruptAnimeEntries(authKey: string, items: LibraryItem[]): Promise<number> {
   const now = new Date().toISOString();
   let removed = 0;
   for (const i of items) {

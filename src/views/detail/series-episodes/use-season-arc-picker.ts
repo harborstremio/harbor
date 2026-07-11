@@ -1,10 +1,11 @@
-import { useMemo } from "react";
 import { setLastSeason } from "@/lib/last-season";
 import type { Season } from "@/lib/providers/tmdb";
 import { seasonDateRange, type TvdbOrder } from "@/lib/providers/tvdb-order";
+import { useMemo } from "react";
+
 import { isNewSeason } from "../helpers";
-import type { ArcGroupsState } from "./use-arc-groups";
 import type { PickerItem } from "./season-arc-picker";
+import type { ArcGroupsState } from "./use-arc-groups";
 
 export function useSeasonArcPicker({
   source,

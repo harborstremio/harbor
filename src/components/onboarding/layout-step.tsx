@@ -45,9 +45,7 @@ export function LayoutStep() {
               type="button"
               onClick={() => update({ homeMode: opt.id })}
               className={`group relative h-[200px] overflow-hidden rounded-2xl border bg-canvas text-start transition-all ${
-                selected
-                  ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
-                  : "border-edge-soft hover:border-edge"
+                selected ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]" : "border-edge-soft hover:border-edge"
               }`}
             >
               <img
@@ -86,12 +84,8 @@ export function LayoutStep() {
                   selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                 }`}
               >
-                <span className="text-[16px] font-semibold tracking-tight text-ink">
-                  {opt.label}
-                </span>
-                <span className="max-w-[88%] text-[12.5px] leading-relaxed text-ink-muted">
-                  {opt.sub}
-                </span>
+                <span className="text-[16px] font-semibold tracking-tight text-ink">{opt.label}</span>
+                <span className="max-w-[88%] text-[12.5px] leading-relaxed text-ink-muted">{opt.sub}</span>
               </div>
             </button>
           );

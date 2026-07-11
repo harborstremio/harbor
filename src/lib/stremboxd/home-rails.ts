@@ -1,8 +1,9 @@
+import type { Meta } from "@/lib/cinemeta";
+import type { HomeRow } from "@/views/home/home-types";
+
 import { fetchFullModeCatalog, fetchFullModeManifest, fetchStremboxdCatalog, fetchStremboxdManifest } from "./client";
 import { stremboxdMetaToMeta } from "./to-meta";
 import type { LetterboxdListRef, LetterboxdSession } from "./types";
-import type { Meta } from "@/lib/cinemeta";
-import type { HomeRow } from "@/views/home/home-types";
 
 export const LETTERBOXD_CATALOG_IDS = [
   "letterboxd-watchlist",

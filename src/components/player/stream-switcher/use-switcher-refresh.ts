@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
+import { buildPickerConfigHash, peekPickerCache, setPickerCache } from "@/lib/picker-cache";
 import { useSettings } from "@/lib/settings";
-import { buildStreamIds } from "@/lib/streams/stream-ids";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
 import { runPipeline } from "@/lib/streams/pipeline";
-import { buildPickerConfigHash, peekPickerCache, setPickerCache } from "@/lib/picker-cache";
-import { useAddons } from "@/views/play-picker/use-addons";
-import { stampAddonOrder } from "@/views/play-picker/picker-utils";
-import type { Meta } from "@/lib/cinemeta";
+import { buildStreamIds } from "@/lib/streams/stream-ids";
 import type { PlayEpisode } from "@/lib/view";
+import { stampAddonOrder } from "@/views/play-picker/picker-utils";
+import { useAddons } from "@/views/play-picker/use-addons";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useSwitcherRefresh(params: {
   meta: Meta;

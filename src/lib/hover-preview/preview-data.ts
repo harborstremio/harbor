@@ -103,7 +103,7 @@ function deriveRating(meta: Meta, isAnime: boolean): PreviewData["rating"] {
   if (isAnime) {
     return meta.imdbRating ? { kind: "mal", value: meta.imdbRating } : null;
   }
-  const imdbId = meta.id.startsWith("tt") ? meta.id : tmdbImdbCached(meta.id) ?? undefined;
+  const imdbId = meta.id.startsWith("tt") ? meta.id : (tmdbImdbCached(meta.id) ?? undefined);
   const real = imdbId ? omdbScoresCached(imdbId)?.imdbRating : undefined;
   if (real) return { kind: "imdb", value: real };
   if (meta.imdbRating) {
@@ -188,8 +188,7 @@ export function assemblePreviewData(meta: Meta): PreviewAssembly {
     });
   };
 
-  const kitsuFetch =
-    isAnime && (!meta.background || !synopsis) ? animeKitsuMeta(meta.id).catch(() => null) : null;
+  const kitsuFetch = isAnime && (!meta.background || !synopsis) ? animeKitsuMeta(meta.id).catch(() => null) : null;
   const ttFetch = isTt && !synopsis ? previewMeta(meta.type, meta.id) : null;
 
   if (!synopsis && kitsuFetch) {

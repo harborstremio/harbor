@@ -13,13 +13,7 @@ export const SIMKL_STATUS_LABELS: Record<WatchlistStatus, string> = {
   dropped: "Dropped",
 };
 
-export const SHOW_STATUS_ORDER: WatchlistStatus[] = [
-  "watching",
-  "plantowatch",
-  "completed",
-  "hold",
-  "dropped",
-];
+export const SHOW_STATUS_ORDER: WatchlistStatus[] = ["watching", "plantowatch", "completed", "hold", "dropped"];
 export const MOVIE_STATUS_ORDER: WatchlistStatus[] = ["plantowatch", "completed", "dropped"];
 
 type RawIds = {
@@ -47,9 +41,7 @@ type SimklData = {
 };
 
 function isStatus(s: string | undefined): s is WatchlistStatus {
-  return (
-    s === "watching" || s === "plantowatch" || s === "hold" || s === "completed" || s === "dropped"
-  );
+  return s === "watching" || s === "plantowatch" || s === "hold" || s === "completed" || s === "dropped";
 }
 
 function idKeys(ids: RawIds | undefined, kind: "movie" | "show"): string[] {
@@ -76,9 +68,9 @@ subscribeSession(() => {
 });
 
 async function pull(): Promise<SimklData> {
-  const data = await simklRequest<RawAllItems>(
-    "/sync/all-items/all/all?extended=full&episode_watched_at=yes",
-  ).catch(() => ({}) as RawAllItems);
+  const data = await simklRequest<RawAllItems>("/sync/all-items/all/all?extended=full&episode_watched_at=yes").catch(
+    () => ({}) as RawAllItems,
+  );
   const statuses = new Map<string, WatchlistStatus>();
   const watched = new Map<string, Set<string>>();
   const add = (entries: RawEntry[] | undefined, kind: "movie" | "show") => {
@@ -119,10 +111,7 @@ export async function loadSimklWatchedMap(): Promise<Map<string, Set<string>>> {
   return (await loadData()).watched;
 }
 
-export function statusForId(
-  map: Map<string, WatchlistStatus>,
-  id: string,
-): WatchlistStatus | null {
+export function statusForId(map: Map<string, WatchlistStatus>, id: string): WatchlistStatus | null {
   return map.get(id) ?? null;
 }
 
@@ -138,16 +127,13 @@ export function simklWatchedForId(
   return new Set();
 }
 
-export async function setSimklStatus(
-  target: SimklTarget,
-  status: WatchlistStatus,
-): Promise<WatchlistStatus> {
+export async function setSimklStatus(target: SimklTarget, status: WatchlistStatus): Promise<WatchlistStatus> {
   const ids = simklTargetIds(target);
   const bucket = target.kind === "movie" ? "movies" : "shows";
-  const r = await simklRequest<{ added?: Record<string, Array<{ to?: string }>> }>(
-    "/sync/add-to-list",
-    { method: "POST", body: { to: status, [bucket]: [{ to: status, ids }] } },
-  );
+  const r = await simklRequest<{ added?: Record<string, Array<{ to?: string }>> }>("/sync/add-to-list", {
+    method: "POST",
+    body: { to: status, [bucket]: [{ to: status, ids }] },
+  });
   const echoed = r?.added?.[bucket]?.[0]?.to;
   const final = isStatus(echoed) ? echoed : status;
   const statuses = (await loadData()).statuses;

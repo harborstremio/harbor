@@ -1,9 +1,4 @@
-import {
-  TRAKT_API_BASE,
-  TRAKT_API_VERSION,
-  TRAKT_CLIENT_ID,
-  TRAKT_TOKEN_PROXY,
-} from "./config";
+import { TRAKT_API_BASE, TRAKT_API_VERSION, TRAKT_CLIENT_ID, TRAKT_TOKEN_PROXY } from "./config";
 import { getSession, setSession } from "./session";
 import type { TraktSession } from "./types";
 
@@ -87,10 +82,7 @@ async function doFetch(path: string, opts: TraktRequestOptions): Promise<Respons
   return fetch(`${TRAKT_API_BASE}${path}`, init);
 }
 
-export async function traktRequest<T>(
-  path: string,
-  opts: TraktRequestOptions = {},
-): Promise<T> {
+export async function traktRequest<T>(path: string, opts: TraktRequestOptions = {}): Promise<T> {
   let res = await doFetch(path, opts);
 
   if (res.status === 401 && opts.authed !== false) {

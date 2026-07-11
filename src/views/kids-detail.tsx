@@ -1,5 +1,3 @@
-import { Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
@@ -7,9 +5,12 @@ import { useT } from "@/lib/i18n";
 import { tmdbDetails, type TmdbDetail } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { CollectionRow } from "./detail/collection-row";
-import { dropUnreleased } from "./kids/kids-filter";
 import { KidsEpisodes } from "./kids-detail/kids-episodes";
+import { dropUnreleased } from "./kids/kids-filter";
 
 export function KidsDetailView({
   meta,
@@ -45,8 +46,7 @@ export function KidsDetailView({
 
   const backdrop = detail?.backdrop || base?.background || meta.background || meta.poster;
   const logo = detail?.logo || base?.logo || meta.logo;
-  const overview =
-    detail?.overview || base?.description || (meta.id.startsWith("tmdb:") ? "" : meta.description) || "";
+  const overview = detail?.overview || base?.description || (meta.id.startsWith("tmdb:") ? "" : meta.description) || "";
   const genres = (detail?.genres?.length ? detail.genres : base?.genres) ?? [];
   const runtime = detail?.runtime;
   const year = meta.releaseInfo || base?.releaseInfo;
@@ -62,12 +62,7 @@ export function KidsDetailView({
     <div ref={scrollRef} className="relative h-full overflow-y-auto bg-canvas">
       <section className="relative h-[66vh] min-h-[460px] w-full overflow-hidden">
         {backdrop && (
-          <img
-            src={backdrop}
-            alt=""
-            draggable={false}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <img src={backdrop} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas via-canvas/35 to-transparent" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
@@ -106,20 +101,14 @@ export function KidsDetailView({
       </section>
 
       <div className="flex flex-col gap-10 px-12 pb-32 pt-3">
-        {overview && (
-          <p className="max-w-3xl text-[17px] font-medium leading-relaxed text-ink">{overview}</p>
-        )}
+        {overview && <p className="max-w-3xl text-[17px] font-medium leading-relaxed text-ink">{overview}</p>}
         {meta.type === "series" && detail && detail.seasons.length > 0 && (
           <KidsEpisodes meta={meta} tvId={detail.id} seasons={detail.seasons} />
         )}
-        {detail?.collection && (
-          <CollectionRow collection={detail.collection} currentId={meta.id} />
-        )}
+        {detail?.collection && <CollectionRow collection={detail.collection} currentId={meta.id} />}
         {recs.length > 0 && (
           <Row
-            title={
-              <span className="font-display text-[#0e3a43]">{t("More to explore")}</span>
-            }
+            title={<span className="font-display text-[#0e3a43]">{t("More to explore")}</span>}
             titleClassName="text-[#0e3a43]"
             titleScale={1.28}
             min={148}

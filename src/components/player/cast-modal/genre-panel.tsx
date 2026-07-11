@@ -1,9 +1,9 @@
-import { Loader2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { tmdbDiscover } from "@/lib/providers/tmdb/tmdb-catalogs";
-import { resolveImdbScore } from "./use-card-imdb";
+import { Loader2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import {
   buildDiscoverParams,
   EMPTY_FILTERS,
@@ -14,6 +14,7 @@ import {
 } from "./genre-filter-model";
 import { GenreToolbar } from "./genre-toolbar";
 import { PosterGrid } from "./rails";
+import { resolveImdbScore } from "./use-card-imdb";
 
 function scrollParent(el: HTMLElement | null): HTMLElement | null {
   let p = el?.parentElement ?? null;
@@ -53,10 +54,7 @@ export function GenrePanel({
   const [done, setDone] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const params = useMemo(
-    () => buildDiscoverParams(genre.id, mediaType, filters),
-    [genre.id, mediaType, filters],
-  );
+  const params = useMemo(() => buildDiscoverParams(genre.id, mediaType, filters), [genre.id, mediaType, filters]);
 
   useEffect(() => {
     if (genre.id) onActiveGenre?.(genre.id, mediaType);

@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowDown, Check, Play } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { SubCue } from "@/lib/subtitles/parser";
 import type { SyncPoint, SyncSegment } from "@/lib/subtitles/text-sync";
+import { ArrowDown, Check, Play } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function TextSyncList({
   cues,

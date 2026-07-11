@@ -1,9 +1,4 @@
-export function CardArtBackdrop({
-  logo,
-}: {
-  logo: string | null | undefined;
-  background?: string | null;
-}) {
+export function CardArtBackdrop({ logo }: { logo: string | null | undefined; background?: string | null }) {
   if (!logo) return null;
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">

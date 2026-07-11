@@ -1,5 +1,6 @@
-import { ChevronDown, Download, Folder } from "lucide-react";
 import type { CodeLang } from "@/components/code-editor";
+import { ChevronDown, Download, Folder } from "lucide-react";
+
 import { IDE, type ThemeFile } from "./files";
 
 export function FileTree({
@@ -23,10 +24,7 @@ export function FileTree({
       style={{ background: IDE.panel, borderRight: `1px solid ${IDE.border}` }}
     >
       <div className="px-4 pb-1.5 pt-4">
-        <span
-          className="text-[11px] font-bold uppercase tracking-[0.24em]"
-          style={{ color: IDE.textFaint }}
-        >
+        <span className="text-[11px] font-bold uppercase tracking-[0.24em]" style={{ color: IDE.textFaint }}>
           Project
         </span>
       </div>

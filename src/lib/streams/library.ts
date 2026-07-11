@@ -1,5 +1,6 @@
-import { parse } from "parse-torrent-title";
 import type { DebridSlug, DebridStore, LibraryEntry } from "@/lib/debrid/types";
+import { parse } from "parse-torrent-title";
+
 import type { Stream } from "./types";
 
 export type LibraryQuery = {
@@ -44,18 +45,9 @@ function matchEntry(entry: LibraryEntry, query: LibraryQuery): MatchInfo | null 
   return checkText(entry.name, query, undefined);
 }
 
-function checkText(
-  text: string,
-  query: LibraryQuery,
-  fileIdx: number | undefined,
-): MatchInfo | null {
+function checkText(text: string, query: LibraryQuery, fileIdx: number | undefined): MatchInfo | null {
   const ptt = parse(text);
-  if (
-    query.type === "movie" &&
-    query.year != null &&
-    ptt.year != null &&
-    Math.abs(ptt.year - query.year) > 1
-  ) {
+  if (query.type === "movie" && query.year != null && ptt.year != null && Math.abs(ptt.year - query.year) > 1) {
     return null;
   }
   if (query.season != null && ptt.season != null && ptt.season !== query.season) return null;

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
+import { useEffect, useRef, useState } from "react";
+
 import { addonKey, idOf } from "./addons-utils";
 import { BrowseRow } from "./browse-row";
 
@@ -40,9 +41,7 @@ export function LazyCategorySection({
     <section ref={ref} className="min-h-[140px]">
       <h3 className="mb-5 font-display text-[24px] font-medium tracking-tight text-ink">
         {title}{" "}
-        <span className="ms-2 text-[13px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
-          {items.length}
-        </span>
+        <span className="ms-2 text-[13px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{items.length}</span>
       </h3>
       {visible ? (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

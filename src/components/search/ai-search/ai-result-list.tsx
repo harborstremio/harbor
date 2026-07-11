@@ -1,8 +1,9 @@
-import { Star } from "lucide-react";
 import type { AiResult } from "@/lib/ai-search";
+import { useT } from "@/lib/i18n";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { Star } from "lucide-react";
+
 import { ResultPoster } from "../result-poster";
 
 function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: () => void; index: number }) {

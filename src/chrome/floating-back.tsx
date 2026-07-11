@@ -1,14 +1,8 @@
-import { ArrowLeft } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { ArrowLeft } from "lucide-react";
 
-export function FloatingBack({
-  offsetLeft = 24,
-  offsetTop = 90,
-}: {
-  offsetLeft?: number;
-  offsetTop?: number;
-}) {
+export function FloatingBack({ offsetLeft = 24, offsetTop = 90 }: { offsetLeft?: number; offsetTop?: number }) {
   const { canGoBack, goBack, exitPlayback, topKind, chromeHidden } = useView();
   const t = useT();
   if (!canGoBack || chromeHidden) return null;

@@ -59,11 +59,7 @@ export async function countNfoFor(videoPaths: string[]): Promise<number> {
   return count;
 }
 
-async function resolveIn(
-  dir: string,
-  index: Map<string, string>,
-  candidates: string[],
-): Promise<string | null> {
+async function resolveIn(dir: string, index: Map<string, string>, candidates: string[]): Promise<string | null> {
   const p = await pathMod();
   for (const cand of candidates) {
     const actual = index.get(cand.toLowerCase());
@@ -99,14 +95,15 @@ export async function findLocalArt(videoPath: string): Promise<LocalArt> {
   const index = await dirIndex(dir);
   const [poster, backdrop, logo] = await Promise.all([
     resolveIn(dir, index, [
-      `${stem}-poster.jpg`, `${stem}-poster.png`, "poster.jpg", "poster.png", "folder.jpg", "cover.jpg",
+      `${stem}-poster.jpg`,
+      `${stem}-poster.png`,
+      "poster.jpg",
+      "poster.png",
+      "folder.jpg",
+      "cover.jpg",
     ]),
-    resolveIn(dir, index, [
-      `${stem}-fanart.jpg`, `${stem}-fanart.png`, "fanart.jpg", "fanart.png", "backdrop.jpg",
-    ]),
-    resolveIn(dir, index, [
-      `${stem}-clearlogo.png`, `${stem}-logo.png`, "clearlogo.png", "logo.png",
-    ]),
+    resolveIn(dir, index, [`${stem}-fanart.jpg`, `${stem}-fanart.png`, "fanart.jpg", "fanart.png", "backdrop.jpg"]),
+    resolveIn(dir, index, [`${stem}-clearlogo.png`, `${stem}-logo.png`, "clearlogo.png", "logo.png"]),
   ]);
   const art: LocalArt = {};
   if (poster) art.poster = poster;
@@ -121,17 +118,16 @@ export async function findShowNfo(videoPath: string): Promise<string | null> {
   return resolveInDirs(await dirAndParent(dir), ["tvshow.nfo"]);
 }
 
-export async function findShowArt(
-  videoPath: string,
-  season: number | null,
-): Promise<LocalArt> {
+export async function findShowArt(videoPath: string, season: number | null): Promise<LocalArt> {
   if (!isTauri) return {};
   const { dir } = await splitVideoPath(videoPath);
   const dirs = await dirAndParent(dir);
-  const seasonTag =
-    season != null ? `season${String(season).padStart(2, "0")}-poster` : null;
+  const seasonTag = season != null ? `season${String(season).padStart(2, "0")}-poster` : null;
   const posterNames = [
-    "poster.jpg", "poster.png", "folder.jpg", "cover.jpg",
+    "poster.jpg",
+    "poster.png",
+    "folder.jpg",
+    "cover.jpg",
     ...(seasonTag ? [`${seasonTag}.jpg`, `${seasonTag}.png`] : []),
   ];
   const [poster, backdrop, logo] = await Promise.all([
@@ -167,22 +163,18 @@ export function parseNfo(xml: string): ParsedNfo {
   }
   if (doc.querySelector("parsererror")) return out;
 
-  const text = (sel: string): string | undefined =>
-    doc.querySelector(sel)?.textContent?.trim() || undefined;
+  const text = (sel: string): string | undefined => doc.querySelector(sel)?.textContent?.trim() || undefined;
 
   out.title = text("title") ?? text("originaltitle");
   out.showTitle = text("showtitle");
 
-  const yearRaw =
-    text("year") ??
-    (text("premiered") || text("aired") || text("releasedate"))?.slice(0, 4);
+  const yearRaw = text("year") ?? (text("premiered") || text("aired") || text("releasedate"))?.slice(0, 4);
   const yearNum = yearRaw ? parseInt(yearRaw, 10) : NaN;
   out.year = Number.isFinite(yearNum) ? yearNum : null;
 
   out.plot = text("plot") ?? text("outline") ?? null;
 
-  const ratingRaw =
-    text("rating") ?? doc.querySelector("ratings rating value")?.textContent?.trim();
+  const ratingRaw = text("rating") ?? doc.querySelector("ratings rating value")?.textContent?.trim();
   const ratingNum = ratingRaw ? parseFloat(ratingRaw) : NaN;
   out.rating = Number.isFinite(ratingNum) && ratingNum > 0 ? ratingNum : null;
 
@@ -217,15 +209,13 @@ export function parseNfo(xml: string): ParsedNfo {
 function parseNfoArt(doc: Document): LocalArt | undefined {
   const thumbs = Array.from(doc.querySelectorAll("thumb"));
   const val = (el: Element | undefined) => el?.textContent?.trim() || undefined;
-  const byAspect = (aspect: string) =>
-    thumbs.filter((el) => el.getAttribute("aspect") === aspect);
+  const byAspect = (aspect: string) => thumbs.filter((el) => el.getAttribute("aspect") === aspect);
 
   const poster = val(byAspect("poster").find((el) => !el.getAttribute("season")));
 
   const logo = val(byAspect("clearlogo")[0] ?? byAspect("logo")[0] ?? byAspect("clearart")[0]);
 
-  const backdrop =
-    val(doc.querySelector("fanart thumb") ?? undefined) ?? val(byAspect("landscape")[0]);
+  const backdrop = val(doc.querySelector("fanart thumb") ?? undefined) ?? val(byAspect("landscape")[0]);
 
   const art: LocalArt = {};
   if (poster) art.poster = poster;

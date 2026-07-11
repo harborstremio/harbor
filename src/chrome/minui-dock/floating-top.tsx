@@ -1,9 +1,7 @@
-import { ArrowLeft, LogOut, Pencil, Search, Settings as SettingsIcon, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { CatAvatar } from "@/components/icons/cat-avatar";
-import { HarborMark } from "@/components/icons/harbor-mark";
 import { RecordingPill } from "@/chrome/recording-pill";
 import { TogetherButton } from "@/chrome/topbar";
+import { CatAvatar } from "@/components/icons/cat-avatar";
+import { HarborMark } from "@/components/icons/harbor-mark";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
@@ -12,6 +10,8 @@ import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useView } from "@/lib/view";
 import { close, minimize, toggleMaximize } from "@/lib/window";
+import { ArrowLeft, LogOut, Pencil, Search, Settings as SettingsIcon, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -21,8 +21,7 @@ export function FloatingTop() {
   const { setOpen: setSearchOpen } = useSearch();
   const t = useT();
 
-  const themePreset =
-    settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
+  const themePreset = settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
   const liveActive = view === "live";
   const showBack = canGoBack && topKind !== "home" && topKind !== "picker";
@@ -84,15 +83,7 @@ export function FloatingTop() {
   );
 }
 
-function PillBtn({
-  onClick,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
+function PillBtn({ onClick, label, children }: { onClick: () => void; label: string; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -132,13 +123,7 @@ function WinBtn({
   );
 }
 
-function ProfilePill({
-  onOpenSettings,
-  settingsActive,
-}: {
-  onOpenSettings: () => void;
-  settingsActive: boolean;
-}) {
+function ProfilePill({ onOpenSettings, settingsActive }: { onOpenSettings: () => void; settingsActive: boolean }) {
   const { user, signOut } = useAuth();
   const { settings } = useSettings();
   const { profiles, activeProfile, openPicker, selectProfile } = useProfiles();
@@ -155,8 +140,7 @@ function ProfilePill({
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const name = activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
   const color = activeProfile?.color ?? "var(--color-accent)";
   const harborAvatar = settings.harborAvatar;
   const otherProfiles = profiles.filter((p) => p.id !== activeProfile?.id);
@@ -184,9 +168,7 @@ function ProfilePill({
         <div className="absolute end-0 top-[calc(100%+10px)] z-50 w-64 overflow-hidden rounded-2xl border border-edge bg-surface shadow-[0_24px_60px_-20px_rgba(15,15,18,0.35)]">
           <div className="border-b border-edge-soft px-4 py-3">
             <div className="text-[13.5px] font-semibold text-ink">{name}</div>
-            {user?.email && (
-              <div className="truncate text-[11.5px] text-ink-subtle">{user.email}</div>
-            )}
+            {user?.email && <div className="truncate text-[11.5px] text-ink-subtle">{user.email}</div>}
           </div>
           {otherProfiles.length > 0 && (
             <div className="flex flex-col gap-0.5 border-b border-edge-soft p-1.5">

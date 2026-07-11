@@ -29,15 +29,13 @@ export function AutoExhaustedModal({
   return (
     <main className="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-black px-6">
       <div className="w-full max-w-md rounded-2xl bg-elevated p-8 ring-1 ring-edge-soft">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-subtle">
-          Harbor
-        </p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-subtle">Harbor</p>
         <h2 className="mt-3 text-start text-[24px] font-semibold leading-tight text-ink" dir="auto">
           We could not find a working stream
         </h2>
         <p className="mt-3 text-start text-[14px] leading-relaxed text-ink-muted" dir="auto">
-          Harbor checked every available source for {title}{epSuffix} and none of them played.
-          The most common reasons:
+          Harbor checked every available source for {title}
+          {epSuffix} and none of them played. The most common reasons:
         </p>
         <ul className="mt-3 space-y-1.5 text-start text-[13.5px] leading-relaxed text-ink-muted" dir="auto">
           <li dir="auto">· A debrid key (TorBox, Real-Debrid, etc.) is missing or expired.</li>

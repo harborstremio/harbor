@@ -29,9 +29,9 @@ export function DebridDownModal({
           Your debrid service can&apos;t process this right now.
         </h1>
         <p className="max-w-xl text-[14.5px] leading-relaxed text-white/75">
-          Stremio hits the same wall when this happens. Real-Debrid, TorBox, AllDebrid and
-          Premiumize all have brief outages where they stop returning links. Wait a few minutes
-          and try again, or check the service&apos;s status page.
+          Stremio hits the same wall when this happens. Real-Debrid, TorBox, AllDebrid and Premiumize all have brief
+          outages where they stop returning links. Wait a few minutes and try again, or check the service&apos;s status
+          page.
         </p>
         <div className="flex items-center gap-3 pt-2">
           <button

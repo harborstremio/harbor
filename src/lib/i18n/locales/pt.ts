@@ -75,26 +75,26 @@ const pt: Record<string, string> = {
   "Episode Not Found": "Episódio Não Encontrado",
   "Episode information is not available": "As informações do episódio não estão disponíveis.",
   "Unable to connect": "Não foi possível conectar",
-  "Stills": "Capturas",
+  Stills: "Capturas",
   "Guest Stars": "Atores Convidados",
   "Guest Stars · {n}": "Atores Convidados · {n}",
-  "Overview": "Sinopse",
+  Overview: "Sinopse",
   "Go Back": "Voltar",
-  "Retry": "Tentar novamente",
+  Retry: "Tentar novamente",
   "Loading episode details...": "Carregando detalhes do episódio...",
   "View Series": "Ver Série",
   "Play Episode": "Reproduzir Episódio",
-  "min": "min",
+  min: "min",
   "Episode {n}": "Episódio {n}",
   "{n} min": "{n} min",
   "Unable to load series information": "Não foi possível carregar as informações da série",
   "An unexpected error occurred": "Ocorreu um erro inesperado",
   "TMDB Rating": "Avaliação do TMDB",
-  "Votes": "Votos",
+  Votes: "Votos",
   "Air Date": "Data de Exibição",
-  "Runtime": "Duração",
+  Runtime: "Duração",
 
-  "My": "Meu",
+  My: "Meu",
   "Reveal comments": "Mostrar comentários",
   "Comments are hidden": "Os comentários estão ocultos",
   "You haven't commented yet": "Você ainda não comentou",
@@ -103,7 +103,8 @@ const pt: Record<string, string> = {
   "Open on Trakt": "Abrir no Trakt",
 
   "AniList Comments": "Comentários do AniList",
-  "Connect your AniList account to see forum threads and comments.": "Conecte sua conta do AniList para ver tópicos do fórum e comentários.",
+  "Connect your AniList account to see forum threads and comments.":
+    "Conecte sua conta do AniList para ver tópicos do fórum e comentários.",
   "Connect AniList": "Conectar AniList",
   "Could not find this title on AniList.": "Não foi possível encontrar este título no AniList.",
   "New thread": "Novo tópico",
@@ -121,7 +122,8 @@ const pt: Record<string, string> = {
   "Loading more": "Carregando mais",
   "Failed to post comment": "Falha ao postar comentário",
   "Show AniList comments": "Mostrar comentários do AniList",
-  "Show forum threads and comments from AniList on anime detail pages.": "Mostra os tópicos do fórum e comentários do AniList nas páginas de detalhes de animes.",
+  "Show forum threads and comments from AniList on anime detail pages.":
+    "Mostra os tópicos do fórum e comentários do AniList nas páginas de detalhes de animes.",
   "Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.":
     "Os comentários nas páginas de animes ficam borrados até você revelá-los, mesmo que não estejam marcados como spoilers.",
 
@@ -132,9 +134,9 @@ const pt: Record<string, string> = {
   "Blurs the hero image and stills on the episode detail page until you click reveal.":
     "Borra o banner principal e as capturas de tela na página de detalhes do episódio até que você clique para revelar.",
 
-  "Likes": "Curtidas",
-  "Newest": "Mais recentes",
-  "Oldest": "Mais antigos",
+  Likes: "Curtidas",
+  Newest: "Mais recentes",
+  Oldest: "Mais antigos",
   "Contains spoiler": "Contém spoiler",
   "Write a comment...": "Escreva um comentário...",
   "Comments may take a moment to appear on Trakt": "Os comentários podem levar um momento para aparecer no Trakt",
@@ -150,7 +152,7 @@ const pt: Record<string, string> = {
   "sports.customize.clearAll": "Limpar tudo",
   "sports.customize.cancel": "Cancelar",
   "sports.customize.save": "Salvar",
-  "Upcoming": "Próximos",
+  Upcoming: "Próximos",
 
   "Add Custom Source": "Adicionar Fonte Personalizada",
   "Provide a JSON link or paste it directly.": "Forneça um link JSON ou cole-o diretamente.",
@@ -166,11 +168,13 @@ const pt: Record<string, string> = {
   "Focus GIF URL": "URL do GIF de Destaque",
   "Addon not installed": "Extensão não instalada",
   "This section depends on the addon": "Esta seção depende da extensão",
-  "You must install this addon in your Stremio account first so Harbor can fetch its works.": "Você deve instalar esta extensão na sua conta do Stremio primeiro para que o Harbor possa buscar seus conteúdos.",
+  "You must install this addon in your Stremio account first so Harbor can fetch its works.":
+    "Você deve instalar esta extensão na sua conta do Stremio primeiro para que o Harbor possa buscar seus conteúdos.",
   "Missing TMDB Key": "Chave do TMDB Ausente",
   "This section relies on TMDB discovery features.": "Esta seção depende dos recursos de descoberta do TMDB.",
-  "Please add your TMDB API key in the Library & Metadata settings to view this folder.": "Por favor, adicione sua chave de API do TMDB nas configurações de Biblioteca e Metadados para visualizar esta pasta.",
-  "OK": "OK",
+  "Please add your TMDB API key in the Library & Metadata settings to view this folder.":
+    "Por favor, adicione sua chave de API do TMDB nas configurações de Biblioteca e Metadados para visualizar esta pasta.",
+  OK: "OK",
   "Loading...": "Carregando...",
 };
 

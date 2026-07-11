@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 export type SleepMode =
   | { kind: "off" }

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { Settings2 } from "lucide-react";
 import { useT, useUiLanguage } from "@/lib/i18n";
 import { liveCount, getLeagueLabel, type LeagueDef, type SportsGame } from "@/lib/sports/espn";
+import { Settings2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { SportsCard } from "./sports-card";
 import { SportsCustomizeModal } from "./sports-customize-modal";
 
@@ -66,21 +67,27 @@ export function SportsMarquee({
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <LeagueChip active={selected === "all"} onClick={() => onLeague("all")} label={t("All")} />
-          {leagues.filter((l) => selectedLeagues.includes(l.key)).map((l) => (
-            <LeagueChip
-              key={l.key}
-              active={selected === l.key}
-              onClick={() => onLeague(l.key)}
-              label={getLeagueLabel(l)}
-              logo={l.logo}
-            />
-          ))}
+          {leagues
+            .filter((l) => selectedLeagues.includes(l.key))
+            .map((l) => (
+              <LeagueChip
+                key={l.key}
+                active={selected === l.key}
+                onClick={() => onLeague(l.key)}
+                label={getLeagueLabel(l)}
+                logo={l.logo}
+              />
+            ))}
         </div>
         {games.length > 0 ? (
           <div
             ref={trackRef}
-            onMouseEnter={() => { pausedRef.current = true; }}
-            onMouseLeave={() => { pausedRef.current = false; }}
+            onMouseEnter={() => {
+              pausedRef.current = true;
+            }}
+            onMouseLeave={() => {
+              pausedRef.current = false;
+            }}
             className="flex gap-4 overflow-x-auto pb-1 [scroll-snap-type:x_mandatory] [&>*]:[scroll-snap-align:start] [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
           >
             {games.map((g) => (
@@ -103,8 +110,6 @@ export function SportsMarquee({
     </>
   );
 }
-
-
 
 function LeagueChip({
   active,

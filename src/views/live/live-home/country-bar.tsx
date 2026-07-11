@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Globe } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { flagUrl, type Country } from "@/lib/iptv/country-detect";
+import { Globe } from "lucide-react";
+import { useState } from "react";
 
 export function CountryBar({
   countries,

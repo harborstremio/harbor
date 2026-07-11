@@ -1,5 +1,6 @@
 import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
+
 import { get, IMG } from "./tmdb-client";
 import { imageLangParam, imageLangRank, pickedImageLangs } from "./tmdb-image-lang";
 
@@ -58,9 +59,7 @@ export async function tmdbLocalizedPoster(key: string, metaId: string): Promise<
   const picks = pickedImageLangs();
   if (!picks.length) return undefined;
   const assets = await fetchMovieAssets(key, metaId);
-  const posters = (assets?.posters ?? []).filter(
-    (p) => typeof p.iso_639_1 === "string" && picks.includes(p.iso_639_1),
-  );
+  const posters = (assets?.posters ?? []).filter((p) => typeof p.iso_639_1 === "string" && picks.includes(p.iso_639_1));
   if (!posters.length) return undefined;
   const rank = (iso?: string | null) => {
     const i = picks.indexOf(iso ?? "");
@@ -76,9 +75,7 @@ export async function tmdbMovieImages(key: string, metaId: string): Promise<stri
   const data = await fetchMovieAssets(key, metaId);
   const seen = new Set<string>();
   const out: string[] = [];
-  for (const b of (data?.backdrops ?? []).sort(
-    (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
-  )) {
+  for (const b of (data?.backdrops ?? []).sort((a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0))) {
     if (!b.file_path || seen.has(b.file_path)) continue;
     seen.add(b.file_path);
     out.push(`${IMG}/w780${b.file_path}`);
@@ -87,11 +84,7 @@ export async function tmdbMovieImages(key: string, metaId: string): Promise<stri
   return out;
 }
 
-export async function tmdbLogo(
-  key: string,
-  metaId: string,
-  originalLang?: string | null,
-): Promise<string | undefined> {
+export async function tmdbLogo(key: string, metaId: string, originalLang?: string | null): Promise<string | undefined> {
   const data = await fetchMovieAssets(key, metaId, originalLang);
   return pickLogo(data?.logos ?? [], originalLang);
 }

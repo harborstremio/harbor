@@ -1,7 +1,7 @@
+import { useT } from "@/lib/i18n";
 import { Delete, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
 
 type Mode =
   | { kind: "unlock"; onUnlock: () => void; onCancel: () => void }
@@ -160,7 +160,9 @@ export function ParentalPinModal({
         )}
         <div className="relative flex items-start justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <h2 className={`text-[19px] font-medium tracking-tight ${kids ? "font-display text-[22px] font-bold text-white" : "text-ink"}`}>
+            <h2
+              className={`text-[19px] font-medium tracking-tight ${kids ? "font-display text-[22px] font-bold text-white" : "text-ink"}`}
+            >
               {headerLabel}
             </h2>
             <p className={`text-[12.5px] leading-relaxed ${kids ? "text-white/85" : "text-ink-muted"}`}>{headerSub}</p>
@@ -217,9 +219,7 @@ export function ParentalPinModal({
               />
             ))}
           </button>
-          {error && (
-            <p className={`text-[12.5px] font-medium ${kids ? "text-amber-200" : "text-red-300"}`}>{error}</p>
-          )}
+          {error && <p className={`text-[12.5px] font-medium ${kids ? "text-amber-200" : "text-red-300"}`}>{error}</p>}
           <div className="grid grid-cols-3 gap-2.5 pt-1">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
               <PinKey key={d} onClick={() => tap(d)} disabled={busy} kids={kids}>

@@ -1,8 +1,4 @@
-import {
-  TRAKT_API_BASE,
-  TRAKT_CLIENT_ID,
-  TRAKT_DEVICE_TOKEN_PROXY,
-} from "./config";
+import { TRAKT_API_BASE, TRAKT_CLIENT_ID, TRAKT_DEVICE_TOKEN_PROXY } from "./config";
 import { setSession } from "./session";
 import type { DeviceCode, TraktSession, TraktUserMe } from "./types";
 
@@ -78,10 +74,7 @@ export type PollHandle = {
   cancel: () => void;
 };
 
-export function pollForToken(
-  device: DeviceCode,
-  onUpdate: (result: PollResult) => void,
-): PollHandle {
+export function pollForToken(device: DeviceCode, onUpdate: (result: PollResult) => void): PollHandle {
   let cancelled = false;
   let intervalSec = device.pollIntervalSec;
   const startedAt = Date.now();

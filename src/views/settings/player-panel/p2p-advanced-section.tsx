@@ -1,15 +1,12 @@
-import { useEffect, useState } from "react";
-import { Check, ClipboardCopy, FolderOpen, Loader2, RotateCcw, Trash2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { torrentEngineHardReset, torrentEngineSetOptions, torrentEngineStatus } from "@/lib/torrent/local-engine";
 import { appCacheDir, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
-import {
-  torrentEngineHardReset,
-  torrentEngineSetOptions,
-  torrentEngineStatus,
-} from "@/lib/torrent/local-engine";
+import { Check, ClipboardCopy, FolderOpen, Loader2, RotateCcw, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { Section, ToggleRow } from "../shared";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -124,12 +121,16 @@ export function P2PAdvancedSection() {
     <>
       <Section
         title={t("Stream cache")}
-        subtitle={t("Downloaded peer-to-peer stream files are kept on disk so reopening a title resumes instantly instead of starting over. Control how long they stay and where they live.")}
+        subtitle={t(
+          "Downloaded peer-to-peer stream files are kept on disk so reopening a title resumes instantly instead of starting over. Control how long they stay and where they live.",
+        )}
       >
         <div className="flex flex-col gap-2">
           <span className="text-[13.5px] font-semibold text-ink">{t("Keep cached files for")}</span>
           <p className="text-[12px] leading-relaxed text-ink-subtle">
-            {t("After you stop watching, a stream file stays cached for this long so reopening resumes instead of re-downloading. Older files are cleaned up automatically. Off deletes the file as soon as you leave the player.")}
+            {t(
+              "After you stop watching, a stream file stays cached for this long so reopening resumes instead of re-downloading. Older files are cleaned up automatically. Off deletes the file as soon as you leave the player.",
+            )}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {RETENTIONS.map((r) => (
@@ -152,7 +153,9 @@ export function P2PAdvancedSection() {
         <div className="flex flex-col gap-2 pt-1">
           <span className="text-[13.5px] font-semibold text-ink">{t("Keep at most")}</span>
           <p className="text-[12px] leading-relaxed text-ink-subtle">
-            {t("Cap how much disk the cache can use. When it goes over, Harbor deletes the oldest files first. Enforced on launch and as streams close.")}
+            {t(
+              "Cap how much disk the cache can use. When it goes over, Harbor deletes the oldest files first. Enforced on launch and as streams close.",
+            )}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {CACHE_LIMITS.map((c) => (
@@ -174,7 +177,9 @@ export function P2PAdvancedSection() {
 
         <ToggleRow
           label={t("Delete after I finish watching")}
-          sub={t("When you finish an episode or movie, remove its downloaded file right away. Something you stop partway through is kept so you can resume.")}
+          sub={t(
+            "When you finish an episode or movie, remove its downloaded file right away. Something you stop partway through is kept so you can resume.",
+          )}
           value={settings.deleteWatchedDownloads}
           onChange={(v) => update({ deleteWatchedDownloads: v })}
         />
@@ -216,16 +221,14 @@ export function P2PAdvancedSection() {
                     : "border border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
                 }`}
               >
-                {clearing ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Trash2 size={14} strokeWidth={2.2} />
-                )}
+                {clearing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} strokeWidth={2.2} />}
                 {clearing ? t("Clearing…") : confirmClear ? t("Confirm clear") : t("Clear cache now")}
               </button>
             </div>
             <p className="text-[12px] leading-relaxed text-ink-subtle">
-              {t("Changing the location restarts the engine. Clearing removes all cached stream files right away; anything you reopen will re-fetch.")}
+              {t(
+                "Changing the location restarts the engine. Clearing removes all cached stream files right away; anything you reopen will re-fetch.",
+              )}
             </p>
           </div>
         )}
@@ -233,18 +236,24 @@ export function P2PAdvancedSection() {
 
       <Section
         title={t("Power tools & diagnostics")}
-        subtitle={t("Low-level knobs for the peer-to-peer engine, plus quick ways to grab debug info when a stream misbehaves.")}
+        subtitle={t(
+          "Low-level knobs for the peer-to-peer engine, plus quick ways to grab debug info when a stream misbehaves.",
+        )}
       >
         <ToggleRow
           label={t("Direct torrent streaming")}
-          sub={t("Stream torrents straight from Harbor's built-in engine when you have no debrid set up, or a torrent isn't cached. This connects to peers over your own connection. Turn off to only ever play debrid and direct links.")}
+          sub={t(
+            "Stream torrents straight from Harbor's built-in engine when you have no debrid set up, or a torrent isn't cached. This connects to peers over your own connection. Turn off to only ever play debrid and direct links.",
+          )}
           value={settings.directTorrentStream}
           onChange={(v) => update({ directTorrentStream: v })}
           lockReason={strictRemote ? t("Disabled while strict remote streaming is on") : undefined}
         />
         <ToggleRow
           label={t("Auto-confirm peer-to-peer streaming")}
-          sub={t("Skip the 'stream over peer-to-peer?' prompt and start uncached torrents immediately. Harbor remembers your choice after the first confirmation anyway.")}
+          sub={t(
+            "Skip the 'stream over peer-to-peer?' prompt and start uncached torrents immediately. Harbor remembers your choice after the first confirmation anyway.",
+          )}
           value={settings.p2pAutoConsent}
           onChange={(v) => update({ p2pAutoConsent: v })}
         />
@@ -269,17 +278,15 @@ export function P2PAdvancedSection() {
               disabled={opening}
               className="flex h-10 items-center gap-2 rounded-lg border border-edge-soft px-4 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-60"
             >
-              {opening ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <FolderOpen size={14} strokeWidth={2.2} />
-              )}
+              {opening ? <Loader2 size={14} className="animate-spin" /> : <FolderOpen size={14} strokeWidth={2.2} />}
               {t("Reveal engine folder")}
             </button>
           )}
         </div>
         <p className="text-[12px] leading-relaxed text-ink-subtle">
-          {t("Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active torrent data.")}
+          {t(
+            "Copy diagnostics grabs the engine status and your P2P settings as JSON, handy to paste into a bug report. The engine folder holds the DHT cache (dht.json) and active torrent data.",
+          )}
         </p>
       </Section>
     </>

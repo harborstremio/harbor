@@ -1,5 +1,6 @@
 import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
+
 import { get } from "./tmdb-client";
 
 const CRITIC_CACHE_MAX = 400;

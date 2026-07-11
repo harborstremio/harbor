@@ -1,12 +1,13 @@
 import type { Addon } from "@/lib/addons";
-import { dlog } from "@/lib/debug";
 import type { DebridStore } from "@/lib/debrid/types";
+import { dlog } from "@/lib/debug";
+
 import { fetchAddonStreams, type StreamRequest } from "./addons";
 import { enhanceAnimeStreams } from "./anitomy";
 import { fetchLibraryStreams, type LibraryQuery } from "./library";
 import { parseStream } from "./parser";
-import { applyTrust, type Rejection, type TrustOptions } from "./trust";
 import { computeCorpusStats, rankAndPick, scoreStream, type ScoreOptions } from "./scoring";
+import { applyTrust, type Rejection, type TrustOptions } from "./trust";
 import type { ParsedStream, RankedPicker, Stream } from "./types";
 
 const PREFER_AAC = typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
@@ -115,9 +116,7 @@ export async function runPipeline(
       library = s;
       return s;
     }),
-    presets.length > 0
-      ? Promise.resolve(presets)
-      : fetchAddonStreams(input.addons, input.request, signal, emitPartial),
+    presets.length > 0 ? Promise.resolve(presets) : fetchAddonStreams(input.addons, input.request, signal, emitPartial),
   ]);
   if (librarySettled.status === "fulfilled") library = librarySettled.value;
   const addonStreams = addonSettled.status === "fulfilled" ? addonSettled.value : [];
@@ -138,7 +137,9 @@ export async function runPipeline(
     ),
   ];
   if (hashes.length > 0 && input.debrids.length > 0 && !signal.aborted) {
-    dlog(`[pipeline] ${parsed.length} parsed streams · ${hashes.length} unique hashes · debrids: ${input.debrids.map((d) => d.name).join(", ")}`);
+    dlog(
+      `[pipeline] ${parsed.length} parsed streams · ${hashes.length} unique hashes · debrids: ${input.debrids.map((d) => d.name).join(", ")}`,
+    );
     const [cacheResults, libraryResults] = await Promise.all([
       Promise.allSettled(input.debrids.map((d) => d.cacheCheck(hashes, signal))),
       Promise.allSettled(input.debrids.map((d) => d.listLibrary(signal))),
@@ -172,7 +173,9 @@ export async function runPipeline(
           p.inLibrary[slug] = true;
         }
       }
-      dlog(`[pipeline] listLibrary cross-check on ${input.debrids[i].name}: ${hits} extra streams flagged cached (lib has ${libHashes.size} hashes)`);
+      dlog(
+        `[pipeline] listLibrary cross-check on ${input.debrids[i].name}: ${hits} extra streams flagged cached (lib has ${libHashes.size} hashes)`,
+      );
     }
 
     const totalCached = parsed.filter((p) => Object.values(p.cached).some(Boolean)).length;

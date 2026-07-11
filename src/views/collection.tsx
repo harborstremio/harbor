@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { tmdbCollection, type TmdbCollection } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export function CollectionView({ collectionId }: { collectionId: number }) {
   const t = useT();
@@ -127,9 +127,7 @@ export function CollectionView({ collectionId }: { collectionId: number }) {
 }
 
 function yearRange(parts: Meta[]): string | null {
-  const years = parts
-    .map((p) => Number(p.releaseInfo))
-    .filter((y) => Number.isFinite(y) && y > 1900);
+  const years = parts.map((p) => Number(p.releaseInfo)).filter((y) => Number.isFinite(y) && y > 1900);
   if (years.length === 0) return null;
   const lo = Math.min(...years);
   const hi = Math.max(...years);

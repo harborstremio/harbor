@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Info, Plus, Search, X } from "lucide-react";
 import { AVATAR_CATALOG, avatarUrl } from "@/lib/avatars/catalog";
 import { useT } from "@/lib/i18n";
+import { ChevronLeft, ChevronRight, Info, Plus, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function AvatarCatalogModal({
   current,
@@ -56,17 +56,12 @@ export function AvatarCatalogModal({
     let flat = AVATAR_CATALOG.flatMap((g) => g.items.map((it) => ({ ...it, group: g.group })));
     if (franchise) flat = flat.filter((it) => it.group === franchise);
     if (query)
-      flat = flat.filter(
-        (it) => it.name.toLowerCase().includes(query) || it.group.toLowerCase().includes(query),
-      );
+      flat = flat.filter((it) => it.name.toLowerCase().includes(query) || it.group.toLowerCase().includes(query));
     return flat;
   }, [franchise, query]);
 
   return (
-    <div
-      className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-8"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-8" onClick={onClose}>
       <div className="absolute inset-0 animate-in fade-in bg-black/70 backdrop-blur-sm duration-200" />
       <div
         onClick={(e) => e.stopPropagation()}
@@ -74,9 +69,7 @@ export function AvatarCatalogModal({
       >
         <div className="flex items-center gap-4 px-6 pt-5 pb-4">
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-              {t("Choose an avatar")}
-            </h2>
+            <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">{t("Choose an avatar")}</h2>
             <div className="flex items-center gap-1.5">
               <p className="text-[12.5px] text-ink-subtle">
                 {t("{n} avatars across film, TV, and anime.", { n: items.length })}
@@ -167,10 +160,7 @@ export function AvatarCatalogModal({
                 );
               })}
               {franchise === null && !query && (
-                <div
-                  className="flex flex-col items-center gap-1.5"
-                  title={t("More avatars coming soon")}
-                >
+                <div className="flex flex-col items-center gap-1.5" title={t("More avatars coming soon")}>
                   <span className="flex aspect-square w-full items-center justify-center rounded-full border border-dashed border-edge/70 text-ink-subtle">
                     <Plus size={18} strokeWidth={2} />
                   </span>
@@ -259,9 +249,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
-        active
-          ? "bg-ink text-canvas"
-          : "bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
+        active ? "bg-ink text-canvas" : "bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
       }`}
     >
       {children}

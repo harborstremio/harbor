@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
 import { randomUuid } from "@/lib/uuid";
+import { useEffect, useMemo, useState } from "react";
 
 const KEY = "harbor.customlists.v1";
 const subs = new Set<() => void>();
@@ -206,7 +206,7 @@ export function useCustomLists(): CustomList[] {
 
 export function useList(id: string | null): CustomList | null {
   const lists = useCustomLists();
-  return useMemo(() => (id ? lists.find((l) => l.id === id) ?? null : null), [lists, id]);
+  return useMemo(() => (id ? (lists.find((l) => l.id === id) ?? null) : null), [lists, id]);
 }
 
 export function useListsContaining(itemId: string | undefined): Set<string> {

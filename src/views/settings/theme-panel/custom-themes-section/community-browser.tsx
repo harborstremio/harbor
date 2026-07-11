@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { AlertCircle, Check, Download, Loader2, Search, Star, Upload } from "lucide-react";
 import { browseThemes, downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
+import { AlertCircle, Check, Download, Loader2, Search, Star, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { CommunityDetail } from "./community-detail";
 import { ThemeUploadFlow } from "./theme-upload-flow";
 
@@ -46,7 +47,9 @@ export function CommunityPane() {
             key={s.id}
             onClick={() => setSort(s.id)}
             className={`h-8 rounded-full border px-3.5 text-[12px] font-semibold transition-colors ${
-              sort === s.id ? "border-ink bg-ink text-canvas" : "border-edge-soft bg-elevated/40 text-ink-muted hover:border-edge hover:text-ink"
+              sort === s.id
+                ? "border-ink bg-ink text-canvas"
+                : "border-edge-soft bg-elevated/40 text-ink-muted hover:border-edge hover:text-ink"
             }`}
           >
             {s.label}
@@ -74,7 +77,9 @@ export function CommunityPane() {
           <Loader2 size={20} className="animate-spin" />
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-8 text-center text-[13px] text-danger">{error}</div>
+        <div className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-8 text-center text-[13px] text-danger">
+          {error}
+        </div>
       ) : themes.length === 0 ? (
         <p className="rounded-xl border border-dashed border-edge px-4 py-12 text-center text-[13px] text-ink-subtle">
           {debounced ? "No themes match your search." : "No community themes yet. Be the first to share one."}
@@ -180,7 +185,13 @@ function CommunityCard({ theme, onOpen }: { theme: StoreTheme; onOpen: () => voi
             ) : (
               <Download size={14} />
             )}
-            {state === "done" ? "Added to library" : state === "error" ? "Failed" : state === "loading" ? "Downloading" : "Download"}
+            {state === "done"
+              ? "Added to library"
+              : state === "error"
+                ? "Failed"
+                : state === "loading"
+                  ? "Downloading"
+                  : "Download"}
           </button>
         </div>
         <div className="absolute bottom-0 left-0 right-0 flex h-1.5">

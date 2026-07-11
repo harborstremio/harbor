@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { getCachedEpg, loadEpg, subscribeEpg } from "@/lib/iptv/epg-store";
 import { deriveEpgUrls } from "@/lib/iptv/m3u";
-import { findCurrent } from "@/lib/iptv/xmltv";
 import type { EpgIndex, EpgProgram, IptvPlaylistSource } from "@/lib/iptv/types";
+import { findCurrent } from "@/lib/iptv/xmltv";
+import { useEffect, useState } from "react";
 
 export function useEpg(
   source: IptvPlaylistSource | null,
@@ -12,9 +12,7 @@ export function useEpg(
   loading: boolean;
   error: string | null;
 } {
-  const [index, setIndex] = useState<EpgIndex | null>(() =>
-    source ? getCachedEpg(source.id) : null,
-  );
+  const [index, setIndex] = useState<EpgIndex | null>(() => (source ? getCachedEpg(source.id) : null));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const extraKey = extraUrls.join("|");

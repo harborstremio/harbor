@@ -1,7 +1,7 @@
-import { Check, ExternalLink, Loader2, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useMal } from "@/lib/mal/provider";
+import { Check, ExternalLink, Loader2, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function MalConnectModal({ onClose }: { onClose: () => void }) {
   const { connectState, beginConnect, submitCode, cancelConnect } = useMal();
@@ -78,7 +78,9 @@ export function MalConnectModal({ onClose }: { onClose: () => void }) {
         {connectState.kind === "needs-code" && (
           <div className="flex flex-col gap-5">
             <p className="text-[13px] leading-relaxed text-ink-muted">
-              {t("A browser tab opened on MyAnimeList. Approve Harbor there, then copy the code or the page URL and paste it below.")}
+              {t(
+                "A browser tab opened on MyAnimeList. Approve Harbor there, then copy the code or the page URL and paste it below.",
+              )}
             </p>
             <textarea
               value={draftCode}

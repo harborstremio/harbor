@@ -1,6 +1,6 @@
+import type { CastDeviceInfo } from "@/lib/cast";
 import { Monitor, Tv2 } from "lucide-react";
 import { useState } from "react";
-import type { CastDeviceInfo } from "@/lib/cast";
 
 const MODULES = import.meta.glob("/src/assets/cast-icons/*.webp", {
   eager: true,
@@ -110,13 +110,7 @@ function resolveSlug(device: CastDeviceInfo): string | null {
   return icon(fallback) ? fallback : null;
 }
 
-export function CastIcon({
-  device,
-  size = 28,
-}: {
-  device: CastDeviceInfo;
-  size?: number;
-}) {
+export function CastIcon({ device, size = 28 }: { device: CastDeviceInfo; size?: number }) {
   const [errored, setErrored] = useState(false);
   const slug = resolveSlug(device);
   const src = slug ? icon(slug) : null;

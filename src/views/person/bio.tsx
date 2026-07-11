@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import type { PersonCredit } from "@/lib/providers/tmdb";
+import { useMemo } from "react";
 
 export function Bio({
   text,
@@ -45,8 +45,7 @@ export function Bio({
       <div
         className="max-h-[210px] overflow-y-auto pe-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
-          maskImage:
-            "linear-gradient(to bottom, transparent 0, black 6px, black calc(100% - 8px), transparent 100%)",
+          maskImage: "linear-gradient(to bottom, transparent 0, black 6px, black calc(100% - 8px), transparent 100%)",
           WebkitMaskImage:
             "linear-gradient(to bottom, transparent 0, black 6px, black calc(100% - 8px), transparent 100%)",
         }}

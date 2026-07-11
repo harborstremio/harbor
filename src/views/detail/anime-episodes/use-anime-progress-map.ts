@@ -1,7 +1,7 @@
-import { useMemo } from "react";
 import { getEpisodeProgress, type EpisodeProgress } from "@/lib/episode-progress";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
+import { useMemo } from "react";
 
 const NO_PROGRESS: EpisodeProgress = { ratio: 0, watched: false, startedAt: 0 };
 
@@ -67,8 +67,7 @@ export function useAnimeProgressMap({
       isNextUp: ep.number === nextUpNum,
     });
 
-  const allWatched =
-    displayEpisodes.length > 0 && displayEpisodes.every((ep) => progressById.get(ep.id)?.watched);
+  const allWatched = displayEpisodes.length > 0 && displayEpisodes.every((ep) => progressById.get(ep.id)?.watched);
 
   return { progressFor, nextUpNum, spoilerFor, allWatched };
 }

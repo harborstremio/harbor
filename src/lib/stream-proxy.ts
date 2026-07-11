@@ -5,10 +5,7 @@ export type ProxyResult = {
   url: string;
 };
 
-export async function registerStreamProxy(
-  url: string,
-  headers?: Record<string, string>,
-): Promise<ProxyResult> {
+export async function registerStreamProxy(url: string, headers?: Record<string, string>): Promise<ProxyResult> {
   const r = await invoke<{ session_id: string; url: string }>("proxy_register", {
     args: { url, headers: headers ?? {} },
   });

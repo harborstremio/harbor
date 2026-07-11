@@ -1,13 +1,7 @@
 import { parseFilename, type LocalEntry } from "@/lib/local-library";
+import { findLocalArt, findNfo, findShowArt, findShowNfo, readNfo } from "@/lib/local-library/sidecars";
 import { effectiveTmdbLanguage } from "@/lib/providers/tmdb/tmdb-client";
 import { imageRequestLang } from "@/lib/providers/tmdb/tmdb-image-lang";
-import {
-  findLocalArt,
-  findNfo,
-  findShowArt,
-  findShowNfo,
-  readNfo,
-} from "@/lib/local-library/sidecars";
 
 export type ScannedFile = { path: string; filename: string; size: number };
 
@@ -31,11 +25,7 @@ export function hashPath(path: string): string {
   return `local-${(hash >>> 0).toString(36)}`;
 }
 
-export async function buildTmdbEntry(
-  f: ScannedFile,
-  parsed: Parsed,
-  tmdbKey: string | null,
-): Promise<LocalEntry> {
+export async function buildTmdbEntry(f: ScannedFile, parsed: Parsed, tmdbKey: string | null): Promise<LocalEntry> {
   let tmdb: TmdbLookup = {};
   if (tmdbKey) tmdb = await tmdbLookup(tmdbKey, parsed.title, parsed.year, parsed.type).catch(() => ({}));
   const needsReview = tmdbKey ? lowConfidence(parsed, tmdb) : false;
@@ -61,11 +51,7 @@ export async function buildTmdbEntry(
   };
 }
 
-export async function buildNfoEntry(
-  f: ScannedFile,
-  parsed: Parsed,
-  tmdbKey: string | null,
-): Promise<LocalEntry> {
+export async function buildNfoEntry(f: ScannedFile, parsed: Parsed, tmdbKey: string | null): Promise<LocalEntry> {
   const nfoPath = await findNfo(f.path);
   const nfo = nfoPath ? await readNfo(nfoPath) : null;
 
@@ -85,9 +71,7 @@ export async function buildNfoEntry(
     backdrop: files.backdrop ?? meta?.art?.backdrop,
   };
 
-  let title = (
-    isShow ? meta?.title || nfo?.showTitle || parsed.title : nfo?.title || parsed.title
-  ).trim();
+  let title = (isShow ? meta?.title || nfo?.showTitle || parsed.title : nfo?.title || parsed.title).trim();
   const year = meta?.year ?? parsed.year;
   let tmdbId = meta?.tmdbId ?? null;
   let imdbId = meta?.imdbId ?? null;
@@ -96,7 +80,7 @@ export async function buildNfoEntry(
   let runtime = meta?.runtime ?? null;
 
   if (tmdbKey && !tmdbId) {
-    const look = await tmdbLookup(tmdbKey, title, year, parsed.type).catch(() => ({} as TmdbLookup));
+    const look = await tmdbLookup(tmdbKey, title, year, parsed.type).catch(() => ({}) as TmdbLookup);
     if (look.tmdbId) tmdbId = look.tmdbId;
     if (!imdbId && look.imdbId) imdbId = look.imdbId;
     if (!art.poster && look.poster) poster = look.poster;
@@ -133,11 +117,7 @@ export async function buildNfoEntry(
 
 function lowConfidence(parsed: Parsed, tmdb: TmdbLookup): boolean {
   if (!tmdb.tmdbId) return true;
-  if (
-    parsed.year != null &&
-    tmdb.matchedYear != null &&
-    Math.abs(parsed.year - tmdb.matchedYear) > 1
-  ) {
+  if (parsed.year != null && tmdb.matchedYear != null && Math.abs(parsed.year - tmdb.matchedYear) > 1) {
     return true;
   }
   if (tmdb.matchedTitle) {

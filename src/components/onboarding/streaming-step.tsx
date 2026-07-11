@@ -1,8 +1,8 @@
-import { Check } from "lucide-react";
 import { ServiceLogo } from "@/components/service-logo";
 import { useT } from "@/lib/i18n";
 import { SERVICES } from "@/lib/providers/streaming";
 import { useSettings, type StreamingService } from "@/lib/settings";
+import { Check } from "lucide-react";
 
 export function StreamingStep() {
   const { settings, toggleStreaming } = useSettings();

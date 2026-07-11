@@ -1,9 +1,9 @@
-import { ChevronDown, Search } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { browseFetcher, listBrowseCatalogs, type BrowseCatalog } from "@/lib/catalog-browse";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { ChevronDown, Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const TYPE_LABELS: Record<string, string> = {
   movie: "Movies",
@@ -22,12 +22,7 @@ type Option = { value: string; label: string; sub?: string; logo?: string };
 function OptionIcon({ logo, label }: { logo?: string; label: string }) {
   if (logo)
     return (
-      <img
-        src={logo}
-        alt=""
-        draggable={false}
-        className="h-[18px] w-[18px] shrink-0 rounded-[5px] object-contain"
-      />
+      <img src={logo} alt="" draggable={false} className="h-[18px] w-[18px] shrink-0 rounded-[5px] object-contain" />
     );
   return (
     <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] bg-elevated text-[10px] font-bold text-ink-subtle ring-1 ring-edge-soft">
@@ -75,14 +70,10 @@ function PillSelect({
       <button
         onClick={() => setOpen((v) => !v)}
         className={`flex h-10 items-center gap-2 rounded-full border ps-3 pe-3.5 text-start transition-colors ${
-          open
-            ? "border-edge bg-elevated"
-            : "border-edge-soft bg-canvas/50 hover:border-edge hover:bg-canvas/70"
+          open ? "border-edge bg-elevated" : "border-edge-soft bg-canvas/50 hover:border-edge hover:bg-canvas/70"
         }`}
       >
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-          {label}
-        </span>
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{label}</span>
         {hasLogos && <OptionIcon logo={valueLogo} label={value} />}
         <span className="max-w-[180px] truncate text-[13.5px] font-medium text-ink">{value}</span>
         <ChevronDown size={14} className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`} />
@@ -214,10 +205,7 @@ export function CatalogBrowser() {
           <PillSelect
             label={t("Genre")}
             value={genre ?? t("All genres")}
-            options={[
-              { value: "", label: t("All genres") },
-              ...selected.genres.map((g) => ({ value: g, label: g })),
-            ]}
+            options={[{ value: "", label: t("All genres") }, ...selected.genres.map((g) => ({ value: g, label: g }))]}
             onChange={(v) => setGenre(v || null)}
             searchable
           />

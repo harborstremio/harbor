@@ -1,22 +1,9 @@
-import {
-  awardSourceMeta,
-  findAnyAwardWins,
-  groupWinsBySource,
-  type AwardSourceId,
-} from "@/lib/anime-awards";
+import { awardSourceMeta, findAnyAwardWins, groupWinsBySource, type AwardSourceId } from "@/lib/anime-awards";
 import { useT } from "@/lib/i18n";
 
 const MAX_LINES = 3;
 
-export function CrunchyrollAwardsCorner({
-  name,
-  year,
-  inline,
-}: {
-  name: string;
-  year?: number;
-  inline?: boolean;
-}) {
+export function CrunchyrollAwardsCorner({ name, year, inline }: { name: string; year?: number; inline?: boolean }) {
   const t = useT();
   const wins = findAnyAwardWins(name, year);
   if (wins.length === 0) return null;
@@ -39,9 +26,7 @@ export function CrunchyrollAwardsCorner({
       data-hero-awards
       onClick={(e) => {
         e.stopPropagation();
-        document
-          .getElementById("anime-awards-section")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("anime-awards-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
       }}
       className={`group flex max-w-xs flex-col items-end gap-2 rounded-2xl px-1 py-1 text-end transition-all duration-200 hover:-translate-y-0.5 ${
         inline ? "" : "absolute bottom-14 end-12"
@@ -65,9 +50,7 @@ export function CrunchyrollAwardsCorner({
             {lines.map((l, i) => (
               <span key={i}>{l}</span>
             ))}
-            {overflow > 0 && (
-              <span className="text-[12px] text-ink-subtle">{t("+{n} more", { n: overflow })}</span>
-            )}
+            {overflow > 0 && <span className="text-[12px] text-ink-subtle">{t("+{n} more", { n: overflow })}</span>}
           </div>
         </div>
       </div>

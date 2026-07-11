@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { fetchEpisodeList, nextUnwatchedAfter } from "@/lib/series-episodes";
 import type { Meta } from "@/lib/cinemeta";
-import type { PlayEpisode } from "@/lib/view";
+import { isNextAired, resurfaceCandidates, type AnimeMode } from "@/lib/cw-resurface";
 import { getEpisodeProgress } from "@/lib/episode-progress";
+import { fetchEpisodeList, nextUnwatchedAfter } from "@/lib/series-episodes";
 import { simklWatchedForId, statusForId, type WatchlistStatus } from "@/lib/simkl/list-status";
 import { episodeFromVideoId, isAnimeCwItem, libraryMetaType, type LibraryItem } from "@/lib/stremio";
-import { isNextAired, resurfaceCandidates, type AnimeMode } from "@/lib/cw-resurface";
+import type { PlayEpisode } from "@/lib/view";
+import { useEffect, useRef, useState } from "react";
 
 const FINISHED_RATIO = 0.9;
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -49,17 +49,7 @@ function watchedPredicate(
   const aniSet = anilistWatched.get(i._id);
   const simklCompleted = statusForId(simklStatus, i._id) === "completed";
   return (season: number, episode: number): boolean => {
-    const prog = getEpisodeProgress(
-      i._id,
-      season,
-      episode,
-      null,
-      traktImdb,
-      traktWatched,
-      undefined,
-      aniSet,
-      simklSet,
-    );
+    const prog = getEpisodeProgress(i._id, season, episode, null, traktImdb, traktWatched, undefined, aniSet, simklSet);
     if (prog.watched) return true;
     if (season === cur.season && episode === cur.episode) return finished;
     return simklCompleted;
@@ -118,10 +108,7 @@ export function useCwAdvance(
       const cur = currentEpisode(i);
       return (
         cur != null &&
-        watchedPredicate(i, cur, traktWatched, simklWatched, anilistWatched, simklStatus)(
-          cur.season,
-          cur.episode,
-        )
+        watchedPredicate(i, cur, traktWatched, simklWatched, anilistWatched, simklStatus)(cur.season, cur.episode)
       );
     });
     void (async () => {
@@ -211,7 +198,19 @@ export function useCwAdvance(
     return () => {
       cancelled = true;
     };
-  }, [items, tmdbKey, enabled, library, animeMode, watchedVersion, traktWatched, simklWatched, anilistWatched, simklStatus, animeVersion]);
+  }, [
+    items,
+    tmdbKey,
+    enabled,
+    library,
+    animeMode,
+    watchedVersion,
+    traktWatched,
+    simklWatched,
+    anilistWatched,
+    simklStatus,
+    animeVersion,
+  ]);
 
   if (!enabled) return items;
   const base =

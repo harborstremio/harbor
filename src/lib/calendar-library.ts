@@ -1,15 +1,11 @@
-import { meta as cinemetaMeta } from "./cinemeta";
-import { library, type LibraryItem } from "./stremio";
-import { readLocalEntries } from "./watchlist";
-import { fetchWatchlist as fetchTraktWatchlist } from "./trakt/watchlist";
-import { tvmazeUpcoming } from "./providers/tvmaze";
-import {
-  tmdbFindByImdb,
-  tmdbMovieRelease,
-  tmdbTvUpcoming,
-} from "./providers/tmdb/tmdb-calendar";
-import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, pickEpisodeTitle } from "./providers/anizip";
 import type { CalendarItem } from "./calendar";
+import { meta as cinemetaMeta } from "./cinemeta";
+import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, pickEpisodeTitle } from "./providers/anizip";
+import { tmdbFindByImdb, tmdbMovieRelease, tmdbTvUpcoming } from "./providers/tmdb/tmdb-calendar";
+import { tvmazeUpcoming } from "./providers/tvmaze";
+import { library, type LibraryItem } from "./stremio";
+import { fetchWatchlist as fetchTraktWatchlist } from "./trakt/watchlist";
+import { readLocalEntries } from "./watchlist";
 
 const SERIES_LIMIT = 80;
 const MOVIE_LIMIT = 80;
@@ -94,10 +90,7 @@ function animeNumericId(id: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-async function animeUpcoming(
-  id: string,
-  inWindow: (date: string) => boolean,
-): Promise<ResolvedSeries | null> {
+async function animeUpcoming(id: string, inWindow: (date: string) => boolean): Promise<ResolvedSeries | null> {
   const numId = animeNumericId(id);
   if (numId == null) return null;
   const mapping = id.startsWith("kitsu:")
@@ -140,10 +133,7 @@ async function tmdbSeries(
   return tmdbTvUpcoming(tmdbKey, tvId, inWindow);
 }
 
-async function cinemetaSeriesUpcoming(
-  id: string,
-  inWindow: (date: string) => boolean,
-): Promise<ResolvedSeries | null> {
+async function cinemetaSeriesUpcoming(id: string, inWindow: (date: string) => boolean): Promise<ResolvedSeries | null> {
   const imdb = id.startsWith("tt") ? id.split(":")[0] : null;
   if (!imdb) return null;
   const m = await cinemetaMeta("series", imdb).catch(() => null);
@@ -282,8 +272,7 @@ function gatherCandidates(
   }
   for (const t of trakt) {
     const id =
-      t.ids.imdb ??
-      (t.ids.tmdb ? (t.type === "movie" ? `tmdb:movie:${t.ids.tmdb}` : `tmdb:tv:${t.ids.tmdb}`) : null);
+      t.ids.imdb ?? (t.ids.tmdb ? (t.type === "movie" ? `tmdb:movie:${t.ids.tmdb}` : `tmdb:tv:${t.ids.tmdb}`) : null);
     if (!id) continue;
     add({
       id,
@@ -296,8 +285,7 @@ function gatherCandidates(
   return Array.from(byId.values());
 }
 
-const curatedFirst = (a: Candidate, b: Candidate) =>
-  (a.temp ? 1 : 0) - (b.temp ? 1 : 0) || b.mtime - a.mtime;
+const curatedFirst = (a: Candidate, b: Candidate) => (a.temp ? 1 : 0) - (b.temp ? 1 : 0) || b.mtime - a.mtime;
 
 export async function fetchLibraryCalendar(
   authKey: string,
@@ -348,8 +336,14 @@ export async function resolveSavedCalendar(
   opts: { tmdbKey: string },
 ): Promise<CalendarItem[]> {
   const inMonth = inMonthFactory(year, month);
-  const series = candidates.filter((c) => c.type === "series").sort(curatedFirst).slice(0, SERIES_LIMIT);
-  const movies = candidates.filter((c) => c.type === "movie").sort(curatedFirst).slice(0, MOVIE_LIMIT);
+  const series = candidates
+    .filter((c) => c.type === "series")
+    .sort(curatedFirst)
+    .slice(0, SERIES_LIMIT);
+  const movies = candidates
+    .filter((c) => c.type === "movie")
+    .sort(curatedFirst)
+    .slice(0, MOVIE_LIMIT);
 
   const out: CalendarItem[] = [];
 

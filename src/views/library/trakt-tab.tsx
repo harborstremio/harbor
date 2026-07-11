@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { fetchWatchedHistory, type HistoryItem } from "@/lib/trakt/history";
-import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { traktItemToMeta } from "@/lib/trakt/to-meta";
 import type { TraktItem } from "@/lib/trakt/types";
+import { fetchWatchlist } from "@/lib/trakt/watchlist";
+import { useEffect, useMemo, useState } from "react";
+
 import { historyItemsToDated } from "./history-tab";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 import {
   applyFilter,
   countByType,
@@ -61,17 +62,14 @@ export function TraktTab() {
 
   const [type, setType] = useState<TypeKey>("all");
   const [query, setQuery] = useState("");
-  const combined = useMemo(
-    () => [...watchlistEntries, ...historyEntries],
-    [watchlistEntries, historyEntries],
-  );
+  const combined = useMemo(() => [...watchlistEntries, ...historyEntries], [watchlistEntries, historyEntries]);
   const counts = useMemo(() => countByType(combined), [combined]);
   const visibleW = useMemo(() => applyFilter(watchlistEntries, type, query), [watchlistEntries, type, query]);
   const visibleH = useMemo(() => applyFilter(historyEntries, type, query), [historyEntries, type, query]);
 
   return (
     <section className="flex flex-col gap-10">
-      {(watchlistEntries.length + historyEntries.length) > 0 && (
+      {watchlistEntries.length + historyEntries.length > 0 && (
         <FilterBar
           type={type}
           setType={setType}
@@ -84,7 +82,9 @@ export function TraktTab() {
       <div className="flex flex-col gap-4">
         <div className="flex items-baseline gap-3">
           <h2 className="text-[18px] font-semibold text-ink">{tr("Trakt watchlist")}</h2>
-          <span className="text-[12px] text-ink-muted">{tr("{shown} of {total}", { shown: visibleW.length, total: watchlistEntries.length })}</span>
+          <span className="text-[12px] text-ink-muted">
+            {tr("{shown} of {total}", { shown: visibleW.length, total: watchlistEntries.length })}
+          </span>
         </div>
         {status === "loading" ? (
           <p className="text-[13px] text-ink-muted">{tr("Loading…")}</p>
@@ -99,7 +99,9 @@ export function TraktTab() {
       <div className="flex flex-col gap-4">
         <div className="flex items-baseline gap-3">
           <h2 className="text-[18px] font-semibold text-ink">{tr("Trakt history")}</h2>
-          <span className="text-[12px] text-ink-muted">{tr("{shown} of {total}", { shown: visibleH.length, total: historyEntries.length })}</span>
+          <span className="text-[12px] text-ink-muted">
+            {tr("{shown} of {total}", { shown: visibleH.length, total: historyEntries.length })}
+          </span>
         </div>
         {status === "loading" ? (
           <p className="text-[13px] text-ink-muted">{tr("Loading…")}</p>

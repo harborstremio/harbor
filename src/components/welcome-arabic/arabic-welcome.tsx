@@ -1,7 +1,8 @@
-import { useEffect } from "react";
-import { createPortal } from "react-dom";
 import { useMedia } from "@/components/hover-preview/scene";
 import { useSettings } from "@/lib/settings";
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+
 import {
   BODY_AR,
   BODY_EN,
@@ -87,11 +88,7 @@ export default function ArabicWelcome({ onFeedback }: { onFeedback?: () => void 
           {ENGLISH_LINE}
         </p>
 
-        <div
-          aria-hidden
-          style={riseStyle(390)}
-          className={`my-7 h-px w-16 bg-edge-soft ${riseClass}`}
-        />
+        <div aria-hidden style={riseStyle(390)} className={`my-7 h-px w-16 bg-edge-soft ${riseClass}`} />
 
         <div className="flex flex-col items-center">
           <p

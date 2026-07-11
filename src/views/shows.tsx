@@ -1,21 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CatalogRows } from "@/components/catalog/catalog-rows";
 import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
 import { ContinueCard } from "@/components/continue-card";
-import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
+import { TmdbNudge } from "@/components/nudge";
 import { PeekHero } from "@/components/peek-hero";
 import { Row, ScrollRootContext } from "@/components/row";
-import { TmdbNudge } from "@/components/nudge";
 import { TopRankCard } from "@/components/top-rank-card";
 import { useAuth } from "@/lib/auth";
 import { topSeries, type Meta } from "@/lib/cinemeta";
-import { useT } from "@/lib/i18n";
+import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
 import { publishResumeStates } from "@/lib/hover-preview/store";
+import { useT } from "@/lib/i18n";
 import { listPager } from "@/lib/list-pager";
-import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
-import { useSettings } from "@/lib/settings";
-import { cwSortKey, isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
 import { clearLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
@@ -23,8 +19,13 @@ import {
   manualWatchedVersion,
   subscribeManualWatched,
 } from "@/lib/manual-watched";
-import { useCwAdvance } from "./home/hooks/use-cw-advance";
+import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
+import { useSettings } from "@/lib/settings";
+import { cwSortKey, isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
 import { useScrollMemory, useView } from "@/lib/view";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+
+import { useCwAdvance } from "./home/hooks/use-cw-advance";
 import { buildShowHero, bucketCopy } from "./shows/hero-curation";
 import { showSpecs } from "./shows/show-specs";
 
@@ -71,7 +72,9 @@ export function Shows({ active = true }: { active?: boolean }) {
       setItems([]);
       return;
     }
-    library(authKey).then(setItems).catch(() => {});
+    library(authKey)
+      .then(setItems)
+      .catch(() => {});
   }, [authKey]);
 
   useEffect(() => {
@@ -80,9 +83,7 @@ export function Shows({ active = true }: { active?: boolean }) {
       if (settings.tmdbKey) {
         const heroPool = await buildShowHero(settings.tmdbKey).catch(() => [] as Meta[]);
         const specs = showSpecs(settings.tmdbKey);
-        const firstPages = await Promise.all(
-          specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
-        );
+        const firstPages = await Promise.all(specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])));
         if (cancelled) return;
         const built: ShowRow[] = specs
           .map((spec, i) => ({
@@ -312,15 +313,9 @@ function PageMast() {
   const copy = bucketCopy();
   return (
     <header data-tauri-drag-region className="flex flex-col gap-2">
-      <span className="text-[11px] font-bold uppercase tracking-[0.42em] text-ink-subtle">
-        {t(copy.kicker)}
-      </span>
-      <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
-        {t(copy.title)}
-      </h1>
-      <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">
-        {t(copy.subtitle)}
-      </p>
+      <span className="text-[11px] font-bold uppercase tracking-[0.42em] text-ink-subtle">{t(copy.kicker)}</span>
+      <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">{t(copy.title)}</h1>
+      <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">{t(copy.subtitle)}</p>
     </header>
   );
 }

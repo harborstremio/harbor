@@ -1,6 +1,7 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { dlog, dwarn } from "@/lib/debug";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
+
 import {
   hashFromMagnet,
   magnetFromHash,
@@ -65,10 +66,7 @@ export function createPremiumize(apiKey: string): DebridStore {
     };
   }
 
-  async function cacheCheckBatch(
-    batch: string[],
-    signal: AbortSignal,
-  ): Promise<DebridResult<CacheMap>> {
+  async function cacheCheckBatch(batch: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
     const params = new URLSearchParams();
     for (const h of batch) params.append("items[]", h);
     const r = await get<PmCacheCheck>(`/cache/check?${params.toString()}`, signal);
@@ -97,9 +95,7 @@ export function createPremiumize(apiKey: string): DebridStore {
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) Object.assign(merged, r.value.data);
     }
-    dlog(
-      `[pm] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`,
-    );
+    dlog(`[pm] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`);
     return { ok: true, data: merged };
   }
 
@@ -118,8 +114,7 @@ export function createPremiumize(apiKey: string): DebridStore {
     }
     const file = pickPmFile(content, fileIdx, hint);
     if (!file) return { ok: false, code: "no-video-file", status: 0 };
-    const url =
-      file.transcode_status === "finished" && file.stream_link ? file.stream_link : file.link;
+    const url = file.transcode_status === "finished" && file.stream_link ? file.stream_link : file.link;
     if (!url) return { ok: false, code: "no-link", status: 0 };
     return {
       ok: true,
@@ -190,7 +185,11 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
   if (!res.ok) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     return { ok: false, code: `http-${res.status}`, status: res.status, raw: body };
   }
   let body: PmEnvelope & T;
@@ -213,15 +212,14 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
 function pickPmFile(content: PmFile[], fileIdx: number | undefined, hint?: EpisodeHint): PmFile | null {
   if (content.length === 0) return null;
   if (fileIdx != null && content[fileIdx]) return content[fileIdx];
-  const videos = content.filter((f) =>
-    VIDEO_EXTS.some((ext) => (f.path ?? "").toLowerCase().endsWith(ext)),
-  );
+  const videos = content.filter((f) => VIDEO_EXTS.some((ext) => (f.path ?? "").toLowerCase().endsWith(ext)));
   const pool = videos.length > 0 ? videos : content;
-  const mi = matchEpisodeFileIndex(pool.map((f) => f.path ?? ""), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((f) => f.path ?? ""),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
-  return pool
-    .slice()
-    .sort((a, b) => Number(b.size ?? 0) - Number(a.size ?? 0))[0];
+  return pool.slice().sort((a, b) => Number(b.size ?? 0) - Number(a.size ?? 0))[0];
 }
 
 type PmEnvelope = {

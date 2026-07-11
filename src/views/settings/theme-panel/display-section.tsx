@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import previewPoster from "@/assets/preview/poster1.webp";
-import { useSettings } from "@/lib/settings";
+import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useEffect, useState } from "react";
+
 import { Section, Segmented, ToggleRow } from "../shared";
 
 export function DisplaySection() {
@@ -15,11 +16,15 @@ export function DisplaySection() {
     <>
       <Section
         title={t("Poster card style")}
-        subtitle={t("Tune the size and corner radius of every poster across Home, Discover, and your library. The preview updates live.")}
+        subtitle={t(
+          "Tune the size and corner radius of every poster across Home, Discover, and your library. The preview updates live.",
+        )}
       >
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
           <div className="flex shrink-0 flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-6 sm:w-[250px]">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Live preview")}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+              {t("Live preview")}
+            </span>
             <div className="flex justify-center py-1">
               <img
                 src={previewPoster}
@@ -65,13 +70,13 @@ export function DisplaySection() {
               <Segmented
                 value={posterSizeKey(settings.posterScale)}
                 options={POSTER_SIZES.map((p) => ({ value: p.value, label: p.label }))}
-                onChange={(v) =>
-                  update({ posterScale: POSTER_SIZES.find((p) => p.value === v)?.scale ?? 1 })
-                }
+                onChange={(v) => update({ posterScale: POSTER_SIZES.find((p) => p.value === v)?.scale ?? 1 })}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Corner radius")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Corner radius")}
+              </span>
               <Segmented
                 value={radiusKey(settings.posterRadius)}
                 options={POSTER_RADII.map((p) => ({ value: p.value, label: t(p.label) }))}
@@ -79,7 +84,9 @@ export function DisplaySection() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Load effect")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Load effect")}
+              </span>
               <Segmented
                 value={settings.posterEffect}
                 options={[
@@ -90,7 +97,9 @@ export function DisplaySection() {
                 onChange={(v) => update({ posterEffect: v as "blur" | "fade" | "off" })}
               />
               <p className="text-[12px] leading-relaxed text-ink-subtle">
-                {t("How posters appear as they load. Blur up looks smoothest; Fade is lighter on older or low-power devices; Instant turns it off.")}
+                {t(
+                  "How posters appear as they load. Blur up looks smoothest; Fade is lighter on older or low-power devices; Instant turns it off.",
+                )}
               </p>
             </div>
           </div>
@@ -99,7 +108,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Title text")}
-        subtitle={t("Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.")}
+        subtitle={t(
+          "Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.",
+        )}
       >
         <SizeSlider
           label={t("Row titles")}
@@ -121,7 +132,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Accessibility")}
-        subtitle={t("Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.")}
+        subtitle={t(
+          "Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.",
+        )}
       >
         <div className="flex items-center gap-4 px-1 py-1.5">
           <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Interface scale")}</span>
@@ -154,17 +167,16 @@ export function DisplaySection() {
       >
         <ToggleRow
           label={t("Show format chips on stream rows")}
-          sub={t("The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.")}
+          sub={t(
+            "The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.",
+          )}
           value={settings.showQualityBadge}
           onChange={(v) => update({ showQualityBadge: v })}
         />
         <QualityPreview />
       </Section>
 
-      <Section
-        title={t("Home hero")}
-        subtitle={t("Make the featured banner on Home bigger and sharper.")}
-      >
+      <Section title={t("Home hero")} subtitle={t("Make the featured banner on Home bigger and sharper.")}>
         <ToggleRow
           label={t("Full hero banner")}
           sub={t("Stretch the featured hero edge to edge and taller, across every layout.")}
@@ -181,7 +193,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Home hero shadow")}
-        subtitle={t("How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.")}
+        subtitle={t(
+          "How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.",
+        )}
       >
         <div className="flex items-center gap-4 px-1 py-1.5">
           <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Shadow")}</span>
@@ -194,9 +208,7 @@ export function DisplaySection() {
             onChange={(e) => update({ heroShadow: parseInt(e.target.value, 10) })}
             className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
           />
-          <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-            {settings.heroShadow}%
-          </span>
+          <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">{settings.heroShadow}%</span>
           {settings.heroShadow !== 100 && (
             <button
               onClick={() => update({ heroShadow: 100 })}
@@ -210,7 +222,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Trailer quality")}
-        subtitle={t("How sharp the trailer is when you hit the preview button. Auto picks from your connection speed. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.")}
+        subtitle={t(
+          "How sharp the trailer is when you hit the preview button. Auto picks from your connection speed. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.",
+        )}
       >
         <Segmented
           value={settings.trailerQuality}
@@ -225,14 +239,18 @@ export function DisplaySection() {
         />
         <ToggleRow
           label={t("Autoplay trailer on detail pages")}
-          sub={t("Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.")}
+          sub={t(
+            "Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.",
+          )}
           value={settings.detailTrailerAutoplay}
           onChange={(v) => update({ detailTrailerAutoplay: v })}
         />
         {settings.detailTrailerAutoplay && (
           <ToggleRow
             label={t("Start trailers with audio")}
-            sub={t("Detail page trailers begin unmuted. Falls back to muted if the browser blocks sound until you interact.")}
+            sub={t(
+              "Detail page trailers begin unmuted. Falls back to muted if the browser blocks sound until you interact.",
+            )}
             value={settings.detailTrailerAudio}
             onChange={(v) => update({ detailTrailerAudio: v })}
           />
@@ -242,15 +260,7 @@ export function DisplaySection() {
   );
 }
 
-function SizeSlider({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
+function SizeSlider({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   const t = useT();
   return (
     <div className="flex items-center gap-4 px-1 py-1.5">
@@ -264,9 +274,7 @@ function SizeSlider({
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
       />
-      <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-        {Math.round(value * 100)}%
-      </span>
+      <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">{Math.round(value * 100)}%</span>
       {value !== 1 && (
         <button
           onClick={() => onChange(1)}

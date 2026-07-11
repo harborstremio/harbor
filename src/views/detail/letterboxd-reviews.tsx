@@ -1,15 +1,15 @@
-import { Component, useCallback, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
-import { ExternalLink, Heart, Loader2, MessageCircle, RefreshCw, Users } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
-import { useLetterboxd } from "@/lib/stremboxd/provider";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import {
   fetchLetterboxdFriendsReviews,
   fetchLetterboxdReviewsDirect,
   type LetterboxdReview,
 } from "@/lib/stremboxd/client";
+import { useLetterboxd } from "@/lib/stremboxd/provider";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
+import { ExternalLink, Heart, Loader2, MessageCircle, RefreshCw, Users } from "lucide-react";
+import { Component, useCallback, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 
 class ReviewsBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -160,16 +160,17 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
         <div className="flex items-center gap-2">
           <MessageCircle size={18} className="text-amber-300" />
           <h2 className="text-[20px] font-bold text-ink">{t("Letterboxd Reviews")}</h2>
-          {reviews.length > 0 && (
-            <span className="text-[12px] text-ink-subtle">({reviews.length})</span>
-          )}
+          {reviews.length > 0 && <span className="text-[12px] text-ink-subtle">({reviews.length})</span>}
         </div>
         <div className="flex items-center gap-2">
           {/* Filters */}
           <div className="flex items-center gap-1 rounded-lg bg-elevated/40 p-0.5 ring-1 ring-edge-soft/60">
             <FilterBtn
               active={filter === "all"}
-              onClick={() => { setFilter("all"); setShowAll(false); }}
+              onClick={() => {
+                setFilter("all");
+                setShowAll(false);
+              }}
               icon={<MessageCircle size={12} />}
               label={t("All")}
               count={reviews.length}
@@ -177,7 +178,10 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
             {lb.isFullConnected && lb.username && (
               <FilterBtn
                 active={filter === "friends"}
-                onClick={() => { setFilter("friends"); setShowAll(false); }}
+                onClick={() => {
+                  setFilter("friends");
+                  setShowAll(false);
+                }}
                 icon={<Users size={12} />}
                 label={t("Friends")}
                 count={loadingFriends ? undefined : friendsReviews.length}
@@ -220,9 +224,11 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
       {visible.length > 0 && (
         <div className={`relative rounded-xl ${settings.blurComments && blurred ? "overflow-hidden" : ""}`}>
           {settings.blurComments && blurred && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center gap-3 pt-16 backdrop-blur-sm"
+            <div
+              className="absolute inset-0 z-10 flex flex-col items-center gap-3 pt-16 backdrop-blur-sm"
               style={{
-                background: "linear-gradient(to bottom, color-mix(in srgb, var(--color-canvas) 5%, transparent) 0%, color-mix(in srgb, var(--color-canvas) 78%, transparent) 40%, color-mix(in srgb, var(--color-canvas) 95%, transparent) 100%)",
+                background:
+                  "linear-gradient(to bottom, color-mix(in srgb, var(--color-canvas) 5%, transparent) 0%, color-mix(in srgb, var(--color-canvas) 78%, transparent) 40%, color-mix(in srgb, var(--color-canvas) 95%, transparent) 100%)",
               }}
             >
               <button
@@ -237,62 +243,67 @@ function LetterboxdReviewsInner({ meta, imdbId }: { meta: Meta; imdbId: string |
 
           <div className="flex flex-col gap-3">
             {visible.map((review, i) => (
-            <div key={`${review.author}-${i}`} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
-              <div className="shrink-0">
-                {review.avatar ? (
-                  <img
-                    src={review.avatar}
-                    alt={review.author}
-                    className="h-9 w-9 rounded-full object-cover"
-                    loading="lazy"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink-muted/20 text-[14px] font-semibold text-ink-muted">
-                    {review.author.charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => review.authorUrl && openUrl(review.authorUrl)}
-                    className="text-[13px] font-semibold text-ink transition-colors hover:text-amber-300"
-                  >
-                    {review.author || t("Anonymous")}
-                  </button>
-                  {review.rating && (
-                    <span className="text-[14px] leading-none text-amber-300">{review.rating}</span>
-                  )}
-                  {review.lang && review.lang !== "en" && (
-                    <span className="rounded-full bg-edge-soft/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-ink-subtle">
-                      {review.lang}
-                    </span>
-                  )}
-                  {review.date && (
-                    <span className="ms-auto text-[11px] text-ink-subtle">
-                      {new Date(review.date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
-                    </span>
+              <div key={`${review.author}-${i}`} className="flex gap-3 rounded-xl bg-elevated p-4 ring-1 ring-edge">
+                <div className="shrink-0">
+                  {review.avatar ? (
+                    <img
+                      src={review.avatar}
+                      alt={review.author}
+                      className="h-9 w-9 rounded-full object-cover"
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink-muted/20 text-[14px] font-semibold text-ink-muted">
+                      {review.author.charAt(0).toUpperCase()}
+                    </div>
                   )}
                 </div>
-                <p className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-ink-muted" dir="auto">
-                  {review.text}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => review.authorUrl && openUrl(review.authorUrl)}
+                      className="text-[13px] font-semibold text-ink transition-colors hover:text-amber-300"
+                    >
+                      {review.author || t("Anonymous")}
+                    </button>
+                    {review.rating && <span className="text-[14px] leading-none text-amber-300">{review.rating}</span>}
+                    {review.lang && review.lang !== "en" && (
+                      <span className="rounded-full bg-edge-soft/40 px-1.5 py-0.5 text-[9px] font-semibold uppercase text-ink-subtle">
+                        {review.lang}
+                      </span>
+                    )}
+                    {review.date && (
+                      <span className="ms-auto text-[11px] text-ink-subtle">
+                        {new Date(review.date).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    )}
+                  </div>
+                  <p
+                    className="mt-1.5 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-ink-muted"
+                    dir="auto"
+                  >
+                    {review.text}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {/* Load more button */}
-          {hiddenCount > 0 && (
-            <button
-              onClick={() => setShowAll(true)}
-              className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl border border-edge-soft bg-elevated/40 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
-            >
-              <Heart size={14} />
-              {t("Show {n} more reviews", { n: hiddenCount })}
-            </button>
-          )}
-        </div>
+            {/* Load more button */}
+            {hiddenCount > 0 && (
+              <button
+                onClick={() => setShowAll(true)}
+                className="mt-1 flex h-10 items-center justify-center gap-2 rounded-xl border border-edge-soft bg-elevated/40 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              >
+                <Heart size={14} />
+                {t("Show {n} more reviews", { n: hiddenCount })}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </section>
@@ -322,9 +333,7 @@ function FilterBtn({
       {icon}
       {label}
       {count != null && count > 0 && (
-        <span className={`rounded-full px-1 text-[9px] ${active ? "bg-canvas/20" : "bg-edge-soft/40"}`}>
-          {count}
-        </span>
+        <span className={`rounded-full px-1 text-[9px] ${active ? "bg-canvas/20" : "bg-edge-soft/40"}`}>{count}</span>
       )}
     </button>
   );

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { useEffect, useState } from "react";
 
 const EPISODE_EXAMPLES = [
   "The one where they go to the beach.",

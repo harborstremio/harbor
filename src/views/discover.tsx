@@ -1,34 +1,21 @@
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AwardTiles } from "@/components/award-tiles";
 import { BackToTop } from "@/components/back-to-top";
+import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
 import { CollectionsRow } from "@/components/collections-row";
 import { CriticsPick } from "@/components/critics-pick";
-import { LazyMount } from "@/components/lazy-mount";
 import { DiscoveryQueueCta } from "@/components/discovery-queue-cta";
 import { FeaturedBanner } from "@/components/featured-banner";
-import { AwardTiles } from "@/components/award-tiles";
 import { GenreTiles } from "@/components/genre-tiles";
 import { LanguageTiles } from "@/components/language-tiles";
-import { Row, ScrollRootContext } from "@/components/row";
-import { PickCard } from "@/components/pick-card";
-import type { Meta } from "@/lib/cinemeta";
-import { fetchCriticsPickList, fetchFeatured, getPool, selectDailyRows, type FeedItem } from "@/lib/feed";
-import { getStore, subscribe as subscribeTaste } from "@/lib/discover/store";
-import { getDownvotedIds, getUpvotedIds, subscribePrefs } from "@/lib/feed/preferences";
-import { recentlyPlayed, subscribePlayback, watchTitleKey } from "@/lib/playback-history";
-import { useSettings } from "@/lib/settings";
-import { useScrollMemory } from "@/lib/view";
-import { useLetterboxd } from "@/lib/stremboxd/provider";
-import { buildLetterboxdHomeRows } from "@/lib/stremboxd/home-rails";
+import { LazyMount } from "@/components/lazy-mount";
 import { LetterboxdRowMenu } from "@/components/letterboxd/letterboxd-row-menu";
-import { Rail } from "./discover/discover-rail";
-import { useDedupedRows } from "./discover/use-deduped-rows";
+import { PickCard } from "@/components/pick-card";
+import { Row, ScrollRootContext } from "@/components/row";
+import type { Meta } from "@/lib/cinemeta";
+import { getStore, subscribe as subscribeTaste } from "@/lib/discover/store";
+import { fetchCriticsPickList, fetchFeatured, getPool, selectDailyRows, type FeedItem } from "@/lib/feed";
 import { ANCHOR_AWARDS, ANCHOR_TOP_RATED } from "@/lib/feed/daily-rows-anchors";
-import type { HomeRow } from "./home/home-types";
-import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
-import { CatalogBrowser } from "@/views/discover/catalog-browser";
-import { SurpriseMe } from "@/views/discover/surprise-me";
-import { SectionEditBar } from "@/views/discover/section-edit-bar";
-import { RowControls } from "@/views/home/row-controls";
+import { getDownvotedIds, getUpvotedIds, subscribePrefs } from "@/lib/feed/preferences";
 import { useT } from "@/lib/i18n";
 import {
   applyPageRows,
@@ -40,6 +27,20 @@ import {
   togglePageRowHidden,
   usePageRows,
 } from "@/lib/page-rows";
+import { recentlyPlayed, subscribePlayback, watchTitleKey } from "@/lib/playback-history";
+import { useSettings } from "@/lib/settings";
+import { buildLetterboxdHomeRows } from "@/lib/stremboxd/home-rails";
+import { useLetterboxd } from "@/lib/stremboxd/provider";
+import { useScrollMemory } from "@/lib/view";
+import { CatalogBrowser } from "@/views/discover/catalog-browser";
+import { SectionEditBar } from "@/views/discover/section-edit-bar";
+import { SurpriseMe } from "@/views/discover/surprise-me";
+import { RowControls } from "@/views/home/row-controls";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { Rail } from "./discover/discover-rail";
+import { useDedupedRows } from "./discover/use-deduped-rows";
+import type { HomeRow } from "./home/home-types";
 
 const MAX_RAIL_PAGES = 10;
 const MIN_PAGE_YIELD = 4;
@@ -147,13 +148,7 @@ export function Discover({ active = true }: { active?: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [
-    settings.tmdbKey,
-    settings.region,
-    settings.feedLocaleBias,
-    settings.preferredLanguages,
-    settings.tmdbLanguage,
-  ]);
+  }, [settings.tmdbKey, settings.region, settings.feedLocaleBias, settings.preferredLanguages, settings.tmdbLanguage]);
 
   useEffect(() => {
     let timer = 0;
@@ -164,8 +159,7 @@ export function Discover({ active = true }: { active?: boolean }) {
     const dropWatched = () => {
       const watched = recentlyPlayed();
       if (watched.ids.size === 0 && watched.titles.size === 0) return;
-      const isWatched = (m: Meta) =>
-        watched.ids.has(m.id) || watched.titles.has(watchTitleKey(m.name));
+      const isWatched = (m: Meta) => watched.ids.has(m.id) || watched.titles.has(watchTitleKey(m.name));
       setFeatured((prev) => {
         const next = prev.filter((m) => !isWatched(m));
         return next.length === prev.length ? prev : next;
@@ -203,8 +197,7 @@ export function Discover({ active = true }: { active?: boolean }) {
     if (!active) return;
     const watched = recentlyPlayed();
     if (watched.ids.size === 0 && watched.titles.size === 0) return;
-    const isWatched = (m: Meta) =>
-      watched.ids.has(m.id) || watched.titles.has(watchTitleKey(m.name));
+    const isWatched = (m: Meta) => watched.ids.has(m.id) || watched.titles.has(watchTitleKey(m.name));
     setFeatured((prev) => prev.filter((m) => !isWatched(m)));
     setQueue((prev) => prev.filter((it) => !isWatched(it.meta)));
     setCriticsPickList((prev) => prev.filter((m) => !isWatched(m)));
@@ -288,30 +281,20 @@ export function Discover({ active = true }: { active?: boolean }) {
   const featuredIds = useMemo(() => new Set(featured.map((m) => m.id)), [featured]);
 
   const criticsPick = useMemo(() => {
-    const candidates = criticsPickList.filter(
-      (m) => !featuredIds.has(m.id) && m.background && m.description,
-    );
+    const candidates = criticsPickList.filter((m) => !featuredIds.has(m.id) && m.background && m.description);
     if (candidates.length === 0) {
       return criticsPickList.find((m) => !featuredIds.has(m.id)) ?? null;
     }
-    const dayOfYear = Math.floor(
-      (Date.now() - new Date(new Date().getUTCFullYear(), 0, 0).getTime()) / 86_400_000,
-    );
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getUTCFullYear(), 0, 0).getTime()) / 86_400_000);
     return candidates[dayOfYear % candidates.length];
   }, [criticsPickList, featuredIds]);
 
   const order = useMemo(() => dailyRows.map((r) => r.id), [dailyRows]);
   const deduped = useDedupedRows(rails, order, featuredIds, criticsPick?.id, DEDUP_PRIORITY);
 
-  const railItems = useMemo(
-    () => dailyRows.map((r) => ({ key: r.id, title: r.shelf.title })),
-    [dailyRows],
-  );
+  const railItems = useMemo(() => dailyRows.map((r) => ({ key: r.id, title: r.shelf.title })), [dailyRows]);
   const railKeys = useMemo(() => railItems.map((r) => r.key), [railItems]);
-  const visibleRails = useMemo(
-    () => applyPageRows(railItems, pageRows.custom, false),
-    [railItems, pageRows.custom],
-  );
+  const visibleRails = useMemo(() => applyPageRows(railItems, pageRows.custom, false), [railItems, pageRows.custom]);
   const editRails = useMemo(
     () =>
       applyPageRows(railItems, pageRows.custom, true).filter((item) => {
@@ -320,10 +303,7 @@ export function Discover({ active = true }: { active?: boolean }) {
       }),
     [railItems, pageRows.custom, deduped],
   );
-  const orderKeys = useMemo(
-    () => orderedRowKeys(railKeys, pageRows.custom),
-    [railKeys, pageRows.custom],
-  );
+  const orderKeys = useMemo(() => orderedRowKeys(railKeys, pageRows.custom), [railKeys, pageRows.custom]);
   const surprisePool = useMemo(() => {
     const seen = new Set<string>();
     const out: Meta[] = [];
@@ -394,9 +374,7 @@ export function Discover({ active = true }: { active?: boolean }) {
             </div>
           ) : (
             (!hiddenCatalog || !hiddenSurprise) && (
-              <div
-                className={`flex flex-wrap items-stretch gap-x-6 gap-y-4 ${!hiddenFeatured ? "-mt-8" : ""}`}
-              >
+              <div className={`flex flex-wrap items-stretch gap-x-6 gap-y-4 ${!hiddenFeatured ? "-mt-8" : ""}`}>
                 {!hiddenCatalog && <CatalogBrowser />}
                 {!hiddenSurprise && <SurpriseMe pool={surprisePool} />}
               </div>
@@ -406,34 +384,34 @@ export function Discover({ active = true }: { active?: boolean }) {
           {letterboxdRows.map((row, i) => {
             const catalogId = row.key.replace("letterboxd-", "");
             return (
-            <Row
-              key={row.key}
-              title={
-                <>
-                  {row.name}
-                  <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
-                    Letterboxd
-                  </span>
-                </>
-              }
-              titleExtra={
-                <LetterboxdRowMenu
-                  canMoveUp={i > 0}
-                  canMoveDown={i < letterboxdRows.length - 1}
-                  hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
-                  onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
-                  onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
-                  onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
-                />
-              }
-              min={148}
-              shape="portrait"
-              scrollKey={`discover:${row.key}`}
-            >
-              {row.metas.map((m) => (
-                <PickCard key={m.id} meta={m} />
-              ))}
-            </Row>
+              <Row
+                key={row.key}
+                title={
+                  <>
+                    {row.name}
+                    <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
+                      Letterboxd
+                    </span>
+                  </>
+                }
+                titleExtra={
+                  <LetterboxdRowMenu
+                    canMoveUp={i > 0}
+                    canMoveDown={i < letterboxdRows.length - 1}
+                    hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
+                    onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
+                    onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
+                    onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
+                  />
+                }
+                min={148}
+                shape="portrait"
+                scrollKey={`discover:${row.key}`}
+              >
+                {row.metas.map((m) => (
+                  <PickCard key={m.id} meta={m} />
+                ))}
+              </Row>
             );
           })}
 

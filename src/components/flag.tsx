@@ -104,9 +104,7 @@ export function Flag({
 
   if (!src) {
     return showLabel ? (
-      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-        {language}
-      </span>
+      <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{language}</span>
     ) : null;
   }
 
@@ -127,10 +125,7 @@ export function Flag({
         draggable={false}
       />
       {showLabel && (
-        <span
-          className="font-semibold tracking-[0.01em] text-ink-muted"
-          style={{ fontSize: LABEL_SIZE[size] }}
-        >
+        <span className="font-semibold tracking-[0.01em] text-ink-muted" style={{ fontSize: LABEL_SIZE[size] }}>
           {language}
         </span>
       )}
@@ -138,15 +133,7 @@ export function Flag({
   );
 }
 
-export function FlagStack({
-  languages,
-  max = 4,
-  size = "md",
-}: {
-  languages: string[];
-  max?: number;
-  size?: FlagSize;
-}) {
+export function FlagStack({ languages, max = 4, size = "md" }: { languages: string[]; max?: number; size?: FlagSize }) {
   if (languages.length === 0) return null;
   const shown = languages.slice(0, max);
   const extra = languages.length - shown.length;
@@ -197,10 +184,7 @@ export function FlagStack({
         );
       })}
       {extra > 0 && (
-        <span
-          className="text-[10px] font-semibold tracking-[0.04em] text-ink-subtle"
-          style={{ lineHeight: 1 }}
-        >
+        <span className="text-[10px] font-semibold tracking-[0.04em] text-ink-subtle" style={{ lineHeight: 1 }}>
           +{extra}
         </span>
       )}

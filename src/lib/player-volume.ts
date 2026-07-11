@@ -13,9 +13,7 @@ export function readPlayerVolume(): PlayerVolumePrefs {
     if (!raw) return DEFAULT;
     const parsed = JSON.parse(raw) as Partial<PlayerVolumePrefs>;
     const volume =
-      typeof parsed.volume === "number" && parsed.volume >= 0 && parsed.volume <= 6
-        ? parsed.volume
-        : DEFAULT.volume;
+      typeof parsed.volume === "number" && parsed.volume >= 0 && parsed.volume <= 6 ? parsed.volume : DEFAULT.volume;
     const muted = parsed.muted === true;
     return { volume, muted };
   } catch {

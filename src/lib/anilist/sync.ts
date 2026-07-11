@@ -1,5 +1,6 @@
 import { activeProfileId } from "@/lib/active-profile-id";
 import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
+
 import { AnilistApiError, anilistRequest } from "./client";
 import { isAuthenticated } from "./session";
 
@@ -146,11 +147,7 @@ export async function markAnimeWatching(harborId: string, title: string): Promis
   }
 }
 
-export async function syncAnimeProgress(
-  harborId: string,
-  episode: number | undefined,
-  title: string,
-): Promise<void> {
+export async function syncAnimeProgress(harborId: string, episode: number | undefined, title: string): Promise<void> {
   if (!isAuthenticated()) return;
   const ep = episode ?? 1;
   if (!Number.isFinite(ep) || ep < 1) return;

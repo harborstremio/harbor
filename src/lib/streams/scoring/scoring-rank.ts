@@ -1,5 +1,5 @@
-import type { DebridSlug, RankedPicker, ScoredStream, Tier } from "../types";
 import { hasUncachedMarker } from "../cached";
+import type { DebridSlug, RankedPicker, ScoredStream, Tier } from "../types";
 
 export function rankAndPick(
   scored: ScoredStream[],
@@ -14,9 +14,7 @@ export function rankAndPick(
   const ret = (s: ScoredStream) => s.addonReturnIdx ?? Number.MAX_SAFE_INTEGER;
   const all = scored
     .slice()
-    .sort((a, b) =>
-      respectAddonOrder ? pri(a) - pri(b) || ret(a) - ret(b) || b.score - a.score : b.score - a.score,
-    );
+    .sort((a, b) => (respectAddonOrder ? pri(a) - pri(b) || ret(a) - ret(b) || b.score - a.score : b.score - a.score));
   const cachedFirst = all.slice().sort((a, b) => {
     const ac = isCached(a) ? 1 : 0;
     const bc = isCached(b) ? 1 : 0;

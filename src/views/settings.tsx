@@ -1,35 +1,36 @@
-import { useEffect, useRef, useState } from "react";
-import { AccountStub } from "./settings/account";
-import { AdvancedPanel } from "./settings/advanced-panel";
-import { BasicsPanel } from "./settings/basics-panel";
-import { BugReportPanel } from "./settings/bug-report-panel";
-import { LibraryPanel, type LibraryKey } from "./settings/library-panel";
-import { LanguagePanel } from "./settings/language-panel";
-import { SettingsNav } from "./settings/nav";
-import { SettingsJumpBar } from "./settings/jump-bar";
-import { HotkeysPanel } from "./settings/hotkeys-panel";
-import { PlayerLayoutPanel } from "./settings/player-layout-panel";
-import { QualityPanel } from "./settings/quality-panel";
-import { MpvPanel } from "./settings/mpv-panel";
-import { P2PPanel } from "./settings/p2p-panel";
-import { AnimePanel } from "./settings/anime-panel";
-import { TraktPanel } from "./settings/trakt-panel";
-import { AnilistPanel } from "./settings/anilist-panel";
-import { MalPanel } from "./settings/mal-panel";
-import { SimklPanel } from "./settings/simkl-panel";
-import { LetterboxdPanel } from "./settings/letterboxd-panel";
-import { RelaySection, type RelayMode } from "./settings/relay-section";
-import { SettingsActiveContext, type SectionId } from "./settings/shared";
-import { StreamingSourcesPanel, type DebridKey } from "./settings/streaming-sources-panel";
-import { StreamFiltersPanel } from "./settings/stream-filters-panel";
-import { ThemePanel } from "./settings/theme-panel";
-import { WebhooksPanel } from "./settings/webhooks-panel";
 import { BackToTop } from "@/components/back-to-top";
+import { useT } from "@/lib/i18n";
 import { resetOmdbBudget } from "@/lib/providers/omdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { useEffect, useRef, useState } from "react";
+
+import { AccountStub } from "./settings/account";
+import { AdvancedPanel } from "./settings/advanced-panel";
+import { AnilistPanel } from "./settings/anilist-panel";
+import { AnimePanel } from "./settings/anime-panel";
+import { BasicsPanel } from "./settings/basics-panel";
+import { BugReportPanel } from "./settings/bug-report-panel";
+import { HotkeysPanel } from "./settings/hotkeys-panel";
+import { SettingsJumpBar } from "./settings/jump-bar";
+import { LanguagePanel } from "./settings/language-panel";
+import { LetterboxdPanel } from "./settings/letterboxd-panel";
+import { LibraryPanel, type LibraryKey } from "./settings/library-panel";
+import { MalPanel } from "./settings/mal-panel";
+import { MpvPanel } from "./settings/mpv-panel";
+import { SettingsNav } from "./settings/nav";
+import { P2PPanel } from "./settings/p2p-panel";
+import { PlayerLayoutPanel } from "./settings/player-layout-panel";
+import { QualityPanel } from "./settings/quality-panel";
+import { RelaySection, type RelayMode } from "./settings/relay-section";
+import { SettingsActiveContext, type SectionId } from "./settings/shared";
+import { SimklPanel } from "./settings/simkl-panel";
+import { StreamFiltersPanel } from "./settings/stream-filters-panel";
+import { StreamingSourcesPanel, type DebridKey } from "./settings/streaming-sources-panel";
+import { ThemePanel } from "./settings/theme-panel";
+import { TraktPanel } from "./settings/trakt-panel";
 import { SettingsUnsavedChanges } from "./settings/unsaved-changes";
+import { WebhooksPanel } from "./settings/webhooks-panel";
 
 const IS_WEB = typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
 
@@ -143,9 +144,7 @@ export function Settings({ active: activeView = true }: { active?: boolean }) {
   const [dlDraft, setDlDraft] = useState(settings.dlKey);
   const [savedKey, setSavedKey] = useState<SavedKey | null>(null);
   const { settingsSectionRequest } = useView();
-  const [active, setActive] = useState<SectionId>(
-    (settingsSectionRequest.section as SectionId | null) ?? "account",
-  );
+  const [active, setActive] = useState<SectionId>((settingsSectionRequest.section as SectionId | null) ?? "account");
   const [relayMode, setRelayMode] = useState<RelayMode>("panel");
   const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
   const scrollRef = useRef<HTMLElement>(null);
@@ -223,8 +222,7 @@ export function Settings({ active: activeView = true }: { active?: boolean }) {
     } else if (which === "rpdb") {
       if (trimmed) update({ rpdbKey: trimmed, showImdbBadge: false, showRtBadge: false });
       else update({ rpdbKey: trimmed });
-    }
-    else if (which === "fanart") update({ fanartKey: trimmed });
+    } else if (which === "fanart") update({ fanartKey: trimmed });
     else if (which === "tvdb") update({ tvdbKey: trimmed });
     else if (which === "rd") update({ rdKey: trimmed });
     else if (which === "tb") update({ tbKey: trimmed });
@@ -237,103 +235,98 @@ export function Settings({ active: activeView = true }: { active?: boolean }) {
 
   return (
     <SettingsActiveContext.Provider value={{ setActive }}>
-    <div className="flex h-full bg-canvas">
-      <SettingsNav active={active} onChange={handleNav} />
-      <main
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto pt-28 pb-16"
-      >
-        <div data-tauri-drag-region className="mx-auto flex max-w-3xl flex-col gap-10 px-12">
-          {!(active === "relay" && relayMode !== "panel") && (
-            <header className="flex flex-col gap-2">
-              <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
-                {t(SECTION_META[active].label)}
-              </h1>
-              <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
-            </header>
-          )}
+      <div className="flex h-full bg-canvas">
+        <SettingsNav active={active} onChange={handleNav} />
+        <main ref={scrollRef} className="flex-1 overflow-y-auto pt-28 pb-16">
+          <div data-tauri-drag-region className="mx-auto flex max-w-3xl flex-col gap-10 px-12">
+            {!(active === "relay" && relayMode !== "panel") && (
+              <header className="flex flex-col gap-2">
+                <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
+                  {t(SECTION_META[active].label)}
+                </h1>
+                <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
+              </header>
+            )}
 
-          {active === "basics" && <BasicsPanel />}
+            {active === "basics" && <BasicsPanel />}
 
-          {active === "account" && <AccountStub />}
+            {active === "account" && <AccountStub />}
 
-          {active === "library" && (
-            <LibraryPanel
-              tmdbDraft={tmdbDraft}
-              omdbDraft={omdbDraft}
-              rpdbDraft={rpdbDraft}
-              fanartDraft={fanartDraft}
-              tvdbDraft={tvdbDraft}
-              setTmdbDraft={setTmdbDraft}
-              setOmdbDraft={setOmdbDraft}
-              setRpdbDraft={setRpdbDraft}
-              setFanartDraft={setFanartDraft}
-              setTvdbDraft={setTvdbDraft}
-              savedKey={savedKey}
-              saveKey={saveKey}
-            />
-          )}
+            {active === "library" && (
+              <LibraryPanel
+                tmdbDraft={tmdbDraft}
+                omdbDraft={omdbDraft}
+                rpdbDraft={rpdbDraft}
+                fanartDraft={fanartDraft}
+                tvdbDraft={tvdbDraft}
+                setTmdbDraft={setTmdbDraft}
+                setOmdbDraft={setOmdbDraft}
+                setRpdbDraft={setRpdbDraft}
+                setFanartDraft={setFanartDraft}
+                setTvdbDraft={setTvdbDraft}
+                savedKey={savedKey}
+                saveKey={saveKey}
+              />
+            )}
 
-          {active === "relay" && (
-            <RelaySection mode={relayMode} onModeChange={setRelayMode} />
-          )}
+            {active === "relay" && <RelaySection mode={relayMode} onModeChange={setRelayMode} />}
 
-          {active === "streaming" && (
-            <StreamingSourcesPanel
-              rdDraft={rdDraft}
-              tbDraft={tbDraft}
-              adDraft={adDraft}
-              pmDraft={pmDraft}
-              dlDraft={dlDraft}
-              setRdDraft={setRdDraft}
-              setTbDraft={setTbDraft}
-              setAdDraft={setAdDraft}
-              setPmDraft={setPmDraft}
-              setDlDraft={setDlDraft}
-              savedKey={savedKey}
-              saveKey={saveKey}
-            />
-          )}
+            {active === "streaming" && (
+              <StreamingSourcesPanel
+                rdDraft={rdDraft}
+                tbDraft={tbDraft}
+                adDraft={adDraft}
+                pmDraft={pmDraft}
+                dlDraft={dlDraft}
+                setRdDraft={setRdDraft}
+                setTbDraft={setTbDraft}
+                setAdDraft={setAdDraft}
+                setPmDraft={setPmDraft}
+                setDlDraft={setDlDraft}
+                savedKey={savedKey}
+                saveKey={saveKey}
+              />
+            )}
 
-          {active === "streamFilters" && <StreamFiltersPanel />}
+            {active === "streamFilters" && <StreamFiltersPanel />}
 
-          {active === "p2p" && <P2PPanel />}
+            {active === "p2p" && <P2PPanel />}
 
-          {active === "language" && <LanguagePanel />}
+            {active === "language" && <LanguagePanel />}
 
-          {active === "player" && <QualityPanel />}
+            {active === "player" && <QualityPanel />}
 
-          {active === "mpv" && <MpvPanel />}
+            {active === "mpv" && <MpvPanel />}
 
-          {active === "anime" && <AnimePanel />}
+            {active === "anime" && <AnimePanel />}
 
-          {active === "playerLayout" && <PlayerLayoutPanel />}
+            {active === "playerLayout" && <PlayerLayoutPanel />}
 
-          {active === "hotkeys" && <HotkeysPanel />}
+            {active === "hotkeys" && <HotkeysPanel />}
 
-          {active === "trakt" && <TraktPanel />}
+            {active === "trakt" && <TraktPanel />}
 
-          {active === "anilist" && <AnilistPanel />}
+            {active === "anilist" && <AnilistPanel />}
 
-          {active === "mal" && <MalPanel />}
+            {active === "mal" && <MalPanel />}
 
-          {active === "simkl" && <SimklPanel />}
+            {active === "simkl" && <SimklPanel />}
 
-          {active === "letterboxd" && <LetterboxdPanel />}
+            {active === "letterboxd" && <LetterboxdPanel />}
 
-          {active === "theme" && <ThemePanel />}
+            {active === "theme" && <ThemePanel />}
 
-          {active === "webhooks" && <WebhooksPanel />}
+            {active === "webhooks" && <WebhooksPanel />}
 
-          {active === "bug" && <BugReportPanel />}
+            {active === "bug" && <BugReportPanel />}
 
-          {active === "advanced" && <AdvancedPanel />}
-        </div>
-      </main>
-      <BackToTop scrollRef={scrollRef} />
-      <SettingsJumpBar scrollRef={scrollRef} activeSection={active} />
-      <SettingsUnsavedChanges active={activeView} />
-    </div>
+            {active === "advanced" && <AdvancedPanel />}
+          </div>
+        </main>
+        <BackToTop scrollRef={scrollRef} />
+        <SettingsJumpBar scrollRef={scrollRef} activeSection={active} />
+        <SettingsUnsavedChanges active={activeView} />
+      </div>
     </SettingsActiveContext.Provider>
   );
 }

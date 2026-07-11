@@ -1,14 +1,11 @@
-import { useMemo } from "react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { useMemo } from "react";
 
 export function DoneStep() {
   const { settings } = useSettings();
   const t = useT();
-  const enabled = useMemo(
-    () => Object.values(settings.streaming).filter(Boolean).length,
-    [settings.streaming],
-  );
+  const enabled = useMemo(() => Object.values(settings.streaming).filter(Boolean).length, [settings.streaming]);
   return (
     <div className="flex flex-col items-center gap-6 pt-4 text-center">
       <DoneCheck />

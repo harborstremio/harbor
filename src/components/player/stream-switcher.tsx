@@ -1,29 +1,30 @@
-import { Filter, Languages, MousePointerClick, RefreshCw, X, Zap } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { HostSourceBanner } from "@/components/host-source-banner";
-import { Tooltip } from "./transport/tooltip";
 import { fetchInstalledAddons } from "@/lib/addon-store";
 import { userAddons, type Addon } from "@/lib/addons";
 import { useAuth } from "@/lib/auth";
+import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { peekPickerCache, subscribePickerCache } from "@/lib/picker-cache";
+import { useActiveKid } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
-import type { ScoredStream } from "@/lib/streams/types";
 import { hasCachedMarker } from "@/lib/streams/cached";
+import type { ScoredStream } from "@/lib/streams/types";
 import type { SourceDescriptor } from "@/lib/together/protocol";
 import { buildMatchScores, matchBadge } from "@/lib/together/source-match";
-import { addonInstanceKey, buildAddonOptions } from "@/views/play-picker/picker-utils";
-import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode, PlayerStreamRef } from "@/lib/view";
-import { useT } from "@/lib/i18n";
-import { useActiveKid } from "@/lib/profiles";
-import { AddonFilterMenu, QualityFilterMenu, SourceFilterMenu } from "./stream-switcher/filter-dropdowns";
+import { addonInstanceKey, buildAddonOptions } from "@/views/play-picker/picker-utils";
 import { sourceGroup } from "@/views/play-picker/quality-filter";
+import { Filter, Languages, MousePointerClick, RefreshCw, X, Zap } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+import { AddonFilterMenu, QualityFilterMenu, SourceFilterMenu } from "./stream-switcher/filter-dropdowns";
 import { KidsStreamSwitcher } from "./stream-switcher/kids-switcher";
 import { abbreviateLanguages, normalizeLangCode, streamMatchesLangs } from "./stream-switcher/lang-utils";
 import { QUALITY_BADGE, QUALITY_LABEL, QUALITY_ORDER, qualityKey, type QualityKey } from "./stream-switcher/quality";
 import { isCurrentStream, streamKey, SwitcherRow } from "./stream-switcher/switcher-row";
 import { useSwitcherRefresh } from "./stream-switcher/use-switcher-refresh";
+import { Tooltip } from "./transport/tooltip";
 
 function isHiddenAddon(addonId: string, addonName?: string): boolean {
   const id = (addonId || "").toLowerCase();
@@ -65,8 +66,7 @@ export function StreamSwitcher({
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const baseLangs = settings.preferredLanguages ?? [];
-  const isAnimeRequest =
-    typeof meta.id === "string" && (meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:"));
+  const isAnimeRequest = typeof meta.id === "string" && (meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:"));
   const preferredLangs = useMemo(() => {
     const codes = settings.preferredAudioLangs ?? [];
     const animeAdd = isAnimeRequest ? ["Japanese"] : [];
@@ -88,10 +88,7 @@ export function StreamSwitcher({
     settings.requirePreferredLanguage === true && preferredLangs.length > 0,
   );
 
-  useEffect(
-    () => subscribePickerCache(() => setCache(peekPickerCache(meta, episode))),
-    [meta, episode],
-  );
+  useEffect(() => subscribePickerCache(() => setCache(peekPickerCache(meta, episode))), [meta, episode]);
 
   const { refreshing, refresh } = useSwitcherRefresh({ meta, episode, imdbId: imdbId ?? null, active: open });
 
@@ -191,9 +188,7 @@ export function StreamSwitcher({
       counts.set(g, (counts.get(g) ?? 0) + 1);
     }
     const order = ["Remux", "BluRay", "WEB-DL", "WEBRip", "HDTV", "CAM"];
-    return order
-      .filter((g) => (counts.get(g) ?? 0) > 0)
-      .map((g) => ({ id: g, name: g, count: counts.get(g) ?? 0 }));
+    return order.filter((g) => (counts.get(g) ?? 0) > 0).map((g) => ({ id: g, name: g, count: counts.get(g) ?? 0 }));
   }, [allStreams]);
   useEffect(() => {
     if (sourceFilter !== "all" && !sourceOptions.some((o) => o.id === sourceFilter)) {
@@ -251,10 +246,7 @@ export function StreamSwitcher({
       return addonMatch && resMatch && sizeMatch;
     };
   }, [currentUrl, currentInfoHash, currentFileIdx, currentRef]);
-  const currentStream = useMemo(
-    () => allStreams.find((s) => matchCurrent(s)) ?? null,
-    [allStreams, matchCurrent],
-  );
+  const currentStream = useMemo(() => allStreams.find((s) => matchCurrent(s)) ?? null, [allStreams, matchCurrent]);
   const list = useMemo(() => {
     if (!currentStream) return filteredList;
     const curKey = streamKey(currentStream);
@@ -267,7 +259,7 @@ export function StreamSwitcher({
   const hiddenCount = addonFilteredList.length - matchedStreams.length;
   const uncachedHidden = allStreams.length - cachedStreams.length;
   const activeAddonName =
-    addonFilter === "all" ? t("All addons") : addonOptions.find((o) => o.id === addonFilter)?.name ?? addonFilter;
+    addonFilter === "all" ? t("All addons") : (addonOptions.find((o) => o.id === addonFilter)?.name ?? addonFilter);
   void cache?.meta.name;
   void cache?.episode;
 
@@ -308,11 +300,7 @@ export function StreamSwitcher({
               </button>
             </Tooltip>
             <span className="text-[13px] font-semibold tracking-[0.01em] text-ink-muted whitespace-nowrap">
-              {refreshing
-                ? t("Refreshing…")
-                : cache
-                  ? t("{n} sources", { n: list.length })
-                  : t("No sources")}
+              {refreshing ? t("Refreshing…") : cache ? t("{n} sources", { n: list.length }) : t("No sources")}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -466,4 +454,3 @@ export function StreamSwitcher({
     </div>
   );
 }
-

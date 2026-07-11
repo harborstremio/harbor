@@ -16,9 +16,5 @@ declare module "gifenc" {
     maxColors: number,
     opts?: { format?: string; oneBitAlpha?: boolean; clearAlpha?: boolean },
   ): Palette;
-  export function applyPalette(
-    rgba: Uint8Array | Uint8ClampedArray,
-    palette: Palette,
-    format?: string,
-  ): Uint8Array;
+  export function applyPalette(rgba: Uint8Array | Uint8ClampedArray, palette: Palette, format?: string): Uint8Array;
 }

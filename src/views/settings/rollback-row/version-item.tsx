@@ -1,9 +1,10 @@
-import { ArrowDownToLine, Check } from "lucide-react";
-import { useState } from "react";
 import { BetaTag } from "@/components/beta-tag";
 import { useT } from "@/lib/i18n";
 import { installerUrl, type VersionEntry } from "@/lib/updater/versions";
 import { openUrl } from "@/lib/window";
+import { ArrowDownToLine, Check } from "lucide-react";
+import { useState } from "react";
+
 import { VersionNotesModal } from "./version-notes-modal";
 
 const RELEASES_URL = "https://github.com/harborstremio/harbor/releases";
@@ -35,9 +36,7 @@ export function VersionItem({ entry, isCurrent }: { entry: VersionEntry; isCurre
           )}
           {entry.date && <span className="text-[11.5px] text-ink-subtle">{entry.date}</span>}
         </div>
-        {entry.notes && (
-          <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">{entry.notes}</span>
-        )}
+        {entry.notes && <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">{entry.notes}</span>}
       </button>
 
       {isCurrent ? (

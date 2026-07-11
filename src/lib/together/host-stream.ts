@@ -1,7 +1,7 @@
 import { parseStream } from "@/lib/streams/parser/parser-stream";
-import { directStreamAvailable } from "@/lib/torrent/stremio-stream";
 import type { ScoredStream, Tier } from "@/lib/streams/types";
 import type { SourceDescriptor } from "@/lib/together/protocol";
+import { directStreamAvailable } from "@/lib/torrent/stremio-stream";
 
 function tierForResolution(res: string): Tier {
   if (res === "4K") return "4K";

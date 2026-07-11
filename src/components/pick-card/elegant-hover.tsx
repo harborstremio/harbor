@@ -1,19 +1,11 @@
-import { Check, Heart, Play } from "lucide-react";
-import { useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { markMovieWatched } from "@/lib/mark-watched";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
-import { useT } from "@/lib/i18n";
+import { Check, Heart, Play } from "lucide-react";
+import { useState } from "react";
 
-export function ElegantHoverActions({
-  meta,
-  onPlay,
-  preview,
-}: {
-  meta: Meta;
-  onPlay: () => void;
-  preview?: boolean;
-}) {
+export function ElegantHoverActions({ meta, onPlay, preview }: { meta: Meta; onPlay: () => void; preview?: boolean }) {
   const t = useT();
   const inWatchlist = useInWatchlist(meta.id);
   const [watched, setWatched] = useState(false);

@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSettings } from "@/lib/settings";
+import type { Meta } from "@/lib/cinemeta";
 import { headersFromChannel } from "@/lib/iptv/channel-headers";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
-import type { Meta } from "@/lib/cinemeta";
+import { useSettings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-export function useLiveChannelOverlay(params: {
-  src: PlayerSrc;
-  replacePlayerSrc: (src: PlayerSrc) => void;
-}) {
+export function useLiveChannelOverlay(params: { src: PlayerSrc; replacePlayerSrc: (src: PlayerSrc) => void }) {
   const { src, replacePlayerSrc } = params;
   const { settings } = useSettings();
   const [open, setOpen] = useState(false);

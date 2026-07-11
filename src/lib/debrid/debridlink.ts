@@ -1,6 +1,7 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { dlog, dwarn } from "@/lib/debug";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
+
 import {
   hashFromMagnet,
   magnetFromHash,
@@ -55,9 +56,7 @@ export function createDebridLink(apiKey: string): DebridStore {
     const r = await get<DlEnvelope<DlUser>>("/account/infos", signal);
     if (!r.ok) return r;
     const u = r.data.value;
-    const expiresAt = typeof u?.premiumLeft === "number"
-      ? Math.floor(Date.now() / 1000) + u.premiumLeft
-      : undefined;
+    const expiresAt = typeof u?.premiumLeft === "number" ? Math.floor(Date.now() / 1000) + u.premiumLeft : undefined;
     return {
       ok: true,
       data: {
@@ -70,10 +69,7 @@ export function createDebridLink(apiKey: string): DebridStore {
     };
   }
 
-  async function cacheCheckBatch(
-    batch: string[],
-    signal: AbortSignal,
-  ): Promise<DebridResult<CacheMap>> {
+  async function cacheCheckBatch(batch: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
     const r = await get<DlEnvelope<Record<string, DlCacheEntry>>>(
       `/seedbox/cached?url=${encodeURIComponent(batch.join(","))}`,
       signal,
@@ -105,9 +101,7 @@ export function createDebridLink(apiKey: string): DebridStore {
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) Object.assign(merged, r.value.data);
     }
-    dlog(
-      `[dl] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`,
-    );
+    dlog(`[dl] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`);
     return { ok: true, data: merged };
   }
 
@@ -120,11 +114,7 @@ export function createDebridLink(apiKey: string): DebridStore {
     const fullMagnet = magnetFromHash(magnet);
     const hash = hashFromMagnet(magnet);
 
-    const add = await postForm<DlEnvelope<DlSeedbox>>(
-      "/seedbox/add",
-      { url: fullMagnet, async: "true" },
-      signal,
-    );
+    const add = await postForm<DlEnvelope<DlSeedbox>>("/seedbox/add", { url: fullMagnet, async: "true" }, signal);
     if (!add.ok) return add;
     const id = add.data.value?.id;
     if (!id) return { ok: false, code: "no-id", status: 0, raw: add.data };
@@ -139,7 +129,7 @@ export function createDebridLink(apiKey: string): DebridStore {
       const r = await get<DlEnvelope<DlSeedbox>>(`/seedbox/list?ids=${encodeURIComponent(id)}`, signal);
       if (!r.ok) return r;
       const arr = (r.data.value as unknown as DlSeedbox[]) ?? [];
-      info = Array.isArray(arr) ? arr[0] ?? null : (r.data.value as DlSeedbox);
+      info = Array.isArray(arr) ? (arr[0] ?? null) : (r.data.value as DlSeedbox);
       if (!info) {
         await sleep(POLL_DELAY_MS, signal);
         continue;
@@ -258,15 +248,18 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   }
   if (res.status === 401 || res.status === 403) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     const errMsg = (body as DlError)?.error ?? (body as DlError)?.message ?? "";
     const code = /subscription|premium/i.test(errMsg) ? "not-premium" : "unauthorized";
     return { ok: false, code, status: res.status, raw: body };
   }
   if (res.status === 402) return { ok: false, code: "not-premium", status: 402 };
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
-  if (res.status === 503 || res.status === 504)
-    return { ok: false, code: "upstream-unavailable", status: res.status };
+  if (res.status === 503 || res.status === 504) return { ok: false, code: "upstream-unavailable", status: res.status };
   if (res.status === 204) return { ok: true, data: undefined as unknown as T };
   if (!res.ok) {
     let body: unknown;
@@ -293,11 +286,12 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
 function pickDlFile(files: DlFile[], fileIdx: number | undefined, hint?: EpisodeHint): DlFile | null {
   if (files.length === 0) return null;
   if (fileIdx != null && files[fileIdx]) return files[fileIdx];
-  const videos = files.filter((f) =>
-    VIDEO_EXTS.some((ext) => (f.name ?? "").toLowerCase().endsWith(ext)),
-  );
+  const videos = files.filter((f) => VIDEO_EXTS.some((ext) => (f.name ?? "").toLowerCase().endsWith(ext)));
   const pool = videos.length > 0 ? videos : files;
-  const mi = matchEpisodeFileIndex(pool.map((f) => f.name ?? ""), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((f) => f.name ?? ""),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0] ?? null;
 }

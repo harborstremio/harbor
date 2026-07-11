@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { readResumeMs, saveResumeMs } from "@/lib/resume";
+import { useSettings } from "@/lib/settings";
 import { cloudWriteId, episodeFromVideoId, libraryGetOne } from "@/lib/stremio";
 import type { PlayerSrc } from "@/lib/view";
+import { useEffect, useRef, useState, type RefObject } from "react";
+
 import { videoIdFor } from "./use-stremio-sync";
-import { useSettings } from "@/lib/settings";
 
 const RESUME_PROMPT_MIN_SEC = 30;
 const RESTART_THRESHOLD = 0.8;
@@ -26,18 +27,8 @@ export function useBridgeLoad(params: {
   pendingSeekSec: number | null;
   clearPendingSeek: () => void;
 } {
-  const {
-    bridgeRef,
-    inRoomRef,
-    isHostRef,
-    bridgeReady,
-    bridgeKey,
-    src,
-    transcodedUrl,
-    season,
-    episode,
-    authKey,
-  } = params;
+  const { bridgeRef, inRoomRef, isHostRef, bridgeReady, bridgeKey, src, transcodedUrl, season, episode, authKey } =
+    params;
 
   const { settings } = useSettings();
   const resumePromptRef = useRef(settings.resumePrompt);
@@ -67,26 +58,23 @@ export function useBridgeLoad(params: {
       (!!src.meta.type && !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
     let cancelled = false;
     (async () => {
-      const openingVid = videoIdFor(
-        src,
-        cloudWriteId(src.meta.id, src.imdbId ?? null, src.imdbIdVerified === true),
-      );
-      const resolved = isLive || src.startFromZero
-        ? { ms: 0, fromRemote: false, finished: false }
-        : await resolveStartMs(
-            src.meta.id,
-            season,
-            episode,
-            authKey,
-            src.imdbId ?? null,
-            src.imdbIdVerified === true,
-            openingVid,
-          );
+      const openingVid = videoIdFor(src, cloudWriteId(src.meta.id, src.imdbId ?? null, src.imdbIdVerified === true));
+      const resolved =
+        isLive || src.startFromZero
+          ? { ms: 0, fromRemote: false, finished: false }
+          : await resolveStartMs(
+              src.meta.id,
+              season,
+              episode,
+              authKey,
+              src.imdbId ?? null,
+              src.imdbIdVerified === true,
+              openingVid,
+            );
       const startMs = resolved.ms;
       const runtimeMin = src.episode?.runtime ?? null;
       const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60_000 : 0;
-      const finishedNearEnd =
-        resolved.finished || (durationMs > 0 && startMs / durationMs >= RESTART_THRESHOLD);
+      const finishedNearEnd = resolved.finished || (durationMs > 0 && startMs / durationMs >= RESTART_THRESHOLD);
       const startSec = (!resumePlaybackRef.current || finishedNearEnd ? 0 : startMs) / 1000;
       const guestInRoom = inRoomRef.current && !isHostRef.current;
       const eligibleForPrompt =
@@ -159,7 +147,18 @@ export function useBridgeLoad(params: {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridgeReady, bridgeKey, src.url, src.notWebReady, src.meta.id, src.subtitles, season, episode, transcodedUrl, authKey]);
+  }, [
+    bridgeReady,
+    bridgeKey,
+    src.url,
+    src.notWebReady,
+    src.meta.id,
+    src.subtitles,
+    season,
+    episode,
+    transcodedUrl,
+    authKey,
+  ]);
 
   useEffect(() => {
     lastLoadedUrlRef.current = null;
@@ -186,9 +185,7 @@ async function resolveStartMs(
   const local = readResumeMs(metaId, season, episode);
   const isEpisode = typeof season === "number" && typeof episode === "number";
   if (!authKey) return { ms: local, fromRemote: false, finished: false };
-  const matchesEpisode = (
-    item: { state?: { season?: number; episode?: number; video_id?: string } } | null,
-  ) => {
+  const matchesEpisode = (item: { state?: { season?: number; episode?: number; video_id?: string } } | null) => {
     if (!item) return false;
     if (typeof season !== "number" || typeof episode !== "number") return true;
     const vid = item.state?.video_id;
@@ -210,8 +207,7 @@ async function resolveStartMs(
     const remoteDuration = remote.state?.duration ?? 0;
     const flaggedWatched = (remote.state as { flaggedWatched?: number })?.flaggedWatched === 1;
     const finished =
-      isEpisode &&
-      (flaggedWatched || (remoteDuration > 0 && remoteMs / remoteDuration >= RESTART_THRESHOLD));
+      isEpisode && (flaggedWatched || (remoteDuration > 0 && remoteMs / remoteDuration >= RESTART_THRESHOLD));
     if (remoteMs >= local) {
       if (remoteMs > local) saveResumeMs(metaId, remoteMs, season, episode);
       return { ms: remoteMs, fromRemote: true, finished };

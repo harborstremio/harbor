@@ -1,9 +1,10 @@
-import { useEffect } from "react";
-import { X } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
 import type { CalendarItem } from "@/lib/calendar";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { X } from "lucide-react";
+import { useEffect } from "react";
+
 import { formatDateLong } from "./utils";
 
 export function DayModal({
@@ -37,16 +38,10 @@ export function DayModal({
       >
         <header className="flex items-center justify-between gap-4 border-b border-edge-soft px-6 py-5">
           <div className="flex flex-col">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">
-              {t("Releases")}
-            </span>
-            <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
-              {formatDateLong(dateISO)}
-            </h2>
+            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">{t("Releases")}</span>
+            <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">{formatDateLong(dateISO)}</h2>
             <span className="mt-0.5 text-[12.5px] text-ink-muted">
-              {items.length === 1
-                ? t("{n} title", { n: items.length })
-                : t("{n} titles", { n: items.length })}
+              {items.length === 1 ? t("{n} title", { n: items.length }) : t("{n} titles", { n: items.length })}
             </span>
           </div>
           <button
@@ -67,13 +62,7 @@ export function DayModal({
   );
 }
 
-function DayModalRow({
-  item,
-  onOpen,
-}: {
-  item: CalendarItem;
-  onOpen: (item: CalendarItem) => void;
-}) {
+function DayModalRow({ item, onOpen }: { item: CalendarItem; onOpen: (item: CalendarItem) => void }) {
   const t = useT();
   const { settings } = useSettings();
   const poster = usePosterChain(
@@ -95,13 +84,7 @@ function DayModalRow({
     >
       <div className="h-[78px] w-[52px] shrink-0 overflow-hidden rounded-md bg-elevated/50 ring-1 ring-edge-soft">
         {item.poster ? (
-          <Poster
-            src={poster.src}
-            onError={poster.onError}
-            seed={item.id}
-            ratio="portrait"
-            className="h-full w-full"
-          />
+          <Poster src={poster.src} onError={poster.onError} seed={item.id} ratio="portrait" className="h-full w-full" />
         ) : null}
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -118,9 +101,7 @@ function DayModalRow({
           )}
         </div>
         <p className="text-[14px] font-semibold leading-tight text-ink">{item.name}</p>
-        {item.overview && (
-          <p className="line-clamp-2 text-[12px] leading-relaxed text-ink-muted">{item.overview}</p>
-        )}
+        {item.overview && <p className="line-clamp-2 text-[12px] leading-relaxed text-ink-muted">{item.overview}</p>}
       </div>
     </button>
   );

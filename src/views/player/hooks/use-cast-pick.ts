@@ -1,15 +1,11 @@
-import { useCallback, useEffect, useState, type RefObject } from "react";
-import {
-  guessContentType,
-  type CastDeviceInfo,
-  type CastSubInfo,
-  type CastSubStyle,
-} from "@/lib/cast";
+import { guessContentType, type CastDeviceInfo, type CastSubInfo, type CastSubStyle } from "@/lib/cast";
 import { useDebridClients } from "@/lib/debrid/registry";
 import type { PlayerBridge, PlayerSnapshot, TrackInfo } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
+import { useCallback, useEffect, useState, type RefObject } from "react";
+
 import { resolveCompatibleCastUrl } from "../cast-resolve";
 import type { useCastSession } from "./use-cast-session";
 
@@ -129,9 +125,7 @@ export function useCastPick(params: {
         );
       }
       if (resolved.kind === "transcode") {
-        console.info(
-          `[cast] transcoding for ${resolved.caps.label}: ${resolved.reasons.join(", ")}`,
-        );
+        console.info(`[cast] transcoding for ${resolved.caps.label}: ${resolved.reasons.join(", ")}`);
       }
       const isLiveIptv = src.meta.id?.startsWith("iptv:") ?? false;
       const burnSub = burnSubsOnTv ? buildCastSub(snap.subtitleTracks) : null;
@@ -148,9 +142,7 @@ export function useCastPick(params: {
             ? "application/x-mpegURL"
             : guessContentType(resolved.url, src.streamRef?.title ?? src.title),
           startTimeSec: isLiveIptv ? 0 : getPlaybackPosition(),
-          headers: isLiveIptv
-            ? { "user-agent": "VLC/3.0.20 LibVLC/3.0.20" }
-            : undefined,
+          headers: isLiveIptv ? { "user-agent": "VLC/3.0.20 LibVLC/3.0.20" } : undefined,
           transcode: forceTranscode,
           profile,
           subtitle: burnSub,

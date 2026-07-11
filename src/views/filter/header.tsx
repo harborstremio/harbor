@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Building2, Calendar, ChevronDown, Clock, Globe, Languages, Tag, Tv } from "lucide-react";
-import { useT } from "@/lib/i18n";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
+import { useT } from "@/lib/i18n";
 import { useView, type MetaFilter } from "@/lib/view";
+import { Building2, Calendar, ChevronDown, Clock, Globe, Languages, Tag, Tv } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { runtimeRange } from "./rails-config";
 
 export function Header({ filter }: { filter: MetaFilter }) {
@@ -14,16 +15,12 @@ export function Header({ filter }: { filter: MetaFilter }) {
         <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-elevated/70 text-ink-muted">
           <Icon size={16} strokeWidth={2} />
         </span>
-        <span className="text-[12.5px] font-medium uppercase tracking-[0.22em] text-ink-subtle">
-          {kicker}
-        </span>
+        <span className="text-[12.5px] font-medium uppercase tracking-[0.22em] text-ink-subtle">{kicker}</span>
       </div>
       {filter.kind === "genre" ? (
         <GenreSwitcher activeName={title} mediaType={filter.mediaType} />
       ) : (
-        <h1 className="mt-3 font-display text-[64px] font-medium leading-[0.95] tracking-tight text-ink">
-          {title}
-        </h1>
+        <h1 className="mt-3 font-display text-[64px] font-medium leading-[0.95] tracking-tight text-ink">{title}</h1>
       )}
       <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-muted">{subtitle}</p>
       {filter.kind === "country" && <MediaTypeToggle filter={filter} />}
@@ -46,9 +43,7 @@ function MediaTypeToggle({ filter }: { filter: MetaFilter }) {
           type="button"
           onClick={() => set(m)}
           className={`rounded-full px-5 py-1.5 text-[13px] font-semibold transition-colors ${
-            filter.mediaType === m
-              ? "bg-ink text-canvas"
-              : "text-ink-muted hover:bg-raised hover:text-ink"
+            filter.mediaType === m ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
           }`}
         >
           {m === "tv" ? t("Shows") : t("Movies")}
@@ -58,13 +53,7 @@ function MediaTypeToggle({ filter }: { filter: MetaFilter }) {
   );
 }
 
-function GenreSwitcher({
-  activeName,
-  mediaType,
-}: {
-  activeName: string;
-  mediaType: "movie" | "tv";
-}) {
+function GenreSwitcher({ activeName, mediaType }: { activeName: string; mediaType: "movie" | "tv" }) {
   const t = useT();
   const { openFilter } = useView();
   const [open, setOpen] = useState(false);
@@ -109,9 +98,7 @@ function GenreSwitcher({
                   openFilter({ kind: "genre", mediaType, name, id: MOVIE_GENRES[name] });
                 }}
                 className={`rounded-xl px-3.5 py-2.5 text-start text-[14px] font-medium transition-colors ${
-                  isActive
-                    ? "bg-accent/15 text-accent"
-                    : "text-ink-muted hover:bg-elevated hover:text-ink"
+                  isActive ? "bg-accent/15 text-accent" : "text-ink-muted hover:bg-elevated hover:text-ink"
                 }`}
               >
                 {t(name)}
@@ -149,10 +136,11 @@ function describe(
     return {
       kicker: t("Runtime"),
       title: t("Around {min} min", { min: f.value }),
-      subtitle: t(
-        "{media} between {lo}-{hi} minutes. Pick a length, not a wall of options.",
-        { media: mediaWord, lo: range.lo, hi: range.hi },
-      ),
+      subtitle: t("{media} between {lo}-{hi} minutes. Pick a length, not a wall of options.", {
+        media: mediaWord,
+        lo: range.lo,
+        hi: range.hi,
+      }),
       Icon: Clock,
     };
   }
@@ -182,10 +170,9 @@ function describe(
     return {
       kicker: t("Language"),
       title: f.name,
-      subtitle: t(
-        "Everything originally in {name}: movies and series across every genre, era, and hidden gems.",
-        { name: f.name },
-      ),
+      subtitle: t("Everything originally in {name}: movies and series across every genre, era, and hidden gems.", {
+        name: f.name,
+      }),
       Icon: Languages,
     };
   }

@@ -1,7 +1,7 @@
-import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 import { lruSet } from "@/lib/cache";
 import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { tmdbTrailerList } from "@/lib/providers/tmdb";
+import { invoke, convertFileSrc } from "@tauri-apps/api/core";
 
 export type TrailerInfo = {
   file_path: string;
@@ -54,10 +54,7 @@ export function shouldPrefetch(): boolean {
   return true;
 }
 
-export function fetchTrailer(
-  videoId: string,
-  quality: Quality = getQualityHint(),
-): Promise<TrailerInfo | null> {
+export function fetchTrailer(videoId: string, quality: Quality = getQualityHint()): Promise<TrailerInfo | null> {
   if (!isTauri || !videoId) return Promise.resolve(null);
   const key = cacheKey(videoId, quality);
   const hit = cache.get(key);
@@ -120,17 +117,15 @@ export function resolveTrailerId(meta: Meta, tmdbKey: string): Promise<string | 
   const lookup = isTmdb
     ? tmdbTrailerList(tmdbKey, meta.id).then((ids) => ids[0] ?? null)
     : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) => {
-        return (
-          full?.trailers?.[0]?.source ??
-          full?.trailerStreams?.[0]?.ytId ??
-          null
-        );
+        return full?.trailers?.[0]?.source ?? full?.trailerStreams?.[0]?.ytId ?? null;
       });
-  const p = lookup.catch(() => null).then((id) => {
-    lruSet(trailerIdCache, meta.id, id, TRAILER_CACHE_MAX);
-    trailerIdInflight.delete(meta.id);
-    return id;
-  });
+  const p = lookup
+    .catch(() => null)
+    .then((id) => {
+      lruSet(trailerIdCache, meta.id, id, TRAILER_CACHE_MAX);
+      trailerIdInflight.delete(meta.id);
+      return id;
+    });
   trailerIdInflight.set(meta.id, p);
   return p;
 }

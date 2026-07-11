@@ -31,11 +31,14 @@ function parseHits(md: string): WebHit[] {
   const seen = new Set<string>();
   const lines = md.split(/\r?\n/);
   const isHostname = (u: string) => {
-    try { return new URL(u).hostname; } catch { return ""; }
+    try {
+      return new URL(u).hostname;
+    } catch {
+      return "";
+    }
   };
 
-  const cleanText = (s: string) =>
-    s.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
+  const cleanText = (s: string) => s.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
 
   for (let i = 0; i < lines.length && hits.length < MAX_RESULTS; i++) {
     const line = lines[i];
@@ -119,10 +122,7 @@ export function hitsToContext(hits: WebHit[]): string {
     .join("\n\n");
 }
 
-export async function enrichWithContent(
-  query: string,
-  apiKey?: string,
-): Promise<{ hits: WebHit[]; context: string }> {
+export async function enrichWithContent(query: string, apiKey?: string): Promise<{ hits: WebHit[]; context: string }> {
   const hits = await webSearch(query, apiKey);
   if (hits.length === 0) return { hits: [], context: "" };
 
@@ -133,7 +133,10 @@ export async function enrichWithContent(
   const toFetch = promoted
     .slice(0, 3)
     .concat(
-      promoted.slice(3).filter((h) => priority(h.url) > 0).slice(0, 1),
+      promoted
+        .slice(3)
+        .filter((h) => priority(h.url) > 0)
+        .slice(0, 1),
     )
     .slice(0, 4);
 

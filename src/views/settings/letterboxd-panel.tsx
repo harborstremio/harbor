@@ -1,18 +1,15 @@
-import { Check, ExternalLink, Link2, Loader2, LogOut, Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import type { LetterboxdSettings } from "@/lib/settings/types";
+import { invalidateLetterboxdCache } from "@/lib/stremboxd/cache";
+import { resolveLetterboxdListPublic, validateStremboxdConfig, type ManifestValidation } from "@/lib/stremboxd/client";
 import { useLetterboxd } from "@/lib/stremboxd/provider";
 import { buildStremboxdConfig } from "@/lib/stremboxd/settings-helper";
-import {
-  resolveLetterboxdListPublic,
-  validateStremboxdConfig,
-  type ManifestValidation,
-} from "@/lib/stremboxd/client";
-import { invalidateLetterboxdCache } from "@/lib/stremboxd/cache";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
+import { Check, ExternalLink, Link2, Loader2, LogOut, Plus, Trash2, X } from "lucide-react";
+import { useState } from "react";
+
 import { Section, Segmented, ToggleRow } from "./shared";
-import type { LetterboxdSettings } from "@/lib/settings/types";
 
 type CatalogOption = { id: string; label: string; fullOnly?: boolean };
 
@@ -49,9 +46,7 @@ export function LetterboxdPanel() {
   };
 
   const toggleCatalog = (id: string, on: boolean) => {
-    const selected = on
-      ? [...lb.selectedCatalogs, id]
-      : lb.selectedCatalogs.filter((c) => c !== id);
+    const selected = on ? [...lb.selectedCatalogs, id] : lb.selectedCatalogs.filter((c) => c !== id);
     syncConfig({ selectedCatalogs: selected });
     setVerify(null);
   };
@@ -112,7 +107,10 @@ export function LetterboxdPanel() {
       const catalogId = `letterboxd-list-${ref.id}`;
       const next = {
         ...lb,
-        listRefs: [...lb.listRefs.filter((r) => r.id !== ref.id), { id: ref.id, name: ref.name, owner: ref.owner, filmCount: ref.filmCount }],
+        listRefs: [
+          ...lb.listRefs.filter((r) => r.id !== ref.id),
+          { id: ref.id, name: ref.name, owner: ref.owner, filmCount: ref.filmCount },
+        ],
         selectedCatalogs: lb.selectedCatalogs.includes(catalogId)
           ? lb.selectedCatalogs
           : [...lb.selectedCatalogs, catalogId],
@@ -141,7 +139,9 @@ export function LetterboxdPanel() {
     <>
       <Section
         title={t("Letterboxd")}
-        subtitle={t("Bring your Letterboxd watchlist, diary, liked films and lists into Harbor via the Stremboxd bridge.")}
+        subtitle={t(
+          "Bring your Letterboxd watchlist, diary, liked films and lists into Harbor via the Stremboxd bridge.",
+        )}
       >
         <ToggleRow
           label={t("Enable Letterboxd integration")}
@@ -166,8 +166,12 @@ export function LetterboxdPanel() {
               />
               <p className="text-[12.5px] leading-relaxed text-ink-subtle">
                 {lb.mode === "public"
-                  ? t("Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.")
-                  : t("Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.")}
+                  ? t(
+                      "Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.",
+                    )
+                  : t(
+                      "Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.",
+                    )}
               </p>
             </div>
 
@@ -215,9 +219,7 @@ export function LetterboxdPanel() {
                     className="h-12 rounded-xl border border-edge-soft bg-elevated px-4 text-[15px] text-ink placeholder:text-ink-subtle/55 outline-none focus:border-ink"
                   />
                 )}
-                {loginError && (
-                  <p className="text-[12.5px] text-red-300">{loginError}</p>
-                )}
+                {loginError && <p className="text-[12.5px] text-red-300">{loginError}</p>}
               </div>
             )}
 
@@ -282,7 +284,9 @@ export function LetterboxdPanel() {
                     <span className="text-[14px] font-medium text-ink">
                       {session.displayName ? `${session.displayName} (@${session.username})` : `@${session.username}`}
                     </span>
-                    <span className="text-[12px] text-ink-subtle">{t("Full mode — diary, friends & ratings enabled")}</span>
+                    <span className="text-[12px] text-ink-subtle">
+                      {t("Full mode — diary, friends & ratings enabled")}
+                    </span>
                   </div>
                 </div>
                 <button
@@ -325,7 +329,9 @@ export function LetterboxdPanel() {
                       </span>
                       {t(opt.label)}
                       {opt.fullOnly && (
-                        <span className="ms-auto text-[10px] uppercase tracking-wider text-ink-subtle">{t("Full")}</span>
+                        <span className="ms-auto text-[10px] uppercase tracking-wider text-ink-subtle">
+                          {t("Full")}
+                        </span>
                       )}
                     </button>
                   );
@@ -411,7 +417,9 @@ export function LetterboxdPanel() {
                     return (
                       <button
                         key={id}
-                        onClick={() => update({ letterboxd: { ...lb, hiddenCatalogs: lb.hiddenCatalogs.filter((h) => h !== id) } })}
+                        onClick={() =>
+                          update({ letterboxd: { ...lb, hiddenCatalogs: lb.hiddenCatalogs.filter((h) => h !== id) } })
+                        }
                         className="flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
                       >
                         {label}

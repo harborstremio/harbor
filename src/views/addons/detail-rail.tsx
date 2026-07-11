@@ -1,4 +1,5 @@
 import type { ResolvedAddon } from "@/lib/addons-store/store";
+
 import { addonKey, idOf } from "./addons-utils";
 import { TileCard } from "./tile-card";
 

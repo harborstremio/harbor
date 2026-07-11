@@ -1,5 +1,6 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
+
 import { tmdbImdbId } from "./providers/tmdb";
 
 const TMDB = "https://api.themoviedb.org/3";
@@ -54,8 +55,7 @@ type DiscoverTvRow = {
 
 function isAnimeRow(row: { genre_ids?: number[]; original_language?: string; origin_country?: string[] }): boolean {
   const animation = (row.genre_ids ?? []).includes(ANIMATION_GENRE);
-  const japanese =
-    row.original_language === "ja" || (row.origin_country ?? []).includes("JP");
+  const japanese = row.original_language === "ja" || (row.origin_country ?? []).includes("JP");
   return animation && japanese;
 }
 
@@ -85,12 +85,7 @@ async function fetchDiscoverMovies(
   }
 }
 
-async function fetchDiscoverTv(
-  apiKey: string,
-  start: string,
-  end: string,
-  page: number,
-): Promise<DiscoverTvRow[]> {
+async function fetchDiscoverTv(apiKey: string, start: string, end: string, page: number): Promise<DiscoverTvRow[]> {
   const url = new URL(`${TMDB}/discover/tv`);
   url.searchParams.set("api_key", apiKey);
   url.searchParams.set("first_air_date.gte", start);
@@ -138,11 +133,7 @@ export async function fetchCalendarRange(
     fetchDiscoverTv(apiKey, start, end, 1),
     fetchDiscoverTv(apiKey, start, end, 2),
   ]);
-  const movieP1 = [
-    ...m1,
-    ...m2,
-    ...mu1.filter((m) => inRange(m.release_date)),
-  ];
+  const movieP1 = [...m1, ...m2, ...mu1.filter((m) => inRange(m.release_date))];
   const movieP2: DiscoverMovieRow[] = [];
   const tvP1 = [...t1, ...t2];
   const tvP2: DiscoverTvRow[] = [];
@@ -227,11 +218,7 @@ type TrackedPerson = {
   role: "any" | "acting" | "directing";
 };
 
-async function fetchPersonCredits(
-  apiKey: string,
-  personId: number,
-  kind: "movie" | "tv",
-): Promise<PersonCreditRow[]> {
+async function fetchPersonCredits(apiKey: string, personId: number, kind: "movie" | "tv"): Promise<PersonCreditRow[]> {
   const url = new URL(`${TMDB}/person/${personId}/${kind}_credits`);
   url.searchParams.set("api_key", apiKey);
   try {
@@ -546,10 +533,7 @@ function extractTelegramChatId(url: string): string {
   return m ? decodeURIComponent(m[1]) : "";
 }
 
-export async function resolveImdbForItem(
-  apiKey: string,
-  item: CalendarItem,
-): Promise<string | null> {
+export async function resolveImdbForItem(apiKey: string, item: CalendarItem): Promise<string | null> {
   if (!apiKey) return null;
   const m = item.id.match(/^tmdb:(movie|tv):(\d+)$/);
   if (!m) return null;

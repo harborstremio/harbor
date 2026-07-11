@@ -1,5 +1,6 @@
-import { Eraser, Eye, EyeOff, Pencil } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Eraser, Eye, EyeOff, Pencil } from "lucide-react";
+
 import { BigButton } from "./big-button";
 
 export function DrawToggle({
@@ -28,11 +29,7 @@ export function DrawToggle({
       </BigButton>
       {active && (
         <>
-          <BigButton
-            onClick={onClear}
-            ariaLabel={t("Clear drawings")}
-            tooltip={t("Clear drawings")}
-          >
+          <BigButton onClick={onClear} ariaLabel={t("Clear drawings")} tooltip={t("Clear drawings")}>
             <Eraser size={22} strokeWidth={2} />
           </BigButton>
           <BigButton

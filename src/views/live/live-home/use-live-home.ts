@@ -1,22 +1,17 @@
-import { useMemo } from "react";
-import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
-import { findCurrent } from "@/lib/iptv/xmltv";
-import {
-  recentChannels,
-  topChannels,
-  useChannelStatsVersion,
-  type ChannelStat,
-} from "@/lib/iptv/channel-stats";
-import { useGroupPrefs } from "@/lib/iptv/group-order";
-import { useCountryPrefs } from "@/lib/iptv/country-prefs";
+import { recentChannels, topChannels, useChannelStatsVersion, type ChannelStat } from "@/lib/iptv/channel-stats";
 import {
   detectCountryFromGroup,
   indexChannelsByCountry,
   stripCountryPrefix,
   type Country,
 } from "@/lib/iptv/country-detect";
+import { useCountryPrefs } from "@/lib/iptv/country-prefs";
+import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import { useFavorites, type StoredFavorite } from "@/lib/iptv/favorites";
+import { useGroupPrefs } from "@/lib/iptv/group-order";
 import type { EpgIndex, EpgProgram, IptvChannel } from "@/lib/iptv/types";
+import { findCurrent } from "@/lib/iptv/xmltv";
+import { useMemo } from "react";
 
 export type NowItem = {
   channel: IptvChannel;
@@ -61,12 +56,36 @@ const THEME_CAP = 60;
 const JUNK_RE = /\b(xxx|adult|adults|porn|ppv|vip|sex|hardcore|nsfw)\b|18\s*\+|\+\s*18|^[\s#*\-=._|~>]+$/i;
 
 const THEMES: Array<{ key: string; title: string; re: RegExp }> = [
-  { key: "sports", title: "Sports", re: /\b(sports?|espn|bein|sky\s?sport|nfl|nba|mlb|nhl|ufc|wwe|boxing|football|soccer|dazn|fubo|golf|tennis|nascar|motogp|formula)\b/i },
-  { key: "news", title: "News", re: /\b(news|cnn|bbc|msnbc|cnbc|bloomberg|newsmax|gb\s?news|al\s?jazeera|sky\s?news|fox\s?news)\b/i },
-  { key: "movies", title: "Movies", re: /\b(movies?|cinema|film|films|hbo|cinemax|starz|showtime|tcm|mgm|paramount)\b/i },
-  { key: "kids", title: "Kids & Family", re: /\b(kids?|cartoon|disney|nick|nickelodeon|junior|baby|boomerang|cbeebies|pbs\s?kids)\b/i },
-  { key: "entertainment", title: "Entertainment", re: /\b(entertain\w*|comedy|drama|lifestyle|reality|bravo|tlc|usa\s?network|tnt|fx|amc)\b/i },
-  { key: "docs", title: "Documentary", re: /\b(document\w*|discovery|history|nat\s?geo|national\s?geographic|science|animal|smithsonian)\b/i },
+  {
+    key: "sports",
+    title: "Sports",
+    re: /\b(sports?|espn|bein|sky\s?sport|nfl|nba|mlb|nhl|ufc|wwe|boxing|football|soccer|dazn|fubo|golf|tennis|nascar|motogp|formula)\b/i,
+  },
+  {
+    key: "news",
+    title: "News",
+    re: /\b(news|cnn|bbc|msnbc|cnbc|bloomberg|newsmax|gb\s?news|al\s?jazeera|sky\s?news|fox\s?news)\b/i,
+  },
+  {
+    key: "movies",
+    title: "Movies",
+    re: /\b(movies?|cinema|film|films|hbo|cinemax|starz|showtime|tcm|mgm|paramount)\b/i,
+  },
+  {
+    key: "kids",
+    title: "Kids & Family",
+    re: /\b(kids?|cartoon|disney|nick|nickelodeon|junior|baby|boomerang|cbeebies|pbs\s?kids)\b/i,
+  },
+  {
+    key: "entertainment",
+    title: "Entertainment",
+    re: /\b(entertain\w*|comedy|drama|lifestyle|reality|bravo|tlc|usa\s?network|tnt|fx|amc)\b/i,
+  },
+  {
+    key: "docs",
+    title: "Documentary",
+    re: /\b(document\w*|discovery|history|nat\s?geo|national\s?geographic|science|animal|smithsonian)\b/i,
+  },
   { key: "music", title: "Music", re: /\b(music|mtv|vevo|vh1|kerrang|stingray|trace|hits)\b/i },
 ];
 
@@ -75,11 +94,31 @@ function isJunk(group: string): boolean {
 }
 
 function statToChannel(s: ChannelStat): IptvChannel {
-  return { id: s.id, tvgId: null, name: s.name, logo: s.logo, group: s.group, url: s.url, catchupSource: null, durationSec: null, attrs: {} };
+  return {
+    id: s.id,
+    tvgId: null,
+    name: s.name,
+    logo: s.logo,
+    group: s.group,
+    url: s.url,
+    catchupSource: null,
+    durationSec: null,
+    attrs: {},
+  };
 }
 
 function favToChannel(f: StoredFavorite): IptvChannel {
-  return { id: f.id, tvgId: f.tvgId, name: f.name, logo: f.logo, group: f.group, url: f.url, catchupSource: null, durationSec: null, attrs: {} };
+  return {
+    id: f.id,
+    tvgId: f.tvgId,
+    name: f.name,
+    logo: f.logo,
+    group: f.group,
+    url: f.url,
+    catchupSource: null,
+    durationSec: null,
+    attrs: {},
+  };
 }
 
 function railFor(g: string, channels: IptvChannel[], code?: string): ChannelRail {
@@ -213,9 +252,7 @@ export function useLiveHome(params: {
           }
           arr.push(ch);
         }
-        const ordered = [...inCountry.entries()]
-          .filter(([g]) => !isJunk(g))
-          .sort((a, b) => b[1].length - a[1].length);
+        const ordered = [...inCountry.entries()].filter(([g]) => !isJunk(g)).sort((a, b) => b[1].length - a[1].length);
         for (const [g, chs] of ordered) {
           if (categoryRails.length >= MAX_RAILS) break;
           categoryRails.push(railFor(g, chs, code));
@@ -225,7 +262,8 @@ export function useLiveHome(params: {
     } else {
       for (const t of THEMES) {
         const chs = themeCh[t.key];
-        if (chs.length >= 3) categoryRails.push({ key: `theme:${t.key}`, title: t.title, group: null, channels: chs.slice(0, 30) });
+        if (chs.length >= 3)
+          categoryRails.push({ key: `theme:${t.key}`, title: t.title, group: null, channels: chs.slice(0, 30) });
       }
       for (const g of topGroups) {
         if (categoryRails.length >= MAX_RAILS) break;
@@ -235,7 +273,19 @@ export function useLiveHome(params: {
     }
 
     return { spotlight, tiles, guide, rails, categoryRails };
-  }, [channels, epg, nowMs, sourceId, prefs, favorites.items, statsVersion, index, tvgCounts, channelsByCountry, countryPrefs.selected]);
+  }, [
+    channels,
+    epg,
+    nowMs,
+    sourceId,
+    prefs,
+    favorites.items,
+    statsVersion,
+    index,
+    tvgCounts,
+    channelsByCountry,
+    countryPrefs.selected,
+  ]);
 
   return { ...out, countries: countries.filter((c) => c.count >= MIN_COUNTRY) };
 }

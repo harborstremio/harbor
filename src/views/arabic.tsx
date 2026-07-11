@@ -1,4 +1,3 @@
-import { useCallback, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { FeedShelf } from "@/components/feed-shelf";
 import { LazyMount } from "@/components/lazy-mount";
@@ -7,6 +6,8 @@ import { ARABIC_ROWS } from "@/lib/arabic";
 import { isRtl, useT, useUiLanguage } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/view";
+import { useCallback, useRef, useState } from "react";
+
 import { HubHeader } from "./arabic/hub-header";
 import { useArabicRows } from "./arabic/use-arabic-rows";
 
@@ -25,11 +26,7 @@ export function ArabicHub({ active = true }: { active?: boolean }) {
   const { rows, loadMore } = useArabicRows(settings.tmdbKey);
 
   return (
-    <main
-      ref={scrollCb}
-      dir={rtl ? "rtl" : "ltr"}
-      className="flex-1 overflow-y-auto px-12 pb-20 pt-20"
-    >
+    <main ref={scrollCb} dir={rtl ? "rtl" : "ltr"} className="flex-1 overflow-y-auto px-12 pb-20 pt-20">
       <ScrollRootContext.Provider value={scrollEl}>
         <div className="flex flex-col gap-14">
           <HubHeader rtl={rtl} />

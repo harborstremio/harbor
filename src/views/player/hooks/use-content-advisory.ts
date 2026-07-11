@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { harborImdbParental, type ParentalCategory } from "@/lib/providers/harbor-imdb";
+import { useEffect, useRef, useState } from "react";
 
 export function useContentAdvisory(
   enabled: boolean,

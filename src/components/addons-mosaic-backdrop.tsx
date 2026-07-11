@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
 import { listAddons, type SAAddon } from "@/lib/providers/stremio-addons";
+import { useEffect, useMemo, useState } from "react";
 
 const SLOT_COUNT = 6;
 
@@ -62,11 +62,7 @@ export function AddonsMosaicBackdrop() {
   );
 
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
-      style={{ contain: "strict" }}
-    >
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden" style={{ contain: "strict" }}>
       <div className="absolute inset-0" style={{ background: "var(--color-canvas)" }} />
       <div className="absolute inset-0">
         {slots.map((s, i) => (

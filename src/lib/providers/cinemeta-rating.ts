@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { meta as fetchMeta } from "@/lib/cinemeta";
+import { useEffect, useState } from "react";
 
 type Kind = "movie" | "series";
 

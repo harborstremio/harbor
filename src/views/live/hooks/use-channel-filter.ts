@@ -1,7 +1,7 @@
-import { useMemo } from "react";
 import { FAVORITES_GROUP_KEY } from "@/lib/iptv/favorites";
 import { arabicAwareMatch } from "@/lib/iptv/rtl";
 import type { IptvChannel } from "@/lib/iptv/types";
+import { useMemo } from "react";
 
 export function useChannelFilter(
   channels: IptvChannel[],

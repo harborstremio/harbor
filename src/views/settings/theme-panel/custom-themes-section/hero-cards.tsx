@@ -119,12 +119,7 @@ function ImportBadge({ name }: { name: string }) {
     if (r) setTip({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) });
   };
   return (
-    <span
-      ref={ref}
-      className="absolute end-3 top-3 z-20"
-      onMouseEnter={show}
-      onMouseLeave={() => setTip(null)}
-    >
+    <span ref={ref} className="absolute end-3 top-3 z-20" onMouseEnter={show} onMouseLeave={() => setTip(null)}>
       <span
         className="flex h-6 w-6 animate-pulse items-center justify-center rounded-full bg-accent text-[14px] font-bold leading-none text-canvas shadow-[0_3px_10px_-2px_var(--color-accent)] ring-2 ring-[var(--color-surface)]"
         aria-label={`${name} imported to your library`}

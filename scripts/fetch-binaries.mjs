@@ -95,7 +95,11 @@ const SOURCES = {
   },
   ffprobe: {
     "x86_64-unknown-linux-gnu": { kind: "tar.xz", url: `${JVS}/ffmpeg-release-amd64-static.tar.xz`, member: "ffprobe" },
-    "aarch64-unknown-linux-gnu": { kind: "tar.xz", url: `${JVS}/ffmpeg-release-arm64-static.tar.xz`, member: "ffprobe" },
+    "aarch64-unknown-linux-gnu": {
+      kind: "tar.xz",
+      url: `${JVS}/ffmpeg-release-arm64-static.tar.xz`,
+      member: "ffprobe",
+    },
     "x86_64-apple-darwin": { kind: "zip", url: `${EVERMEET}/ffprobe/zip`, member: "ffprobe" },
     "aarch64-apple-darwin": { kind: "zip", url: `${EVERMEET}/ffprobe/zip`, member: "ffprobe" },
     "x86_64-pc-windows-msvc": { kind: "zip", url: GYAN, member: "ffprobe.exe" },
@@ -160,7 +164,12 @@ function extractMember(buf, kind, member, dest) {
     } else if (process.platform === "win32") {
       execFileSync(
         "powershell",
-        ["-NoProfile", "-NonInteractive", "-Command", `Expand-Archive -LiteralPath "${archive}" -DestinationPath "${outDir}" -Force`],
+        [
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          `Expand-Archive -LiteralPath "${archive}" -DestinationPath "${outDir}" -Force`,
+        ],
         { stdio: "inherit" },
       );
     } else {
@@ -180,7 +189,10 @@ function hint(name) {
     `[binaries]      ${name}-${triple}${EXE} into src-tauri/binaries/ by hand.`,
   ];
   if (name === "yt-dlp") lines.push("[binaries]      source: github.com/yt-dlp/yt-dlp/releases/latest");
-  else lines.push("[binaries]      static builds: johnvansickle.com (linux), evermeet.cx / osxexperts.net (macOS), gyan.dev or BtbN (windows)");
+  else
+    lines.push(
+      "[binaries]      static builds: johnvansickle.com (linux), evermeet.cx / osxexperts.net (macOS), gyan.dev or BtbN (windows)",
+    );
   return lines.join("\n");
 }
 

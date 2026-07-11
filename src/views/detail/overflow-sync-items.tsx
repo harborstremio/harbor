@@ -1,11 +1,11 @@
-import { Check, ChevronDown, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import anilistLogo from "@/assets/anilist.png";
 import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.png";
 import { deleteListEntry, fetchListEntry, saveListEntry } from "@/lib/anilist/mutations";
 import { useAnilist } from "@/lib/anilist/provider";
 import { resolveAnilistMediaId } from "@/lib/anilist/sync";
 import type { MediaListStatus } from "@/lib/anilist/types";
+import { useT } from "@/lib/i18n";
 import { resolveSimklTarget } from "@/lib/simkl/ids";
 import {
   clearSimklStatus,
@@ -19,10 +19,10 @@ import {
 } from "@/lib/simkl/list-status";
 import { useSimkl } from "@/lib/simkl/provider";
 import type { SimklTarget } from "@/lib/simkl/types";
-import traktLogo from "@/assets/trakt.png";
-import { useTrakt } from "@/lib/trakt/provider";
 import { pushWatched } from "@/lib/trakt/history";
-import { useT } from "@/lib/i18n";
+import { useTrakt } from "@/lib/trakt/provider";
+import { Check, ChevronDown, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const ANILIST_LABELS: Record<MediaListStatus, string> = {
   CURRENT: "Watching",
@@ -33,26 +33,9 @@ const ANILIST_LABELS: Record<MediaListStatus, string> = {
   DROPPED: "Dropped",
 };
 
-const ANILIST_ORDER: MediaListStatus[] = [
-  "CURRENT",
-  "PLANNING",
-  "COMPLETED",
-  "REPEATING",
-  "PAUSED",
-  "DROPPED",
-];
+const ANILIST_ORDER: MediaListStatus[] = ["CURRENT", "PLANNING", "COMPLETED", "REPEATING", "PAUSED", "DROPPED"];
 
-function GroupRow({
-  logo,
-  label,
-  open,
-  onClick,
-}: {
-  logo: string;
-  label: string;
-  open: boolean;
-  onClick: () => void;
-}) {
+function GroupRow({ logo, label, open, onClick }: { logo: string; label: string; open: boolean; onClick: () => void }) {
   return (
     <button
       role="menuitem"
@@ -61,10 +44,7 @@ function GroupRow({
     >
       <img src={logo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
       <span className="flex-1 truncate">{label}</span>
-      <ChevronDown
-        size={13}
-        className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
-      />
+      <ChevronDown size={13} className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`} />
     </button>
   );
 }
@@ -190,13 +170,7 @@ export function SimklMenuItems({
   );
 }
 
-export function AnilistMenuItems({
-  harborId,
-  onAction,
-}: {
-  harborId: string;
-  onAction: () => void;
-}) {
+export function AnilistMenuItems({ harborId, onAction }: { harborId: string; onAction: () => void }) {
   const t = useT();
   const { isConnected } = useAnilist();
   const [mediaId, setMediaId] = useState<number | null>(null);

@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSettings } from "@/lib/settings";
-import { clearPlaylistCache } from "@/lib/iptv/store";
 import { clearEpg } from "@/lib/iptv/epg-store";
-import { purgePlaylistState } from "@/lib/iptv/source-cleanup";
 import { useFavorites } from "@/lib/iptv/favorites";
+import { purgePlaylistState } from "@/lib/iptv/source-cleanup";
+import { clearPlaylistCache } from "@/lib/iptv/store";
 import type { IptvPlaylistSource } from "@/lib/iptv/types";
+import { useSettings } from "@/lib/settings";
 import { buildXtreamUrls, type PlaylistFormValue } from "@/views/live/source-picker/playlist-form";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const ACTIVE_KEY = "harbor.vod.active";
 

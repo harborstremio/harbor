@@ -29,9 +29,7 @@ export function IdentityRow({
         />
       </div>
       <div className="mt-1 flex flex-col gap-2">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-          Or start from
-        </span>
+        <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">Or start from</span>
         <div className="flex flex-wrap gap-2">
           {Object.values(THEME_PRESETS).map((p) => (
             <button

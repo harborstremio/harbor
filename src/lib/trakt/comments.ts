@@ -113,12 +113,13 @@ export async function deleteComment(id: number): Promise<void> {
   await traktRequest(`/comments/${id}`, { method: "DELETE", authed: true });
 }
 
-
 function subjectBody(target: TraktTarget) {
   const ids: Record<string, string | number> = {};
-  const src = target.kind === "episode"
-    ? (target as { ids?: { tmdb?: number; imdb?: string } }).ids ?? (target as { show: { ids: { tmdb?: number; imdb?: string } } }).show.ids
-    : target.ids;
+  const src =
+    target.kind === "episode"
+      ? ((target as { ids?: { tmdb?: number; imdb?: string } }).ids ??
+        (target as { show: { ids: { tmdb?: number; imdb?: string } } }).show.ids)
+      : target.ids;
   if (src.tmdb) ids.tmdb = src.tmdb;
   if (src.imdb) ids.imdb = src.imdb;
   const key = target.kind === "episode" ? "episode" : target.kind;

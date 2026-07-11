@@ -1,10 +1,11 @@
+import { loadStoredSettings } from "@/lib/settings/load";
+
 import type { Meta } from "../../cinemeta";
 import { get, IMG, effectiveTmdbLanguage } from "./tmdb-client";
-import { loadStoredSettings } from "@/lib/settings/load";
-import { pickLogo, fetchMovieAssets } from "./tmdb-images";
 import { imageLangParam, imageLangRank } from "./tmdb-image-lang";
-import { pickTrailers, type Video } from "./tmdb-trailers";
+import { pickLogo, fetchMovieAssets } from "./tmdb-images";
 import type { PersonRef } from "./tmdb-people";
+import { pickTrailers, type Video } from "./tmdb-trailers";
 
 export type CastEntry = {
   id: number;
@@ -128,11 +129,7 @@ const PRODUCER_JOBS = new Set(["Producer", "Executive Producer"]);
 
 type RawImageEntry = { file_path?: string; vote_average?: number };
 
-function urlsFromImages(
-  entries: RawImageEntry[] | undefined,
-  size: string,
-  max: number,
-): string[] {
+function urlsFromImages(entries: RawImageEntry[] | undefined, size: string, max: number): string[] {
   if (!entries?.length) return [];
   const seen = new Set<string>();
   const out: string[] = [];
@@ -194,7 +191,8 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
   const settings = loadStoredSettings();
   const metaLang = effectiveTmdbLanguage() || "en";
   const raw = await get<any>(key, `${kind}/${id}`, {
-    append_to_response: "credits,aggregate_credits,recommendations,similar,videos,external_ids,images,keywords,translations",
+    append_to_response:
+      "credits,aggregate_credits,recommendations,similar,videos,external_ids,images,keywords,translations",
     language: metaLang,
     include_image_language: imageLangParam(),
   });
@@ -234,7 +232,12 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
     name: c.name,
     character:
       c.character ??
-      (c.roles?.length ? c.roles.map((r: any) => r.character).filter(Boolean).join(", ") : ""),
+      (c.roles?.length
+        ? c.roles
+            .map((r: any) => r.character)
+            .filter(Boolean)
+            .join(", ")
+        : ""),
     profilePath: c.profile_path ?? null,
     order: c.order ?? 999,
   }));
@@ -252,8 +255,7 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
 
   const jobsOf = (e: any): string[] =>
     e.jobs?.length ? e.jobs.map((j: any) => j.job).filter(Boolean) : e.job ? [e.job] : [];
-  const byJob = (test: (job: string) => boolean) =>
-    uniqByName(crewSrc.filter((c: any) => jobsOf(c).some(test)));
+  const byJob = (test: (job: string) => boolean) => uniqByName(crewSrc.filter((c: any) => jobsOf(c).some(test)));
 
   const directors = byJob((j) => j === "Director");
   const writers = byJob((j) => WRITER_JOBS.has(j));
@@ -291,15 +293,16 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
       airDate: s.air_date ?? null,
     }));
 
-  const runtime = kind === "movie"
-    ? raw.runtime
-      ? `${raw.runtime} min`
-      : undefined
-    : raw.episode_run_time?.[0]
-      ? `${raw.episode_run_time[0]} min episodes`
-      : raw.number_of_seasons
-        ? `${raw.number_of_seasons} season${raw.number_of_seasons === 1 ? "" : "s"}`
-        : undefined;
+  const runtime =
+    kind === "movie"
+      ? raw.runtime
+        ? `${raw.runtime} min`
+        : undefined
+      : raw.episode_run_time?.[0]
+        ? `${raw.episode_run_time[0]} min episodes`
+        : raw.number_of_seasons
+          ? `${raw.number_of_seasons} season${raw.number_of_seasons === 1 ? "" : "s"}`
+          : undefined;
 
   let overview = raw.overview ?? "";
   let tagline = raw.tagline ?? "";
@@ -324,8 +327,8 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
     id: raw.id,
     imdbId: raw.external_ids?.imdb_id ?? null,
     title: settings.translateTitles
-      ? (raw.title || raw.name)
-      : (raw.original_title || raw.original_name || raw.title || raw.name),
+      ? raw.title || raw.name
+      : raw.original_title || raw.original_name || raw.title || raw.name,
     originalTitle: raw.original_title ?? raw.original_name ?? "",
     tagline,
     overview,
@@ -395,11 +398,7 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
   };
 }
 
-export async function tmdbSeasonEpisodes(
-  key: string,
-  tvId: number,
-  seasonNumber: number,
-): Promise<Episode[]> {
+export async function tmdbSeasonEpisodes(key: string, tvId: number, seasonNumber: number): Promise<Episode[]> {
   if (!key) return [];
   const data = await get<any>(key, `tv/${tvId}/season/${seasonNumber}`, {
     language: effectiveTmdbLanguage() || "en",

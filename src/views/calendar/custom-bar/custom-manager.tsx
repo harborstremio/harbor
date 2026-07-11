@@ -1,9 +1,10 @@
+import traktLogo from "@/assets/trakt.svg";
+import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
+import { useT } from "@/lib/i18n";
+import { searchAll, type SearchPerson } from "@/lib/search";
 import { Film, Globe2, Loader2, Plus, Search, Sparkles, Trash2, Tv2, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
-import { searchAll, type SearchPerson } from "@/lib/search";
-import { useT } from "@/lib/i18n";
-import traktLogo from "@/assets/trakt.svg";
+
 import { COUNTRIES, WATCH_PROVIDERS, type CustomCalendar } from "./constants";
 import { ChipMultiselect, PillToggle, Section, ToggleRow } from "./controls";
 
@@ -196,9 +197,7 @@ export function CustomManager({
                   <ToggleRow
                     label={t("My Trakt watchlist")}
                     sub={
-                      traktConnected
-                        ? t("Upcoming items from your watchlist")
-                        : t("Connect Trakt in settings first")
+                      traktConnected ? t("Upcoming items from your watchlist") : t("Connect Trakt in settings first")
                     }
                     on={value.includeTraktWatchlist}
                     onToggle={() => traktConnected && onToggleSource("includeTraktWatchlist")}
@@ -217,9 +216,7 @@ export function CustomManager({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={
-                  tmdbKey ? t("Search actors, directors…") : t("Add a TMDB key in settings first")
-                }
+                placeholder={tmdbKey ? t("Search actors, directors…") : t("Add a TMDB key in settings first")}
                 disabled={!tmdbKey}
                 className="h-full flex-1 bg-transparent text-[14px] text-ink placeholder:text-ink-subtle outline-none"
               />
@@ -258,9 +255,7 @@ export function CustomManager({
                         <span className="block truncate text-[11.5px] text-ink-subtle">{p.knownFor}</span>
                       </span>
                       {tracked ? (
-                        <span className="text-[10.5px] uppercase tracking-[0.14em] text-ink-subtle">
-                          {t("added")}
-                        </span>
+                        <span className="text-[10.5px] uppercase tracking-[0.14em] text-ink-subtle">{t("added")}</span>
                       ) : (
                         <Plus size={15} className="text-ink-subtle" />
                       )}
@@ -272,10 +267,7 @@ export function CustomManager({
             {value.trackedPeople.length > 0 && (
               <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 {value.trackedPeople.map((p) => (
-                  <li
-                    key={p.id}
-                    className="flex items-center gap-3 rounded-lg bg-canvas/40 px-3 py-2"
-                  >
+                  <li key={p.id} className="flex items-center gap-3 rounded-lg bg-canvas/40 px-3 py-2">
                     <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-elevated text-ink-subtle">
                       {p.profile ? (
                         <img

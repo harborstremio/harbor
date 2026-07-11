@@ -1,4 +1,5 @@
 import { DEFAULT_THEME } from "@/lib/theme";
+
 import type { Settings } from "./types";
 
 export const STORAGE_KEY = "harbor.settings";

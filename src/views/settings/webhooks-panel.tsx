@@ -1,20 +1,16 @@
-import { Globe, Library, Star } from "lucide-react";
-import { useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
-import { fireWebhook, type WebhookKind, type WebhookPayload } from "@/lib/calendar";
 import { useAuth } from "@/lib/auth";
+import { fireWebhook, type WebhookKind, type WebhookPayload } from "@/lib/calendar";
+import { useT } from "@/lib/i18n";
 import { useSettings, type Settings } from "@/lib/settings";
 import { useTrakt } from "@/lib/trakt/provider";
-import { useT } from "@/lib/i18n";
+import { Globe, Library, Star } from "lucide-react";
+import { useRef, useState } from "react";
+
 import { Section } from "./shared";
 import { RuleBuilder } from "./webhooks-panel/rule-builder";
-import {
-  DiscordMark,
-  DiscordTutorial,
-  WebhookField,
-  type FieldStatus,
-} from "./webhooks-panel/webhook-field";
 import { TelegramComposedField } from "./webhooks-panel/telegram-field";
+import { DiscordMark, DiscordTutorial, WebhookField, type FieldStatus } from "./webhooks-panel/webhook-field";
 
 const idleStatus: FieldStatus = { state: "idle", message: null };
 
@@ -104,7 +100,7 @@ export function WebhooksPanel() {
       const res = await fireWebhook(kind, url, testPayload);
       setStatus({
         state: res.ok ? "ok" : "error",
-        message: res.ok ? "Sent. Check your channel." : res.error ?? "Failed",
+        message: res.ok ? "Sent. Check your channel." : (res.error ?? "Failed"),
       });
     } finally {
       inFlightRef.current[kind] = false;
@@ -116,7 +112,9 @@ export function WebhooksPanel() {
     <>
       <Section
         title={t("Where alerts go")}
-        subtitle={t("Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.")}
+        subtitle={t(
+          "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.",
+        )}
       >
         <div className="flex flex-col gap-5">
           <WebhookField
@@ -147,13 +145,7 @@ export function WebhooksPanel() {
             const blocker = s.prereq(settings, { authKey, traktConnected });
             const on = settings.webhooks.sources[s.id];
             return (
-              <SourceToggle
-                key={s.id}
-                source={s}
-                on={on}
-                blocker={blocker}
-                onChange={(v) => setSource(s.id, v)}
-              />
+              <SourceToggle key={s.id} source={s} on={on} blocker={blocker} onChange={(v) => setSource(s.id, v)} />
             );
           })}
         </div>
@@ -164,9 +156,17 @@ export function WebhooksPanel() {
         subtitle={t("Filter by type after the sources merge. Leave them all on to send everything.")}
       >
         <div className="flex flex-wrap gap-2">
-          <ChipToggle label={t("Movies")} on={settings.webhooks.notifyMovies} onToggle={(v) => setNotify("notifyMovies", v)} />
+          <ChipToggle
+            label={t("Movies")}
+            on={settings.webhooks.notifyMovies}
+            onToggle={(v) => setNotify("notifyMovies", v)}
+          />
           <ChipToggle label={t("TV")} on={settings.webhooks.notifyTv} onToggle={(v) => setNotify("notifyTv", v)} />
-          <ChipToggle label={t("Anime")} on={settings.webhooks.notifyAnime} onToggle={(v) => setNotify("notifyAnime", v)} />
+          <ChipToggle
+            label={t("Anime")}
+            on={settings.webhooks.notifyAnime}
+            onToggle={(v) => setNotify("notifyAnime", v)}
+          />
         </div>
       </Section>
 
@@ -225,9 +225,7 @@ function SourceToggle({
       </div>
       <span
         aria-hidden
-        className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-          effective ? "bg-ink" : "bg-edge"
-        }`}
+        className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${effective ? "bg-ink" : "bg-edge"}`}
       >
         <span
           className={`absolute start-0 top-0.5 h-4 w-4 rounded-full bg-canvas transition-transform ${
@@ -239,15 +237,7 @@ function SourceToggle({
   );
 }
 
-function ChipToggle({
-  label,
-  on,
-  onToggle,
-}: {
-  label: string;
-  on: boolean;
-  onToggle: (v: boolean) => void;
-}) {
+function ChipToggle({ label, on, onToggle }: { label: string; on: boolean; onToggle: (v: boolean) => void }) {
   const t = useT();
   return (
     <button

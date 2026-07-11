@@ -1,5 +1,5 @@
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 
 export function DisplayPanelSelector() {
   const { settings, update } = useSettings();
@@ -19,9 +19,7 @@ export function DisplayPanelSelector() {
             type="button"
             onClick={() => update({ playerDisplayPanel: p })}
             className={`px-3 py-1.5 text-[12.5px] font-semibold transition-colors ${
-              settings.playerDisplayPanel === p
-                ? "bg-elevated text-ink"
-                : "text-ink-muted hover:bg-canvas/60"
+              settings.playerDisplayPanel === p ? "bg-elevated text-ink" : "text-ink-muted hover:bg-canvas/60"
             }`}
           >
             {p === "auto" ? t("Auto") : p.toUpperCase()}

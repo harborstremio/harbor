@@ -1,3 +1,7 @@
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useView } from "@/lib/view";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Children,
   createContext,
@@ -10,10 +14,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
 
 const GAP = 20;
 const EAGER_COUNT = 6;

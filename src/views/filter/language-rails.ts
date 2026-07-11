@@ -96,33 +96,61 @@ export function languageRails(iso: string, name: string): AnyRail[] {
   });
 
   for (const [label, gid] of MOVIE_GENRE_RAILS) {
-    add(`mg-${gid}`, `${name} ${label}`, "Movies", "movie", {
-      with_genres: gid,
-      sort_by: "popularity.desc",
-      "vote_count.gte": "20",
-    }, true);
+    add(
+      `mg-${gid}`,
+      `${name} ${label}`,
+      "Movies",
+      "movie",
+      {
+        with_genres: gid,
+        sort_by: "popularity.desc",
+        "vote_count.gte": "20",
+      },
+      true,
+    );
   }
   for (const [label, gid] of TV_GENRE_RAILS) {
-    add(`tg-${gid}`, `${name} ${label}`, "Series", "tv", {
-      with_genres: gid,
-      sort_by: "popularity.desc",
-      "vote_count.gte": "12",
-    }, true);
+    add(
+      `tg-${gid}`,
+      `${name} ${label}`,
+      "Series",
+      "tv",
+      {
+        with_genres: gid,
+        sort_by: "popularity.desc",
+        "vote_count.gte": "12",
+      },
+      true,
+    );
   }
   for (const [label, gte, lte] of DECADES) {
-    add(`dec-${gte}`, `${name} Movies: ${label}`, "By the decade", "movie", {
-      "primary_release_date.gte": gte,
-      "primary_release_date.lte": lte,
-      sort_by: "vote_average.desc",
-      "vote_count.gte": "20",
-    }, true);
+    add(
+      `dec-${gte}`,
+      `${name} Movies: ${label}`,
+      "By the decade",
+      "movie",
+      {
+        "primary_release_date.gte": gte,
+        "primary_release_date.lte": lte,
+        sort_by: "vote_average.desc",
+        "vote_count.gte": "20",
+      },
+      true,
+    );
   }
-  add("gems", `Hidden ${name} Gems`, "Loved, lesser known", "movie", {
-    sort_by: "vote_average.desc",
-    "vote_count.gte": "30",
-    "vote_count.lte": "1500",
-    "vote_average.gte": "6.5",
-  }, true);
+  add(
+    "gems",
+    `Hidden ${name} Gems`,
+    "Loved, lesser known",
+    "movie",
+    {
+      sort_by: "vote_average.desc",
+      "vote_count.gte": "30",
+      "vote_count.lte": "1500",
+      "vote_average.gte": "6.5",
+    },
+    true,
+  );
 
   return rails;
 }

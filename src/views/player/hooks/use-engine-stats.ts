@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
 import {
   fetchEngineStats,
   GENUINE_FAILURE_WINDOW_MS,
@@ -6,7 +6,7 @@ import {
   ENGINE_DOWN_STRIKES,
   type EngineStats,
 } from "@/lib/torrent/engine-stats";
-import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
+import { useEffect, useRef, useState } from "react";
 
 const POLL_MS = 2000;
 const GROWTH_THRESHOLD = 64 * 1024;

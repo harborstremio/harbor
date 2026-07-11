@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-export function LazyReveal({
-  minHeight = 280,
-  children,
-}: {
-  minHeight?: number;
-  children: ReactNode;
-}) {
+export function LazyReveal({ minHeight = 280, children }: { minHeight?: number; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   useEffect(() => {

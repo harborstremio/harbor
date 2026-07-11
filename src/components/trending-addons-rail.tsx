@@ -1,8 +1,8 @@
-import { Plus, Loader2, Star, TrendingUp } from "lucide-react";
-import { useState } from "react";
 import { ArrowedScrollRow } from "@/components/arrowed-scroll-row";
 import { installAddon } from "@/lib/addon-store";
 import { useTopMovers, type MoverEntry } from "@/lib/providers/stremio-addons-velocity";
+import { Plus, Loader2, Star, TrendingUp } from "lucide-react";
+import { useState } from "react";
 
 export function TrendingAddonsRail({
   onChange,
@@ -22,27 +22,18 @@ export function TrendingAddonsRail({
             <TrendingUp size={18} strokeWidth={2.4} className="text-rose-300" />
           </span>
           <div className="flex flex-col">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-rose-300">
-              Trending up
-            </span>
-            <h3 className="text-[22px] font-medium tracking-tight text-ink">
-              Rising on stremio-addons.net
-            </h3>
+            <span className="text-[10.5px] font-bold uppercase tracking-[0.22em] text-rose-300">Trending up</span>
+            <h3 className="text-[22px] font-medium tracking-tight text-ink">Rising on stremio-addons.net</h3>
             <p className="text-[12.5px] text-ink-muted">
-              Most stars gained in the last {windowDays} {windowDays === 1 ? "day" : "days"}.
-              Tracked locally. Your Harbor visits power this.
+              Most stars gained in the last {windowDays} {windowDays === 1 ? "day" : "days"}. Tracked locally. Your
+              Harbor visits power this.
             </p>
           </div>
         </div>
       </div>
       <ArrowedScrollRow className="-mx-1">
         {movers.map((m) => (
-          <MoverCard
-            key={m.community.uuid}
-            entry={m}
-            onChange={onChange}
-            onOpen={onOpen}
-          />
+          <MoverCard key={m.community.uuid} entry={m} onChange={onChange} onOpen={onOpen} />
         ))}
       </ArrowedScrollRow>
     </section>
@@ -120,11 +111,7 @@ function MoverCard({
       <div className="flex min-h-[110px] flex-1 flex-col gap-2 px-3.5 py-3">
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-[14px] font-semibold leading-tight text-ink">{name}</span>
-          {desc && (
-            <span className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">
-              {desc}
-            </span>
-          )}
+          {desc && <span className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">{desc}</span>}
         </div>
         <div className="mt-auto flex items-center justify-between gap-2">
           <span className="flex items-center gap-1 text-[11px] font-bold text-accent">

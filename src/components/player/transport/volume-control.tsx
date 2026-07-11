@@ -1,8 +1,9 @@
+import { useT } from "@/lib/i18n";
+import type { VolumeStyle } from "@/lib/player-chrome";
+import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import { Minus, Plus, Volume2, VolumeX } from "lucide-react";
 import { useRef } from "react";
-import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
-import type { VolumeStyle } from "@/lib/player-chrome";
-import { useT } from "@/lib/i18n";
+
 import { Tooltip } from "./tooltip";
 import {
   NORMAL_FRACTION,
@@ -113,9 +114,7 @@ export function VolumeControl({
             <Minus size={16} strokeWidth={2.4} />
           </button>
         </Tooltip>
-        <span className="min-w-[2.5rem] text-center font-mono text-[12px] tabular-nums text-white/85">
-          {pct}%
-        </span>
+        <span className="min-w-[2.5rem] text-center font-mono text-[12px] tabular-nums text-white/85">{pct}%</span>
         <Tooltip label={tr("Volume up")}>
           <button
             onClick={() => step(0.05)}
@@ -157,10 +156,7 @@ export function VolumeControl({
         />
       </div>
       {boosting && (
-        <span
-          className="text-[12px] font-semibold tabular-nums leading-none"
-          style={{ color, minWidth: 36 }}
-        >
+        <span className="text-[12px] font-semibold tabular-nums leading-none" style={{ color, minWidth: 36 }}>
           {pct}%
         </span>
       )}

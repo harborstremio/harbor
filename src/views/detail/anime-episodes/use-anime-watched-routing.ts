@@ -1,12 +1,8 @@
-import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { recordManualWatchedMeta, setManualWatchedMany, type ManualWatchedMeta } from "@/lib/manual-watched";
 import type { FranchiseEntry } from "@/lib/providers/anime-detail";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
-import {
-  recordManualWatchedMeta,
-  setManualWatchedMany,
-  type ManualWatchedMeta,
-} from "@/lib/manual-watched";
+import { useMemo } from "react";
 
 export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[]) {
   const byId = useMemo(() => {
@@ -21,7 +17,7 @@ export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[]) 
   };
 
   const manualMetaFor = (metaId: string): ManualWatchedMeta => {
-    const m = metaId === meta.id ? meta : byId.get(metaId) ?? meta;
+    const m = metaId === meta.id ? meta : (byId.get(metaId) ?? meta);
     return { type: "series", name: m.name, poster: m.poster, background: m.background };
   };
 

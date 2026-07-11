@@ -1,5 +1,5 @@
-import { MOVIE_GENRES } from "./tags";
 import { relax, type CatalogEntry, type RowEndpoint } from "./daily-rows-types";
+import { MOVIE_GENRES } from "./tags";
 
 function recentWindow(floor: Record<string, string>): Record<string, string> {
   const fmt = (t: number) => new Date(t).toISOString().slice(0, 10);

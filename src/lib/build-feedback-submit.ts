@@ -1,5 +1,5 @@
-import { safeFetch } from "@/lib/safe-fetch";
 import { APP_VERSION, IS_BETA_BUILD } from "@/lib/build-info";
+import { safeFetch } from "@/lib/safe-fetch";
 
 const URL = "https://bugs.harbor.site/v1/feedback";
 

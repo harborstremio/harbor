@@ -15,9 +15,7 @@ export function CastCard({ cast }: { cast: CastEntry }) {
       : `https://image.tmdb.org/t/p/w185${cast.profilePath}`
     : undefined;
   const Wrap: "button" | "div" = isResolved ? "button" : "div";
-  const wrapProps = isResolved
-    ? { onClick: () => openPerson(cast.id), type: "button" as const }
-    : {};
+  const wrapProps = isResolved ? { onClick: () => openPerson(cast.id), type: "button" as const } : {};
   return (
     <Wrap
       {...wrapProps}
@@ -37,9 +35,7 @@ export function CastCard({ cast }: { cast: CastEntry }) {
       </div>
       <div className="flex flex-col gap-0.5">
         <p className="line-clamp-1 text-[13px] font-medium text-ink">{cast.name}</p>
-        {cast.character && (
-          <p className="line-clamp-2 text-[12px] leading-tight text-ink-subtle">{cast.character}</p>
-        )}
+        {cast.character && <p className="line-clamp-2 text-[12px] leading-tight text-ink-subtle">{cast.character}</p>}
       </div>
     </Wrap>
   );

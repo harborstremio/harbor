@@ -1,13 +1,4 @@
-export type AiProvider =
-  | "openai"
-  | "anthropic"
-  | "gemini"
-  | "meta"
-  | "mistral"
-  | "deepseek"
-  | "xai"
-  | "qwen"
-  | "groq";
+export type AiProvider = "openai" | "anthropic" | "gemini" | "meta" | "mistral" | "deepseek" | "xai" | "qwen" | "groq";
 
 export type AiModel = {
   id: string;
@@ -58,8 +49,20 @@ export const AI_MODELS: AiModel[] = [
 
 export const GROQ_MODELS: AiModel[] = [
   { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile", provider: "groq", free: true, recommended: true },
-  { id: "meta-llama/llama-4-scout-17b-16e-instruct", label: "Llama 4 Scout 17B", provider: "groq", free: true, recommended: true },
-  { id: "meta-llama/llama-4-maverick-17b-128e-instruct", label: "Llama 4 Maverick 17B", provider: "groq", free: true, recommended: true },
+  {
+    id: "meta-llama/llama-4-scout-17b-16e-instruct",
+    label: "Llama 4 Scout 17B",
+    provider: "groq",
+    free: true,
+    recommended: true,
+  },
+  {
+    id: "meta-llama/llama-4-maverick-17b-128e-instruct",
+    label: "Llama 4 Maverick 17B",
+    provider: "groq",
+    free: true,
+    recommended: true,
+  },
   { id: "moonshotai/kimi-k2-instruct", label: "Kimi K2 Instruct", provider: "groq", free: true },
   { id: "openai/gpt-oss-120b", label: "GPT-OSS 120B", provider: "groq", free: true, recommended: true },
   { id: "openai/gpt-oss-20b", label: "GPT-OSS 20B", provider: "groq", free: true },

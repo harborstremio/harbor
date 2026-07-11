@@ -1,7 +1,7 @@
+import { useT } from "@/lib/i18n";
+import type { IptvPlaylistSource } from "@/lib/iptv/types";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { IptvPlaylistSource } from "@/lib/iptv/types";
-import { useT } from "@/lib/i18n";
 
 export function InlineSourceSwitcher({
   sources,
@@ -68,11 +68,7 @@ export function InlineSourceSwitcher({
                     isActive ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
                   }`}
                 >
-                  <span
-                    className={`h-2 w-2 shrink-0 rounded-full ${
-                      isActive ? "bg-danger" : "bg-ink-subtle/45"
-                    }`}
-                  />
+                  <span className={`h-2 w-2 shrink-0 rounded-full ${isActive ? "bg-danger" : "bg-ink-subtle/45"}`} />
                   <span className="truncate">{s.name}</span>
                 </button>
               );

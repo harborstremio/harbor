@@ -1,10 +1,10 @@
+import { useSettings } from "@/lib/settings";
+import { ToggleRow } from "@/views/settings/shared";
 import { downloadDir } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { FolderOpen, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSettings } from "@/lib/settings";
-import { ToggleRow } from "@/views/settings/shared";
 
 export function DownloadsSection() {
   const { settings, update } = useSettings();

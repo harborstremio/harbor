@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useT } from "@/lib/i18n";
+import { useEffect } from "react";
 
 export type CastErrorInfo = {
   title: string;
@@ -8,13 +8,7 @@ export type CastErrorInfo = {
   deviceName?: string;
 };
 
-export function CastErrorModal({
-  error,
-  onDismiss,
-}: {
-  error: CastErrorInfo | null;
-  onDismiss: () => void;
-}) {
+export function CastErrorModal({ error, onDismiss }: { error: CastErrorInfo | null; onDismiss: () => void }) {
   const t = useT();
   useEffect(() => {
     if (!error) return;
@@ -35,17 +29,23 @@ export function CastErrorModal({
       >
         <div className="mb-5 flex items-start gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-rose-400/15 text-rose-200">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           </span>
           <div className="flex-1">
-            <h2
-              className="text-[20px] font-semibold leading-tight text-ink"
-              style={{ fontFamily: "Fraunces, serif" }}
-            >
+            <h2 className="text-[20px] font-semibold leading-tight text-ink" style={{ fontFamily: "Fraunces, serif" }}>
               {error.title}
             </h2>
             {error.deviceName && (

@@ -1,14 +1,25 @@
-import { Check, FolderOpen, Languages, Loader2, Search as SearchIcon, SlidersHorizontal, Sparkles, Timer, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { Flag } from "@/components/flag";
-import { markImportedSub } from "@/lib/player/imported-subs";
 import { useT } from "@/lib/i18n";
+import { markImportedSub } from "@/lib/player/imported-subs";
 import { openSyncBar } from "@/lib/player/sub-sync";
+import {
+  Check,
+  FolderOpen,
+  Languages,
+  Loader2,
+  Search as SearchIcon,
+  SlidersHorizontal,
+  Sparkles,
+  Timer,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import { Tooltip } from "../transport/tooltip";
 import { SearchSection } from "./search-section";
-import { VariantRow } from "./variant-row";
 import type { SubtitleMenuProps } from "./types";
 import { groupByLang, isVeryNewRelease } from "./utils";
+import { VariantRow } from "./variant-row";
 
 type SourceFilter = "all" | "embedded" | "external";
 const ALL_LANGS = "__all__";
@@ -46,10 +57,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
 
   const veryNewMovie = useMemo(() => isVeryNewRelease(metaReleaseDate), [metaReleaseDate]);
   const allLangs = activeLang === ALL_LANGS;
-  const activeGroup = useMemo(
-    () => groups.find((g) => g.langKey === activeLang) ?? null,
-    [groups, activeLang],
-  );
+  const activeGroup = useMemo(() => groups.find((g) => g.langKey === activeLang) ?? null, [groups, activeLang]);
   const visibleVariants = useMemo(() => {
     const list = allLangs ? tracks : (activeGroup?.variants ?? []);
     return list.filter((t) => {
@@ -99,11 +107,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
       <header className="flex items-center justify-between border-b border-edge-soft px-4 py-2.5">
         <div className="flex items-center gap-2.5">
           <span className="text-[13.5px] font-semibold text-ink">{tr("Subtitles")}</span>
-          {tracks.length > 0 && (
-            <span className="text-[11.5px] tabular-nums text-ink-subtle">
-              {tracks.length}
-            </span>
-          )}
+          {tracks.length > 0 && <span className="text-[11.5px] tabular-nums text-ink-subtle">{tracks.length}</span>}
         </div>
 
         <div className="flex items-center gap-1">
@@ -120,9 +124,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             >
               <Timer size={16} strokeWidth={2} />
               {/* badge when delay is active */}
-              {delayNonZero && (
-                <span className="absolute end-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
-              )}
+              {delayNonZero && <span className="absolute end-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent" />}
             </button>
           </Tooltip>
 
@@ -163,9 +165,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             }}
             disabled={offSelected}
             className={`flex items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] font-semibold transition-colors ${
-              offSelected
-                ? "text-ink-subtle"
-                : "bg-elevated text-ink ring-1 ring-edge hover:bg-raised"
+              offSelected ? "text-ink-subtle" : "bg-elevated text-ink ring-1 ring-edge hover:bg-raised"
             }`}
           >
             <span
@@ -212,12 +212,8 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
               >
                 <Flag language={g.langDisplay} size="sm" showLabel={false} />
                 <span className="flex-1 truncate font-medium">{g.langDisplay}</span>
-                {hasSelected && (
-                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
-                )}
-                <span className="text-[10.5px] tabular-nums text-ink-subtle">
-                  {g.variants.length}
-                </span>
+                {hasSelected && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />}
+                <span className="text-[10.5px] tabular-nums text-ink-subtle">{g.variants.length}</span>
               </button>
             );
           })}
@@ -251,11 +247,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
                   label={tr("HI")}
                   hint={hideHI ? tr("Hidden") : tr("Shown")}
                 />
-                <ToggleChip
-                  active={forcedOnly}
-                  onClick={() => setForcedOnly((v) => !v)}
-                  label={tr("Forced")}
-                />
+                <ToggleChip active={forcedOnly} onClick={() => setForcedOnly((v) => !v)} label={tr("Forced")} />
               </span>
             </div>
           )}
@@ -340,9 +332,7 @@ function Tab({
       onClick={onClick}
       disabled={disabled}
       className={`flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold transition-colors disabled:opacity-40 ${
-        active
-          ? "bg-elevated text-ink ring-1 ring-edge"
-          : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+        active ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
       }`}
     >
       {children}

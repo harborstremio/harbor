@@ -199,7 +199,7 @@ export async function fetchXtreamLiveChannels(
     const s = streams[i];
     if (!s || s.stream_id == null) continue;
     const tvgId = s.epg_channel_id?.trim() || null;
-    const group = s.category_id ? categoryName.get(String(s.category_id)) ?? null : null;
+    const group = s.category_id ? (categoryName.get(String(s.category_id)) ?? null) : null;
     const url = buildLiveStreamUrl(creds, s.stream_id, resolvedContainer, streamBase);
     const attrs: Record<string, string> = {};
     if (Number(s.tv_archive) > 0) {

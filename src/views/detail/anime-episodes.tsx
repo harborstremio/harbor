@@ -1,39 +1,40 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+﻿import { EpisodeWatchedMenu, type WatchedMenuTarget } from "@/components/episode-watched-menu";
+import { providerForModel } from "@/lib/ai-models";
+import { useAnilistWatched } from "@/lib/anilist/use-anilist-watched";
 import type { Meta } from "@/lib/cinemeta";
 import { scrollToDataEp } from "@/lib/episode-scroll";
+import { useT } from "@/lib/i18n";
+import { useMalWatched } from "@/lib/mal/use-mal-watched";
+import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
 import { type FranchiseEntry } from "@/lib/providers/anime-detail";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { parseKitsuId } from "@/lib/providers/kitsu";
+import { pickTvdbImage } from "@/lib/providers/tvdb-proxy";
 import { useSettings } from "@/lib/settings";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
 import { useTrakt } from "@/lib/trakt/provider";
-import { useAnilistWatched } from "@/lib/anilist/use-anilist-watched";
-import { useMalWatched } from "@/lib/mal/use-mal-watched";
-import { EpisodeWatchedMenu, type WatchedMenuTarget } from "@/components/episode-watched-menu";
-import { manualWatchedVersion, subscribeManualWatched } from "@/lib/manual-watched";
-import { useT } from "@/lib/i18n";
-import { AnimeEpisodeRow } from "./anime-episodes/episode-row";
-import { AnimeSeasonPicker } from "./anime-episodes/anime-season-picker";
-import { MovieEntryCard } from "./anime-episodes/movie-entry-card";
-import { useAnimeOrder } from "./anime-episodes/use-anime-order";
-import { SeasonArcPicker } from "./series-episodes/season-arc-picker";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+
 import { AnimeEpisodeStrip } from "./anime-episode-strip";
+import { AnimeAiBar } from "./anime-episodes/anime-ai-bar";
+import { AnimeSeasonPicker } from "./anime-episodes/anime-season-picker";
+import { AnimeEpisodeRow } from "./anime-episodes/episode-row";
+import { MovieEntryCard } from "./anime-episodes/movie-entry-card";
+import { useAnimeAiSearch } from "./anime-episodes/use-anime-ai-search";
+import { useAnimeFranchiseNav } from "./anime-episodes/use-anime-franchise-nav";
+import { useAnimeOrder } from "./anime-episodes/use-anime-order";
+import { useAnimeProgressMap } from "./anime-episodes/use-anime-progress-map";
+import { useAnimeTvdbPanel } from "./anime-episodes/use-anime-tvdb-panel";
+import { useAnimeWatchedRouting } from "./anime-episodes/use-anime-watched-routing";
+import { useFranchiseEpisodes } from "./anime-episodes/use-franchise-episodes";
+import { useTvdbProxyImages } from "./anime-episodes/use-tvdb-proxy-images";
+import { AnimeRandomButton } from "./anime-random-button";
 import { EpisodeGridControls } from "./episode-grid-controls";
 import { EpisodeLayoutToggle } from "./episode-layout-toggle";
 import { EpisodeSearch } from "./episode-search";
-import { AnimeRandomButton } from "./anime-random-button";
 import { EpisodeSearchToggle } from "./series-episodes/episode-search-controls";
-import { AnimeAiBar } from "./anime-episodes/anime-ai-bar";
-import { useAnimeAiSearch } from "./anime-episodes/use-anime-ai-search";
-import { useAnimeProgressMap } from "./anime-episodes/use-anime-progress-map";
-import { useAnimeTvdbPanel } from "./anime-episodes/use-anime-tvdb-panel";
-import { useFranchiseEpisodes } from "./anime-episodes/use-franchise-episodes";
-import { useAnimeWatchedRouting } from "./anime-episodes/use-anime-watched-routing";
-import { useAnimeFranchiseNav } from "./anime-episodes/use-anime-franchise-nav";
-import { useTvdbProxyImages } from "./anime-episodes/use-tvdb-proxy-images";
-import { pickTvdbImage } from "@/lib/providers/tvdb-proxy";
+import { SeasonArcPicker } from "./series-episodes/season-arc-picker";
 import { TvdbOrderPanel } from "./series-episodes/tvdb-order-panel";
-import { parseKitsuId } from "@/lib/providers/kitsu";
-import { providerForModel } from "@/lib/ai-models";
 
 const WINDOW_STEP = 60;
 
@@ -74,14 +75,8 @@ export function AnimeEpisodes({
     };
   }, [traktConnected]);
 
-  const { watchedKeys: anilistWatched, completed: anilistCompleted } = useAnilistWatched(
-    trackId ?? meta.id,
-    episodes,
-  );
-  const { watchedKeys: malWatched, completed: malCompleted } = useMalWatched(
-    trackId ?? meta.id,
-    episodes,
-  );
+  const { watchedKeys: anilistWatched, completed: anilistCompleted } = useAnilistWatched(trackId ?? meta.id, episodes);
+  const { watchedKeys: malWatched, completed: malCompleted } = useMalWatched(trackId ?? meta.id, episodes);
   const { settings, update } = useSettings();
   const order = useAnimeOrder(
     imdbId ?? null,
@@ -158,10 +153,7 @@ export function AnimeEpisodes({
     setRenderCount(WINDOW_STEP);
   }, [meta.id, settings.episodeLayout, settings.episodeSort, order?.activeKey]);
   const grow = useCallback(
-    () =>
-      setRenderCount((c) =>
-        c >= orderedEpisodes.length ? c : Math.min(orderedEpisodes.length, c + WINDOW_STEP),
-      ),
+    () => setRenderCount((c) => (c >= orderedEpisodes.length ? c : Math.min(orderedEpisodes.length, c + WINDOW_STEP))),
     [orderedEpisodes.length],
   );
   const reveal = useCallback(
@@ -184,9 +176,7 @@ export function AnimeEpisodes({
     if (aiMode && ai.matched) return displayEpisodes.filter((e) => ai.matched!.has(e.number));
     const q = query.trim().toLowerCase();
     if (!q) return null;
-    return displayEpisodes.filter(
-      (e) => String(e.number).includes(q) || (e.title ?? "").toLowerCase().includes(q),
-    );
+    return displayEpisodes.filter((e) => String(e.number).includes(q) || (e.title ?? "").toLowerCase().includes(q));
   }, [query, displayEpisodes, aiMode, ai.matched]);
   const gridEpisodes = filteredEpisodes ?? displayEpisodes;
   const windowEpisodes = filteredEpisodes
@@ -225,81 +215,76 @@ export function AnimeEpisodes({
   return (
     <div data-anime-episodes className="flex flex-col gap-6 scroll-mt-24">
       <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-6">
-        <h3 className="text-[22px] font-medium tracking-tight text-ink">
-          {isOneOff ? t("Movie") : t("Episodes")}
-        </h3>
-        <div className="flex items-center gap-4">
-          {!isOneOff && (
-            <p className="text-[13px] text-ink-subtle">
-              {displayEpisodes.length === 1
-                ? t("{n} episode", { n: displayEpisodes.length })
-                : t("{n} episodes", { n: displayEpisodes.length })}
-            </p>
-          )}
-          {!isOneOff && <AnimeRandomButton meta={meta} episodes={displayEpisodes} />}
-          {!isOneOff && (
-            <EpisodeLayoutToggle
-              value={settings.episodeLayout}
-              onChange={(v) => update({ episodeLayout: v })}
-            />
-          )}
-          {!isOneOff && (
-            <EpisodeGridControls
-              sort={settings.episodeSort}
-              onSort={(s) => update({ episodeSort: s })}
-              allWatched={allWatched}
-              onMarkSeason={markSeason}
-            />
-          )}
-          {!isOneOff && (
-            <EpisodeSearchToggle
-              searchActive={searchOpen || query.trim().length > 0}
-              aiMode={aiMode}
-              aiEnabled={!!settings.aiSearchKey.trim()}
-              aiProvider={aiProvider}
-              onSearch={() => {
-                setSearchOpen((v) => !v);
-                setAiMode(false);
-                ai.reset();
-              }}
-              onAskAi={() => {
-                setAiMode(true);
-                setSearchOpen(false);
-                setQuery("");
-              }}
-            />
-          )}
-          {tvdbPanel ? (
-            <TvdbOrderPanel
-              items={tvdbPanel.items}
-              activeKey={tvdbPanel.activeKey}
-              onSelect={tvdbPanel.onSelect}
-              orderTypes={tvdbPanel.orderTypes}
-              activeType={tvdbPanel.activeType}
-              onSelectType={(v) => update({ tvdbSeasonType: v })}
-            />
-          ) : order ? (
-            <SeasonArcPicker items={pickerItems} activeKey={order.activeKey} onSelect={selectPickerItem} />
-          ) : franchise.length > 1 ? (
-            <AnimeSeasonPicker franchise={franchise} currentId={currentId} />
-          ) : null}
+        <div className="flex items-center justify-between gap-6">
+          <h3 className="text-[22px] font-medium tracking-tight text-ink">{isOneOff ? t("Movie") : t("Episodes")}</h3>
+          <div className="flex items-center gap-4">
+            {!isOneOff && (
+              <p className="text-[13px] text-ink-subtle">
+                {displayEpisodes.length === 1
+                  ? t("{n} episode", { n: displayEpisodes.length })
+                  : t("{n} episodes", { n: displayEpisodes.length })}
+              </p>
+            )}
+            {!isOneOff && <AnimeRandomButton meta={meta} episodes={displayEpisodes} />}
+            {!isOneOff && (
+              <EpisodeLayoutToggle value={settings.episodeLayout} onChange={(v) => update({ episodeLayout: v })} />
+            )}
+            {!isOneOff && (
+              <EpisodeGridControls
+                sort={settings.episodeSort}
+                onSort={(s) => update({ episodeSort: s })}
+                allWatched={allWatched}
+                onMarkSeason={markSeason}
+              />
+            )}
+            {!isOneOff && (
+              <EpisodeSearchToggle
+                searchActive={searchOpen || query.trim().length > 0}
+                aiMode={aiMode}
+                aiEnabled={!!settings.aiSearchKey.trim()}
+                aiProvider={aiProvider}
+                onSearch={() => {
+                  setSearchOpen((v) => !v);
+                  setAiMode(false);
+                  ai.reset();
+                }}
+                onAskAi={() => {
+                  setAiMode(true);
+                  setSearchOpen(false);
+                  setQuery("");
+                }}
+              />
+            )}
+            {tvdbPanel ? (
+              <TvdbOrderPanel
+                items={tvdbPanel.items}
+                activeKey={tvdbPanel.activeKey}
+                onSelect={tvdbPanel.onSelect}
+                orderTypes={tvdbPanel.orderTypes}
+                activeType={tvdbPanel.activeType}
+                onSelectType={(v) => update({ tvdbSeasonType: v })}
+              />
+            ) : order ? (
+              <SeasonArcPicker items={pickerItems} activeKey={order.activeKey} onSelect={selectPickerItem} />
+            ) : franchise.length > 1 ? (
+              <AnimeSeasonPicker franchise={franchise} currentId={currentId} />
+            ) : null}
+          </div>
         </div>
-      </div>
-      {!isOneOff && aiMode && (
-        <AnimeAiBar
-          provider={aiProvider}
-          loading={ai.status === "loading"}
-          onSubmit={ai.run}
-          onExit={() => {
-            setAiMode(false);
-            ai.reset();
-          }}
-        />
-      )}
-      {!isOneOff && !aiMode && searchOpen && (
-        <EpisodeSearch query={query} onQuery={setQuery} matched={filteredEpisodes?.length ?? null} />
-      )}
+        {!isOneOff && aiMode && (
+          <AnimeAiBar
+            provider={aiProvider}
+            loading={ai.status === "loading"}
+            onSubmit={ai.run}
+            onExit={() => {
+              setAiMode(false);
+              ai.reset();
+            }}
+          />
+        )}
+        {!isOneOff && !aiMode && searchOpen && (
+          <EpisodeSearch query={query} onQuery={setQuery} matched={filteredEpisodes?.length ?? null} />
+        )}
       </div>
       {isOneOff ? (
         <MovieEntryCard meta={meta} ep={episodes[0]} watched={anilistCompleted || malCompleted} />
@@ -328,9 +313,7 @@ export function AnimeEpisodes({
                   metaForEp={routing.metaForEp}
                 />
               ))}
-              {hasMore && !filteredEpisodes && (
-                <div ref={sentinelRef} aria-hidden className="h-px w-full" />
-              )}
+              {hasMore && !filteredEpisodes && <div ref={sentinelRef} aria-hidden className="h-px w-full" />}
             </div>
           ) : (
             <AnimeEpisodeStrip

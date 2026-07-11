@@ -1,14 +1,11 @@
-import { Pencil, Play, Plus, Star } from "lucide-react";
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { topMovies, type Meta } from "@/lib/cinemeta";
-import {
-  CardHoverOverlay,
-  cardHoverPosterClass,
-  type CardHoverStyle,
-} from "@/components/pick-card/card-hover";
+import { CardHoverOverlay, cardHoverPosterClass, type CardHoverStyle } from "@/components/pick-card/card-hover";
 import { CustomHoverOverlay, customHoverPosterProps } from "@/components/pick-card/custom-hover";
+import { topMovies, type Meta } from "@/lib/cinemeta";
 import { listCustomHovers, subscribeCustomHovers, type CustomHoverConfig } from "@/lib/custom-hover";
 import { useT } from "@/lib/i18n";
+import { Pencil, Play, Plus, Star } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
 import { CustomHoverEditor } from "./custom-hover-editor";
 
 const STYLES: Array<{ id: CardHoverStyle; label: string; sub: string }> = [
@@ -169,9 +166,17 @@ function CustomTile({
         selected ? "border-accent bg-accent/10" : "border-edge-soft bg-canvas/50 hover:border-edge"
       }`}
     >
-      <div className={`relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft/60 ${props.className}`} style={props.style}>
+      <div
+        className={`relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft/60 ${props.className}`}
+        style={props.style}
+      >
         {meta?.poster && (
-          <img src={meta.poster} alt="" draggable={false} className="absolute inset-0 h-full w-full rounded-lg object-cover" />
+          <img
+            src={meta.poster}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full rounded-lg object-cover"
+          />
         )}
         {meta && <CustomHoverOverlay config={config} meta={meta} onPlay={() => {}} preview />}
         <button
@@ -187,7 +192,9 @@ function CustomTile({
         </button>
       </div>
       <div className="flex items-center justify-between px-0.5">
-        <span className={`line-clamp-1 text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>{config.name}</span>
+        <span className={`line-clamp-1 text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>
+          {config.name}
+        </span>
       </div>
     </div>
   );

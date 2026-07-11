@@ -1,12 +1,31 @@
-import { t as translate } from "@/lib/i18n";
-import { Camera, ChevronLeft, Info, Maximize, Minimize, PauseCircle, PictureInPicture2, PlayCircle, Replace, Tv } from "lucide-react";
-import type { ReactNode } from "react";
-import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { Meta } from "@/lib/cinemeta";
-import { getCustomIcon, type ControlVariant, type CustomIconMap, type PlayerControlId, type TimeFormat, type VolumeStyle } from "@/lib/player-chrome";
-import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
-import { renderCustomIconControl } from "./custom-icon-renderer";
+import { t as translate } from "@/lib/i18n";
+import {
+  getCustomIcon,
+  type ControlVariant,
+  type CustomIconMap,
+  type PlayerControlId,
+  type TimeFormat,
+  type VolumeStyle,
+} from "@/lib/player-chrome";
+import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import { realQualityLabel } from "@/lib/player/resolution-label";
+import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
+import {
+  Camera,
+  ChevronLeft,
+  Info,
+  Maximize,
+  Minimize,
+  PauseCircle,
+  PictureInPicture2,
+  PlayCircle,
+  Replace,
+  Tv,
+} from "lucide-react";
+import type { ReactNode } from "react";
+
+import { renderCustomIconControl } from "./custom-icon-renderer";
 
 function getControlState(id: PlayerControlId, ctx: ControlContext): string | undefined {
   const preview = ctx.previewStates?.[id];
@@ -29,25 +48,26 @@ function getControlState(id: PlayerControlId, ctx: ControlContext): string | und
   }
   return undefined;
 }
-import { SubtitleMenu } from "../subtitle-menu";
-import { AudioMenu } from "../audio-menu";
-import { DownloadButton } from "./download-button";
-import { Tooltip } from "./tooltip";
-import { BigButton } from "./big-button";
-import { DvrButton } from "./dvr-button";
-import { VolumeControl } from "./volume-control";
-import { SpeedMenu } from "./speed-menu";
-import { AspectMenu } from "./aspect-menu";
-import { Anime4kMenu } from "./anime4k-menu";
-import { HdrToggleBigBtn } from "./hdr-toggle-btn";
-import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
-import { DrawToggle } from "./draw-toggle";
-import { CastButton } from "./cast-button";
-import { SeekStepBtn } from "./seek-step-btn";
-import { EpisodeNavBtn } from "./episode-nav-btn";
-import { TimeStart, TimeEnd } from "./time-display";
-import { WindowControlButtons } from "./window-control-buttons";
 import { IdentifySongButton } from "@/components/identify-song-button";
+import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
+
+import { AudioMenu } from "../audio-menu";
+import { SubtitleMenu } from "../subtitle-menu";
+import { Anime4kMenu } from "./anime4k-menu";
+import { AspectMenu } from "./aspect-menu";
+import { BigButton } from "./big-button";
+import { CastButton } from "./cast-button";
+import { DownloadButton } from "./download-button";
+import { DrawToggle } from "./draw-toggle";
+import { DvrButton } from "./dvr-button";
+import { EpisodeNavBtn } from "./episode-nav-btn";
+import { HdrToggleBigBtn } from "./hdr-toggle-btn";
+import { SeekStepBtn } from "./seek-step-btn";
+import { SpeedMenu } from "./speed-menu";
+import { TimeStart, TimeEnd } from "./time-display";
+import { Tooltip } from "./tooltip";
+import { VolumeControl } from "./volume-control";
+import { WindowControlButtons } from "./window-control-buttons";
 
 export type ControlContext = {
   t?: (key: string, vars?: Record<string, string | number>) => string;
@@ -196,17 +216,11 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             aria-label={t("Title info")}
           >
             <div className="flex flex-col items-start gap-0.5">{lines}</div>
-            <Info
-              size={14}
-              strokeWidth={2.2}
-              className="opacity-50 transition-opacity group-hover:opacity-95"
-            />
+            <Info size={14} strokeWidth={2.2} className="opacity-50 transition-opacity group-hover:opacity-95" />
           </button>
         );
       }
-      return (
-        <div className="pointer-events-none flex flex-col items-start gap-0.5 text-start">{lines}</div>
-      );
+      return <div className="pointer-events-none flex flex-col items-start gap-0.5 text-start">{lines}</div>;
     }
     case "time-start": {
       return (
@@ -248,7 +262,13 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     }
     case "download": {
       if (ctx.mid || ctx.isLiveChannel) return null;
-      if (!ctx.download || !ctx.onDownloadStart || !ctx.onDownloadCancel || !ctx.onDownloadReveal || !ctx.onDownloadReset) {
+      if (
+        !ctx.download ||
+        !ctx.onDownloadStart ||
+        !ctx.onDownloadCancel ||
+        !ctx.onDownloadReveal ||
+        !ctx.onDownloadReset
+      ) {
         return null;
       }
       return (
@@ -324,11 +344,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           ariaLabel={ctx.isLiveChannel ? t("TV Guide") : t("Switch stream")}
           tooltip={ctx.isLiveChannel ? t("TV Guide") : t("Switch stream")}
         >
-          {ctx.isLiveChannel ? (
-            <Tv size={22} strokeWidth={1.9} />
-          ) : (
-            <Replace size={22} strokeWidth={1.9} />
-          )}
+          {ctx.isLiveChannel ? <Tv size={22} strokeWidth={1.9} /> : <Replace size={22} strokeWidth={1.9} />}
         </BigButton>
       );
     }
@@ -371,23 +387,12 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     case "speed-menu": {
       if (ctx.compact || ctx.isLiveChannel) return null;
       return (
-        <SpeedMenu
-          rate={ctx.snap.rate}
-          onRate={ctx.onRate}
-          sleep={ctx.sleep}
-          onOpenChange={ctx.setSpeedMenuOpen}
-        />
+        <SpeedMenu rate={ctx.snap.rate} onRate={ctx.onRate} sleep={ctx.sleep} onOpenChange={ctx.setSpeedMenuOpen} />
       );
     }
     case "aspect-menu": {
       if (ctx.tight || ctx.engine === "html5" || !ctx.onCropMode) return null;
-      return (
-        <AspectMenu
-          mode={ctx.cropMode ?? "fit"}
-          onMode={ctx.onCropMode}
-          onOpenChange={ctx.setAspectMenuOpen}
-        />
-      );
+      return <AspectMenu mode={ctx.cropMode ?? "fit"} onMode={ctx.onCropMode} onOpenChange={ctx.setAspectMenuOpen} />;
     }
     case "anime4k-menu": {
       if (ctx.tight || ctx.engine === "html5" || !ctx.onAnime4kMode || !ctx.anime4kAvailable) return null;
@@ -445,11 +450,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           ariaLabel={t("Fullscreen")}
           tooltip={ctx.fullscreen ? t("Exit fullscreen") : t("Fullscreen")}
         >
-          {ctx.fullscreen ? (
-            <Minimize size={22} strokeWidth={1.9} />
-          ) : (
-            <Maximize size={22} strokeWidth={1.9} />
-          )}
+          {ctx.fullscreen ? <Minimize size={22} strokeWidth={1.9} /> : <Maximize size={22} strokeWidth={1.9} />}
         </BigButton>
       );
     }

@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 
 export type ViewSummonable = "home" | "discover" | "anime" | "queue" | "addons";
 

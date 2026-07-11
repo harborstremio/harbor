@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { useEffect } from "react";
 
 export function useSdrBoostGate(params: { engine: "html5" | "mpv"; hdrGamma: string; enabled: boolean }) {
   const { engine, hdrGamma, enabled } = params;

@@ -1,15 +1,15 @@
+import type { CalendarItem } from "./calendar";
+import { resolveSavedCalendar, type SavedCandidate } from "./calendar-library";
 import { meta as cinemetaMeta } from "./cinemeta";
+import { fetchSimklCdnCalendar } from "./simkl/calendar";
+import { isAuthenticated as simklConnected } from "./simkl/session";
+import { fetchWatchlist as fetchSimklWatchlist, fetchWatchingItems } from "./simkl/watchlist";
 import {
   fetchAnticipatedMovies,
   fetchAnticipatedShows,
   fetchUpcomingEpisodes,
   fetchUpcomingMovies,
 } from "./trakt/calendar";
-import type { CalendarItem } from "./calendar";
-import { resolveSavedCalendar, type SavedCandidate } from "./calendar-library";
-import { fetchWatchlist as fetchSimklWatchlist, fetchWatchingItems } from "./simkl/watchlist";
-import { fetchSimklCdnCalendar } from "./simkl/calendar";
-import { isAuthenticated as simklConnected } from "./simkl/session";
 
 export { fetchLibraryCalendar } from "./calendar-library";
 
@@ -22,10 +22,7 @@ const calendarCache = new Map<string, CacheEntry>();
 const calendarInFlight = new Map<string, Promise<CalendarItem[]>>();
 const CACHE_STALE_MS = 30 * 60 * 1000;
 
-function withCalendarCache(
-  cacheKey: string,
-  fetcher: () => Promise<CalendarItem[]>,
-): Promise<CalendarItem[]> {
+function withCalendarCache(cacheKey: string, fetcher: () => Promise<CalendarItem[]>): Promise<CalendarItem[]> {
   const cached = calendarCache.get(cacheKey);
   const now = Date.now();
 
@@ -68,10 +65,7 @@ export function clearCalendarSourceCache() {
   calendarInFlight.clear();
 }
 
-export async function fetchSimklPremieresCalendar(
-  year: number,
-  month: number,
-): Promise<CalendarItem[]> {
+export async function fetchSimklPremieresCalendar(year: number, month: number): Promise<CalendarItem[]> {
   const cacheKey = `simkl-premieres:${year}-${month}`;
   return withCalendarCache(cacheKey, () => fetchSimklCdnCalendar(year, month).catch(() => []));
 }
@@ -135,20 +129,13 @@ function isAnimationGenre(genres: string[] | undefined): boolean {
   return genres.some((g) => wanted.includes(g.toLowerCase()));
 }
 
-export async function fetchTraktCalendar(
-  year: number,
-  month: number,
-): Promise<CalendarItem[]> {
+export async function fetchTraktCalendar(year: number, month: number): Promise<CalendarItem[]> {
   const today = new Date();
   const cur = new Date(year, month, 1);
-  const fwdMonths =
-    (cur.getFullYear() - today.getFullYear()) * 12 + (cur.getMonth() - today.getMonth());
+  const fwdMonths = (cur.getFullYear() - today.getFullYear()) * 12 + (cur.getMonth() - today.getMonth());
   if (fwdMonths < 0 || fwdMonths > TRAKT_MAX_FORWARD_MONTHS) return [];
   const days = Math.max(31, (fwdMonths + 1) * 31);
-  const [eps, mvs] = await Promise.all([
-    fetchUpcomingEpisodes(days),
-    fetchUpcomingMovies(days),
-  ]);
+  const [eps, mvs] = await Promise.all([fetchUpcomingEpisodes(days), fetchUpcomingMovies(days)]);
 
   const epsInMonth = eps.filter((ep) => inMonth((ep.airDate ?? "").slice(0, 10), year, month));
   const mvsInMonth = mvs.filter((m) => inMonth((m.contextDate ?? "").slice(0, 10), year, month));
@@ -166,19 +153,15 @@ export async function fetchTraktCalendar(
   for (const ep of epsInMonth) {
     const date = (ep.airDate ?? "").slice(0, 10);
     const imdb = ep.ids.imdb ?? null;
-    const meta = imdb ? showMeta.get(imdb) ?? null : null;
+    const meta = imdb ? (showMeta.get(imdb) ?? null) : null;
     const baseId = imdb ?? `trakt:${ep.ids.tmdb ?? ep.ids.tvdb ?? ep.title}`;
     const epLabel = `S${pad(ep.season)}E${pad(ep.number)}`;
-    const vid = meta?.videos?.find(
-      (v) => (v.season ?? 0) === ep.season && (v.episode ?? v.number ?? 0) === ep.number,
-    );
+    const vid = meta?.videos?.find((v) => (v.season ?? 0) === ep.season && (v.episode ?? v.number ?? 0) === ep.number);
     out.push({
       id: `${baseId}:${ep.season}:${ep.number}`,
       imdbId: imdb,
       type: "tv",
-      name: ep.episodeTitle
-        ? `${ep.title} ${epLabel}: ${ep.episodeTitle}`
-        : `${ep.title} ${epLabel}`,
+      name: ep.episodeTitle ? `${ep.title} ${epLabel}: ${ep.episodeTitle}` : `${ep.title} ${epLabel}`,
       poster: vid?.thumbnail ?? meta?.poster ?? null,
       background: meta?.background ?? null,
       releaseDate: date,
@@ -190,7 +173,7 @@ export async function fetchTraktCalendar(
   for (const m of mvsInMonth) {
     const date = (m.contextDate ?? "").slice(0, 10);
     const imdb = m.ids.imdb ?? null;
-    const meta = imdb ? movieMeta.get(imdb) ?? null : null;
+    const meta = imdb ? (movieMeta.get(imdb) ?? null) : null;
     const id = imdb ?? `trakt:${m.ids.tmdb ?? m.title}`;
     out.push({
       id,
@@ -209,14 +192,8 @@ export async function fetchTraktCalendar(
   return out;
 }
 
-export async function fetchAnticipatedCalendar(
-  year: number,
-  month: number,
-): Promise<CalendarItem[]> {
-  const [shows, mvs] = await Promise.all([
-    fetchAnticipatedShows(),
-    fetchAnticipatedMovies(),
-  ]);
+export async function fetchAnticipatedCalendar(year: number, month: number): Promise<CalendarItem[]> {
+  const [shows, mvs] = await Promise.all([fetchAnticipatedShows(), fetchAnticipatedMovies()]);
   const inMonthShows = shows.filter((s) => inMonth(s.firstAired, year, month));
   const inMonthMovies = mvs.filter((m) => inMonth(m.released, year, month));
   const [showMetas, movieMetas] = await Promise.all([

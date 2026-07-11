@@ -6,7 +6,10 @@ const MAX_SHOWN = 1500;
 
 const SHOWN_CACHE = new Map<string, number>();
 
-export function useLazyVisible<T>(items: T[], resetKey: unknown): {
+export function useLazyVisible<T>(
+  items: T[],
+  resetKey: unknown,
+): {
   visible: T[];
   sentinelRef: (el: HTMLDivElement | null) => void;
   hasMore: boolean;

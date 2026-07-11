@@ -1,16 +1,17 @@
-import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Play } from "lucide-react";
-import { useEffect, useState } from "react";
 import { awardSourceMeta, findTopAward, parseAwardYear } from "@/lib/anime-awards";
+import { resolveHeroBackdrop } from "@/lib/anime-backdrop";
 import type { Meta } from "@/lib/cinemeta";
 import { isSaved, toggleSaved } from "@/lib/feed";
 import { useT } from "@/lib/i18n";
-import { kitsuCoverImage, parseKitsuId } from "@/lib/providers/kitsu";
-import { resolveHeroBackdrop } from "@/lib/anime-backdrop";
 import { resolveLogo } from "@/lib/logo";
 import { useMalRating } from "@/lib/mal-rating";
+import { kitsuCoverImage, parseKitsuId } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { observe, usePageVisible } from "@/lib/visibility";
+import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Play } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import { MalLogo } from "./icons/mal-logo";
 import { PickCard } from "./pick-card";
 import { Row } from "./row";
@@ -18,13 +19,7 @@ import { Row } from "./row";
 const ROTATE_MS = 14000;
 const FADE_MS = 700;
 
-export function AnimeHero({
-  slides,
-  topPicks,
-}: {
-  slides: Meta[];
-  topPicks: Meta[];
-}) {
+export function AnimeHero({ slides, topPicks }: { slides: Meta[]; topPicks: Meta[] }) {
   const { settings } = useSettings();
   const { openMeta } = useView();
   const t = useT();
@@ -171,17 +166,12 @@ export function AnimeHero({
       </div>
 
       <div className="relative z-10 flex min-h-[520px] items-end px-12 pt-24 pb-10">
-        <div
-          className="flex max-w-[520px] flex-col gap-5"
-          style={{ transition: `opacity ${FADE_MS}ms ease-out` }}
-        >
+        <div className="flex max-w-[520px] flex-col gap-5" style={{ transition: `opacity ${FADE_MS}ms ease-out` }}>
           <CrunchyrollBadge name={current.name} year={parseAwardYear(current.releaseInfo)} />
           <HeroLogo title={current.name} logo={logo} />
           <HeroTags meta={current} />
           {current.description && (
-            <p className="line-clamp-3 text-[14.5px] leading-relaxed text-ink-muted">
-              {current.description}
-            </p>
+            <p className="line-clamp-3 text-[14.5px] leading-relaxed text-ink-muted">{current.description}</p>
           )}
           <div className="mt-1 flex items-center gap-3">
             <button
@@ -265,10 +255,7 @@ export function AnimeHero({
         ) : (
           <div className="flex gap-4 overflow-hidden">
             {Array.from({ length: 7 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/35"
-              />
+              <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/35" />
             ))}
           </div>
         )}
@@ -323,17 +310,8 @@ function CrunchyrollBadge({ name, year }: { name: string; year?: number }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <img
-        src={src.iconSmall}
-        alt=""
-        width={16}
-        height={16}
-        className={iconCls}
-        draggable={false}
-      />
-      <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink">
-        {label}
-      </span>
+      <img src={src.iconSmall} alt="" width={16} height={16} className={iconCls} draggable={false} />
+      <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink">{label}</span>
       <div
         role="tooltip"
         className={`pointer-events-none absolute start-0 top-full z-30 mt-2 w-max max-w-[280px] origin-top-left rtl:origin-top-right rounded-xl border border-edge-soft/70 bg-elevated/95 px-3.5 py-2.5 text-start shadow-[0_18px_40px_-16px_rgba(0,0,0,0.8)] backdrop-blur-md transition-all duration-150 ${
@@ -342,9 +320,7 @@ function CrunchyrollBadge({ name, year }: { name: string; year?: number }) {
       >
         <div className="flex items-center gap-2">
           <img src={src.iconSmall} alt="" width={14} height={14} className={tipIconCls} draggable={false} />
-          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
-            {src.name}
-          </span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent">{src.name}</span>
         </div>
         <div className="mt-1 text-[13.5px] font-semibold text-ink">
           {win.year} {win.categoryName}
@@ -368,7 +344,11 @@ function HeroTags({ meta }: { meta: Meta }) {
     <div className="flex flex-wrap items-center gap-x-2 text-[13px] text-ink-muted">
       {parts.map((p, i) => (
         <span key={`${p}-${i}`} className="inline-flex items-center gap-2">
-          {i > 0 && <span aria-hidden className="text-ink-subtle">·</span>}
+          {i > 0 && (
+            <span aria-hidden className="text-ink-subtle">
+              ·
+            </span>
+          )}
           <span>{p}</span>
         </span>
       ))}

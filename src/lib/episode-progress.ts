@@ -16,9 +16,7 @@ export function resumeDefaultSeason(
   stremioWatched?: Set<string>,
   lastPlayedSeasonHint?: number | null,
 ): number {
-  const real = seasons
-    .filter((s) => s.seasonNumber >= 1)
-    .sort((a, b) => a.seasonNumber - b.seasonNumber);
+  const real = seasons.filter((s) => s.seasonNumber >= 1).sort((a, b) => a.seasonNumber - b.seasonNumber);
   const first = real[0]?.seasonNumber ?? seasons[0]?.seasonNumber ?? 1;
   if (real.length <= 1) return first;
 
@@ -62,8 +60,7 @@ export function getEpisodeProgress(
   traktSeason?: number,
   traktEpisode?: number,
 ): EpisodeProgress {
-  const resumeIds =
-    traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
+  const resumeIds = traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
   let entry: { ms: number; t: number } | null = null;
   for (const id of resumeIds) {
     const e = readResumeEntry(id, season, episode);

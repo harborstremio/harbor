@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
-import type { PlayerBridge } from "@/lib/player/bridge";
 import { t } from "@/lib/i18n";
+import type { PlayerBridge } from "@/lib/player/bridge";
 import { useSettings } from "@/lib/settings";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 type CropMode = {
   id: string;
@@ -27,9 +27,9 @@ const MODES: CropMode[] = [
   { id: "original", label: "2.39:1", panscan: 0, aspect: "2.39:1", zoom: 0 },
 ];
 
-export const CROP_PRESETS: ReadonlyArray<{ id: string; label: string }> = MODES.filter(
-  (m) => m.id !== "zoom",
-).map((m) => ({ id: m.id, label: m.label }));
+export const CROP_PRESETS: ReadonlyArray<{ id: string; label: string }> = MODES.filter((m) => m.id !== "zoom").map(
+  (m) => ({ id: m.id, label: m.label }),
+);
 
 const modeIndex = (id: string) => {
   const i = MODES.findIndex((m) => m.id === id);

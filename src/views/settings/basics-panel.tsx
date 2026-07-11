@@ -1,8 +1,9 @@
+import { useAuth } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { ChevronRight, Eye, EyeOff, Languages, LogIn, MonitorPlay, Palette, Zap } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { useAuth } from "@/lib/auth";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+
 import { PlayModePanel } from "./player-panel";
 import { Section, useSettingsActiveContext } from "./shared";
 
@@ -88,15 +89,7 @@ function maskEmail(email: string): string {
   return `${local.slice(0, 1)}${"*".repeat(Math.max(local.length - 1, 4))}@${domain}`;
 }
 
-function SignInRow({
-  email,
-  signedIn,
-  onManage,
-}: {
-  email: string | null;
-  signedIn: boolean;
-  onManage: () => void;
-}) {
+function SignInRow({ email, signedIn, onManage }: { email: string | null; signedIn: boolean; onManage: () => void }) {
   const t = useT();
   const [reveal, setReveal] = useState(false);
 
@@ -119,10 +112,7 @@ function SignInRow({
         <span className="shrink-0 rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-accent">
           {t("Recommended")}
         </span>
-        <ChevronRight
-          size={18}
-          className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
-        />
+        <ChevronRight size={18} className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5" />
       </button>
     );
   }
@@ -203,10 +193,7 @@ function LaunchRow({
           {status}
         </span>
       )}
-      <ChevronRight
-        size={18}
-        className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
-      />
+      <ChevronRight size={18} className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5" />
     </button>
   );
 }

@@ -1,8 +1,9 @@
-import { Star } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
-import { ResultPoster } from "./result-poster";
 import { useView } from "@/lib/view";
+import { Star } from "lucide-react";
+
+import { ResultPoster } from "./result-poster";
 
 function MetaRow({ m, onClose, index }: { m: Meta; onClose: () => void; index?: number }) {
   const { openMeta } = useView();
@@ -26,9 +27,7 @@ function MetaRow({ m, onClose, index }: { m: Meta; onClose: () => void; index?: 
         <span className="truncate text-[16px] font-semibold text-ink">{m.name}</span>
         <div className="flex items-center gap-2 text-[12.5px] text-ink-muted">
           {m.releaseInfo && <span>{m.releaseInfo}</span>}
-          {m.releaseInfo && m.imdbRating && (
-            <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />
-          )}
+          {m.releaseInfo && m.imdbRating && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />}
           {m.imdbRating && (
             <span className="flex items-center gap-1 text-ink">
               <Star size={11} className="fill-accent text-accent" />
@@ -36,11 +35,7 @@ function MetaRow({ m, onClose, index }: { m: Meta; onClose: () => void; index?: 
             </span>
           )}
         </div>
-        {description && (
-          <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">
-            {description}
-          </span>
-        )}
+        {description && <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">{description}</span>}
       </div>
     </button>
   );
@@ -60,11 +55,7 @@ export function MetaList({
   if (items.length === 0) return null;
   return (
     <section className="min-w-0">
-      {title && (
-        <h3 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">
-          {title}
-        </h3>
-      )}
+      {title && <h3 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">{title}</h3>}
       <div className="grid min-w-0 gap-1">
         {items.map((m, i) => (
           <MetaRow key={m.id} m={m} onClose={onClose} index={stagger ? i : undefined} />

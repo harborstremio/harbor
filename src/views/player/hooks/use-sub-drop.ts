@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
-import type { PlayerBridge } from "@/lib/player/bridge";
 import { t } from "@/lib/i18n";
 import { writePlayerPrefs } from "@/lib/player-prefs";
+import type { PlayerBridge } from "@/lib/player/bridge";
+import { useEffect, useRef, useState, type RefObject } from "react";
 
 const SUB_EXT = /\.(srt|ass|ssa|vtt|sub)$/i;
 
@@ -20,14 +20,12 @@ export function useSubDrop(bridgeRef: RefObject<PlayerBridge | null>, metaId: st
           const path = e.payload.paths.find((p) => SUB_EXT.test(p));
           if (!path) return;
           const name = path.split(/[\\/]/).pop() ?? "Subtitle";
-          void bridgeRef.current
-            ?.addSubtitle(path, undefined, name.replace(SUB_EXT, ""), true)
-            .then((ok) => {
-              if (ok) writePlayerPrefs(metaId, { subsOff: false });
-              setToast(ok ? t("Loaded {name}", { name }) : t("Couldn't load {name}", { name }));
-              if (timer.current) window.clearTimeout(timer.current);
-              timer.current = window.setTimeout(() => setToast(null), 2200);
-            });
+          void bridgeRef.current?.addSubtitle(path, undefined, name.replace(SUB_EXT, ""), true).then((ok) => {
+            if (ok) writePlayerPrefs(metaId, { subsOff: false });
+            setToast(ok ? t("Loaded {name}", { name }) : t("Couldn't load {name}", { name }));
+            if (timer.current) window.clearTimeout(timer.current);
+            timer.current = window.setTimeout(() => setToast(null), 2200);
+          });
         });
       } catch {}
     })();

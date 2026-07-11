@@ -1,11 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
 import { getCachedPlaylist, loadPlaylist, subscribePlaylists } from "@/lib/iptv/store";
 import type { IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
+import { useEffect, useMemo, useState } from "react";
 
-export function useAllPlaylists(
-  sources: IptvPlaylistSource[],
-  enabled: boolean,
-): Map<string, IptvPlaylist> {
+export function useAllPlaylists(sources: IptvPlaylistSource[], enabled: boolean): Map<string, IptvPlaylist> {
   const sourceKey = sources.map((s) => s.id).join("|");
 
   const initial = useMemo(() => snapshot(sources), [sourceKey]);

@@ -1,5 +1,5 @@
-import { fetchAndParseXmltv, indexProgramsByChannel } from "./xmltv";
 import type { EpgChannelMeta, EpgIndex, EpgProgram } from "./types";
+import { fetchAndParseXmltv, indexProgramsByChannel } from "./xmltv";
 
 const TTL_MS = 60 * 60 * 1000;
 
@@ -39,11 +39,7 @@ export function clearEpg(playlistId?: string) {
   notify();
 }
 
-export async function loadEpg(params: {
-  playlistId: string;
-  urls: string[];
-  force?: boolean;
-}): Promise<EpgIndex> {
+export async function loadEpg(params: { playlistId: string; urls: string[]; force?: boolean }): Promise<EpgIndex> {
   const { playlistId, urls, force } = params;
   const existing = cache.get(playlistId);
   if (!force && existing && Date.now() - existing.fetchedAt < TTL_MS) {

@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { pulseWebviewMemoryLow } from "@/lib/webview-memory";
 import { runMaintenance } from "@/lib/maintenance";
+import { pulseWebviewMemoryLow } from "@/lib/webview-memory";
+import { useEffect } from "react";
 
 const TRIM_INTERVAL_MS = 60000;
 

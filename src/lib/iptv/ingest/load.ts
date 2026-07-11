@@ -1,12 +1,6 @@
 import { parseM3u } from "../m3u";
-import {
-  commitHydratedPlaylist,
-  fetchM3uText,
-  markVodHydrated,
-  shapePlaylist,
-  unmarkVodHydrated,
-} from "../store";
 import { liveContainerPref } from "../settings-bridge";
+import { commitHydratedPlaylist, fetchM3uText, markVodHydrated, shapePlaylist, unmarkVodHydrated } from "../store";
 import type { IptvPlaylist, IptvPlaylistSource } from "../types";
 import {
   fetchXtreamLiveChannels,
@@ -20,10 +14,7 @@ import type { ProviderShape } from "./detect";
 
 const MIDDLEWARE_CANDIDATES = ["/iptv/m3u", "/m3u", "/playlist.m3u", "/get.php?type=m3u_plus"];
 
-export async function loadFromShape(
-  src: IptvPlaylistSource,
-  shape: ProviderShape,
-): Promise<IptvPlaylist> {
+export async function loadFromShape(src: IptvPlaylistSource, shape: ProviderShape): Promise<IptvPlaylist> {
   if (shape.kind === "invalid") throw new Error(shape.reason);
   if (shape.kind === "epg") return shapePlaylist({ ...src, url: shape.url }, []);
   if (shape.kind === "xtream") return loadXtream(src, shape.creds);
@@ -58,11 +49,7 @@ async function hydrateXtreamVod(
   }
 }
 
-async function loadM3u(
-  src: IptvPlaylistSource,
-  url: string,
-  middleware: boolean,
-): Promise<IptvPlaylist> {
+async function loadM3u(src: IptvPlaylistSource, url: string, middleware: boolean): Promise<IptvPlaylist> {
   const text = await fetchM3uText(url);
   if (isM3u(text)) return parseAndShape(src, text);
   if (middleware) {

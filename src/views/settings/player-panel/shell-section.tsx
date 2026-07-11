@@ -13,9 +13,7 @@ export function ShellSection() {
             type="button"
             onClick={() => update({ playerShellId: shell.id })}
             className={`flex items-start gap-3.5 rounded-2xl border px-5 py-4 text-start transition-colors ${
-              selected
-                ? "border-ink bg-elevated"
-                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
+              selected ? "border-ink bg-elevated" : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
             }`}
           >
             <span

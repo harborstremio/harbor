@@ -1,7 +1,7 @@
 import { BookOpen } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { CodeBlock, CopyName, HoverTip } from "./cheat-sheet-parts";
+
 import {
   COLOR_TOKENS,
   EASING_TOKENS,
@@ -14,6 +14,7 @@ import {
   Z_INDEX_MAP,
   type TokenRow,
 } from "./cheat-sheet-data";
+import { CodeBlock, CopyName, HoverTip } from "./cheat-sheet-parts";
 import { RECIPES } from "./cheat-sheet-recipes";
 import { SUITE_CHROME } from "./suite-theme";
 
@@ -126,9 +127,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => jump(s.id)}
                 className={`relative rounded-lg px-3 py-2.5 text-start text-[14px] font-medium transition-colors ${
-                  active === s.id
-                    ? "bg-white/[0.06] text-ink"
-                    : "text-ink-muted hover:bg-white/[0.03] hover:text-ink"
+                  active === s.id ? "bg-white/[0.06] text-ink" : "text-ink-muted hover:bg-white/[0.03] hover:text-ink"
                 }`}
               >
                 {s.label}
@@ -139,7 +138,11 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           <div className="mx-auto flex max-w-[960px] flex-col gap-12 px-6 py-9 lg:px-10">
-            <Section id="tokens-color" title="Color tokens" sub="Every surface in Harbor maps to one of these 12 variables.">
+            <Section
+              id="tokens-color"
+              title="Color tokens"
+              sub="Every surface in Harbor maps to one of these 12 variables."
+            >
               <TokenTable rows={COLOR_TOKENS} swatch />
             </Section>
 
@@ -147,11 +150,19 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               <TokenTable rows={FONT_TOKENS} />
             </Section>
 
-            <Section id="tokens-easing" title="Easing tokens" sub="Shared transition curves. Use anywhere you transition.">
+            <Section
+              id="tokens-easing"
+              title="Easing tokens"
+              sub="Shared transition curves. Use anywhere you transition."
+            >
               <TokenTable rows={EASING_TOKENS} />
             </Section>
 
-            <Section id="data-attrs" title="Root data attributes" sub="Set on <html>. Use them to scope styles to a specific layout/card/button choice.">
+            <Section
+              id="data-attrs"
+              title="Root data attributes"
+              sub="Set on <html>. Use them to scope styles to a specific layout/card/button choice."
+            >
               <div className="flex flex-col gap-2.5">
                 {ROOT_DATA_ATTRS.map((d) => (
                   <div key={d.attr} className="rounded-lg border border-edge-soft bg-elevated/15 p-4">
@@ -176,7 +187,11 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="utilities" title="Tailwind utility shortcuts" sub="The Tailwind classes that already exist on every component. Override one of these in CSS and you change everywhere it's used.">
+            <Section
+              id="utilities"
+              title="Tailwind utility shortcuts"
+              sub="The Tailwind classes that already exist on every component. Override one of these in CSS and you change everywhere it's used."
+            >
               <div className="grid gap-1.5 sm:grid-cols-2">
                 {TAILWIND_UTILITIES.map((u) => (
                   <div
@@ -190,26 +205,29 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="selectors" title="Stable selectors" sub="Class names and data attributes that won't change between releases. Safe to target from your CSS.">
+            <Section
+              id="selectors"
+              title="Stable selectors"
+              sub="Class names and data attributes that won't change between releases. Safe to target from your CSS."
+            >
               <div className="flex flex-col gap-1.5">
                 {STABLE_SELECTORS.map((s) => (
-                  <div
-                    key={s.selector}
-                    className="rounded-lg border border-edge-soft bg-elevated/15 px-3.5 py-2.5"
-                  >
+                  <div key={s.selector} className="rounded-lg border border-edge-soft bg-elevated/15 px-3.5 py-2.5">
                     <div className="flex flex-wrap items-baseline gap-3">
                       <CopyName text={s.selector} />
                       <span className="text-[11.5px] text-ink-muted">{s.where}</span>
                     </div>
-                    {s.tip && (
-                      <p className="mt-1 text-[11px] italic text-ink-subtle">{s.tip}</p>
-                    )}
+                    {s.tip && <p className="mt-1 text-[11px] italic text-ink-subtle">{s.tip}</p>}
                   </div>
                 ))}
               </div>
             </Section>
 
-            <Section id="z-index" title="Z-index map" sub="Pick a z-index for your overlays that sits where you want it.">
+            <Section
+              id="z-index"
+              title="Z-index map"
+              sub="Pick a z-index for your overlays that sits where you want it."
+            >
               <div className="flex flex-col gap-1">
                 {Z_INDEX_MAP.map((l) => (
                   <div
@@ -228,13 +246,14 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="events" title="Window events" sub="Dispatched on window. Listen from your theme JS to react to Harbor's lifecycle.">
+            <Section
+              id="events"
+              title="Window events"
+              sub="Dispatched on window. Listen from your theme JS to react to Harbor's lifecycle."
+            >
               <div className="flex flex-col gap-1.5">
                 {WINDOW_EVENTS.map((e) => (
-                  <div
-                    key={e.name}
-                    className="rounded-lg border border-edge-soft bg-elevated/15 px-3.5 py-2.5"
-                  >
+                  <div key={e.name} className="rounded-lg border border-edge-soft bg-elevated/15 px-3.5 py-2.5">
                     <div className="flex flex-wrap items-baseline gap-2">
                       <CopyName text={e.name} />
                       {e.payload && (
@@ -249,16 +268,18 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="views" title="View identifiers" sub="Use these strings if you wire a custom navbar that needs to navigate.">
+            <Section
+              id="views"
+              title="View identifiers"
+              sub="Use these strings if you wire a custom navbar that needs to navigate."
+            >
               <div className="flex flex-wrap gap-1.5">
                 {VIEW_NAMES.map((v) => (
                   <span
                     key={v.id}
                     className="flex items-center gap-2 rounded-full border border-edge-soft bg-elevated/20 py-1 ps-1.5 pe-3"
                   >
-                    <code className="rounded-full bg-canvas/70 px-2 py-0.5 font-mono text-[11px] text-ink">
-                      {v.id}
-                    </code>
+                    <code className="rounded-full bg-canvas/70 px-2 py-0.5 font-mono text-[11px] text-ink">{v.id}</code>
                     <span className="text-[11.5px] text-ink-muted">{v.label}</span>
                   </span>
                 ))}
@@ -351,4 +372,3 @@ function TokenTable({ rows, swatch }: { rows: TokenRow[]; swatch?: boolean }) {
     </div>
   );
 }
-

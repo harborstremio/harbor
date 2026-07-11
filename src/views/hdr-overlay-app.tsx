@@ -1,12 +1,13 @@
-import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { AuthProvider } from "@/lib/auth";
-import { SettingsProvider } from "@/lib/settings";
-import { ShellLayer } from "./player/shell-layer";
-import { DragClickStage } from "./player/drag-click-stage";
+import { hdrOverlayEmitAction, onHdrStageProps } from "@/lib/hdr-overlay";
 import { emptySnapshot, type PlayerSnapshot } from "@/lib/player/bridge";
 import { createForwardingMpvBridge } from "@/lib/player/mpv-forward";
-import { hdrOverlayEmitAction, onHdrStageProps } from "@/lib/hdr-overlay";
+import { SettingsProvider } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
+import { Component, useEffect, useMemo, useRef, useState } from "react";
+
+import { DragClickStage } from "./player/drag-click-stage";
+import { ShellLayer } from "./player/shell-layer";
 
 export type HdrStagePayload = {
   snap: PlayerSnapshot;

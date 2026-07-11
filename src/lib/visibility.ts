@@ -29,10 +29,7 @@ export function observe(el: Element, cb: Callback): () => void {
   };
 }
 
-export function useInViewport(
-  ref: RefObject<Element | null>,
-  initial = false,
-): boolean {
+export function useInViewport(ref: RefObject<Element | null>, initial = false): boolean {
   const [inView, setInView] = useState(initial);
   useEffect(() => {
     const el = ref.current;
@@ -43,9 +40,7 @@ export function useInViewport(
 }
 
 export function usePageVisible(): boolean {
-  const [visible, setVisible] = useState(
-    typeof document === "undefined" ? true : !document.hidden,
-  );
+  const [visible, setVisible] = useState(typeof document === "undefined" ? true : !document.hidden);
   useEffect(() => {
     const onChange = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", onChange);

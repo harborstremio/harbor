@@ -33,9 +33,7 @@ export function parseBase16(text: string): PaletteBucket | null {
   }
   bg.push(slots.base00, slots.base01, slots.base02, slots.base03);
 
-  const accentPool = ["base08", "base09", "base0a", "base0b", "base0c", "base0e"]
-    .map((k) => slots[k])
-    .filter(Boolean);
+  const accentPool = ["base08", "base09", "base0a", "base0b", "base0c", "base0e"].map((k) => slots[k]).filter(Boolean);
   let accentAlt = slots.base0d;
   let best = -1;
   for (const c of accentPool) {

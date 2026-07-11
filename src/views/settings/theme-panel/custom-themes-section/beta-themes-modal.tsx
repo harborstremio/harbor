@@ -1,7 +1,7 @@
+import { BETA_THEMES, type ThemePreset } from "@/lib/theme";
 import { ArrowLeft, Check, FlaskConical, X } from "lucide-react";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { BETA_THEMES, type ThemePreset } from "@/lib/theme";
 
 export function BetaThemesCard({ count, onClick }: { count: number; onClick: () => void }) {
   return (
@@ -106,15 +106,7 @@ export function BetaThemesModal({
   );
 }
 
-function BetaCard({
-  theme,
-  active,
-  onActivate,
-}: {
-  theme: ThemePreset;
-  active: boolean;
-  onActivate: () => void;
-}) {
+function BetaCard({ theme, active, onActivate }: { theme: ThemePreset; active: boolean; onActivate: () => void }) {
   const hasImage = !!theme.previewImage;
   const bg = theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
   return (

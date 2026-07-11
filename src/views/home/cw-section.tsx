@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { LogIn } from "lucide-react";
 import stremioWordmark from "@/assets/stremio-wordmark.png";
 import { AuthModal } from "@/components/auth-modal";
 import { ContinueCard } from "@/components/continue-card";
@@ -7,6 +5,8 @@ import { Row } from "@/components/row";
 import { useT } from "@/lib/i18n";
 import { type LibraryItem } from "@/lib/stremio";
 import { isLibraryItemWatched } from "@/lib/trakt/library-key";
+import { LogIn } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   signedIn: boolean;
@@ -35,13 +35,7 @@ export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
   if (items.length > 0) {
     return (
       <>
-        <Row
-          title={t("Continue Watching")}
-          min={260}
-          shape="landscape"
-          scrollKey="home:cw"
-          headerRight={signInButton}
-        >
+        <Row title={t("Continue Watching")} min={260} shape="landscape" scrollKey="home:cw" headerRight={signInButton}>
           {items.map((item) => (
             <ContinueCard
               key={item._id}

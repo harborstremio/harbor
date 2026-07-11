@@ -1,6 +1,6 @@
-import { Home } from "lucide-react";
-import { togglePinnedCatalog, useIsPinned, type PinnedSource } from "@/lib/pinned-catalogs";
 import { useT } from "@/lib/i18n";
+import { togglePinnedCatalog, useIsPinned, type PinnedSource } from "@/lib/pinned-catalogs";
+import { Home } from "lucide-react";
 
 export function PinHomeButton({
   id,

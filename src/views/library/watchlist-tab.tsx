@@ -1,14 +1,21 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { useSettings } from "@/lib/settings";
 import { type Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { library, libraryMetaType, removeStremioLibraryItem, type LibraryItem } from "@/lib/stremio";
-import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { useTrakt } from "@/lib/trakt/provider";
 import { traktItemToMeta } from "@/lib/trakt/to-meta";
 import type { TraktItem } from "@/lib/trakt/types";
-import { readLocalEntries, removeFromWatchlist, setWatchlistAggregate, subscribeWatchlist, type LocalEntry } from "@/lib/watchlist";
-import { useT } from "@/lib/i18n";
+import { fetchWatchlist } from "@/lib/trakt/watchlist";
+import {
+  readLocalEntries,
+  removeFromWatchlist,
+  setWatchlistAggregate,
+  subscribeWatchlist,
+  type LocalEntry,
+} from "@/lib/watchlist";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import {
   applyFilter,
   countByType,
@@ -103,10 +110,7 @@ export function WatchlistTab() {
     };
   }, [traktConnected]);
 
-  const merged = useMemo(
-    () => mergeWatchlist(localEntries, stremio, trakt),
-    [localEntries, stremio, trakt],
-  );
+  const merged = useMemo(() => mergeWatchlist(localEntries, stremio, trakt), [localEntries, stremio, trakt]);
 
   useEffect(() => {
     const ids = new Set<string>();
@@ -139,9 +143,7 @@ export function WatchlistTab() {
   const subtitle = (() => {
     const parts: string[] = [];
     if (traktConnected)
-      parts.push(
-        traktStatus === "loading" ? tr("Syncing Trakt…") : tr("{n} on Trakt", { n: trakt.length }),
-      );
+      parts.push(traktStatus === "loading" ? tr("Syncing Trakt…") : tr("{n} on Trakt", { n: trakt.length }));
     else parts.push(tr("Connect Trakt in Settings to sync"));
     parts.push(tr("{n} saved on this device", { n: localEntries.length }));
     if (authKey && rawCount > 0) parts.push(tr("{n} in your Stremio library", { n: rawCount }));
@@ -160,9 +162,7 @@ export function WatchlistTab() {
           trailing={
             <>
               <SortControl />
-              {settings.librarySort === "recent" && (
-                <ViewModeToggle flat={flat} onToggle={toggleFlat} />
-              )}
+              {settings.librarySort === "recent" && <ViewModeToggle flat={flat} onToggle={toggleFlat} />}
             </>
           }
         />
@@ -180,7 +180,9 @@ export function WatchlistTab() {
         <GroupedGrid groups={sortedGroups(visible, settings.librarySort)} onRemove={handleRemove} />
       ) : flat ? (
         <GroupedGrid
-          groups={[{ label: "Everything", items: [...visible].sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity)) }]}
+          groups={[
+            { label: "Everything", items: [...visible].sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity)) },
+          ]}
           onRemove={handleRemove}
         />
       ) : (
@@ -224,12 +226,12 @@ function filterLibrary(items: LibraryItem[], bookmarkedOnly: boolean): LibraryIt
   });
 }
 
-function mergeWatchlist(
-  localEntries: LocalEntry[],
-  stremio: LibraryItem[],
-  trakt: TraktItem[],
-): WatchlistMerged[] {
-  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+function mergeWatchlist(localEntries: LocalEntry[], stremio: LibraryItem[], trakt: TraktItem[]): WatchlistMerged[] {
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .trim();
   const byKey = new Map<string, WatchlistMerged>();
   const setOrUpgrade = (key: string, entry: WatchlistMerged) => {
     const existing = byKey.get(key);
@@ -264,7 +266,10 @@ function mergeWatchlist(
   for (const e of localEntries) {
     let dupById = false;
     for (const v of byKey.values()) {
-      if (v.meta.id === e.id) { dupById = true; break; }
+      if (v.meta.id === e.id) {
+        dupById = true;
+        break;
+      }
     }
     if (dupById) continue;
     const nameKey = e.name ? `${e.type}:${norm(e.name)}` : null;

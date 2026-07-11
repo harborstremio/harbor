@@ -46,7 +46,11 @@ function escapeAttr(value: string): string {
 }
 
 export function suggestExportFilename(playlistName: string): string {
-  const safe = playlistName.trim().replace(/[^a-z0-9-]+/gi, "-").replace(/^-+|-+$/g, "") || "playlist";
+  const safe =
+    playlistName
+      .trim()
+      .replace(/[^a-z0-9-]+/gi, "-")
+      .replace(/^-+|-+$/g, "") || "playlist";
   const stamp = new Date().toISOString().slice(0, 10);
   return `${safe}-${stamp}.m3u`;
 }

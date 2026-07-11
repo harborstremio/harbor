@@ -1,0 +1,54 @@
+# Frontend static checks (format + lint) via Vite+.
+# Runs before merge; keeps style aligned and blocks broken pushes.
+# Full typecheck remains part of `pnpm build` / tauri build.
+name: check
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "index.html"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "vite.config.*"
+      - "tsconfig*.json"
+      - ".github/workflows/check.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "scripts/**"
+      - "index.html"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "vite.config.*"
+      - "tsconfig*.json"
+      - ".github/workflows/check.yml"
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fmt-lint:
+    name: format + lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          node-version: "24"
+          cache: true
+
+      - name: Install dependencies
+        run: vp install
+
+      - name: Format check
+        run: vp fmt --check
+
+      - name: Lint
+        run: vp lint

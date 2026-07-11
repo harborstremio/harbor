@@ -1,13 +1,7 @@
-import { useState } from "react";
 import type { IptvChannel } from "@/lib/iptv/types";
+import { useState } from "react";
 
-export function NetworkTiles({
-  channels,
-  onPlay,
-}: {
-  channels: IptvChannel[];
-  onPlay: (ch: IptvChannel) => void;
-}) {
+export function NetworkTiles({ channels, onPlay }: { channels: IptvChannel[]; onPlay: (ch: IptvChannel) => void }) {
   if (channels.length === 0) return null;
   return (
     <div className="flex gap-2.5 overflow-x-auto pb-1 ps-[9px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

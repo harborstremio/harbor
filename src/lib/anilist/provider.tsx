@@ -1,17 +1,10 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
 import { openUrl } from "@/lib/window";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+
 import { buildAuthorizeUrl, completeAuthorization } from "./auth";
 import { getSession, isAuthenticated, setSession, subscribeSession } from "./session";
-import { validateAnilistSession } from "./validate";
 import type { AnilistSession } from "./types";
+import { validateAnilistSession } from "./validate";
 
 export type ConnectState =
   | { kind: "idle" }

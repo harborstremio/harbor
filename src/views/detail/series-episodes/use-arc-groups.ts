@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import {
   tmdbEpisodeGroup,
   tmdbEpisodeGroups,
@@ -6,6 +5,7 @@ import {
   type Episode,
   type StoryArc,
 } from "@/lib/providers/tmdb";
+import { useEffect, useState } from "react";
 
 export type ArcGroupsState = {
   arcs: StoryArc[];

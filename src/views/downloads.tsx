@@ -1,9 +1,4 @@
-import { useMemo, type ReactNode } from "react";
-import { Check, Download as DownloadIcon, FolderOpen, Pause, Play, Trash2, X } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
-import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
-import { DownloadDirBar } from "./downloads/download-dir-bar";
 import {
   cancelDownload,
   pauseDownload,
@@ -13,6 +8,12 @@ import {
   useDownloads,
   type DownloadItem,
 } from "@/lib/download/downloads-store";
+import { useSettings } from "@/lib/settings";
+import { useView } from "@/lib/view";
+import { Check, Download as DownloadIcon, FolderOpen, Pause, Play, Trash2, X } from "lucide-react";
+import { useMemo, type ReactNode } from "react";
+
+import { DownloadDirBar } from "./downloads/download-dir-bar";
 
 function fmtBytes(n: number | null): string {
   if (n == null || n <= 0) return "";
@@ -78,10 +79,7 @@ function buildGroups(items: DownloadItem[]): DownloadGroup[] {
 export function DownloadsView() {
   const items = useDownloads();
   const active = items.filter((d) => d.status === "downloading").length;
-  const savedBytes = items.reduce(
-    (sum, d) => (d.status === "done" ? sum + (d.totalBytes ?? d.receivedBytes) : sum),
-    0,
-  );
+  const savedBytes = items.reduce((sum, d) => (d.status === "done" ? sum + (d.totalBytes ?? d.receivedBytes) : sum), 0);
   const groups = useMemo(() => buildGroups(items), [items]);
 
   return (
@@ -133,7 +131,8 @@ function EmptyState() {
       <div className="flex flex-col gap-1.5">
         <p className="text-[15px] font-semibold text-ink">No downloads yet</p>
         <p className="max-w-[340px] text-[13.5px] leading-relaxed text-ink-muted">
-          Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.
+          Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it
+          saves here for offline watching.
         </p>
       </div>
     </div>
@@ -144,10 +143,7 @@ function ShowGroup({ group }: { group: Extract<DownloadGroup, { kind: "show" }> 
   const { settings } = useSettings();
   const poster = usePosterChain(settings.rpdbKey, group.metaId, group.poster ?? undefined, "series");
   const episodes = useMemo(
-    () =>
-      [...group.items].sort(
-        (a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0),
-      ),
+    () => [...group.items].sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0)),
     [group.items],
   );
   const totalBytes = episodes.reduce(
@@ -199,16 +195,11 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
       title: d.title,
       subtitle: d.subtitle ?? undefined,
       notWebReady: true,
-      episode:
-        d.season != null && d.episode != null
-          ? { season: d.season, episode: d.episode }
-          : undefined,
+      episode: d.season != null && d.episode != null ? { season: d.season, episode: d.episode } : undefined,
     });
   return (
     <li className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3 transition-colors hover:bg-elevated/70">
-      <div
-        className={`${compact ? "h-[44px] w-[30px]" : "h-[68px] w-[46px]"} shrink-0 overflow-hidden rounded-lg`}
-      >
+      <div className={`${compact ? "h-[44px] w-[30px]" : "h-[68px] w-[46px]"} shrink-0 overflow-hidden rounded-lg`}>
         <Poster src={poster.src} onError={poster.onError} seed={d.metaId} ratio="portrait" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">

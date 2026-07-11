@@ -1,9 +1,10 @@
 import { topMovies, type Meta } from "@/lib/cinemeta";
-import type { Settings } from "@/lib/settings";
 import { topEntries } from "@/lib/discover/affinity";
 import { getStore } from "@/lib/discover/store";
 import { recentlyPlayed, watchTitleKey } from "@/lib/playback-history";
 import { tmdbDiscover, tmdbMovieRow, tmdbSeriesRow, tmdbTrending } from "@/lib/providers/tmdb";
+import type { Settings } from "@/lib/settings";
+
 import { localizeFloor } from "./locale";
 import { getDownvotedIds, getUpvotedIds } from "./preferences";
 import { rankMetasByAffinity } from "./rank";
@@ -45,10 +46,8 @@ function tasteSeedGenres(): number[] {
 export async function fetchFeatured(tmdbKey: string, settings?: Settings): Promise<Meta[]> {
   const blocked = votedIds();
   const watched = recentlyPlayed();
-  const loc = (floor: Record<string, string>) =>
-    settings ? localizeFloor(floor, settings, "movie") : floor;
-  const skip = (m: Meta) =>
-    blocked.has(m.id) || watched.ids.has(m.id) || watched.titles.has(watchTitleKey(m.name));
+  const loc = (floor: Record<string, string>) => (settings ? localizeFloor(floor, settings, "movie") : floor);
+  const skip = (m: Meta) => blocked.has(m.id) || watched.ids.has(m.id) || watched.titles.has(watchTitleKey(m.name));
   if (!tmdbKey) {
     const list = await topMovies();
     const pool = list.filter((m) => m.background && !skip(m)).slice(0, 40);
@@ -101,11 +100,8 @@ export async function fetchFeatured(tmdbKey: string, settings?: Settings): Promi
 
 export async function fetchCriticsPickList(tmdbKey: string, settings?: Settings): Promise<Meta[]> {
   if (!tmdbKey) return [];
-  const loc = (floor: Record<string, string>) =>
-    settings ? localizeFloor(floor, settings, "movie") : floor;
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getUTCFullYear(), 0, 0).getTime()) / 86_400_000,
-  );
+  const loc = (floor: Record<string, string>) => (settings ? localizeFloor(floor, settings, "movie") : floor);
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getUTCFullYear(), 0, 0).getTime()) / 86_400_000);
   const pageOf = (offset: number) => String(((dayOfYear + offset) % 5) + 1);
   const queries = await Promise.all([
     tmdbDiscover(

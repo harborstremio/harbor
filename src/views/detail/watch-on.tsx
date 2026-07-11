@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import type { WatchProvider } from "@/lib/providers/tmdb";
 import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
 
 export function WatchOn({ providers }: { providers: WatchProvider[] }) {
   const t = useT();

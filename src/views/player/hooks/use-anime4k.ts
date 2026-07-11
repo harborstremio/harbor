@@ -1,8 +1,8 @@
-import { useEffect, type RefObject } from "react";
-import type { PlayerBridge } from "@/lib/player/bridge";
 import { anime4kChain, type Anime4kMode, type Anime4kTier } from "@/lib/player/anime4k-modes";
+import type { PlayerBridge } from "@/lib/player/bridge";
 import { useSettings, type Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
+import { useEffect, type RefObject } from "react";
 
 export type Anime4kChoice = "auto" | "off" | Anime4kMode;
 
@@ -41,12 +41,7 @@ function gatedTier(settings: Settings): Anime4kTier {
   return settings.playerAnime4kTier as Anime4kTier;
 }
 
-export function anime4kShadersFor(
-  settings: Settings,
-  src: PlayerSrc,
-  c: Anime4kChoice,
-  dims?: Anime4kDims,
-): string[] {
+export function anime4kShadersFor(settings: Settings, src: PlayerSrc, c: Anime4kChoice, dims?: Anime4kDims): string[] {
   if (c === "off") return [];
   const tier = gatedTier(settings);
   if (c === "auto") {
@@ -56,12 +51,7 @@ export function anime4kShadersFor(
   return anime4kChain(settings.playerAnime4kFolder, gatedMode(c, dims), tier);
 }
 
-export function useAnime4k(
-  bridgeRef: RefObject<PlayerBridge | null>,
-  srcKey: string,
-  src: PlayerSrc,
-  videoWidth = 0,
-) {
+export function useAnime4k(bridgeRef: RefObject<PlayerBridge | null>, srcKey: string, src: PlayerSrc, videoWidth = 0) {
   const { settings, update } = useSettings();
   const choice = (settings.playerAnime4kOverride as Anime4kChoice) || "auto";
   const available = !!settings.playerAnime4kFolder;

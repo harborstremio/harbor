@@ -1,7 +1,7 @@
-import { useLayoutEffect, useRef, useState } from "react";
 import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
 import { Laurel } from "@/components/icons/laurel";
 import { useT } from "@/lib/i18n";
+import { useLayoutEffect, useRef, useState } from "react";
 
 type HeroTier = "full" | "compact" | "hidden";
 
@@ -39,21 +39,16 @@ export function HeroAwardsCorner({
   const top = summary[0];
   if (!top || tier === "hidden") return null;
   const compact = tier === "compact";
-  const nominationsLabel = (n: number) =>
-    n === 1 ? t("nomination") : t("nominations");
+  const nominationsLabel = (n: number) => (n === 1 ? t("nomination") : t("nominations"));
   const lines: string[] = [];
   for (const item of summary) {
     if (item.wins > 0) {
       const winPart = `${item.wins} ${awardNoun(item.type, item.wins)}`;
       lines.push(
-        item.nominations > 0
-          ? `${winPart} · ${item.nominations} ${nominationsLabel(item.nominations)}`
-          : winPart,
+        item.nominations > 0 ? `${winPart} · ${item.nominations} ${nominationsLabel(item.nominations)}` : winPart,
       );
     } else if (item.nominations > 0) {
-      lines.push(
-        `${item.nominations} ${awardNoun(item.type, item.nominations)} ${nominationsLabel(item.nominations)}`,
-      );
+      lines.push(`${item.nominations} ${awardNoun(item.type, item.nominations)} ${nominationsLabel(item.nominations)}`);
     }
   }
   if (lines.length === 0) return null;
@@ -102,9 +97,7 @@ export function HeroAwardsCorner({
 
   if (!interactive) {
     return (
-      <div className={`group flex items-center gap-3 rounded-2xl px-3 py-2 text-end ${positionCls}`}>
-        {content}
-      </div>
+      <div className={`group flex items-center gap-3 rounded-2xl px-3 py-2 text-end ${positionCls}`}>{content}</div>
     );
   }
 

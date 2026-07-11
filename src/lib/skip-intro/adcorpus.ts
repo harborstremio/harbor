@@ -1,4 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
+
 import type { SkipSegment } from "./types";
 
 const CORPUS_URL = "https://harbor.site/updates/ad-segments.json";
@@ -9,11 +10,7 @@ type CorpusEntry = { content: string; source: string; ranges: Array<{ start: num
 let entriesCache: CorpusEntry[] | null = null;
 let inflight: Promise<CorpusEntry[]> | null = null;
 
-export async function fetchAdSegments(
-  content: string,
-  source: string,
-  fresh = false,
-): Promise<SkipSegment[]> {
+export async function fetchAdSegments(content: string, source: string, fresh = false): Promise<SkipSegment[]> {
   if (!content) return [];
   if (!source.startsWith("ih_") && !source.startsWith("rg_")) return [];
   const entries = await loadCorpus(fresh);
@@ -48,13 +45,7 @@ async function load(): Promise<CorpusEntry[]> {
 
 async function verify(payload: string, sigB64: string): Promise<boolean> {
   try {
-    const key = await crypto.subtle.importKey(
-      "raw",
-      b64(CORPUS_PUBKEY),
-      { name: "Ed25519" },
-      false,
-      ["verify"],
-    );
+    const key = await crypto.subtle.importKey("raw", b64(CORPUS_PUBKEY), { name: "Ed25519" }, false, ["verify"]);
     return await crypto.subtle.verify("Ed25519", key, b64(sigB64), new TextEncoder().encode(payload));
   } catch {
     return false;

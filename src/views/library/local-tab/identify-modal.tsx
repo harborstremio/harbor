@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
-import { Loader2, Search, X } from "lucide-react";
-import { get, IMG } from "@/lib/providers/tmdb/tmdb-client";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import type { LocalEntry } from "@/lib/local-library";
+import { get, IMG } from "@/lib/providers/tmdb/tmdb-client";
+import { useSettings } from "@/lib/settings";
+import { Loader2, Search, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Candidate = {
   tmdbId: number;
@@ -24,11 +24,7 @@ export type IdentifyResolution = {
   type: "movie" | "show";
 };
 
-async function searchTmdb(
-  key: string,
-  kind: "movie" | "tv",
-  query: string,
-): Promise<Candidate[]> {
+async function searchTmdb(key: string, kind: "movie" | "tv", query: string): Promise<Candidate[]> {
   const data = await get<{ results?: any[] }>(key, `search/${kind}`, {
     query,
     include_adult: "false",
@@ -206,7 +202,9 @@ export function IdentifyModal({
         ) : (
           <div className="flex max-h-[42vh] flex-col gap-1 overflow-y-auto">
             {results.length === 0 && !loading && query.trim() && (
-              <p className="px-1 py-6 text-center text-[13px] text-ink-muted">{t("No matches. Try a different search.")}</p>
+              <p className="px-1 py-6 text-center text-[13px] text-ink-muted">
+                {t("No matches. Try a different search.")}
+              </p>
             )}
             {results.map((c) => (
               <button
@@ -227,7 +225,9 @@ export function IdentifyModal({
                     {c.year && <span className="shrink-0 text-[12px] font-normal text-ink-subtle">{c.year}</span>}
                     {picking === c.tmdbId && <Loader2 size={13} className="shrink-0 animate-spin text-ink-subtle" />}
                   </span>
-                  {c.overview && <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-muted">{c.overview}</span>}
+                  {c.overview && (
+                    <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-muted">{c.overview}</span>
+                  )}
                 </div>
               </button>
             ))}

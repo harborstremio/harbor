@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
-import { useTrakt } from "./provider";
-import { TRAKT_API_BASE, TRAKT_API_VERSION, TRAKT_CLIENT_ID } from "./config";
-import { getSession } from "./session";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { useSettings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
+import { useEffect, useRef } from "react";
+
+import { TRAKT_API_BASE, TRAKT_API_VERSION, TRAKT_CLIENT_ID } from "./config";
+import { useTrakt } from "./provider";
+import { getSession } from "./session";
 
 type Snap = {
   status: string;
@@ -108,15 +109,7 @@ export function useTraktScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
       }
       lastActionRef.current = "pause";
     }
-  }, [
-    isConnected,
-    resolveTarget,
-    scrobble,
-    metaId,
-    src.episode,
-    snap.status,
-    snap.durationSec,
-  ]);
+  }, [isConnected, resolveTarget, scrobble, metaId, src.episode, snap.status, snap.durationSec]);
 
   const seekTrackRef = useRef({ pos: 0, at: 0, lastResyncAt: 0 });
   useEffect(() => {

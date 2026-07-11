@@ -1,18 +1,13 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Poster, usePosterChain } from "@/components/poster";
 import type { CalendarItem } from "@/lib/calendar";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+
 import { formatDateLong } from "./utils";
 
-export function CalendarChip({
-  item,
-  onOpen,
-}: {
-  item: CalendarItem;
-  onOpen: (item: CalendarItem) => void;
-}) {
+export function CalendarChip({ item, onOpen }: { item: CalendarItem; onOpen: (item: CalendarItem) => void }) {
   const t = useT();
   const { settings } = useSettings();
   const poster = usePosterChain(
@@ -42,13 +37,7 @@ export function CalendarChip({
     >
       <div className="h-7 w-5 shrink-0 overflow-hidden rounded-[3px] bg-elevated/50">
         {item.poster ? (
-          <Poster
-            src={poster.src}
-            onError={poster.onError}
-            seed={item.id}
-            ratio="portrait"
-            className="h-full w-full"
-          />
+          <Poster src={poster.src} onError={poster.onError} seed={item.id} ratio="portrait" className="h-full w-full" />
         ) : null}
       </div>
       <span className="flex-1 truncate text-[11.5px] font-medium text-ink">{item.name}</span>
@@ -62,13 +51,7 @@ export function CalendarChip({
   );
 }
 
-function ChipTooltip({
-  item,
-  anchorRef,
-}: {
-  item: CalendarItem;
-  anchorRef: React.RefObject<HTMLElement | null>;
-}) {
+function ChipTooltip({ item, anchorRef }: { item: CalendarItem; anchorRef: React.RefObject<HTMLElement | null> }) {
   const t = useT();
   const { settings } = useSettings();
   const poster = usePosterChain(
@@ -123,9 +106,7 @@ function ChipTooltip({
           ) : null}
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">
-            {tag}
-          </span>
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.18em] text-ink-subtle">{tag}</span>
           <p className="text-[14px] font-semibold leading-tight text-ink">{item.name}</p>
           <p className="text-[12px] text-ink-muted">{dateLabel}</p>
           {item.voteAverage > 0 && (
@@ -135,9 +116,7 @@ function ChipTooltip({
           )}
         </div>
       </div>
-      {item.overview && (
-        <p className="line-clamp-4 text-[12px] leading-relaxed text-ink-muted">{item.overview}</p>
-      )}
+      {item.overview && <p className="line-clamp-4 text-[12px] leading-relaxed text-ink-muted">{item.overview}</p>}
     </div>,
     document.body,
   );

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { PersonHoverCard } from "./person-hover-card";
 
 export function PersonLink({
@@ -53,10 +54,13 @@ export function PersonLink({
     return () => window.removeEventListener("scroll", onScroll, true);
   }, [anchor]);
 
-  useEffect(() => () => {
-    clearOpen();
-    clearClose();
-  }, []);
+  useEffect(
+    () => () => {
+      clearOpen();
+      clearClose();
+    },
+    [],
+  );
 
   return (
     <>
@@ -76,14 +80,7 @@ export function PersonLink({
       >
         {name}
       </button>
-      {anchor && (
-        <PersonHoverCard
-          personId={id}
-          anchor={anchor}
-          onEnter={cancelClose}
-          onLeave={scheduleClose}
-        />
-      )}
+      {anchor && <PersonHoverCard personId={id} anchor={anchor} onEnter={cancelClose} onLeave={scheduleClose} />}
     </>
   );
 }

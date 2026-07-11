@@ -13,10 +13,7 @@ export function WelcomeStep() {
             style={{ transform: "translateY(2px)" }}
           >
             Harb
-            <span
-              className="inline-block"
-              style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-            >
+            <span className="inline-block" style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}>
               o
             </span>
             r
@@ -40,9 +37,7 @@ export function WelcomeStep() {
 function Bullet({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5 rounded-xl border border-edge-soft bg-canvas/60 p-4">
-      <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink">
-        {title}
-      </span>
+      <span className="text-[12.5px] font-semibold uppercase tracking-[0.14em] text-ink">{title}</span>
       <span className="text-[12.5px] leading-snug text-ink-muted">{children}</span>
     </div>
   );

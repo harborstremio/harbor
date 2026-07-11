@@ -1,8 +1,9 @@
 import { addonAccepts, type Addon } from "@/lib/addons";
-import { safeFetch } from "@/lib/safe-fetch";
 import { dlog } from "@/lib/debug";
-import type { SubResult, SubSearchQuery } from "../types";
+import { safeFetch } from "@/lib/safe-fetch";
+
 import { normalizeLang } from "../language";
+import type { SubResult, SubSearchQuery } from "../types";
 
 type RawAddonSub = {
   id?: string;
@@ -17,9 +18,7 @@ function transportBase(transportUrl: string): string {
 }
 
 function contentId(q: SubSearchQuery): string | null {
-  const base =
-    q.stremioId?.trim() ||
-    (q.imdbId ? (q.imdbId.startsWith("tt") ? q.imdbId : `tt${q.imdbId}`) : "");
+  const base = q.stremioId?.trim() || (q.imdbId ? (q.imdbId.startsWith("tt") ? q.imdbId : `tt${q.imdbId}`) : "");
   if (!base) return null;
   const isEpisode = q.season != null && q.episode != null;
   if (isEpisode && !/:\d+:\d+$/.test(base)) {
@@ -56,15 +55,12 @@ async function callOne(addon: Addon, type: string, id: string, extra: string): P
   }
 }
 
-export async function searchAddons(
-  addons: Addon[],
-  q: SubSearchQuery,
-): Promise<SubResult[]> {
+export async function searchAddons(addons: Addon[], q: SubSearchQuery): Promise<SubResult[]> {
   dlog(`[addons] searchAddons called with ${addons.length} addons`);
 
   const id = contentId(q);
   if (!id) {
-    dlog('[addons] No content ID, returning empty');
+    dlog("[addons] No content ID, returning empty");
     return [];
   }
 
@@ -80,10 +76,10 @@ export async function searchAddons(
   });
   dlog(`[addons] === Filtered subtitle addons: ${subAddons.length} of ${addons.length} ===`);
   if (subAddons.length > 0) {
-    dlog(`[addons] Accepting addons: ${subAddons.map(a => a.manifest.name).join(', ')}`);
+    dlog(`[addons] Accepting addons: ${subAddons.map((a) => a.manifest.name).join(", ")}`);
   }
   if (subAddons.length === 0) {
-    dlog('[addons] No subtitle addons accept this content');
+    dlog("[addons] No subtitle addons accept this content");
     return [];
   }
 
@@ -104,8 +100,8 @@ export async function searchAddons(
       if (!s.url) continue;
       // Include addon name and index to ensure unique IDs across different addons
       const uniqueId = s.id
-        ? `${addonName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${s.id}`
-        : `${addonName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${idx}`;
+        ? `${addonName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${s.id}`
+        : `${addonName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${idx}`;
       out.push({
         id: uniqueId,
         url: s.url,
@@ -120,4 +116,3 @@ export async function searchAddons(
   dlog(`[addons] Total addon results: ${out.length}`);
   return out;
 }
-

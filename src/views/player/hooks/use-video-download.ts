@@ -1,20 +1,13 @@
+import type { Meta } from "@/lib/cinemeta";
+import { buildDefaultFilename, extensionFromUrl } from "@/lib/download/filename";
+import { startDownload, type DownloadHandle, type DownloadProgress } from "@/lib/download/video-download";
+import { useSettings } from "@/lib/settings";
+import { randomUuid } from "@/lib/uuid";
+import type { PlayEpisode } from "@/lib/view";
 import { downloadDir } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Meta } from "@/lib/cinemeta";
-import { randomUuid } from "@/lib/uuid";
-import {
-  buildDefaultFilename,
-  extensionFromUrl,
-} from "@/lib/download/filename";
-import {
-  startDownload,
-  type DownloadHandle,
-  type DownloadProgress,
-} from "@/lib/download/video-download";
-import { useSettings } from "@/lib/settings";
-import type { PlayEpisode } from "@/lib/view";
 
 export type DownloadStatus =
   | { kind: "idle" }

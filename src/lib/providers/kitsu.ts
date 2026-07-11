@@ -1,7 +1,7 @@
+import { adultContentHidden } from "@/lib/addons-store/adult-filter";
 import { lruSet } from "@/lib/cache";
 import type { Meta } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
-import { adultContentHidden } from "@/lib/addons-store/adult-filter";
 
 const KITSU = "https://kitsu.io/api/edge";
 
@@ -48,7 +48,12 @@ type KitsuCharacterAttrs = {
   description?: string;
 };
 
-type Resource<T> = { id: string; type: string; attributes: T; relationships?: Record<string, { data?: { id: string; type: string } | Array<{ id: string; type: string }> }> };
+type Resource<T> = {
+  id: string;
+  type: string;
+  attributes: T;
+  relationships?: Record<string, { data?: { id: string; type: string } | Array<{ id: string; type: string }> }>;
+};
 type Doc<D, I = unknown> = { data: D; included?: Resource<I>[] };
 
 const cache = new Map<string, { v: unknown; t: number }>();
@@ -172,9 +177,7 @@ const coverCache = new Map<number, string | null>();
 
 export async function kitsuCoverImage(id: number): Promise<string | null> {
   if (coverCache.has(id)) return coverCache.get(id)!;
-  const j = await get<Doc<Resource<{ coverImage?: Img | null }>>>(
-    `/anime/${id}?fields[anime]=coverImage`,
-  );
+  const j = await get<Doc<Resource<{ coverImage?: Img | null }>>>(`/anime/${id}?fields[anime]=coverImage`);
   const img = j?.data?.attributes?.coverImage;
   const url = pickImg(img) ?? null;
   lruSet(coverCache, id, url, COVER_CACHE_MAX);
@@ -243,11 +246,7 @@ function attrsToMeta(id: string, a: KitsuAnimeAttrs): Meta {
   };
 }
 
-export async function kitsuSimilarByGenres(
-  genreSlugs: string[],
-  excludeId: number,
-  limit = 18,
-): Promise<Meta[]> {
+export async function kitsuSimilarByGenres(genreSlugs: string[], excludeId: number, limit = 18): Promise<Meta[]> {
   if (genreSlugs.length === 0) return [];
   const slug = genreSlugs.slice(0, 4).join(",");
   const ageFilter = adultContentHidden() ? "&filter[ageRating]=G,PG,R" : "";
@@ -320,9 +319,7 @@ export async function kitsuStreamingLinks(id: number): Promise<KitsuStreamer[]> 
 }
 
 export async function kitsuEpisodes(id: number, limit = 60): Promise<KitsuEpisode[]> {
-  const j = await get<Doc<Resource<KitsuEpisodeAttrs>[]>>(
-    `/anime/${id}/episodes?page[limit]=${limit}&sort=number`,
-  );
+  const j = await get<Doc<Resource<KitsuEpisodeAttrs>[]>>(`/anime/${id}/episodes?page[limit]=${limit}&sort=number`);
   if (!j?.data) return [];
   return j.data.map((ep) => {
     const a = ep.attributes;
@@ -344,9 +341,7 @@ type CastingAttrs = { locale?: string; notes?: string };
 type PersonAttrs = { name?: string; image?: Img | null };
 
 export async function kitsuCharacters(id: number, limit = 30): Promise<KitsuCharacter[]> {
-  const j = await get<
-    Doc<Resource<AnimeCharAttrs>[], KitsuCharacterAttrs | CastingAttrs | PersonAttrs>
-  >(
+  const j = await get<Doc<Resource<AnimeCharAttrs>[], KitsuCharacterAttrs | CastingAttrs | PersonAttrs>>(
     `/anime/${id}/anime-characters?include=character,castings.person&page[limit]=${limit}&sort=role`,
   );
   if (!j?.data) return [];

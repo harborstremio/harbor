@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
-import { useT } from "@/lib/i18n";
 
 export function Stepper({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
   const t = useT();
@@ -70,15 +70,7 @@ function HoldStepButton({
   );
 }
 
-export function Dots({
-  count,
-  active,
-  onJump,
-}: {
-  count: number;
-  active: number;
-  onJump: (i: number) => void;
-}) {
+export function Dots({ count, active, onJump }: { count: number; active: number; onJump: (i: number) => void }) {
   const t = useT();
   return (
     <div className="flex justify-center gap-1.5">

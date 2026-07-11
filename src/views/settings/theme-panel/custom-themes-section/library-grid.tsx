@@ -1,6 +1,6 @@
+import type { ThemePreset } from "@/lib/theme";
 import { Check, Copy, FilePlus2, Palette, Trash2 } from "lucide-react";
 import { useState } from "react";
-import type { ThemePreset } from "@/lib/theme";
 
 export type LibraryEntry = {
   theme: ThemePreset;
@@ -119,14 +119,10 @@ function ImportTile({ onUpload }: { onUpload: (file: File) => void }) {
       aria-label="Import a theme file"
     >
       <div className="relative flex flex-col gap-1.5">
-        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-subtle">
-          Have a file?
-        </span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-ink-subtle">Have a file?</span>
         <span className="text-[18px] font-semibold tracking-tight text-ink">Import a theme</span>
         <span className="max-w-[24ch] text-[12.5px] leading-snug text-ink-muted">
-          {dragOver
-            ? "Release to add it to your library"
-            : "Drop a theme file here or click to browse."}
+          {dragOver ? "Release to add it to your library" : "Drop a theme file here or click to browse."}
         </span>
       </div>
       <div className="relative flex items-end justify-between gap-3 self-stretch">
@@ -198,9 +194,7 @@ function LibraryCard({
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-[14.5px] font-semibold text-ink">{theme.name}</span>
           {theme.blurb && (
-            <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">
-              {theme.blurb}
-            </span>
+            <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">{theme.blurb}</span>
           )}
         </div>
         <div className="flex items-center justify-between gap-2">
@@ -208,9 +202,7 @@ function LibraryCard({
             type="button"
             onClick={onActivate}
             className={`h-8 flex-1 rounded-lg text-[12px] font-semibold transition-opacity ${
-              active
-                ? "bg-elevated/70 text-ink ring-1 ring-edge"
-                : "bg-ink text-canvas hover:opacity-90"
+              active ? "bg-elevated/70 text-ink ring-1 ring-edge" : "bg-ink text-canvas hover:opacity-90"
             }`}
           >
             {active ? "Active" : "Apply"}
@@ -229,20 +221,12 @@ function LibraryCard({
   );
 }
 
-function CategoryBadge({
-  category,
-  active,
-}: {
-  category: LibraryEntry["category"];
-  active: boolean;
-}) {
+function CategoryBadge({ category, active }: { category: LibraryEntry["category"]; active: boolean }) {
   const isFeatured = category === "Featured";
   return (
     <span
       className={`absolute start-3 top-3 flex items-center gap-1 rounded-full px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-[0.2em] backdrop-blur-sm ${
-        isFeatured
-          ? "bg-canvas/65 text-accent ring-1 ring-accent/40"
-          : "bg-canvas/65 text-ink/85 ring-1 ring-white/15"
+        isFeatured ? "bg-canvas/65 text-accent ring-1 ring-accent/40" : "bg-canvas/65 text-ink/85 ring-1 ring-white/15"
       } ${active ? "opacity-0" : "opacity-100"}`}
     >
       {category}

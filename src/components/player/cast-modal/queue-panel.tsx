@@ -1,10 +1,6 @@
-import { Check, Clock, Moon, Play, Plus, Trash2, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
-import { fetchUpcomingEpisodes } from "@/lib/series-episodes";
 import { useContinueWatching, type CwCard } from "@/lib/continue-watching";
+import { useT } from "@/lib/i18n";
 import {
   queueClear,
   queueRemove,
@@ -15,7 +11,11 @@ import {
   useSleepAtEnd,
   type QueueItem,
 } from "@/lib/queue";
+import { fetchUpcomingEpisodes } from "@/lib/series-episodes";
+import { useSettings } from "@/lib/settings";
 import type { PlayEpisode } from "@/lib/view";
+import { Check, Clock, Moon, Play, Plus, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function runtimeMinutes(item: QueueItem): number {
   if (item.episode?.runtime) return item.episode.runtime;
@@ -49,13 +49,7 @@ function cwEpisode(c: CwCard): PlayEpisode | undefined {
   return { season: c.season, episode: c.episode, videoId: c.videoId };
 }
 
-function CwSuggestionRow({
-  card,
-  onPlay,
-}: {
-  card: CwCard;
-  onPlay: (meta: Meta, episode?: PlayEpisode) => void;
-}) {
+function CwSuggestionRow({ card, onPlay }: { card: CwCard; onPlay: (meta: Meta, episode?: PlayEpisode) => void }) {
   const t = useT();
   const meta = cwMeta(card);
   const episode = cwEpisode(card);
@@ -90,9 +84,7 @@ function CwSuggestionRow({
         onClick={() => queueToggle(meta, episode)}
         aria-label={queued ? t("Remove from queue") : t("Add to queue")}
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
-          queued
-            ? "bg-white text-black"
-            : "bg-white/[0.08] text-white/70 ring-1 ring-white/12 hover:bg-white/15"
+          queued ? "bg-white text-black" : "bg-white/[0.08] text-white/70 ring-1 ring-white/12 hover:bg-white/15"
         }`}
       >
         {queued ? <Check size={17} strokeWidth={2.5} /> : <Plus size={18} strokeWidth={2.3} />}
@@ -211,7 +203,9 @@ export function QueuePanel({
             type="button"
             onClick={() => setSleepAtEnd(!sleepAtEnd)}
             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors ${
-              sleepAtEnd ? "bg-white text-black" : "bg-white/[0.08] text-white/70 ring-1 ring-white/12 hover:bg-white/15"
+              sleepAtEnd
+                ? "bg-white text-black"
+                : "bg-white/[0.08] text-white/70 ring-1 ring-white/12 hover:bg-white/15"
             }`}
           >
             <Moon size={15} strokeWidth={2.3} />
@@ -240,11 +234,7 @@ export function QueuePanel({
               <span className="w-6 shrink-0 text-center text-[13px] font-bold text-white/35">{i + 1}</span>
               <div className="h-14 w-24 shrink-0 overflow-hidden rounded-lg bg-white/[0.06]">
                 {(item.meta.background || item.meta.poster) && (
-                  <img
-                    src={item.meta.background || item.meta.poster}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={item.meta.background || item.meta.poster} alt="" className="h-full w-full object-cover" />
                 )}
               </div>
               <div className="flex min-w-0 flex-1 flex-col">

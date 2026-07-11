@@ -12,11 +12,7 @@ export class AnilistApiError extends Error {
 
 type GraphqlResponse<T> = { data?: T; errors?: Array<{ message: string }> };
 
-function doFetch(
-  query: string,
-  variables: Record<string, unknown>,
-  token: string | null,
-): Promise<Response> {
+function doFetch(query: string, variables: Record<string, unknown>, token: string | null): Promise<Response> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -35,7 +31,7 @@ export async function anilistRequest<T>(
   accessToken?: string,
   skipAuth = false,
 ): Promise<T> {
-  const token = skipAuth ? null : accessToken ?? getSession()?.accessToken ?? null;
+  const token = skipAuth ? null : (accessToken ?? getSession()?.accessToken ?? null);
   let res = await doFetch(query, variables, token);
 
   if (res.status === 429) {

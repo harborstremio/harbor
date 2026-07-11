@@ -1,14 +1,14 @@
-import { useMemo, useState } from "react";
-import { Tv } from "lucide-react";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { isHydratableChannel } from "@/lib/iptv/channel-hydration";
 import { useFavorites } from "@/lib/iptv/favorites";
-import { useChannelHydration } from "@/views/live/hooks/use-channel-hydration";
-import { formatTimeLabel } from "@/views/live/guide/guide-utils";
-import { FavoriteButton } from "@/views/live/favorite-button";
-import { HoverTooltip } from "@/components/hover-tooltip";
 import type { EpgProgram, IptvChannel } from "@/lib/iptv/types";
-import { useT } from "@/lib/i18n";
+import { FavoriteButton } from "@/views/live/favorite-button";
+import { formatTimeLabel } from "@/views/live/guide/guide-utils";
+import { useChannelHydration } from "@/views/live/hooks/use-channel-hydration";
+import { Tv } from "lucide-react";
+import { useMemo, useState } from "react";
 
 export function CurrentChannelInfo({
   channel,
@@ -25,7 +25,7 @@ export function CurrentChannelInfo({
     return [channel.name];
   }, [channel]);
   const hydrations = useChannelHydration(hydrationNames);
-  const hydrated = channel ? hydrations.get(channel.name) ?? null : null;
+  const hydrated = channel ? (hydrations.get(channel.name) ?? null) : null;
   if (!channel) return null;
   return (
     <div className="flex h-[140px] w-full overflow-hidden rounded-2xl border border-edge-soft/60 bg-canvas/85 backdrop-blur">
@@ -38,19 +38,11 @@ export function CurrentChannelInfo({
   );
 }
 
-function Backdrop({
-  hydrated,
-  logo,
-}: {
-  hydrated: Meta | null;
-  logo: string | null;
-}) {
+function Backdrop({ hydrated, logo }: { hydrated: Meta | null; logo: string | null }) {
   const [errored, setErrored] = useState(false);
   const url = hydrated?.background || hydrated?.poster || logo;
   if (!url || errored) {
-    return (
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-elevated/40 to-canvas/95" />
-    );
+    return <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-elevated/40 to-canvas/95" />;
   }
   return (
     <>
@@ -66,13 +58,7 @@ function Backdrop({
   );
 }
 
-function ChannelLogo({
-  channel,
-  hydrated,
-}: {
-  channel: IptvChannel;
-  hydrated: Meta | null;
-}) {
+function ChannelLogo({ channel, hydrated }: { channel: IptvChannel; hydrated: Meta | null }) {
   const [errored, setErrored] = useState(false);
   const url = hydrated?.poster || channel.logo;
   if (!url || errored) {
@@ -118,8 +104,7 @@ function Body({
     current && now && current.endMs > current.startMs
       ? Math.max(0, Math.min(1, (now - current.startMs) / (current.endMs - current.startMs)))
       : null;
-  const remainingMin =
-    current && now ? Math.max(0, Math.round((current.endMs - now) / 60_000)) : null;
+  const remainingMin = current && now ? Math.max(0, Math.round((current.endMs - now) / 60_000)) : null;
   const favorites = useFavorites();
   const isFav = favorites.has(channel.id);
   return (
@@ -139,12 +124,7 @@ function Body({
         <HoverTooltip label={title} sublabel={channel.group} className="min-w-0">
           <h2 className="truncate text-[20px] font-semibold leading-tight text-ink">{title}</h2>
         </HoverTooltip>
-        <FavoriteButton
-          active={isFav}
-          onToggle={() => favorites.toggle(channel)}
-          size={16}
-          variant="inline"
-        />
+        <FavoriteButton active={isFav} onToggle={() => favorites.toggle(channel)} size={16} variant="inline" />
       </div>
       {current ? (
         <>
@@ -161,15 +141,10 @@ function Body({
               </>
             )}
           </div>
-          {description && (
-            <p className="truncate text-[12.5px] text-ink-muted/85">{description}</p>
-          )}
+          {description && <p className="truncate text-[12.5px] text-ink-muted/85">{description}</p>}
           {progress != null && (
             <div className="mt-1 h-[3px] w-full max-w-[280px] overflow-hidden rounded-full bg-canvas/55">
-              <div
-                className="h-full rounded-full bg-danger"
-                style={{ width: `${progress * 100}%` }}
-              />
+              <div className="h-full rounded-full bg-danger" style={{ width: `${progress * 100}%` }} />
             </div>
           )}
         </>

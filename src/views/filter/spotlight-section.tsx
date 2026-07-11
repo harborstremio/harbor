@@ -1,19 +1,15 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";
 import type { Meta } from "@/lib/cinemeta";
 import { type Spotlight } from "@/lib/feed/genre-spotlights";
-import { useT } from "@/lib/i18n";
 import { useClaimSeenIds } from "@/lib/feed/seen-ids";
 import { genreEquivalents } from "@/lib/feed/tags";
-import {
-  creditToMeta,
-  tmdbPerson,
-  tmdbPersonIdByName,
-  type PersonCredit,
-} from "@/lib/providers/tmdb";
+import { useT } from "@/lib/i18n";
+import { creditToMeta, tmdbPerson, tmdbPersonIdByName, type PersonCredit } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+
 import { SPOTLIGHT_SELF_TIMEOUT_MS, SpotlightGateContext } from "./spotlight-gate";
 
 const DIRECTOR_JOBS = new Set(["Director"]);
@@ -33,10 +29,7 @@ function spotlightCredits(
       : person.cast.filter((c) => !isCameo(c));
 
   const related = spotlight.relatedGenreIds ?? [];
-  const accepted = new Set<number>([
-    ...genreEquivalents(genreId),
-    ...related.flatMap(genreEquivalents),
-  ]);
+  const accepted = new Set<number>([...genreEquivalents(genreId), ...related.flatMap(genreEquivalents)]);
   const matched = pool.filter(
     (c) =>
       !!c.poster &&
@@ -54,13 +47,9 @@ function spotlightCredits(
 
   unique.sort((a, b) => {
     const sa =
-      (a.voteAverage || 0) *
-      Math.log2(2 + (a.voteCount || 0)) *
-      (0.7 + jitter(`${spotlight.name}:${a.id}`) * 0.6);
+      (a.voteAverage || 0) * Math.log2(2 + (a.voteCount || 0)) * (0.7 + jitter(`${spotlight.name}:${a.id}`) * 0.6);
     const sb =
-      (b.voteAverage || 0) *
-      Math.log2(2 + (b.voteCount || 0)) *
-      (0.7 + jitter(`${spotlight.name}:${b.id}`) * 0.6);
+      (b.voteAverage || 0) * Math.log2(2 + (b.voteCount || 0)) * (0.7 + jitter(`${spotlight.name}:${b.id}`) * 0.6);
     return sb - sa;
   });
 
@@ -84,13 +73,7 @@ function isCameo(c: PersonCredit): boolean {
   return false;
 }
 
-export function SpotlightSection({
-  spotlight,
-  genreId,
-}: {
-  spotlight: Spotlight;
-  genreId: number;
-}) {
+export function SpotlightSection({ spotlight, genreId }: { spotlight: Spotlight; genreId: number }) {
   const t = useT();
   const { settings } = useSettings();
   const { openPerson } = useView();
@@ -158,9 +141,7 @@ export function SpotlightSection({
           reportDone();
           return;
         }
-        setProfileUrl(
-          p.profilePath ? `https://image.tmdb.org/t/p/h632${p.profilePath}` : null,
-        );
+        setProfileUrl(p.profilePath ? `https://image.tmdb.org/t/p/h632${p.profilePath}` : null);
         const credits = spotlightCredits(p, spotlight, genreId);
         const metas = credits.map(creditToMeta);
         claim(metas);
@@ -184,9 +165,7 @@ export function SpotlightSection({
       <span className="text-[20px] font-medium tracking-tight text-ink">
         {t("{name}'s {sub}", { name: spotlight.name, sub: t(spotlight.sub) })}
       </span>
-      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
-        {t("Spotlight")}
-      </span>
+      <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{t("Spotlight")}</span>
     </span>
   );
 
@@ -220,9 +199,7 @@ export function SpotlightSection({
           }}
         />
         <div className="absolute inset-x-4 bottom-3.5 flex flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
-            {t(spotlight.sub)}
-          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">{t(spotlight.sub)}</span>
           <span className="font-display text-[26px] font-medium leading-[0.98] tracking-tight text-ink drop-shadow-[0_2px_18px_rgba(0,0,0,0.4)]">
             {spotlight.name}
           </span>

@@ -1,12 +1,13 @@
+import { useT } from "@/lib/i18n";
+import { isMacDesktop } from "@/lib/platform";
+import { useSettings } from "@/lib/settings";
+import { fetchTrailer, resolveTrailerQuality, trailerSrc } from "@/lib/trailer";
+import { useView } from "@/lib/view";
+import { openUrl } from "@/lib/window";
 import { Cast, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { fetchTrailer, resolveTrailerQuality, trailerSrc } from "@/lib/trailer";
-import { isMacDesktop } from "@/lib/platform";
-import { openUrl } from "@/lib/window";
-import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+
 import { NativeTrailerPlayer } from "./native-trailer-player";
 import { Tooltip } from "./tooltip";
 
@@ -91,8 +92,7 @@ export function TrailerOverlay({
         style={{
           opacity: open ? 1 : 0,
           transform: open ? "scale(1)" : "scale(0.85)",
-          transition:
-            "opacity 320ms ease 60ms, transform 360ms cubic-bezier(0.32,0.72,0.24,1) 60ms",
+          transition: "opacity 320ms ease 60ms, transform 360ms cubic-bezier(0.32,0.72,0.24,1) 60ms",
         }}
       >
         {!extractFailed && <CastButton videoRef={videoRef} />}
@@ -116,8 +116,7 @@ export function TrailerOverlay({
         style={{
           opacity: open ? 1 : 0,
           transform: open ? "scale(1)" : "scale(0.93)",
-          transition:
-            "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
+          transition: "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
         }}
       >
         {streamUrl ? (
@@ -199,9 +198,7 @@ function ExternalTrailerFallback({ id, title, logo }: { id: string; title: strin
           {title}
         </p>
       )}
-      <p className="max-w-sm text-[14px] leading-relaxed text-white/55">
-        {t("This trailer plays on YouTube.")}
-      </p>
+      <p className="max-w-sm text-[14px] leading-relaxed text-white/55">{t("This trailer plays on YouTube.")}</p>
       <button
         type="button"
         onClick={(e) => {
@@ -231,9 +228,7 @@ function TrailerLoader({ title, logo }: { title: string; logo?: string }) {
           {title}
         </p>
       )}
-      <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/45">
-        {t("Loading trailer")}
-      </p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-white/45">{t("Loading trailer")}</p>
     </div>
   );
 }

@@ -1,24 +1,25 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { markStreamDead, recordStubEvent } from "@/lib/dead-streams";
 import type { DebridStore } from "@/lib/debrid/types";
 import { savePlayback } from "@/lib/playback-history";
 import { saveSeasonLock } from "@/lib/season-lock";
-import { markStreamDead, recordStubEvent } from "@/lib/dead-streams";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
 const PREFLIGHT_STUB_TTL_MS = 15 * 60 * 1000;
 const SAME_SOURCE_MAX_RETRIES = 4;
 const SAME_SOURCE_RETRY_DELAY_MS = 1500;
-import { engineP2pEligible } from "@/lib/torrent/stremio-stream";
+import { enqueueDownload } from "@/lib/download/downloads-store";
+import { registerStreamProxy } from "@/lib/stream-proxy";
 import { hasUncachedMarker } from "@/lib/streams/cached";
 import { preflightCheck } from "@/lib/streams/preflight";
 import { resolveStream } from "@/lib/streams/resolve";
-import { registerStreamProxy } from "@/lib/stream-proxy";
 import type { ScoredStream } from "@/lib/streams/types";
-import type { PlayInvite } from "@/lib/together/protocol";
 import { buildPlayInvite } from "@/lib/together/build-invite";
+import type { PlayInvite } from "@/lib/together/protocol";
+import { engineP2pEligible } from "@/lib/torrent/stremio-stream";
 import { type PlayEpisode, type PlayerSrc } from "@/lib/view";
 import { openInAppBrowser, openUrl } from "@/lib/window";
-import { enqueueDownload } from "@/lib/download/downloads-store";
+
 import { formatStreamQuality, humanError, isDebridFailure } from "./picker-utils";
 
 export function usePickHandler({
@@ -87,11 +88,7 @@ export function usePickHandler({
   const sameSourceRetryRef = useRef(0);
   const retryTimerRef = useRef<number | null>(null);
 
-  const scheduleSameSourceRetry = (
-    stream: ScoredStream,
-    committed: boolean,
-    forceP2p: boolean,
-  ): boolean => {
+  const scheduleSameSourceRetry = (stream: ScoredStream, committed: boolean, forceP2p: boolean): boolean => {
     if (!seasonLock && autoActive) return false;
     if (sameSourceRetryRef.current >= SAME_SOURCE_MAX_RETRIES) return false;
     const n = (sameSourceRetryRef.current += 1);
@@ -135,9 +132,7 @@ export function usePickHandler({
           if (!d.listTorrentFiles) continue;
           const filesResult = await d.listTorrentFiles(stream.infoHash, ac.signal);
           if (!filesResult.ok || filesResult.data.length === 0) continue;
-          const videoFiles = filesResult.data.filter((f) =>
-            /\.(mkv|mp4|avi|m4v|webm|ts|mov|wmv)$/i.test(f.name),
-          );
+          const videoFiles = filesResult.data.filter((f) => /\.(mkv|mp4|avi|m4v|webm|ts|mov|wmv)$/i.test(f.name));
           if (videoFiles.length === 0) continue;
           const targetSeason = episode?.season ?? 1;
           for (let i = 0; i < videoFiles.length; i++) {
@@ -225,9 +220,7 @@ export function usePickHandler({
         setFailedStreams((prev) => new Set(prev).add(stream));
         const reasonStr = `preflight_stub_${preflight.sizeBytes ?? 0}b`;
         markStreamDead({ url: r.data.url }, reasonStr, PREFLIGHT_STUB_TTL_MS);
-        console.warn(
-          `[picker] preflight detected stub (${preflight.sizeBytes ?? "unknown"} bytes); skipping`,
-        );
+        console.warn(`[picker] preflight detected stub (${preflight.sizeBytes ?? "unknown"} bytes); skipping`);
         if (!autoActive && !forceP2p && engineP2pEligible(stream)) {
           setResolving(null);
           setP2pConfirm({ stream, forceP2p: true });

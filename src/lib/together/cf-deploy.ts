@@ -13,9 +13,7 @@ const NOT_NATIVE_MSG =
   "Relay deploy is only available in the Harbor desktop app. Open Harbor outside the browser to continue.";
 
 function ensureNative(): void {
-  const hasTauri =
-    typeof window !== "undefined" &&
-    ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
+  const hasTauri = typeof window !== "undefined" && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
   if (!hasTauri) {
     throw new Error(NOT_NATIVE_MSG);
   }

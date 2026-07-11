@@ -1,16 +1,7 @@
 import type { BadgeKind } from "@/components/format-badge";
 import type { ScoredStream } from "@/lib/streams/types";
 
-export type QualityKey =
-  | "all"
-  | "4K"
-  | "1080p"
-  | "720p"
-  | "480p"
-  | "SD"
-  | "telecine"
-  | "telesync"
-  | "cam";
+export type QualityKey = "all" | "4K" | "1080p" | "720p" | "480p" | "SD" | "telecine" | "telesync" | "cam";
 
 export const QUALITY_ORDER: Exclude<QualityKey, "all">[] = [
   "4K",

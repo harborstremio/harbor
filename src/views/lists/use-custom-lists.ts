@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { useSettings } from "@/lib/settings";
 import { detectSource } from "@/lib/lists/detect";
 import { sourceLabel, type CustomList, type ListSource } from "@/lib/lists/types";
+import { useSettings } from "@/lib/settings";
+import { useCallback, useEffect, useState } from "react";
 
 const ACTIVE_KEY = "harbor.lists.active";
 

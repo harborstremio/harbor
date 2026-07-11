@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { fetchSeasonEpisodes, fetchSeasonList, isAnimeId } from "@/lib/series-episodes";
 import { useSettings } from "@/lib/settings";
 import type { PlayEpisode } from "@/lib/view";
+import { useEffect, useState } from "react";
 
 export function useSeasonBrowser(
   meta: Meta,

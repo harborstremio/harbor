@@ -1,6 +1,6 @@
-import { Grid2x2, Home, LayoutGrid, ListTree } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { isWindowsDesktop } from "@/lib/platform";
+import { Grid2x2, Home, LayoutGrid, ListTree } from "lucide-react";
 
 export type ViewMode = "home" | "grid" | "guide" | "multiview";
 

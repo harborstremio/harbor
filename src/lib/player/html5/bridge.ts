@@ -1,5 +1,7 @@
+import { fetchAndParse, findActiveCue } from "@/lib/subtitles/parser";
 import Hls from "hls.js";
 import mpegts from "mpegts.js";
+
 import {
   emptySnapshot,
   type PlayerBridge,
@@ -8,11 +10,10 @@ import {
   type PlayerSource,
   type TrackInfo,
 } from "../bridge";
-import { fetchAndParse, findActiveCue } from "@/lib/subtitles/parser";
-import type { SubTrack } from "./types";
 import { bufferedAhead, readAudioTracks, videoAudio } from "./audio-tracks";
 import { mapErrorCode, mapErrorMessage } from "./error-map";
 import { mountCustomPip } from "./pip";
+import type { SubTrack } from "./types";
 
 let DOCUMENT_PIP_KNOWN_BROKEN = false;
 
@@ -193,13 +194,7 @@ export function createHtml5Bridge(): PlayerBridge {
   };
 
   const onAny = () => {
-    if (
-      video &&
-      abLoopA != null &&
-      abLoopB != null &&
-      abLoopB > abLoopA &&
-      video.currentTime >= abLoopB - 0.05
-    ) {
+    if (video && abLoopA != null && abLoopB != null && abLoopB > abLoopA && video.currentTime >= abLoopB - 0.05) {
       video.currentTime = abLoopA;
     }
     refreshSnapshot();
@@ -328,7 +323,9 @@ export function createHtml5Bridge(): PlayerBridge {
       unbind();
       stopCueTicker();
       if (hls) {
-        try { hls.destroy(); } catch {}
+        try {
+          hls.destroy();
+        } catch {}
         hls = null;
       }
       teardownTs();
@@ -349,7 +346,9 @@ export function createHtml5Bridge(): PlayerBridge {
       isLiveSrc = src.notWebReady === true;
       pendingStart = src.startAtSec ?? null;
       if (hls) {
-        try { hls.destroy(); } catch {}
+        try {
+          hls.destroy();
+        } catch {}
         hls = null;
       }
       teardownTs();
@@ -367,7 +366,8 @@ export function createHtml5Bridge(): PlayerBridge {
       const bare = src.url.toLowerCase().split("?")[0];
       const lowerUrl = src.url.toLowerCase();
       const isHls = /\.m3u8$/.test(bare) || lowerUrl.includes("m3u8") || lowerUrl.includes("/playlist/");
-      const isTs = bare.endsWith(".ts") || (src.notWebReady === true && !isHls && !/\.(mp4|webm|mov|mkv|mpd)$/.test(bare));
+      const isTs =
+        bare.endsWith(".ts") || (src.notWebReady === true && !isHls && !/\.(mp4|webm|mov|mkv|mpd)$/.test(bare));
       if (isHls && Hls.isSupported()) {
         hls = new Hls(
           src.notWebReady === true || src.isLive === true
@@ -497,9 +497,7 @@ export function createHtml5Bridge(): PlayerBridge {
     },
     setAudioTrack(id) {
       if (hls && Array.isArray(hls.audioTracks) && hls.audioTracks.length > 0) {
-        const idx = hls.audioTracks.findIndex(
-          (t, i) => String(i) === id || String(t.id) === id || `hls-${i}` === id,
-        );
+        const idx = hls.audioTracks.findIndex((t, i) => String(i) === id || String(t.id) === id || `hls-${i}` === id);
         if (idx >= 0) {
           hls.audioTrack = idx;
           refreshSnapshot();
@@ -548,11 +546,7 @@ export function createHtml5Bridge(): PlayerBridge {
     setAnime4kShaders() {},
     async addSubtitle(url, lang, title, select): Promise<boolean> {
       let resolvedUrl = url;
-      if (
-        !/^(https?|blob|data):/i.test(url) &&
-        typeof window !== "undefined" &&
-        "__TAURI_INTERNALS__" in window
-      ) {
+      if (!/^(https?|blob|data):/i.test(url) && typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
         try {
           const { convertFileSrc } = await import("@tauri-apps/api/core");
           resolvedUrl = convertFileSrc(url);
@@ -626,20 +620,27 @@ export function createHtml5Bridge(): PlayerBridge {
       if (!video || !host) return;
       if (pipWindow) return;
       bindMediaSession();
-      const dpip = (window as Window & { documentPictureInPicture?: { requestWindow: (o: { width: number; height: number }) => Promise<Window> } }).documentPictureInPicture;
+      const dpip = (
+        window as Window & {
+          documentPictureInPicture?: { requestWindow: (o: { width: number; height: number }) => Promise<Window> };
+        }
+      ).documentPictureInPicture;
       const tryDocumentPip = async (): Promise<boolean> => {
         if (DOCUMENT_PIP_KNOWN_BROKEN) return false;
         if (!dpip || typeof dpip.requestWindow !== "function") return false;
         try {
           const aspectW = Math.max(
             360,
-            Math.min(
-              560,
-              video!.videoWidth ? Math.round((video!.videoWidth / video!.videoHeight) * 280) : 480,
-            ),
+            Math.min(560, video!.videoWidth ? Math.round((video!.videoWidth / video!.videoHeight) * 280) : 480),
           );
           const w = await dpip.requestWindow({ width: aspectW, height: 280 });
-          mountCustomPip(w, video!, host!, () => emit(), () => snap);
+          mountCustomPip(
+            w,
+            video!,
+            host!,
+            () => emit(),
+            () => snap,
+          );
           pipWindow = w;
           pipCleanup = () => {
             if (!host || !video) {
@@ -723,7 +724,9 @@ export function createHtml5Bridge(): PlayerBridge {
       return {
         engine: "html5",
         pictureInPicture: !!nativePiP || docPiP,
-        airplay: typeof (window as { WebKitPlaybackTargetAvailabilityEvent?: unknown }).WebKitPlaybackTargetAvailabilityEvent !== "undefined",
+        airplay:
+          typeof (window as { WebKitPlaybackTargetAvailabilityEvent?: unknown })
+            .WebKitPlaybackTargetAvailabilityEvent !== "undefined",
         chromecast: false,
         hdrPassthrough: false,
         hardwareDecode: true,
@@ -741,7 +744,9 @@ export function createHtml5Bridge(): PlayerBridge {
       subTracks.length = 0;
       activeSubId = null;
       if (hls) {
-        try { hls.destroy(); } catch {}
+        try {
+          hls.destroy();
+        } catch {}
         hls = null;
       }
       teardownTs();

@@ -1,4 +1,5 @@
 import { activeProfileId } from "@/lib/active-profile-id";
+
 import { malRequest, MalApiError } from "./client";
 import { resolveMalMediaId } from "./mutations";
 import { isAuthenticated } from "./session";
@@ -91,11 +92,7 @@ export async function markMalWatching(harborId: string, title: string): Promise<
   }
 }
 
-export async function syncMalProgress(
-  harborId: string,
-  episode: number | undefined,
-  title: string,
-): Promise<void> {
+export async function syncMalProgress(harborId: string, episode: number | undefined, title: string): Promise<void> {
   if (!isAuthenticated()) return;
   const ep = episode ?? 1;
   if (!Number.isFinite(ep) || ep < 1) return;
@@ -124,16 +121,13 @@ export async function syncMalProgress(
     const status = total > 0 && ep >= total ? "completed" : "watching";
     emit({ kind: "syncing", title, episode: ep });
 
-    const saved = await malRequest<{ num_episodes_watched: number }>(
-      `/anime/${malId}/my_list_status`,
-      {
-        method: "PATCH",
-        body: new URLSearchParams({
-          num_watched_episodes: String(ep),
-          status,
-        }),
-      },
-    );
+    const saved = await malRequest<{ num_episodes_watched: number }>(`/anime/${malId}/my_list_status`, {
+      method: "PATCH",
+      body: new URLSearchParams({
+        num_watched_episodes: String(ep),
+        status,
+      }),
+    });
 
     if (saved?.num_episodes_watched === ep) {
       sent[harborId] = ep;

@@ -27,10 +27,7 @@ export const pickTrailers = (videos: Video[]): string[] => {
   return out;
 };
 
-export async function tmdbTrailerList(
-  key: string,
-  metaId: string,
-): Promise<string[]> {
+export async function tmdbTrailerList(key: string, metaId: string): Promise<string[]> {
   if (!key) return [];
   const match = metaId.match(/^tmdb:(movie|tv):(\d+)$/);
   if (!match) return [];
@@ -39,10 +36,7 @@ export async function tmdbTrailerList(
   return pickTrailers(data?.results ?? []);
 }
 
-export async function tmdbTrailer(
-  key: string,
-  metaId: string,
-): Promise<string | null> {
+export async function tmdbTrailer(key: string, metaId: string): Promise<string | null> {
   const list = await tmdbTrailerList(key, metaId);
   return list[0] ?? null;
 }

@@ -6,7 +6,8 @@ const downloads: Record<string, string> = {
   "{count} downloading": "جارٍ تنزيل {count}",
   "{size} saved": "تم حفظ {size}",
   "No downloads yet": "لا توجد تنزيلات بعد",
-  "Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.": "افتح أي فيلم أو مسلسل، مرر المؤشر فوق حلقة، وانقر على أيقونة التنزيل. اختر المصدر الذي تريده بدقة وسيتم حفظه هنا للمشاهدة بدون اتصال.",
+  "Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.":
+    "افتح أي فيلم أو مسلسل، مرر المؤشر فوق حلقة، وانقر على أيقونة التنزيل. اختر المصدر الذي تريده بدقة وسيتم حفظه هنا للمشاهدة بدون اتصال.",
   "Failed: {error}": "فشل: {error}",
   Canceled: "أُلغي",
   "Interrupted: re-download to finish": "قوطع: أعد التنزيل للإكمال",
@@ -58,8 +59,8 @@ const downloads: Record<string, string> = {
   "No video files found in that folder.": "لم يُعثر على ملفات فيديو في ذلك المجلد.",
   "Couldn't scan that folder.": "تعذّر فحص ذلك المجلد.",
   "Couldn't open this file": "تعذّر فتح هذا الملف",
-  "This file is in OneDrive. If \"Files On-Demand\" is on, the file is a cloud placeholder until it's downloaded. Right-click it in Explorer and pick":
-    "هذا الملف في OneDrive. إذا كانت ميزة \"الملفات عند الطلب\" مفعّلة، فالملف عنصر نائب سحابي حتى يُنزَّل. انقر عليه بزرّ الفأرة الأيمن في مستكشف الملفات واختر",
+  'This file is in OneDrive. If "Files On-Demand" is on, the file is a cloud placeholder until it\'s downloaded. Right-click it in Explorer and pick':
+    'هذا الملف في OneDrive. إذا كانت ميزة "الملفات عند الطلب" مفعّلة، فالملف عنصر نائب سحابي حتى يُنزَّل. انقر عليه بزرّ الفأرة الأيمن في مستكشف الملفات واختر',
   ", then try again.": "، ثم حاول مرة أخرى.",
 
   "You're offline": "أنت غير متصل",

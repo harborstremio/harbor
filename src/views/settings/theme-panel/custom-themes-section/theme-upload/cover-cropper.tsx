@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from "react";
 import { ImagePlus, Move, ZoomIn } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 
 const OUT_W = 1600;
 const OUT_H = 900;
@@ -79,7 +79,13 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
   };
   const onMove = (e: React.PointerEvent) => {
     if (!drag.current) return;
-    setOffset(clamp({ x: drag.current.ox + (e.clientX - drag.current.x), y: drag.current.oy + (e.clientY - drag.current.y) }, zoom, nat));
+    setOffset(
+      clamp(
+        { x: drag.current.ox + (e.clientX - drag.current.x), y: drag.current.oy + (e.clientY - drag.current.y) },
+        zoom,
+        nat,
+      ),
+    );
   };
   const onUp = () => {
     if (!drag.current) return;
@@ -124,7 +130,11 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
             </div>
           </>
         ) : (
-          <button type="button" onClick={pick} className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-subtle transition-colors hover:text-ink">
+          <button
+            type="button"
+            onClick={pick}
+            className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-subtle transition-colors hover:text-ink"
+          >
             <ImagePlus size={28} strokeWidth={1.6} />
             <span className="text-[13px] font-medium">Add a cover image</span>
             <span className="text-[11.5px]">A 16:9 shot of your theme looks best</span>
@@ -149,7 +159,11 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
             }}
             className="h-1.5 flex-1 cursor-pointer accent-accent"
           />
-          <button type="button" onClick={pick} className="shrink-0 text-[12px] font-medium text-ink-muted transition-colors hover:text-ink">
+          <button
+            type="button"
+            onClick={pick}
+            className="shrink-0 text-[12px] font-medium text-ink-muted transition-colors hover:text-ink"
+          >
             Replace
           </button>
         </div>

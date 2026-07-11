@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
 import type { FranchiseEntry } from "@/lib/providers/anime-detail";
 import { fetchEntryEpisodes } from "@/lib/providers/anime-franchise-episodes";
 import { parseKitsuId, type KitsuEpisode } from "@/lib/providers/kitsu";
+import { useEffect, useMemo, useState } from "react";
 
 export function useFranchiseEpisodes(
   franchise: FranchiseEntry[],
@@ -28,11 +28,9 @@ export function useFranchiseEpisodes(
       return;
     }
     let cancelled = false;
-    void Promise.all(otherIds.map((id) => fetchEntryEpisodes(id).catch(() => [] as KitsuEpisode[]))).then(
-      (lists) => {
-        if (!cancelled) setExtra(lists.flat());
-      },
-    );
+    void Promise.all(otherIds.map((id) => fetchEntryEpisodes(id).catch(() => [] as KitsuEpisode[]))).then((lists) => {
+      if (!cancelled) setExtra(lists.flat());
+    });
     return () => {
       cancelled = true;
     };

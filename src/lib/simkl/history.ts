@@ -31,9 +31,9 @@ function num(v: number | string | undefined): number | undefined {
 }
 
 export async function fetchWatchedHistory(limit = 200): Promise<SimklHistoryItem[]> {
-  const data = await simklRequest<RawAllItems>(
-    "/sync/all-items/all/completed?extended=full",
-  ).catch(() => ({}) as RawAllItems);
+  const data = await simklRequest<RawAllItems>("/sync/all-items/all/completed?extended=full").catch(
+    () => ({}) as RawAllItems,
+  );
   const out: SimklHistoryItem[] = [];
   for (const e of data.movies ?? []) {
     const m = e.movie;
@@ -76,25 +76,22 @@ export async function addToHistory(target: SimklTarget): Promise<boolean> {
       return (r?.added?.movies ?? 0) > 0;
     }
     if (target.kind === "episode") {
-      const r = await simklRequest<{ added?: { episodes?: number; shows?: number } }>(
-        "/sync/history",
-        {
-          method: "POST",
-          body: {
-            shows: [
-              {
-                ids: target.show.ids,
-                seasons: [
-                  {
-                    number: target.season,
-                    episodes: [{ number: target.number, watched_at: watchedAt }],
-                  },
-                ],
-              },
-            ],
-          },
+      const r = await simklRequest<{ added?: { episodes?: number; shows?: number } }>("/sync/history", {
+        method: "POST",
+        body: {
+          shows: [
+            {
+              ids: target.show.ids,
+              seasons: [
+                {
+                  number: target.season,
+                  episodes: [{ number: target.number, watched_at: watchedAt }],
+                },
+              ],
+            },
+          ],
         },
-      );
+      });
       return (r?.added?.episodes ?? r?.added?.shows ?? 0) > 0;
     }
     const r = await simklRequest<{ added?: { shows?: number } }>("/sync/history", {
@@ -107,11 +104,7 @@ export async function addToHistory(target: SimklTarget): Promise<boolean> {
   }
 }
 
-export async function markEpisodesWatched(
-  show: SimklIds,
-  season: number,
-  episodes: number[],
-): Promise<boolean> {
+export async function markEpisodesWatched(show: SimklIds, season: number, episodes: number[]): Promise<boolean> {
   if (episodes.length === 0) return false;
   const watchedAt = new Date().toISOString();
   try {
@@ -137,11 +130,7 @@ export async function markEpisodesWatched(
   }
 }
 
-export async function unmarkEpisodeWatched(
-  show: SimklIds,
-  season: number,
-  episode: number,
-): Promise<boolean> {
+export async function unmarkEpisodeWatched(show: SimklIds, season: number, episode: number): Promise<boolean> {
   try {
     await simklRequest("/sync/history/remove", {
       method: "POST",

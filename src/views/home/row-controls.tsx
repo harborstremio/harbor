@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ArrowDown, ArrowUp, Check, Eye, EyeOff, ListOrdered, Pencil, Sparkles, X, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function RowControls({
   name,
@@ -74,9 +74,7 @@ export function RowControls({
             className="h-12 min-w-0 flex-1 rounded-xl border-2 border-[#1f8f88]/30 bg-white px-4 text-[18px] font-bold text-[#0e3a43] outline-none focus:border-[#1f8f88]"
           />
         ) : (
-          <span className="ms-2 min-w-0 flex-1 truncate text-[18px] font-extrabold text-[#0e3a43]">
-            {name}
-          </span>
+          <span className="ms-2 min-w-0 flex-1 truncate text-[18px] font-extrabold text-[#0e3a43]">{name}</span>
         )}
         {editing ? (
           <>
@@ -85,15 +83,29 @@ export function RowControls({
           </>
         ) : (
           <>
-            <KidCtrl icon={<ArrowUp size={22} strokeWidth={2.6} />} label={t("Up")} onClick={onMoveUp} disabled={!canMoveUp} />
-            <KidCtrl icon={<ArrowDown size={22} strokeWidth={2.6} />} label={t("Down")} onClick={onMoveDown} disabled={!canMoveDown} />
+            <KidCtrl
+              icon={<ArrowUp size={22} strokeWidth={2.6} />}
+              label={t("Up")}
+              onClick={onMoveUp}
+              disabled={!canMoveUp}
+            />
+            <KidCtrl
+              icon={<ArrowDown size={22} strokeWidth={2.6} />}
+              label={t("Down")}
+              onClick={onMoveDown}
+              disabled={!canMoveDown}
+            />
             <KidCtrl
               icon={hidden ? <EyeOff size={22} strokeWidth={2.6} /> : <Eye size={22} strokeWidth={2.6} />}
               label={hidden ? t("Show") : t("Hide")}
               onClick={onToggleHidden}
               active={hidden}
             />
-            <KidCtrl icon={<Pencil size={20} strokeWidth={2.6} />} label={t("Rename")} onClick={() => setEditing(true)} />
+            <KidCtrl
+              icon={<Pencil size={20} strokeWidth={2.6} />}
+              label={t("Rename")}
+              onClick={() => setEditing(true)}
+            />
           </>
         )}
       </div>
@@ -159,9 +171,7 @@ export function RowControls({
                 : t("Needs artwork-rich titles to feed the hero")
           }
           className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors disabled:opacity-30 disabled:hover:bg-transparent ${
-            heroActive
-              ? "bg-accent/15 text-accent hover:bg-accent/25"
-              : "text-ink-muted hover:bg-raised hover:text-ink"
+            heroActive ? "bg-accent/15 text-accent hover:bg-accent/25" : "text-ink-muted hover:bg-raised hover:text-ink"
           }`}
         >
           <Sparkles size={14} strokeWidth={2.2} />

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { getPlaybackPosition, subscribePlaybackClock } from "@/lib/player/playback-clock";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 export type AbLoopState = {
   a: number | null;
@@ -23,9 +23,10 @@ export function useAbLoop(params: {
   const positionRef = useRef(getPlaybackPosition());
 
   useEffect(
-    () => subscribePlaybackClock(() => {
-      positionRef.current = getPlaybackPosition();
-    }),
+    () =>
+      subscribePlaybackClock(() => {
+        positionRef.current = getPlaybackPosition();
+      }),
     [],
   );
 
@@ -73,9 +74,21 @@ export function useAbLoop(params: {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const target = e.target as HTMLElement | null;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
-      if (e.key === "I") { e.preventDefault(); setA(); return; }
-      if (e.key === "O") { e.preventDefault(); setB(); return; }
-      if (e.key === "L") { e.preventDefault(); clear(); return; }
+      if (e.key === "I") {
+        e.preventDefault();
+        setA();
+        return;
+      }
+      if (e.key === "O") {
+        e.preventDefault();
+        setB();
+        return;
+      }
+      if (e.key === "L") {
+        e.preventDefault();
+        clear();
+        return;
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

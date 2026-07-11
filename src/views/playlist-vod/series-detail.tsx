@@ -1,8 +1,8 @@
-import { ArrowLeft, Play } from "lucide-react";
-import { useState } from "react";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
 import type { VodEpisode, VodSeries } from "@/lib/iptv/vod";
+import { ArrowLeft, Play } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   series: VodSeries;

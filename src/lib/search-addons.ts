@@ -14,10 +14,7 @@ function addonOrigin(addon: Addon) {
   };
 }
 
-export async function searchAddonCatalogs(
-  addons: Addon[],
-  query: string,
-): Promise<{ movies: Meta[]; series: Meta[] }> {
+export async function searchAddonCatalogs(addons: Addon[], query: string): Promise<{ movies: Meta[]; series: Meta[] }> {
   const q = query.trim();
   if (!q) return { movies: [], series: [] };
 

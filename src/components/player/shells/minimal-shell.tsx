@@ -1,8 +1,8 @@
-import { ChevronLeft, Maximize, Minimize, Pause, Play } from "lucide-react";
-import { useRef, useState } from "react";
+import { useT } from "@/lib/i18n";
 import type { PlayerShellProps } from "@/lib/player-shells/types";
 import { usePlaybackPositionGated } from "@/lib/player/playback-clock";
-import { useT } from "@/lib/i18n";
+import { ChevronLeft, Maximize, Minimize, Pause, Play } from "lucide-react";
+import { useRef, useState } from "react";
 
 export function MinimalShell({
   snap,
@@ -129,11 +129,7 @@ function MinimalTrack({
         style={{ width: `${ratio * 100}%` }}
       />
       {hoverRatio != null && hoverRatio !== ratio && (
-        <div
-          aria-hidden
-          className="absolute inset-y-0 left-0 bg-white/25"
-          style={{ width: `${hoverRatio * 100}%` }}
-        />
+        <div aria-hidden className="absolute inset-y-0 left-0 bg-white/25" style={{ width: `${hoverRatio * 100}%` }} />
       )}
     </div>
   );

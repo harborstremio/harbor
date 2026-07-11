@@ -1,4 +1,5 @@
 import type { DefaultParserResult } from "parse-torrent-title";
+
 import type { AudioCodec, AudioInfo } from "../types";
 
 const AUDIO_CODEC_RX: Array<[RegExp, AudioCodec]> = [
@@ -25,7 +26,7 @@ export function parseAudio(text: string, ptt: DefaultParserResult): AudioInfo {
     }
   }
   const channelsMatch = text.match(CHANNELS_RX);
-  const channels = channelsMatch ? mapChannels(channelsMatch[1]) : ptt.channels ?? 2;
+  const channels = channelsMatch ? mapChannels(channelsMatch[1]) : (ptt.channels ?? 2);
   const bitDepthMatch = text.match(BIT_DEPTH_RX);
   const bitDepth = bitDepthMatch ? Number(bitDepthMatch[1]) : ptt.bitdepth;
   return { codec, channels, bitDepth };

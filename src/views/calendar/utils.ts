@@ -1,11 +1,22 @@
 import type { CalendarFilter, CalendarItem } from "@/lib/calendar";
-import { type LibraryItem } from "@/lib/stremio";
 import type { Meta } from "@/lib/cinemeta";
+import { type LibraryItem } from "@/lib/stremio";
+
 import type { Cell } from "./types";
 
 export const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

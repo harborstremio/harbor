@@ -4,6 +4,7 @@ import type { DebridStore } from "@/lib/debrid/types";
 import { readPlayback } from "@/lib/playback-history";
 import type { Settings } from "@/lib/settings";
 import type { PlayEpisode } from "@/lib/view";
+
 import type { PipelineInput } from "./pipeline";
 import type { Stream } from "./types";
 
@@ -22,12 +23,8 @@ function embeddedStreams(meta: Meta, episode: PlayEpisode | undefined): Stream[]
   const pick = episode?.videoId
     ? vids.find((v) => v.id === episode.videoId)
     : episode
-      ? vids.find(
-          (v) =>
-            (v.season ?? null) === episode.season &&
-            ((v.episode ?? v.number) ?? null) === episode.episode,
-        )
-      : vids.find((v) => v.id === meta.id) ?? (vids.length === 1 ? vids[0] : undefined);
+      ? vids.find((v) => (v.season ?? null) === episode.season && (v.episode ?? v.number ?? null) === episode.episode)
+      : (vids.find((v) => v.id === meta.id) ?? (vids.length === 1 ? vids[0] : undefined));
   const raw = pick?.streams ?? [];
   return raw.map(
     (s) =>
@@ -54,19 +51,13 @@ export function buildEpisodePipelineInput(params: {
   const { meta, episode, imdbId, streamIds, addons, debrids, settings, strictMode, filterDisabled } = params;
   const embedded = embeddedStreams(meta, episode);
   const addonNative = isAddonNativeMeta(meta);
-  const requestType = addonNative
-    ? meta.type
-    : episode
-      ? "series"
-      : meta.type === "series"
-        ? "series"
-        : "movie";
+  const requestType = addonNative ? meta.type : episode ? "series" : meta.type === "series" ? "series" : "movie";
   const animeReq = streamIds.some((id) => id.startsWith("kitsu:") || id.startsWith("mal:"));
   const effSeason = episode?.imdbSeason ?? episode?.season;
   const effEpisode = episode?.imdbEpisode ?? episode?.episode;
   const prevGroup =
     episode && typeof effSeason === "number" && typeof effEpisode === "number" && effEpisode > 1
-      ? readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined
+      ? (readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined)
       : undefined;
   return {
     request: {
@@ -109,8 +100,7 @@ export function buildEpisodePipelineInput(params: {
       runtimeMinutes: runtimeMinutes(meta.runtime),
       inTheaters: meta.inTheaters === true,
       bandwidthMbps: settings.bandwidthMbps > 0 ? settings.bandwidthMbps : undefined,
-      preferSingleAudioTrack:
-        !("__TAURI_INTERNALS__" in window) || settings.playerEngine === "html5",
+      preferSingleAudioTrack: !("__TAURI_INTERNALS__" in window) || settings.playerEngine === "html5",
       preferAddonId: meta.addonOrigin?.id,
       preferredReleaseGroup: prevGroup,
       respectAddonOrder: settings.streamSort === "addon",

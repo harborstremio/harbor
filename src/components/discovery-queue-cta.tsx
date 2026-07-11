@@ -1,9 +1,10 @@
-import { ArrowRight } from "lucide-react";
 import type { FeedItem } from "@/lib/feed";
 import { useT } from "@/lib/i18n";
 import { rpdbPoster } from "@/lib/providers/rpdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { ArrowRight } from "lucide-react";
+
 import { Poster } from "./poster";
 
 export function DiscoveryQueueCta({ items }: { items: FeedItem[] }) {
@@ -31,11 +32,7 @@ export function DiscoveryQueueCta({ items }: { items: FeedItem[] }) {
       >
         <div className="absolute inset-0 grid grid-cols-6 gap-px">
           {peek.map((item, i) => (
-            <div
-              key={item.meta.id}
-              className="relative overflow-hidden"
-              style={{ opacity: 0.45 + i * 0.06 }}
-            >
+            <div key={item.meta.id} className="relative overflow-hidden" style={{ opacity: 0.45 + i * 0.06 }}>
               <Poster
                 src={rpdbPoster(settings.rpdbKey, item.meta.id, item.meta.background ?? item.meta.poster)}
                 seed={item.meta.id}

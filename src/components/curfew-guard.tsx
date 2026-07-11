@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { loadCurfew, saveCurfew, type CurfewRecord } from "@/lib/curfew";
 import { useT } from "@/lib/i18n";
 import { verifyProfilePassword } from "@/lib/profile-password";
 import { useProfiles, type Profile } from "@/lib/profiles";
 import { useView } from "@/lib/view";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export function CurfewGuard() {
   const { activeProfile, openPicker } = useProfiles();
@@ -84,12 +84,7 @@ function CurfewLockdown({
     <div className="fixed inset-0 z-[300] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#3aa6c4] via-[#1c789f] to-[#0a3d5c] px-8 text-center text-white">
       <Bubbles />
       <div className="curfew-bob pointer-events-none absolute bottom-[14%] left-[8%]">
-        <img
-          src="/kids/doodles/liloctored.png"
-          alt=""
-          draggable={false}
-          className="h-24 w-auto opacity-80"
-        />
+        <img src="/kids/doodles/liloctored.png" alt="" draggable={false} className="h-24 w-auto opacity-80" />
       </div>
       <img
         src="/kids/doodles/lilpurpocto.png"
@@ -103,9 +98,7 @@ function CurfewLockdown({
         {t("Time's up!")}
       </h1>
       <p className="relative mt-4 max-w-md text-[18px] font-medium leading-relaxed text-white/90">
-        {t(
-          "The ship is sailing away. Thanks for watching with Harbor, it's time to listen to your grown-ups.",
-        )}
+        {t("The ship is sailing away. Thanks for watching with Harbor, it's time to listen to your grown-ups.")}
       </p>
 
       {hash ? (
@@ -131,9 +124,7 @@ function CurfewLockdown({
           </span>
         </div>
       ) : (
-        <p className="relative mt-8 text-[14px] text-white/80">
-          {t("Ask a grown-up to switch profiles.")}
-        </p>
+        <p className="relative mt-8 text-[14px] text-white/80">{t("Ask a grown-up to switch profiles.")}</p>
       )}
 
       <button

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+
 import { useSettings } from "./settings";
 
 const TMDB = "https://api.themoviedb.org/3";

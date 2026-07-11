@@ -1,6 +1,7 @@
+import type { HomeRow } from "@/views/home/home-types";
+
 import { browseFetcher, type BrowseCatalog } from "./catalog-browse";
 import type { Meta } from "./cinemeta";
-import type { HomeRow } from "@/views/home/home-types";
 import type { PinnedCatalog } from "./pinned-catalogs";
 
 const MAX_PER_ROW = 30;

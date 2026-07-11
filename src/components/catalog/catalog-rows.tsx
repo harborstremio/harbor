@@ -1,9 +1,6 @@
-import { ChevronRight } from "lucide-react";
-import { useMemo } from "react";
 import { LazyMount } from "@/components/lazy-mount";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";
-import { RowControls } from "@/views/home/row-controls";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import {
@@ -15,6 +12,9 @@ import {
   type PageRowCustomization,
 } from "@/lib/page-rows";
 import { useView } from "@/lib/view";
+import { RowControls } from "@/views/home/row-controls";
+import { ChevronRight } from "lucide-react";
+import { useMemo } from "react";
 
 export type CatalogRow = {
   key: string;

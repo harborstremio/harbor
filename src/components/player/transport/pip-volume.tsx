@@ -1,7 +1,7 @@
+import { useT } from "@/lib/i18n";
+import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { PlayerSnapshot } from "@/lib/player/bridge";
-import { useT } from "@/lib/i18n";
 
 export function PipVolume({
   snap,
@@ -37,12 +37,7 @@ export function PipVolume({
     return () => window.removeEventListener("mousedown", onDown);
   }, [open]);
   return (
-    <div
-      ref={wrapRef}
-      className="relative flex items-center"
-      onMouseEnter={cancelClose}
-      onMouseLeave={armClose}
-    >
+    <div ref={wrapRef} className="relative flex items-center" onMouseEnter={cancelClose} onMouseLeave={armClose}>
       <button
         type="button"
         onClick={onMute}
@@ -78,7 +73,10 @@ export function PipVolume({
           <span
             className="font-mono text-[10.5px] tabular-nums"
             style={{
-              color: snap.volume > 1 ? `hsl(${Math.max(0, 30 - (snap.volume - 1) * 6)}, 95%, 65%)` : "rgba(255,255,255,0.75)",
+              color:
+                snap.volume > 1
+                  ? `hsl(${Math.max(0, 30 - (snap.volume - 1) * 6)}, 95%, 65%)`
+                  : "rgba(255,255,255,0.75)",
             }}
           >
             {Math.round((muted ? 0 : snap.volume) * 100)}%

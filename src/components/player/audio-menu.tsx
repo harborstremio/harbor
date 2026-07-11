@@ -1,11 +1,12 @@
+import { Flag } from "@/components/flag";
+import { useT } from "@/lib/i18n";
+import { modalOverlayClose, modalOverlayEmitState, modalOverlayOpen } from "@/lib/modal-overlay";
+import type { TrackInfo } from "@/lib/player/bridge";
+import { languageName } from "@/lib/subtitles/language";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { Check, Languages, RotateCcw, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { Flag } from "@/components/flag";
-import type { TrackInfo } from "@/lib/player/bridge";
-import { modalOverlayClose, modalOverlayEmitState, modalOverlayOpen } from "@/lib/modal-overlay";
-import { languageName } from "@/lib/subtitles/language";
-import { useT } from "@/lib/i18n";
+
 import { useMenuSide } from "./menu-side";
 import { Tooltip } from "./transport/tooltip";
 
@@ -119,7 +120,9 @@ export function AudioMenu(props: Props) {
         </button>
       </Tooltip>
       {open && (forceInline || !useOverlay) && (
-        <div className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex max-h-[400px] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}>
+        <div
+          className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex max-h-[400px] w-[360px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}
+        >
           <AudioMenuBody {...props} onClose={() => setOpen(false)} />
         </div>
       )}
@@ -139,9 +142,7 @@ function MenuBody(props: Props & { onClose: () => void }) {
       <header className="flex items-center justify-between border-b border-edge-soft px-4 py-2.5">
         <div className="flex items-center gap-2.5">
           <span className="text-[13.5px] font-semibold text-ink">{t("Audio")}</span>
-          {tracks.length > 0 && (
-            <span className="text-[11.5px] tabular-nums text-ink-subtle">{tracks.length}</span>
-          )}
+          {tracks.length > 0 && <span className="text-[11.5px] tabular-nums text-ink-subtle">{tracks.length}</span>}
         </div>
         <button
           onClick={onClose}
@@ -186,9 +187,7 @@ function TrackSection({
       <div className="px-3 py-4 text-[12.5px] leading-relaxed text-ink-muted">
         {engine === "mpv"
           ? tr("This file has one audio track.")
-          : tr(
-              "Track switching isn't supported on the current engine. The file's default audio is playing.",
-            )}
+          : tr("Track switching isn't supported on the current engine. The file's default audio is playing.")}
       </div>
     );
   }
@@ -218,9 +217,7 @@ function TrackSection({
               </span>
             )}
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="truncate text-[12.5px] font-medium leading-snug text-ink">
-                {trackTitle(t, tr)}
-              </span>
+              <span className="truncate text-[12.5px] font-medium leading-snug text-ink">{trackTitle(t, tr)}</span>
               <span className="truncate text-[10.5px] uppercase tracking-[0.1em] text-ink-subtle">
                 {trackSubtitle(t, tr)}
               </span>
@@ -247,15 +244,7 @@ function trackSubtitle(t: TrackInfo, tr: (key: string) => string): string {
   return parts.filter(Boolean).join(" · ");
 }
 
-function DelayRow({
-  delay,
-  onDelay,
-  disabled,
-}: {
-  delay: number;
-  onDelay: (sec: number) => void;
-  disabled: boolean;
-}) {
+function DelayRow({ delay, onDelay, disabled }: { delay: number; onDelay: (sec: number) => void; disabled: boolean }) {
   const tr = useT();
   const round = (v: number) => Math.round(v * 100) / 100;
   return (
@@ -265,11 +254,11 @@ function DelayRow({
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-semibold text-ink">
-          {tr("Sync Offset")}
-        </span>
+        <span className="text-[12px] font-semibold text-ink">{tr("Sync Offset")}</span>
         <div className="flex items-center gap-2">
-          <span className={`font-mono text-[13px] font-bold tabular-nums ${delay !== 0 ? "text-accent" : "text-ink-muted"}`}>
+          <span
+            className={`font-mono text-[13px] font-bold tabular-nums ${delay !== 0 ? "text-accent" : "text-ink-muted"}`}
+          >
             {delay > 0 ? "+" : ""}
             {delay.toFixed(2)}s
           </span>
@@ -284,7 +273,7 @@ function DelayRow({
           )}
         </div>
       </div>
-      
+
       <div className="flex items-stretch overflow-hidden rounded-lg bg-raised">
         <button
           disabled={disabled}
@@ -305,4 +294,3 @@ function DelayRow({
     </div>
   );
 }
-

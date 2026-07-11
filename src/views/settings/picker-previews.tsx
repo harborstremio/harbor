@@ -1,13 +1,11 @@
-import { ChevronDown, Play, Zap } from "lucide-react";
+import previewPoster from "@/assets/preview/poster1.webp";
 import { AddonLogo } from "@/components/addon-logo";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
-import previewPoster from "@/assets/preview/poster1.webp";
+import { ChevronDown, Play, Zap } from "lucide-react";
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-1 flex flex-col gap-3 rounded-2xl border border-edge-soft bg-canvas/40 p-4">
-      {children}
-    </div>
+    <div className="mt-1 flex flex-col gap-3 rounded-2xl border border-edge-soft bg-canvas/40 p-4">{children}</div>
   );
 }
 
@@ -94,7 +92,14 @@ function CondensedMock() {
   );
 }
 
-const TIERS: Array<{ badge: BadgeKind; label: string; status: string; size: string; instant?: boolean; dim?: boolean }> = [
+const TIERS: Array<{
+  badge: BadgeKind;
+  label: string;
+  status: string;
+  size: string;
+  instant?: boolean;
+  dim?: boolean;
+}> = [
   { badge: "4k-uhd", label: "4K", status: "Instant", size: "18.4 GB", instant: true },
   { badge: "1080p", label: "1080p", status: "Cached", size: "2.6 GB" },
   { badge: "720p", label: "720p", status: "Cache", size: "1.1 GB", dim: true },
@@ -104,16 +109,59 @@ function GridIcon() {
   return (
     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-elevated ring-1 ring-edge-soft">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
+        <rect
+          x="3"
+          y="3"
+          width="7"
+          height="7"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-ink-muted"
+        />
+        <rect
+          x="14"
+          y="3"
+          width="7"
+          height="7"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-ink-muted"
+        />
+        <rect
+          x="3"
+          y="14"
+          width="7"
+          height="7"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-ink-muted"
+        />
+        <rect
+          x="14"
+          y="14"
+          width="7"
+          height="7"
+          rx="1.5"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="text-ink-muted"
+        />
       </svg>
     </span>
   );
 }
 
-const SOURCES: Array<{ addonId: string; addonName: string; headline: string; desc: string; file: string; badges: BadgeKind[] }> = [
+const SOURCES: Array<{
+  addonId: string;
+  addonName: string;
+  headline: string;
+  desc: string;
+  file: string;
+  badges: BadgeKind[];
+}> = [
   {
     addonId: "torrentio",
     addonName: "Torrentio",
@@ -149,9 +197,7 @@ function SourceRow({ src, filename }: { src: (typeof SOURCES)[number]; filename?
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
         <p className="truncate text-[14px] font-semibold leading-snug text-ink">{src.headline}</p>
         <p className="truncate text-[12.5px] leading-snug text-ink-muted">{src.desc}</p>
-        {filename && (
-          <p className="truncate font-mono text-[11px] leading-snug text-ink-subtle/80">{src.file}</p>
-        )}
+        {filename && <p className="truncate font-mono text-[11px] leading-snug text-ink-subtle/80">{src.file}</p>}
         <div className="flex flex-wrap items-center gap-1.5">
           {src.badges.map((k) => (
             <FormatBadge key={k} kind={k} size="sm" />
@@ -210,9 +256,7 @@ export function StreamDescriptionPreview({ full }: { full: boolean }) {
           <AddonLogo addonId="aiostreams" addonName="AIOStreams" size="xl" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
-          <p className="truncate text-[14px] font-semibold leading-snug text-ink">
-            Dune: Part Two 2024 2160p WEB-DL
-          </p>
+          <p className="truncate text-[14px] font-semibold leading-snug text-ink">Dune: Part Two 2024 2160p WEB-DL</p>
           <p className={`whitespace-pre-line text-[12.5px] leading-snug text-ink-muted ${full ? "" : "line-clamp-3"}`}>
             {DESC}
           </p>

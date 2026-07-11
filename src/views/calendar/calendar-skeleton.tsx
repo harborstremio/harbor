@@ -1,14 +1,11 @@
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
+
 import { orderedWeekdayNames } from "./utils";
 
 const CHIPS_PER_CELL = [
-  2, 0, 1, 3, 0, 1, 0,
-  2, 1, 0, 0, 2, 1, 3,
-  0, 1, 0, 2, 0, 1, 2,
-  0, 1, 0, 3, 1, 0, 2,
-  0, 1, 0, 2, 1, 0, 1,
-  0, 2, 0, 1, 3, 0, 1,
+  2, 0, 1, 3, 0, 1, 0, 2, 1, 0, 0, 2, 1, 3, 0, 1, 0, 2, 0, 1, 2, 0, 1, 0, 3, 1, 0, 2, 0, 1, 0, 2, 1, 0, 1, 0, 2, 0, 1,
+  3, 0, 1,
 ];
 
 export function CalendarSkeleton() {
@@ -18,10 +15,7 @@ export function CalendarSkeleton() {
     <div className="flex flex-col gap-2">
       <div className="grid grid-cols-7 gap-2">
         {orderedWeekdayNames(settings.weekStartsMonday).map((d) => (
-          <div
-            key={d}
-            className="px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-subtle"
-          >
+          <div key={d} className="px-2 text-[11px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
             {t(d)}
           </div>
         ))}

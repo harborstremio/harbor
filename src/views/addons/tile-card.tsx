@@ -1,10 +1,11 @@
-import { Check, Loader2, Settings2 } from "lucide-react";
-import { useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { AddonStarBadge } from "@/components/addon-star-badge";
 import { CardArtBackdrop } from "@/components/card-art-backdrop";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
+import { Check, Loader2, Settings2 } from "lucide-react";
+import { useState } from "react";
+
 import { idOf, nameOf, subtitleFromManifest } from "./addons-utils";
 
 export function TileCard({
@@ -22,8 +23,7 @@ export function TileCard({
   const description = resolved.manifest?.description ?? subtitleFromManifest(resolved);
   const [installing, setInstalling] = useState(false);
   const configurable =
-    !!resolved.manifest?.behaviorHints?.configurable ||
-    !!resolved.manifest?.behaviorHints?.configurationRequired;
+    !!resolved.manifest?.behaviorHints?.configurable || !!resolved.manifest?.behaviorHints?.configurationRequired;
 
   const handle = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,9 +60,7 @@ export function TileCard({
           size="tile"
         />
         <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-          <span className="line-clamp-2 text-[15.5px] font-semibold leading-tight text-ink">
-            {nameOf(resolved)}
-          </span>
+          <span className="line-clamp-2 text-[15.5px] font-semibold leading-tight text-ink">{nameOf(resolved)}</span>
           <AddonStarBadge manifestId={resolved.manifest?.id} size="xs" />
         </div>
       </div>

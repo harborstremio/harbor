@@ -128,8 +128,7 @@ export function matchesCustomFilter(stream: ParsedStream, filter: CustomStreamFi
     if (stream.hdrFormat == null) return false;
   }
   if (filter.cachedOnly === true) {
-    const cached =
-      Object.values(stream.cached).some(Boolean) || Object.values(stream.inLibrary).some(Boolean);
+    const cached = Object.values(stream.cached).some(Boolean) || Object.values(stream.inLibrary).some(Boolean);
     if (!cached) return false;
   }
   if (isPositive(filter.minSeeders)) {

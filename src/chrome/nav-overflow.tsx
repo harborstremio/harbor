@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { ChevronDown } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export type NavEntry = {
   key: string;

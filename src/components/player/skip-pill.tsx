@@ -1,10 +1,10 @@
-import { ChevronsRight, FastForward, Play, X } from "lucide-react";
 import { AdSkipIcon } from "@/components/icons/adskip-icon";
-import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n";
 import type { SkipSegment } from "@/lib/skip-intro";
 import type { SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { ChevronsRight, FastForward, Play, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function SkipPill({
   segment,
@@ -50,8 +50,7 @@ export function SkipPill({
 
   const isOutroNext = mounted.kind === "outro" && hasNextEp && !!nextEp;
   const finalLeadSec = typeof leadSec === "number" && leadSec > 0 ? leadSec : 15;
-  const inCountdownWindow =
-    isOutroNext && remainingSec > 0 && remainingSec <= finalLeadSec;
+  const inCountdownWindow = isOutroNext && remainingSec > 0 && remainingSec <= finalLeadSec;
 
   if (isOutroNext && inCountdownWindow && nextEp) {
     return (
@@ -83,9 +82,7 @@ export function SkipPill({
   return (
     <div
       className={`pointer-events-none absolute end-7 z-30 flex items-center gap-2 transition-all duration-200 ease-out ${
-        visible && show
-          ? "bottom-44 opacity-100 translate-y-0"
-          : "bottom-40 opacity-0 translate-y-2"
+        visible && show ? "bottom-44 opacity-100 translate-y-0" : "bottom-40 opacity-0 translate-y-2"
       }`}
     >
       <button
@@ -143,21 +140,13 @@ function UpNextCard({
   return (
     <div
       className={`pointer-events-none absolute end-7 z-30 transition-all duration-200 ease-out ${
-        visible
-          ? "bottom-44 opacity-100 translate-y-0"
-          : "bottom-40 opacity-0 translate-y-2"
+        visible ? "bottom-44 opacity-100 translate-y-0" : "bottom-40 opacity-0 translate-y-2"
       }`}
     >
       <div className="pointer-events-auto relative flex w-[360px] overflow-hidden rounded-2xl border border-white/15 bg-black/80 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.9)] backdrop-blur-md">
         <div className="relative aspect-[16/10] w-[148px] shrink-0 overflow-hidden bg-white/5">
           {ep.still && !hideStill ? (
-            <img
-              src={ep.still}
-              alt=""
-              draggable={false}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
+            <img src={ep.still} alt="" draggable={false} loading="lazy" className="h-full w-full object-cover" />
           ) : (
             <div className="grid h-full place-items-center text-[11px] uppercase tracking-[0.18em] text-white/45">
               {epLabel}
@@ -171,12 +160,8 @@ function UpNextCard({
               <div className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
                 {t("Up next in {s}s", { s: seconds })}
               </div>
-              <div className="mt-0.5 truncate text-[13.5px] font-semibold text-white">
-                {title}
-              </div>
-              {title !== epLabel && (
-                <div className="truncate text-[11.5px] text-white/55">{epLabel}</div>
-              )}
+              <div className="mt-0.5 truncate text-[13.5px] font-semibold text-white">{title}</div>
+              {title !== epLabel && <div className="truncate text-[11.5px] text-white/55">{epLabel}</div>}
             </div>
             {onCancel && (
               <button

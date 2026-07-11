@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+
 import { affinityIsEmpty, score, topEntries } from "./affinity";
 import { profileFromDetail, profileFromMeta } from "./profile";
 import { clearStore, getStore, subscribe, trackEvent } from "./store";

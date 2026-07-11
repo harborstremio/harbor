@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { SkipPill } from "@/components/player/skip-pill";
-import { activeSegment, type SkipSegment } from "@/lib/skip-intro";
+import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { useSettings } from "@/lib/settings";
+import { activeSegment, type SkipSegment } from "@/lib/skip-intro";
 import type { SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export function nextEpisodeLead(setting: number, durationSec: number): number {
   if (setting === 0) return 0;
@@ -99,8 +99,7 @@ export function SkipPillContainer({
     const id = window.setTimeout(() => setAutoHiddenKey(buttonKey), settings.skipButtonHideSec * 1000);
     return () => window.clearTimeout(id);
   }, [buttonKey, settings.skipButtonHideSec]);
-  const skipHidden =
-    buttonKey != null && (buttonKey === autoHiddenKey || dismissedKeys.has(buttonKey));
+  const skipHidden = buttonKey != null && (buttonKey === autoHiddenKey || dismissedKeys.has(buttonKey));
   const displaySkip = settings.showSkipButton && !skipHidden ? realActiveSkip : null;
   const activeSkip = displaySkip ?? syntheticOutro;
 
@@ -118,11 +117,7 @@ export function SkipPillContainer({
       }}
       onNextEpisode={onNextEpisode}
       onCancelAutoNext={onCancelAutoNext}
-      onDismiss={
-        displaySkip && buttonKey
-          ? () => setDismissedKeys((prev) => new Set(prev).add(buttonKey))
-          : undefined
-      }
+      onDismiss={displaySkip && buttonKey ? () => setDismissedKeys((prev) => new Set(prev).add(buttonKey)) : undefined}
     />
   );
 }

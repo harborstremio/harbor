@@ -1,11 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  invalidateAnimeAwardSynonyms,
-  uniqueWinnerFranchisesAcrossSources,
-  type AwardWin,
-} from "@/lib/anime-awards";
+import { invalidateAnimeAwardSynonyms, uniqueWinnerFranchisesAcrossSources, type AwardWin } from "@/lib/anime-awards";
 import type { Meta } from "@/lib/cinemeta";
 import { jikanSearchByTitle } from "@/lib/providers/jikan";
+import { useEffect, useMemo, useState } from "react";
 
 const CACHE_KEY = "harbor.anime_awards.metas.v2";
 

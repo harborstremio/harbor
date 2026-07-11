@@ -1,14 +1,8 @@
-import { useState } from "react";
 import { SERVICES } from "@/lib/providers/streaming";
 import type { StreamingService } from "@/lib/settings";
+import { useState } from "react";
 
-export function ServiceLogo({
-  service,
-  height = 28,
-}: {
-  service: StreamingService;
-  height?: number;
-}) {
+export function ServiceLogo({ service, height = 28 }: { service: StreamingService; height?: number }) {
   const [failed, setFailed] = useState(false);
   const meta = SERVICES[service];
   if (!meta) return null;
@@ -19,9 +13,7 @@ export function ServiceLogo({
       </span>
     );
   }
-  const finalHeight = meta.logoHeight
-    ? Math.round(height * (meta.logoHeight / 32))
-    : height;
+  const finalHeight = meta.logoHeight ? Math.round(height * (meta.logoHeight / 32)) : height;
   return (
     <img
       src={meta.logo}

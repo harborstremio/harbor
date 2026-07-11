@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ArrowDownUp, Check, CheckCheck, ChevronDown, EyeOff } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 type Sort = "oldest" | "newest";
 
@@ -80,13 +80,7 @@ function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
   );
 }
 
-function OptionsMenu({
-  allWatched,
-  onMarkSeason,
-}: {
-  allWatched: boolean;
-  onMarkSeason: (watched: boolean) => void;
-}) {
+function OptionsMenu({ allWatched, onMarkSeason }: { allWatched: boolean; onMarkSeason: (watched: boolean) => void }) {
   const t = useT();
   const label = allWatched ? t("Mark season as unwatched") : t("Mark season as watched");
   return (

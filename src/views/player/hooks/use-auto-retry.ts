@@ -1,22 +1,25 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
-import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
-import { getPlaybackBuffered, getPlaybackPosition, usePlaybackFlag } from "@/lib/player/playback-clock";
-import { isLocalUrl } from "@/lib/player/local-url";
-import { clearOnePickerCache } from "@/lib/picker-cache";
-import { resolveViaDebrids } from "@/lib/streams/resolve";
-import { registerStreamProxy } from "@/lib/stream-proxy";
-import { buildTranscodedUrl, probeStremioServer } from "@/lib/stremio-server";
-import type { DebridStore } from "@/lib/debrid/types";
 import type { Meta } from "@/lib/cinemeta";
-import type { PlayerSrc, PlayEpisode } from "@/lib/view";
-import { BLACK_SCREEN_GRACE_MS, MAX_AUTORETRY_ATTEMPTS, ROOM_STALL_MS, SLOW_LOAD_MS, STUCK_AUTORETRY_MS } from "../player-utils";
+import type { DebridStore } from "@/lib/debrid/types";
+import { clearOnePickerCache } from "@/lib/picker-cache";
+import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import { isLocalUrl } from "@/lib/player/local-url";
+import { getPlaybackBuffered, getPlaybackPosition, usePlaybackFlag } from "@/lib/player/playback-clock";
+import { registerStreamProxy } from "@/lib/stream-proxy";
+import { resolveViaDebrids } from "@/lib/streams/resolve";
+import { buildTranscodedUrl, probeStremioServer } from "@/lib/stremio-server";
 import { GENUINE_FAILURE_WINDOW_MS, type EngineStats } from "@/lib/torrent/engine-stats";
+import type { PlayerSrc, PlayEpisode } from "@/lib/view";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
-type OpenPicker = (
-  meta: Meta,
-  episode?: PlayEpisode,
-  opts?: { autoPlay?: boolean; attempt?: number },
-) => void;
+import {
+  BLACK_SCREEN_GRACE_MS,
+  MAX_AUTORETRY_ATTEMPTS,
+  ROOM_STALL_MS,
+  SLOW_LOAD_MS,
+  STUCK_AUTORETRY_MS,
+} from "../player-utils";
+
+type OpenPicker = (meta: Meta, episode?: PlayEpisode, opts?: { autoPlay?: boolean; attempt?: number }) => void;
 
 export function useAutoRetry(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -32,7 +35,20 @@ export function useAutoRetry(params: {
   isP2pEngine: boolean;
   engineStats: EngineStats | null;
 }) {
-  const { bridgeRef, src, snap, stremioServerTranscode, instantPlay, inRoom, debrids, selfFrameReadyRef, openPicker, engineFailure, isP2pEngine, engineStats } = params;
+  const {
+    bridgeRef,
+    src,
+    snap,
+    stremioServerTranscode,
+    instantPlay,
+    inRoom,
+    debrids,
+    selfFrameReadyRef,
+    openPicker,
+    engineFailure,
+    isP2pEngine,
+    engineStats,
+  } = params;
   const isLocal = isLocalUrl(src.url);
   const isLive = src.meta.id.startsWith("iptv:");
   const ENGINE_FIRST_FRAME_GRACE_MS = 20_000;
@@ -49,9 +65,7 @@ export function useAutoRetry(params: {
   engineStatsRef.current = engineStats;
   const dlRef = useRef({ bytes: 0, at: 0 });
 
-  const hasProgress = usePlaybackFlag(
-    () => getPlaybackPosition() > 0.5 || getPlaybackBuffered() > 0.5,
-  );
+  const hasProgress = usePlaybackFlag(() => getPlaybackPosition() > 0.5 || getPlaybackBuffered() > 0.5);
   const [slowLoad, setSlowLoad] = useState(false);
   useEffect(() => {
     setSlowLoad(false);
@@ -92,17 +106,20 @@ export function useAutoRetry(params: {
     const b = bridgeRef.current;
     if (!b) return;
     const attempt = liveRetryCountRef.current + 1;
-    const timer = window.setTimeout(() => {
-      liveRetryCountRef.current = attempt;
-      console.warn(`[player] live auto-reconnect attempt ${attempt}/${maxAttempts}`);
-      void b.load({
-        url: src.url,
-        subtitles: src.subtitles,
-        notWebReady: src.notWebReady,
-        isLive: true,
-        headers: src.headers,
-      });
-    }, livePlayedRef.current ? 4000 : 1500);
+    const timer = window.setTimeout(
+      () => {
+        liveRetryCountRef.current = attempt;
+        console.warn(`[player] live auto-reconnect attempt ${attempt}/${maxAttempts}`);
+        void b.load({
+          url: src.url,
+          subtitles: src.subtitles,
+          notWebReady: src.notWebReady,
+          isLive: true,
+          headers: src.headers,
+        });
+      },
+      livePlayedRef.current ? 4000 : 1500,
+    );
     return () => window.clearTimeout(timer);
   }, [isLive, snap.errorCode, src.url, src.subtitles, src.notWebReady, bridgeRef]);
 
@@ -135,12 +152,23 @@ export function useAutoRetry(params: {
       openPicker(
         src.meta,
         src.episode,
-        instantPlay || inRoom
-          ? { autoPlay: true, attempt: nextAttempt }
-          : { autoPlay: false },
+        instantPlay || inRoom ? { autoPlay: true, attempt: nextAttempt } : { autoPlay: false },
       );
     },
-    [src.attempt, src.meta, src.episode, openPicker, instantPlay, isLocal, isLive, inRoom, src.url, src.subtitles, src.notWebReady, bridgeRef],
+    [
+      src.attempt,
+      src.meta,
+      src.episode,
+      openPicker,
+      instantPlay,
+      isLocal,
+      isLive,
+      inRoom,
+      src.url,
+      src.subtitles,
+      src.notWebReady,
+      bridgeRef,
+    ],
   );
 
   useEffect(() => {
@@ -160,25 +188,32 @@ export function useAutoRetry(params: {
       const hint = src.episode
         ? { season: src.episode.season ?? null, episode: src.episode.episode ?? null }
         : undefined;
-      void resolveViaDebrids(failoverHash, src.streamRef?.fileIdx ?? undefined, cached, debrids, ac.signal, false, {}, hint).then(
-        async (r) => {
-          const b = bridgeRef.current;
-          if (r.ok && b) {
-            let url = r.data.url;
-            if (r.data.headers && Object.keys(r.data.headers).length > 0) {
-              try {
-                url = (await registerStreamProxy(r.data.url, r.data.headers)).url;
-              } catch {
-                /* fall back to the raw debrid url */
-              }
+      void resolveViaDebrids(
+        failoverHash,
+        src.streamRef?.fileIdx ?? undefined,
+        cached,
+        debrids,
+        ac.signal,
+        false,
+        {},
+        hint,
+      ).then(async (r) => {
+        const b = bridgeRef.current;
+        if (r.ok && b) {
+          let url = r.data.url;
+          if (r.data.headers && Object.keys(r.data.headers).length > 0) {
+            try {
+              url = (await registerStreamProxy(r.data.url, r.data.headers)).url;
+            } catch {
+              /* fall back to the raw debrid url */
             }
-            console.warn(`[player] debrid failover via ${r.via}`);
-            void b.load({ url, subtitles: src.subtitles, notWebReady: r.data.notWebReady ?? src.notWebReady });
-          } else {
-            triggerAutoRetry(`playback error "${snap.errorCode}"`);
           }
-        },
-      );
+          console.warn(`[player] debrid failover via ${r.via}`);
+          void b.load({ url, subtitles: src.subtitles, notWebReady: r.data.notWebReady ?? src.notWebReady });
+        } else {
+          triggerAutoRetry(`playback error "${snap.errorCode}"`);
+        }
+      });
       return;
     }
     if (!sameUrlRetriedRef.current) {
@@ -325,7 +360,19 @@ export function useAutoRetry(params: {
       }
     }, ROOM_STALL_MS);
     return () => window.clearTimeout(t);
-  }, [inRoom, isLocal, isLive, snap.status, snap.videoWidth, snap.videoHeight, triggerAutoRetry, src.url, selfFrameReadyRef, isP2pEngine, engineFailure]);
+  }, [
+    inRoom,
+    isLocal,
+    isLive,
+    snap.status,
+    snap.videoWidth,
+    snap.videoHeight,
+    triggerAutoRetry,
+    src.url,
+    selfFrameReadyRef,
+    isP2pEngine,
+    engineFailure,
+  ]);
 
   useEffect(() => {
     if (!isP2pEngine || snap.status === "ended") return;

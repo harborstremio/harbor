@@ -1,14 +1,15 @@
-import { ArrowLeft, Search, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CollectionCard } from "@/components/collection-card";
 import { HarborLoader } from "@/components/harbor-loader";
 import { COLLECTION_CATEGORIES, COLLECTIONS_CATALOG } from "@/lib/collections-catalog";
-import { layoutHasGlobalBack } from "@/lib/theme";
+import { useT } from "@/lib/i18n";
 import { tmdbSearchCollections, type CollectionHit } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
+import { layoutHasGlobalBack } from "@/lib/theme";
 import { useScrollMemory, useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { ArrowLeft, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { useCategoryFeed } from "./collections/use-category-feed";
 
 const FEED_QUERY = "collection";
@@ -44,10 +45,7 @@ export function CollectionsView() {
     return COLLECTIONS_CATALOG.filter((c) => c.cats.includes(category));
   }, [category]);
 
-  const curatedNames = useMemo(
-    () => new Set(COLLECTIONS_CATALOG.map((c) => c.name.toLowerCase())),
-    [],
-  );
+  const curatedNames = useMemo(() => new Set(COLLECTIONS_CATALOG.map((c) => c.name.toLowerCase())), []);
 
   const catFeed = useCategoryFeed({
     tmdbKey: settings.tmdbKey,
@@ -70,10 +68,10 @@ export function CollectionsView() {
     const el = stickySentinelRef.current;
     const root = scrollRef.current;
     if (!el || !root) return;
-    const io = new IntersectionObserver(
-      (entries) => setStuck(!entries[0]?.isIntersecting),
-      { root, rootMargin: "-104px 0px 0px 0px" },
-    );
+    const io = new IntersectionObserver((entries) => setStuck(!entries[0]?.isIntersecting), {
+      root,
+      rootMargin: "-104px 0px 0px 0px",
+    });
     io.observe(el);
     return () => io.disconnect();
   }, []);
@@ -240,16 +238,8 @@ export function CollectionsView() {
               {catFeed.hits.length > 0 && (
                 <div className="grid grid-cols-2 gap-5 lg:grid-cols-3 2xl:grid-cols-4">
                   {catFeed.hits.map((h) => (
-                    <div
-                      key={h.id}
-                      style={{ contentVisibility: "auto", containIntrinsicSize: "auto 220px" }}
-                    >
-                      <CollectionCard
-                        id={h.id}
-                        name={h.name}
-                        knownBackdrop={h.backdrop}
-                        knownCount={h.count}
-                      />
+                    <div key={h.id} style={{ contentVisibility: "auto", containIntrinsicSize: "auto 220px" }}>
+                      <CollectionCard id={h.id} name={h.name} knownBackdrop={h.backdrop} knownCount={h.count} />
                     </div>
                   ))}
                 </div>
@@ -281,15 +271,8 @@ export function CollectionsView() {
               </p>
               <div className="grid grid-cols-2 gap-5 lg:grid-cols-3 2xl:grid-cols-4">
                 {hits.map((h) => (
-                  <div
-                    key={h.id}
-                    style={{ contentVisibility: "auto", containIntrinsicSize: "auto 220px" }}
-                  >
-                    <CollectionCard
-                      id={h.id}
-                      name={stripSuffix(h.name)}
-                      knownBackdrop={h.backdrop}
-                    />
+                  <div key={h.id} style={{ contentVisibility: "auto", containIntrinsicSize: "auto 220px" }}>
+                    <CollectionCard id={h.id} name={stripSuffix(h.name)} knownBackdrop={h.backdrop} />
                   </div>
                 ))}
               </div>

@@ -1,9 +1,10 @@
-import { PanelTop } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { type ThemeSettings } from "@/lib/theme";
-import { useT } from "@/lib/i18n";
-import { Section } from "./shared";
+import { PanelTop } from "lucide-react";
+
 import { SeekBarPanel } from "./player-panel";
+import { Section } from "./shared";
 import { BackgroundPicker } from "./theme-panel/background-picker";
 import { ColorThemeBody } from "./theme-panel/color-theme-body";
 import { CustomThemesSection } from "./theme-panel/custom-themes-section";
@@ -23,10 +24,7 @@ export function ThemePanel() {
 
   return (
     <>
-      <Section
-        title={t("Theme")}
-        subtitle={t("Pick a look. Every color and surface updates instantly.")}
-      >
+      <Section title={t("Theme")} subtitle={t("Pick a look. Every color and surface updates instantly.")}>
         <ColorThemeBody
           activePreset={theme.preset}
           fontPair={theme.fontPair}
@@ -77,7 +75,9 @@ export function ThemePanel() {
 
       <Section
         title={t("Seek bar")}
-        subtitle={t("Style the timeline at the bottom of the player. Swap the dot for a sticker, change the bar height, recolor it. Settings live-preview right here.")}
+        subtitle={t(
+          "Style the timeline at the bottom of the player. Swap the dot for a sticker, change the bar height, recolor it. Settings live-preview right here.",
+        )}
       >
         <SeekBarPanel />
       </Section>
@@ -85,7 +85,9 @@ export function ThemePanel() {
       {isTauri && (
         <Section
           title={t("Window title bar")}
-          subtitle={t("Use your operating system's native title bar and window buttons instead of Harbor's built-in ones. Handy if the in-app buttons ever feel out of reach, like during playback.")}
+          subtitle={t(
+            "Use your operating system's native title bar and window buttons instead of Harbor's built-in ones. Handy if the in-app buttons ever feel out of reach, like during playback.",
+          )}
         >
           <NativeTitleBarRow />
         </Section>
@@ -110,7 +112,9 @@ function NativeTitleBarRow() {
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-[14px] font-medium text-ink">{t("Use the native window title bar")}</span>
         <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Show your operating system's own title bar with its minimize, maximize, and close buttons. They stay reachable everywhere, including while a video is playing. Turn this off to use Harbor's built-in window buttons.")}
+          {t(
+            "Show your operating system's own title bar with its minimize, maximize, and close buttons. They stay reachable everywhere, including while a video is playing. Turn this off to use Harbor's built-in window buttons.",
+          )}
         </p>
       </div>
       <button

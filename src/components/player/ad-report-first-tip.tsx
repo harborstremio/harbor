@@ -1,5 +1,5 @@
-import { X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { X } from "lucide-react";
 
 export function AdReportFirstTip({ onDismiss }: { onDismiss: () => void }) {
   const t = useT();

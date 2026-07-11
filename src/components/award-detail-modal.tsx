@@ -1,11 +1,11 @@
+import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
+import { Laurel } from "@/components/icons/laurel";
+import { meta as cinemetaMeta, type Meta } from "@/lib/cinemeta";
+import type { AwardEntry, AwardType } from "@/lib/providers/wikidata";
+import { useView } from "@/lib/view";
 import { ExternalLink, X } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
-import { Laurel } from "@/components/icons/laurel";
-import type { AwardEntry, AwardType } from "@/lib/providers/wikidata";
-import { useView } from "@/lib/view";
-import { meta as cinemetaMeta, type Meta } from "@/lib/cinemeta";
 
 const TYPE_TITLE: Record<AwardType, string> = {
   oscar: "Academy Awards",
@@ -69,9 +69,11 @@ export function AwardDetailModal({
     const vh = window.innerHeight;
     const spaceBelow = vh - anchor.bottom;
     const spaceAbove = anchor.top;
-    const place: "below" | "above" =
-      spaceBelow >= 220 || spaceBelow >= spaceAbove ? "below" : "above";
-    const desiredHeight = Math.min(TOOLTIP_MAX_HEIGHT, place === "below" ? spaceBelow - GAP - 12 : spaceAbove - GAP - 12);
+    const place: "below" | "above" = spaceBelow >= 220 || spaceBelow >= spaceAbove ? "below" : "above";
+    const desiredHeight = Math.min(
+      TOOLTIP_MAX_HEIGHT,
+      place === "below" ? spaceBelow - GAP - 12 : spaceAbove - GAP - 12,
+    );
     const top = place === "below" ? anchor.bottom + GAP : anchor.top - GAP - desiredHeight;
     let left = anchor.left + anchor.width / 2 - TOOLTIP_WIDTH / 2;
     left = Math.max(12, Math.min(left, vw - TOOLTIP_WIDTH - 12));
@@ -101,9 +103,7 @@ export function AwardDetailModal({
           </Laurel>
         </span>
         <div className="flex min-w-0 flex-1 flex-col">
-          <h3 className="truncate text-[13.5px] font-semibold leading-tight text-ink">
-            {TYPE_TITLE[type]}
-          </h3>
+          <h3 className="truncate text-[13.5px] font-semibold leading-tight text-ink">{TYPE_TITLE[type]}</h3>
           <p className="text-[10.5px] text-ink-muted">
             {wins > 0 && `${wins} ${wins === 1 ? "win" : "wins"}`}
             {wins > 0 && noms > 0 && " · "}
@@ -233,17 +233,11 @@ function AwardRow({
             {won ? "Won" : "Nom"}
           </span>
         </span>
-        <span className="truncate text-[12px] font-semibold text-ink">
-          {title ?? (cats || group.awardName)}
-        </span>
-        {title && cats && (
-          <span className="truncate text-[10.5px] text-ink-muted">{cats}</span>
-        )}
+        <span className="truncate text-[12px] font-semibold text-ink">{title ?? (cats || group.awardName)}</span>
+        {title && cats && <span className="truncate text-[10.5px] text-ink-muted">{cats}</span>}
       </div>
 
-      {interactive && (
-        <ExternalLink size={11} strokeWidth={2.2} className="shrink-0 text-ink-subtle" />
-      )}
+      {interactive && <ExternalLink size={11} strokeWidth={2.2} className="shrink-0 text-ink-subtle" />}
     </button>
   );
 }
@@ -252,7 +246,7 @@ const CINEMETA = "https://v3-cinemeta.strem.io";
 const workCache = new Map<string, Meta | null>();
 const workInflight = new Map<string, Promise<Meta | null>>();
 
-function workKey(entry: WorkLike):string {
+function workKey(entry: WorkLike): string {
   return entry.workImdb ?? `t:${(entry.workTitle ?? "").toLowerCase()}:${entry.year ?? ""}`;
 }
 
@@ -273,7 +267,10 @@ function pickByYear(metas: Meta[], year?: number): Meta | null {
 }
 
 function normMatch(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 async function cinemetaSearch(title: string, year: number | undefined, preferSeries: boolean): Promise<Meta | null> {

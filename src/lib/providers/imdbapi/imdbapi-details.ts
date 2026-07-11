@@ -1,4 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
+
 import type { TmdbDetail } from "../tmdb/tmdb-details";
 
 const BASE = "https://api.imdbapi.dev/titles";
@@ -84,9 +85,7 @@ function toTmdbDetail(title: ImdbTitleResponse, cast: TmdbDetail["cast"]): TmdbD
     backdrop: undefined,
     logo: undefined,
     year: title.startYear ? String(title.startYear) : undefined,
-    rating: title.rating?.aggregateRating
-      ? Number(title.rating.aggregateRating).toFixed(1)
-      : undefined,
+    rating: title.rating?.aggregateRating ? Number(title.rating.aggregateRating).toFixed(1) : undefined,
     voteCount: title.rating?.voteCount ?? 0,
     runtime: formatRuntime(title.runtimeSeconds),
     status: "Released",
@@ -135,15 +134,10 @@ function creditsToCast(credits: ImdbCreditsEntry[]): TmdbDetail["cast"] {
     }));
 }
 
-export async function imdbapiDetails(
-  metaId: string,
-  season?: number,
-  episode?: number,
-): Promise<TmdbDetail | null> {
+export async function imdbapiDetails(metaId: string, season?: number, episode?: number): Promise<TmdbDetail | null> {
   if (!metaId.startsWith("tt")) return null;
 
-  const cacheKey =
-    season !== undefined && episode !== undefined ? `${metaId}:s${season}e${episode}` : metaId;
+  const cacheKey = season !== undefined && episode !== undefined ? `${metaId}:s${season}e${episode}` : metaId;
 
   const cached = cache.get(cacheKey);
   if (cached) return cached;
@@ -155,9 +149,7 @@ export async function imdbapiDetails(
 
   if (season !== undefined && episode !== undefined && title.type !== "movie") {
     const eps = await fetchJson<{ episodes: ImdbEpisodeEntry[] }>(`${BASE}/${metaId}/episodes`);
-    const match = eps?.episodes?.find(
-      (e) => Number(e.season) === season && e.episodeNumber === episode,
-    );
+    const match = eps?.episodes?.find((e) => Number(e.season) === season && e.episodeNumber === episode);
     if (match) targetId = match.id;
   }
 

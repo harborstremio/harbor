@@ -1,16 +1,10 @@
+import { useT } from "@/lib/i18n";
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export const SKIP_EXIT_CONFIRM_KEY = "harbor.player.skipExitConfirm";
 
-export function ExitConfirm({
-  onCancel,
-  onConfirm,
-}: {
-  onCancel: () => void;
-  onConfirm: (remember: boolean) => void;
-}) {
+export function ExitConfirm({ onCancel, onConfirm }: { onCancel: () => void; onConfirm: (remember: boolean) => void }) {
   const t = useT();
   const [remember, setRemember] = useState(false);
 
@@ -21,11 +15,7 @@ export function ExitConfirm({
         {t("You'll leave the player and open the full details page.")}
       </p>
 
-      <button
-        type="button"
-        onClick={() => setRemember((v) => !v)}
-        className="group mt-5 flex items-center gap-2.5"
-      >
+      <button type="button" onClick={() => setRemember((v) => !v)} className="group mt-5 flex items-center gap-2.5">
         <span
           className={`flex h-[18px] w-[18px] items-center justify-center rounded-[6px] ring-1 transition-colors ${
             remember ? "bg-white ring-white" : "bg-white/5 ring-white/25 group-hover:ring-white/45"

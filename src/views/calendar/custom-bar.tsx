@@ -1,8 +1,9 @@
+import { useT } from "@/lib/i18n";
+import type { SearchPerson } from "@/lib/search";
 import { UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import type { SearchPerson } from "@/lib/search";
-import { useT } from "@/lib/i18n";
+
 import type { CustomCalendar } from "./custom-bar/constants";
 import { CustomManager } from "./custom-bar/custom-manager";
 
@@ -33,10 +34,7 @@ export function CustomCalendarBar({
     if (value.trackedPeople.some((x) => x.id === p.id)) return;
     onChange({
       ...value,
-      trackedPeople: [
-        ...value.trackedPeople,
-        { id: p.id, name: p.name, profile: p.profile, role: "any" },
-      ],
+      trackedPeople: [...value.trackedPeople, { id: p.id, name: p.name, profile: p.profile, role: "any" }],
     });
   };
   const removePerson = (id: number) => {
@@ -70,9 +68,7 @@ export function CustomCalendarBar({
     const exists = value.originCountries.includes(code);
     onChange({
       ...value,
-      originCountries: exists
-        ? value.originCountries.filter((c) => c !== code)
-        : [...value.originCountries, code],
+      originCountries: exists ? value.originCountries.filter((c) => c !== code) : [...value.originCountries, code],
     });
   };
   const clearAll = () => {
@@ -89,8 +85,7 @@ export function CustomCalendarBar({
 
   const summary = (() => {
     const bits: string[] = [];
-    if (value.trackedPeople.length)
-      bits.push(t("{n} people", { n: value.trackedPeople.length }));
+    if (value.trackedPeople.length) bits.push(t("{n} people", { n: value.trackedPeople.length }));
     if (value.genres.length)
       bits.push(
         value.genres.length === 1

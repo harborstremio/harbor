@@ -1,8 +1,9 @@
-import { ChevronRight, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
+import { useT } from "@/lib/i18n";
+import { playLocalAware } from "@/lib/local-library/playback";
+import { localPlayerSrc } from "@/lib/local-library/player-src";
 import type { PanelCorner } from "@/lib/player-chrome";
 import { useSettings } from "@/lib/settings";
 import { spoilerMaskFor } from "@/lib/spoilers";
@@ -11,9 +12,9 @@ import { preflightCheck } from "@/lib/streams/preflight";
 import { resolveStream } from "@/lib/streams/resolve";
 import type { ScoredStream } from "@/lib/streams/types";
 import { useView, type PlayEpisode } from "@/lib/view";
-import { playLocalAware } from "@/lib/local-library/playback";
-import { localPlayerSrc } from "@/lib/local-library/player-src";
-import { useT } from "@/lib/i18n";
+import { ChevronRight, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { EpisodeRow } from "./episode-row";
 import { SeasonPicker } from "./season-picker";
 import { StreamsView } from "./streams-view";
@@ -54,11 +55,7 @@ export function EpisodePanel({
   const { settings, update } = useSettings();
   const { openPicker, replacePlayerSrc } = useView();
   const debrids = useDebridClients();
-  const { seasons, season, setSeason, episodes, loading } = useSeasonBrowser(
-    meta,
-    currentEpisode,
-    open,
-  );
+  const { seasons, season, setSeason, episodes, loading } = useSeasonBrowser(meta, currentEpisode, open);
   const nextSeason = seasons.find((n) => n > season);
   const listRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -123,7 +120,7 @@ export function EpisodePanel({
       const skipPreflight = r.via === "p2p" || r.via === "direct";
       const preflight = skipPreflight
         ? ({ ok: true } as const)
-        : await preflightCheck(playUrl).catch(() => ({ ok: true } as const));
+        : await preflightCheck(playUrl).catch(() => ({ ok: true }) as const);
       if (!preflight.ok && preflight.reason === "stub") {
         setResolvingFor(null);
         return;
@@ -153,10 +150,7 @@ export function EpisodePanel({
     }
   };
   return (
-    <div
-      aria-hidden={!open}
-      className={`pointer-events-${open ? "auto" : "none"} absolute inset-0 z-30`}
-    >
+    <div aria-hidden={!open} className={`pointer-events-${open ? "auto" : "none"} absolute inset-0 z-30`}>
       {resolvingFor && (
         <div className="pointer-events-auto absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black/82 backdrop-blur-md animate-in fade-in duration-150">
           <HarborLoader size="md" caption={t("Connecting")} />
@@ -181,7 +175,9 @@ export function EpisodePanel({
         role="dialog"
         aria-label={t("Up next")}
         className={`absolute top-0 flex h-full w-full max-w-[440px] flex-col overflow-hidden bg-surface shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] transition-transform duration-300 ease-out ${
-          corner === "top-left" || corner === "bottom-left" ? "left-0 border-r border-edge-soft" : "right-0 border-l border-edge-soft"
+          corner === "top-left" || corner === "bottom-left"
+            ? "left-0 border-r border-edge-soft"
+            : "right-0 border-l border-edge-soft"
         } ${
           open
             ? "translate-x-0"
@@ -205,9 +201,7 @@ export function EpisodePanel({
                 <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
                   {t("Up Next")}
                 </p>
-                <h2 className="mt-1 font-display text-[22px] font-semibold leading-tight text-ink">
-                  {meta.name}
-                </h2>
+                <h2 className="mt-1 font-display text-[22px] font-semibold leading-tight text-ink">{meta.name}</h2>
               </div>
               <button
                 aria-label={t("Close")}
@@ -229,9 +223,7 @@ export function EpisodePanel({
               ) : (
                 <span />
               )}
-              {seasons.length > 1 && (
-                <SeasonPicker seasons={seasons} active={season} onChange={setSeason} />
-              )}
+              {seasons.length > 1 && <SeasonPicker seasons={seasons} active={season} onChange={setSeason} />}
             </div>
             <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
               {loading && episodes.length === 0 && (

@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
-import { Star, Loader2 } from "lucide-react";
-import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
-import { kitsuToMal } from "@/lib/providers/anime-mapping";
-import type { SimklTarget } from "@/lib/simkl/types";
-import { addSimklRating, removeSimklRating, getCachedRatingByTarget } from "@/lib/simkl/ratings";
 import { useT } from "@/lib/i18n";
+import { kitsuToMal } from "@/lib/providers/anime-mapping";
+import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
+import { addSimklRating, removeSimklRating, getCachedRatingByTarget } from "@/lib/simkl/ratings";
+import type { SimklTarget } from "@/lib/simkl/types";
+import { Star, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function SimklRatingPicker({
   harborId,

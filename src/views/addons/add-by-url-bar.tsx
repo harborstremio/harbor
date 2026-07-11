@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { Link } from "lucide-react";
 import { useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function AddByUrlBar({
   onSubmit,

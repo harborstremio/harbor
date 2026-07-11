@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { tmdbDiscover } from "@/lib/providers/tmdb";
 import { rpdbPoster } from "@/lib/providers/rpdb";
+import { tmdbDiscover } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { Row } from "./row";
+import { useEffect, useState } from "react";
+
 import { Poster } from "./poster";
+import { Row } from "./row";
 
 type Lang = { iso: string; name: string; endonym: string; hue: number };
 
@@ -71,9 +72,7 @@ function LanguageTile({ lang }: { lang: Lang }) {
   return (
     <button
       type="button"
-      onClick={() =>
-        openFilter({ kind: "language", mediaType: "tv", name: lang.name, iso: lang.iso })
-      }
+      onClick={() => openFilter({ kind: "language", mediaType: "tv", name: lang.name, iso: lang.iso })}
       className="group relative aspect-[5/4] w-full cursor-pointer overflow-hidden rounded-2xl border border-edge-soft text-start transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] hover:-translate-y-1"
       style={{ background: `linear-gradient(150deg, ${from}, ${to})` }}
     >

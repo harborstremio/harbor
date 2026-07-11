@@ -1,5 +1,6 @@
 import { get } from "@/lib/providers/tmdb/tmdb-client";
 import { movieMeta, seriesMeta, type RawMovie, type RawSeries } from "@/lib/providers/tmdb/tmdb-meta-mappers";
+
 import type { ListItem } from "../types";
 import { ListResolveError } from "../types";
 

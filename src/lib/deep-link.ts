@@ -94,9 +94,7 @@ function shouldForward(url: string): boolean {
 }
 
 export async function startDeepLinkBridge(): Promise<() => void> {
-  const isTauri =
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
+  const isTauri = typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
   if (!isTauri) return () => {};
   try {
     const mod = await import("@tauri-apps/plugin-deep-link");
@@ -141,10 +139,7 @@ export async function startDeepLinkBridge(): Promise<() => void> {
       const { invoke } = await import("@tauri-apps/api/core");
       invoke("browser_close").catch(() => {});
     };
-    const unlistenBrowserCap = await listen<string>(
-      "harbor://browser-stremio-capture",
-      forwardLinuxBrowserInstall,
-    );
+    const unlistenBrowserCap = await listen<string>("harbor://browser-stremio-capture", forwardLinuxBrowserInstall);
     const unlistenOpenFile = await listen<string>("harbor:open-file", (e) => {
       if (typeof e.payload === "string" && e.payload) emitOpenLocalFile(e.payload);
     });

@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import {
   captureBaseTitle,
@@ -10,6 +9,7 @@ import {
 } from "@/lib/player/capture-path";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerSrc } from "@/lib/view";
+import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 export type FrameGrabToast = {
   id: number;
@@ -18,10 +18,10 @@ export type FrameGrabToast = {
   path?: string;
 };
 
-export function useFrameGrab(params: {
-  bridgeRef: RefObject<PlayerBridge | null>;
-  src: PlayerSrc;
-}): { toast: FrameGrabToast | null; trigger: () => void } {
+export function useFrameGrab(params: { bridgeRef: RefObject<PlayerBridge | null>; src: PlayerSrc }): {
+  toast: FrameGrabToast | null;
+  trigger: () => void;
+} {
   const { bridgeRef, src } = params;
   const [toast, setToast] = useState<FrameGrabToast | null>(null);
   const busyRef = useRef(false);
@@ -60,9 +60,12 @@ export function useFrameGrab(params: {
     }
   }, [bridgeRef, src.meta.name, src.episode]);
 
-  useEffect(() => () => {
-    if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
+    },
+    [],
+  );
 
   return { toast, trigger };
 }

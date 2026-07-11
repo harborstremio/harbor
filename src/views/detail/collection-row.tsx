@@ -1,13 +1,13 @@
-import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
 import { PickCard } from "@/components/pick-card";
 import { Row } from "@/components/row";
 import type { Meta } from "@/lib/cinemeta";
-import { tmdbCollection } from "@/lib/providers/tmdb";
 import { useActiveKid } from "@/lib/profiles";
+import { tmdbCollection } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { dropUnreleased } from "@/views/kids/kids-filter";
+import { ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function CollectionRow({
   collection,

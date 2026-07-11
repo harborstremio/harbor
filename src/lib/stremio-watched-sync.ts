@@ -60,9 +60,7 @@ async function putWithState(
     name,
     poster: meta.poster ?? base?.poster ?? null,
     posterShape:
-      posterShape === "square" || posterShape === "landscape" || posterShape === "poster"
-        ? posterShape
-        : "poster",
+      posterShape === "square" || posterShape === "landscape" || posterShape === "poster" ? posterShape : "poster",
     background: meta.background ?? base?.background,
     state,
     behaviorHints: {

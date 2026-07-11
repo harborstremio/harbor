@@ -39,8 +39,7 @@ export function impossiblySmallMoviePenalty(s: ParsedStream, opts: ScoreOptions)
   const days = (Date.now() - t) / 86_400_000;
   if (days >= 90) return { signal: "tiny-skip-mature", delta: 0 };
 
-  const isTheaterCapture =
-    s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC";
+  const isTheaterCapture = s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC";
   if (isTheaterCapture) return { signal: "tiny-skip-theater", delta: 0 };
 
   const sizeMB = s.size / (1024 * 1024);
@@ -63,13 +62,13 @@ export function undersizedNewReleasePenalty(s: ParsedStream, opts: ScoreOptions)
   const days = (Date.now() - t) / 86_400_000;
   if (days >= 90) return { signal: "undersized-skip-mature", delta: 0 };
 
-  const isTheaterCapture =
-    s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC";
+  const isTheaterCapture = s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC";
   if (isTheaterCapture) return { signal: "undersized-skip-theater", delta: 0 };
 
-  const sizeGB = s.size / (1024 ** 3);
+  const sizeGB = s.size / 1024 ** 3;
   if (s.resolution === "4K" && sizeGB < 6) return { signal: `4k-undersized-${sizeGB.toFixed(1)}gb`, delta: -250 };
-  if (s.resolution === "1080p" && sizeGB < 1.5) return { signal: `1080p-undersized-${sizeGB.toFixed(1)}gb`, delta: -200 };
+  if (s.resolution === "1080p" && sizeGB < 1.5)
+    return { signal: `1080p-undersized-${sizeGB.toFixed(1)}gb`, delta: -200 };
   if (s.resolution === "720p" && sizeGB < 0.6) return { signal: `720p-undersized-${sizeGB.toFixed(1)}gb`, delta: -80 };
   return { signal: "undersized-ok", delta: 0 };
 }

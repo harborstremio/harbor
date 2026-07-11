@@ -1,5 +1,5 @@
-import { invoke } from "@tauri-apps/api/core";
 import { isWindowsDesktop } from "@/lib/platform";
+import { invoke } from "@tauri-apps/api/core";
 
 const RTX_VF = "d3d11vpp=format=x2bgr10:nvidia-true-hdr,format=x2bgr10";
 

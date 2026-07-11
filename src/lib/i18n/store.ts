@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+
 import { isRtl, type UiLanguage } from "./languages";
 
 let current: UiLanguage = "en";

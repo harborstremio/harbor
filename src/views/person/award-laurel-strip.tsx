@@ -1,9 +1,9 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
 import { Laurel } from "@/components/icons/laurel";
-import type { AwardType } from "@/lib/providers/wikidata";
 import { useT } from "@/lib/i18n";
+import type { AwardType } from "@/lib/providers/wikidata";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function AwardLaurelStrip({
   chips,

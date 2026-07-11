@@ -1,11 +1,11 @@
-import { ThumbsDown, ThumbsUp, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { trackEvent } from "@/lib/discover/store";
 import { getVote, setVote, subscribePrefs, type FeedVote } from "@/lib/feed/preferences";
 import { useT } from "@/lib/i18n";
 import { useOnboarding } from "@/lib/onboarding";
 import { Tooltip } from "@/views/detail/tooltip";
+import { ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 function profileFromMeta(meta: Meta) {
   const year = meta.releaseInfo ? parseInt(meta.releaseInfo.slice(0, 4), 10) : NaN;
@@ -38,10 +38,7 @@ export function ThumbsDock({ meta }: { meta: Meta }) {
     if (showHint) dismiss("featured-thumbs");
   };
   return (
-    <div
-      className="absolute bottom-6 end-6 flex items-center gap-1.5"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="absolute bottom-6 end-6 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
       <Tooltip label={t("Show me less like this")}>
         <ThumbButton
           active={vote === "down"}
@@ -127,9 +124,7 @@ function ThumbButton({
       aria-label={ariaLabel}
       aria-pressed={active}
       className={`flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-200 ${
-        active
-          ? activeClass
-          : "border-edge-soft/70 bg-canvas/55 text-ink/85 hover:bg-canvas/80 hover:text-ink"
+        active ? activeClass : "border-edge-soft/70 bg-canvas/55 text-ink/85 hover:bg-canvas/80 hover:text-ink"
       }`}
     >
       {children}

@@ -1,5 +1,6 @@
 import { AlertCircle, ImageDown, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+
 import { processBackgroundImage } from "./image-utils";
 
 export function BackgroundPicker({
@@ -34,9 +35,7 @@ export function BackgroundPicker({
 
   useEffect(() => {
     if (justSetRef.current && !imageData) {
-      flashError(
-        "Couldn't save that background. Your local storage is full. Try a smaller crop or clear cached data.",
-      );
+      flashError("Couldn't save that background. Your local storage is full. Try a smaller crop or clear cached data.");
       justSetRef.current = false;
     } else if (imageData) {
       justSetRef.current = false;
@@ -67,15 +66,9 @@ export function BackgroundPicker({
       <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-edge-soft bg-elevated/30">
         {imageData ? (
           <>
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${imageData})` }}
-            />
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${imageData})` }} />
             <div className="absolute inset-0" style={{ background: "black", opacity: 0.45 }} />
-            <div
-              className="absolute inset-0 bg-canvas"
-              style={{ opacity: dim }}
-            />
+            <div className="absolute inset-0 bg-canvas" style={{ opacity: dim }} />
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-ink-subtle">
@@ -84,9 +77,7 @@ export function BackgroundPicker({
           </div>
         )}
         <div className="relative z-10 flex h-full flex-col items-start justify-end gap-1 p-5">
-          <p className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
-            Live preview
-          </p>
+          <p className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">Live preview</p>
           <p className="font-display text-[26px] font-medium tracking-tight text-ink">Tonight's picks</p>
           <p className="text-[12px] text-ink-muted">Both serif and body text should stay legible at this dim.</p>
         </div>
@@ -120,9 +111,7 @@ export function BackgroundPicker({
             Remove
           </button>
         )}
-        <p className="ms-auto text-[11.5px] text-ink-subtle">
-          JPEG / PNG / WebP. Big files auto-compress to fit.
-        </p>
+        <p className="ms-auto text-[11.5px] text-ink-subtle">JPEG / PNG / WebP. Big files auto-compress to fit.</p>
       </div>
       {error && (
         <div className="flex animate-fade-in items-start gap-2.5 rounded-xl border border-rose-300/30 bg-rose-400/[0.08] px-4 py-3 text-[12.5px] leading-relaxed text-rose-100">

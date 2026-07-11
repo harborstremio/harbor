@@ -1,5 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import { tmdbSearchMovie } from "@/lib/providers/tmdb";
+
 import type { ArabicRowDef } from "./rows";
 
 export const EGYPTIAN_CLASSICS: { title: string; year: number }[] = [
@@ -17,9 +18,7 @@ export const EGYPTIAN_CLASSICS: { title: string; year: number }[] = [
 
 export async function fetchEgyptianClassics(key: string): Promise<Meta[]> {
   if (!key) return [];
-  const resolved = await Promise.all(
-    EGYPTIAN_CLASSICS.map((c) => tmdbSearchMovie(key, c.title, c.year)),
-  );
+  const resolved = await Promise.all(EGYPTIAN_CLASSICS.map((c) => tmdbSearchMovie(key, c.title, c.year)));
   const seen = new Set<string>();
   const out: Meta[] = [];
   for (const m of resolved) {

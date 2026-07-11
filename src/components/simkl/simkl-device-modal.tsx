@@ -1,8 +1,8 @@
-import { Check, Copy, ExternalLink, Loader2, X } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useSimkl } from "@/lib/simkl/provider";
 import { openUrl } from "@/lib/window";
+import { Check, Copy, ExternalLink, Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function SimklDeviceModal({ onClose }: { onClose: () => void }) {
   const { connectState, beginConnect, cancelConnect } = useSimkl();
@@ -153,15 +153,7 @@ function Spinner({ label }: { label: string }) {
   );
 }
 
-function ErrorBox({
-  title,
-  message,
-  onRetry,
-}: {
-  title: string;
-  message: string;
-  onRetry: () => void;
-}) {
+function ErrorBox({ title, message, onRetry }: { title: string; message: string; onRetry: () => void }) {
   const t = useT();
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-red-400/25 bg-red-400/8 p-4">

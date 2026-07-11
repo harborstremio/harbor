@@ -11,13 +11,7 @@ function fmtBytes(n: number): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export function FileDrop({
-  files,
-  onChange,
-}: {
-  files: File[];
-  onChange: (next: File[]) => void;
-}) {
+export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: File[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [reject, setReject] = useState<string | null>(null);
@@ -68,9 +62,7 @@ export function FileDrop({
         }`}
       >
         <ImagePlus size={22} strokeWidth={1.7} />
-        <span className="text-[13.5px] font-medium">
-          Drop screenshots or screen recordings, or click to browse
-        </span>
+        <span className="text-[13.5px] font-medium">Drop screenshots or screen recordings, or click to browse</span>
         <span className="text-[11.5px] text-ink-subtle">
           PNG, JPG, WebP, GIF, MP4, WebM, MOV. Up to {MAX_FILES} files, 100 MB each.
         </span>
@@ -86,9 +78,7 @@ export function FileDrop({
           e.target.value = "";
         }}
       />
-      {reject && (
-        <p className="text-[11.5px] text-danger">{reject}</p>
-      )}
+      {reject && <p className="text-[11.5px] text-danger">{reject}</p>}
       {files.length > 0 && (
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {files.map((f, i) => (
@@ -98,7 +88,9 @@ export function FileDrop({
             >
               <FilePreview file={f} />
               <div className="flex items-center gap-2 px-2.5 py-2 text-[11px] text-ink-muted">
-                <span className="truncate" title={f.name}>{f.name}</span>
+                <span className="truncate" title={f.name}>
+                  {f.name}
+                </span>
                 <span className="ms-auto shrink-0 text-ink-subtle">{fmtBytes(f.size)}</span>
               </div>
               <button
@@ -133,12 +125,5 @@ function FilePreview({ file }: { file: File }) {
       />
     );
   }
-  return (
-    <img
-      src={url}
-      alt=""
-      className="aspect-video w-full bg-canvas object-cover"
-      draggable={false}
-    />
-  );
+  return <img src={url} alt="" className="aspect-video w-full bg-canvas object-cover" draggable={false} />;
 }

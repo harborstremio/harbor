@@ -1,6 +1,6 @@
+import { adultContentHidden, isAdultText } from "@/lib/addons-store/adult-filter";
 import type { Meta } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
-import { adultContentHidden, isAdultText } from "@/lib/addons-store/adult-filter";
 
 const JIKAN = "https://api.jikan.moe/v4";
 const ARM = "https://relations.yuna.moe/api/ids";
@@ -154,11 +154,7 @@ function pickFranchiseAnchor(group: JikanAnime[]): JikanAnime {
 
 function toMeta(a: JikanAnime, id: string): Meta {
   const isSeries = !a.type || SERIES_TYPES.has(a.type);
-  const releaseInfo = a.year
-    ? String(a.year)
-    : a.aired?.from
-      ? a.aired.from.slice(0, 4)
-      : undefined;
+  const releaseInfo = a.year ? String(a.year) : a.aired?.from ? a.aired.from.slice(0, 4) : undefined;
   const poster = bestPoster(a);
   return {
     id,
@@ -236,10 +232,7 @@ const PERSIST_DESC_MAX = 500;
 
 (() => {
   try {
-    const raw = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "{}") as Record<
-      string,
-      { metas: Meta[]; t: number }
-    >;
+    const raw = JSON.parse(localStorage.getItem(CATALOG_KEY) ?? "{}") as Record<string, { metas: Meta[]; t: number }>;
     const now = Date.now();
     for (const [k, e] of Object.entries(raw)) {
       if (e && Array.isArray(e.metas) && now - e.t < CACHE_TTL) cache.set(k, e);
@@ -462,7 +455,8 @@ export const jikanByEra = (start: string, end: string, page = 1) =>
 const GEM_MEMBER_CEILING = 350_000;
 const GEM_SCORED_BY_FLOOR = 4_000;
 
-const SEQUEL_RX = /\b(?:1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th|Final|Last|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth)\s+(?:Season|Cour|Part)\b|\bSeason\s+\d+\b|\bS\d+\b|\b(?:Part|Cour)\s+\d+\b|\s(?:II|III|IV|V|VI|VII|VIII|IX|X)$/i;
+const SEQUEL_RX =
+  /\b(?:1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th|11th|12th|Final|Last|Second|Third|Fourth|Fifth|Sixth|Seventh|Eighth|Ninth|Tenth)\s+(?:Season|Cour|Part)\b|\bSeason\s+\d+\b|\bS\d+\b|\b(?:Part|Cour)\s+\d+\b|\s(?:II|III|IV|V|VI|VII|VIII|IX|X)$/i;
 
 function isSequelTitle(a: JikanAnime): boolean {
   const candidates = [a.title_english, a.title, a.title_japanese].filter(Boolean) as string[];

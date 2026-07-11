@@ -1,14 +1,10 @@
-import { ArrowUpRight, Search, Trophy, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
-import {
-  readAnimeAwardSource,
-  type AnimeAwardCategory,
-  type AwardSourceId,
-} from "@/lib/anime-awards";
+import { readAnimeAwardSource, type AnimeAwardCategory, type AwardSourceId } from "@/lib/anime-awards";
+import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { ArrowUpRight, Search, Trophy, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const SOURCE_TINTS: Record<AwardSourceId, string> = {
   crunchyroll: "#f47521",
@@ -64,14 +60,7 @@ export function AnimeAwardView({ sourceId }: { sourceId: AwardSourceId }) {
           </p>
         ) : (
           <>
-            <FilterBar
-              year={year}
-              years={data.years}
-              onYear={setYear}
-              query={query}
-              onQuery={setQuery}
-              tint={tint}
-            />
+            <FilterBar year={year} years={data.years} onYear={setYear} query={query} onQuery={setQuery} tint={tint} />
 
             {noResults && (
               <p className="rounded-2xl border border-edge-soft bg-elevated/30 p-5 text-[13.5px] text-ink-muted">
@@ -149,7 +138,8 @@ function Banner({
             {data.categories.length === 1 ? t("category") : t("categories")}
             {yearSpan && (
               <>
-                {" "}· <span className="text-ink">{yearSpan}</span>
+                {" "}
+                · <span className="text-ink">{yearSpan}</span>
               </>
             )}
           </p>

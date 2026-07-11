@@ -40,9 +40,7 @@ function parseSrt(text: string): SubCue[] {
     let timingIdx = 0;
     if (/^\d+$/.test(lines[0].trim())) timingIdx = 1;
     const timing = lines[timingIdx];
-    const m = timing?.match(
-      /(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})\s*-->\s*(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})/,
-    );
+    const m = timing?.match(/(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})\s*-->\s*(\d{1,2}):(\d{2}):(\d{2})[,.](\d{1,3})/);
     if (!m) continue;
     const start = toSec(m[1], m[2], m[3], m[4]);
     const end = toSec(m[5], m[6], m[7], m[8]);
@@ -170,7 +168,8 @@ function toSec(h: string, m: string, s: string, ms: string): number {
 function decodeText(bytes: Uint8Array): string {
   if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes.slice(2));
   if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder("utf-16be").decode(bytes.slice(2));
-  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) return new TextDecoder("utf-8").decode(bytes.slice(3));
+  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf)
+    return new TextDecoder("utf-8").decode(bytes.slice(3));
   try {
     const out = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
     return out;

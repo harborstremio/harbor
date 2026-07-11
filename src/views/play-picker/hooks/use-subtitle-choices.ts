@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/lib/auth";
 import type { Addon } from "@/lib/addons";
+import { useAuth } from "@/lib/auth";
+import { useSettings } from "@/lib/settings";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { languageName } from "@/lib/subtitles/language";
 import { searchSubtitles } from "@/lib/subtitles/search";
 import type { SubResult } from "@/lib/subtitles/types";
-import { useSettings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
+import { useEffect, useMemo, useState } from "react";
 
 export type SubtitleLangGroup = { langKey: string; langDisplay: string; items: SubResult[] };
 
@@ -33,7 +33,7 @@ export function useSubtitleChoices(src: PlayerSrc) {
   const preferredLangs = useMemo(() => {
     const primary = settings.preferredSubLangs?.length
       ? settings.preferredSubLangs
-      : settings.preferredLanguages ?? [];
+      : (settings.preferredLanguages ?? []);
     const base = primary.length > 0 ? primary : ["English"];
     return isAnimeSrc(src) ? base : base.filter((l) => !isJapanese(l));
   }, [settings.preferredSubLangs, settings.preferredLanguages, src.meta.id]);

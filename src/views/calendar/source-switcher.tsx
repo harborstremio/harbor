@@ -1,9 +1,9 @@
+import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
+import { useT } from "@/lib/i18n";
+import type { Settings } from "@/lib/settings";
 import { Library, Globe, Star } from "lucide-react";
 import type { ReactNode } from "react";
-import traktLogo from "@/assets/trakt.svg";
-import simklLogo from "@/assets/simkl.png";
-import type { Settings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 
 type Source = Settings["calendarSource"];
 
@@ -14,13 +14,9 @@ type Option = {
   hint: string;
 };
 
-const TraktGlyph = () => (
-  <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />
-);
+const TraktGlyph = () => <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />;
 
-const SimklGlyph = () => (
-  <img src={simklLogo} alt="" className="h-3.5 w-3.5 object-contain" />
-);
+const SimklGlyph = () => <img src={simklLogo} alt="" className="h-3.5 w-3.5 object-contain" />;
 
 const OPTIONS: Option[] = [
   {
@@ -95,9 +91,7 @@ export function SourceSwitcher({
             onClick={() => onChange(opt.id)}
             title={t(opt.hint)}
             className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-              active
-                ? "bg-ink text-canvas"
-                : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+              active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised/60 hover:text-ink"
             }`}
           >
             {opt.icon()}

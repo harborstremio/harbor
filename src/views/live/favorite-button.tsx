@@ -1,5 +1,5 @@
-import { Star } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Star } from "lucide-react";
 
 export function FavoriteButton({
   active,
@@ -30,17 +30,11 @@ export function FavoriteButton({
                 : "bg-canvas/55 text-ink-muted opacity-0 group-hover:opacity-100 hover:bg-canvas/75 hover:text-ink"
             }`
           : `flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
-              active
-                ? "text-accent hover:bg-elevated"
-                : "text-ink-subtle hover:bg-elevated hover:text-ink"
+              active ? "text-accent hover:bg-elevated" : "text-ink-subtle hover:bg-elevated hover:text-ink"
             }`
       }
     >
-      <Star
-        size={size}
-        strokeWidth={active ? 0 : 1.9}
-        fill={active ? "currentColor" : "none"}
-      />
+      <Star size={size} strokeWidth={active ? 0 : 1.9} fill={active ? "currentColor" : "none"} />
     </button>
   );
 }

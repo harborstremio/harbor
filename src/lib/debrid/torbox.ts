@@ -1,6 +1,7 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { dlog, dwarn } from "@/lib/debug";
+import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { matchEpisodeFileIndex, type EpisodeHint } from "@/lib/streams/episode-file";
+
 import {
   hashFromMagnet,
   magnetFromHash,
@@ -51,9 +52,7 @@ export function createTorbox(apiKey: string): DebridStore {
     const r = await get<TbEnvelope<TbUser>>("/user/me", signal);
     if (!r.ok) return r;
     const d = r.data.data;
-    const expiresAt = d?.premium_expires_at
-      ? Math.floor(new Date(d.premium_expires_at).getTime() / 1000)
-      : undefined;
+    const expiresAt = d?.premium_expires_at ? Math.floor(new Date(d.premium_expires_at).getTime() / 1000) : undefined;
     return {
       ok: true,
       data: {
@@ -66,18 +65,12 @@ export function createTorbox(apiKey: string): DebridStore {
     };
   }
 
-  async function cacheCheckBatch(
-    batch: string[],
-    signal: AbortSignal,
-  ): Promise<DebridResult<CacheMap>> {
+  async function cacheCheckBatch(batch: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
     const params = new URLSearchParams();
     for (const h of batch) params.append("hash", h.toLowerCase());
     params.append("format", "object");
     params.append("list_files", "false");
-    const r = await get<TbEnvelope<unknown>>(
-      `/torrents/checkcached?${params.toString()}`,
-      signal,
-    );
+    const r = await get<TbEnvelope<unknown>>(`/torrents/checkcached?${params.toString()}`, signal);
     if (!r.ok) {
       dwarn("[torbox] cacheCheck batch failed", { code: r.code, status: r.status });
       return { ok: true, data: {} };
@@ -108,9 +101,7 @@ export function createTorbox(apiKey: string): DebridStore {
         if (h) tag(h);
       }
     }
-    dlog(
-      `[torbox] cacheCheck batch ${batch.length} → ${Object.keys(out).length} cached`,
-    );
+    dlog(`[torbox] cacheCheck batch ${batch.length} → ${Object.keys(out).length} cached`);
     return { ok: true, data: out };
   }
 
@@ -121,18 +112,14 @@ export function createTorbox(apiKey: string): DebridStore {
     for (let i = 0; i < hashes.length; i += BATCH) {
       batches.push(hashes.slice(i, i + BATCH));
     }
-    const results = await Promise.allSettled(
-      batches.map((b) => cacheCheckBatch(b, signal)),
-    );
+    const results = await Promise.allSettled(batches.map((b) => cacheCheckBatch(b, signal)));
     const merged: CacheMap = {};
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) {
         Object.assign(merged, r.value.data);
       }
     }
-    dlog(
-      `[torbox] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`,
-    );
+    dlog(`[torbox] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`);
     return { ok: true, data: merged };
   }
 
@@ -225,10 +212,7 @@ export function createTorbox(apiKey: string): DebridStore {
     return { ok: true, data };
   }
 
-  async function queueCache(
-    magnet: string,
-    signal: AbortSignal,
-  ): Promise<DebridResult<{ id: string }>> {
+  async function queueCache(magnet: string, signal: AbortSignal): Promise<DebridResult<{ id: string }>> {
     const fullMagnet = magnetFromHash(magnet);
     const add = await postForm<TbEnvelope<TbCreate>>(
       "/torrents/createtorrent",
@@ -244,7 +228,11 @@ export function createTorbox(apiKey: string): DebridStore {
 
   async function listTorrentFiles(hash: string, signal: AbortSignal): Promise<DebridResult<DebridFile[]>> {
     const fullMagnet = magnetFromHash(hash);
-    const created = await postForm<TbEnvelope<TbCreate>>("/torrents/createtorrent", { magnet: fullMagnet, allow_zip: "false", as_queued: "false" }, signal);
+    const created = await postForm<TbEnvelope<TbCreate>>(
+      "/torrents/createtorrent",
+      { magnet: fullMagnet, allow_zip: "false", as_queued: "false" },
+      signal,
+    );
     if (!created.ok) return created;
     const id = created.data.data?.torrent_id ?? created.data.data?.queued_id;
     if (id == null) return { ok: false, code: "no-id", status: 0 };
@@ -303,8 +291,7 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
     if (err?.name === "AbortError") return { ok: false, code: "aborted", status: 0 };
     return { ok: false, code: "network-error", status: 0, raw: err };
   }
-  if (res.status === 401 || res.status === 403)
-    return { ok: false, code: "unauthorized", status: res.status };
+  if (res.status === 401 || res.status === 403) return { ok: false, code: "unauthorized", status: res.status };
   if (res.status === 402) return { ok: false, code: "not-premium", status: 402 };
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
   if (!res.ok) {
@@ -332,7 +319,10 @@ function pickTbFile(files: TbFile[], fileIdx: number | undefined, hint?: Episode
     VIDEO_EXTS.some((ext) => (f.short_name ?? f.name ?? "").toLowerCase().endsWith(ext)),
   );
   const pool = videos.length > 0 ? videos : files;
-  const mi = matchEpisodeFileIndex(pool.map((f) => f.short_name ?? f.name ?? ""), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((f) => f.short_name ?? f.name ?? ""),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0] ?? null;
 }

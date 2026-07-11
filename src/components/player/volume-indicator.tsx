@@ -1,5 +1,6 @@
-import { Volume1, Volume2, VolumeX } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Volume1, Volume2, VolumeX } from "lucide-react";
+
 import { NORMAL_FRACTION, VOL_MAX, boostColor, fractionFromValue } from "./transport/transport-utils";
 
 export type VolumeIndicatorState = {
@@ -67,9 +68,7 @@ export function VolumeIndicator({
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-2.5">
         <span className="flex items-center justify-between gap-4">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/58">
-            {t("Volume")}
-          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/58">{t("Volume")}</span>
           <span
             className="font-mono text-[22px] font-bold tabular-nums leading-none"
             style={{ color: boosting ? color : "rgba(255,255,255,0.92)" }}
@@ -83,10 +82,7 @@ export function VolumeIndicator({
             style={{ width: `${fillPct}%`, background: boosting ? color : "rgba(255,255,255,0.92)" }}
           />
           {allowBoost && (
-            <span
-              className="absolute inset-y-[-2px] w-px bg-white/35"
-              style={{ left: `${NORMAL_FRACTION * 100}%` }}
-            />
+            <span className="absolute inset-y-[-2px] w-px bg-white/35" style={{ left: `${NORMAL_FRACTION * 100}%` }} />
           )}
         </span>
       </span>

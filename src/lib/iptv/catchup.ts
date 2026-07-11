@@ -38,13 +38,7 @@ function strftime(fmt: string, d: Date): string {
     .replace(/S/g, pad(d.getUTCSeconds()));
 }
 
-function fillTemplate(
-  tpl: string,
-  start: number,
-  end: number,
-  now: number,
-  duration: number,
-): string {
+function fillTemplate(tpl: string, start: number, end: number, now: number, duration: number): string {
   const offset = Math.max(0, now - start);
   const startDate = new Date(start * 1000);
   let out = tpl;
@@ -115,8 +109,11 @@ export function buildCatchupUrl(
       return fillTemplate(src, start, end, now, duration);
     }
     const sep = ch.url.includes("?") ? "&" : "?";
-    return ch.url + (src.startsWith("?") || src.startsWith("&") ? "" : sep) +
-      fillTemplate(src.replace(/^[?&]/, ""), start, end, now, duration);
+    return (
+      ch.url +
+      (src.startsWith("?") || src.startsWith("&") ? "" : sep) +
+      fillTemplate(src.replace(/^[?&]/, ""), start, end, now, duration)
+    );
   }
 
   const sep = ch.url.includes("?") ? "&" : "?";

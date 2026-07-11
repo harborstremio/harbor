@@ -1,13 +1,14 @@
-import { Subtitles as SubsIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { useT } from "@/lib/i18n";
 import { modalOverlayClose, modalOverlayEmitState, modalOverlayOpen } from "@/lib/modal-overlay";
 import { openStyleBar } from "@/lib/player/sub-presets";
-import { useT } from "@/lib/i18n";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { Subtitles as SubsIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
+import { useMenuSide } from "./menu-side";
 import { MenuBody } from "./subtitle-menu/menu-body";
 import type { SubtitleMenuProps } from "./subtitle-menu/types";
 import { buildOverlayState } from "./subtitle-menu/utils";
-import { useMenuSide } from "./menu-side";
 import { Tooltip } from "./transport/tooltip";
 
 export type { SubtitleMenuProps } from "./subtitle-menu/types";
@@ -123,13 +124,13 @@ export function SubtitleMenu(props: Props) {
           }`}
         >
           <SubsIcon size={19} strokeWidth={2} />
-          {subSelected && (
-            <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          )}
+          {subSelected && <span className="absolute end-2.5 top-2.5 h-1.5 w-1.5 rounded-full bg-emerald-400" />}
         </button>
       </Tooltip>
       {open && (forceInline || !useOverlay) && (
-        <div className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex h-[400px] max-h-[72vh] w-[500px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}>
+        <div
+          className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex h-[400px] max-h-[72vh] w-[500px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}
+        >
           <MenuBody {...props} onClose={() => setOpen(false)} onOpenStyleBar={openStyleBar} />
         </div>
       )}

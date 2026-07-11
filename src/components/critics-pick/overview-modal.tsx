@@ -1,9 +1,10 @@
-import { ChevronLeft, ChevronRight, ExternalLink, Quote, X } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import type { CriticReview } from "@/lib/providers/tmdb";
 import { openUrl } from "@/lib/window";
+import { ChevronLeft, ChevronRight, ExternalLink, Quote, X } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+
 import { LinkedReview } from "./linked-review";
 import type { PersonRef } from "./types";
 import { formatReviewDate } from "./utils";
@@ -105,9 +106,7 @@ export function OverviewModal({
                 {typeof review.rating === "number" && review.rating > 0 && (
                   <span className="text-ink-subtle">· {review.rating}/10</span>
                 )}
-                {review.createdAt && (
-                  <span className="text-ink-subtle">· {formatReviewDate(review.createdAt)}</span>
-                )}
+                {review.createdAt && <span className="text-ink-subtle">· {formatReviewDate(review.createdAt)}</span>}
               </span>
               <div className="flex shrink-0 items-center gap-2.5">
                 {!!reviewCount && reviewCount > 1 && onNavReview && (

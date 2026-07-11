@@ -27,9 +27,7 @@ export async function hydrateLibraryMeta(
       const tmdbType = isTv ? "tv" : "movie";
       const tmdbId = id.replace(/^tmdb:(movie|tv|series):/, "");
       try {
-        const r = await fetch(
-          `https://api.themoviedb.org/3/${tmdbType}/${tmdbId}?api_key=${tmdbKey}`,
-        );
+        const r = await fetch(`https://api.themoviedb.org/3/${tmdbType}/${tmdbId}?api_key=${tmdbKey}`);
         if (r.ok) {
           const j = await r.json();
           return {
@@ -37,9 +35,7 @@ export async function hydrateLibraryMeta(
             type,
             name: j.title || j.name || "",
             poster: j.poster_path ? `https://image.tmdb.org/t/p/w342${j.poster_path}` : undefined,
-            background: j.backdrop_path
-              ? `https://image.tmdb.org/t/p/w780${j.backdrop_path}`
-              : undefined,
+            background: j.backdrop_path ? `https://image.tmdb.org/t/p/w780${j.backdrop_path}` : undefined,
             releaseInfo: (j.release_date || j.first_air_date)?.slice(0, 4),
           } as Meta;
         }

@@ -1,9 +1,10 @@
-import { Globe, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { setUiLanguage, useT } from "@/lib/i18n";
 import { localeForRegion, localeLabel, type LocaleProfile } from "@/lib/region/locale-map";
 import { useSettings } from "@/lib/settings";
 import type { Settings } from "@/lib/settings";
+import { Globe, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { RegionPicker } from "./region-picker";
 
 export { RegionPicker };

@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { addToWatchlist as traktAdd, removeFromWatchlist as traktRemove } from "@/lib/trakt/watchlist";
-import { stremioIdToTraktTarget } from "@/lib/trakt/ids";
-import { addToWatchlist as simklAdd, removeFromWatchlist as simklRemove } from "@/lib/simkl/watchlist";
+import { readActiveStremioAuthKey } from "@/lib/auth";
 import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
 import { isAuthenticated as simklConnected } from "@/lib/simkl/session";
+import { addToWatchlist as simklAdd, removeFromWatchlist as simklRemove } from "@/lib/simkl/watchlist";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
 import { cloudWriteId, saveStremioBookmark, removeStremioBookmark } from "@/lib/stremio";
-import { readActiveStremioAuthKey } from "@/lib/auth";
+import { stremioIdToTraktTarget } from "@/lib/trakt/ids";
+import { addToWatchlist as traktAdd, removeFromWatchlist as traktRemove } from "@/lib/trakt/watchlist";
+import { useEffect, useMemo, useState } from "react";
 
 const KEY = "harbor.watchlist.v1";
 const AGG_KEY = "harbor.watchlist.aggregate.v1";
@@ -157,7 +157,7 @@ export function removeFromWatchlist(id: string): void {
 export function toggleWatchlist(input: string | WatchlistInput): boolean {
   const map = read();
   const id = typeof input === "string" ? input : input.id;
-  const imdb = typeof input === "string" ? null : input.imdbId ?? null;
+  const imdb = typeof input === "string" ? null : (input.imdbId ?? null);
   const has = map.has(id) || aggregateIds.has(id) || (!!imdb && aggregateIds.has(imdb));
   if (has) {
     map.delete(id);
@@ -201,13 +201,12 @@ async function syncWithStremio(input: string | WatchlistInput, added: boolean): 
   const authKey = readActiveStremioAuthKey();
   if (!authKey) return;
   const id = typeof input === "string" ? input : input.id;
-  const imdb = typeof input === "string" ? null : input.imdbId ?? null;
+  const imdb = typeof input === "string" ? null : (input.imdbId ?? null);
   const writeId = cloudWriteId(id, imdb, !!imdb);
   if (!writeId) return;
   try {
     if (added) {
-      const meta =
-        typeof input === "string" ? {} : { type: input.type, name: input.name, poster: input.poster };
+      const meta = typeof input === "string" ? {} : { type: input.type, name: input.name, poster: input.poster };
       await saveStremioBookmark(authKey, writeId, meta);
     } else {
       await removeStremioBookmark(authKey, writeId);
@@ -217,10 +216,7 @@ async function syncWithStremio(input: string | WatchlistInput, added: boolean): 
   }
 }
 
-export function useInWatchlist(
-  id: string | undefined,
-  altIds?: Array<string | null | undefined>,
-): boolean {
+export function useInWatchlist(id: string | undefined, altIds?: Array<string | null | undefined>): boolean {
   const candidates = useMemo(() => {
     const arr: string[] = [];
     if (id) arr.push(id);

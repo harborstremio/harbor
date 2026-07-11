@@ -1,14 +1,15 @@
-import { ChevronDown, Download, ExternalLink, Loader2, Play, Zap } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { AddonLogo, AddonLogoStack } from "@/components/addon-logo";
-import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { FlagStack } from "@/components/flag";
 import { FormatBadge } from "@/components/format-badge";
 import { HostMatchChip } from "@/components/host-match-chip";
+import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { useDebridClients } from "@/lib/debrid/registry";
 import { useSettings } from "@/lib/settings";
 import type { ScoredStream } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
+import { ChevronDown, Download, ExternalLink, Loader2, Play, Zap } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import { EditionChip } from "./edition-chip";
 import {
   addonInstanceKey,
@@ -65,10 +66,7 @@ export function SourceDrawer({
         onClick={onToggle}
         className="group flex w-fit items-center gap-3 rounded-full border border-edge-soft/70 bg-canvas/70 px-4 py-2 text-[11.5px] font-semibold uppercase tracking-[0.22em] text-ink-muted transition-all hover:border-edge hover:bg-canvas/90 hover:text-ink"
       >
-        <ChevronDown
-          size={14}
-          className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown size={14} className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`} />
         <span>{open ? "Hide all sources" : "All sources"}</span>
         <span className="text-ink-subtle/80">{count}</span>
         {usedAddons.length > 0 && (
@@ -82,7 +80,12 @@ export function SourceDrawer({
       </button>
       {open && addonOptions.length > 1 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <AddonPill active={addonFilter === "all"} onClick={() => setAddonFilter("all")} label="All" count={streams.length} />
+          <AddonPill
+            active={addonFilter === "all"}
+            onClick={() => setAddonFilter("all")}
+            label="All"
+            count={streams.length}
+          />
           {addonOptions.map((o) => (
             <AddonPill
               key={o.id}
@@ -195,12 +198,7 @@ function SourceRow({
             </p>
           )}
           <p className="flex items-center gap-2 truncate text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-            <AddonLogo
-              addonId={stream.addonId}
-              addonName={stream.addonName}
-              manifestLogo={addonLogo}
-              size="sm"
-            />
+            <AddonLogo addonId={stream.addonId} addonName={stream.addonName} manifestLogo={addonLogo} size="sm" />
             <span className="truncate">
               {contributorLabel(stream)}
               {summary.length > 0 && <span className="text-ink-subtle/60"> · {summary.join(" · ")}</span>}

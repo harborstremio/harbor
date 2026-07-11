@@ -1,8 +1,8 @@
-import { Zap } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
 import { useDebridClients } from "@/lib/debrid/registry";
 import type { ScoredStream } from "@/lib/streams/types";
 import { directStreamAvailable } from "@/lib/torrent/stremio-stream";
+import { Zap } from "lucide-react";
 
 export function PlayProvenance({
   stream,
@@ -17,12 +17,7 @@ export function PlayProvenance({
 }) {
   const addonChip = (
     <span className="inline-flex items-center gap-1.5">
-      <AddonLogo
-        addonId={stream.addonId}
-        addonName={stream.addonName}
-        manifestLogo={addonLogo}
-        size="xs"
-      />
+      <AddonLogo addonId={stream.addonId} addonName={stream.addonName} manifestLogo={addonLogo} size="xs" />
       <span>{stream.addonName}</span>
     </span>
   );
@@ -39,9 +34,7 @@ export function PlayProvenance({
     if (directStreamAvailable(stream)) {
       return (
         <div className="flex flex-col gap-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-muted">
-            Streams from peers
-          </p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-muted">Streams from peers</p>
           <p className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.18em] text-ink-subtle/70">
             <span>found by</span>
             {addonChip}
@@ -51,9 +44,7 @@ export function PlayProvenance({
     }
     return (
       <div className="flex flex-col gap-1">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-danger/80">
-          No debrid configured
-        </p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-danger/80">No debrid configured</p>
         <p className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.18em] text-ink-subtle/80">
           add one in settings · found by {addonChip}
         </p>

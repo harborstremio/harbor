@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { fetchSports, type SportsGame } from "@/lib/sports/espn";
+import { useEffect, useState } from "react";
 
 export function useSports(opts: { enabled: boolean; leagues: string[] }): SportsGame[] {
   const { enabled, leagues } = opts;

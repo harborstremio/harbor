@@ -1,6 +1,3 @@
-import { Check, ChevronDown } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 import flagAe from "@/assets/regions/ae.svg";
 import flagAr from "@/assets/regions/ar.svg";
 import flagAu from "@/assets/regions/au.svg";
@@ -37,6 +34,9 @@ import flagTr from "@/assets/regions/tr.svg";
 import flagTw from "@/assets/regions/tw.svg";
 import flagUs from "@/assets/regions/us.svg";
 import flagZa from "@/assets/regions/za.svg";
+import { useT } from "@/lib/i18n";
+import { Check, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const REGIONS: Array<{ code: string; label: string }> = [
   { code: "US", label: "United States" },
@@ -137,23 +137,12 @@ function FlagChip({ code, size = 24 }: { code: string; size?: number }) {
       className="inline-block overflow-hidden rounded-[3px] shadow-[0_1px_2px_rgba(0,0,0,0.4)] ring-1 ring-black/20"
       style={{ width: size, height: Math.round(size * 0.75) }}
     >
-      <img
-        src={src}
-        alt=""
-        draggable={false}
-        className="h-full w-full object-cover"
-      />
+      <img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
     </span>
   );
 }
 
-export function RegionPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (code: string) => void;
-}) {
+export function RegionPicker({ value, onChange }: { value: string; onChange: (code: string) => void }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const t = useT();
@@ -189,9 +178,7 @@ export function RegionPicker({
   const filtered: Array<{ code: string; label: string }> = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return REGIONS;
-    return REGIONS.filter(
-      (r) => r.label.toLowerCase().includes(q) || r.code.toLowerCase().includes(q),
-    );
+    return REGIONS.filter((r) => r.label.toLowerCase().includes(q) || r.code.toLowerCase().includes(q));
   }, [query]);
 
   return (
@@ -200,16 +187,12 @@ export function RegionPicker({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={`flex h-14 w-full items-center gap-3.5 rounded-2xl border bg-elevated px-4 text-start transition-all ${
-          open
-            ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
-            : "border-edge hover:border-edge"
+          open ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]" : "border-edge hover:border-edge"
         }`}
       >
         <FlagChip code={current.code} size={36} />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
-            {t("Region")}
-          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{t("Region")}</span>
           <span className="truncate text-[15px] font-medium text-ink">{current.label}</span>
         </span>
         <ChevronDown
@@ -227,52 +210,56 @@ export function RegionPicker({
               setOpen(false);
             }}
           />
-        <div
-          className="absolute left-0 right-0 z-30 mt-2 flex max-h-[420px] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
-          style={{ animation: "harbor-fade-in 140ms ease-out both" }}
-        >
-          <div className="flex items-center gap-2 border-b border-edge-soft px-4 py-3">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.7" className="text-ink-subtle" />
-              <path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" className="text-ink-subtle" />
-            </svg>
-            <input
-              ref={inputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={t("Search countries...")}
-              className="h-7 flex-1 bg-transparent text-[14px] text-ink placeholder:text-ink-subtle/60 outline-none"
-            />
+          <div
+            className="absolute left-0 right-0 z-30 mt-2 flex max-h-[420px] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
+            style={{ animation: "harbor-fade-in 140ms ease-out both" }}
+          >
+            <div className="flex items-center gap-2 border-b border-edge-soft px-4 py-3">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.7" className="text-ink-subtle" />
+                <path
+                  d="M16 16l4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  className="text-ink-subtle"
+                />
+              </svg>
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("Search countries...")}
+                className="h-7 flex-1 bg-transparent text-[14px] text-ink placeholder:text-ink-subtle/60 outline-none"
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto py-1.5">
+              {filtered.length === 0 ? (
+                <div className="px-4 py-6 text-center text-[13px] text-ink-subtle">{t("No matches")}</div>
+              ) : (
+                filtered.map((r) => {
+                  const selected = r.code === current.code;
+                  return (
+                    <button
+                      key={r.code}
+                      onClick={() => {
+                        onChange(r.code);
+                        setOpen(false);
+                      }}
+                      className={`flex h-12 w-full items-center gap-3 px-3 text-start transition-colors ${
+                        selected ? "bg-raised text-ink" : "text-ink-muted hover:bg-canvas/50 hover:text-ink"
+                      }`}
+                    >
+                      <FlagChip code={r.code} size={30} />
+                      <span className="flex-1 truncate text-[14px] font-medium">{r.label}</span>
+                      <span className="shrink-0 font-mono text-[10.5px] tracking-wider text-ink-subtle">{r.code}</span>
+                      {selected && <Check size={14} strokeWidth={2.4} className="ms-1 text-ink" />}
+                    </button>
+                  );
+                })
+              )}
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto py-1.5">
-            {filtered.length === 0 ? (
-              <div className="px-4 py-6 text-center text-[13px] text-ink-subtle">{t("No matches")}</div>
-            ) : (
-              filtered.map((r) => {
-                const selected = r.code === current.code;
-                return (
-                  <button
-                    key={r.code}
-                    onClick={() => {
-                      onChange(r.code);
-                      setOpen(false);
-                    }}
-                    className={`flex h-12 w-full items-center gap-3 px-3 text-start transition-colors ${
-                      selected ? "bg-raised text-ink" : "text-ink-muted hover:bg-canvas/50 hover:text-ink"
-                    }`}
-                  >
-                    <FlagChip code={r.code} size={30} />
-                    <span className="flex-1 truncate text-[14px] font-medium">{r.label}</span>
-                    <span className="shrink-0 font-mono text-[10.5px] tracking-wider text-ink-subtle">
-                      {r.code}
-                    </span>
-                    {selected && <Check size={14} strokeWidth={2.4} className="ms-1 text-ink" />}
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </div>
         </>
       )}
     </div>

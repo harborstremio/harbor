@@ -1,7 +1,7 @@
-import { Radio, Tv } from "lucide-react";
+import type { Meta } from "@/lib/cinemeta";
 import type { LiveTvHit } from "@/lib/search";
 import { useView } from "@/lib/view";
-import type { Meta } from "@/lib/cinemeta";
+import { Radio, Tv } from "lucide-react";
 
 export function LiveTvRow({ items, onClose }: { items: LiveTvHit[]; onClose: () => void }) {
   const { openPlayer } = useView();
@@ -42,13 +42,7 @@ export function LiveTvRow({ items, onClose }: { items: LiveTvHit[]; onClose: () 
           >
             <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-canvas">
               {hit.logo ? (
-                <img
-                  src={hit.logo}
-                  alt=""
-                  loading="lazy"
-                  draggable={false}
-                  className="h-full w-full object-contain"
-                />
+                <img src={hit.logo} alt="" loading="lazy" draggable={false} className="h-full w-full object-contain" />
               ) : (
                 <Tv size={18} strokeWidth={1.7} className="text-ink-subtle" />
               )}

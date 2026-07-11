@@ -1,8 +1,9 @@
+import { AddonLogo } from "@/components/addon-logo";
+import { useT } from "@/lib/i18n";
+import type { ScoredStream } from "@/lib/streams/types";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { AddonLogo } from "@/components/addon-logo";
-import type { ScoredStream } from "@/lib/streams/types";
-import { useT } from "@/lib/i18n";
+
 import { StreamPill } from "./stream-pill";
 
 export function AddonGroup({
@@ -35,18 +36,14 @@ export function AddonGroup({
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-[13.5px] font-semibold text-ink">{addonName}</span>
           <span className="text-[11px] text-ink-subtle">
-            {streams.length === 1
-              ? t("{n} source", { n: streams.length })
-              : t("{n} sources", { n: streams.length })}
+            {streams.length === 1 ? t("{n} source", { n: streams.length }) : t("{n} sources", { n: streams.length })}
             {cachedCount > 0 ? t(" · {n} instant", { n: cachedCount }) : ""}
           </span>
         </div>
         <ChevronDown
           size={18}
           strokeWidth={2.4}
-          className={`shrink-0 text-ink-muted transition-transform duration-200 ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`shrink-0 text-ink-muted transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (

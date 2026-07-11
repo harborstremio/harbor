@@ -1,7 +1,7 @@
+import { scrollToDataEp } from "@/lib/episode-scroll";
 import { Hash } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { scrollToDataEp } from "@/lib/episode-scroll";
 
 const CHUNK_SIZE = 50;
 

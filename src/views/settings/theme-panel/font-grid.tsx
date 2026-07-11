@@ -1,5 +1,6 @@
-import { Check } from "lucide-react";
 import { FONT_PAIRS, type FontPairId } from "@/lib/theme";
+import { Check } from "lucide-react";
+
 import { CustomFontTiles } from "./custom-font-tiles";
 
 export function FontGrid({
@@ -49,11 +50,7 @@ export function FontGrid({
         );
       })}
 
-      <CustomFontTiles
-        activeId={customValue}
-        onSelect={onPickCustom}
-        onClear={() => onPickPair(pairValue)}
-      />
+      <CustomFontTiles activeId={customValue} onSelect={onPickCustom} onClear={() => onPickPair(pairValue)} />
     </div>
   );
 }

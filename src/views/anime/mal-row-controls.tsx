@@ -2,9 +2,7 @@ import { MalLogo } from "@/components/icons/mal-logo";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 
-const ROWS = [
-  { key: "yourMalLists", label: "Your MAL lists" },
-] as const;
+const ROWS = [{ key: "yourMalLists", label: "Your MAL lists" }] as const;
 
 export function MalRowControls() {
   const t = useT();

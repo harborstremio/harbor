@@ -1,13 +1,7 @@
 export function TvIcon({ active = false }: { active?: boolean }) {
   return (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <g
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      >
+      <g stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" fill="none">
         <path d="M8.5 3 L11.5 8" />
         <path d="M15.5 3 L12.5 8" />
         <rect x="3" y="8" width="18" height="13" rx="2" />

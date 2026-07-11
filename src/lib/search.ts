@@ -1,13 +1,19 @@
-import { get } from "@/lib/providers/tmdb/tmdb-client";
-import { movieMeta, seriesMeta, type Page, type RawMovie, type RawSeries } from "@/lib/providers/tmdb/tmdb-meta-mappers";
-import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import type { Meta } from "@/lib/cinemeta";
-import type { AddonResultGroup } from "@/lib/search-addons";
-import type { AddonHit } from "@/lib/search-addon-index";
-import { getCachedPlaylist } from "@/lib/iptv/store";
+import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import { arabicAwareMatch } from "@/lib/iptv/rtl";
-import type { Settings } from "@/lib/settings";
+import { getCachedPlaylist } from "@/lib/iptv/store";
+import { get } from "@/lib/providers/tmdb/tmdb-client";
+import {
+  movieMeta,
+  seriesMeta,
+  type Page,
+  type RawMovie,
+  type RawSeries,
+} from "@/lib/providers/tmdb/tmdb-meta-mappers";
 import { safeFetch } from "@/lib/safe-fetch";
+import type { AddonHit } from "@/lib/search-addon-index";
+import type { AddonResultGroup } from "@/lib/search-addons";
+import type { Settings } from "@/lib/settings";
 
 export type SearchPerson = {
   id: number;
@@ -54,7 +60,14 @@ export type AnimeHit = {
 
 export type SearchResults = {
   query: string;
-  topMatch: { kind: "movie" | "series"; meta: Meta; popularity: number; backdrop?: string; overview?: string; voteAverage?: number } | null;
+  topMatch: {
+    kind: "movie" | "series";
+    meta: Meta;
+    popularity: number;
+    backdrop?: string;
+    overview?: string;
+    voteAverage?: number;
+  } | null;
   people: SearchPerson[];
   movies: Meta[];
   series: Meta[];
@@ -70,11 +83,7 @@ export type SearchIntent =
   | { kind: "genre"; genre: string; mediaType: "movie" | "tv"; label: string }
   | null;
 
-export function searchLiveTvChannels(
-  query: string,
-  iptvPlaylists: Settings["iptvPlaylists"],
-  limit = 8,
-): LiveTvHit[] {
+export function searchLiveTvChannels(query: string, iptvPlaylists: Settings["iptvPlaylists"], limit = 8): LiveTvHit[] {
   const q = query.trim().toLowerCase();
   if (q.length < 2) return [];
   const hits: LiveTvHit[] = [];
@@ -161,10 +170,32 @@ export async function searchAll(
 ): Promise<SearchResults> {
   const trimmed = query.trim();
   if (!trimmed) {
-    return { query: "", topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], addonGroups: [], addons: [], intent: null };
+    return {
+      query: "",
+      topMatch: null,
+      people: [],
+      movies: [],
+      series: [],
+      liveTv: [],
+      anime: [],
+      addonGroups: [],
+      addons: [],
+      intent: null,
+    };
   }
   if (!key) {
-    return { query: trimmed, topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], addonGroups: [], addons: [], intent: detectIntent(trimmed) };
+    return {
+      query: trimmed,
+      topMatch: null,
+      people: [],
+      movies: [],
+      series: [],
+      liveTv: [],
+      anime: [],
+      addonGroups: [],
+      addons: [],
+      intent: detectIntent(trimmed),
+    };
   }
 
   const data = await get<Page<MultiItem>>(key, "search/multi", {
@@ -219,10 +250,7 @@ export async function searchAll(
     }
   }
 
-  if (
-    trimmed.split(/\s+/).length >= 2 &&
-    (people.length >= 1 || (movies.length === 0 && series.length === 0))
-  ) {
+  if (trimmed.split(/\s+/).length >= 2 && (people.length >= 1 || (movies.length === 0 && series.length === 0))) {
     await fuzzyPeopleFallback(key, trimmed, people);
   }
 
@@ -282,11 +310,7 @@ function nameCloseTo(name: string, query: string): boolean {
   return levenshtein(n, q) <= Math.max(1, Math.round(q.length * 0.2));
 }
 
-async function fuzzyPeopleFallback(
-  key: string,
-  query: string,
-  people: SearchPerson[],
-): Promise<void> {
+async function fuzzyPeopleFallback(key: string, query: string, people: SearchPerson[]): Promise<void> {
   const token = query
     .split(/\s+/)
     .filter((t) => t.length >= 3)

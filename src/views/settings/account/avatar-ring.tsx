@@ -1,14 +1,6 @@
 import { CatAvatar } from "@/components/icons/cat-avatar";
 
-export function AvatarRing({
-  src,
-  size,
-  onClick,
-}: {
-  src: string | null;
-  size: number;
-  onClick?: () => void;
-}) {
+export function AvatarRing({ src, size, onClick }: { src: string | null; size: number; onClick?: () => void }) {
   return (
     <button
       onClick={onClick}

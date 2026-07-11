@@ -1,6 +1,6 @@
-import { aniZipByKitsu } from "@/lib/providers/anizip";
 import { buildKitsuEpisodes, mergeAniZipEpisodes } from "@/lib/providers/anime-episode-build";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
+import { aniZipByKitsu } from "@/lib/providers/anizip";
 import { kitsuEpisodes, type KitsuEpisode } from "@/lib/providers/kitsu";
 
 const cache = new Map<number, Promise<KitsuEpisode[]>>();

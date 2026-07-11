@@ -1,17 +1,13 @@
-import { useEffect, type RefObject } from "react";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { mvGeometry, mvVisibility } from "@/lib/multiview/bridge";
 import { screenRectForEl } from "@/lib/multiview/geom";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useEffect, type RefObject } from "react";
 
 type Cells = Map<number, HTMLElement>;
 
 const BURST_MS = 500;
 
-export function useGeomSync(
-  cellsRef: RefObject<Cells>,
-  activeSlots: number[],
-  enabled: boolean,
-) {
+export function useGeomSync(cellsRef: RefObject<Cells>, activeSlots: number[], enabled: boolean) {
   const key = activeSlots.join(",");
   useEffect(() => {
     if (!enabled) return;
@@ -109,14 +105,24 @@ export function useGeomSync(
     let unlistenResized: (() => void) | null = null;
     let unlistenMoved: (() => void) | null = null;
     const win = getCurrentWindow();
-    void win.onResized(() => { restoreAfterDrag(); kick(); }).then((u) => {
-      if (cancelled) u();
-      else unlistenResized = u;
-    });
-    void win.onMoved(() => { restoreAfterDrag(); kick(); }).then((u) => {
-      if (cancelled) u();
-      else unlistenMoved = u;
-    });
+    void win
+      .onResized(() => {
+        restoreAfterDrag();
+        kick();
+      })
+      .then((u) => {
+        if (cancelled) u();
+        else unlistenResized = u;
+      });
+    void win
+      .onMoved(() => {
+        restoreAfterDrag();
+        kick();
+      })
+      .then((u) => {
+        if (cancelled) u();
+        else unlistenMoved = u;
+      });
 
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(() => burst()) : null;
     if (ro) {

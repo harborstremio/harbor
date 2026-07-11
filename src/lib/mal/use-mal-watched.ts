@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { useMal } from "@/lib/mal/provider";
 import { fetchListEntry, resolveMalMediaId } from "@/lib/mal/mutations";
+import { useMal } from "@/lib/mal/provider";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { useEffect, useState } from "react";
 
 export type MalWatched = { watchedKeys: Set<string>; completed: boolean };
 
@@ -21,12 +21,9 @@ export function useMalWatched(harborId: string, episodes: KitsuEpisode[]): MalWa
       const info = await fetchListEntry(malId).catch(() => null);
       if (cancelled || !info?.entry) return;
       const { status, numEpisodesWatched } = info.entry;
-      const sorted = [...episodes].sort(
-        (a, b) => (a.seasonNumber || 1) - (b.seasonNumber || 1) || a.number - b.number,
-      );
+      const sorted = [...episodes].sort((a, b) => (a.seasonNumber || 1) - (b.seasonNumber || 1) || a.number - b.number);
       const total = sorted.length;
-      const watchedCount =
-        status === "completed" ? total : Math.max(0, Math.min(numEpisodesWatched, total));
+      const watchedCount = status === "completed" ? total : Math.max(0, Math.min(numEpisodesWatched, total));
       const watchedKeys = new Set<string>();
       for (let i = 0; i < watchedCount; i++) {
         const ep = sorted[i];

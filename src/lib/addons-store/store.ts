@@ -1,17 +1,15 @@
-import { useEffect, useState } from "react";
-import type { Addon } from "@/lib/addons";
-import { useAuth } from "@/lib/auth";
-import { userAddons } from "@/lib/addons";
 import { fetchInstalledAddons } from "@/lib/addon-store";
+import type { Addon } from "@/lib/addons";
+import { userAddons } from "@/lib/addons";
+import { useAuth } from "@/lib/auth";
 import { listAddons } from "@/lib/providers/stremio-addons";
+import { useEffect, useState } from "react";
+
 import { isAdultText } from "./adult-filter";
 import { fetchCommunityAddons, fetchManifest } from "./community";
 import { CURATED_ADDONS, type CuratedEntry } from "./curated";
 
-const ALWAYS_HIDDEN_IDS = new Set<string>([
-  "org.stremio.opensubtitles",
-  "com.opensubtitles.v3",
-]);
+const ALWAYS_HIDDEN_IDS = new Set<string>(["org.stremio.opensubtitles", "com.opensubtitles.v3"]);
 
 function normalizeAddonName(name: string | undefined): string {
   if (!name) return "";
@@ -50,10 +48,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
     (async () => {
       const local = await fetchInstalledAddons().catch(() => [] as Addon[]);
       const stremio = authKey ? await userAddons(authKey).catch(() => [] as Addon[]) : [];
-      const installed = new Set<string>([
-        ...local.map((a) => a.manifest.id),
-        ...stremio.map((a) => a.manifest.id),
-      ]);
+      const installed = new Set<string>([...local.map((a) => a.manifest.id), ...stremio.map((a) => a.manifest.id)]);
       if (cancelled) return;
 
       const map = new Map<string, ResolvedAddon>();
@@ -92,11 +87,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
       const [community, saList] = await Promise.all([
         fetchCommunityAddons(),
         listAddons({ limit: 200, sort_by: "stars", order: "desc" })
-          .then((r) =>
-            r.addons.map(
-              (a): Addon => ({ manifest: a.manifest, transportUrl: a.manifestUrl }),
-            ),
-          )
+          .then((r) => r.addons.map((a): Addon => ({ manifest: a.manifest, transportUrl: a.manifestUrl })))
           .catch(() => [] as Addon[]),
       ]);
       if (cancelled) return;
@@ -151,9 +142,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
         }
       }
 
-      const curatedNeedingFetch = [...map.values()].filter(
-        (r) => !r.manifest && r.source === "curated",
-      );
+      const curatedNeedingFetch = [...map.values()].filter((r) => !r.manifest && r.source === "curated");
       await Promise.all(
         curatedNeedingFetch.map(async (r) => {
           const m = await fetchManifest(r.transportUrl);
@@ -264,10 +253,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
 
 export function isAdultAddon(r: ResolvedAddon): boolean {
   if (r.curated) return r.curated.nsfw === true;
-  return (
-    r.manifest?.behaviorHints?.adult === true ||
-    isAdultText(r.manifest?.id, r.manifest?.name)
-  );
+  return r.manifest?.behaviorHints?.adult === true || isAdultText(r.manifest?.id, r.manifest?.name);
 }
 
 function manifestText(r: ResolvedAddon): string {
@@ -281,9 +267,12 @@ function hasResource(r: ResolvedAddon, name: string): boolean {
 }
 
 const ANIME_RX = /\banime\b|\bkitsu\b|\bmal\b|\bjikan\b|\bmyanimelist\b|\banidb\b|\banilist\b|\bmanga\b/i;
-const SPORTS_RX = /\bsports?\b|\bnfl\b|\bnba\b|\bnhl\b|\bmlb\b|\bsoccer\b|\bfootball\b|\bf1\b|\bformula\s*1\b|\bcricket\b|\bbasketball\b|\bufc\b|\bmma\b|\bwwe\b|\bdazn\b|\besports?\b|\bsporttv\b|\bdaddylive\b/i;
-const LIVE_TV_RX = /\biptv\b|\blive\s*tv\b|\bchannel\b|\bm3u\b|\bplutotv\b|\bpluto\.tv\b|\busatv\b|\bota\b|\bbroadcast\b/i;
-const DEBRID_RX = /\bdebrid\b|\brealdebrid\b|\breal-debrid\b|\btorbox\b|\balldebrid\b|\bpremiumize\b|\bdebridlink\b|\beasydebrid\b|\boffcloud\b|\bmediafusion\b|\bcomet\b|\btorrentio\b|\bjackettio\b|\bknightcrawler\b|\baiostreams\b|\bstreamfusion\b/i;
+const SPORTS_RX =
+  /\bsports?\b|\bnfl\b|\bnba\b|\bnhl\b|\bmlb\b|\bsoccer\b|\bfootball\b|\bf1\b|\bformula\s*1\b|\bcricket\b|\bbasketball\b|\bufc\b|\bmma\b|\bwwe\b|\bdazn\b|\besports?\b|\bsporttv\b|\bdaddylive\b/i;
+const LIVE_TV_RX =
+  /\biptv\b|\blive\s*tv\b|\bchannel\b|\bm3u\b|\bplutotv\b|\bpluto\.tv\b|\busatv\b|\bota\b|\bbroadcast\b/i;
+const DEBRID_RX =
+  /\bdebrid\b|\brealdebrid\b|\breal-debrid\b|\btorbox\b|\balldebrid\b|\bpremiumize\b|\bdebridlink\b|\beasydebrid\b|\boffcloud\b|\bmediafusion\b|\bcomet\b|\btorrentio\b|\bjackettio\b|\bknightcrawler\b|\baiostreams\b|\bstreamfusion\b/i;
 const USENET_RX = /\busenet\b|\bnzb\b|\beasynews\b|\bsabnzbd\b|\bnzbget\b/i;
 const SUBS_FOREIGN_RX = /\bsubdl\b|\bsubscene\b|\bopensubtitles\b|\bsubtitle\b|\bsubtitles\b|\bcaption\b|\bwyzie\b/i;
 
@@ -333,17 +322,16 @@ export function matchesRail(r: ResolvedAddon, railId: string): boolean {
     case "anime":
       return (
         (hasStream || hasMeta || hasCatalog) &&
-        (ids.some((i) => i.startsWith("kitsu") || i.startsWith("mal") || i.startsWith("anidb")) ||
-          ANIME_RX.test(text))
+        (ids.some((i) => i.startsWith("kitsu") || i.startsWith("mal") || i.startsWith("anidb")) || ANIME_RX.test(text))
       );
     case "subtitles":
       return hasSub || SUBS_FOREIGN_RX.test(text);
     case "metadata":
       return (hasCatalog || hasMeta) && !hasSub && !hasStream;
     case "sports":
-      return SPORTS_RX.test(text) ||
-        LIVE_TV_RX.test(text) ||
-        (m.types ?? []).some((t) => t === "tv" || t === "channel");
+      return (
+        SPORTS_RX.test(text) || LIVE_TV_RX.test(text) || (m.types ?? []).some((t) => t === "tv" || t === "channel")
+      );
     default:
       return false;
   }
@@ -358,11 +346,7 @@ function shuffled<T>(arr: T[]): T[] {
   return out;
 }
 
-export function buildRail(
-  byId: Map<string, ResolvedAddon>,
-  railId: string,
-  hardCap = 16,
-): ResolvedAddon[] {
+export function buildRail(byId: Map<string, ResolvedAddon>, railId: string, hardCap = 16): ResolvedAddon[] {
   const all = [...byId.values()].filter((r) => matchesRail(r, railId));
   const tier = (r: ResolvedAddon) => {
     const rec = r.curated?.recommended ?? -1;

@@ -1,8 +1,8 @@
+import { parseSourceRows, type SourceRow } from "@/lib/custom-sources";
+import { useT } from "@/lib/i18n";
+import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
-import { useT } from "@/lib/i18n";
-import { parseSourceRows, type SourceRow } from "@/lib/custom-sources";
 
 export function AddSourceModal({
   isOpen,
@@ -71,7 +71,9 @@ export function AddSourceModal({
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-0.5">
             <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Add Custom Source")}</h2>
-            <p className="text-[12.5px] leading-relaxed text-ink-muted">{t("Provide a JSON link or paste it directly.")}</p>
+            <p className="text-[12.5px] leading-relaxed text-ink-muted">
+              {t("Provide a JSON link or paste it directly.")}
+            </p>
           </div>
           <button
             onClick={onClose}

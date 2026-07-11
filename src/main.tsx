@@ -1,11 +1,12 @@
+import { App } from "@/App";
+import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import { HdrOverlayApp } from "@/views/hdr-overlay-app";
+import { ModalOverlayApp } from "@/views/modal-overlay-app";
+import { PipApp } from "@/views/pip";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "@/App";
-import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
-import { ModalOverlayApp } from "@/views/modal-overlay-app";
-import { HdrOverlayApp } from "@/views/hdr-overlay-app";
-import { PipApp } from "@/views/pip";
+
 import "@/index.css";
 
 function detectPipMode(): boolean {
@@ -57,7 +58,23 @@ if (!isPip && !isModal && !isHdrOverlay) {
         ? "windows"
         : "web";
 }
-if (import.meta.env.DEV) console.log("[harbor] entry: pip =", isPip, "modal =", isModal, "hdr =", isHdrOverlay, "label =", (() => { try { return getCurrentWindow().label; } catch { return "?"; } })());
+if (import.meta.env.DEV)
+  console.log(
+    "[harbor] entry: pip =",
+    isPip,
+    "modal =",
+    isModal,
+    "hdr =",
+    isHdrOverlay,
+    "label =",
+    (() => {
+      try {
+        return getCurrentWindow().label;
+      } catch {
+        return "?";
+      }
+    })(),
+  );
 if (import.meta.env.DEV && !isPip && !isModal && !isHdrOverlay) {
   void import("./lib/streams/__fixtures__/verify").then((m) => m.logVerificationReport());
 }

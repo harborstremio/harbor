@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import { resolveList } from "@/lib/lists/resolve";
 import { ListResolveError, type CustomList, type ListItem } from "@/lib/lists/types";
 import { useSettings } from "@/lib/settings";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useListItems(list: CustomList | null, active: boolean) {
   const { settings } = useSettings();
@@ -32,9 +32,7 @@ export function useListItems(list: CustomList | null, active: boolean) {
       .catch((e) => {
         if (epoch.current !== current) return;
         setItems([]);
-        setError(
-          e instanceof ListResolveError ? e : new ListResolveError("network", list.source),
-        );
+        setError(e instanceof ListResolveError ? e : new ListResolveError("network", list.source));
       })
       .finally(() => {
         if (epoch.current === current) setLoading(false);

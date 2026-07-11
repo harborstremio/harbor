@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
-import { AI_MODELS, DEFAULT_AI_MODEL, GROQ_MODELS, providerForModel } from "@/lib/ai-models";
-import openrouterLogo from "@/assets/ai-logos/openrouter.png";
 import groqLogo from "@/assets/ai-logos/groq.png";
+import openrouterLogo from "@/assets/ai-logos/openrouter.png";
+import { AI_MODELS, DEFAULT_AI_MODEL, GROQ_MODELS, providerForModel } from "@/lib/ai-models";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useRef, useState } from "react";
+
 import { AiModelSelect } from "./ai-model-select";
 import { ExtLink, KeyField, Section, Segmented, ToggleRow } from "./shared";
 
@@ -48,9 +49,7 @@ export function AiSearchSection() {
       subtitle={t("Type what you want in plain language and let a model find it. Bring your own API key.")}
     >
       <div className="flex flex-col gap-1.5">
-        <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-          {t("Provider")}
-        </span>
+        <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Provider")}</span>
         <Segmented
           value={tab}
           onChange={(v) => _setTab(v)}
@@ -78,9 +77,8 @@ export function AiSearchSection() {
               <>
                 Adds an "Ask AI" button to search, so you can type things like{" "}
                 <em>popular French TV shows last year</em>. Get a key at{" "}
-                <ExtLink href="https://openrouter.ai/keys">openrouter.ai/keys</ExtLink>. It
-                only runs when you tap that button, so it never costs anything unless you
-                ask.
+                <ExtLink href="https://openrouter.ai/keys">openrouter.ai/keys</ExtLink>. It only runs when you tap that
+                button, so it never costs anything unless you ask.
               </>
             }
           />
@@ -108,9 +106,8 @@ export function AiSearchSection() {
               <>
                 Adds an "Ask AI" button to search, so you can type things like{" "}
                 <em>popular French TV shows last year</em>. Get a key at{" "}
-                <ExtLink href="https://console.groq.com/keys">console.groq.com/keys</ExtLink>.
-                Groq runs open-source models on its LPU hardware with a generous free tier —
-                every model listed below runs on the free tier.
+                <ExtLink href="https://console.groq.com/keys">console.groq.com/keys</ExtLink>. Groq runs open-source
+                models on its LPU hardware with a generous free tier — every model listed below runs on the free tier.
               </>
             }
           />
@@ -125,9 +122,7 @@ export function AiSearchSection() {
 
       <div className="mt-1 flex flex-col gap-3 border-t border-edge-soft pt-5">
         <div className="flex flex-col gap-0.5">
-          <span className="text-[15px] font-medium tracking-tight text-ink">
-            {t("Live web (Jina Reader)")}
-          </span>
+          <span className="text-[15px] font-medium tracking-tight text-ink">{t("Live web (Jina Reader)")}</span>
           <p className="text-[13px] leading-relaxed text-ink-muted">
             {t("Augments AI picks with current web results before asking the model. Powered by")}{" "}
             <ExtLink href="https://jina.ai/reader">Jina Reader</ExtLink>

@@ -1,6 +1,7 @@
+import cloudflareLogo from "@/assets/cloudflare.webp";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import cloudflareLogo from "@/assets/cloudflare.webp";
+
 import { isTauri } from "./internals";
 
 const SPEEDTEST_CHUNK = 25_000_000;
@@ -50,12 +51,7 @@ function SpeedResultBadge({ value }: { value: string }) {
           open ? "ring-edge" : "ring-edge-soft hover:ring-edge"
         }`}
       >
-        <img
-          src={cloudflareLogo}
-          alt=""
-          draggable={false}
-          className="h-3.5 w-3.5 shrink-0 object-contain"
-        />
+        <img src={cloudflareLogo} alt="" draggable={false} className="h-3.5 w-3.5 shrink-0 object-contain" />
         {value}
       </button>
       {pinned && (
@@ -74,24 +70,17 @@ function SpeedResultBadge({ value }: { value: string }) {
           style={{ animation: "harbor-fade-in 140ms ease-out both" }}
         >
           <div className="mb-2 flex items-center gap-2">
-            <img
-              src={cloudflareLogo}
-              alt=""
-              draggable={false}
-              className="h-4 w-4 shrink-0 object-contain"
-            />
+            <img src={cloudflareLogo} alt="" draggable={false} className="h-4 w-4 shrink-0 object-contain" />
             <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
               How this is measured
             </span>
           </div>
           <p className="mb-2.5 text-[12.5px] leading-snug text-ink-muted">
-            Harbor opens 4 parallel HTTP streams to{" "}
-            <span className="font-medium text-ink">speed.cloudflare.com</span>, runs for 8 seconds,
-            and discards the first 1.5s of warmup so TCP slow-start doesn't tank the result.
+            Harbor opens 4 parallel HTTP streams to <span className="font-medium text-ink">speed.cloudflare.com</span>,
+            runs for 8 seconds, and discards the first 1.5s of warmup so TCP slow-start doesn't tank the result.
           </p>
           <p className="mb-2 text-[12.5px] leading-snug text-ink-muted">
-            The reported number is your steady-state throughput, which is what fast.com and
-            speedtest.net also use.
+            The reported number is your steady-state throughput, which is what fast.com and speedtest.net also use.
           </p>
           <div className="mt-2 flex items-center gap-2 border-t border-edge-soft pt-2 text-[11px] text-ink-subtle">
             <span className="h-1 w-1 rounded-full bg-ink-subtle/60" />
@@ -176,8 +165,7 @@ function SpeedTestButtonInner() {
             samples.push({ t, bytes: value.length });
             if (t - startedAt >= SPEEDTEST_WARMUP_MS) total += value.length;
           }
-        } catch {
-        }
+        } catch {}
       }
     };
 

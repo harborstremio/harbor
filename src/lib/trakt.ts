@@ -56,11 +56,7 @@ export type PollResult =
   | { status: "denied" }
   | { status: "error"; message: string };
 
-export async function pollDeviceToken(
-  clientId: string,
-  clientSecret: string,
-  deviceCode: string,
-): Promise<PollResult> {
+export async function pollDeviceToken(clientId: string, clientSecret: string, deviceCode: string): Promise<PollResult> {
   const res = await fetch(`${API}/oauth/device/token`, {
     method: "POST",
     headers: headers(clientId),
@@ -100,10 +96,7 @@ export async function refreshAccessToken(
   return (await res.json()) as TokenResponse;
 }
 
-export async function fetchTraktUser(
-  clientId: string,
-  accessToken: string,
-): Promise<TraktUser["user"] | null> {
+export async function fetchTraktUser(clientId: string, accessToken: string): Promise<TraktUser["user"] | null> {
   const res = await fetch(`${API}/users/settings`, {
     headers: headers(clientId, accessToken),
   });
@@ -112,11 +105,7 @@ export async function fetchTraktUser(
   return data.user;
 }
 
-export async function revokeToken(
-  clientId: string,
-  clientSecret: string,
-  accessToken: string,
-): Promise<void> {
+export async function revokeToken(clientId: string, clientSecret: string, accessToken: string): Promise<void> {
   try {
     await fetch(`${API}/oauth/revoke`, {
       method: "POST",

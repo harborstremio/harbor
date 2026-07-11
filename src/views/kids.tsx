@@ -1,15 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CatalogRows } from "@/components/catalog/catalog-rows";
 import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
-import { ScrollRootContext } from "@/components/row";
 import { TmdbNudge } from "@/components/nudge";
+import { ScrollRootContext } from "@/components/row";
 import { topMovies, type Meta } from "@/lib/cinemeta";
-import { recentlyPlayed } from "@/lib/playback-history";
 import { listPager } from "@/lib/list-pager";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
+import { recentlyPlayed } from "@/lib/playback-history";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/view";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { KidsDoodles } from "./kids/kids-doodles";
 import { dropUnreleased } from "./kids/kids-filter";
 import { KidsFranchiseRail } from "./kids/kids-franchise-rail";
@@ -57,9 +58,7 @@ export function Kids({ active = true }: { active?: boolean }) {
         if (cancelled) return;
         setHero(dropUnreleased(heroPool));
         const specs = kidsSpecs(settings.tmdbKey);
-        const firstPages = await Promise.all(
-          specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
-        );
+        const firstPages = await Promise.all(specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])));
         if (cancelled) return;
         const built: KidsRow[] = specs
           .map((spec, i) => ({
@@ -163,11 +162,36 @@ export function Kids({ active = true }: { active?: boolean }) {
           <KidsDoodles />
           <div className="relative">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-10 bottom-0">
-              <img src="/kids/doodles/lilleaflitter.png" alt="" draggable={false} className="absolute left-[2%] top-6 h-11 w-auto -rotate-12 opacity-90" />
-              <img src="/kids/doodles/lilpurpocto.png" alt="" draggable={false} className="absolute left-[26%] top-9 h-12 w-auto opacity-90" />
-              <img src="/kids/doodles/lilwhitestar.png" alt="" draggable={false} className="absolute left-[46%] top-3 h-6 w-auto opacity-80" />
-              <img src="/kids/doodles/lilorangestar2.png" alt="" draggable={false} className="absolute left-[56%] top-11 h-9 w-auto opacity-90" />
-              <img src="/kids/doodles/lilpurplestar.png" alt="" draggable={false} className="absolute left-[67%] top-4 h-14 w-auto opacity-85" />
+              <img
+                src="/kids/doodles/lilleaflitter.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[2%] top-6 h-11 w-auto -rotate-12 opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilpurpocto.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[26%] top-9 h-12 w-auto opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilwhitestar.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[46%] top-3 h-6 w-auto opacity-80"
+              />
+              <img
+                src="/kids/doodles/lilorangestar2.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[56%] top-11 h-9 w-auto opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilpurplestar.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[67%] top-4 h-14 w-auto opacity-85"
+              />
             </div>
             <CatalogCustomizeBar
               editMode={pageRows.editMode}

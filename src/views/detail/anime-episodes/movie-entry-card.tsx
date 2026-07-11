@@ -1,9 +1,9 @@
-import { Check, Play } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { Check, Play } from "lucide-react";
 
 export function MovieEntryCard({
   meta,

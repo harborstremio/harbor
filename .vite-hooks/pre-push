@@ -1,0 +1,35 @@
+#!/bin/sh
+# Block push if format or lint errors remain (not typecheck — not strict).
+# Fix with:  vp fmt && vp lint --fix
+set -e
+
+if ! command -v vp >/dev/null 2>&1; then
+  # hooks may run without global PATH; prefer local shim
+  if [ -x "./node_modules/.bin/vp" ]; then
+    VP="./node_modules/.bin/vp"
+  elif [ -x "$HOME/.vite-plus/bin/vp" ]; then
+    VP="$HOME/.vite-plus/bin/vp"
+  else
+    echo "vp not found — install Vite+ (https://viteplus.dev) or run: pnpm install"
+    exit 1
+  fi
+else
+  VP="vp"
+fi
+
+echo "→ pre-push: format check (vp fmt --check)"
+if ! $VP fmt --check; then
+  echo ""
+  echo "Format check failed. Fix with:  vp fmt"
+  exit 1
+fi
+
+echo "→ pre-push: lint (vp lint)"
+if ! $VP lint; then
+  echo ""
+  echo "Lint failed. Fix with:  vp lint --fix"
+  echo "(Full typecheck is not required here — run tsc / build separately.)"
+  exit 1
+fi
+
+echo "→ pre-push: ok"

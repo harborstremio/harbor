@@ -1,10 +1,7 @@
 import { channelPlayCount, MOST_WATCHED_MIN } from "./channel-stats";
 import type { IptvChannel } from "./types";
 
-export function applyUserChannelOrder(
-  channels: IptvChannel[],
-  pinnedOrder: string[],
-): IptvChannel[] {
+export function applyUserChannelOrder(channels: IptvChannel[], pinnedOrder: string[]): IptvChannel[] {
   if (channels.length === 0) return channels;
   const pinRank = new Map<string, number>();
   pinnedOrder.forEach((id, i) => pinRank.set(id, i));
@@ -29,10 +26,7 @@ export function applyUserChannelOrder(
   return [...pinned, ...watched.map((w) => w.ch), ...rest];
 }
 
-export function applyUserGroupOrder(
-  groups: string[],
-  prefs: { pinned: string[]; hidden: string[] },
-): string[] {
+export function applyUserGroupOrder(groups: string[], prefs: { pinned: string[]; hidden: string[] }): string[] {
   if (prefs.pinned.length === 0 && prefs.hidden.length === 0) return groups;
   const hidden = new Set(prefs.hidden);
   const pinRank = new Map(prefs.pinned.map((g, i) => [g, i] as const));

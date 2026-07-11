@@ -1,8 +1,8 @@
+import { useT } from "@/lib/i18n";
+import { GENRE } from "@/lib/providers/jikan";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useT } from "@/lib/i18n";
-import { GENRE } from "@/lib/providers/jikan";
 
 const OPTIONS: Array<{ id: number; label: string }> = [
   { id: GENRE.Action, label: "Action" },

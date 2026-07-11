@@ -10,9 +10,9 @@ type RawWatchlistRow = {
 };
 
 export async function fetchWatchlist(): Promise<TraktItem[]> {
-  const rows = await traktRequest<RawWatchlistRow[]>(
-    "/sync/watchlist?sort_by=added&sort_how=desc",
-  ).catch(() => [] as RawWatchlistRow[]);
+  const rows = await traktRequest<RawWatchlistRow[]>("/sync/watchlist?sort_by=added&sort_how=desc").catch(
+    () => [] as RawWatchlistRow[],
+  );
   const out: TraktItem[] = [];
   for (const r of rows) {
     if (r.type === "movie" && r.movie) {

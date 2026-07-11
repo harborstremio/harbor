@@ -84,12 +84,7 @@ function mergeAlt(id: ParsedId, altId?: string): ParsedId {
   };
 }
 
-export function rpdbPoster(
-  key: string,
-  metaId: string,
-  fallback?: string,
-  altId?: string,
-): string | undefined {
+export function rpdbPoster(key: string, metaId: string, fallback?: string, altId?: string): string | undefined {
   const parsed = parseMetaId(metaId);
   if (!parsed) return fallback;
   const id = mergeAlt(parsed, altId);

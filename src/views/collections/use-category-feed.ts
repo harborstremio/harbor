@@ -1,9 +1,5 @@
+import { tmdbCollection, tmdbSearchCollections, type TmdbCollection } from "@/lib/providers/tmdb";
 import { useEffect, useRef, useState } from "react";
-import {
-  tmdbCollection,
-  tmdbSearchCollections,
-  type TmdbCollection,
-} from "@/lib/providers/tmdb";
 
 const FEED_QUERY = "collection";
 const PAGES_PER_PULL = 4;
@@ -29,10 +25,7 @@ function matchesCategory(col: TmdbCollection, category: string): boolean {
   const cnt = (id: number) => col.genreCounts?.[id] ?? 0;
   if (category === "Sagas") return total >= 4;
   if (category === "Superheroes") {
-    return (
-      cnt(28) + cnt(878) + cnt(14) >= Math.ceil(total / 2) &&
-      HERO_RX.test(`${col.name} ${col.overview}`)
-    );
+    return cnt(28) + cnt(878) + cnt(14) >= Math.ceil(total / 2) && HERO_RX.test(`${col.name} ${col.overview}`);
   }
   const gid = GENRE_IDS[category];
   if (gid == null) return false;
@@ -90,11 +83,10 @@ export function useCategoryFeed(params: {
           let exhausted = false;
           for (let i = 0; i < PAGES_PER_PULL && found.length < MIN_MATCHES_PER_PULL; i++) {
             const next = pageRef.current + 1;
-            const { hits: batch, totalPages } = await tmdbSearchCollections(
-              tmdbKey,
-              FEED_QUERY,
-              next,
-            ).catch(() => ({ hits: [], totalPages: 0 }));
+            const { hits: batch, totalPages } = await tmdbSearchCollections(tmdbKey, FEED_QUERY, next).catch(() => ({
+              hits: [],
+              totalPages: 0,
+            }));
             pageRef.current = next;
             if (batch.length === 0 || next >= totalPages) {
               exhausted = true;
@@ -102,9 +94,7 @@ export function useCategoryFeed(params: {
             }
             const cols = await Promise.all(
               batch.map((h) =>
-                seenRef.current.has(h.id)
-                  ? Promise.resolve(null)
-                  : tmdbCollection(tmdbKey, h.id).catch(() => null),
+                seenRef.current.has(h.id) ? Promise.resolve(null) : tmdbCollection(tmdbKey, h.id).catch(() => null),
               ),
             );
             for (const c of cols) {

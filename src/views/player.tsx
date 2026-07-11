@@ -1,80 +1,81 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { resolveChromeTheme } from "@/lib/theme";
-import { useActiveKid } from "@/lib/profiles";
-import { type PlayerBridge } from "@/lib/player/bridge";
+import { LeaveConfirmModal } from "@/components/player/leave-confirm-modal";
+import type { VolumeIndicatorState } from "@/components/player/volume-indicator";
+import { withinAdWindow } from "@/lib/ad-report/window";
+import { useAuth } from "@/lib/auth";
+import { markStreamDead, STUB_TTL_MS } from "@/lib/dead-streams";
 import { useDebridClients } from "@/lib/debrid/registry";
-import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { writePlayerVolume } from "@/lib/player-volume";
+import { type PlayerBridge } from "@/lib/player/bridge";
+import { isLocalUrl } from "@/lib/player/local-url";
+import { setPlaybackDownloaded } from "@/lib/player/playback-clock";
+import { useActiveKid } from "@/lib/profiles";
+import { useQueue, useSleepAtEnd } from "@/lib/queue";
+import { useSettings } from "@/lib/settings";
+import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
+import { setSkipSegmentsView } from "@/lib/skip-intro/segment-store";
+import { spoilerMaskFor } from "@/lib/spoilers";
+import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
+import { resolveChromeTheme } from "@/lib/theme";
+import { buildPlayInvite } from "@/lib/together/build-invite";
 import { nameColor } from "@/lib/together/colors";
 import { useTogether } from "@/lib/together/provider";
-import { buildPlayInvite } from "@/lib/together/build-invite";
+import { hostSourceMatchesMedia } from "@/lib/together/room-derive";
 import { useView, type PlayerSrc, type PlayEpisode } from "@/lib/view";
-import { useQueue, useSleepAtEnd } from "@/lib/queue";
-import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
-import { withinAdWindow } from "@/lib/ad-report/window";
-import { isLocalUrl } from "@/lib/player/local-url";
-import { useAuth } from "@/lib/auth";
-import { embedFlags } from "./player/player-utils";
-import { useFullscreen } from "./player/hooks/use-fullscreen";
-import { useSvpGuard } from "./player/hooks/use-svp-guard";
-import { usePlayerCast } from "./player/hooks/use-player-cast";
+import type { ToastInfo } from "@/views/addons/addons-types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { HdrStageBridge } from "./player/hdr-stage-bridge";
+import { useAbLoop } from "./player/hooks/use-ab-loop";
+import { useAnime4k } from "./player/hooks/use-anime4k";
+import { useAutoEndExit } from "./player/hooks/use-auto-end-exit";
+import { useAutoNextEpisode } from "./player/hooks/use-auto-next-episode";
+import { useAutoRetry } from "./player/hooks/use-auto-retry";
+import { useBridgeLoad } from "./player/hooks/use-bridge-load";
 import { useCastReturnPublish } from "./player/hooks/use-cast-return-publish";
 import { useChromeConfig } from "./player/hooks/use-chrome-config";
-import { useEverPlayed } from "./player/hooks/use-ever-played";
-import { useDrawMode } from "./player/hooks/use-draw-mode";
 import { useChromeVisibility } from "./player/hooks/use-chrome-visibility";
-import { useAutoRetry } from "./player/hooks/use-auto-retry";
-import { useWakeReconnect } from "./player/hooks/use-wake-reconnect";
-import { useEngineStats } from "./player/hooks/use-engine-stats";
-import { useContentAdvisory } from "./player/hooks/use-content-advisory";
-import { setPlaybackDownloaded } from "@/lib/player/playback-clock";
-import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
-import { usePauseOnInactive } from "./player/hooks/use-pause-on-inactive";
-import { spoilerMaskFor } from "@/lib/spoilers";
-import { usePlayerWatched } from "./player/hooks/use-player-watched";
-import { useRoomSync } from "./player/hooks/use-room-sync";
-import { useHostSource } from "./player/hooks/use-host-source";
-import { useLobbyGate } from "./player/hooks/use-lobby-gate";
-import { hostSourceMatchesMedia } from "@/lib/together/room-derive";
-import { useLiveChannelOverlay } from "./player/hooks/use-live-channel-overlay";
-import { useStreamSwitcher } from "./player/hooks/use-stream-switcher";
-import { useMpvEmbed } from "./player/hooks/use-mpv-embed";
-import { usePlayerBridge } from "./player/hooks/use-player-bridge";
-import { useTextSync } from "./player/hooks/use-text-sync";
-import { useT } from "@/lib/i18n";
-import { useEpisodeNavigation } from "./player/hooks/use-episode-navigation";
-import { useAbLoop } from "./player/hooks/use-ab-loop";
-import { useAutoNextEpisode } from "./player/hooks/use-auto-next-episode";
-import { useStartedNearEnd } from "./player/hooks/use-started-near-end";
-import { useFrameGrab } from "./player/hooks/use-frame-grab";
 import { useClipRecorder } from "./player/hooks/use-clip-recorder";
+import { useContentAdvisory } from "./player/hooks/use-content-advisory";
+import { useDrawMode } from "./player/hooks/use-draw-mode";
+import { useEngineStats } from "./player/hooks/use-engine-stats";
+import { useEpisodeNavigation } from "./player/hooks/use-episode-navigation";
+import { useEverPlayed } from "./player/hooks/use-ever-played";
+import { useFrameGrab } from "./player/hooks/use-frame-grab";
+import { useFullscreen } from "./player/hooks/use-fullscreen";
 import { useGifRecorder } from "./player/hooks/use-gif-recorder";
-import { useSleepTimer } from "./player/hooks/use-sleep-timer";
-import { useAutoEndExit } from "./player/hooks/use-auto-end-exit";
-import { useQueueAdvance } from "./player/hooks/use-queue-advance";
+import { useHdrStage } from "./player/hooks/use-hdr-stage";
+import { useHostSource } from "./player/hooks/use-host-source";
+import { useLiveChannelOverlay } from "./player/hooks/use-live-channel-overlay";
+import { useLivePictureEq } from "./player/hooks/use-live-picture-eq";
+import { useLobbyGate } from "./player/hooks/use-lobby-gate";
+import { useMpvEmbed } from "./player/hooks/use-mpv-embed";
+import { usePauseOnInactive } from "./player/hooks/use-pause-on-inactive";
+import { usePendingSeekApply } from "./player/hooks/use-pending-seek-apply";
 import { usePipMode } from "./player/hooks/use-pip-mode";
 import { usePlaybackControls } from "./player/hooks/use-playback-controls";
 import { usePlaybackPresence } from "./player/hooks/use-playback-presence";
+import { usePlayerBridge } from "./player/hooks/use-player-bridge";
+import { usePlayerCast } from "./player/hooks/use-player-cast";
 import { usePlayerExit } from "./player/hooks/use-player-exit";
-import { usePendingSeekApply } from "./player/hooks/use-pending-seek-apply";
 import { usePlayerHotkeys } from "./player/hooks/use-player-hotkeys";
 import { usePlayerMedia } from "./player/hooks/use-player-media";
-import { useTrickplay } from "./player/hooks/use-trickplay";
-import { useStreamPill } from "./player/hooks/use-stream-pill";
-import { useStubDetection } from "./player/hooks/use-stub-detection";
-import { useBridgeLoad } from "./player/hooks/use-bridge-load";
-import { useVideoFill } from "./player/hooks/use-video-fill";
-import { useLivePictureEq } from "./player/hooks/use-live-picture-eq";
-import { useAnime4k } from "./player/hooks/use-anime4k";
-import { useHdrStage } from "./player/hooks/use-hdr-stage";
+import { usePlayerWatched } from "./player/hooks/use-player-watched";
+import { useQueueAdvance } from "./player/hooks/use-queue-advance";
+import { useRoomSync } from "./player/hooks/use-room-sync";
 import { useSdrBoostGate } from "./player/hooks/use-sdr-boost-gate";
+import { useSleepTimer } from "./player/hooks/use-sleep-timer";
+import { useStartedNearEnd } from "./player/hooks/use-started-near-end";
+import { useStreamPill } from "./player/hooks/use-stream-pill";
+import { useStreamSwitcher } from "./player/hooks/use-stream-switcher";
+import { useStubDetection } from "./player/hooks/use-stub-detection";
+import { useSvpGuard } from "./player/hooks/use-svp-guard";
+import { useTextSync } from "./player/hooks/use-text-sync";
+import { useTrickplay } from "./player/hooks/use-trickplay";
+import { useVideoFill } from "./player/hooks/use-video-fill";
+import { useWakeReconnect } from "./player/hooks/use-wake-reconnect";
 import { PlayerOverlayLayers, type PlayerOverlayLayersProps } from "./player/player-overlay-layers";
-import { LeaveConfirmModal } from "@/components/player/leave-confirm-modal";
-import { HdrStageBridge } from "./player/hdr-stage-bridge";
-import { setSkipSegmentsView } from "@/lib/skip-intro/segment-store";
-import { markStreamDead, STUB_TTL_MS } from "@/lib/dead-streams";
-import type { VolumeIndicatorState } from "@/components/player/volume-indicator";
-import type { ToastInfo } from "@/views/addons/addons-types";
+import { embedFlags } from "./player/player-utils";
 
 export function PlayerView({ src }: { src: PlayerSrc }) {
   const { setChromeHidden, topPath, openPicker, exitPlayback, replacePlayerSrc, exitPlayer } = useView();
@@ -93,14 +94,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       delete root.dataset.playerBlack;
     };
   }, [settings.playerMenuBlack]);
-  const {
-    avatarsCorner,
-    chatCorner,
-    episodesCorner,
-    avatarsHidden,
-    chatHidden,
-    episodesHidden,
-  } = useChromeConfig(chromeTheme);
+  const { avatarsCorner, chatCorner, episodesCorner, avatarsHidden, chatHidden, episodesHidden } =
+    useChromeConfig(chromeTheme);
   const { authKey } = useAuth();
   const debrids = useDebridClients();
   const {
@@ -317,12 +312,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     episode,
   });
 
-  const contentAdvisory = useContentAdvisory(
-    settings.contentAdvisoryToast,
-    resolvedImdbId,
-    src.url,
-    playing,
-  );
+  const contentAdvisory = useContentAdvisory(settings.contentAdvisoryToast, resolvedImdbId, src.url, playing);
 
   const {
     streamCheckOpen,
@@ -680,13 +670,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     playUrl,
     withinAdWindow(src.meta) || settings.adSkipEnabled,
   );
-  const skipSegments = useSkipSegments(
-    src.meta,
-    src.episode,
-    snap.chapters,
-    snap.durationSec,
-    adSegments,
-  );
+  const skipSegments = useSkipSegments(src.meta, src.episode, snap.chapters, snap.durationSec, adSegments);
   useEffect(() => {
     setSkipSegmentsView(skipSegments);
     return () => setSkipSegmentsView([]);
@@ -716,12 +700,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       ),
   });
 
-  const { mpvEmbedWindowsActive, stageBg } = embedFlags(
-    engine,
-    embedActive,
-    snap.videoWidth,
-    snap.videoHeight,
-  );
+  const { mpvEmbedWindowsActive, stageBg } = embedFlags(engine, embedActive, snap.videoWidth, snap.videoHeight);
   const { loaderActive } = useEverPlayed({
     url: src.url,
     status: snap.status,
@@ -740,17 +719,20 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   useEffect(() => {
     volumeRef.current = snap.volume;
   }, [snap.volume]);
-  const onVolumeWheel = useCallback((deltaY: number) => {
-    const dir = deltaY < 0 ? 1 : -1;
-    const boost = !isKid && bridgeRef.current?.capabilities().engine === "mpv";
-    const max = boost ? 6 : 1;
-    const next = Math.min(max, Math.max(0, volumeRef.current + dir * 0.05));
-    volumeRef.current = next;
-    bridgeRef.current?.setVolume(next);
-    bridgeRef.current?.setMuted(false);
-    writePlayerVolume({ volume: next, muted: false });
-    showVolumeFeedback(next, false);
-  }, [showVolumeFeedback, isKid]);
+  const onVolumeWheel = useCallback(
+    (deltaY: number) => {
+      const dir = deltaY < 0 ? 1 : -1;
+      const boost = !isKid && bridgeRef.current?.capabilities().engine === "mpv";
+      const max = boost ? 6 : 1;
+      const next = Math.min(max, Math.max(0, volumeRef.current + dir * 0.05));
+      volumeRef.current = next;
+      bridgeRef.current?.setVolume(next);
+      bridgeRef.current?.setMuted(false);
+      writePlayerVolume({ volume: next, muted: false });
+      showVolumeFeedback(next, false);
+    },
+    [showVolumeFeedback, isKid],
+  );
 
   const overlayProps: PlayerOverlayLayersProps = {
     snap,
@@ -797,7 +779,13 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     onLoaderRetry: () => {
       const b = bridgeRef.current;
       if (b) {
-        void b.load({ url: src.url, subtitles: src.subtitles, notWebReady: src.notWebReady, isLive: src.meta.id?.startsWith("iptv:"), headers: src.headers });
+        void b.load({
+          url: src.url,
+          subtitles: src.subtitles,
+          notWebReady: src.notWebReady,
+          isLive: src.meta.id?.startsWith("iptv:"),
+          headers: src.headers,
+        });
       }
     },
     bridgeRef,
@@ -894,7 +882,14 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     episodePanelOpen,
     setEpisodePanelOpen,
     upNextButtonVisible:
-      isSeriesPlayback && chromeVisible && !episodePanelOpen && !switcherOpen && !pipMode && !drawMode && !episodesHidden && !roomGuest,
+      isSeriesPlayback &&
+      chromeVisible &&
+      !episodePanelOpen &&
+      !switcherOpen &&
+      !pipMode &&
+      !drawMode &&
+      !episodesHidden &&
+      !roomGuest,
     episodesCorner,
     episodesHidden,
     roomGuest,

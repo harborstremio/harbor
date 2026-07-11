@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Check, ChevronDown, Hourglass, Play, RotateCcw } from "lucide-react";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { SPOILER_TEXT_CLASS, SPOILER_THUMB_CLASS, type SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
-import { useSettings } from "@/lib/settings";
 import { EpisodeRatingBadge } from "@/views/detail/episode-rating-badge";
-import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Hourglass, Play, RotateCcw } from "lucide-react";
+import { useState } from "react";
 
 function formatAirDate(d: string): string {
   const date = new Date(d.length <= 10 ? `${d}T00:00:00` : d);
@@ -75,7 +75,9 @@ export function EpisodeRow({
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
           <div className="flex items-start justify-between gap-2">
-            <p className={`line-clamp-2 text-[14.5px] font-semibold leading-snug text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
+            <p
+              className={`line-clamp-2 text-[14.5px] font-semibold leading-snug text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
+            >
               {episode.name ?? t("Episode {n}", { n: episode.episode })}
             </p>
             {isCurrent && (

@@ -26,12 +26,7 @@ function writeAll(all: Record<string, Entry>): void {
   }
 }
 
-export function saveResumeMs(
-  id: string,
-  ms: number,
-  season?: number,
-  episode?: number,
-): void {
+export function saveResumeMs(id: string, ms: number, season?: number, episode?: number): void {
   if (!Number.isFinite(ms) || ms < 0) return;
   if (typeof season === "number" && typeof episode === "number") {
     if (season < 0 || episode < 1) return;
@@ -57,20 +52,12 @@ export function saveResumeBatch(
   writeAll(all);
 }
 
-export function readResumeMs(
-  id: string,
-  season?: number,
-  episode?: number,
-): number {
+export function readResumeMs(id: string, season?: number, episode?: number): number {
   const all = readAll();
   return all[entryKey(id, season, episode)]?.ms ?? 0;
 }
 
-export function readResumeEntry(
-  id: string,
-  season?: number,
-  episode?: number,
-): { ms: number; t: number } | null {
+export function readResumeEntry(id: string, season?: number, episode?: number): { ms: number; t: number } | null {
   const all = readAll();
   const e = all[entryKey(id, season, episode)];
   return e ? { ms: e.ms, t: e.t } : null;
@@ -82,9 +69,7 @@ export function clearResume(id: string, season?: number, episode?: number): void
   writeAll(all);
 }
 
-export function lastPlayedEpisode(
-  seriesId: string,
-): { season: number; episode: number; ms: number; t: number } | null {
+export function lastPlayedEpisode(seriesId: string): { season: number; episode: number; ms: number; t: number } | null {
   const all = readAll();
   const prefix = `${seriesId}|s`;
   let best: { season: number; episode: number; ms: number; t: number } | null = null;

@@ -1,6 +1,7 @@
 import { traktRequest, TraktApiError } from "@/lib/trakt/client";
 import { traktItemToMeta } from "@/lib/trakt/to-meta";
 import type { TraktItem } from "@/lib/trakt/types";
+
 import type { ListItem } from "../types";
 import { ListResolveError } from "../types";
 

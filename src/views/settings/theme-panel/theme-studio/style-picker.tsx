@@ -90,8 +90,7 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
         <div
           className="aspect-[5/3] w-full rounded-lg border"
           style={{
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04))",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04))",
             borderColor: "rgba(255,255,255,0.18)",
             backdropFilter: "blur(8px)",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2)",
@@ -103,11 +102,13 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
       return (
         <div
           className="aspect-[5/3] w-full rounded-lg ring-2"
-          style={{
-            background: "linear-gradient(135deg, #181434, #1f1b3f)",
-            borderColor: "rgba(255,255,255,0.12)",
-            "--tw-ring-color": active ? "var(--color-accent)" : "#7b5bf5",
-          } as React.CSSProperties}
+          style={
+            {
+              background: "linear-gradient(135deg, #181434, #1f1b3f)",
+              borderColor: "rgba(255,255,255,0.12)",
+              "--tw-ring-color": active ? "var(--color-accent)" : "#7b5bf5",
+            } as React.CSSProperties
+          }
         />
       );
     }
@@ -136,11 +137,9 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
         <div
           className="rounded-full px-4 py-2 text-[12px] font-semibold"
           style={{
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 55%), var(--color-accent)",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 55%), var(--color-accent)",
             color: "#fff",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 18px -6px rgba(0,0,0,0.45)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 18px -6px rgba(0,0,0,0.45)",
           }}
         >
           Button

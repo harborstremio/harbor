@@ -1,8 +1,8 @@
+import { MOVIE_GENRES } from "@/lib/feed/tags";
+import { useT } from "@/lib/i18n";
+import type { Settings, WebhookTrigger } from "@/lib/settings";
 import { Plus, Trash2, X, Zap } from "lucide-react";
 import { useState } from "react";
-import { useT } from "@/lib/i18n";
-import { MOVIE_GENRES } from "@/lib/feed/tags";
-import type { Settings, WebhookTrigger } from "@/lib/settings";
 
 type Rule = Settings["webhookRules"][number];
 type TrackedPerson = Settings["customCalendar"]["trackedPeople"][number];
@@ -75,15 +75,16 @@ function defaultTrigger(event: WebhookTrigger["event"]): WebhookTrigger {
 
 function describeTrigger(t: WebhookTrigger, trackedPeople: TrackedPerson[]): string {
   switch (t.event) {
-    case "newMovie": return "Any new movie";
-    case "newSeries": return "Any new series";
-    case "newAnime": return "Any new anime";
+    case "newMovie":
+      return "Any new movie";
+    case "newSeries":
+      return "Any new series";
+    case "newAnime":
+      return "Any new anime";
     case "fromTrackedPerson": {
       const ids = t.personIds ?? [];
       if (ids.length === 0) return `Any of your ${trackedPeople.length} tracked people`;
-      const names = ids
-        .map((id) => trackedPeople.find((p) => p.id === id)?.name)
-        .filter(Boolean) as string[];
+      const names = ids.map((id) => trackedPeople.find((p) => p.id === id)?.name).filter(Boolean) as string[];
       return names.join(", ") || "Tracked people";
     }
     case "fromGenre":
@@ -96,13 +97,18 @@ function describeTrigger(t: WebhookTrigger, trackedPeople: TrackedPerson[]): str
     case "fromProvider":
       return t.providerIds.length === 0
         ? "Any streamer"
-        : t.providerIds.map((id) => PROVIDERS.find((p) => p.id === id)?.name).filter(Boolean).join(", ");
+        : t.providerIds
+            .map((id) => PROVIDERS.find((p) => p.id === id)?.name)
+            .filter(Boolean)
+            .join(", ");
     case "fromCountry":
       return t.countryCodes.length === 0
         ? "Any country"
         : t.countryCodes.map((c) => COUNTRIES.find((x) => x.code === c)?.name ?? c).join(", ");
-    case "fromTraktAnticipated": return "Trakt anticipated";
-    case "fromTraktWatchlist": return "Your Trakt watchlist";
+    case "fromTraktAnticipated":
+      return "Trakt anticipated";
+    case "fromTraktWatchlist":
+      return "Your Trakt watchlist";
     case "liveTvEvent":
       return `Live TV · ${t.favoritesOnly ? "favorites" : "all channels"} · ${t.leadMinutes ?? 15} min lead`;
   }
@@ -134,8 +140,7 @@ export function RuleBuilder({
     setEditing(null);
   };
   const remove = (id: string) => onChange(rules.filter((r) => r.id !== id));
-  const toggleEnabled = (id: string) =>
-    onChange(rules.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
+  const toggleEnabled = (id: string) => onChange(rules.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
 
   const startNew = () =>
     setEditing({
@@ -210,9 +215,8 @@ export function RuleBuilder({
                 </span>
                 <span className="truncate text-[11.5px] text-ink-subtle">
                   {describeTrigger(r.trigger, trackedPeople)} →{" "}
-                  {[r.channels.discord && "Discord", r.channels.telegram && "Telegram"]
-                    .filter(Boolean)
-                    .join(" + ") || "no channel"}
+                  {[r.channels.discord && "Discord", r.channels.telegram && "Telegram"].filter(Boolean).join(" + ") ||
+                    "no channel"}
                 </span>
               </div>
               <button
@@ -274,9 +278,7 @@ function RuleEditor({
     <div className="fixed inset-0 z-[120] flex items-center justify-center bg-canvas/80 p-6 backdrop-blur-sm">
       <div className="flex max-h-[88vh] w-full max-w-[560px] flex-col gap-5 overflow-y-auto rounded-2xl border border-edge-soft bg-elevated p-6 shadow-[0_28px_80px_-20px_rgba(0,0,0,0.7)]">
         <div className="flex items-start justify-between">
-          <h2 className="text-[18px] font-semibold text-ink">
-            {rule.name ? "Edit rule" : "New rule"}
-          </h2>
+          <h2 className="text-[18px] font-semibold text-ink">{rule.name ? "Edit rule" : "New rule"}</h2>
           <button
             type="button"
             onClick={onCancel}
@@ -322,7 +324,13 @@ function RuleEditor({
                 { value: "tv", label: "Series" },
               ]}
               onChange={(v) =>
-                setDraft({ ...draft, trigger: { ...(draft.trigger as Extract<WebhookTrigger, { event: "fromGenre" }>), mediaType: v as "movie" | "tv" } })
+                setDraft({
+                  ...draft,
+                  trigger: {
+                    ...(draft.trigger as Extract<WebhookTrigger, { event: "fromGenre" }>),
+                    mediaType: v as "movie" | "tv",
+                  },
+                })
               }
             />
             <SubChips
@@ -333,9 +341,7 @@ function RuleEditor({
                 selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromGenre" }>).genreIds.includes(id),
                 onToggle: () => {
                   const t = draft.trigger as Extract<WebhookTrigger, { event: "fromGenre" }>;
-                  const next = t.genreIds.includes(id)
-                    ? t.genreIds.filter((x) => x !== id)
-                    : [...t.genreIds, id];
+                  const next = t.genreIds.includes(id) ? t.genreIds.filter((x) => x !== id) : [...t.genreIds, id];
                   setDraft({ ...draft, trigger: { ...t, genreIds: next } });
                 },
               }))}
@@ -350,7 +356,9 @@ function RuleEditor({
               items={PROVIDERS.map((p) => ({
                 key: String(p.id),
                 label: p.name,
-                selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromProvider" }>).providerIds.includes(p.id),
+                selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromProvider" }>).providerIds.includes(
+                  p.id,
+                ),
                 onToggle: () => {
                   const t = draft.trigger as Extract<WebhookTrigger, { event: "fromProvider" }>;
                   const next = t.providerIds.includes(p.id)
@@ -370,7 +378,9 @@ function RuleEditor({
               items={COUNTRIES.map((c) => ({
                 key: c.code,
                 label: c.name,
-                selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromCountry" }>).countryCodes.includes(c.code),
+                selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromCountry" }>).countryCodes.includes(
+                  c.code,
+                ),
                 onToggle: () => {
                   const t = draft.trigger as Extract<WebhookTrigger, { event: "fromCountry" }>;
                   const next = t.countryCodes.includes(c.code)
@@ -402,9 +412,7 @@ function RuleEditor({
                 Heads up
               </span>
               <select
-                value={String(
-                  (draft.trigger as Extract<WebhookTrigger, { event: "liveTvEvent" }>).leadMinutes ?? 15,
-                )}
+                value={String((draft.trigger as Extract<WebhookTrigger, { event: "liveTvEvent" }>).leadMinutes ?? 15)}
                 onChange={(e) => {
                   const t = draft.trigger as Extract<WebhookTrigger, { event: "liveTvEvent" }>;
                   setDraft({ ...draft, trigger: { ...t, leadMinutes: Number(e.target.value) } });
@@ -463,7 +471,9 @@ function RuleEditor({
               label="Telegram"
               on={draft.channels.telegram}
               disabled={!canTelegram}
-              onToggle={() => setDraft({ ...draft, channels: { ...draft.channels, telegram: !draft.channels.telegram } })}
+              onToggle={() =>
+                setDraft({ ...draft, channels: { ...draft.channels, telegram: !draft.channels.telegram } })
+              }
             />
           </div>
         </Field>
@@ -500,11 +510,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function TriggerSubFields({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft/60 bg-canvas/30 p-3.5">
-      {children}
-    </div>
-  );
+  return <div className="flex flex-col gap-3 rounded-xl border border-edge-soft/60 bg-canvas/30 p-3.5">{children}</div>;
 }
 
 function SubSelect({

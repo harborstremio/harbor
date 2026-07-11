@@ -52,18 +52,12 @@ function eligible(target: ResolvedAddon, cand: ResolvedAddon, selfId: string): b
   return true;
 }
 
-export function relatedAddons(
-  target: ResolvedAddon,
-  all: ResolvedAddon[],
-  limit = 8,
-): ResolvedAddon[] {
+export function relatedAddons(target: ResolvedAddon, all: ResolvedAddon[], limit = 8): ResolvedAddon[] {
   const selfId = target.manifest?.id ?? target.curated?.id ?? target.transportUrl;
   const targetNorm = normName(target.manifest?.name);
   const cat = categorizeAddon(target);
   const eligibleCandidates = all.filter(
-    (r) =>
-      eligible(target, r, selfId) &&
-      (!targetNorm || normName(r.manifest?.name) !== targetNorm),
+    (r) => eligible(target, r, selfId) && (!targetNorm || normName(r.manifest?.name) !== targetNorm),
   );
   const sameCat = eligibleCandidates
     .filter((r) => categorizeAddon(r) === cat)

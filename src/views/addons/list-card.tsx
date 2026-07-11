@@ -2,6 +2,7 @@ import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { AddonStarBadge } from "@/components/addon-star-badge";
 import { CardArtBackdrop } from "@/components/card-art-backdrop";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
+
 import { idOf, nameOf, subtitleFromManifest } from "./addons-utils";
 import { InstallPill } from "./install-pill";
 

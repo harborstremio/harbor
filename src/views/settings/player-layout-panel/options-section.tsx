@@ -1,5 +1,5 @@
-import type { PlayerChromeConfig, TimeFormat, VolumeStyle } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
+import type { PlayerChromeConfig, TimeFormat, VolumeStyle } from "@/lib/player-chrome";
 
 export function getOptions(t: (k: string) => string) {
   const TIME_OPTIONS: Array<{ id: TimeFormat; label: string; sub: string }> = [
@@ -62,9 +62,7 @@ function OptionCard<T extends string>({
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-edge-soft bg-elevated/40 p-5">
       <div className="flex flex-col gap-1">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-          {title}
-        </span>
+        <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{title}</span>
         <p className="text-[12px] text-ink-muted">{sub}</p>
       </div>
       <div className="flex flex-col gap-1.5">
@@ -76,9 +74,7 @@ function OptionCard<T extends string>({
               type="button"
               onClick={() => onChange(opt.id)}
               className={`flex items-start gap-3 rounded-xl border px-3.5 py-2.5 text-start transition-colors ${
-                selected
-                  ? "border-ink bg-elevated"
-                  : "border-edge-soft bg-canvas/40 hover:border-edge"
+                selected ? "border-ink bg-elevated" : "border-edge-soft bg-canvas/40 hover:border-edge"
               }`}
             >
               <span

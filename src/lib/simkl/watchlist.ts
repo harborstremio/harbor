@@ -35,9 +35,7 @@ export function mapIds(ids: RawIds | undefined): SimklIds {
 }
 
 async function fetchByStatus(status: string): Promise<SimklItem[]> {
-  const data = await simklRequest<RawAllItems>(`/sync/all-items/all/${status}`).catch(
-    () => ({}) as RawAllItems,
-  );
+  const data = await simklRequest<RawAllItems>(`/sync/all-items/all/${status}`).catch(() => ({}) as RawAllItems);
   const out: SimklItem[] = [];
   for (const e of data.movies ?? []) {
     const m = e.movie;

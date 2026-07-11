@@ -1,6 +1,6 @@
+import { useT } from "@/lib/i18n";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
 
 export function Synopsis({ text }: { text: string }) {
   const t = useT();
@@ -28,10 +28,7 @@ export function Synopsis({ text }: { text: string }) {
 
   return (
     <div className="max-w-3xl">
-      <p
-        ref={ref}
-        className={`text-[16px] leading-relaxed text-ink-muted ${expanded ? "" : "line-clamp-4"}`}
-      >
+      <p ref={ref} className={`text-[16px] leading-relaxed text-ink-muted ${expanded ? "" : "line-clamp-4"}`}>
         {text}
       </p>
       {showToggle && (
@@ -41,9 +38,7 @@ export function Synopsis({ text }: { text: string }) {
           className="mt-3 inline-flex items-center gap-1 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
         >
           {expanded ? t("Show less") : t("Show more")}
-          <ChevronDown
-            className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
-          />
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`} />
         </button>
       )}
     </div>

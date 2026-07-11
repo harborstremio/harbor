@@ -1,0 +1,23 @@
+# https://editorconfig.org — matches Harbor frontend style + Oxfmt defaults
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{ts,tsx,js,jsx,mjs,cjs,json,css,html,yml,yaml,md}]
+indent_size = 2
+
+[*.{rs,toml}]
+# Rust / Cargo — leave to rustfmt
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+[*.md]
+trim_trailing_whitespace = false

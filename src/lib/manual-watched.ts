@@ -1,5 +1,5 @@
-import type { LibraryItem } from "@/lib/stremio";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
+import type { LibraryItem } from "@/lib/stremio";
 
 const KEY = "harbor.manualwatched.v1";
 const UNKEY = "harbor.manualunwatched.v1";
@@ -26,8 +26,7 @@ function loadMeta(): Record<string, ManualWatchedMeta> {
   try {
     const raw = localStorage.getItem(METAKEY);
     const parsed = raw ? JSON.parse(raw) : {};
-    metaCache =
-      parsed && typeof parsed === "object" ? (parsed as Record<string, ManualWatchedMeta>) : {};
+    metaCache = parsed && typeof parsed === "object" ? (parsed as Record<string, ManualWatchedMeta>) : {};
   } catch {
     metaCache = {};
   }
@@ -105,23 +104,14 @@ export function isManuallyWatched(metaId: string, season: number, episode: numbe
   return watchedSet().has(key(metaId, season, episode));
 }
 
-export function manualWatchedState(
-  metaId: string,
-  season: number,
-  episode: number,
-): boolean | undefined {
+export function manualWatchedState(metaId: string, season: number, episode: number): boolean | undefined {
   const k = key(metaId, season, episode);
   if (watchedSet().has(k)) return true;
   if (unwatchedSet().has(k)) return false;
   return undefined;
 }
 
-export function setManualWatched(
-  metaId: string,
-  season: number,
-  episode: number,
-  watched: boolean,
-): void {
+export function setManualWatched(metaId: string, season: number, episode: number, watched: boolean): void {
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const k = key(metaId, season, episode);
@@ -135,12 +125,7 @@ export function setManualWatched(
   persist(on, off);
 }
 
-export function setManualWatchedUpTo(
-  metaId: string,
-  season: number,
-  episode: number,
-  watched: boolean,
-): void {
+export function setManualWatchedUpTo(metaId: string, season: number, episode: number, watched: boolean): void {
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   for (let e = 1; e <= episode; e++) {
@@ -188,12 +173,7 @@ export function recordManualWatchedMeta(metaId: string, meta: ManualWatchedMeta)
   } catch {
     return;
   }
-  if (
-    prev &&
-    prev.name === meta.name &&
-    prev.poster === meta.poster &&
-    prev.background === meta.background
-  ) {
+  if (prev && prev.name === meta.name && prev.poster === meta.poster && prev.background === meta.background) {
     return;
   }
   version += 1;

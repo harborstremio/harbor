@@ -1,9 +1,10 @@
-import { ChevronLeft, ListVideo, Search, X } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useQueue } from "@/lib/queue";
 import type { PlayEpisode } from "@/lib/view";
+import { ChevronLeft, ListVideo, Search, X } from "lucide-react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+
 import { EpisodePicker } from "./cast-modal/episode-picker";
 import { ExitConfirm, SKIP_EXIT_CONFIRM_KEY } from "./cast-modal/exit-confirm";
 import { GenreBackdrop } from "./cast-modal/genre-backdrop";
@@ -51,24 +52,16 @@ export function CastModal({
     if (open) setConfirmTarget(null);
   }, [open, meta]);
 
-  const [activeGenre, setActiveGenre] = useState<{ id: number; mediaType: "movie" | "tv" } | null>(
-    null,
-  );
-  const reportGenre = useCallback(
-    (id: number, mt: "movie" | "tv") => setActiveGenre({ id, mediaType: mt }),
-    [],
-  );
+  const [activeGenre, setActiveGenre] = useState<{ id: number; mediaType: "movie" | "tv" } | null>(null);
+  const reportGenre = useCallback((id: number, mt: "movie" | "tv") => setActiveGenre({ id, mediaType: mt }), []);
 
   const view = stack[stack.length - 1];
   const canBack = stack.length > 1;
   const back = () => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
   const openTitle = (m: Meta) => setStack((s) => [...s, { kind: "title", meta: m }]);
-  const openPerson = (id: number, name: string) =>
-    setStack((s) => [...s, { kind: "person", id, name }]);
-  const openSearch = () =>
-    setStack((s) => (s[s.length - 1].kind === "search" ? s : [...s, { kind: "search" }]));
-  const openQueueView = () =>
-    setStack((s) => (s[s.length - 1].kind === "queue" ? s : [...s, { kind: "queue" }]));
+  const openPerson = (id: number, name: string) => setStack((s) => [...s, { kind: "person", id, name }]);
+  const openSearch = () => setStack((s) => (s[s.length - 1].kind === "search" ? s : [...s, { kind: "search" }]));
+  const openQueueView = () => setStack((s) => (s[s.length - 1].kind === "queue" ? s : [...s, { kind: "queue" }]));
   const openEpisodes = (m: Meta, id: string | null) =>
     setStack((s) => [...s, { kind: "episodes", meta: m, imdbId: id }]);
   const openGenre = (name: string, genreId: number, mediaType: "movie" | "tv") => {
@@ -158,10 +151,7 @@ export function CastModal({
           </div>
         ) : null}
 
-        <header
-          ref={headerRef}
-          className="relative z-10 flex shrink-0 items-center justify-between gap-3 px-5 py-3.5"
-        >
+        <header ref={headerRef} className="relative z-10 flex shrink-0 items-center justify-between gap-3 px-5 py-3.5">
           {canBack ? (
             <button
               type="button"
@@ -252,18 +242,9 @@ export function CastModal({
                   onActiveGenre={reportGenre}
                 />
               ) : view.kind === "person" ? (
-                <PersonPanel
-                  personId={view.id}
-                  name={view.name}
-                  tmdbKey={tmdbKey}
-                  onOpenTitle={openTitle}
-                />
+                <PersonPanel personId={view.id} name={view.name} tmdbKey={tmdbKey} onOpenTitle={openTitle} />
               ) : view.kind === "episodes" ? (
-                <EpisodePicker
-                  meta={view.meta}
-                  imdbId={view.imdbId}
-                  onPlayEpisode={(ep) => play(view.meta, ep)}
-                />
+                <EpisodePicker meta={view.meta} imdbId={view.imdbId} onPlayEpisode={(ep) => play(view.meta, ep)} />
               ) : view.kind === "queue" ? (
                 <QueuePanel onPlay={play} currentMeta={meta} currentEpisode={currentEpisode} />
               ) : (

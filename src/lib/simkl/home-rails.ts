@@ -1,16 +1,13 @@
-import type { HomeRow } from "@/views/home/home-types";
 import type { Settings } from "@/lib/settings";
-import { fetchWatchingItems, fetchWatchlist } from "./watchlist";
-import type { SimklItem } from "./types";
+import type { HomeRow } from "@/views/home/home-types";
+
 import { getLocalCache } from "./activities";
 import { enhanceGroupsWithRelations, type AnimeFranchise } from "./anime-grouping";
 import { clearCdnCache, fetchSimklTrending } from "./home-rails/cdn";
-import {
-  groupSimklItemsByFranchise,
-  hydrateSimklItems,
-  hydrateSimklItemsFranchise,
-} from "./home-rails/hydrate";
+import { groupSimklItemsByFranchise, hydrateSimklItems, hydrateSimklItemsFranchise } from "./home-rails/hydrate";
 import { computeUpNextShows } from "./home-rails/up-next";
+import type { SimklItem } from "./types";
+import { fetchWatchingItems, fetchWatchlist } from "./watchlist";
 
 export { hydrateSimklItems };
 
@@ -33,17 +30,12 @@ export async function buildSimklHomeRows(settings: Settings): Promise<HomeRow[]>
     fetchSimklTrending().catch(() => []),
   ]);
 
-  const isAnimeType = (it: SimklItem) =>
-    it.ids.mal != null || it.ids.anidb != null || it.ids.kitsu != null;
+  const isAnimeType = (it: SimklItem) => it.ids.mal != null || it.ids.anidb != null || it.ids.kitsu != null;
   const watchingShows = watching.filter((it) => it.type === "show" && !isAnimeType(it));
-  const watchingAnimeRaw = watching.filter(
-    (it) => (it.type === "show" || it.type === "movie") && isAnimeType(it),
-  );
+  const watchingAnimeRaw = watching.filter((it) => (it.type === "show" || it.type === "movie") && isAnimeType(it));
   const planMovies = plan.filter((it) => it.type === "movie" && !isAnimeType(it));
   const planShows = plan.filter((it) => it.type === "show" && !isAnimeType(it));
-  const planAnimeRaw = plan.filter(
-    (it) => (it.type === "show" || it.type === "movie") && isAnimeType(it),
-  );
+  const planAnimeRaw = plan.filter((it) => (it.type === "show" || it.type === "movie") && isAnimeType(it));
 
   let watchingAnime = groupSimklItemsByFranchise(watchingAnimeRaw);
   let planAnime = groupSimklItemsByFranchise(planAnimeRaw);

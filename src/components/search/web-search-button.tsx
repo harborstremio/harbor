@@ -1,18 +1,14 @@
-import { Globe } from "lucide-react";
-import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 import { HoverTooltip } from "@/components/hover-tooltip";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { Globe } from "lucide-react";
 
 export function WebSearchButton() {
   const { settings, update } = useSettings();
   const t = useT();
   const active = settings.aiWebSearch;
   return (
-    <HoverTooltip
-      label={active ? t("Live web on") : t("Live web off")}
-      side="top"
-      align="center"
-    >
+    <HoverTooltip label={active ? t("Live web on") : t("Live web off")} side="top" align="center">
       <button
         type="button"
         onClick={() => update({ aiWebSearch: !active })}

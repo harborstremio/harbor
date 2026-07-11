@@ -1,7 +1,7 @@
-import { Link2, Play } from "lucide-react";
-import { useMemo } from "react";
 import { directUrlNotWebReady } from "@/lib/torrent/magnet";
 import { useView, type PlayerSrc } from "@/lib/view";
+import { Link2, Play } from "lucide-react";
+import { useMemo } from "react";
 
 export function UrlCard({ raw, onClose }: { raw: string; onClose: () => void }) {
   const { openPlayer } = useView();

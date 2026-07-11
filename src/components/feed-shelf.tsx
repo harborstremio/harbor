@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import { PickCard } from "./pick-card";
 import { Row } from "./row";
 
@@ -36,12 +37,7 @@ export function FeedShelf({
   if (items.length === 0) return null;
 
   return (
-    <Row
-      title={<ShelfTitle shelf={shelf} />}
-      onEndReached={onEndReached}
-      scrollKey={scrollKey}
-      onViewAll={onViewAll}
-    >
+    <Row title={<ShelfTitle shelf={shelf} />} onEndReached={onEndReached} scrollKey={scrollKey} onViewAll={onViewAll}>
       {items.map((m) => (
         <PickCard key={m.id} meta={m} flagRerun={flagRerun} />
       ))}
@@ -53,9 +49,7 @@ function ShelfTitle({ shelf }: { shelf: ShelfMeta }) {
   return (
     <span className="flex flex-col gap-0.5">
       <span className="text-[17px] font-medium tracking-tight text-ink">{shelf.title}</span>
-      {shelf.kicker && (
-        <span className="text-[12px] font-medium text-ink-subtle">{shelf.kicker}</span>
-      )}
+      {shelf.kicker && <span className="text-[12px] font-medium text-ink-subtle">{shelf.kicker}</span>}
     </span>
   );
 }

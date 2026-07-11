@@ -1,8 +1,9 @@
-import { Sparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n";
 import { ANIME4K_MODES } from "@/lib/player/anime4k-modes";
 import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
-import { useT } from "@/lib/i18n";
+import { Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { useMenuSide } from "../menu-side";
 import { Tooltip } from "./tooltip";
 
@@ -60,7 +61,9 @@ export function Anime4kMenu({
         </button>
       </Tooltip>
       {open && (
-        <div className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} w-[320px] max-w-[calc(100vw-32px)] overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}>
+        <div
+          className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} w-[320px] max-w-[calc(100vw-32px)] overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}
+        >
           <div className="p-2">
             <div className="px-3 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
               {t("Anime4K")}

@@ -1,5 +1,5 @@
-import { Check, Pencil, RotateCcw } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { Check, Pencil, RotateCcw } from "lucide-react";
 
 type Props = {
   editMode: boolean;
@@ -13,8 +13,9 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
   const t = useT();
   return (
     <>
-      {editMode && hasChanges && (
-        kids ? (
+      {editMode &&
+        hasChanges &&
+        (kids ? (
           <button
             onClick={onReset}
             className="flex h-12 items-center gap-2 rounded-full bg-amber-400 px-5 text-[15px] font-extrabold text-[#0e3a43] shadow-[0_8px_20px_-8px_rgba(180,120,0,0.5)] transition-transform hover:scale-105 active:scale-95"
@@ -30,8 +31,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
             <RotateCcw size={12} strokeWidth={2.2} />
             {t("Reset")}
           </button>
-        )
-      )}
+        ))}
       {kids ? (
         editMode ? (
           <button
@@ -46,12 +46,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
             onClick={onToggleEdit}
             className="relative inline-flex transition-transform duration-200 hover:scale-[1.05] active:scale-[0.96]"
           >
-            <img
-              src="/kids/buttonkids2.svg"
-              alt=""
-              draggable={false}
-              className="block h-10 w-auto select-none"
-            />
+            <img src="/kids/buttonkids2.svg" alt="" draggable={false} className="block h-10 w-auto select-none" />
             <span className="absolute inset-0 flex items-center justify-center gap-1.5 pe-1 text-[13px] font-semibold text-[#36254d]">
               <Pencil size={14} strokeWidth={2.6} />
               {t("Customize page")}

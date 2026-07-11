@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Captions, CaptionsOff, Check, Languages, Loader2, Play } from "lucide-react";
 import { Flag } from "@/components/flag";
+import { useT } from "@/lib/i18n";
 import { languageName } from "@/lib/subtitles/language";
 import type { SubResult } from "@/lib/subtitles/types";
-import { useT } from "@/lib/i18n";
-import type { PlayEpisode, PlayerSrc } from "@/lib/view";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
+import type { PlayEpisode, PlayerSrc } from "@/lib/view";
+import { ArrowLeft, Captions, CaptionsOff, Check, Languages, Loader2, Play } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { BackdropLayer } from "./backdrop-layer";
 import { useSubtitleChoices } from "./hooks/use-subtitle-choices";
 
@@ -63,8 +64,7 @@ export function SubtitleSelectStep({
     onStart(src);
   };
 
-  const visible =
-    activeLang === "all" ? results ?? [] : groups.find((g) => g.langKey === activeLang)?.items ?? [];
+  const visible = activeLang === "all" ? (results ?? []) : (groups.find((g) => g.langKey === activeLang)?.items ?? []);
   const context = episodeContext(src.episode, src.meta.name);
   const total = results?.length ?? 0;
 

@@ -1,4 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
+
 import { kitsuToTvdb } from "./anime-mapping";
 
 const PROXY = "https://harbor.site/api/tvdb/images";
@@ -40,9 +41,7 @@ export function pickTvdbImage(
   const abs = ep.absoluteNumber ?? ep.number;
   return (
     map[`abs${abs}`] ??
-    (ep.imdbSeason != null && ep.imdbEpisode != null
-      ? map[`s${ep.imdbSeason}e${ep.imdbEpisode}`]
-      : undefined) ??
+    (ep.imdbSeason != null && ep.imdbEpisode != null ? map[`s${ep.imdbSeason}e${ep.imdbEpisode}`] : undefined) ??
     (ep.seasonNumber != null ? map[`s${ep.seasonNumber}e${ep.number}`] : undefined) ??
     null
   );

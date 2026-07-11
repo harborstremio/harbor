@@ -1,8 +1,11 @@
-import { Check, Download, FlaskConical, Github, Link2, Loader2, Lock, RotateCw, Wrench } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
 import cornerSvg from "@/assets/corner.svg";
 import harborDiscord from "@/assets/harbor-discord.svg";
+import { BetaTag } from "@/components/beta-tag";
+import { findCorruptAnimeEntries, healCorruptAnimeEntries } from "@/lib/anime-cw-repair";
 import { useAuth } from "@/lib/auth";
+import { IS_BETA_BUILD } from "@/lib/build-info";
+import { clearResurfaceCache } from "@/lib/cw-resurface";
+import { useT } from "@/lib/i18n";
 import { useOnboarding } from "@/lib/onboarding";
 import {
   resetOmdbBudget,
@@ -11,11 +14,8 @@ import {
   omdbBudget as readOmdbBudget,
 } from "@/lib/providers/omdb";
 import { useSettings } from "@/lib/settings";
-import { repairStremioLibrary, type RepairProgress, type RepairResult } from "@/lib/stremio-library-repair";
-import { findCorruptAnimeEntries, healCorruptAnimeEntries } from "@/lib/anime-cw-repair";
-import { clearResurfaceCache } from "@/lib/cw-resurface";
 import type { LibraryItem } from "@/lib/stremio";
-import { openUrl } from "@/lib/window";
+import { repairStremioLibrary, type RepairProgress, type RepairResult } from "@/lib/stremio-library-repair";
 import {
   checkForUpdate,
   clearStagedUpdate,
@@ -23,19 +23,20 @@ import {
   updateAvailable,
   useUpdate,
 } from "@/lib/updater/use-update";
-import { BetaTag } from "@/components/beta-tag";
-import { IS_BETA_BUILD } from "@/lib/build-info";
+import { openUrl } from "@/lib/window";
+import { Check, Download, FlaskConical, Github, Link2, Loader2, Lock, RotateCw, Wrench } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+
 import { BackupRow } from "./backup-row";
-import { SettingsRecoverRow } from "./settings-recover-row";
 import { BuildFeedback } from "./build-feedback";
-import { RollbackRow } from "./rollback-row";
-import { PrivacyRow } from "./privacy-row";
-import { TrayRow } from "./tray-row";
-import { Section } from "./shared";
-import { Signature } from "./signature";
 import { CustomCodeCard, DownloadsSection } from "./player-panel";
 import { DesktopOnlyBlock } from "./player-panel/internals";
-import { useT } from "@/lib/i18n";
+import { PrivacyRow } from "./privacy-row";
+import { RollbackRow } from "./rollback-row";
+import { SettingsRecoverRow } from "./settings-recover-row";
+import { Section } from "./shared";
+import { Signature } from "./signature";
+import { TrayRow } from "./tray-row";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 const DOWNLOAD_URL = "https://harbor.site/download";
@@ -50,7 +51,9 @@ export function AdvancedPanel() {
       {isTauri && (
         <Section
           title={t("Updates")}
-          subtitle={t("Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.")}
+          subtitle={t(
+            "Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.",
+          )}
         >
           <div className="flex flex-col gap-2.5">
             <UpdatesRow />
@@ -63,7 +66,9 @@ export function AdvancedPanel() {
 
       <Section
         title={t("Backup & restore")}
-        subtitle={t("Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your Stremio sign-in.")}
+        subtitle={t(
+          "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your Stremio sign-in.",
+        )}
       >
         <SettingsRecoverRow />
         <BackupRow />
@@ -71,14 +76,18 @@ export function AdvancedPanel() {
 
       <Section
         title={t("Downloads")}
-        subtitle={t("Where Harbor saves videos when you hit Download in the player. Pick any folder, including one on a different drive.")}
+        subtitle={t(
+          "Where Harbor saves videos when you hit Download in the player. Pick any folder, including one on a different drive.",
+        )}
       >
         <DownloadsSection />
       </Section>
 
       <Section
         title={t("Privacy")}
-        subtitle={t("Harbor sends no telemetry. This also drops outbound ad, analytics, and tracker requests that addons or metadata providers try to make, before they leave your machine.")}
+        subtitle={t(
+          "Harbor sends no telemetry. This also drops outbound ad, analytics, and tracker requests that addons or metadata providers try to make, before they leave your machine.",
+        )}
       >
         <PrivacyRow />
       </Section>
@@ -86,7 +95,9 @@ export function AdvancedPanel() {
       {isTauri && (
         <Section
           title={t("System tray")}
-          subtitle={t("Keep Harbor a click away. Close it to the system tray instead of quitting, and control it from the tray menu. These also mirror into the tray menu live.")}
+          subtitle={t(
+            "Keep Harbor a click away. Close it to the system tray instead of quitting, and control it from the tray menu. These also mirror into the tray menu live.",
+          )}
         >
           <TrayRow />
         </Section>
@@ -95,7 +106,9 @@ export function AdvancedPanel() {
       {isTauri && (
         <Section
           title={t("Stremio install links")}
-          subtitle={t("Harbor catches stremio:// install links so the configure-and-install flow stays inside the app. Every install also syncs to your Stremio account, so the official app remains the canonical home for your library.")}
+          subtitle={t(
+            "Harbor catches stremio:// install links so the configure-and-install flow stays inside the app. Every install also syncs to your Stremio account, so the official app remains the canonical home for your library.",
+          )}
         >
           <StremioDeeplinkRow />
         </Section>
@@ -104,7 +117,9 @@ export function AdvancedPanel() {
       {isTauri && (
         <Section
           title={t("Discord Rich Presence")}
-          subtitle={t("Let your Discord friends see what you are watching, with the show poster and a live progress bar. Desktop only, and only your own Discord client is involved (nothing touches a Harbor server).")}
+          subtitle={t(
+            "Let your Discord friends see what you are watching, with the show poster and a live progress bar. Desktop only, and only your own Discord client is involved (nothing touches a Harbor server).",
+          )}
         >
           <DiscordPresenceRow />
         </Section>
@@ -117,16 +132,15 @@ export function AdvancedPanel() {
         <OmdbBudgetRow />
       </Section>
 
-      <Section
-        title={t("Onboarding")}
-        subtitle={t("Replay the walkthrough or unhide every dismissed tip in the app.")}
-      >
+      <Section title={t("Onboarding")} subtitle={t("Replay the walkthrough or unhide every dismissed tip in the app.")}>
         <OnboardingRow />
       </Section>
 
       <Section
         title={t("Stremio library repair")}
-        subtitle={t("Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema. Safe to run anytime; only items that need fixing get touched.")}
+        subtitle={t(
+          "Scans your Stremio library and rewrites any item whose shape doesn't match Stremio's exact schema. Safe to run anytime; only items that need fixing get touched.",
+        )}
       >
         <DesktopOnlyBlock>
           <LibraryRepairRow />
@@ -136,10 +150,7 @@ export function AdvancedPanel() {
 
       <CustomCodeCard />
 
-      <Section
-        title={t("About")}
-        subtitle={t("Build identity. Useful when filing a bug report at bugs@harbor.site.")}
-      >
+      <Section title={t("About")} subtitle={t("Build identity. Useful when filing a bug report at bugs@harbor.site.")}>
         <AboutRow />
       </Section>
 
@@ -153,25 +164,23 @@ export function AdvancedPanel() {
 function LegalDisclaimer() {
   return (
     <section className="rounded-2xl border border-edge-soft bg-canvas/30 p-5">
-      <span className="block text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">
-        Legal
-      </span>
+      <span className="block text-[10.5px] font-bold uppercase tracking-[0.22em] text-ink-subtle">Legal</span>
       <p className="mt-2 text-[12px] leading-relaxed text-ink-muted">
         Harbor is an independent, open-source desktop and web client. It is{" "}
-        <span className="font-semibold text-ink">not affiliated with, endorsed by, sponsored by, or in any way associated with Stremio Ltd.</span>,{" "}
-        the maker of <span className="font-semibold text-ink">Stremio</span>, or with any company,
-        addon author, or trademark holder referenced inside the app.
-        &quot;Stremio&quot;, &quot;Cinemeta&quot;, &quot;OpenSubtitles&quot;, &quot;Real-Debrid&quot;,
-        &quot;Premiumize&quot;, &quot;AllDebrid&quot;, &quot;TorBox&quot;, &quot;DebridLink&quot;,
-        &quot;TMDB&quot;, &quot;Trakt&quot;, &quot;IMDb&quot;, &quot;Netflix&quot;, &quot;Disney+&quot;,
-        and all other names, logos, and brand references are property of their respective owners
-        and are used here only for compatibility and identification.
+        <span className="font-semibold text-ink">
+          not affiliated with, endorsed by, sponsored by, or in any way associated with Stremio Ltd.
+        </span>
+        , the maker of <span className="font-semibold text-ink">Stremio</span>, or with any company, addon author, or
+        trademark holder referenced inside the app. &quot;Stremio&quot;, &quot;Cinemeta&quot;,
+        &quot;OpenSubtitles&quot;, &quot;Real-Debrid&quot;, &quot;Premiumize&quot;, &quot;AllDebrid&quot;,
+        &quot;TorBox&quot;, &quot;DebridLink&quot;, &quot;TMDB&quot;, &quot;Trakt&quot;, &quot;IMDb&quot;,
+        &quot;Netflix&quot;, &quot;Disney+&quot;, and all other names, logos, and brand references are property of their
+        respective owners and are used here only for compatibility and identification.
       </p>
       <p className="mt-2 text-[12px] leading-relaxed text-ink-muted">
-        Harbor itself does not host, distribute, or index any media. All streams come from
-        third-party addons, debrid services, or your own Stremio account that you configure
-        yourself. You are responsible for what you choose to play and for complying with the
-        laws of your jurisdiction.
+        Harbor itself does not host, distribute, or index any media. All streams come from third-party addons, debrid
+        services, or your own Stremio account that you configure yourself. You are responsible for what you choose to
+        play and for complying with the laws of your jurisdiction.
       </p>
     </section>
   );
@@ -199,14 +208,16 @@ function WebBuildBanner() {
         <span className="w-fit rounded-full border border-edge-soft bg-canvas/60 px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
           {t("Web build")}
         </span>
-        <h2 className="text-[19px] font-medium tracking-tight text-ink">
-          {t("Where your data lives")}
-        </h2>
+        <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Where your data lives")}</h2>
         <p className="text-[13.5px] leading-relaxed text-ink-muted">
-          {t("Everything you save here stays in this browser. Your Stremio login, API keys, watch progress, picker cache, dismissed tips. Harbor servers never see any of it. Clearing your browser data wipes it.")}
+          {t(
+            "Everything you save here stays in this browser. Your Stremio login, API keys, watch progress, picker cache, dismissed tips. Harbor servers never see any of it. Clearing your browser data wipes it.",
+          )}
         </p>
         <p className="text-[13.5px] leading-relaxed text-ink-muted">
-          {t("The web build can't run mpv, the trickplay generator, the local bandwidth probe, or your own Cloudflare relay. If you want HDR passthrough, TrueHD or DTS-HD audio, and smoother seeking, grab the desktop app.")}
+          {t(
+            "The web build can't run mpv, the trickplay generator, the local bandwidth probe, or your own Cloudflare relay. If you want HDR passthrough, TrueHD or DTS-HD audio, and smoother seeking, grab the desktop app.",
+          )}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <button
@@ -247,7 +258,9 @@ function BetaChannelRow() {
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-[14px] font-medium text-ink">{t("Get beta updates")}</span>
         <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Receive early builds with the newest fixes before they reach the stable release. Betas can be rough around the edges; switch this off to return to stable at the next update.")}
+          {t(
+            "Receive early builds with the newest fixes before they reach the stable release. Betas can be rough around the edges; switch this off to return to stable at the next update.",
+          )}
         </p>
       </div>
       <button
@@ -287,11 +300,11 @@ function StremioDeeplinkRow() {
           <Link2 size={15} strokeWidth={2.2} />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[14px] font-medium text-ink">
-            {t("Catch stremio:// install links inside Harbor")}
-          </span>
+          <span className="text-[14px] font-medium text-ink">{t("Catch stremio:// install links inside Harbor")}</span>
           <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Harbor's in-app installer animates the manifest install and keeps you in context. Anything Harbor installs is also synced to your Stremio account, so the official app stays the canonical library. Turn this off and Stremio becomes the only handler for stremio:// links; Harbor still installs anything you trigger from inside the app (Configure & install, paste, drag-and-drop).")}
+            {t(
+              "Harbor's in-app installer animates the manifest install and keeps you in context. Anything Harbor installs is also synced to your Stremio account, so the official app stays the canonical library. Turn this off and Stremio becomes the only handler for stremio:// links; Harbor still installs anything you trigger from inside the app (Configure & install, paste, drag-and-drop).",
+            )}
           </p>
         </div>
         <button
@@ -312,11 +325,15 @@ function StremioDeeplinkRow() {
       </div>
       {on ? (
         <p className="px-1 text-[11.5px] leading-relaxed text-ink-subtle">
-          {t("Heads up: if Stremio is also installed, Windows may ask which app to use the first time a stremio:// link fires. Pick Harbor to make it stick.")}
+          {t(
+            "Heads up: if Stremio is also installed, Windows may ask which app to use the first time a stremio:// link fires. Pick Harbor to make it stick.",
+          )}
         </p>
       ) : (
         <p className="px-1 text-[11.5px] leading-relaxed text-ink-subtle">
-          {t("stremio:// links now open in the Stremio app. Harbor will only install when you trigger it from inside Harbor.")}
+          {t(
+            "stremio:// links now open in the Stremio app. Harbor will only install when you trigger it from inside Harbor.",
+          )}
         </p>
       )}
     </div>
@@ -388,16 +405,13 @@ function DiscordPresenceRow() {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-start gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5">
-        <img
-          src={harborDiscord}
-          alt=""
-          draggable={false}
-          className="h-14 w-auto shrink-0 self-center object-contain"
-        />
+        <img src={harborDiscord} alt="" draggable={false} className="h-14 w-auto shrink-0 self-center object-contain" />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[14px] font-medium text-ink">{t("Show on Discord")}</span>
           <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Display what you are watching on your Discord profile, with the show poster and a live progress bar. Requires the Discord desktop app to be running.")}
+            {t(
+              "Display what you are watching on your Discord profile, with the show poster and a live progress bar. Requires the Discord desktop app to be running.",
+            )}
           </p>
         </div>
         <button
@@ -593,9 +607,7 @@ function AboutRow() {
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
+      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</span>
       <span className="text-[13.5px] tabular-nums text-ink">{value}</span>
     </div>
   );
@@ -690,7 +702,10 @@ function LibraryRepairRow() {
         "."
       );
     }
-    if (!progress) return t("Rewrites every library item to match Stremio's exact schema. Run once if your Stremio app started crashing after Harbor synced playback.");
+    if (!progress)
+      return t(
+        "Rewrites every library item to match Stremio's exact schema. Run once if your Stremio app started crashing after Harbor synced playback.",
+      );
     if (progress.phase === "fetching") {
       return progress.total ? t("Fetching {n} items…", { n: progress.total }) : t("Fetching library index…");
     }
@@ -710,7 +725,9 @@ function LibraryRepairRow() {
       label={t("Repair library")}
       sub={statusLine}
       cta={busy ? t("Working…") : result ? t("Run again") : t("Repair now")}
-      icon={busy ? <Loader2 size={13} strokeWidth={2.4} className="animate-spin" /> : <Wrench size={13} strokeWidth={2.4} />}
+      icon={
+        busy ? <Loader2 size={13} strokeWidth={2.4} className="animate-spin" /> : <Wrench size={13} strokeWidth={2.4} />
+      }
       onClick={run}
       disabled={busy}
       tone={result && result.repaired > 0 && !error ? "success" : undefined}
@@ -764,7 +781,10 @@ function AnimeRepairRow() {
   }
 
   const names =
-    found.slice(0, 4).map((i) => i.name || i._id).join(", ") + (found.length > 4 ? "…" : "");
+    found
+      .slice(0, 4)
+      .map((i) => i.name || i._id)
+      .join(", ") + (found.length > 4 ? "…" : "");
   const showRemove = phase === "scanned" && found.length > 0;
   const busy = phase === "scanning" || phase === "removing";
   const sub = (() => {
@@ -773,17 +793,21 @@ function AnimeRepairRow() {
     if (phase === "scanned")
       return found.length === 0
         ? t("No issues found. Your anime library looks clean.")
-        : t("Found {n}: {names}. These are saved under the wrong id, which breaks Continue Watching and Trakt marking.", { n: found.length, names });
+        : t(
+            "Found {n}: {names}. These are saved under the wrong id, which breaks Continue Watching and Trakt marking.",
+            { n: found.length, names },
+          );
     if (phase === "removing") return t("Removing…");
     if (phase === "done") return t("Removed {n}. Rewatch and they re-add correctly.", { n: removed });
-    return t("Finds anime saved under a movie or series id (which breaks Continue Watching and Trakt) and removes just those so they re-add correctly.");
+    return t(
+      "Finds anime saved under a movie or series id (which breaks Continue Watching and Trakt) and removes just those so they re-add correctly.",
+    );
   })();
   const cta = (() => {
     if (phase === "scanning") return t("Scanning…");
     if (phase === "removing") return t("Removing…");
     if (showRemove) return t("Remove {n}", { n: found.length });
-    if (phase === "done" || phase === "error" || (phase === "scanned" && found.length === 0))
-      return t("Scan again");
+    if (phase === "done" || phase === "error" || (phase === "scanned" && found.length === 0)) return t("Scan again");
     return t("Scan for corruption");
   })();
 
@@ -792,11 +816,12 @@ function AnimeRepairRow() {
       label={t("Fix corrupted anime")}
       sub={sub}
       cta={cta}
-      icon={busy ? <Loader2 size={13} strokeWidth={2.4} className="animate-spin" /> : <Wrench size={13} strokeWidth={2.4} />}
+      icon={
+        busy ? <Loader2 size={13} strokeWidth={2.4} className="animate-spin" /> : <Wrench size={13} strokeWidth={2.4} />
+      }
       onClick={showRemove ? remove : scan}
       disabled={busy}
       tone={phase === "done" && removed > 0 ? "success" : undefined}
     />
   );
 }
-

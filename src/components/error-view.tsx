@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import snip404 from "@/assets/snip404.svg";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { submitErrorReport } from "@/lib/bug-report";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type HarborError = {
   code: string;
@@ -64,20 +64,16 @@ export function ErrorView() {
     };
     const onUnhandledRejection = (e: PromiseRejectionEvent) => {
       const reason = e.reason as { name?: string; message?: string; stack?: string } | string | undefined;
-      const message =
-        typeof reason === "string"
-          ? reason
-          : reason?.message ?? "Unhandled promise rejection.";
-      const name = typeof reason === "object" ? reason?.name ?? "Rejection" : "Rejection";
+      const message = typeof reason === "string" ? reason : (reason?.message ?? "Unhandled promise rejection.");
+      const name = typeof reason === "object" ? (reason?.name ?? "Rejection") : "Rejection";
       if (isNoisyError(reason, message)) return;
       showHarborError({
         code: name,
         title: "Promise rejection",
         message,
-        detail: [
-          `${name}: ${message}`,
-          typeof reason === "object" && reason?.stack ? `\n${reason.stack}` : "",
-        ].join(""),
+        detail: [`${name}: ${message}`, typeof reason === "object" && reason?.stack ? `\n${reason.stack}` : ""].join(
+          "",
+        ),
       });
     };
     window.addEventListener("harbor:error", onError);
@@ -151,10 +147,7 @@ export function ErrorView() {
           style={{ transform: "translateY(1px)" }}
         >
           Harb
-          <span
-            className="inline-block"
-            style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}
-          >
+          <span className="inline-block" style={{ transform: "rotate(7deg)", transformOrigin: "50% 65%" }}>
             o
           </span>
           r
@@ -174,9 +167,7 @@ export function ErrorView() {
           Oops..
         </h1>
 
-        <p className="max-w-[460px] text-[14.5px] leading-relaxed text-ink-muted sm:text-[15.5px]">
-          {error.message}
-        </p>
+        <p className="max-w-[460px] text-[14.5px] leading-relaxed text-ink-muted sm:text-[15.5px]">{error.message}</p>
 
         {error.detail && <TechnicalDetail content={buildReportBody(error)} />}
 
@@ -227,8 +218,7 @@ export function ErrorView() {
         <p className="text-[11.5px] text-ink-subtle">
           {report.kind === "sent" ? (
             <>
-              Thanks. Tracked as{" "}
-              <span className="font-mono text-ink-muted">{report.id}</span>.
+              Thanks. Tracked as <span className="font-mono text-ink-muted">{report.id}</span>.
             </>
           ) : report.kind === "error" ? (
             <span className="text-danger/80">Could not send: {report.message}</span>
@@ -302,9 +292,7 @@ function TechnicalDetail({ content }: { content: string }) {
               aria-label={copied ? "Copied" : "Copy to clipboard"}
               title={copied ? "Copied" : "Copy"}
               className={`absolute end-2.5 top-2.5 inline-flex h-8 w-8 items-center justify-center rounded-full transition-[background-color,color,transform] active:scale-95 ${
-                copied
-                  ? "bg-accent/20 text-accent"
-                  : "text-ink-subtle hover:bg-elevated/70 hover:text-ink"
+                copied ? "bg-accent/20 text-accent" : "text-ink-subtle hover:bg-elevated/70 hover:text-ink"
               }`}
             >
               <span className="relative inline-flex h-[14px] w-[14px] items-center justify-center">

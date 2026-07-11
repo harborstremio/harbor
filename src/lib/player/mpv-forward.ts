@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+
 import { emptySnapshot, type PlayerBridge, type PlayerCapabilities, type PlayerSnapshot } from "./bridge";
 
 export type ForwardingBridge = PlayerBridge & {
@@ -12,8 +13,7 @@ export function createForwardingMpvBridge(): ForwardingBridge {
     const next = { ...snap };
     listeners.forEach((l) => l(next));
   };
-  const set = (name: string, value: unknown) =>
-    invoke("mpv_set_property", { name, value }).catch(() => {});
+  const set = (name: string, value: unknown) => invoke("mpv_set_property", { name, value }).catch(() => {});
   const cmd = (c: Array<string | number>) => invoke("mpv_command", { cmd: c }).catch(() => {});
 
   return {
@@ -89,8 +89,12 @@ export function createForwardingMpvBridge(): ForwardingBridge {
     setAudioDevice(name) {
       void set("audio-device", name && name !== "auto" ? name : "auto");
     },
-    getSelectedTrackCues() { return null; },
-    getSelectedTrackUrl() { return null; },
+    getSelectedTrackCues() {
+      return null;
+    },
+    getSelectedTrackUrl() {
+      return null;
+    },
     setMediaInfo() {},
     async screenshot(path) {
       try {

@@ -1,6 +1,7 @@
-import { Check, Globe } from "lucide-react";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { Check, Globe } from "lucide-react";
+
 import { LangFlags } from "./home-language-flags";
 
 const LANGS: Array<{ code: string; native: string; name: string; flags: string[] }> = [
@@ -29,9 +30,7 @@ export function HomeLanguagePicker() {
 
   const toggle = (code: string) =>
     update({
-      homeLanguages: selected.includes(code)
-        ? selected.filter((c) => c !== code)
-        : [...selected, code],
+      homeLanguages: selected.includes(code) ? selected.filter((c) => c !== code) : [...selected, code],
     });
 
   return (

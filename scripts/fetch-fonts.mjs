@@ -4,8 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const BASE =
-  process.env.HARBOR_FONTS_BASE ??
-  "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetOTF/JP";
+  process.env.HARBOR_FONTS_BASE ?? "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/SubsetOTF/JP";
 
 const FONTS = [
   {

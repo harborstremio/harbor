@@ -1,8 +1,8 @@
+import { LazyMount } from "@/components/lazy-mount";
+import { orderedSectionKeys, type DetailCustomization } from "@/lib/detail-customization";
+import { useT } from "@/lib/i18n";
 import { ChevronDown, ChevronUp, Eye, EyeOff } from "lucide-react";
 import type { ReactNode } from "react";
-import { LazyMount } from "@/components/lazy-mount";
-import { useT } from "@/lib/i18n";
-import { orderedSectionKeys, type DetailCustomization } from "@/lib/detail-customization";
 
 export type DetailSection = {
   key: string;

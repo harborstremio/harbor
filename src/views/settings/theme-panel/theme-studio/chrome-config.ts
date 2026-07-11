@@ -1,4 +1,5 @@
 import type { ChromeConfig, ChromeNavId } from "@/lib/theme";
+
 import { iconInnerSvg } from "./chrome-icons";
 
 export const NAV_LABELS: Record<ChromeNavId, string> = {
@@ -32,11 +33,7 @@ export const DEFAULT_CHROME: ChromeConfig = {
 };
 
 function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function resolveIconMarkup(value: string): string | undefined {

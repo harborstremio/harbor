@@ -1,8 +1,8 @@
 import { type Meta } from "@/lib/cinemeta";
-import { recentlyPlayed, watchTitleKey } from "@/lib/playback-history";
-import { fetchUnderNinety } from "@/lib/feed/sections";
 import { pickMoodSpecs } from "@/lib/feed/moods";
+import { fetchUnderNinety } from "@/lib/feed/sections";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
+import { recentlyPlayed, watchTitleKey } from "@/lib/playback-history";
 import { tmdbDiscover, tmdbMovieRow, tmdbTrending } from "@/lib/providers/tmdb";
 
 export const HERO_POOL_TARGET = 5;
@@ -14,10 +14,7 @@ export type RowSpec = {
   noPaginate?: boolean;
 };
 
-export async function buildMovieHero(
-  key: string,
-  seen: ReturnType<typeof recentlyPlayed>,
-): Promise<Meta[]> {
+export async function buildMovieHero(key: string, seen: ReturnType<typeof recentlyPlayed>): Promise<Meta[]> {
   const [topA, topB, prestigeA, prestigeB, modern] = await Promise.all([
     tmdbMovieRow(key, "top_rated", "US", 1).catch(() => [] as Meta[]),
     tmdbMovieRow(key, "top_rated", "US", 2).catch(() => [] as Meta[]),
@@ -58,9 +55,7 @@ export function rotateDaily<T extends { id: string; name: string }>(
   n: number,
   seen: ReturnType<typeof recentlyPlayed>,
 ): T[] {
-  const unseen = pool.filter(
-    (m) => !seen.ids.has(m.id) && !seen.titles.has(watchTitleKey(m.name)),
-  );
+  const unseen = pool.filter((m) => !seen.ids.has(m.id) && !seen.titles.has(watchTitleKey(m.name)));
   const base = unseen.length >= n ? unseen : pool;
   if (base.length === 0) return [];
   const day = Math.floor(Date.now() / 86_400_000);
@@ -87,11 +82,13 @@ export function movieSpecs(key: string, region: string): RowSpec[] {
       title: "In Theaters Now",
       fetcher: (p) => tmdbMovieRow(key, "now_playing", region, p),
     },
-    ...pickMoodSpecs(new Date()).map((m): RowSpec => ({
-      key: m.id,
-      title: m.title,
-      fetcher: (p) => tmdbDiscover(key, "movie", { ...m.params, page: String(p) }),
-    })),
+    ...pickMoodSpecs(new Date()).map(
+      (m): RowSpec => ({
+        key: m.id,
+        title: m.title,
+        fetcher: (p) => tmdbDiscover(key, "movie", { ...m.params, page: String(p) }),
+      }),
+    ),
     {
       key: "critics-acclaim",
       title: "Critics' Picks",

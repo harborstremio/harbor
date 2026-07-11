@@ -121,14 +121,7 @@ function isValidEpisodeDetail(data: unknown): data is EpisodeDetail {
 }
 
 // Export verification - ensures types can be imported elsewhere
-export type {
-  EpisodeDetail,
-  GuestStar,
-  CrewMember,
-  StillImage,
-  EpisodeCacheEntry,
-  TmdbEpisodeResponse,
-};
+export type { EpisodeDetail, GuestStar, CrewMember, StillImage, EpisodeCacheEntry, TmdbEpisodeResponse };
 
 // Test successful if this compiles without errors
 console.log("Episode types verification: All types are properly defined");

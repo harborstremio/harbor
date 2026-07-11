@@ -1,5 +1,5 @@
-import { type CSSProperties } from "react";
 import { customColorsToTokens, FONT_PAIRS } from "@/lib/theme";
+import { type CSSProperties } from "react";
 
 export const SUITE_COLORS = {
   canvas: "#1c1f24",

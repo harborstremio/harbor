@@ -1,6 +1,6 @@
-import type { ComponentType } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import type { ComponentType } from "react";
 
 export type PlayerShellProps = {
   snap: PlayerSnapshot;

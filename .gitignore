@@ -28,6 +28,7 @@ pnpm-debug.log*
 .idea
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 *.suo
 *.sw?
 
@@ -40,3 +41,6 @@ pnpm-debug.log*
 /src-tauri/fonts/*.otf
 /src-tauri/fonts/*.ttf
 local_docs/
+
+# pnpm content-addressable store (local)
+.pnpm-store/

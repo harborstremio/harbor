@@ -1,10 +1,18 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { randomUuid } from "@/lib/uuid";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
 import { TogetherClient, type RoomEvent, type RoomSnapshot } from "./client";
-import { useSelfIdentity } from "./use-self-identity";
-import { relayOutdated } from "./relay-version";
-import { deriveHostSource, deriveRoomGuestPick, type HostSourceInfo, type LastInviteMeta } from "./room-derive";
+import {
+  WT_PROTO,
+  generateRoomCode,
+  normalizeRoomCode,
+  type ParticipantLocation,
+  type PlayInvite,
+  type RoomCommand,
+  type SummonTarget,
+  type SyncState,
+} from "./protocol";
 import { applyRoomEvent } from "./provider-events";
 import type {
   ChatMessage,
@@ -16,17 +24,10 @@ import type {
   PartialSyncState,
   RemoteCursor,
 } from "./provider-types";
+import { relayOutdated } from "./relay-version";
+import { deriveHostSource, deriveRoomGuestPick, type HostSourceInfo, type LastInviteMeta } from "./room-derive";
 import { createCommandSender } from "./seek-coalesce";
-import {
-  WT_PROTO,
-  generateRoomCode,
-  normalizeRoomCode,
-  type ParticipantLocation,
-  type PlayInvite,
-  type RoomCommand,
-  type SummonTarget,
-  type SyncState,
-} from "./protocol";
+import { useSelfIdentity } from "./use-self-identity";
 
 const CLIENT_ID_KEY = "harbor.together.clientId";
 const NAME_KEY = "harbor.together.name";
@@ -67,7 +68,14 @@ type TogetherValue = {
   dismissSummon: () => void;
   sendCursor: (x: number, y: number, visible: boolean, path: string) => void;
   remoteCursors: RemoteCursor[];
-  sendDraw: (strokeId: string, phase: "start" | "point" | "end" | "clear", path: string, x?: number, y?: number, color?: string) => void;
+  sendDraw: (
+    strokeId: string,
+    phase: "start" | "point" | "end" | "clear",
+    path: string,
+    x?: number,
+    y?: number,
+    color?: string,
+  ) => void;
   onIncomingDraw: (cb: (e: IncomingDraw) => void) => () => void;
   sendPresence: (location?: ParticipantLocation) => void;
   presenceMap: Map<string, number>;
@@ -171,9 +179,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
   const [incomingSummon, setIncomingSummon] = useState<IncomingSummon | null>(null);
   const [cursorMap, setCursorMap] = useState<Map<string, RemoteCursor>>(new Map());
   const [presenceMap, setPresenceMap] = useState<Map<string, number>>(new Map());
-  const [participantLocations, setParticipantLocations] = useState<Map<string, ParticipantLocation>>(
-    new Map(),
-  );
+  const [participantLocations, setParticipantLocations] = useState<Map<string, ParticipantLocation>>(new Map());
 
   const openModal = useCallback(() => setModalOpen(true), []);
   const closeModal = useCallback(() => setModalOpen(false), []);

@@ -69,9 +69,7 @@ async function malInfo(malId: number): Promise<{ titles: string[]; year?: number
   try {
     const ac = new AbortController();
     const timer = setTimeout(() => ac.abort(), 8000);
-    const r = await fetch(`${JIKAN}/anime/${malId}`, { signal: ac.signal }).finally(() =>
-      clearTimeout(timer),
-    );
+    const r = await fetch(`${JIKAN}/anime/${malId}`, { signal: ac.signal }).finally(() => clearTimeout(timer));
     if (!r.ok) return { titles: [] };
     const j = (await r.json()) as {
       data?: {
@@ -116,9 +114,7 @@ function slugCandidates(titles: string[], year?: number): string[] {
 async function fetchShow(slug: string): Promise<string | null> {
   try {
     const url = `${AFL}/${slug}`;
-    const r = isTauri
-      ? await tauriHttpFetch(url, { method: "GET", headers: { "User-Agent": UA } })
-      : await fetch(url);
+    const r = isTauri ? await tauriHttpFetch(url, { method: "GET", headers: { "User-Agent": UA } }) : await fetch(url);
     if (!r.ok) return null;
     return await r.text();
   } catch {

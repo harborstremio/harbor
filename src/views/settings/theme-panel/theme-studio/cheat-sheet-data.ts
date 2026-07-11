@@ -6,46 +6,150 @@ export type TokenRow = {
 };
 
 export const COLOR_TOKENS: TokenRow[] = [
-  { name: "--color-canvas", type: "color", defaultValue: "oklch(0.18 0.004 260)", desc: "Page background. Everything sits on this." },
-  { name: "--color-surface", type: "color", defaultValue: "oklch(0.22 0.004 260)", desc: "Cards, panels, search input, modal bodies." },
-  { name: "--color-elevated", type: "color", defaultValue: "oklch(0.27 0.004 260)", desc: "Modals, dropdowns, popovers, settings nav." },
-  { name: "--color-raised", type: "color", defaultValue: "oklch(0.32 0.004 260)", desc: "Hover states, pressed surfaces, pill backgrounds." },
-  { name: "--color-ink", type: "color", defaultValue: "oklch(0.97 0.003 260)", desc: "Primary text and icons. Maximum contrast." },
-  { name: "--color-ink-muted", type: "color", defaultValue: "oklch(0.72 0.003 260)", desc: "Secondary text, inactive nav items, blurbs." },
-  { name: "--color-ink-subtle", type: "color", defaultValue: "oklch(0.50 0.003 260)", desc: "Captions, eyebrow labels, hints, dim metadata." },
-  { name: "--color-edge", type: "color", defaultValue: "oklch(0.36 0.004 260 / 0.55)", desc: "Strong borders and dividers. Includes alpha." },
-  { name: "--color-edge-soft", type: "color", defaultValue: "oklch(0.36 0.004 260 / 0.25)", desc: "Soft borders. Used for low-emphasis containers." },
-  { name: "--color-accent", type: "color", defaultValue: "oklch(0.78 0.13 60)", desc: "Brand color. Active states, focus rings, buttons." },
-  { name: "--color-accent-soft", type: "color", defaultValue: "oklch(0.78 0.13 60 / 0.18)", desc: "Accent tints, hover backgrounds, glow effects." },
-  { name: "--color-danger", type: "color", defaultValue: "oklch(0.55 0.18 25)", desc: "Errors, destructive actions, delete buttons." },
+  {
+    name: "--color-canvas",
+    type: "color",
+    defaultValue: "oklch(0.18 0.004 260)",
+    desc: "Page background. Everything sits on this.",
+  },
+  {
+    name: "--color-surface",
+    type: "color",
+    defaultValue: "oklch(0.22 0.004 260)",
+    desc: "Cards, panels, search input, modal bodies.",
+  },
+  {
+    name: "--color-elevated",
+    type: "color",
+    defaultValue: "oklch(0.27 0.004 260)",
+    desc: "Modals, dropdowns, popovers, settings nav.",
+  },
+  {
+    name: "--color-raised",
+    type: "color",
+    defaultValue: "oklch(0.32 0.004 260)",
+    desc: "Hover states, pressed surfaces, pill backgrounds.",
+  },
+  {
+    name: "--color-ink",
+    type: "color",
+    defaultValue: "oklch(0.97 0.003 260)",
+    desc: "Primary text and icons. Maximum contrast.",
+  },
+  {
+    name: "--color-ink-muted",
+    type: "color",
+    defaultValue: "oklch(0.72 0.003 260)",
+    desc: "Secondary text, inactive nav items, blurbs.",
+  },
+  {
+    name: "--color-ink-subtle",
+    type: "color",
+    defaultValue: "oklch(0.50 0.003 260)",
+    desc: "Captions, eyebrow labels, hints, dim metadata.",
+  },
+  {
+    name: "--color-edge",
+    type: "color",
+    defaultValue: "oklch(0.36 0.004 260 / 0.55)",
+    desc: "Strong borders and dividers. Includes alpha.",
+  },
+  {
+    name: "--color-edge-soft",
+    type: "color",
+    defaultValue: "oklch(0.36 0.004 260 / 0.25)",
+    desc: "Soft borders. Used for low-emphasis containers.",
+  },
+  {
+    name: "--color-accent",
+    type: "color",
+    defaultValue: "oklch(0.78 0.13 60)",
+    desc: "Brand color. Active states, focus rings, buttons.",
+  },
+  {
+    name: "--color-accent-soft",
+    type: "color",
+    defaultValue: "oklch(0.78 0.13 60 / 0.18)",
+    desc: "Accent tints, hover backgrounds, glow effects.",
+  },
+  {
+    name: "--color-danger",
+    type: "color",
+    defaultValue: "oklch(0.55 0.18 25)",
+    desc: "Errors, destructive actions, delete buttons.",
+  },
 ];
 
 export const FONT_TOKENS: TokenRow[] = [
-  { name: "--font-display", type: "font", defaultValue: '"Sentient", "Georgia", serif', desc: "Hero titles, section headers, wordmark." },
-  { name: "--font-sans", type: "font", defaultValue: '"Switzer", "Inter", system-ui, sans-serif', desc: "Body text. Everything that isn't a heading." },
-  { name: "--font-mono", type: "font", defaultValue: '"JetBrains Mono", ui-monospace, monospace', desc: "Code blocks, token values, debug output." },
+  {
+    name: "--font-display",
+    type: "font",
+    defaultValue: '"Sentient", "Georgia", serif',
+    desc: "Hero titles, section headers, wordmark.",
+  },
+  {
+    name: "--font-sans",
+    type: "font",
+    defaultValue: '"Switzer", "Inter", system-ui, sans-serif',
+    desc: "Body text. Everything that isn't a heading.",
+  },
+  {
+    name: "--font-mono",
+    type: "font",
+    defaultValue: '"JetBrains Mono", ui-monospace, monospace',
+    desc: "Code blocks, token values, debug output.",
+  },
 ];
 
 export const EASING_TOKENS: TokenRow[] = [
-  { name: "--ease-out", type: "easing", defaultValue: "cubic-bezier(0.16, 1, 0.3, 1)", desc: "Main entrance curve. Pages, modals, drawers." },
-  { name: "--ease-in-out", type: "easing", defaultValue: "cubic-bezier(0.65, 0, 0.35, 1)", desc: "Continuous loops, breathing animations." },
+  {
+    name: "--ease-out",
+    type: "easing",
+    defaultValue: "cubic-bezier(0.16, 1, 0.3, 1)",
+    desc: "Main entrance curve. Pages, modals, drawers.",
+  },
+  {
+    name: "--ease-in-out",
+    type: "easing",
+    defaultValue: "cubic-bezier(0.65, 0, 0.35, 1)",
+    desc: "Continuous loops, breathing animations.",
+  },
 ];
 
 export type QuickStep = { step: string; detail: string };
 
 export const QUICKSTART: QuickStep[] = [
   { step: "Start from a theme", detail: "Open the Theme Studio. Begin from a built-in look or from scratch." },
-  { step: "Set colors and fonts", detail: "The Look tab drives the 12 color tokens and the type pairing. The live sample updates instantly." },
-  { step: "Choose a layout", detail: "The Layout tab picks where navigation lives. Custom hides built-in chrome and your own HTML takes over." },
-  { step: "Build custom chrome visually", detail: "On Custom, the builder makes a sidebar or top bar with no code. Wire items to window.harbor.navigate()." },
-  { step: "Go deeper with code", detail: "Open the code editor for raw CSS, HTML and JS layered over the whole app. Everything below is fair to target." },
-  { step: "Save or export", detail: "Save adds it to Your themes. Export writes a .harborstyle file you can share with anyone." },
+  {
+    step: "Set colors and fonts",
+    detail: "The Look tab drives the 12 color tokens and the type pairing. The live sample updates instantly.",
+  },
+  {
+    step: "Choose a layout",
+    detail: "The Layout tab picks where navigation lives. Custom hides built-in chrome and your own HTML takes over.",
+  },
+  {
+    step: "Build custom chrome visually",
+    detail: "On Custom, the builder makes a sidebar or top bar with no code. Wire items to window.harbor.navigate().",
+  },
+  {
+    step: "Go deeper with code",
+    detail:
+      "Open the code editor for raw CSS, HTML and JS layered over the whole app. Everything below is fair to target.",
+  },
+  {
+    step: "Save or export",
+    detail: "Save adds it to Your themes. Export writes a .harborstyle file you can share with anyone.",
+  },
 ];
 
 export type HarborApi = { call: string; desc: string };
 
 export const WINDOW_HARBOR: HarborApi[] = [
-  { call: "window.harbor.navigate(view)", desc: "Switch the app to a view. Pass a view id below, e.g. window.harbor.navigate('movies')." },
+  {
+    call: "window.harbor.navigate(view)",
+    desc: "Switch the app to a view. Pass a view id below, e.g. window.harbor.navigate('movies').",
+  },
   { call: "window.harbor.back()", desc: "Go back one step, same as the back button." },
 ];
 
@@ -85,7 +189,7 @@ export const ROOT_DATA_ATTRS: DataAttr[] = [
     attr: "data-chrome-hidden",
     values: ["present", "absent"],
     desc: "Present on <html> while the player, play picker, or immersive Live TV is active. Use it to hide custom chrome during playback.",
-    example: 'html[data-chrome-hidden] .my-sidebar { display: none !important; }',
+    example: "html[data-chrome-hidden] .my-sidebar { display: none !important; }",
   },
 ];
 
@@ -120,12 +224,24 @@ export const STABLE_SELECTORS: HookSelector[] = [
   { selector: ".harbor-cinema-badge", where: "In-cinema chip on hero + detail." },
   { selector: ".harbor-chat-toast", where: "Together chat bubble. Floating bottom-right." },
   { selector: ".harbor-together-pill", where: "Together status pill. Top bar / floating dock." },
-  { selector: ".harbor-search-backdrop", where: "Full-screen backdrop behind the search overlay.", tip: "Override to change blur amount or tint." },
+  {
+    selector: ".harbor-search-backdrop",
+    where: "Full-screen backdrop behind the search overlay.",
+    tip: "Override to change blur amount or tint.",
+  },
   { selector: ".harbor-minui-shell", where: "The floating dock container (Floating dock layout)." },
-  { selector: ".glass-card", where: "Cards that opt into the glass treatment.", tip: "Active only when data-theme-card is glass." },
+  {
+    selector: ".glass-card",
+    where: "Cards that opt into the glass treatment.",
+    tip: "Active only when data-theme-card is glass.",
+  },
   { selector: ".modal-panel", where: "Modal bodies (auth, profile picker, together, etc.)." },
   { selector: "[data-harbor-player]", where: "The video player root. Player surfaces scope to this." },
-  { selector: "[data-harbor-nav]", where: "Nav buttons in builder-generated custom chrome.", tip: "Gets [data-active] on the current view. Style the active item." },
+  {
+    selector: "[data-harbor-nav]",
+    where: "Nav buttons in builder-generated custom chrome.",
+    tip: "Gets [data-active] on the current view. Style the active item.",
+  },
   { selector: "[data-tauri-drag-region]", where: "Window-drag areas. Keep one if you replace the title bar." },
   { selector: "main", where: "The scrolling content area. Add padding for custom chrome." },
 ];
@@ -181,7 +297,11 @@ export const FORMAT_FIELDS: FormatField[] = [
   { key: "font", example: "font: sentient-switzer", desc: "A font-pair id (see Typography in the studio)." },
   { key: "bokeh", example: "bokeh: false", desc: "true or false. Floating orbs over the canvas." },
   { key: "swatch", example: "swatch: #0a0d14, #181d28, #7b5cff", desc: "Three hex colors for the picker preview." },
-  { key: "@tokens", example: "@tokens\n--color-canvas: #0a0d14", desc: "Required block. The 12 color variables, one per line." },
+  {
+    key: "@tokens",
+    example: "@tokens\n--color-canvas: #0a0d14",
+    desc: "Required block. The 12 color variables, one per line.",
+  },
   { key: "@css", example: "@css\n.pick-card { border-radius: 0; }", desc: "Raw CSS layered over the whole app." },
   { key: "@html", example: "@html\n<aside>...</aside>", desc: "Raw HTML overlay. Your chrome when layout is custom." },
   { key: "@js", example: "@js\nconsole.info('loaded')", desc: "Runs once when the theme loads." },

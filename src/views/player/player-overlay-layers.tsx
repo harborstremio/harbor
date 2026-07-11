@@ -1,27 +1,28 @@
-import { type ComponentProps, type RefObject } from "react";
-import { DrawCanvas, StrokesLayer, type Stroke } from "@/components/player/draw-canvas";
-import { StreamSwitcher } from "@/components/player/stream-switcher";
-import { StreamCheckPill } from "@/components/player/stream-check-pill";
 import { AdReportButton } from "@/components/player/ad-report-button";
+import { DrawCanvas, StrokesLayer, type Stroke } from "@/components/player/draw-canvas";
 import { P2pStatusChip } from "@/components/player/p2p-status-chip";
+import { StreamCheckPill } from "@/components/player/stream-check-pill";
+import { StreamSwitcher } from "@/components/player/stream-switcher";
 import type { VolumeHudPosition, VolumeIndicatorState } from "@/components/player/volume-indicator";
-import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
 import type { PlayerSrc, PlayEpisode } from "@/lib/view";
+import type { ToastInfo } from "@/views/addons/addons-types";
+import { Toaster } from "@/views/addons/toaster";
+import { type ComponentProps, type RefObject } from "react";
+
 import { CastLayer } from "./cast-layer";
 import { DragClickStage } from "./drag-click-stage";
+import type { usePlayerCast } from "./hooks/use-player-cast";
+import type { useTextSync } from "./hooks/use-text-sync";
 import { LiveLayer } from "./live-layer";
 import { LoaderLayer } from "./loader-layer";
 import { PanelsLayer } from "./panels-layer";
 import { RoomLayer } from "./room-layer";
 import { ShellLayer } from "./shell-layer";
 import { StageOverlays } from "./stage-overlays";
-import { ToolsLayer } from "./tools-layer";
 import { TextSyncOverlay } from "./text-sync-overlay";
-import { Toaster } from "@/views/addons/toaster";
-import type { ToastInfo } from "@/views/addons/addons-types";
-import type { usePlayerCast } from "./hooks/use-player-cast";
-import type { useTextSync } from "./hooks/use-text-sync";
+import { ToolsLayer } from "./tools-layer";
 
 type Room = ComponentProps<typeof RoomLayer>;
 type Shell = ComponentProps<typeof ShellLayer>;
@@ -197,7 +198,9 @@ export function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
         videoFillPill={p.videoFillPill}
         subDropToast={p.subDropToast}
         contentAdvisory={p.contentAdvisory}
-        onSubDelay={(s) => { p.bridgeRef.current?.setSubDelay(s); }}
+        onSubDelay={(s) => {
+          p.bridgeRef.current?.setSubDelay(s);
+        }}
         onEnterSync={p.onEnterSync}
         chromeVisible={p.showChrome}
       />
@@ -347,11 +350,7 @@ export function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
       )}
 
       {!p.loaderActive && p.syncMode !== "idle" && (
-        <TextSyncOverlay
-          api={p.syncApi}
-          playing={p.snap.status === "playing"}
-          onPlayPause={p.onSyncPlayPause}
-        />
+        <TextSyncOverlay api={p.syncApi} playing={p.snap.status === "playing"} onPlayPause={p.onSyncPlayPause} />
       )}
 
       <Toaster toast={p.syncToast} />
@@ -403,10 +402,7 @@ export function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
         />
       )}
 
-      <P2pStatusChip
-        stats={p.engineStats}
-        visible={p.isP2pEngine && p.showChrome && !p.pipMode && !p.drawMode}
-      />
+      <P2pStatusChip stats={p.engineStats} visible={p.isP2pEngine && p.showChrome && !p.pipMode && !p.drawMode} />
 
       <LiveLayer
         liveOverlay={p.liveOverlay}

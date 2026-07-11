@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Play, Tv } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import type { IptvChannel } from "@/lib/iptv/types";
+import { Play, Tv } from "lucide-react";
+import { useState } from "react";
+
 import { channelNumber, fmtLeft } from "./now-format";
 import type { NowItem } from "./use-live-home";
 
@@ -88,10 +89,7 @@ export function NowCard({
         {progress != null && (
           <div className="mt-1 flex items-center gap-2">
             <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-canvas/55">
-              <div
-                className="h-full rounded-full bg-danger"
-                style={{ width: `${progress * 100}%` }}
-              />
+              <div className="h-full rounded-full bg-danger" style={{ width: `${progress * 100}%` }} />
             </div>
             {left && <span className="shrink-0 text-[10.5px] font-medium text-ink-subtle">{left}</span>}
           </div>

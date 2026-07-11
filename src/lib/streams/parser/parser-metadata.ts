@@ -1,4 +1,5 @@
 import type { DefaultParserResult } from "parse-torrent-title";
+
 import type { Container, Resolution, Source } from "../types";
 
 const CONTAINER_RX = /\.(mkv|mp4|m4v|avi|webm|mov|ts|wmv)\b/i;
@@ -22,17 +23,16 @@ export function parseEpisodeTitle(filename: string, season?: number, episode?: n
   let after = filename.slice(idx + code.length).replace(/^[\.\-_\s]+/, "");
   const stop = after.search(QUALITY_STOP_RX);
   if (stop > 0) after = after.slice(0, stop);
-  const cleaned = after.replace(/[\.\-_]+/g, " ").replace(/\s+/g, " ").trim();
+  const cleaned = after
+    .replace(/[\.\-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   if (cleaned.length < 2 || cleaned.length > 80) return null;
   if (/^(?:e\d+|episode|hdtv|webrip)$/i.test(cleaned)) return null;
   return cleaned;
 }
 
-export function parseContainer(
-  filenameHint: string | undefined,
-  filenameLine: string,
-  text: string,
-): Container | null {
+export function parseContainer(filenameHint: string | undefined, filenameLine: string, text: string): Container | null {
   for (const src of [filenameHint, filenameLine, text]) {
     if (!src) continue;
     const m = src.match(CONTAINER_RX);

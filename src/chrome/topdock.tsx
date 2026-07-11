@@ -1,21 +1,21 @@
-import { useEffect, useRef, useState } from "react";
-import { LogOut, Pencil, Search, Settings as SettingsIcon, Users } from "lucide-react";
-import { HarborMark } from "@/components/icons/harbor-mark";
-import { CatAvatar } from "@/components/icons/cat-avatar";
+import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
 import { RecordingPill } from "@/chrome/recording-pill";
 import { TogetherButton } from "@/chrome/topbar";
+import { CatAvatar } from "@/components/icons/cat-avatar";
+import { HarborMark } from "@/components/icons/harbor-mark";
+import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
+import { useParental } from "@/lib/parental";
 import { useProfiles } from "@/lib/profiles";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
-import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
-import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
-import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
-import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { LogOut, Pencil, Search, Settings as SettingsIcon, Users } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -28,8 +28,7 @@ export function TopDock() {
   const [pinFor, setPinFor] = useState<View | null>(null);
   const maxed = useMaximized();
 
-  const themePreset =
-    settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
+  const themePreset = settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
 
   const navigate = (item: NavItem) => {
@@ -101,9 +100,7 @@ export function TopDock() {
               <HarborMark className="h-7 w-7" />
             )}
             {themePreset?.id === "crunch" && (
-              <span className="font-display text-[22px] font-bold leading-none text-ink">
-                Harbor
-              </span>
+              <span className="font-display text-[22px] font-bold leading-none text-ink">Harbor</span>
             )}
           </button>
 
@@ -119,11 +116,7 @@ export function TopDock() {
           <div className="ms-2 flex shrink-0 items-center gap-1">
             <RecordingPill />
             {view !== "live" && <TogetherButton variant="ghost" connectStyle="tab" />}
-            <IconBtn
-              onClick={() => setSearchOpen(true)}
-              label={t("common.search")}
-              active={false}
-            >
+            <IconBtn onClick={() => setSearchOpen(true)} label={t("common.search")} active={false}>
               <Search size={15} strokeWidth={2.2} />
             </IconBtn>
             <ProfileChipCompact onOpenSettings={() => setView("settings")} settingsActive={view === "settings"} />
@@ -136,7 +129,12 @@ export function TopDock() {
                   {maxed ? (
                     <>
                       <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
-                      <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" strokeWidth="1.4" fill="none" />
+                      <path
+                        d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        fill="none"
+                      />
                     </>
                   ) : (
                     <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
@@ -186,9 +184,7 @@ function IconBtn({
       aria-label={label}
       title={label}
       className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-        active
-          ? "bg-white/20 text-ink ring-1 ring-white/25"
-          : "text-ink-muted hover:bg-white/12 hover:text-ink"
+        active ? "bg-white/20 text-ink ring-1 ring-white/25" : "text-ink-muted hover:bg-white/12 hover:text-ink"
       }`}
     >
       {children}
@@ -196,15 +192,7 @@ function IconBtn({
   );
 }
 
-function WinBtn({
-  onClick,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
+function WinBtn({ onClick, label, children }: { onClick: () => void; label: string; children: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -243,8 +231,7 @@ function ProfileChipCompact({
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+  const name = activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
   const color = activeProfile?.color ?? "#7cd6ff";
   const avatarSrc = activeProfile?.avatar ?? settings.harborAvatar ?? user?.avatar ?? null;
   const otherProfiles = profiles.filter((p) => p.id !== activeProfile?.id);
@@ -275,9 +262,7 @@ function ProfileChipCompact({
         <div className="harbor-profile-dropdown absolute end-0 top-[calc(100%+8px)] z-40 w-60 overflow-hidden rounded-2xl border border-white/15 bg-canvas/95 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
           <div className="border-b border-white/10 px-4 py-3">
             <div className="text-[13.5px] font-semibold text-ink">{name}</div>
-            {user?.email && (
-              <div className="truncate text-[11.5px] text-ink-subtle">{user.email}</div>
-            )}
+            {user?.email && <div className="truncate text-[11.5px] text-ink-subtle">{user.email}</div>}
           </div>
           {otherProfiles.length > 0 && (
             <div className="flex flex-col gap-0.5 border-b border-white/10 p-1.5">

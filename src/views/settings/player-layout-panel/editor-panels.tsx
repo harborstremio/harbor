@@ -1,4 +1,3 @@
-import { Crown } from "lucide-react";
 import {
   PANEL_META,
   PANELS,
@@ -7,6 +6,7 @@ import {
   type PanelId,
   type PlayerChromeConfig,
 } from "@/lib/player-chrome";
+import { Crown } from "lucide-react";
 
 type Props = {
   config: PlayerChromeConfig;
@@ -24,13 +24,7 @@ export function EditorPanels({ config, selectedPanelId, onSelect, mode }: Props)
         if (mode !== "together" && (id === "avatars" || id === "chat")) return null;
         if (mode === "live" && id === "episodes") return null;
         return (
-          <PanelMount
-            key={id}
-            id={id}
-            corner={cfg.corner}
-            selected={selectedPanelId === id}
-            onSelect={onSelect}
-          />
+          <PanelMount key={id} id={id} corner={cfg.corner} selected={selectedPanelId === id} onSelect={onSelect} />
         );
       })}
     </>
@@ -57,12 +51,7 @@ function PanelMount({
   onSelect: (id: PanelId | null) => void;
 }) {
   const style = id === "episodes" ? episodeTabStyle(corner) : cornerStyle(corner);
-  const radius =
-    id === "episodes"
-      ? isLeftCorner(corner)
-        ? "rounded-r-2xl"
-        : "rounded-l-2xl"
-      : "rounded-2xl";
+  const radius = id === "episodes" ? (isLeftCorner(corner) ? "rounded-r-2xl" : "rounded-l-2xl") : "rounded-2xl";
   return (
     <div
       data-panel-id={id}

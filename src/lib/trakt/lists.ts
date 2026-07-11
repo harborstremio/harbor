@@ -9,11 +9,14 @@ type RawListItem = {
   show?: { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; tvdb?: number; trakt?: number } };
 };
 
-export async function fetchTraktList(listId: string | number, page: number = 1, limit: number = 20): Promise<TraktItem[]> {
-  const rows = await traktRequest<RawListItem[]>(
-    `/lists/${listId}/items?page=${page}&limit=${limit}`,
-    { authed: false }
-  ).catch(() => []);
+export async function fetchTraktList(
+  listId: string | number,
+  page: number = 1,
+  limit: number = 20,
+): Promise<TraktItem[]> {
+  const rows = await traktRequest<RawListItem[]>(`/lists/${listId}/items?page=${page}&limit=${limit}`, {
+    authed: false,
+  }).catch(() => []);
 
   const out: TraktItem[] = [];
   for (const r of rows) {

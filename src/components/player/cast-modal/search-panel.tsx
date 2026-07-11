@@ -1,9 +1,10 @@
-import { Search as SearchIcon, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { searchAll, type AnimeHit, type SearchResults } from "@/lib/search";
 import { tmdbTrending } from "@/lib/providers/tmdb/tmdb-catalogs";
+import { searchAll, type AnimeHit, type SearchResults } from "@/lib/search";
+import { Search as SearchIcon, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+
 import { PeopleRail, PosterRail, RailSection, RailSkeleton, type Person } from "./rails";
 
 function animeToMeta(a: AnimeHit): Meta {

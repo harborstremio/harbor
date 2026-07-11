@@ -6,12 +6,7 @@ export type MalSession = {
   userName: string;
 };
 
-export type MalListStatus =
-  | "watching"
-  | "completed"
-  | "on_hold"
-  | "dropped"
-  | "plan_to_watch";
+export type MalListStatus = "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
 
 export type MalAnime = {
   id: number;

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { useEffect, useState } from "react";
 
 export type CardScores = {
   rtAudience: number | null;
@@ -78,9 +78,9 @@ function ratingFrom(item: Record<string, unknown>, sources: string[]): number | 
   const rows = item.ratings;
   if (!Array.isArray(rows)) return null;
   for (const source of sources) {
-    const r = rows.find(
-      (x: { source?: string; value?: number | null }) => x?.source === source,
-    ) as { value?: number | null } | undefined;
+    const r = rows.find((x: { source?: string; value?: number | null }) => x?.source === source) as
+      | { value?: number | null }
+      | undefined;
     if (typeof r?.value === "number" && r.value > 0) return r.value;
   }
   return null;
@@ -102,14 +102,11 @@ async function flush(): Promise<void> {
     for (const i of ids) queues[kind].delete(i);
     if (!apiKey || Date.now() < blockedUntil) continue;
     try {
-      const res = await fetch(
-        `https://api.mdblist.com/imdb/${kind}/?apikey=${encodeURIComponent(apiKey)}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids }),
-        },
-      );
+      const res = await fetch(`https://api.mdblist.com/imdb/${kind}/?apikey=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      });
       if (!res.ok) {
         if (res.status === 429) blockedUntil = Date.now() + BACKOFF_MS;
         continue;
@@ -155,10 +152,7 @@ export function mdblistCardCached(imdbId: string | undefined, kind: MediaKind): 
   return fresh(`${kind}:${imdbId}`)?.v ?? null;
 }
 
-export function useMdblistCardScores(
-  imdbId: string | undefined,
-  kind: MediaKind,
-): CardScores | null {
+export function useMdblistCardScores(imdbId: string | undefined, kind: MediaKind): CardScores | null {
   const [v, setV] = useState<CardScores | null>(() => mdblistCardCached(imdbId, kind));
   useEffect(() => {
     setV(mdblistCardCached(imdbId, kind));

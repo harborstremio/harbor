@@ -1,8 +1,8 @@
+import { CodeEditor } from "@/components/code-editor";
+import { topMovies, type Meta } from "@/lib/cinemeta";
 import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { CodeEditor } from "@/components/code-editor";
-import { topMovies, type Meta } from "@/lib/cinemeta";
 
 const STARTER = `/* Custom cards: .your-card targets each poster. */
 .your-card {
@@ -24,7 +24,11 @@ const HOOKS = [
 ];
 
 const FALLBACK: Array<{ id: string; name: string; poster: string }> = [
-  { id: "tt0111161", name: "The Shawshank Redemption", poster: "https://images.metahub.space/poster/medium/tt0111161/img" },
+  {
+    id: "tt0111161",
+    name: "The Shawshank Redemption",
+    poster: "https://images.metahub.space/poster/medium/tt0111161/img",
+  },
   { id: "tt0468569", name: "The Dark Knight", poster: "https://images.metahub.space/poster/medium/tt0468569/img" },
   { id: "tt1375666", name: "Inception", poster: "https://images.metahub.space/poster/medium/tt1375666/img" },
   { id: "tt0816692", name: "Interstellar", poster: "https://images.metahub.space/poster/medium/tt0816692/img" },
@@ -70,12 +74,8 @@ export function CardCssPopout({
       >
         <header className="flex h-14 shrink-0 items-center gap-3 border-b border-edge-soft bg-surface/80 px-5">
           <div className="flex min-w-0 flex-col">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
-              Custom cards
-            </span>
-            <span className="truncate text-[14px] font-semibold text-ink">
-              Write CSS, watch real posters react
-            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-subtle">Custom cards</span>
+            <span className="truncate text-[14px] font-semibold text-ink">Write CSS, watch real posters react</span>
           </div>
           <button
             type="button"
@@ -112,8 +112,8 @@ export function CardCssPopout({
               {!css && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-8 text-center">
                   <span className="text-[13.5px] leading-relaxed text-ink-subtle">
-                    Style <span className="font-mono text-ink-muted">.your-card</span> and the posters on
-                    the right update live. Hit Insert starter for a head start.
+                    Style <span className="font-mono text-ink-muted">.your-card</span> and the posters on the right
+                    update live. Hit Insert starter for a head start.
                   </span>
                 </div>
               )}

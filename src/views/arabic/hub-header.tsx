@@ -11,8 +11,7 @@ export function HubHeader({ rtl }: { rtl: boolean }) {
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background:
-            "radial-gradient(120% 140% at 100% 0%, var(--color-accent-soft), transparent 60%)",
+          background: "radial-gradient(120% 140% at 100% 0%, var(--color-accent-soft), transparent 60%)",
         }}
       />
       <div className="relative flex flex-col gap-2">
@@ -20,9 +19,7 @@ export function HubHeader({ rtl }: { rtl: boolean }) {
           {t("arabic.hub.title")}
         </h1>
         <p className="text-[13.5px] text-ink-muted">
-          <bdi>
-            {t("Ramadan series, drama, films, Egyptian classics, and Gulf - all in one place.")}
-          </bdi>
+          <bdi>{t("Ramadan series, drama, films, Egyptian classics, and Gulf - all in one place.")}</bdi>
         </p>
       </div>
     </header>

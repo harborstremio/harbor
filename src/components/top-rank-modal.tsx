@@ -1,17 +1,17 @@
-import { ArrowUp, ExternalLink, Search, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import tmdbLogo from "@/assets/addon-logos/tmdb.png";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { Poster, usePosterChain } from "@/components/poster";
+import type { Meta } from "@/lib/cinemeta";
+import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { useT } from "@/lib/i18n";
 import { useRankings, type KnownForEntry, type PersonEntry } from "@/lib/rankings";
 import { useSettings } from "@/lib/settings";
 import { useTopRankModal, type TopRankDept } from "@/lib/top-rank-modal";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
-import { pushActivityHint } from "@/lib/discord/activity-hint";
-import type { Meta } from "@/lib/cinemeta";
+import { ArrowUp, ExternalLink, Search, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const DEPT_LABELS: Record<TopRankDept, { title: string; subtitle: string }> = {
   Acting: { title: "Top 100 Actors", subtitle: "Most popular performers right now" },
@@ -71,9 +71,7 @@ export function TopRankModal() {
     if (!query.trim()) return list;
     const q = query.trim().toLowerCase();
     return list.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.knownFor.some((k) => k.title.toLowerCase().includes(q)),
+      (p) => p.name.toLowerCase().includes(q) || p.knownFor.some((k) => k.title.toLowerCase().includes(q)),
     );
   }, [list, query]);
 
@@ -261,12 +259,8 @@ function KnownChip({ entry, onClick }: { entry: KnownForEntry; onClick: () => vo
           <span className="block h-full w-full bg-gradient-to-br from-canvas to-elevated" />
         )}
       </span>
-      <span className="truncate text-[11.5px] font-medium text-ink group-hover/chip:text-accent">
-        {entry.title}
-      </span>
-      {entry.releaseInfo && (
-        <span className="font-mono text-[10px] text-ink-subtle">{entry.releaseInfo}</span>
-      )}
+      <span className="truncate text-[11.5px] font-medium text-ink group-hover/chip:text-accent">{entry.title}</span>
+      {entry.releaseInfo && <span className="font-mono text-[10px] text-ink-subtle">{entry.releaseInfo}</span>}
     </button>
   );
 }

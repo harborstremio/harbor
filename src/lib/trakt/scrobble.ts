@@ -16,11 +16,7 @@ function scrobbleBody(target: TraktTarget, progress: number) {
   return { show: { ids: target.ids }, progress: clamped };
 }
 
-async function send(
-  action: ScrobbleAction,
-  target: TraktTarget,
-  progress: number,
-): Promise<ScrobbleResponse | null> {
+async function send(action: ScrobbleAction, target: TraktTarget, progress: number): Promise<ScrobbleResponse | null> {
   if (target.kind === "show") return null;
   for (let attempt = 0; attempt < 2; attempt++) {
     try {

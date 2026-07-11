@@ -1,8 +1,8 @@
+import { useT } from "@/lib/i18n";
+import { useSkipSegmentsView } from "@/lib/skip-intro/segment-store";
+import { thumbCacheGet, thumbCacheNearest, thumbCacheSet, trickplayGet } from "@/lib/trickplay";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { thumbCacheGet, thumbCacheNearest, thumbCacheSet, trickplayGet } from "@/lib/trickplay";
-import { useSkipSegmentsView } from "@/lib/skip-intro/segment-store";
-import { useT } from "@/lib/i18n";
 
 const SEG_LABEL = { intro: "OP", outro: "ED", recap: "Recap", ad: "Ad" } as const;
 const BUCKET_SECONDS = 2;
@@ -13,15 +13,7 @@ const RETRY_MS = 400;
 const SETTLE_MS = 130;
 const NEAREST_WINDOW = 30;
 
-export function ThumbPreview({
-  time,
-  dur,
-  canFetch = true,
-}: {
-  time: number;
-  dur: number;
-  canFetch?: boolean;
-}) {
+export function ThumbPreview({ time, dur, canFetch = true }: { time: number; dur: number; canFetch?: boolean }) {
   const bucket = Math.round(time / BUCKET_SECONDS);
   const liveBucketRef = useRef(bucket);
   liveBucketRef.current = bucket;

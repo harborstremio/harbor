@@ -1,11 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { applyTheme, isKnownPreset, nextColorTheme } from "@/lib/theme";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
-import { loadBgImage, saveBgImage } from "@/lib/theme-storage";
-import { effectiveTmdbLanguage, setTmdbLanguage } from "@/lib/providers/tmdb/tmdb-client";
-import { setPosterBaseUrl } from "@/lib/providers/rpdb";
-import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
 import { setUiLanguage } from "@/lib/i18n";
+import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
+import { setPosterBaseUrl } from "@/lib/providers/rpdb";
+import { effectiveTmdbLanguage, setTmdbLanguage } from "@/lib/providers/tmdb/tmdb-client";
+import { applyTheme, isKnownPreset, nextColorTheme } from "@/lib/theme";
+import { loadBgImage, saveBgImage } from "@/lib/theme-storage";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
 import { STORAGE_KEY } from "./settings/defaults";
 import { readSettingsFile, writeSettingsFile } from "./settings/file-store";
 import {
@@ -17,13 +18,7 @@ import {
 } from "./settings/profile-store";
 import type { Settings, StreamingService } from "./settings/types";
 
-export type {
-  ContentCategory,
-  ContentFilters,
-  Settings,
-  StreamingService,
-  WebhookTrigger,
-} from "./settings/types";
+export type { ContentCategory, ContentFilters, Settings, StreamingService, WebhookTrigger } from "./settings/types";
 
 type SettingsValue = {
   settings: Settings;
@@ -156,7 +151,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const scale = settings.uiScale > 0 ? settings.uiScale : 1;
-    const root = document.getElementById("root") as (HTMLElement & { style: CSSStyleDeclaration & { zoom?: string } }) | null;
+    const root = document.getElementById("root") as
+      | (HTMLElement & { style: CSSStyleDeclaration & { zoom?: string } })
+      | null;
     if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
       void import("@tauri-apps/api/webview")
         .then(({ getCurrentWebview }) => getCurrentWebview().setZoom(scale))
@@ -218,7 +215,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
   }, [settings.customFonts]);
 
-
   useEffect(() => {
     void import("@/lib/privacy/blocklist").then(({ setTrackerBlocking }) => {
       setTrackerBlocking(settings.blockTrackers);
@@ -235,8 +231,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     window.__harborStremioDeeplink = settings.stremioDeeplinkInstall;
     if (!("__TAURI_INTERNALS__" in window)) return;
     void import("@tauri-apps/api/core").then(({ invoke }) => {
-      void invoke("deeplink_set_stremio", { enabled: settings.stremioDeeplinkInstall }).catch(
-        (e) => console.warn("[harbor] deeplink_set_stremio failed", e),
+      void invoke("deeplink_set_stremio", { enabled: settings.stremioDeeplinkInstall }).catch((e) =>
+        console.warn("[harbor] deeplink_set_stremio failed", e),
       );
     });
   }, [settings.stremioDeeplinkInstall]);

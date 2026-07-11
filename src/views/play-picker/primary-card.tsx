@@ -1,16 +1,24 @@
-import { Check, Download, ExternalLink, Loader2, Play, Zap } from "lucide-react";
 import { Flag } from "@/components/flag";
-import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { FormatBadge, streamBadges } from "@/components/format-badge";
 import { HostMatchChip } from "@/components/host-match-chip";
+import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
 import { useSettings } from "@/lib/settings";
 import type { ScoredStream } from "@/lib/streams/types";
 import { directStreamAvailable } from "@/lib/torrent/stremio-stream";
 import type { PlayEpisode } from "@/lib/view";
+import { Check, Download, ExternalLink, Loader2, Play, Zap } from "lucide-react";
+
 import { EditionChip } from "./edition-chip";
-import { anyStreamCached, confirmationLabel, displayTitle, hasUncachedMarker, streamSummaryParts, torrentFilename } from "./picker-utils";
+import {
+  anyStreamCached,
+  confirmationLabel,
+  displayTitle,
+  hasUncachedMarker,
+  streamSummaryParts,
+  torrentFilename,
+} from "./picker-utils";
 import { PlayProvenance } from "./play-provenance";
 
 export function PrimaryCard({
@@ -75,12 +83,7 @@ export function PrimaryCard({
           }`}
         >
           {heroImage ? (
-            <img
-              src={heroImage}
-              alt=""
-              className="h-full w-full object-cover"
-              draggable={false}
-            />
+            <img src={heroImage} alt="" className="h-full w-full object-cover" draggable={false} />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-canvas to-elevated" />
           )}
@@ -132,18 +135,12 @@ export function PrimaryCard({
               </span>
             )}
             {titleConfirmation && (
-              <p className="text-[12px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
-                {titleConfirmation}
-              </p>
+              <p className="text-[12px] font-bold uppercase tracking-[0.28em] text-ink-subtle">{titleConfirmation}</p>
             )}
             <HostMatchChip match={match} long />
-            <p className="break-all font-mono text-[15.5px] leading-relaxed text-ink">
-              {title}
-            </p>
+            <p className="break-all font-mono text-[15.5px] leading-relaxed text-ink">{title}</p>
             {fname && fname !== title && (
-              <p className="break-all font-mono text-[12.5px] leading-relaxed text-ink-subtle/80">
-                {fname}
-              </p>
+              <p className="break-all font-mono text-[12.5px] leading-relaxed text-ink-subtle/80">{fname}</p>
             )}
 
             {summary.length > 0 && (
@@ -157,7 +154,13 @@ export function PrimaryCard({
               </div>
             )}
 
-            {(cachedDebrid || addonCached || queued || (debrids.length > 0 && !stream.url) || stream.remux || stream.releaseGroupNormalized || stream.edition) && (
+            {(cachedDebrid ||
+              addonCached ||
+              queued ||
+              (debrids.length > 0 && !stream.url) ||
+              stream.remux ||
+              stream.releaseGroupNormalized ||
+              stream.edition) && (
               <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
                 {libraryDebrids.length > 0 ? (
                   <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold tracking-[0.04em] text-accent">
@@ -241,11 +244,7 @@ export function PrimaryCard({
                 disabled={resolving}
                 className="group flex h-14 items-center gap-3 rounded-full border border-accent/55 bg-accent/12 px-7 text-[14.5px] font-semibold tracking-[0.04em] text-accent transition-[transform,background-color,opacity] duration-200 hover:scale-[1.02] hover:bg-accent/20 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
               >
-                {resolving ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                  <Download size={18} strokeWidth={2.4} />
-                )}
+                {resolving ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} strokeWidth={2.4} />}
                 {resolving ? "Sending to TorBox" : `Cache on ${queueTarget.name}`}
               </button>
             ) : canStream ? (
@@ -275,13 +274,7 @@ export function PrimaryCard({
               </button>
             )}
             <PlayProvenance stream={stream} debrids={debrids} isCached={isCached} addonLogo={addonLogo} />
-            {link && (
-              <CopyLinkButton
-                url={link}
-                size={15}
-                className="h-9 w-9 ring-1 ring-edge-soft/60"
-              />
-            )}
+            {link && <CopyLinkButton url={link} size={15} className="h-9 w-9 ring-1 ring-edge-soft/60" />}
           </div>
         </div>
       </div>

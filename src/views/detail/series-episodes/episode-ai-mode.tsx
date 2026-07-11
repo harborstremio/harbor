@@ -1,16 +1,17 @@
-import { useMemo, useState } from "react";
-import { X } from "lucide-react";
-import type { Meta } from "@/lib/cinemeta";
+import { AiExampleHint } from "@/components/ai-example-hint";
 import { ProviderLogo } from "@/components/ai-provider-logo";
-import { modelLabelFor, providerForModel } from "@/lib/ai-models";
+import { AiThinking } from "@/components/search/ai-search/ai-thinking";
 import { aiFindEpisodes, type EpisodeCandidate } from "@/lib/ai-episode-search";
+import { modelLabelFor, providerForModel } from "@/lib/ai-models";
+import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
 import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
-import { AiThinking } from "@/components/search/ai-search/ai-thinking";
+import { X } from "lucide-react";
+import { useMemo, useState } from "react";
+
 import { CrossSeasonResults } from "./cross-season-results";
 import { EpisodeResultRow } from "./episode-result-row";
-import { AiExampleHint } from "@/components/ai-example-hint";
 
 type Video = NonNullable<Meta["videos"]>[number];
 type Status = "idle" | "loading" | "done";
@@ -135,21 +136,14 @@ export function EpisodeAiMode({
       {status === "done" && !fellBack && (
         <div className="flex flex-col gap-1.5">
           {matches.map((v, i) => (
-            <EpisodeResultRow
-              key={v.id ?? `${v.season}-${v.episode}`}
-              video={v}
-              onPlay={() => play(v)}
-              index={i}
-            />
+            <EpisodeResultRow key={v.id ?? `${v.season}-${v.episode}`} video={v} onPlay={() => play(v)} index={i} />
           ))}
         </div>
       )}
 
       {status === "done" && fellBack && (
         <div className="flex flex-col gap-3">
-          <p className="animate-ai-entrance text-[13px] text-ink-muted">
-            {t("Showing keyword matches instead")}
-          </p>
+          <p className="animate-ai-entrance text-[13px] text-ink-muted">{t("Showing keyword matches instead")}</p>
           <CrossSeasonResults meta={meta} videos={videos} query={ranQuery} imdbId={imdbId} />
         </div>
       )}

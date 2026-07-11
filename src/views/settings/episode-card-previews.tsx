@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt } from "@/lib/settings-preview-art";
+import type { ReactNode } from "react";
 
 export type EpisodeCardKind = "rating" | "description" | "hd";
 
@@ -13,14 +13,7 @@ export function EpisodeCardPreview({ kind }: { kind: EpisodeCardKind }) {
   const art = useSettingsPreviewArt();
   const stills = art?.stills ?? [];
   if (kind === "hd") return <HdCompare src={stills[0]} />;
-  return (
-    <EpiCard
-      still={stills[0]}
-      showRating
-      showDesc={kind === "description"}
-      glowRating={kind === "rating"}
-    />
-  );
+  return <EpiCard still={stills[0]} showRating showDesc={kind === "description"} glowRating={kind === "rating"} />;
 }
 
 function Caption({ children }: { children: ReactNode }) {
@@ -74,9 +67,7 @@ function EpiCard({
           <span className="text-[12px] font-semibold text-ink">{t(MOCK_TITLE)}</span>
           <span className="text-[10px] text-ink-subtle">E4 · {t("{n} min", { n: 48 })}</span>
           {showDesc && (
-            <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-ink-muted">
-              {t(MOCK_SYNOPSIS)}
-            </p>
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-ink-muted">{t(MOCK_SYNOPSIS)}</p>
           )}
         </div>
       </div>
@@ -113,9 +104,7 @@ function Tile({ label, src, soft, accent }: { label: string; src?: string; soft?
         </div>
       </div>
       <span
-        className={`text-[9px] font-bold uppercase tracking-[0.12em] ${
-          accent ? "text-accent" : "text-ink-subtle"
-        }`}
+        className={`text-[9px] font-bold uppercase tracking-[0.12em] ${accent ? "text-accent" : "text-ink-subtle"}`}
       >
         {label}
       </span>

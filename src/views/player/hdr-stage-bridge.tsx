@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
 import { hdrOverlayEmitProps } from "@/lib/hdr-overlay";
+import { useEffect, useRef } from "react";
+
 import type { HdrStagePayload } from "../hdr-overlay-app";
 
 export type HdrStageHandlers = {

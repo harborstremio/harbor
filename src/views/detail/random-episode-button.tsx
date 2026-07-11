@@ -1,9 +1,9 @@
-import { Shuffle } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import type { Season } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { useT } from "@/lib/i18n";
+import { Shuffle } from "lucide-react";
 
 function pickRandomEpisode(seasons: Season[]): { season: number; episode: number } | null {
   const today = new Date().toISOString().slice(0, 10);

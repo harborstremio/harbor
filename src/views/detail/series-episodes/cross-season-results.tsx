@@ -1,8 +1,9 @@
-import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { useLocalAwareSeriesPlay } from "@/lib/local-library/use-series-play";
 import { useSettings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
+import { useMemo } from "react";
+
 import { EpisodeResultRow } from "./episode-result-row";
 
 type Video = NonNullable<Meta["videos"]>[number];
@@ -29,21 +30,13 @@ export function CrossSeasonResults({
       .filter((v) => v.season != null && v.season >= 1 && v.episode != null)
       .filter((v) => {
         const name = (v.name ?? "").toLowerCase();
-        return (
-          name.includes(q) ||
-          String(v.episode).includes(q) ||
-          `s${v.season}e${v.episode}`.includes(q)
-        );
+        return name.includes(q) || String(v.episode).includes(q) || `s${v.season}e${v.episode}`.includes(q);
       })
       .sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0));
   }, [videos, q]);
 
   if (results.length === 0) {
-    return (
-      <p className="py-10 text-center text-[14px] text-ink-muted">
-        {t('No episodes match "{q}"', { q: query })}
-      </p>
-    );
+    return <p className="py-10 text-center text-[14px] text-ink-muted">{t('No episodes match "{q}"', { q: query })}</p>;
   }
 
   const play = (v: Video) =>

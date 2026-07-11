@@ -1,7 +1,7 @@
-import { Lock, Pencil } from "lucide-react";
 import { CatAvatar } from "@/components/icons/cat-avatar";
 import { useT } from "@/lib/i18n";
 import { type Profile } from "@/lib/profiles";
+import { Lock, Pencil } from "lucide-react";
 
 export function ProfileTile({
   profile,
@@ -17,8 +17,7 @@ export function ProfileTile({
   const t = useT();
   const dim = size === "lg" ? "h-24 w-24" : size === "md" ? "h-16 w-16" : "h-12 w-12";
   const ring = size === "lg" ? "ring-[3px]" : "ring-2";
-  const fontName =
-    size === "lg" ? "text-[14px]" : size === "md" ? "text-[12.5px]" : "text-[11px]";
+  const fontName = size === "lg" ? "text-[14px]" : size === "md" ? "text-[12.5px]" : "text-[11px]";
 
   return (
     <div className="group flex flex-col items-center gap-2">
@@ -34,12 +33,7 @@ export function ProfileTile({
             style={{ boxShadow: `0 0 0 3px ${profile.color}` }}
           >
             {profile.avatar ? (
-              <img
-                src={profile.avatar}
-                alt=""
-                className="h-full w-full object-cover"
-                draggable={false}
-              />
+              <img src={profile.avatar} alt="" className="h-full w-full object-cover" draggable={false} />
             ) : (
               <CatAvatar className="h-full w-full" />
             )}
@@ -67,10 +61,7 @@ export function ProfileTile({
       <div className="flex flex-col items-center gap-0.5">
         <span className={`font-medium text-ink ${fontName}`}>{profile.name}</span>
         {profile.isPrimary && size !== "sm" && (
-          <span
-            className="text-[9.5px] font-bold uppercase tracking-[0.18em]"
-            style={{ color: profile.color }}
-          >
+          <span className="text-[9.5px] font-bold uppercase tracking-[0.18em]" style={{ color: profile.color }}>
             {t("profile.primary")}
           </span>
         )}

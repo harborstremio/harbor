@@ -1,10 +1,10 @@
-import { Dices } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import { usePosterChain } from "@/components/poster";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { Dices } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 function shuffle<T>(arr: T[]): T[] {
   const out = [...arr];

@@ -1,12 +1,4 @@
-export function Dots({
-  count,
-  active,
-  onJump,
-}: {
-  count: number;
-  active: number;
-  onJump: (i: number) => void;
-}) {
+export function Dots({ count, active, onJump }: { count: number; active: number; onJump: (i: number) => void }) {
   return (
     <div className="flex items-center gap-2">
       {Array.from({ length: count }).map((_, i) => (

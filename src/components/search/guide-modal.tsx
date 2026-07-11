@@ -1,14 +1,14 @@
-import { Loader2, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
 import { getCachedPlaylist } from "@/lib/iptv/store";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { GuideView } from "@/views/live/guide/guide-view";
 import { useEpg, useNowTick } from "@/views/live/hooks/use-epg";
 import { useIptvPlaylist } from "@/views/live/hooks/use-iptv-playlist";
-import { GuideView } from "@/views/live/guide/guide-view";
+import { Loader2, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 function synthChannelMeta(ch: IptvChannel): Meta {
   return {
@@ -113,13 +113,7 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
           <EmptyMessage title="No channels" body="This playlist hasn't been loaded yet, or it has no channels." />
         )}
         {source && playlist && playlist.channels.length > 0 && (
-          <GuideView
-            channels={playlist.channels}
-            epg={epg}
-            nowMs={nowMs}
-            onPlay={onPlay}
-            resetKey={source.id}
-          />
+          <GuideView channels={playlist.channels} epg={epg} nowMs={nowMs} onPlay={onPlay} resetKey={source.id} />
         )}
       </div>
     </div>,

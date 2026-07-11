@@ -1,4 +1,5 @@
 import { parseStream } from "@/lib/streams/parser";
+
 import { ADDON_SAMPLES, type Sample, type ExpectedFlags } from "./addon-samples";
 
 type Failure = {
@@ -23,11 +24,7 @@ export function verifyAddonSamples(): { passed: number; failed: Failure[] } {
   return { passed, failed };
 }
 
-function compareExpected(
-  parsed: ReturnType<typeof parseStream>,
-  expected: ExpectedFlags,
-  sample: Sample,
-): Failure[] {
+function compareExpected(parsed: ReturnType<typeof parseStream>, expected: ExpectedFlags, sample: Sample): Failure[] {
   const out: Failure[] = [];
   const where = `${sample.addonName}${sample.note ? ` (${sample.note})` : ""}`;
 
@@ -43,7 +40,12 @@ function compareExpected(
       if (!want) continue;
       const isUncached = parsed.cached[slug as keyof typeof parsed.cached] === false;
       if (!isUncached) {
-        out.push({ addon: where, field: `uncached.${slug}`, expected: true, actual: parsed.cached[slug as keyof typeof parsed.cached] });
+        out.push({
+          addon: where,
+          field: `uncached.${slug}`,
+          expected: true,
+          actual: parsed.cached[slug as keyof typeof parsed.cached],
+        });
       }
     }
   }
@@ -78,6 +80,8 @@ export function logVerificationReport(): void {
   }
   console.warn(`[parser-verify] ${passed}/${total} samples passed, ${failed.length} mismatches:`);
   for (const f of failed) {
-    console.warn(`  ${f.addon} :: ${f.field} — expected ${JSON.stringify(f.expected)}, got ${JSON.stringify(f.actual)}`);
+    console.warn(
+      `  ${f.addon} :: ${f.field} — expected ${JSON.stringify(f.expected)}, got ${JSON.stringify(f.actual)}`,
+    );
   }
 }

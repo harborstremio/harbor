@@ -1,6 +1,7 @@
-import { Wand2 } from "lucide-react";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { Wand2 } from "lucide-react";
+
 import { Tooltip } from "../transport/tooltip";
 
 export function AutoSyncToggle() {

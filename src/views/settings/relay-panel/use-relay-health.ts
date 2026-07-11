@@ -1,12 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
-import { fetch as tauriFetchImpl } from "@tauri-apps/plugin-http";
 import { relayOutdated } from "@/lib/together/relay-version";
+import { fetch as tauriFetchImpl } from "@tauri-apps/plugin-http";
+import { useCallback, useEffect, useState } from "react";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 const safeFetch: typeof fetch = (input, init) =>
-  isTauri
-    ? (tauriFetchImpl(input as string, init as RequestInit) as Promise<Response>)
-    : fetch(input, init);
+  isTauri ? (tauriFetchImpl(input as string, init as RequestInit) as Promise<Response>) : fetch(input, init);
 
 export type RelayTest = {
   ok: boolean;

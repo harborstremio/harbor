@@ -211,7 +211,10 @@ export function PipApp() {
         v.currentTime = Math.max(0, v.currentTime - 5);
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        v.currentTime = Math.min(Number.isFinite(v.duration) ? v.duration - 0.25 : v.currentTime + 5, v.currentTime + 5);
+        v.currentTime = Math.min(
+          Number.isFinite(v.duration) ? v.duration - 0.25 : v.currentTime + 5,
+          v.currentTime + 5,
+        );
       } else if (e.key === "Escape") {
         closeWithState();
       } else if (e.key === "m" || e.key === "M") {
@@ -294,7 +297,16 @@ export function PipApp() {
             onClick={closeWithState}
             className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/60 px-3 py-1.5 text-[11.5px] font-semibold uppercase tracking-[0.16em] text-white/90 backdrop-blur-md transition-colors hover:bg-black/80"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M3 9V5a2 2 0 0 1 2-2h4" />
               <path d="M21 9V5a2 2 0 0 0-2-2h-4" />
               <path d="M3 15v4a2 2 0 0 0 2 2h4" />
@@ -303,9 +315,7 @@ export function PipApp() {
             Exit PiP
           </button>
           {session?.title && (
-            <span className="pointer-events-none truncate text-[12px] font-medium text-white/75">
-              {session.title}
-            </span>
+            <span className="pointer-events-none truncate text-[12px] font-medium text-white/75">{session.title}</span>
           )}
         </div>
 
@@ -314,10 +324,7 @@ export function PipApp() {
             hover ? "opacity-100" : "opacity-0"
           }`}
         >
-          <div
-            onPointerDown={onSeek}
-            className="relative h-2 cursor-pointer rounded-full bg-white/15"
-          >
+          <div onPointerDown={onSeek} className="relative h-2 cursor-pointer rounded-full bg-white/15">
             <div
               className="absolute inset-y-0 left-0 rounded-full bg-[oklch(0.78_0.13_60)]"
               style={{ width: `${progressPct}%` }}
@@ -326,11 +333,22 @@ export function PipApp() {
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1">
               <PipBtn label="Back 30 seconds" onClick={back30}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M3 12a9 9 0 1 0 3-6.7" />
                   <polyline points="3 4 3 10 9 10" />
                 </svg>
-                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">30</span>
+                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">
+                  30
+                </span>
               </PipBtn>
               <button
                 type="button"
@@ -350,11 +368,22 @@ export function PipApp() {
                 )}
               </button>
               <PipBtn label="Forward 30 seconds" onClick={fwd30}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M21 12a9 9 0 1 1-3-6.7" />
                   <polyline points="21 4 21 10 15 10" />
                 </svg>
-                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">30</span>
+                <span className="absolute bottom-0.5 right-0.5 rounded-sm bg-black/55 px-1 text-[8px] font-bold leading-none">
+                  30
+                </span>
               </PipBtn>
             </div>
             <span className="font-mono text-[11px] tabular-nums text-white/85">
@@ -363,13 +392,31 @@ export function PipApp() {
             <div className="flex items-center gap-1.5">
               <PipBtn label="Mute / Unmute" onClick={toggleMute}>
                 {muted || vol === 0 ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <line x1="22" y1="9" x2="16" y2="15" />
                     <line x1="16" y1="9" x2="22" y2="15" />
                   </svg>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
                   </svg>
@@ -393,15 +440,7 @@ export function PipApp() {
   );
 }
 
-function PipBtn({
-  children,
-  onClick,
-  label,
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  label: string;
-}) {
+function PipBtn({ children, onClick, label }: { children: React.ReactNode; onClick: () => void; label: string }) {
   return (
     <button
       type="button"

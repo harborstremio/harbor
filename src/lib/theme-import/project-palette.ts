@@ -89,11 +89,7 @@ export function projectPalette(bucket: PaletteBucket): ProjectedTheme {
   const [canvas, surface, elevated, raised] = elevation(bg, light);
   const [primaryInk, mutedInk, subtleInk] = textLadder(ink, canvas, light);
 
-  const edgeBase = bucket.edge
-    ? parseColor(bucket.edge)
-    : light
-      ? mix(canvas, primaryInk, 0.7)
-      : raised;
+  const edgeBase = bucket.edge ? parseColor(bucket.edge) : light ? mix(canvas, primaryInk, 0.7) : raised;
   const edgeRgb = edgeBase
     ? { r: edgeBase.r, g: edgeBase.g, b: edgeBase.b }
     : light
@@ -111,12 +107,7 @@ export function projectPalette(bucket: PaletteBucket): ProjectedTheme {
   const accentHex = toHex6(accentRgb);
 
   const dangerParsed = bucket.danger ? parseColor(bucket.danger) : null;
-  const dangerHex =
-    dangerParsed && isRedHue(dangerParsed)
-      ? toHex6(dangerParsed)
-      : light
-        ? "#dc2626"
-        : "#ef5a5a";
+  const dangerHex = dangerParsed && isRedHue(dangerParsed) ? toHex6(dangerParsed) : light ? "#dc2626" : "#ef5a5a";
 
   const tokens: Record<string, string> = {
     "--color-canvas": toHex6(canvas),

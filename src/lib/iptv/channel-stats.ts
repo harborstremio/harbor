@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+
 import type { IptvChannel } from "./types";
 
 const KEY = "harbor.iptv.stats.v1";

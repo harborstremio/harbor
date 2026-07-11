@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { listAddons, type SAAddon } from "./stremio-addons";
 
 const INDEX_TTL_MS = 60 * 60 * 1000;

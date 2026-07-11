@@ -32,19 +32,11 @@ function trendingSince(): string {
 async function fetchRamadan(key: string, page: number): Promise<Meta[]> {
   const year = RAMADAN_YEARS[(page - 1) % RAMADAN_YEARS.length];
   const cycle = Math.floor((page - 1) / RAMADAN_YEARS.length) + 1;
-  return tmdbDiscover(
-    key,
-    "tv",
-    arParams({ first_air_date_year: String(year), page: String(cycle) }),
-  );
+  return tmdbDiscover(key, "tv", arParams({ first_air_date_year: String(year), page: String(cycle) }));
 }
 
 async function fetchDrama(key: string, page: number): Promise<Meta[]> {
-  return tmdbDiscover(
-    key,
-    "tv",
-    arParams({ with_genres: String(TV_GENRES.Drama), page: String(page) }),
-  );
+  return tmdbDiscover(key, "tv", arParams({ with_genres: String(TV_GENRES.Drama), page: String(page) }));
 }
 
 async function fetchMovies(key: string, page: number): Promise<Meta[]> {
@@ -52,19 +44,11 @@ async function fetchMovies(key: string, page: number): Promise<Meta[]> {
 }
 
 async function fetchKhaleeji(key: string, page: number): Promise<Meta[]> {
-  return tmdbDiscover(
-    key,
-    "tv",
-    arParams({ with_origin_country: GULF_COUNTRIES, page: String(page) }),
-  );
+  return tmdbDiscover(key, "tv", arParams({ with_origin_country: GULF_COUNTRIES, page: String(page) }));
 }
 
 async function fetchComedy(key: string, page: number): Promise<Meta[]> {
-  return tmdbDiscover(
-    key,
-    "movie",
-    arParams({ with_genres: String(MOVIE_GENRES.Comedy), page: String(page) }),
-  );
+  return tmdbDiscover(key, "movie", arParams({ with_genres: String(MOVIE_GENRES.Comedy), page: String(page) }));
 }
 
 async function fetchTrending(key: string, page: number): Promise<Meta[]> {

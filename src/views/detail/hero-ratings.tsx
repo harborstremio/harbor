@@ -1,18 +1,18 @@
-import { Popcorn } from "lucide-react";
-import type { ReactNode } from "react";
+import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
+import mdblistLogo from "@/assets/addon-logos/mdblist.png";
+import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { MalLogo } from "@/components/icons/mal-logo";
 import { RtBadge } from "@/components/rt-badge";
-import { HoverTooltip } from "@/components/hover-tooltip";
 import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
-import type { OmdbScores } from "@/lib/providers/omdb";
 import type { MdblistScores } from "@/lib/providers/mdblist";
+import type { OmdbScores } from "@/lib/providers/omdb";
+import { useSettings } from "@/lib/settings";
 import { useSimklCommunityRating } from "@/lib/simkl/ratings";
-import mdblistLogo from "@/assets/addon-logos/mdblist.png";
-import letterboxdLogo from "@/assets/addon-logos/letterboxd.png";
-import traktLogo from "@/assets/trakt.svg";
-import simklLogo from "@/assets/simkl.png";
+import { Popcorn } from "lucide-react";
+import type { ReactNode } from "react";
 
 function ScoreItem({
   label,
@@ -26,9 +26,7 @@ function ScoreItem({
   children: ReactNode;
 }) {
   const inner = (
-    <span className="flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-semibold text-ink">
-      {children}
-    </span>
+    <span className="flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-semibold text-ink">{children}</span>
   );
   return (
     <HoverTooltip label={label} sublabel={sublabel} side="top" align="center">
@@ -155,11 +153,7 @@ export function HeroRatings({
   if (settings.showDetailRatings && settings.showRtAudienceDetail && mdblist?.rtAudience != null) {
     items.push(
       <ScoreItem key="rt-audience" label={t("Rotten Tomatoes Audience")} sublabel={t("Popcornmeter")}>
-        <Popcorn
-          size={15}
-          strokeWidth={2}
-          className={mdblist.rtAudience >= 60 ? "text-accent" : "text-ink-subtle"}
-        />
+        <Popcorn size={15} strokeWidth={2} className={mdblist.rtAudience >= 60 ? "text-accent" : "text-ink-subtle"} />
         <span>{Math.round(mdblist.rtAudience)}%</span>
       </ScoreItem>,
     );
@@ -173,11 +167,7 @@ export function HeroRatings({
         sublabel={t("Average /5")}
         onClick={imdbId ? () => onOpenUrl(`https://letterboxd.com/imdb/${imdbId}/`) : undefined}
       >
-        <img
-          src={letterboxdLogo}
-          alt=""
-          className="h-[14px] w-[14px] rounded-[3px] object-cover"
-        />
+        <img src={letterboxdLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-cover" />
         <span>{mdblist.letterboxd.toFixed(1)}</span>
       </ScoreItem>,
     );
@@ -218,11 +208,7 @@ export function HeroRatings({
         sublabel={t("Average /10")}
         onClick={imdbId ? () => onOpenUrl(`https://simkl.com/search/id/?i=${imdbId}`) : undefined}
       >
-        <img
-          src={simklLogo}
-          alt=""
-          className="h-[14px] w-[14px] rounded-[3px] object-contain"
-        />
+        <img src={simklLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
         <span>{effectiveSimklRating.toFixed(1)}</span>
       </ScoreItem>,
     );
@@ -235,11 +221,7 @@ export function HeroRatings({
         label={t("MDBList")}
         onClick={imdbId ? () => onOpenUrl(`https://mdblist.com/${mediaType}/${imdbId}`) : undefined}
       >
-        <img
-          src={mdblistLogo}
-          alt=""
-          className="h-[14px] w-[14px] rounded-[3px] object-contain"
-        />
+        <img src={mdblistLogo} alt="" className="h-[14px] w-[14px] rounded-[3px] object-contain" />
         <span>{Math.round(mdblist.score)}</span>
       </ScoreItem>,
     );

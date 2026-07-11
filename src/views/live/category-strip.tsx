@@ -1,5 +1,5 @@
-import { forwardRef, useEffect, useRef } from "react";
 import { useT } from "@/lib/i18n";
+import { forwardRef, useEffect, useRef } from "react";
 
 export function CategoryStrip({
   groups,
@@ -54,28 +54,27 @@ export function CategoryStrip({
   );
 }
 
-const Chip = forwardRef<
-  HTMLButtonElement,
-  { label: string; count: number; active: boolean; onClick: () => void }
->(function Chip({ label, count, active, onClick }, ref) {
-  return (
-    <button
-      ref={ref}
-      onClick={onClick}
-      className={`flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[13px] font-medium transition-colors duration-150 ${
-        active
-          ? "border-ink bg-ink text-canvas"
-          : "border-edge-soft/55 bg-elevated text-ink-muted hover:border-edge hover:text-ink"
-      }`}
-    >
-      <span className="truncate max-w-[200px]">{label}</span>
-      <span
-        className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10.5px] font-semibold tabular-nums ${
-          active ? "bg-canvas/15 text-canvas" : "bg-canvas/40 text-ink-subtle"
+const Chip = forwardRef<HTMLButtonElement, { label: string; count: number; active: boolean; onClick: () => void }>(
+  function Chip({ label, count, active, onClick }, ref) {
+    return (
+      <button
+        ref={ref}
+        onClick={onClick}
+        className={`flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[13px] font-medium transition-colors duration-150 ${
+          active
+            ? "border-ink bg-ink text-canvas"
+            : "border-edge-soft/55 bg-elevated text-ink-muted hover:border-edge hover:text-ink"
         }`}
       >
-        {count}
-      </span>
-    </button>
-  );
-});
+        <span className="truncate max-w-[200px]">{label}</span>
+        <span
+          className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10.5px] font-semibold tabular-nums ${
+            active ? "bg-canvas/15 text-canvas" : "bg-canvas/40 text-ink-subtle"
+          }`}
+        >
+          {count}
+        </span>
+      </button>
+    );
+  },
+);

@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { fetch as tauriFetchImpl } from "@tauri-apps/plugin-http";
+
 import { TrackerBlockedError, isBlockedUrl, noteBlocked } from "./privacy/blocklist";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -9,10 +10,7 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 // works) — proxying them through the VPS gets 403'd. EVERYTHING ELSE routes through the
 // VPS /api-proxy: it's required for addons that send no CORS header at all (OpenSubtitles)
 // and for the CORS-less debrid REST APIs, and it's fine for the rest (Cinemeta, Comet).
-const DIRECT_HOSTS = new Set([
-  "torrentio.strem.fun",
-  "stremio.torbox.app",
-]);
+const DIRECT_HOSTS = new Set(["torrentio.strem.fun", "stremio.torbox.app"]);
 
 const PROXY_HOSTS = new Set([
   "v3-cinemeta.strem.io",
@@ -52,8 +50,7 @@ function rewriteForWeb(url: string, init?: RequestInit): { url: string; init?: R
     return { url, init };
   }
   if (DIRECT_HOSTS.has(parsed.hostname)) return { url, init };
-  const proxiable =
-    PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
+  const proxiable = PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
   if (!proxiable) return { url, init };
 
   const proxied = `/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;

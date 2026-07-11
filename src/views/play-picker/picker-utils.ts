@@ -6,11 +6,11 @@ import {
   sourceBadge,
   type BadgeKind,
 } from "@/components/format-badge";
-import type { Meta } from "@/lib/cinemeta";
-import type { Rejection } from "@/lib/streams/trust";
 import type { Addon } from "@/lib/addons";
-import type { ScoredStream, Stream, Tier } from "@/lib/streams/types";
+import type { Meta } from "@/lib/cinemeta";
 import { hasCachedMarker } from "@/lib/streams/cached";
+import type { Rejection } from "@/lib/streams/trust";
+import type { ScoredStream, Stream, Tier } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
 
 export async function cinemetaImdbFallback(
@@ -84,10 +84,7 @@ export function buildAddonOptions(
     }
   }
   if (rank) {
-    opts.sort(
-      (a, b) =>
-        (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER),
-    );
+    opts.sort((a, b) => (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER));
   } else {
     opts.sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -98,9 +95,7 @@ export function streamMatchesLangs(s: ScoredStream, prefs: string[]): boolean {
   if (s.audioLanguages.length === 0) return true;
   if (s.audioLanguages.includes("Multi")) return true;
   return s.audioLanguages.some((l) =>
-    prefs.some(
-      (p) => l.toLowerCase() === p.toLowerCase() || l.toLowerCase().startsWith(p.toLowerCase()),
-    ),
+    prefs.some((p) => l.toLowerCase() === p.toLowerCase() || l.toLowerCase().startsWith(p.toLowerCase())),
   );
 }
 
@@ -121,13 +116,32 @@ export function normalizeLangCode(s: string): string {
   const lower = s.trim().toLowerCase();
   if (lower === "jp") return "ja";
   const nameToCode: Record<string, string> = {
-    english: "en", portuguese: "pt", spanish: "es", french: "fr",
-    german: "de", italian: "it", japanese: "ja", korean: "ko",
-    chinese: "zh", russian: "ru", hindi: "hi", arabic: "ar",
-    dutch: "nl", polish: "pl", turkish: "tr", swedish: "sv",
-    norwegian: "no", danish: "da", finnish: "fi", czech: "cs",
-    hungarian: "hu", romanian: "ro", hebrew: "he", thai: "th",
-    vietnamese: "vi", ukrainian: "uk",
+    english: "en",
+    portuguese: "pt",
+    spanish: "es",
+    french: "fr",
+    german: "de",
+    italian: "it",
+    japanese: "ja",
+    korean: "ko",
+    chinese: "zh",
+    russian: "ru",
+    hindi: "hi",
+    arabic: "ar",
+    dutch: "nl",
+    polish: "pl",
+    turkish: "tr",
+    swedish: "sv",
+    norwegian: "no",
+    danish: "da",
+    finnish: "fi",
+    czech: "cs",
+    hungarian: "hu",
+    romanian: "ro",
+    hebrew: "he",
+    thai: "th",
+    vietnamese: "vi",
+    ukrainian: "uk",
   };
   if (nameToCode[lower]) return nameToCode[lower];
   return lower.slice(0, 2);
@@ -234,9 +248,7 @@ export function groupRejections(rejected: Rejection[]): Array<{ label: string; c
     const label = rejectionLabel(r.reason);
     counts.set(label, (counts.get(label) ?? 0) + 1);
   }
-  return [...counts.entries()]
-    .map(([label, count]) => ({ label, count }))
-    .sort((a, b) => b.count - a.count);
+  return [...counts.entries()].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
 }
 
 export function rejectionLabel(reason: string): string {
@@ -245,8 +257,7 @@ export function rejectionLabel(reason: string): string {
   if (reason === "size-stub") return "tiny stubs";
   if (reason.startsWith("size-too-large-")) return "oversized";
   if (reason.startsWith("year-mismatch")) return "year mismatch";
-  if (reason.startsWith("season-mismatch") || reason.startsWith("episode-mismatch"))
-    return "wrong episode";
+  if (reason.startsWith("season-mismatch") || reason.startsWith("episode-mismatch")) return "wrong episode";
   if (reason === "season-pack-no-file-idx") return "season packs";
   if (reason.startsWith("scam-score-")) return "scam metadata";
   if (reason === "dead-torrent-zero-seeders") return "dead torrents";
@@ -306,7 +317,10 @@ export function displayTitle(s: ScoredStream, showName: string, episode?: PlayEp
   if (raw) return raw;
   if (!episode) {
     const filename = s.behaviorHints?.filename ?? s.behaviorHints?.fileName ?? "";
-    const firstLine = (s.title ?? "").split("\n").map((l) => l.trim()).find((l) => l.length > 0);
+    const firstLine = (s.title ?? "")
+      .split("\n")
+      .map((l) => l.trim())
+      .find((l) => l.length > 0);
     return filename || firstLine || s.name || showName || s.parsedTitle || "";
   }
   const parts = [showName || s.parsedTitle];
@@ -321,7 +335,10 @@ export function displayTitle(s: ScoredStream, showName: string, episode?: PlayEp
 export function torrentFilename(s: ScoredStream): string {
   const fn = s.behaviorHints?.filename ?? s.behaviorHints?.fileName;
   if (fn && fn.trim()) return fn.trim();
-  const firstLine = (s.title ?? "").split("\n").map((l) => l.trim()).find((l) => l.length > 0);
+  const firstLine = (s.title ?? "")
+    .split("\n")
+    .map((l) => l.trim())
+    .find((l) => l.length > 0);
   return firstLine ?? "";
 }
 
@@ -352,14 +369,7 @@ export function formatStreamQuality(s: ScoredStream): string {
   if (s.resolution) parts.push(s.resolution);
   if (s.hdrFormat) parts.push(HDR_LABEL[s.hdrFormat] ?? s.hdrFormat);
   if (s.audio.codec !== "Other") {
-    const ch =
-      s.audio.channels === 8
-        ? " 7.1"
-        : s.audio.channels === 7
-          ? " 6.1"
-          : s.audio.channels === 6
-            ? " 5.1"
-            : "";
+    const ch = s.audio.channels === 8 ? " 7.1" : s.audio.channels === 7 ? " 6.1" : s.audio.channels === 6 ? " 5.1" : "";
     parts.push(`${s.audio.codec}${ch}`);
   }
   return parts.join(" · ");
@@ -479,9 +489,7 @@ function streamIdentity(s: {
   title?: string;
   name?: string;
 }): string {
-  const base = s.infoHash
-    ? `h:${s.infoHash}:${s.fileIdx ?? ""}`
-    : `u:${s.url ?? s.title ?? s.name ?? ""}`;
+  const base = s.infoHash ? `h:${s.infoHash}:${s.fileIdx ?? ""}` : `u:${s.url ?? s.title ?? s.name ?? ""}`;
   return `${s.addonId}:${base}`;
 }
 
@@ -523,8 +531,7 @@ export function orderByAddonNative(
     if (!arrival.has(k)) arrival.set(k, i);
   });
   const BIG = Number.MAX_SAFE_INTEGER;
-  const arrivalOf = (s: ScoredStream): number =>
-    s.nativeIdx ?? arrival.get(streamIdentity(s)) ?? BIG;
+  const arrivalOf = (s: ScoredStream): number => s.nativeIdx ?? arrival.get(streamIdentity(s)) ?? BIG;
   return streams.slice().sort((a, b) => {
     const ar = rank.get(a.addonUrl ?? "") ?? BIG;
     const br = rank.get(b.addonUrl ?? "") ?? BIG;

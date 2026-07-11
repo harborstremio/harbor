@@ -1,7 +1,7 @@
-import { HardDrive, Play } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import type { LocalEntry } from "@/lib/local-library";
 import { episodeLabel } from "@/lib/local-library/player-src";
-import { useT } from "@/lib/i18n";
+import { HardDrive, Play } from "lucide-react";
 
 export function LocalStreamCard({ entry, onPlay }: { entry: LocalEntry; onPlay: () => void }) {
   const t = useT();
@@ -17,9 +17,7 @@ export function LocalStreamCard({ entry, onPlay }: { entry: LocalEntry; onPlay: 
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
           {t("On your disk")}
-          {ep && (
-            <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] tracking-normal">{ep}</span>
-          )}
+          {ep && <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] tracking-normal">{ep}</span>}
         </span>
         <span className="truncate text-[14.5px] font-semibold text-ink">{entry.filename}</span>
       </span>

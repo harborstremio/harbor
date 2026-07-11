@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { Tv } from "lucide-react";
 import { useView } from "@/lib/view";
+import { Tv } from "lucide-react";
+import { useEffect } from "react";
 
 export function TogetherLeaveForLiveModal() {
   const { pendingLiveSrc, confirmLeavePartyForLive, cancelLeavePartyForLive } = useView();
@@ -34,7 +34,8 @@ export function TogetherLeaveForLiveModal() {
           <div className="flex flex-col gap-1.5">
             <h2 className="text-[17px] font-semibold text-ink">Watch Live TV?</h2>
             <p className="text-[14px] leading-relaxed text-ink-muted">
-              Live TV can't be synced in a watch party, so playing {name} will leave your party. Everyone else can keep watching together.
+              Live TV can't be synced in a watch party, so playing {name} will leave your party. Everyone else can keep
+              watching together.
             </p>
           </div>
         </div>

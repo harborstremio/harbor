@@ -39,9 +39,7 @@ export function Dropdown({
 
   useLayoutEffect(() => {
     if (!open) return;
-    listRef.current
-      ?.querySelector('[data-selected="true"]')
-      ?.scrollIntoView({ block: "nearest" });
+    listRef.current?.querySelector('[data-selected="true"]')?.scrollIntoView({ block: "nearest" });
   }, [open]);
 
   return (

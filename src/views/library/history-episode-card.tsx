@@ -1,11 +1,12 @@
-import { Play, RotateCcw, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
 import { type Meta } from "@/lib/cinemeta";
 import { useContextMenu } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
+import { fetchSeasonEpisodes } from "@/lib/series-episodes";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { fetchSeasonEpisodes } from "@/lib/series-episodes";
+import { Play, RotateCcw, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { type HistoryEntry } from "./history-tab";
 
 export function HistoryEpisodeCard({
@@ -80,15 +81,10 @@ export function HistoryEpisodeCard({
 
   const src = candidates[imgIdx];
   const remaining =
-    entry.durationMs > 0 && !entry.watched
-      ? formatRemaining(t, entry.durationMs - entry.timeOffsetMs)
-      : "";
+    entry.durationMs > 0 && !entry.watched ? formatRemaining(t, entry.durationMs - entry.timeOffsetMs) : "";
 
   const open = () =>
-    openMeta(
-      entry.meta,
-      isEpisode ? { episodeHint: { season: entry.season!, episode: entry.episode! } } : undefined,
-    );
+    openMeta(entry.meta, isEpisode ? { episodeHint: { season: entry.season!, episode: entry.episode! } } : undefined);
 
   return (
     <div className="group relative w-full min-w-0">
@@ -142,13 +138,9 @@ export function HistoryEpisodeCard({
               </p>
             </>
           ) : (
-            <p className="truncate text-[13px] font-medium text-ink">
-              {entry.meta.name || entry.meta.id}
-            </p>
+            <p className="truncate text-[13px] font-medium text-ink">{entry.meta.name || entry.meta.id}</p>
           )}
-          {entry.watchedAt && (
-            <p className="text-[11px] text-ink-subtle">{formatShortDate(entry.watchedAt)}</p>
-          )}
+          {entry.watchedAt && <p className="text-[11px] text-ink-subtle">{formatShortDate(entry.watchedAt)}</p>}
         </div>
       </button>
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
@@ -165,9 +157,7 @@ export function HistoryEpisodeCard({
           <Play size={20} fill="currentColor" className="ml-0.5 text-ink" />
         </button>
       </div>
-      {onRemove && entry.stremioId && (
-        <RemoveButton onRemove={() => onRemove(entry.stremioId as string)} />
-      )}
+      {onRemove && entry.stremioId && <RemoveButton onRemove={() => onRemove(entry.stremioId as string)} />}
     </div>
   );
 }
@@ -212,10 +202,7 @@ function formatShortDate(ts: number): string {
   return `${mm}/${dd}/${d.getFullYear()}`;
 }
 
-function formatRemaining(
-  t: (key: string, vars?: Record<string, string | number>) => string,
-  ms: number,
-): string {
+function formatRemaining(t: (key: string, vars?: Record<string, string | number>) => string, ms: number): string {
   const minutes = Math.max(0, Math.round(ms / 60000));
   if (minutes < 60) return t("{m}m left", { m: minutes });
   const h = Math.floor(minutes / 60);

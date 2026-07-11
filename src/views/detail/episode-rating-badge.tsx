@@ -1,5 +1,5 @@
-import { Star } from "lucide-react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
+import { Star } from "lucide-react";
 
 export function EpisodeRatingBadge({ value, isImdb }: { value: number; isImdb: boolean }) {
   return (

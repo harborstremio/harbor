@@ -1,6 +1,6 @@
-import type { Meta } from "@/lib/cinemeta";
 import { AWARD_CATALOG } from "@/lib/awards-catalog";
 import { readAwardHistory } from "@/lib/awards-history";
+import type { Meta } from "@/lib/cinemeta";
 import { get, IMG } from "@/lib/providers/tmdb/tmdb-client";
 import type { AwardType } from "@/lib/providers/wikidata";
 
@@ -28,18 +28,9 @@ type PersonSeed = { name: string; role: string; work: string | null; year: numbe
 const PRIMARY_FILM_KEYS: Partial<Record<AwardType, string[]>> = {
   oscar: ["best_picture"],
   emmy: ["outstanding_drama_series", "outstanding_comedy_series", "outstanding_limited_series"],
-  golden_globe: [
-    "best_picture_drama",
-    "best_picture_musical_comedy",
-    "best_tv_drama",
-    "best_tv_musical_comedy",
-  ],
+  golden_globe: ["best_picture_drama", "best_picture_musical_comedy", "best_tv_drama", "best_tv_musical_comedy"],
   bafta: ["best_film"],
-  sag: [
-    "outstanding_cast_motion_picture",
-    "outstanding_drama_ensemble",
-    "outstanding_comedy_ensemble",
-  ],
+  sag: ["outstanding_cast_motion_picture", "outstanding_drama_ensemble", "outstanding_comedy_ensemble"],
   critics_choice: ["best_picture", "best_drama_series", "best_comedy_series"],
   cannes: ["palme_dor"],
   venice: ["golden_lion"],
@@ -103,8 +94,7 @@ function isPersonName(name: string): boolean {
   const k = norm(name);
   if (!k) return false;
   if (NON_PERSON.has(k)) return false;
-  if (/^the (novel|play|memoir|book|novella|short story|television play|story)$/i.test(name.trim()))
-    return false;
+  if (/^the (novel|play|memoir|book|novella|short story|television play|story)$/i.test(name.trim())) return false;
   if (/\bbrothers\b/i.test(name)) return false;
   return true;
 }

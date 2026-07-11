@@ -1,29 +1,21 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
 import { useSettings } from "@/lib/settings";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+
+import { invalidateLetterboxdCache } from "./cache";
 import {
   loginLetterboxd,
   StremboxdLoginError,
   updateLetterboxdPreferences,
   type LetterboxdPreferences,
 } from "./client";
+import { getLetterboxdSession, setLetterboxdSession, subscribeLetterboxdSession } from "./session";
 import { buildStremboxdConfig } from "./settings-helper";
-import { invalidateLetterboxdCache } from "./cache";
-import {
-  getLetterboxdSession,
-  setLetterboxdSession,
-  subscribeLetterboxdSession,
-} from "./session";
 import type { LetterboxdSession } from "./types";
 
-type LoginResult = { kind: "success"; session: LetterboxdSession } | { kind: "2fa" } | { kind: "error"; message: string };
+type LoginResult =
+  | { kind: "success"; session: LetterboxdSession }
+  | { kind: "2fa" }
+  | { kind: "error"; message: string };
 
 type Value = {
   enabled: boolean;

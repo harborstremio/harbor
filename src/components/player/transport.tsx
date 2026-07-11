@@ -1,20 +1,6 @@
-import { Settings2 } from "lucide-react";
-import { Fragment, useEffect, useRef, useState } from "react";
-import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import { SongIdToast } from "@/components/song-id-toast";
 import type { Meta } from "@/lib/cinemeta";
-import { CastModal } from "./cast-modal";
-import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
-import { TransportStremio } from "./transport-stremio";
-import { TransportKids } from "./transport-kids";
-import { useActiveKid } from "@/lib/profiles";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { useView } from "@/lib/view";
-import { resolveChromeTheme } from "@/lib/theme";
-import { SeekBar } from "./transport/seek-bar";
-import { LiveBadge, GoToLive, LiveSeekBar } from "./transport/live-controls";
-import { PipChrome } from "./transport/pip-chrome";
-import { fmtTime } from "./transport/transport-utils";
 import {
   controlsInSlot,
   PLAYER_CHROME_CHANGED_EVENT,
@@ -23,8 +9,23 @@ import {
   type PlayerChromeConfig,
   type TimeFormat,
 } from "@/lib/player-chrome";
+import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import { useActiveKid } from "@/lib/profiles";
+import { useSettings } from "@/lib/settings";
+import { resolveChromeTheme } from "@/lib/theme";
+import { useView } from "@/lib/view";
+import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
+import { Settings2 } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+
+import { CastModal } from "./cast-modal";
+import { TransportKids } from "./transport-kids";
+import { TransportStremio } from "./transport-stremio";
 import { renderControl, type ControlContext } from "./transport/control-renderer";
-import { SongIdToast } from "@/components/song-id-toast";
+import { LiveBadge, GoToLive, LiveSeekBar } from "./transport/live-controls";
+import { PipChrome } from "./transport/pip-chrome";
+import { SeekBar } from "./transport/seek-bar";
+import { fmtTime } from "./transport/transport-utils";
 import { useCastModalPlay } from "./use-cast-modal-play";
 
 export function Transport({
@@ -166,9 +167,7 @@ export function Transport({
   const [aspectMenuOpen, setAspectMenuOpen] = useState(false);
   const [anime4kMenuOpen, setAnime4kMenuOpen] = useState(false);
   const [castModalOpen, setCastModalOpen] = useState(false);
-  const [chromeConfig, setChromeConfig] = useState<PlayerChromeConfig>(() =>
-    readPlayerChromeConfig("default"),
-  );
+  const [chromeConfig, setChromeConfig] = useState<PlayerChromeConfig>(() => readPlayerChromeConfig("default"));
   const isLiveChannel = !!meta?.id?.startsWith("iptv:");
   const titleClickable = !!meta && !isLiveChannel;
   const { openMeta, exitPlayer } = useView();
@@ -343,9 +342,7 @@ export function Transport({
     engine,
     useOverlayPopups,
     customIcons: chromeConfig.customIcons,
-    controlVariants: Object.fromEntries(
-      chromeConfig.controls.map((c) => [c.id, c.variant ?? "auto"]),
-    ),
+    controlVariants: Object.fromEntries(chromeConfig.controls.map((c) => [c.id, c.variant ?? "auto"])),
     timeFormat: chromeConfig.options.timeFormat,
     onCycleTimeFormat,
     volumeStyle: chromeConfig.options.volumeStyle,
@@ -456,9 +453,11 @@ export function Transport({
             </>
           )}
         </div>
-        <div className={`pointer-events-auto grid items-center ${
-          compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
-        }`}>
+        <div
+          className={`pointer-events-auto grid items-center ${
+            compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
+          }`}
+        >
           <div className="flex min-w-0 items-center gap-2 justify-self-start">
             {controlsInSlot(chromeConfig, "bottom-left").map((c) => (
               <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
@@ -492,9 +491,7 @@ export function Transport({
             setCastModalOpen(false);
             castModalPlay(m, ep);
           }}
-          currentEpisode={
-            season != null && episode != null ? { season, episode } : null
-          }
+          currentEpisode={season != null && episode != null ? { season, episode } : null}
         />
       )}
     </>

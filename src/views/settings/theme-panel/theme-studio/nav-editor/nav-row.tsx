@@ -1,6 +1,6 @@
+import type { NavItem } from "@/chrome/nav-items";
 import { Eye, EyeOff, GripVertical } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { NavItem } from "@/chrome/nav-items";
 
 export function NavRow({
   item,
@@ -119,9 +119,7 @@ export function NavRow({
         title={hidden ? "Show in nav" : "Hide from nav"}
         aria-pressed={hidden}
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
-          hidden
-            ? "bg-danger/15 text-danger hover:bg-danger/25"
-            : "text-ink-subtle hover:bg-raised hover:text-ink"
+          hidden ? "bg-danger/15 text-danger hover:bg-danger/25" : "text-ink-subtle hover:bg-raised hover:text-ink"
         }`}
       >
         {hidden ? <EyeOff size={15} strokeWidth={2.2} /> : <Eye size={15} strokeWidth={2.2} />}

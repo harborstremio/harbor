@@ -1,15 +1,11 @@
-import { Loader2 } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { IMG } from "@/lib/providers/tmdb/tmdb-client";
-import {
-  creditToMeta,
-  tmdbPerson,
-  tmdbPersonCached,
-  type PersonDetail,
-} from "@/lib/providers/tmdb/tmdb-people";
+import { creditToMeta, tmdbPerson, tmdbPersonCached, type PersonDetail } from "@/lib/providers/tmdb/tmdb-people";
 import { dedupe, isCameoOrGuest, notableScore } from "@/views/person/person-utils";
+import { Loader2 } from "lucide-react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+
 import { PosterRail, RailSection, RailSkeleton } from "./rails";
 
 function fmtYear(d: string | null): string {
@@ -117,10 +113,7 @@ export function PersonPanel({
           )}
           {bio && (
             <div className="pt-0.5">
-              <p
-                ref={bioRef}
-                className={`text-[14px] leading-relaxed text-white/72 ${expanded ? "" : "line-clamp-4"}`}
-              >
+              <p ref={bioRef} className={`text-[14px] leading-relaxed text-white/72 ${expanded ? "" : "line-clamp-4"}`}>
                 {bio}
               </p>
               {bioClamped && (
@@ -159,9 +152,7 @@ export function PersonPanel({
             </RailSection>
           )}
           {!loading && knownFor.length === 0 && movies.length === 0 && shows.length === 0 && !bio && (
-            <p className="px-1 text-[13.5px] text-white/55">
-              {t("No details available for this person.")}
-            </p>
+            <p className="px-1 text-[13.5px] text-white/55">{t("No details available for this person.")}</p>
           )}
         </>
       )}

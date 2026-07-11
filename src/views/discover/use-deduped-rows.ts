@@ -1,5 +1,5 @@
-import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { useMemo } from "react";
 
 const MIN_ROW = 16;
 

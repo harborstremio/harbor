@@ -1,6 +1,6 @@
-import { Camera } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt } from "@/lib/settings-preview-art";
+import { Camera } from "lucide-react";
 
 export function CwSnapshotShowcase() {
   const t = useT();
@@ -31,7 +31,9 @@ export function CwSnapshotShowcase() {
       <div className="min-w-0 flex-1">
         <div className="text-[12.5px] font-semibold text-ink">{t("Picks up right where you left off")}</div>
         <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
-          {t("Back out mid-episode and the card keeps the exact frame you stopped on, with your progress, so it looks like a pause instead of a thumbnail.")}
+          {t(
+            "Back out mid-episode and the card keeps the exact frame you stopped on, with your progress, so it looks like a pause instead of a thumbnail.",
+          )}
         </p>
       </div>
     </div>

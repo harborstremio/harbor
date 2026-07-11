@@ -1,5 +1,6 @@
 import type { Affinity } from "@/lib/discover/types";
 import type { Settings } from "@/lib/settings";
+
 import { mixSeed, mulberry32 } from "./tags";
 
 export type RowEndpoint = "discover" | "trending" | "awards";

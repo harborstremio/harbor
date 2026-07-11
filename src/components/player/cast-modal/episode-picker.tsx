@@ -1,18 +1,18 @@
-import { Check, ChevronDown, Play } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
 import { getEpisodeProgress, resumeDefaultSeason } from "@/lib/episode-progress";
-import { fetchEpisodeList } from "@/lib/series-episodes";
+import { useT } from "@/lib/i18n";
 import type { Episode } from "@/lib/providers/tmdb";
-import { useTrakt } from "@/lib/trakt/provider";
+import { fetchEpisodeList } from "@/lib/series-episodes";
+import { useSettings } from "@/lib/settings";
 import { useSimkl } from "@/lib/simkl/provider";
+import { useTrakt } from "@/lib/trakt/provider";
 import type { PlayEpisode } from "@/lib/view";
 import { useArcGroups } from "@/views/detail/series-episodes/use-arc-groups";
 import { useEpisodeOrder } from "@/views/detail/series-episodes/use-episode-order";
 import { useSeriesTvdbStills } from "@/views/detail/series-episodes/use-series-tvdb-stills";
 import { useWatchedSets } from "@/views/detail/series-episodes/use-watched-sets";
+import { Check, ChevronDown, Play } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type DropOption = { key: string; label: string };
 
@@ -188,7 +188,7 @@ export function EpisodePicker({
 
   const activeKey =
     mode === "arcs"
-      ? arc.activeArcId ?? arc.arcs[0]?.id ?? ""
+      ? (arc.activeArcId ?? arc.arcs[0]?.id ?? "")
       : mode === "order"
         ? String(orderSeasonEff)
         : String(flatActive);
@@ -203,15 +203,23 @@ export function EpisodePicker({
   const thumbFor = (ep: PlayEpisode) =>
     ep.still ?? tvdbStills[`s${ep.season}e${ep.episode}`] ?? tvdbStills[`abs${ep.episode}`];
   const progressFor = (ep: PlayEpisode) =>
-    getEpisodeProgress(meta.id, ep.season, ep.episode, ep.runtime ?? null, imdbId ?? null, traktWatched, undefined, undefined, simklWatched);
+    getEpisodeProgress(
+      meta.id,
+      ep.season,
+      ep.episode,
+      ep.runtime ?? null,
+      imdbId ?? null,
+      traktWatched,
+      undefined,
+      undefined,
+      simklWatched,
+    );
 
   const loadingNow = mode === "arcs" ? arc.loading : mode === "flat" ? loading : false;
 
   return (
     <div className="flex flex-col gap-5 px-6 pb-8 pt-1 sm:px-8">
-      {options.length > 1 && (
-        <SeasonDropdown options={options} activeKey={activeKey} onSelect={onSelectKey} />
-      )}
+      {options.length > 1 && <SeasonDropdown options={options} activeKey={activeKey} onSelect={onSelectKey} />}
 
       {loadingNow ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -226,9 +234,7 @@ export function EpisodePicker({
           {activeEpisodes.map((ep) => {
             const thumb = thumbFor(ep);
             const prog = progressFor(ep);
-            const sub = [ep.airDate?.slice(0, 10), ep.runtime ? `${ep.runtime}m` : null]
-              .filter(Boolean)
-              .join(" · ");
+            const sub = [ep.airDate?.slice(0, 10), ep.runtime ? `${ep.runtime}m` : null].filter(Boolean).join(" · ");
             return (
               <button
                 key={`${ep.season}-${ep.episode}`}
@@ -269,7 +275,9 @@ export function EpisodePicker({
                   )}
                 </div>
                 <div className="flex flex-col gap-0.5 px-0.5">
-                  <span className={`line-clamp-1 text-[13px] font-semibold ${prog.watched ? "text-white/55" : "text-white/90"}`}>
+                  <span
+                    className={`line-clamp-1 text-[13px] font-semibold ${prog.watched ? "text-white/55" : "text-white/90"}`}
+                  >
                     {ep.name || t("Episode {n}", { n: ep.episode })}
                   </span>
                   {sub && <span className="text-[11.5px] text-white/45">{sub}</span>}

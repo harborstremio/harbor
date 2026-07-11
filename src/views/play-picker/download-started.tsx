@@ -1,7 +1,7 @@
-import { Check } from "lucide-react";
-import { useEffect } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { type PlayEpisode } from "@/lib/view";
+import { Check } from "lucide-react";
+import { useEffect } from "react";
 
 export function DownloadStarted({
   meta,
@@ -44,9 +44,7 @@ export function DownloadStarted({
             Saving to Downloads
           </p>
           <p className="text-[14px] text-white/75">{title}</p>
-          {label && (
-            <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/45">{label}</p>
-          )}
+          {label && <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-white/45">{label}</p>}
         </div>
         <p className="text-[13px] text-white/55">Track progress on the Downloads tab</p>
       </div>

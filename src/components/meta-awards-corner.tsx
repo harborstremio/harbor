@@ -1,10 +1,10 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { AwardLogo, laurelColorFor } from "@/components/icons/award-logo";
 import { Laurel } from "@/components/icons/laurel";
 import { awardSourceMeta, findAnyAwardWins, parseAwardYear } from "@/lib/anime-awards";
+import { mergeBundledAwards } from "@/lib/awards-history";
 import type { Meta } from "@/lib/cinemeta";
 import { awardSummary, useAwards, type AwardType } from "@/lib/providers/wikidata";
-import { mergeBundledAwards } from "@/lib/awards-history";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 
 const HEADLINE_FOR: Record<string, string> = {
   oscar: "Academy Award",
@@ -145,18 +145,13 @@ function ClassicCorner({ imdbId, name, year }: { imdbId: string | null; name: st
             </span>
           ))}
       </div>
-      <span
-        className="shrink-0 text-accent"
-        style={laurelTint ? { color: laurelTint } : undefined}
-      >
+      <span className="shrink-0 text-accent" style={laurelTint ? { color: laurelTint } : undefined}>
         {won ? (
           <Laurel size={compact ? 48 : 68}>
             <AwardLogo type={top.type as AwardType} size={compact ? 18 : 24} />
           </Laurel>
         ) : (
-          <span
-            className={`flex items-center justify-center opacity-85 ${compact ? "h-11 w-11" : "h-16 w-16"}`}
-          >
+          <span className={`flex items-center justify-center opacity-85 ${compact ? "h-11 w-11" : "h-16 w-16"}`}>
             <AwardLogo type={top.type as AwardType} size={compact ? 26 : 36} />
           </span>
         )}
@@ -171,4 +166,3 @@ function pluralizeNoun(type: string, n: number): string {
   if (base.endsWith("s")) return base;
   return `${base}s`;
 }
-

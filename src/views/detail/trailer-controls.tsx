@@ -1,6 +1,7 @@
+import { useT } from "@/lib/i18n";
 import { Volume1, Volume2, VolumeX } from "lucide-react";
 import { useRef, useState } from "react";
-import { useT } from "@/lib/i18n";
+
 import { Tooltip } from "./tooltip";
 
 export function formatTime(s: number) {
@@ -96,10 +97,7 @@ export function Scrubber({
         className="absolute inset-x-0 top-1/2 -translate-y-1/2 overflow-hidden bg-white/25 transition-[height] duration-150 ease-out"
         style={{ height: expanded ? 14 : 9 }}
       >
-        <div
-          className="absolute inset-y-0 left-0 bg-white"
-          style={{ width: `${display * 100}%` }}
-        />
+        <div className="absolute inset-y-0 left-0 bg-white" style={{ width: `${display * 100}%` }} />
       </div>
       <div
         className="pointer-events-none absolute top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_3px_12px_rgba(0,0,0,0.55)] transition-opacity duration-150"
@@ -212,11 +210,7 @@ export function VolumeControl({
   const expanded = hover || active;
 
   return (
-    <div
-      className="flex items-center"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
+    <div className="flex items-center" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <Tooltip label={muted ? t("Unmute · M") : t("Mute · M")}>
         <button
           onClick={onToggleMute}
@@ -238,10 +232,7 @@ export function VolumeControl({
           className="relative w-full overflow-hidden bg-white/35 transition-[height] duration-150 ease-out"
           style={{ height: expanded ? 6 : 4 }}
         >
-          <div
-            className="absolute inset-y-0 left-0 bg-accent"
-            style={{ width: `${effective * 100}%` }}
-          />
+          <div className="absolute inset-y-0 left-0 bg-accent" style={{ width: `${effective * 100}%` }} />
         </div>
         <div
           className="pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_2px_6px_rgba(0,0,0,0.55)]"

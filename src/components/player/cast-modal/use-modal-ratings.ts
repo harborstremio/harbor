@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { useSettings } from "@/lib/settings";
-import { omdbScores, type OmdbScores } from "@/lib/providers/omdb";
-import { useMdblistScores } from "@/lib/providers/mdblist";
 import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
+import { useMdblistScores } from "@/lib/providers/mdblist";
+import { omdbScores, type OmdbScores } from "@/lib/providers/omdb";
+import { useSettings } from "@/lib/settings";
+import { useEffect, useState } from "react";
 
 export function useModalRatings(imdbId: string | null, mediaType: "movie" | "show") {
   const { settings } = useSettings();

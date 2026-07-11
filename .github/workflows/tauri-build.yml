@@ -68,11 +68,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 11.9.0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - name: Install JS deps
@@ -121,7 +121,7 @@ jobs:
           TARGET="${{ matrix.platform.target }}"
           EXT=""
           if [[ "$TARGET" == *"windows"* ]]; then EXT=".exe"; fi
-          
+
           echo "Downloading yt-dlp..."
           if [[ "$TARGET" == *"windows"* ]]; then
             curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"

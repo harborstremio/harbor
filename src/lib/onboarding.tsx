@@ -36,10 +36,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const resetOnboarding = useCallback(() => setFlags({ onboarded: false, nudges: {} }), []);
   const resetNudges = useCallback(() => setFlags((f) => ({ ...f, nudges: {} })), []);
   const isDismissed = useCallback((key: string) => !!flags.nudges[key], [flags.nudges]);
-  const dismiss = useCallback(
-    (key: string) => setFlags((f) => ({ ...f, nudges: { ...f.nudges, [key]: true } })),
-    [],
-  );
+  const dismiss = useCallback((key: string) => setFlags((f) => ({ ...f, nudges: { ...f.nudges, [key]: true } })), []);
 
   const value = useMemo(
     () => ({

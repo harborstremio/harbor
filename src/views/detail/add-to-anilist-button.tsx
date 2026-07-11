@@ -1,5 +1,3 @@
-import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import anilistLogo from "@/assets/anilist.png";
 import { AnchoredMenu } from "@/components/anchored-menu";
 import { deleteListEntry, fetchListEntry, saveListEntry } from "@/lib/anilist/mutations";
@@ -7,6 +5,8 @@ import { useAnilist } from "@/lib/anilist/provider";
 import { resolveAnilistMediaId } from "@/lib/anilist/sync";
 import type { MediaListStatus } from "@/lib/anilist/types";
 import { useT } from "@/lib/i18n";
+import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 const STATUS_LABELS: Record<MediaListStatus, string> = {
   CURRENT: "Watching",
@@ -17,14 +17,7 @@ const STATUS_LABELS: Record<MediaListStatus, string> = {
   DROPPED: "Dropped",
 };
 
-const STATUS_ORDER: MediaListStatus[] = [
-  "CURRENT",
-  "PLANNING",
-  "COMPLETED",
-  "REPEATING",
-  "PAUSED",
-  "DROPPED",
-];
+const STATUS_ORDER: MediaListStatus[] = ["CURRENT", "PLANNING", "COMPLETED", "REPEATING", "PAUSED", "DROPPED"];
 
 export function AddToAnilistButton({ harborId, title }: { harborId: string; title: string }) {
   const t = useT();
@@ -124,10 +117,7 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
       >
         <img src={anilistLogo} alt="" className="h-[18px] w-[18px] rounded-[3px] object-contain" />
         {t(STATUS_LABELS[status])}
-        <ChevronDown
-          size={16}
-          className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`}
-        />
+        <ChevronDown size={16} className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`} />
       </button>
       <AnchoredMenu anchorRef={btnRef} open={menuOpen} onClose={() => setMenuOpen(false)} width={224}>
         <div className="overflow-hidden rounded-2xl border border-edge bg-raised py-1.5 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)]">

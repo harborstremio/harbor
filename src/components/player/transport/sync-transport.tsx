@@ -1,5 +1,5 @@
-import { PauseCircle, PlayCircle, RotateCcw, Save, Undo2, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { PauseCircle, PlayCircle, RotateCcw, Save, Undo2, X } from "lucide-react";
 
 export function SyncTransport({
   mode,
@@ -39,11 +39,7 @@ export function SyncTransport({
           aria-label={playing ? t("Pause") : t("Play")}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white transition-colors hover:bg-white/20 active:scale-95"
         >
-          {playing ? (
-            <PauseCircle size={20} strokeWidth={1.5} />
-          ) : (
-            <PlayCircle size={20} strokeWidth={1.5} />
-          )}
+          {playing ? <PauseCircle size={20} strokeWidth={1.5} /> : <PlayCircle size={20} strokeWidth={1.5} />}
         </button>
 
         {/* Nudge steps */}
@@ -101,11 +97,7 @@ export function SyncTransport({
                 ))}
               </div>
               <span className="max-w-[120px] truncate text-[12px] font-medium text-white/60">
-                {anchorCount === 0
-                  ? t("Click a line")
-                  : anchorCount === 1
-                    ? t("Click another")
-                    : t("Ready")}
+                {anchorCount === 0 ? t("Click a line") : anchorCount === 1 ? t("Click another") : t("Ready")}
               </span>
             </>
           ) : (
@@ -139,7 +131,6 @@ export function SyncTransport({
           {t("Save")}
         </button>
       </div>
-
     </div>
   );
 }

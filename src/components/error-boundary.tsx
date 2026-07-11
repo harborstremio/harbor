@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+
 import { showHarborError } from "./error-view";
 
 type State = { crashed: boolean };
@@ -16,8 +17,7 @@ export class HarborErrorBoundary extends Component<{ children: ReactNode }, Stat
       code: error.name || "Crash",
       title: "Crash",
       message:
-        error.message ||
-        "Something blew up while rendering. Reload to recover, or send us the technical detail.",
+        error.message || "Something blew up while rendering. Reload to recover, or send us the technical detail.",
       detail: [
         `${error.name}: ${error.message}`,
         "",

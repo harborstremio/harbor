@@ -1,10 +1,10 @@
+import { useT } from "@/lib/i18n";
+import type { PanelCorner } from "@/lib/player-chrome";
+import { nameColor } from "@/lib/together/colors";
+import type { Participant, ParticipantLocation, SyncState } from "@/lib/together/protocol";
+import { useSelfIdentity } from "@/lib/together/use-self-identity";
 import { Crown, DoorOpen, Pause, WifiOff } from "lucide-react";
 import { useEffect, useState } from "react";
-import { nameColor } from "@/lib/together/colors";
-import { useSelfIdentity } from "@/lib/together/use-self-identity";
-import type { PanelCorner } from "@/lib/player-chrome";
-import type { Participant, ParticipantLocation, SyncState } from "@/lib/together/protocol";
-import { useT } from "@/lib/i18n";
 
 const ACTIVE_THRESHOLD_MS = 18_000;
 
@@ -40,8 +40,7 @@ export function AvatarDock({
 }) {
   if (hidden) return null;
   if (participants.length === 0) return null;
-  const lastPauserId =
-    syncState && !syncState.playing && syncState.updatedBy ? syncState.updatedBy : null;
+  const lastPauserId = syncState && !syncState.playing && syncState.updatedBy ? syncState.updatedBy : null;
   const alignRight = corner === "top-right" || corner === "bottom-right";
 
   const attention = participants.some((p) => {
@@ -60,9 +59,11 @@ export function AvatarDock({
         surface ? "pointer-events-none opacity-100" : "pointer-events-none opacity-0"
       }`}
     >
-      <div className={`flex flex-col gap-1.5 rounded-2xl border border-white/12 bg-black/35 px-2.5 py-2 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.65)] ${alignRight ? "items-end" : "items-start"}`}>
+      <div
+        className={`flex flex-col gap-1.5 rounded-2xl border border-white/12 bg-black/35 px-2.5 py-2 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.65)] ${alignRight ? "items-end" : "items-start"}`}
+      >
         {participants.map((p) => {
-          const lastSeen = p.id === selfId ? now : presenceMap.get(p.id) ?? p.joinedAt;
+          const lastSeen = p.id === selfId ? now : (presenceMap.get(p.id) ?? p.joinedAt);
           const stale = now - lastSeen > ACTIVE_THRESHOLD_MS;
           const loc = participantLocations.get(p.id);
           const leftPlayer = p.id !== selfId && !!loc && loc.kind !== "player";
@@ -101,12 +102,10 @@ function Avatar({
   const t = useT();
   const { avatar: selfAvatar, color: selfColor } = useSelfIdentity();
   const initial = (participant.name?.[0] ?? "?").toUpperCase();
-  const avatarSrc = isSelf ? selfAvatar : participant.avatar ?? null;
+  const avatarSrc = isSelf ? selfAvatar : (participant.avatar ?? null);
   const [avatarFailed, setAvatarFailed] = useState(false);
   useEffect(() => setAvatarFailed(false), [avatarSrc]);
-  const tint = isSelf
-    ? selfColor ?? nameColor(participant.name)
-    : participant.color ?? nameColor(participant.name);
+  const tint = isSelf ? (selfColor ?? nameColor(participant.name)) : (participant.color ?? nameColor(participant.name));
   const dim = isPauser || isStale || leftPlayer || !participant.ready;
   return (
     <div className="group/avatar pointer-events-auto flex items-center gap-2">

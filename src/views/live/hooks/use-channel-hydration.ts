@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { getCachedHydration, hydrateChannel } from "@/lib/iptv/channel-hydration";
+import { useEffect, useRef, useState } from "react";
 
 const BATCH_SIZE = 16;
 const BATCH_DELAY_MS = 0;

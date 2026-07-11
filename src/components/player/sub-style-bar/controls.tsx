@@ -1,10 +1,10 @@
+import { useT } from "@/lib/i18n";
+import { type Settings } from "@/lib/settings";
+import { ColorPopoverTrigger } from "@/views/settings/color-picker";
+import { previewFamily } from "@/views/settings/player-panel/internals";
 import { Check, ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ColorPopoverTrigger } from "@/views/settings/color-picker";
-import { previewFamily } from "@/views/settings/player-panel/internals";
-import { type Settings } from "@/lib/settings";
-import { useT } from "@/lib/i18n";
 
 export const SWATCHES = ["#FFFFFF", "#FFE45E", "#9AE6B4", "#93C5FD", "#FCA5A5", "#C4B5FD"];
 
@@ -69,9 +69,7 @@ export function FontMenu({
         className="flex h-11 min-w-[120px] shrink-0 items-center justify-between gap-2 px-3 text-[14px] font-semibold text-ink transition-colors hover:bg-elevated"
         style={{ fontFamily: previewFamily(value) }}
       >
-        <span className="truncate">
-          {current.id.startsWith("custom:") ? current.label : t(current.label)}
-        </span>
+        <span className="truncate">{current.id.startsWith("custom:") ? current.label : t(current.label)}</span>
         <ChevronDown size={15} className="shrink-0 text-ink-subtle" />
       </button>
       {open &&
@@ -104,9 +102,7 @@ export function FontMenu({
                     }`}
                     style={{ fontFamily: previewFamily(it.id) }}
                   >
-                    <span className="truncate">
-                      {it.id.startsWith("custom:") ? it.label : t(it.label)}
-                    </span>
+                    <span className="truncate">{it.id.startsWith("custom:") ? it.label : t(it.label)}</span>
                     {active && <Check size={15} className="shrink-0 text-ink" />}
                   </button>
                 );
@@ -136,7 +132,11 @@ export function SizeStepper({ value, onChange }: { value: number; onChange: (n: 
   };
   return (
     <div className="flex h-11 shrink-0 items-stretch">
-      <button aria-label={t("Smaller")} onClick={() => onChange(value - 1)} className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink">
+      <button
+        aria-label={t("Smaller")}
+        onClick={() => onChange(value - 1)}
+        className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+      >
         <span className="text-[13px] font-bold">A</span>
       </button>
       <button
@@ -148,7 +148,11 @@ export function SizeStepper({ value, onChange }: { value: number; onChange: (n: 
       >
         {value}
       </button>
-      <button aria-label={t("Larger")} onClick={() => onChange(value + 1)} className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink">
+      <button
+        aria-label={t("Larger")}
+        onClick={() => onChange(value + 1)}
+        className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+      >
         <span className="text-[17px] font-bold">A</span>
       </button>
     </div>

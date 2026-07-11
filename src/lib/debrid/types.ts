@@ -1,11 +1,9 @@
-import type { DebridSlug } from "@/lib/streams/types";
 import type { EpisodeHint } from "@/lib/streams/episode-file";
+import type { DebridSlug } from "@/lib/streams/types";
 
 export type { DebridSlug };
 
-export type DebridResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; code: string; status: number; raw?: unknown };
+export type DebridResult<T> = { ok: true; data: T } | { ok: false; code: string; status: number; raw?: unknown };
 
 export type Account = {
   slug: DebridSlug;

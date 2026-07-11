@@ -1,12 +1,11 @@
-import { Check, ExternalLink, Loader2, X } from "lucide-react";
-import { openUrl } from "@/lib/window";
-import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
+import { openUrl } from "@/lib/window";
+import { Check, ExternalLink, Loader2, X } from "lucide-react";
+import type { ReactNode } from "react";
 
 export type FieldStatus = { state: "idle" | "busy" | "ok" | "error"; message: string | null };
 
 export function WebhookField({
-
   label,
   logo,
   placeholder,
@@ -54,9 +53,7 @@ export function WebhookField({
           {t("Send test")}
         </button>
       </div>
-      <div className="rounded-lg bg-canvas/60 p-3 text-[12px] leading-relaxed text-ink-muted">
-        {help}
-      </div>
+      <div className="rounded-lg bg-canvas/60 p-3 text-[12px] leading-relaxed text-ink-muted">{help}</div>
     </div>
   );
 }
@@ -71,9 +68,7 @@ export function StatusBadge({ status }: { status: FieldStatus }) {
         ? "border-rose-300/40 bg-rose-400/15 text-rose-100"
         : "border-edge bg-elevated/40 text-ink-muted";
   return (
-    <span
-      className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${palette}`}
-    >
+    <span className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${palette}`}>
       {status.state === "ok" && <Check size={11} strokeWidth={2.6} />}
       {status.state === "error" && <X size={11} strokeWidth={2.6} />}
       {status.state === "busy" && <Loader2 size={11} strokeWidth={2.4} className="animate-spin" />}
@@ -91,9 +86,17 @@ export function DiscordTutorial() {
       </p>
       <ol className="ms-4 list-decimal space-y-1.5 text-[12px] text-ink-muted marker:text-ink-subtle">
         <li>{t("Open the Discord server where you want notifications to land.")}</li>
-        <li>{t("Right-click a text channel, pick")} <span className="text-ink">{t("Edit Channel")}</span>.</li>
-        <li>{t("Click")} <span className="text-ink">{t("Integrations")}</span> {t("on the left, then")} <span className="text-ink">{t("Webhooks")}</span>.</li>
-        <li>{t("Click")} <span className="text-ink">{t("New Webhook")}</span>, {t("name it Harbor, hit")} <span className="text-ink">{t("Copy Webhook URL")}</span>.</li>
+        <li>
+          {t("Right-click a text channel, pick")} <span className="text-ink">{t("Edit Channel")}</span>.
+        </li>
+        <li>
+          {t("Click")} <span className="text-ink">{t("Integrations")}</span> {t("on the left, then")}{" "}
+          <span className="text-ink">{t("Webhooks")}</span>.
+        </li>
+        <li>
+          {t("Click")} <span className="text-ink">{t("New Webhook")}</span>, {t("name it Harbor, hit")}{" "}
+          <span className="text-ink">{t("Copy Webhook URL")}</span>.
+        </li>
         <li>{t("Paste the URL into the box above and send a test.")}</li>
       </ol>
       <p className="text-[11.5px] text-ink-subtle">
@@ -112,14 +115,37 @@ export function TelegramTutorial() {
   return (
     <div className="flex flex-col gap-2.5">
       <p className="text-[12px] text-ink-muted">
-        {t("Telegram sends through a bot you create. You need two things: a")} <span className="text-ink">{t("bot token")}</span> {t("and your")} <span className="text-ink">{t("chat ID")}</span>. {t("Both go in the boxes above. Harbor builds the URL for you.")}
+        {t("Telegram sends through a bot you create. You need two things: a")}{" "}
+        <span className="text-ink">{t("bot token")}</span> {t("and your")}{" "}
+        <span className="text-ink">{t("chat ID")}</span>.{" "}
+        {t("Both go in the boxes above. Harbor builds the URL for you.")}
       </p>
       <ol className="ms-4 list-decimal space-y-1.5 text-[12px] text-ink-muted marker:text-ink-subtle">
-        <li>{t("Tap")} <span className="text-ink">{t("Open BotFather")}</span> {t("below. In Telegram, send him")} <span className="font-mono text-ink">/newbot</span>. {t("Pick any name. Pick a username ending in")} <span className="font-mono text-ink">bot</span>.</li>
-        <li>{t("BotFather replies with a token like")} <span className="font-mono text-ink">1234567890:AAExample...</span>. {t("Long string with a colon in it. Copy it. Paste it into the")} <span className="text-ink">{t("Bot token")}</span> {t("box above.")}</li>
-        <li>{t("Open the bot BotFather just made (he sends you a link). Send it any message so it's allowed to message you back.")}</li>
-        <li>{t("Tap")} <span className="text-ink">{t("Open userinfobot")}</span> {t("below. Send it")} <span className="font-mono text-ink">/start</span>. {t("It replies with your numeric ID. Copy that number. Paste it into the")} <span className="text-ink">{t("Chat ID")}</span> {t("box above.")}</li>
-        <li>{t("Hit")} <span className="text-ink">{t("Send test")}</span>. {t("You should get a message from your new bot.")}</li>
+        <li>
+          {t("Tap")} <span className="text-ink">{t("Open BotFather")}</span> {t("below. In Telegram, send him")}{" "}
+          <span className="font-mono text-ink">/newbot</span>. {t("Pick any name. Pick a username ending in")}{" "}
+          <span className="font-mono text-ink">bot</span>.
+        </li>
+        <li>
+          {t("BotFather replies with a token like")} <span className="font-mono text-ink">1234567890:AAExample...</span>
+          . {t("Long string with a colon in it. Copy it. Paste it into the")}{" "}
+          <span className="text-ink">{t("Bot token")}</span> {t("box above.")}
+        </li>
+        <li>
+          {t(
+            "Open the bot BotFather just made (he sends you a link). Send it any message so it's allowed to message you back.",
+          )}
+        </li>
+        <li>
+          {t("Tap")} <span className="text-ink">{t("Open userinfobot")}</span> {t("below. Send it")}{" "}
+          <span className="font-mono text-ink">/start</span>.{" "}
+          {t("It replies with your numeric ID. Copy that number. Paste it into the")}{" "}
+          <span className="text-ink">{t("Chat ID")}</span> {t("box above.")}
+        </li>
+        <li>
+          {t("Hit")} <span className="text-ink">{t("Send test")}</span>.{" "}
+          {t("You should get a message from your new bot.")}
+        </li>
       </ol>
       <div className="flex flex-wrap gap-2">
         <ExternalLinkButton label={t("Open BotFather")} url="https://t.me/botfather" />

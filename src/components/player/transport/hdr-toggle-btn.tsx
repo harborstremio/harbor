@@ -1,8 +1,9 @@
-import { Contrast } from "lucide-react";
-import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { StremioBtn } from "./stremio-btn";
+import { useSettings } from "@/lib/settings";
+import { Contrast } from "lucide-react";
+
 import { BigButton } from "./big-button";
+import { StremioBtn } from "./stremio-btn";
 import { Tooltip } from "./tooltip";
 
 function useHdrToSdr() {

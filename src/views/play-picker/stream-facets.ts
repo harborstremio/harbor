@@ -1,4 +1,5 @@
 import type { ScoredStream } from "@/lib/streams/types";
+
 import { qualityTier, sourceGroup } from "./quality-filter";
 
 export type FacetDim = {

@@ -1,5 +1,5 @@
-import { Check, Copy } from "lucide-react";
 import type { ThemePreset } from "@/lib/theme";
+import { Check, Copy } from "lucide-react";
 
 export function ActiveBanner({
   theme,
@@ -14,13 +14,9 @@ export function ActiveBanner({
     return (
       <div className="flex items-center justify-between rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4">
         <div>
-          <span className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink-subtle">
-            Now using
-          </span>
+          <span className="text-[10.5px] font-bold uppercase tracking-[0.2em] text-ink-subtle">Now using</span>
           <h3 className="mt-1 text-[16px] font-semibold text-ink">Custom palette</h3>
-          <p className="mt-0.5 text-[12.5px] text-ink-muted">
-            Hand-tuned colors. Edit them in the section above.
-          </p>
+          <p className="mt-0.5 text-[12.5px] text-ink-muted">Hand-tuned colors. Edit them in the section above.</p>
         </div>
         <button
           type="button"
@@ -48,16 +44,8 @@ export function ActiveBanner({
   const exportFg = isLight ? "#ffffff" : "#0a0a0c";
   return (
     <div className="relative overflow-hidden rounded-2xl border border-accent/40 shadow-[0_18px_40px_-22px_rgba(0,0,0,0.45)]">
-      <div
-        className="pointer-events-none absolute inset-0"
-        aria-hidden
-        style={{ background: bg, zIndex: 0 }}
-      />
-      <div
-        className="pointer-events-none absolute inset-0"
-        aria-hidden
-        style={{ background: scrim, zIndex: 1 }}
-      />
+      <div className="pointer-events-none absolute inset-0" aria-hidden style={{ background: bg, zIndex: 0 }} />
+      <div className="pointer-events-none absolute inset-0" aria-hidden style={{ background: scrim, zIndex: 1 }} />
       <div className="relative flex flex-wrap items-center justify-between gap-4 px-5 py-5" style={{ zIndex: 2 }}>
         <div className="flex min-w-0 flex-col gap-1">
           <div
@@ -79,9 +67,17 @@ export function ActiveBanner({
             </p>
           )}
           <div className="mt-1.5 flex flex-wrap gap-1.5">
-            <Chip bg={chipBg} ring={chipRing} fg={fg}>{labelForLayout(theme.layout)}</Chip>
-            <Chip bg={chipBg} ring={chipRing} fg={fg}>{labelForCard(theme.cardStyle)}</Chip>
-            {theme.bokeh && <Chip bg={chipBg} ring={chipRing} fg={fg}>Bokeh</Chip>}
+            <Chip bg={chipBg} ring={chipRing} fg={fg}>
+              {labelForLayout(theme.layout)}
+            </Chip>
+            <Chip bg={chipBg} ring={chipRing} fg={fg}>
+              {labelForCard(theme.cardStyle)}
+            </Chip>
+            {theme.bokeh && (
+              <Chip bg={chipBg} ring={chipRing} fg={fg}>
+                Bokeh
+              </Chip>
+            )}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -120,18 +116,10 @@ function parseColor(c: string): [number, number, number] | null {
   if (c.startsWith("#")) {
     const hex = c.slice(1);
     if (hex.length === 3) {
-      return [
-        parseInt(hex[0] + hex[0], 16),
-        parseInt(hex[1] + hex[1], 16),
-        parseInt(hex[2] + hex[2], 16),
-      ];
+      return [parseInt(hex[0] + hex[0], 16), parseInt(hex[1] + hex[1], 16), parseInt(hex[2] + hex[2], 16)];
     }
     if (hex.length === 6 || hex.length === 8) {
-      return [
-        parseInt(hex.slice(0, 2), 16),
-        parseInt(hex.slice(2, 4), 16),
-        parseInt(hex.slice(4, 6), 16),
-      ];
+      return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
     }
     return null;
   }
@@ -187,17 +175,7 @@ function labelForCard(c?: string): string {
   }
 }
 
-function Chip({
-  children,
-  bg,
-  ring,
-  fg,
-}: {
-  children: React.ReactNode;
-  bg?: string;
-  ring?: string;
-  fg?: string;
-}) {
+function Chip({ children, bg, ring, fg }: { children: React.ReactNode; bg?: string; ring?: string; fg?: string }) {
   return (
     <span
       className="rounded-full px-2.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm"

@@ -1,7 +1,8 @@
 const library: Record<string, string> = {
   "My library": "مكتبتي",
   "Your collection.": "مجموعتك.",
-  "Watchlist is what you've saved for later. History is everything you've watched. Local is files on your computer.": "قائمة المشاهدة هي ما حفظته لوقت لاحق. السجل هو كل ما شاهدته. المحلّي هي الملفات الموجودة على جهازك.",
+  "Watchlist is what you've saved for later. History is everything you've watched. Local is files on your computer.":
+    "قائمة المشاهدة هي ما حفظته لوقت لاحق. السجل هو كل ما شاهدته. المحلّي هي الملفات الموجودة على جهازك.",
   History: "السجل",
   Local: "المحلّي",
   Watchlist: "قائمة المشاهدة",
@@ -20,13 +21,12 @@ const library: Record<string, string> = {
 
   "No history yet": "لا يوجد سجلّ بعد",
   "Nothing watched yet": "لم تتم مشاهدة أي شيء بعد",
-  "Nothing in progress yet. Press Play on something.":
-    "لا شيء قيد التقدم بعد. اضغط تشغيل على شيء ما.",
+  "Nothing in progress yet. Press Play on something.": "لا شيء قيد التقدم بعد. اضغط تشغيل على شيء ما.",
   "Press play on something. It'll show up here once you start watching.":
     "اضغط تشغيل على شيء ما. سيظهر هنا بمجرد أن تبدأ المشاهدة.",
   "Your watchlist is empty": "قائمة مشاهدتك فارغة",
-  "Right-click any title in Harbor or hit \"Add to Watchlist\" on its detail page to save it here.":
-    "انقر بزرّ الفأرة الأيمن على أي عنوان في Harbor أو اضغط \"إضافة إلى قائمة المشاهدة\" في صفحة تفاصيله لحفظه هنا.",
+  'Right-click any title in Harbor or hit "Add to Watchlist" on its detail page to save it here.':
+    'انقر بزرّ الفأرة الأيمن على أي عنوان في Harbor أو اضغط "إضافة إلى قائمة المشاهدة" في صفحة تفاصيله لحفظه هنا.',
   "Loading favorites…": "جارٍ تحميل المفضّلة…",
   "Loading favorites from other providers…": "جارٍ تحميل المفضّلة من مزوّدين آخرين…",
 
@@ -42,9 +42,9 @@ const library: Record<string, string> = {
   "Couldn't load the calendar": "تعذّر تحميل التقويم",
   "Previous month": "الشهر السابق",
   "Next month": "الشهر التالي",
-  "Anticipated": "منتظَر",
+  Anticipated: "منتظَر",
   "Upcoming items from your watchlist": "العناصر القادمة من قائمة مشاهدتك",
-  "All upcoming needs a TMDB key": "يتطلب \"كل القادم\" مفتاح TMDB",
+  "All upcoming needs a TMDB key": 'يتطلب "كل القادم" مفتاح TMDB',
 
   "What to include": "ما الذي تريد تضمينه",
   "Pick what you want in your calendar. Mix and match: tracked people, genres, streamers, countries, Trakt lists.":
@@ -56,15 +56,13 @@ const library: Record<string, string> = {
   "Nothing from your library this month": "لا شيء من مكتبتك هذا الشهر",
   "Nothing from your library lands this month. Toggle Watchlist off to see all releases.":
     "لا شيء من مكتبتك يقع هذا الشهر. عطّل قائمة المشاهدة لرؤية كل الإصدارات.",
-  "No {kind} releases this month. Try a different filter.":
-    "لا توجد إصدارات {kind} هذا الشهر. جرّب مرشّحًا مختلفًا.",
-  "TMDB has no notable releases for this month and region.":
-    "لا توجد لدى TMDB إصدارات بارزة لهذا الشهر والمنطقة.",
+  "No {kind} releases this month. Try a different filter.": "لا توجد إصدارات {kind} هذا الشهر. جرّب مرشّحًا مختلفًا.",
+  "TMDB has no notable releases for this month and region.": "لا توجد لدى TMDB إصدارات بارزة لهذا الشهر والمنطقة.",
   "Your saved shows have no episodes scheduled for this month. Switch to All upcoming to browse the full release calendar.":
-    "ليس لمسلسلاتك المحفوظة حلقات مجدولة هذا الشهر. بدّل إلى \"كل القادم\" لتصفّح تقويم الإصدارات الكامل.",
+    'ليس لمسلسلاتك المحفوظة حلقات مجدولة هذا الشهر. بدّل إلى "كل القادم" لتصفّح تقويم الإصدارات الكامل.',
 
   "TMDB powers the firehose of every release this month. The free tier covers it. About 60 seconds to set up. Switch to My Library if you'd rather only see what you've saved.":
-    "تغذّي TMDB سيل كل إصدارات هذا الشهر. الباقة المجانية تكفي. الإعداد يستغرق نحو 60 ثانية. بدّل إلى \"مكتبتي\" إن كنت تفضّل رؤية ما حفظته فقط.",
+    'تغذّي TMDB سيل كل إصدارات هذا الشهر. الباقة المجانية تكفي. الإعداد يستغرق نحو 60 ثانية. بدّل إلى "مكتبتي" إن كنت تفضّل رؤية ما حفظته فقط.',
   "Failed to load": "تعذّر التحميل",
 
   Watching: "قيد المشاهدة",
@@ -109,18 +107,15 @@ const library: Record<string, string> = {
   "My Trakt": "Trakt الخاص بي",
   "My Simkl": "Simkl الخاص بي",
   "Simkl premieres": "العروض الأولى على Simkl",
-  "Upcoming episodes and movies from your saved shows":
-    "الحلقات والأفلام القادمة من مسلسلاتك المحفوظة",
+  "Upcoming episodes and movies from your saved shows": "الحلقات والأفلام القادمة من مسلسلاتك المحفوظة",
   "Everything releasing this month from TMDB": "كل ما يصدر هذا الشهر من TMDB",
-  "Upcoming episodes and movies from your Trakt watchlist":
-    "الحلقات والأفلام القادمة من قائمة مشاهدة Trakt لديك",
+  "Upcoming episodes and movies from your Trakt watchlist": "الحلقات والأفلام القادمة من قائمة مشاهدة Trakt لديك",
   "The most anticipated upcoming releases on Trakt": "أكثر الإصدارات القادمة ترقبًا على Trakt",
   "Upcoming episodes and movies from your Simkl plan-to-watch list":
     "الحلقات والأفلام القادمة من قائمة خطة المشاهدة على Simkl لديك",
   "New shows and anime premiering this month, from Simkl":
     "المسلسلات والأنمي الجديدة التي تُعرض لأول مرة هذا الشهر، من Simkl",
-  "Build your own feed from actors, directors, and Trakt lists":
-    "ابنِ موجزك الخاص من الممثلين والمخرجين وقوائم Trakt",
+  "Build your own feed from actors, directors, and Trakt lists": "ابنِ موجزك الخاص من الممثلين والمخرجين وقوائم Trakt",
 
   "Discovery Queue": "قائمة الاكتشاف",
   Queue: "القائمة",

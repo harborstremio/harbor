@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { hydrateShortEpg } from "@/lib/iptv/xtream-short-epg";
-import { credsFromServer } from "@/lib/iptv/xtream";
 import type { EpgIndex, IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
+import { credsFromServer } from "@/lib/iptv/xtream";
+import { hydrateShortEpg } from "@/lib/iptv/xtream-short-epg";
+import { useEffect, useMemo, useState } from "react";
 
 const MAX_CHANNELS = 120;
 

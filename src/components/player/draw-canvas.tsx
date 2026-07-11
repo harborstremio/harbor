@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+
 import { PenCursor } from "./pen-cursor";
 
 export type Stroke = {

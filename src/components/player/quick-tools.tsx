@@ -1,8 +1,8 @@
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import { Camera, FolderOpen, Repeat, X } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import type { AbLoopState } from "@/views/player/hooks/use-ab-loop";
 import type { FrameGrabToast } from "@/views/player/hooks/use-frame-grab";
-import { useT } from "@/lib/i18n";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { Camera, FolderOpen, Repeat, X } from "lucide-react";
 
 function formatTime(sec: number): string {
   const s = Math.max(0, Math.floor(sec));
@@ -28,9 +28,7 @@ export function QuickTools({
 }) {
   return (
     <>
-      {(ab.a != null || ab.b != null) && (
-        <AbLoopChip ab={ab} visible={visible} />
-      )}
+      {(ab.a != null || ab.b != null) && <AbLoopChip ab={ab} visible={visible} />}
       {toast && <FrameToast toast={toast} />}
       {gifToast && <FrameToast toast={gifToast} />}
       {clipToast && <FrameToast toast={clipToast} />}
@@ -80,9 +78,7 @@ function FrameToast({ toast }: { toast: FrameGrabToast }) {
     >
       <div
         className={`pointer-events-auto flex items-center gap-2.5 rounded-full border py-2 ps-4 pe-2 text-[12.5px] font-medium backdrop-blur-md ${
-          toast.kind === "ok"
-            ? "border-white/20 bg-black/80 text-white"
-            : "border-danger/40 bg-danger/15 text-danger"
+          toast.kind === "ok" ? "border-white/20 bg-black/80 text-white" : "border-danger/40 bg-danger/15 text-danger"
         }`}
       >
         <Camera size={13} strokeWidth={2.2} className="shrink-0" />

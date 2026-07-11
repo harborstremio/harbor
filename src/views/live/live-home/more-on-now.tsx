@@ -1,9 +1,10 @@
-import { Play } from "lucide-react";
-import type { Meta } from "@/lib/cinemeta";
 import { Poster, usePosterChain } from "@/components/poster";
+import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
-import { useSettings } from "@/lib/settings";
 import type { IptvChannel } from "@/lib/iptv/types";
+import { useSettings } from "@/lib/settings";
+import { Play } from "lucide-react";
+
 import { hydrationKey, type NowItem } from "./use-live-home";
 
 export function MoreOnNow({
@@ -22,27 +23,14 @@ export function MoreOnNow({
       <h3 className="ps-0.5 text-[15px] font-medium italic text-ink-muted">{t("On now")}</h3>
       <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((it) => (
-          <Pick
-            key={it.channel.id}
-            item={it}
-            hydrated={hydrations.get(hydrationKey(it)) ?? null}
-            onPlay={onPlay}
-          />
+          <Pick key={it.channel.id} item={it} hydrated={hydrations.get(hydrationKey(it)) ?? null} onPlay={onPlay} />
         ))}
       </div>
     </div>
   );
 }
 
-function Pick({
-  item,
-  hydrated,
-  onPlay,
-}: {
-  item: NowItem;
-  hydrated: Meta | null;
-  onPlay: (ch: IptvChannel) => void;
-}) {
+function Pick({ item, hydrated, onPlay }: { item: NowItem; hydrated: Meta | null; onPlay: (ch: IptvChannel) => void }) {
   const t = useT();
   const { settings } = useSettings();
   const { channel, current } = item;

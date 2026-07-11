@@ -1,17 +1,10 @@
-import {
-  Check,
-  ChevronDown,
-  Copy,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { confirmDialog } from "@/lib/dialog";
+import { useT } from "@/lib/i18n";
+import { sourceLabel, type CustomList } from "@/lib/lists/types";
+import { Check, ChevronDown, Copy, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { confirmDialog } from "@/lib/dialog";
-import { sourceLabel, type CustomList } from "@/lib/lists/types";
-import { useT } from "@/lib/i18n";
+
 import { AddListForm } from "./add-list-form";
 import { SOURCE_DOT } from "./source-dot";
 
@@ -69,7 +62,7 @@ export function ListPicker({
   }, [open, mode, actions]);
 
   const active = lists.find((l) => l.id === activeId) ?? null;
-  const editing = editingId ? lists.find((l) => l.id === editingId) ?? null : null;
+  const editing = editingId ? (lists.find((l) => l.id === editingId) ?? null) : null;
 
   const copyRef = async (ref: string, id: string) => {
     try {
@@ -219,10 +212,7 @@ function ListRow({
           isActive ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
-        <button
-          onClick={onSelect}
-          className="flex flex-1 items-center gap-2.5 px-3.5 py-2.5 text-start text-[13.5px]"
-        >
+        <button onClick={onSelect} className="flex flex-1 items-center gap-2.5 px-3.5 py-2.5 text-start text-[13.5px]">
           <span
             className={`h-2 w-2 shrink-0 rounded-full ${isActive ? SOURCE_DOT[list.source] : "bg-ink-subtle/45"}`}
           />

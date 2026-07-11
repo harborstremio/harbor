@@ -1,4 +1,5 @@
 import type { Meta } from "@/lib/cinemeta";
+
 import { anilistRequest } from "./client";
 import { anilistMediaToMeta } from "./to-meta";
 import type { AnilistMedia } from "./types";
@@ -86,9 +87,7 @@ const ART_BY_MAL_QUERY = `query ($mal: Int) {
 
 const artByMalCache = new Map<number, { id?: number; banner?: string; cover?: string }>();
 
-export async function anilistArtByMalId(
-  malId: number,
-): Promise<{ id?: number; banner?: string; cover?: string }> {
+export async function anilistArtByMalId(malId: number): Promise<{ id?: number; banner?: string; cover?: string }> {
   const cached = artByMalCache.get(malId);
   if (cached) return cached;
   try {

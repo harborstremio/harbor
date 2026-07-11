@@ -1,4 +1,5 @@
 import { DEFAULT_CUSTOM_COLORS, type ThemePreset } from "@/lib/theme";
+
 import { DEFAULT_CHROME } from "./chrome-config";
 import type { Draft } from "./studio-types";
 

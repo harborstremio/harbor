@@ -1,7 +1,8 @@
-import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2 } from "lucide-react";
-import { useState } from "react";
 import { CodeEditor, type CodeLang } from "@/components/code-editor";
 import { downloadText } from "@/lib/download-text";
+import { BookOpen, Check, Copy, Download, Play, Redo2, Undo2 } from "lucide-react";
+import { useState } from "react";
+
 import { CheatSheet } from "./cheat-sheet";
 import { FileTree } from "./code-popout/file-tree";
 import { IDE, THEME_FILES } from "./code-popout/files";
@@ -212,13 +213,7 @@ export function CodePopout({
         </div>
       </div>
 
-      <StatusBar
-        file={meta}
-        line={caret.line}
-        col={caret.col}
-        lines={value.split("\n").length}
-        chars={value.length}
-      />
+      <StatusBar file={meta} line={caret.line} col={caret.col} lines={value.split("\n").length} chars={value.length} />
 
       {cheatOpen && <CheatSheet onClose={() => setCheatOpen(false)} />}
     </div>

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useTogether } from "@/lib/together/provider";
+import { useEffect } from "react";
 
 export function TogetherParticipantLeftToast() {
   const { incomingParticipantLeft, dismissParticipantLeft, snapshot } = useTogether();

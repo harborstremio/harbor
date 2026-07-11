@@ -1,6 +1,6 @@
-import { Check, Clock, Lock } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { KidConfig } from "@/lib/profiles";
+import { Check, Clock, Lock } from "lucide-react";
 
 const KID_AVATARS = [1, 2, 3, 4, 5].map((n) => `/kids/avatars/kid-${n}.webp`);
 const AGES = [3, 5, 7, 9, 12];
@@ -130,24 +130,14 @@ export function KidsSetupPanel({
               </span>
             )}
           </div>
-          <p className="mt-2 text-[11px] text-white/75">
-            {t("Used to lift Time's Up and to leave the kids space.")}
-          </p>
+          <p className="mt-2 text-[11px] text-white/75">{t("Used to lift Time's Up and to leave the kids space.")}</p>
         </Section>
       </div>
     </div>
   );
 }
 
-function Section({
-  icon,
-  label,
-  children,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  children: React.ReactNode;
-}) {
+function Section({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
       <span className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-[0.14em] text-white/85">
@@ -174,9 +164,7 @@ function Pill({
     <button
       type="button"
       onClick={onClick}
-      className={`h-10 rounded-xl text-[14px] font-extrabold transition ${
-        wide ? "px-4" : "flex-1"
-      } ${
+      className={`h-10 rounded-xl text-[14px] font-extrabold transition ${wide ? "px-4" : "flex-1"} ${
         on
           ? "bg-white text-[#0c4a6e] shadow-[0_4px_12px_-4px_rgba(0,0,0,0.4)]"
           : "bg-white/15 text-white hover:bg-white/25"

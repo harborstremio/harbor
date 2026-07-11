@@ -1,15 +1,12 @@
-import { useMemo } from "react";
 import type { FranchiseEntry } from "@/lib/providers/anime-detail";
 import { useView } from "@/lib/view";
+import { useMemo } from "react";
+
 import type { PickerItem } from "../series-episodes/season-arc-picker";
 
 type AnimeOrder = { items: PickerItem[]; onSelect: (key: string) => void } | null;
 
-export function useAnimeFranchiseNav(
-  order: AnimeOrder,
-  franchise: FranchiseEntry[],
-  currentId: string,
-) {
+export function useAnimeFranchiseNav(order: AnimeOrder, franchise: FranchiseEntry[], currentId: string) {
   const { openMeta } = useView();
 
   const franchiseNav = useMemo(

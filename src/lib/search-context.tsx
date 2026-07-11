@@ -1,12 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { gatherCatalogAddons, type Addon } from "@/lib/addons";
+import { useAuth } from "@/lib/auth";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
 import { useParental } from "@/lib/parental";
 import { searchAll, searchAnime, searchCinemeta, searchLiveTvChannels, type SearchResults } from "@/lib/search";
-import { searchAddonCatalogs, searchAddonGroups, mergeMetas } from "@/lib/search-addons";
 import { searchAddonIndex } from "@/lib/search-addon-index";
-import { gatherCatalogAddons, type Addon } from "@/lib/addons";
-import { useAuth } from "@/lib/auth";
+import { searchAddonCatalogs, searchAddonGroups, mergeMetas } from "@/lib/search-addons";
 import { useSettings } from "@/lib/settings";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 type SearchState = {
   open: boolean;
@@ -102,9 +102,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       const addonPromise = addonsP
         .then((a) => searchAddonCatalogs(a, trimmed))
         .catch(() => ({ movies: [], series: [] }));
-      const addonGroupsPromise = addonsP
-        .then((a) => searchAddonGroups(a, trimmed))
-        .catch(() => []);
+      const addonGroupsPromise = addonsP.then((a) => searchAddonGroups(a, trimmed)).catch(() => []);
       const cinemetaPromise = searchCinemeta(trimmed).catch(() => ({ movies: [], series: [] }));
       let tmdbResult: Awaited<typeof tmdbPromise> | null = null;
       const acc = {

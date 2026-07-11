@@ -1,3 +1,4 @@
+import { ARABIC_CLASSICS, EGYPTIAN_CLASSICS, fetchEgyptianClassics } from "./classics";
 import {
   ARABIC_COMEDY,
   ARABIC_DRAMA,
@@ -7,7 +8,6 @@ import {
   ARABIC_TRENDING,
   type ArabicRowDef,
 } from "./rows";
-import { ARABIC_CLASSICS, EGYPTIAN_CLASSICS, fetchEgyptianClassics } from "./classics";
 
 export type { ArabicRowDef };
 export { EGYPTIAN_CLASSICS, fetchEgyptianClassics };

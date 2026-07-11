@@ -1,14 +1,14 @@
-import { Lock } from "lucide-react";
-import { useState } from "react";
-import { HarborMark } from "@/components/icons/harbor-mark";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
-import { ProfileChip } from "@/chrome/sidebar/profile-chip";
 import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
+import { ProfileChip } from "@/chrome/sidebar/profile-chip";
+import { HarborMark } from "@/components/icons/harbor-mark";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
 import { useParental } from "@/lib/parental";
 import { useSettings } from "@/lib/settings";
 import { useView, type View } from "@/lib/view";
+import { Lock } from "lucide-react";
+import { useState } from "react";
 
 const PRIMARY_IDS = new Set(["home", "discover", "movies", "shows", "kids", "anime", "live", "vod"]);
 
@@ -183,9 +183,7 @@ function NavPill({
       title={gated ? t("chrome.lockedShort", { label }) : label}
       className={`group relative flex h-12 items-center justify-center gap-3.5 rounded-[18px] transition-colors duration-200 ${
         collapsed ? "" : "lg:justify-start lg:px-4"
-      } ${
-        active ? "text-accent" : "text-ink-muted hover:text-ink"
-      }`}
+      } ${active ? "text-accent" : "text-ink-muted hover:text-ink"}`}
     >
       {active ? (
         <span
@@ -211,12 +209,8 @@ function NavPill({
         )}
       </span>
       {!collapsed && (
-        <span className="relative hidden flex-1 text-[17px] font-medium tracking-tight lg:inline">
-          {label}
-        </span>
+        <span className="relative hidden flex-1 text-[17px] font-medium tracking-tight lg:inline">{label}</span>
       )}
     </button>
   );
 }
-
-

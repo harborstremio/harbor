@@ -1,10 +1,11 @@
-import { ArrowUpDown, Settings2 } from "lucide-react";
-import { useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { isAddonEnabled, setAddonEnabled } from "@/lib/addon-store";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
+import { ArrowUpDown, Settings2 } from "lucide-react";
+import { useState } from "react";
+
 import { addonKey, idOf, nameOf, subtitleFromManifest } from "./addons-utils";
 
 export function InstalledPane({
@@ -37,7 +38,9 @@ export function InstalledPane({
       <div className="rounded-2xl border border-edge-soft bg-elevated/30 p-12 text-center">
         <h3 className="font-display text-[22px] font-medium text-ink">{t("No addons installed yet")}</h3>
         <p className="mx-auto mt-2 max-w-md text-[13.5px] text-ink-muted">
-          {t("Head to Discover. Cinemeta and OpenSubtitles cover the basics; Torrentio + a debrid key cover almost everything else.")}
+          {t(
+            "Head to Discover. Cinemeta and OpenSubtitles cover the basics; Torrentio + a debrid key cover almost everything else.",
+          )}
         </p>
       </div>
     );
@@ -68,13 +71,7 @@ export function InstalledPane({
       )}
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
         {filtered.map((r) => (
-          <InstalledRow
-            key={addonKey(r)}
-            resolved={r}
-            onOpen={onOpen}
-            onUninstall={onUninstall}
-            onManage={onManage}
-          />
+          <InstalledRow key={addonKey(r)} resolved={r} onOpen={onOpen} onUninstall={onUninstall} onManage={onManage} />
         ))}
       </div>
     </div>
@@ -97,8 +94,7 @@ function InstalledRow({
   const [busy, setBusy] = useState(false);
   const [enabled, setEnabled] = useState(() => isAddonEnabled(r.transportUrl));
   const isConfigurable =
-    r.manifest?.behaviorHints?.configurable === true ||
-    r.manifest?.behaviorHints?.configurationRequired === true;
+    r.manifest?.behaviorHints?.configurable === true || r.manifest?.behaviorHints?.configurationRequired === true;
   const transportUrl = r.transportUrl;
 
   const handleUninstall = async (e: React.MouseEvent) => {
@@ -117,9 +113,7 @@ function InstalledRow({
     const next = !enabled;
     setEnabled(next);
     setAddonEnabled(r.transportUrl, next);
-    window.dispatchEvent(
-      new CustomEvent("harbor:addons-changed", { detail: { id: idOf(r), enabled: next } }),
-    );
+    window.dispatchEvent(new CustomEvent("harbor:addons-changed", { detail: { id: idOf(r), enabled: next } }));
   };
 
   return (

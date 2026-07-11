@@ -1,5 +1,5 @@
-import { ArrowLeft, ListVideo, RadioTower, RotateCcw } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { ArrowLeft, ListVideo, RadioTower, RotateCcw } from "lucide-react";
 
 export function LiveChannelError({
   channelName,
@@ -20,12 +20,12 @@ export function LiveChannelError({
           <RadioTower size={26} strokeWidth={1.8} />
         </span>
         <div className="flex flex-col gap-2">
-          <h2 className="font-display text-[24px] font-semibold text-white">
-            {t("This channel isn't responding")}
-          </h2>
+          <h2 className="font-display text-[24px] font-semibold text-white">{t("This channel isn't responding")}</h2>
           <p className="text-[13.5px] leading-relaxed text-white/70">{channelName}</p>
           <p className="mx-auto max-w-md text-[13px] leading-relaxed text-white/55">
-            {t("It looks offline right now. Free playlists often include channels that have gone dark, so another one is usually a click away.")}
+            {t(
+              "It looks offline right now. Free playlists often include channels that have gone dark, so another one is usually a click away.",
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2.5 pt-2">

@@ -14,19 +14,11 @@ export const HARBOR_COLOR_SWATCHES = [
   "#22d3ee",
 ];
 
-export function ColorPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (hex: string) => void;
-}) {
+export function ColorPicker({ value, onChange }: { value: string; onChange: (hex: string) => void }) {
   const isPreset = HARBOR_COLOR_SWATCHES.includes(value.toLowerCase());
   return (
     <div className="flex flex-col gap-2 pt-1">
-      <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-        Your color
-      </span>
+      <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">Your color</span>
       <div className="flex flex-wrap items-center gap-2">
         {HARBOR_COLOR_SWATCHES.map((hex) => {
           const selected = value.toLowerCase() === hex;
@@ -104,9 +96,7 @@ export function ColorPopoverTrigger({
       if (!r) return;
       const width = 280;
       const left =
-        align === "right"
-          ? Math.max(8, r.right - width)
-          : Math.min(Math.max(8, r.left), window.innerWidth - width - 8);
+        align === "right" ? Math.max(8, r.right - width) : Math.min(Math.max(8, r.left), window.innerWidth - width - 8);
       const top = direction === "up" ? r.top - 8 : r.bottom + 8;
       setPos({ top, left });
     };
@@ -139,11 +129,7 @@ export function ColorPopoverTrigger({
             : "border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
         }`}
       >
-        <span
-          aria-hidden
-          className="h-3 w-3 rounded-full ring-1 ring-black/30"
-          style={{ background: value }}
-        />
+        <span aria-hidden className="h-3 w-3 rounded-full ring-1 ring-black/30" style={{ background: value }} />
         {label}
       </button>
       {open && !portal && (
@@ -193,13 +179,7 @@ export function ColorPopoverTrigger({
   );
 }
 
-function CustomColorPanel({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (hex: string) => void;
-}) {
+function CustomColorPanel({ value, onChange }: { value: string; onChange: (hex: string) => void }) {
   const [hsv, setHsv] = useState(() => {
     const { r, g, b } = hexToRgb(value);
     return rgbToHsv(r, g, b);
@@ -297,10 +277,7 @@ function CustomColorPanel({
         />
       </div>
       <div className="flex items-center gap-2">
-        <span
-          className="h-7 w-7 shrink-0 rounded-md ring-1 ring-edge-soft"
-          style={{ background: value }}
-        />
+        <span className="h-7 w-7 shrink-0 rounded-md ring-1 ring-edge-soft" style={{ background: value }} />
         <input
           value={hexDraft.toUpperCase()}
           onChange={(e) => {
@@ -327,7 +304,10 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
-  const c = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+  const c = (n: number) =>
+    Math.max(0, Math.min(255, Math.round(n)))
+      .toString(16)
+      .padStart(2, "0");
   return `#${c(r)}${c(g)}${c(b)}`;
 }
 

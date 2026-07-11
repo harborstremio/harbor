@@ -30,10 +30,7 @@ function PersonCard({ person, tint }: { person: AwardPerson; tint: string }) {
   const t = useT();
   const { openPerson } = useView();
   return (
-    <button
-      onClick={() => openPerson(person.id)}
-      className="group flex w-full min-w-0 flex-col gap-2.5 text-start"
-    >
+    <button onClick={() => openPerson(person.id)} className="group flex w-full min-w-0 flex-col gap-2.5 text-start">
       <div className="relative transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] group-hover:-translate-y-1.5">
         <Poster
           src={person.photo ?? undefined}
@@ -53,9 +50,7 @@ function PersonCard({ person, tint }: { person: AwardPerson; tint: string }) {
       </div>
       <div className="flex flex-col gap-0.5 px-0.5">
         <span className="line-clamp-1 text-[13.5px] font-semibold text-ink">{person.name}</span>
-        {person.work && (
-          <span className="line-clamp-1 text-[11.5px] text-ink-subtle">{person.work}</span>
-        )}
+        {person.work && <span className="line-clamp-1 text-[11.5px] text-ink-subtle">{person.work}</span>}
       </div>
     </button>
   );

@@ -89,9 +89,7 @@ export async function createAndListFiles(
       length: Number(f.length ?? f.size ?? 0) || 0,
     }));
     const guessedFileIdx =
-      typeof json.guessedFileIdx === "number" && json.guessedFileIdx >= 0
-        ? json.guessedFileIdx
-        : null;
+      typeof json.guessedFileIdx === "number" && json.guessedFileIdx >= 0 ? json.guessedFileIdx : null;
     return { files, guessedFileIdx };
   } catch {
     return null;

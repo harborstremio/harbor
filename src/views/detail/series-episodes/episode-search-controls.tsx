@@ -1,7 +1,7 @@
-import { Search, X } from "lucide-react";
-import type { AiProvider } from "@/lib/ai-models";
 import { ProviderLogo } from "@/components/ai-provider-logo";
+import type { AiProvider } from "@/lib/ai-models";
 import { useT } from "@/lib/i18n";
+import { Search, X } from "lucide-react";
 
 export function EpisodeSearchToggle({
   searchActive,
@@ -54,13 +54,7 @@ export function EpisodeSearchToggle({
   );
 }
 
-export function EpisodeSearchBar({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
+export function EpisodeSearchBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const t = useT();
   return (
     <div className="flex items-center gap-2.5 rounded-2xl bg-elevated px-3.5 ring-1 ring-edge-soft">

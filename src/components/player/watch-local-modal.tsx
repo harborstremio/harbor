@@ -1,6 +1,3 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { createPortal } from "react-dom";
-import { Check, HardDrive, RotateCcw, Wifi } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import {
   closeWatchLocalConfirm,
@@ -8,6 +5,9 @@ import {
   subscribeWatchLocalConfirm,
   type WatchLocalChoice,
 } from "@/lib/player/watch-local-confirm";
+import { Check, HardDrive, RotateCcw, Wifi } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 
 function formatClock(ms: number): string {
   const total = Math.max(0, Math.floor(ms / 1000));

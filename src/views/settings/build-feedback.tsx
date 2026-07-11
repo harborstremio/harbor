@@ -1,10 +1,10 @@
+import { BetaTag } from "@/components/beta-tag";
+import { submitBuildFeedback } from "@/lib/build-feedback-submit";
+import { APP_VERSION, IS_BETA_BUILD } from "@/lib/build-info";
+import { useT } from "@/lib/i18n";
+import { openUrl } from "@/lib/window";
 import { Angry, Frown, Github, Laugh, Meh, Smile, ThumbsUp } from "lucide-react";
 import { useRef, useState, type ComponentType } from "react";
-import { BetaTag } from "@/components/beta-tag";
-import { APP_VERSION, IS_BETA_BUILD } from "@/lib/build-info";
-import { submitBuildFeedback } from "@/lib/build-feedback-submit";
-import { openUrl } from "@/lib/window";
-import { useT } from "@/lib/i18n";
 
 const KEY = "harbor.build.rating.v1";
 const REPO_ISSUE = "https://github.com/harborstremio/harbor/issues/new";
@@ -58,9 +58,7 @@ export function BuildFeedback() {
     const s = STOPS[rating];
     const title = `Beta feedback: ${APP_VERSION} feels ${s.label.toLowerCase()}`;
     const body = `**Build:** ${APP_VERSION}${IS_BETA_BUILD ? " (beta)" : ""}\n**How it feels:** ${s.label}\n\n**What got worse, or what broke?**\n\n\n**Steps to make it happen (if any):**\n\n\n_A screenshot helps us a ton._`;
-    void openUrl(
-      `${REPO_ISSUE}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=feedback`,
-    );
+    void openUrl(`${REPO_ISSUE}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}&labels=feedback`);
   };
 
   if (committed != null) {
@@ -189,7 +187,13 @@ export function BuildFeedback() {
             className={`absolute top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-canvas shadow-[0_4px_14px_-2px_rgba(0,0,0,0.55)] ring-2 transition-all duration-150 ${
               dragging.current ? "scale-110" : ""
             }`}
-            style={{ left: `${(value / (STOPS.length - 1)) * 100}%`, color: cur.color, "--tw-ring-color": cur.color } as React.CSSProperties}
+            style={
+              {
+                left: `${(value / (STOPS.length - 1)) * 100}%`,
+                color: cur.color,
+                "--tw-ring-color": cur.color,
+              } as React.CSSProperties
+            }
           >
             <cur.Icon size={19} strokeWidth={2.1} />
           </span>

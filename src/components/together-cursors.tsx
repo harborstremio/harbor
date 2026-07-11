@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useTogether, type RemoteCursor } from "@/lib/together/provider";
 import { useView } from "@/lib/view";
+import { useEffect, useRef, useState } from "react";
 
 const SEND_INTERVAL_MS = 60;
 const HIDDEN_AFTER_IDLE_MS = 1500;
@@ -172,9 +172,7 @@ export function TogetherCursors() {
   if (!settings.togetherShareCursors) return null;
   if (chromeHidden) return null;
 
-  const visibleCursors = remoteCursors.filter(
-    (c) => c.visible && c.from !== clientId && c.path === topPath,
-  );
+  const visibleCursors = remoteCursors.filter((c) => c.visible && c.from !== clientId && c.path === topPath);
   if (visibleCursors.length === 0) return null;
 
   void scrollTick;
@@ -224,13 +222,7 @@ function RemotePointer({
         transition: "transform 80ms linear",
       }}
     >
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]"
-      >
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]">
         <path
           d="M5.5 4.2 L18.6 10.4 Q19.6 10.9 18.6 11.5 L13 13.4 Q12.4 13.6 12.2 14.2 L10.4 19.8 Q9.9 21 9.2 19.8 L4.6 5.6 Q4.1 4 5.5 4.2 Z"
           fill={color}

@@ -1,22 +1,18 @@
 import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+
 import type { Meta } from "./cinemeta";
-import type { PlayEpisode } from "./view";
-import { tmdbDetails, tmdbSeasonEpisodes } from "./providers/tmdb";
 import { resolveMeta } from "./meta-resource";
 import { animeKitsuMeta } from "./providers/anime-kitsu-addon";
 import { externalToKitsu } from "./providers/anime-mapping";
-import { parseKitsuId } from "./providers/kitsu";
 import { aniZipByKitsu } from "./providers/anizip";
+import { parseKitsuId } from "./providers/kitsu";
+import { tmdbDetails, tmdbSeasonEpisodes } from "./providers/tmdb";
+import type { PlayEpisode } from "./view";
 
 export function isAnimeId(id: string): boolean {
-  return (
-    id.startsWith("kitsu:") ||
-    id.startsWith("mal:") ||
-    id.startsWith("anilist:") ||
-    id.startsWith("anidb:")
-  );
+  return id.startsWith("kitsu:") || id.startsWith("mal:") || id.startsWith("anilist:") || id.startsWith("anidb:");
 }
 
 function animeSeriesFromStreamId(streamId: string | undefined): string | null {
@@ -131,8 +127,7 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
   const eps: PlayEpisode[] = [];
   for (const v of raw) {
     const season = typeof v.season === "number" ? v.season : null;
-    const episode =
-      typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
+    const episode = typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null || season < 1) continue;
     const ep: PlayEpisode = { season, episode, name: v.title || v.name || undefined, still: v.thumbnail };
     const vid = (v as { id?: string }).id;
@@ -202,9 +197,7 @@ export async function fetchUpcomingEpisodes(
     let cursor = current.episode;
     while (out.length < count && season <= current.season + 3) {
       const eps = await tmdbSeason(opts.tmdbKey, tvId, season);
-      const start = season === current.season
-        ? eps.findIndex((e) => e.episode === cursor) + 1
-        : 0;
+      const start = season === current.season ? eps.findIndex((e) => e.episode === cursor) + 1 : 0;
       if (start < 0) break;
       for (let i = start; i < eps.length && out.length < count; i++) out.push(eps[i]);
       season += 1;
@@ -239,12 +232,7 @@ async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
   const eps: PlayEpisode[] = [];
   for (const v of raw) {
     const season = typeof v.season === "number" ? v.season : null;
-    const episode =
-      typeof v.episode === "number"
-        ? v.episode
-        : typeof v.number === "number"
-          ? v.number
-          : null;
+    const episode = typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null) continue;
     if (season < 1) continue;
     eps.push({

@@ -1,5 +1,3 @@
-import { Download, FolderOpen, Pause, Play, Trash2, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import {
   cancelDownload,
@@ -12,6 +10,8 @@ import {
 } from "@/lib/download/downloads-store";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { Download, FolderOpen, Pause, Play, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 type T = (key: string) => string;
 
@@ -97,11 +97,7 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
   const active = d.status === "downloading" || d.status === "paused";
   return (
     <div className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors hover:bg-raised/50">
-      <button
-        onClick={onOpen}
-        title={t("Go to show")}
-        className="flex min-w-0 flex-1 items-center gap-3 text-start"
-      >
+      <button onClick={onOpen} title={t("Go to show")} className="flex min-w-0 flex-1 items-center gap-3 text-start">
         <span className="h-12 w-9 shrink-0 overflow-hidden rounded-md bg-canvas">
           {d.poster && <img src={d.poster} alt="" className="h-full w-full object-cover" />}
         </span>
@@ -120,17 +116,13 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
           ) : (
             <span
               className={`text-[10.5px] ${
-                d.status === "done"
-                  ? "text-accent"
-                  : d.status === "error"
-                    ? "text-danger"
-                    : "text-ink-subtle"
+                d.status === "done" ? "text-accent" : d.status === "error" ? "text-danger" : "text-ink-subtle"
               }`}
             >
               {d.status === "done"
                 ? t("Completed")
                 : d.status === "error"
-                  ? d.error ?? t("Failed")
+                  ? (d.error ?? t("Failed"))
                   : d.status === "interrupted"
                     ? t("Interrupted")
                     : t("Canceled")}
@@ -174,15 +166,7 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
   );
 }
 
-function RowBtn({
-  label,
-  onClick,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
+function RowBtn({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       aria-label={label}
