@@ -94,7 +94,7 @@ const discover: Record<string, string> = {
   "Trending now": "رائج الآن",
   "New this week": "جديد هذا الأسبوع",
   "Editors' picks": "اختيارات المحرّرين",
-  "Skip": "تخطّي",
+  Skip: "تخطّي",
   Runtime: "المدة",
   Year: "السنة",
   Play: "تشغيل",
