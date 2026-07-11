@@ -76,6 +76,54 @@ const catalog: Record<string, string> = {
     "تحتاج مرشّحات السنة والمدة واللغة والدولة إلى TMDB. يعود تصفّح الأنواع إلى Cinemeta تلقائيًا.",
   "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.":
     "أفضل {media} {genre}، مرتّبة حسب المزاج. تصفّح الرائج، وتعمّق في أعمال مخرج، ورتّب حسب العقد، واكتشف الجواهر الهادئة.",
+
+  // ── Catalogs page ──────────────────────────────────────────────────────
+  Catalog: "كتالوج",
+  Catalogs: "الكتالوجات",
+  Customize: "تخصيص",
+  "Customize page": "تخصيص الصفحة",
+  "Search catalogs": "ابحث في الكتالوجات",
+  "No catalogs yet": "لا توجد كتالوجات بعد",
+  "No catalogs match your search.": "لا توجد كتالوجات مطابقة لبحثك.",
+  "Everything your addons offer, shown as posters. Scroll, search, or filter to what you want.":
+    "كل ما تقدّمه إضافاتك، معروضًا كملصقات. مرّر أو ابحث أو صفِّ لما تريد.",
+  "Install a Stremio addon and its catalogs show up here as poster rails, ready to browse.":
+    "ثبّت إضافة Stremio وستظهر كتالوجاتها هنا كصفوف ملصقات جاهزة للتصفّح.",
+  "Pin the catalogs you want up top, hide the ones you never open, and reorder your pinned rails. Your browse view updates instantly.":
+    "ثبّت الكتالوجات التي تريدها في الأعلى، وأخفِ ما لا تفتحه، وأعد ترتيب الصفوف المثبّتة. يتحدّث عرض التصفّح فورًا.",
+  "Choose what shows, what stays hidden, and what sits up top.":
+    "اختر ما يظهر، وما يبقى مخفيًا، وما يجلس في الأعلى.",
+  "You've hidden every catalog that matched.": "لقد أخفيت كل الكتالوجات المطابقة.",
+  "You've hidden the one catalog that matched.": "لقد أخفيت الكتالوج الوحيد المطابق.",
+  "Show this catalog": "إظهار هذا الكتالوج",
+  "Hide this catalog": "إخفاء هذا الكتالوج",
+  "Show row": "إظهار الصف",
+  "Hide row": "إخفاء الصف",
+  "Pinned to top": "مثبّت في الأعلى",
+  Unpin: "إلغاء التثبيت",
+  "Add to Home Screen": "إضافة إلى الشاشة الرئيسية",
+  "Remove from Home": "إزالة من الرئيسية",
+  "All Done": "تم الكل",
+  "Undo All": "التراجع عن الكل",
+  Up: "أعلى",
+  Down: "أسفل",
+  "All genres": "كل الأنواع",
+
+  // ── Home / hero / continue watching ────────────────────────────────────
+  "Featured {n}": "مميّز {n}",
+  "Next featured": "المميّز التالي",
+  "Previous featured": "المميّز السابق",
+  Next: "التالي",
+  Previous: "السابق",
+  "1 new episode since you last watched": "حلقة جديدة منذ آخر مشاهدة",
+  "{n} new episodes since you last watched": "{n} حلقات جديدة منذ آخر مشاهدة",
+  "Watched by {name}": "شاهده {name}",
+  "Close image viewer": "إغلاق عارض الصور",
+  "Image {n}": "صورة {n}",
+  "Next image": "الصورة التالية",
+  "Previous image": "الصورة السابقة",
+  "{title} image viewer": "عارض صور {title}",
+  "Delete custom source": "حذف المصدر المخصص",
 };
 
 export default catalog;

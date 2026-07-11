@@ -79,10 +79,26 @@ const discover: Record<string, string> = {
   Crime: "جريمة",
   "Can't decide?": "محتار؟",
   "Surprise me": "فاجئني",
-  "Pick a random title": "اختر عنواناً عشوائياً",
+  "Pick a random title": "اختر عنوانًا عشوائيًا",
   "Browse your catalogs": "تصفّح كتالوجاتك",
   "Hide section": "إخفاء القسم",
   "Show section": "إظهار القسم",
+
+  // Discover / Explore page extras
+  Discover: "اكتشف",
+  Explore: "استكشف",
+  "Your daily rails": "صفوفك اليومية",
+  "For you": "من أجلك",
+  "Based on what you watch": "بناءً على ما تشاهده",
+  "Because you watched": "لأنك شاهدت",
+  "Trending now": "رائج الآن",
+  "New this week": "جديد هذا الأسبوع",
+  "Editors' picks": "اختيارات المحرّرين",
+  "Skip": "تخطّي",
+  Runtime: "المدة",
+  Year: "السنة",
+  Play: "تشغيل",
+  Series: "مسلسل",
 };
 
 export default discover;
