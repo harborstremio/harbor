@@ -910,6 +910,8 @@ pub async fn mpv_set_geometry(
             let _ = tx.send(());
         });
         let _ = rx.recv_timeout(std::time::Duration::from_millis(300));
+        // mac always uses the native embed path — no geometry property fallback.
+        let _ = state;
         return Ok(());
     }
     #[cfg(target_os = "linux")]
@@ -934,18 +936,27 @@ pub async fn mpv_set_geometry(
             return Ok(());
         }
     }
-    #[cfg(all(not(windows), not(target_os = "macos")))]
-    let _ = app;
 
-    let mpv = {
-        let g = state.inner.lock().await;
-        g.as_ref().map(|s| s.mpv.clone()).ok_or_else(|| "mpv not started".to_string())?
-    };
-    let geo = format!(
-        "{}x{}+{}+{}",
-        geom.css_width as i32, geom.css_height as i32, geom.css_left as i32, geom.css_top as i32
-    );
-    mpv.set_property("geometry", geo.as_str()).map_err(|e| format!("geometry: {}", e))
+    // Standalone / non-embedded window: set mpv geometry property.
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app;
+        let mpv = {
+            let g = state.inner.lock().await;
+            g.as_ref()
+                .map(|s| s.mpv.clone())
+                .ok_or_else(|| "mpv not started".to_string())?
+        };
+        let geo = format!(
+            "{}x{}+{}+{}",
+            geom.css_width as i32,
+            geom.css_height as i32,
+            geom.css_left as i32,
+            geom.css_top as i32
+        );
+        mpv.set_property("geometry", geo.as_str())
+            .map_err(|e| format!("geometry: {}", e))
+    }
 }
 
 #[tauri::command]
