@@ -6,6 +6,7 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
 import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
+import { useGroupPrefs } from "@/lib/iptv/group-order";
 import { clearPlaylistCache, getCachedPlaylist } from "@/lib/iptv/store";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
@@ -221,6 +222,14 @@ export function LiveView({ active }: { active: boolean }) {
     allSources,
   });
 
+  const groupPrefs = useGroupPrefs(activeId ?? "");
+  const hiddenCategoryCount = groupPrefs.hidden.length;
+  const [openHiddenManager, setOpenHiddenManager] = useState(false);
+  const openCategoryManager = useCallback(() => {
+    if (mode === "home" || mode === "multiview") setMode("grid");
+    setOpenHiddenManager(true);
+  }, [mode, setMode]);
+
   const selectActive = useCallback((id: string | null) => {
     setActiveId(id);
     writeActiveId(id);
@@ -253,7 +262,11 @@ export function LiveView({ active }: { active: boolean }) {
 
   return (
     <main data-rail-flush className={`relative flex min-h-0 flex-1 ${immersive ? "pt-0" : "pt-20"}`}>
-      {playlist && sortedGroups.length > 0 && mode !== "multiview" && mode !== "home" && state.kind !== "error" && (
+      {playlist &&
+        (sortedGroups.length > 0 || hiddenCategoryCount > 0) &&
+        mode !== "multiview" &&
+        mode !== "home" &&
+        state.kind !== "error" && (
         <CategorySidebar
           groups={sortedGroups}
           active={group}
@@ -262,6 +275,8 @@ export function LiveView({ active }: { active: boolean }) {
           groupLogos={groupLogos}
           favoritesCount={favorites.count}
           sourceId={activeId ?? ""}
+          openHiddenManager={openHiddenManager}
+          onHiddenManagerOpened={() => setOpenHiddenManager(false)}
         />
       )}
       <div className="flex min-w-0 flex-1 flex-col">
@@ -368,7 +383,14 @@ export function LiveView({ active }: { active: boolean }) {
                 />
               )}
               {mode !== "home" && playlist && visible.length === 0 && (
-                <EmptyResult onClear={() => { setQuery(""); setGroup(null); }} />
+                <EmptyResult
+                  onClear={() => {
+                    setQuery("");
+                    setGroup(null);
+                  }}
+                  hiddenCount={hiddenCategoryCount}
+                  onManageHidden={hiddenCategoryCount > 0 ? openCategoryManager : undefined}
+                />
               )}
               {visible.length > 0 && mode === "grid" && (
                 <div className="flex flex-col gap-6">

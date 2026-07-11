@@ -49,6 +49,50 @@ export function toggleGroupHidden(sourceId: string, group: string): void {
   }));
 }
 
+/** Hide or unhide many groups at once (Live TV multi-select). */
+export function setGroupsHidden(sourceId: string, groups: string[], hidden: boolean): void {
+  if (!sourceId || groups.length === 0) return;
+  const want = new Set(groups);
+  update(sourceId, (p) => {
+    if (hidden) {
+      const nextHidden = [...p.hidden];
+      for (const g of want) {
+        if (!nextHidden.includes(g)) nextHidden.push(g);
+      }
+      return {
+        pinned: p.pinned.filter((g) => !want.has(g)),
+        hidden: nextHidden,
+      };
+    }
+    return {
+      pinned: p.pinned,
+      hidden: p.hidden.filter((g) => !want.has(g)),
+    };
+  });
+}
+
+/** Pin many groups at once (Live TV multi-select). Does not toggle — always pins. */
+export function setGroupsPinned(sourceId: string, groups: string[], pinned: boolean): void {
+  if (!sourceId || groups.length === 0) return;
+  const want = new Set(groups);
+  update(sourceId, (p) => {
+    if (pinned) {
+      const nextPinned = [...p.pinned];
+      for (const g of want) {
+        if (!nextPinned.includes(g)) nextPinned.push(g);
+      }
+      return {
+        pinned: nextPinned,
+        hidden: p.hidden.filter((g) => !want.has(g)),
+      };
+    }
+    return {
+      pinned: p.pinned.filter((g) => !want.has(g)),
+      hidden: p.hidden,
+    };
+  });
+}
+
 export function clearGroupPrefs(sourceId: string): void {
   update(sourceId, () => ({ pinned: [], hidden: [] }));
 }
