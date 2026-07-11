@@ -132,10 +132,16 @@ export function CategorySidebar({
         e.preventDefault();
         const last = groups[groups.length - 1];
         if (last) onSelect(last);
-      } else if (e.key === "Escape" && selected.size > 0) {
+      } else if (e.key === "Escape" && (selected.size > 0 || hiddenSelected.size > 0)) {
         e.preventDefault();
-        setSelected(new Set());
-        lastClickedRef.current = null;
+        if (selected.size > 0) {
+          setSelected(new Set());
+          lastClickedRef.current = null;
+        }
+        if (hiddenSelected.size > 0) {
+          setHiddenSelected(new Set());
+          lastHiddenClickedRef.current = null;
+        }
       } else if ((e.key === "a" || e.key === "A") && (e.metaKey || e.ctrlKey) && visibleGroups.length > 0) {
         e.preventDefault();
         setSelected(new Set(visibleGroups));
@@ -145,7 +151,7 @@ export function CategorySidebar({
     return () => {
       root.removeEventListener("keydown", onKey);
     };
-  }, [move, onSelect, groups, selected.size, visibleGroups]);
+  }, [move, onSelect, groups, selected.size, hiddenSelected.size, visibleGroups]);
 
   const applyRangeSelect = useCallback(
     (
@@ -211,7 +217,15 @@ export function CategorySidebar({
     applyRangeSelect(prefs.hidden, g, lastHiddenClickedRef, setHiddenSelected, e.shiftKey, e.metaKey || e.ctrlKey);
   };
 
+  const allVisibleSelected = visibleGroups.length > 0 && visibleGroups.every((g) => selected.has(g));
+
   const selectAllVisible = () => {
+    // Toggle: if everything is already selected, clear the selection
+    if (allVisibleSelected) {
+      setSelected(new Set());
+      lastClickedRef.current = null;
+      return;
+    }
     setSelected(new Set(visibleGroups));
     lastClickedRef.current = visibleGroups[visibleGroups.length - 1] ?? null;
   };
@@ -244,9 +258,22 @@ export function CategorySidebar({
     });
   };
 
+  const allHiddenSelected = prefs.hidden.length > 0 && prefs.hidden.every((g) => hiddenSelected.has(g));
+
   const selectAllHidden = () => {
+    // Toggle: if everything is already selected, clear the selection
+    if (allHiddenSelected) {
+      setHiddenSelected(new Set());
+      lastHiddenClickedRef.current = null;
+      return;
+    }
     setHiddenSelected(new Set(prefs.hidden));
     lastHiddenClickedRef.current = prefs.hidden[prefs.hidden.length - 1] ?? null;
+  };
+
+  const clearHiddenSelection = () => {
+    setHiddenSelected(new Set());
+    lastHiddenClickedRef.current = null;
   };
 
   const unhideSelected = () => {
@@ -296,9 +323,9 @@ export function CategorySidebar({
               onClick={selectAllVisible}
               className="rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle transition-colors hover:bg-elevated/70 hover:text-ink"
             >
-              {t("Select all")}
+              {allVisibleSelected ? t("Deselect all") : t("Select all")}
             </button>
-            {selected.size > 0 && (
+            {selected.size > 0 && !allVisibleSelected && (
               <>
                 <span className="text-[10px] text-ink-subtle">·</span>
                 <button
@@ -438,8 +465,17 @@ export function CategorySidebar({
                   onClick={selectAllHidden}
                   className="rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle transition-colors hover:bg-elevated/70 hover:text-ink"
                 >
-                  {t("Select all")}
+                  {allHiddenSelected ? t("Deselect all") : t("Select all")}
                 </button>
+                {hiddenSelected.size > 0 && !allHiddenSelected && (
+                  <button
+                    type="button"
+                    onClick={clearHiddenSelection}
+                    className="rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold uppercase tracking-wide text-ink-subtle transition-colors hover:bg-elevated/70 hover:text-ink"
+                  >
+                    {t("Clear")}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={unhideAll}

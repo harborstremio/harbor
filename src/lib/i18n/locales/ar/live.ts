@@ -133,6 +133,7 @@ const live: Record<string, string> = {
     "قد تكون بعض الفئات مخفية، أو قد تكون عوامل التصفية ضيقة جدًا. أعد تعيينها أو حدّد الفئات التي تريد إظهارها.",
   "Manage categories": "إدارة الفئات",
   "Select all": "تحديد الكل",
+  "Deselect all": "إلغاء تحديد الكل",
   "Unhide all": "إظهار الكل",
   "Unhide selected": "إظهار المحدد",
   "{n} selected": "تم تحديد {n}",
