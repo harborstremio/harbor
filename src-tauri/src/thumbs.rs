@@ -19,6 +19,8 @@ const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 static BUNDLED_MPV: OnceLock<PathBuf> = OnceLock::new();
 
+/// Windows bundles `mpv.exe` next to the app; called from setup on that platform only.
+#[cfg_attr(not(windows), allow(dead_code))]
 pub fn set_bundled_mpv(path: PathBuf) {
     let _ = BUNDLED_MPV.set(path);
 }
