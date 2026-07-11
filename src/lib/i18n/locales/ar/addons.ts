@@ -11,7 +11,7 @@ const addons: Record<string, string> = {
   Removed: "تمت الإزالة",
   "Install failed.": "فشل التثبيت.",
   "Couldn't remove. Try again.": "تعذّرت الإزالة. حاول مرة أخرى.",
-  "Loading the catalog": "جارٍ تحميل الكتالوج",
+  "Loading the catalog": "جارٍ تحميل الفهرس",
   "Addon order synced to your Stremio account": "تمت مزامنة ترتيب الإضافات مع حساب Stremio الخاص بك",
   "Addon order saved on this device": "تم حفظ ترتيب الإضافات على هذا الجهاز",
   Adult: "للبالغين",
@@ -36,7 +36,7 @@ const addons: Record<string, string> = {
   "Clear the search to see all {n} installed.": "امسح البحث لرؤية كل الإضافات المثبّتة البالغ عددها {n}.",
   Reorder: "إعادة ترتيب",
   "Change the order addons are tried in": "غيّر الترتيب الذي تُجرّب به الإضافات",
-  "Off · catalogs and streams hidden": "متوقّفة · الكتالوجات والبثوث مخفية",
+  "Off · catalogs and streams hidden": "متوقّفة · الفهارس ومصادر البث مخفية",
   Enabled: "مُفعّلة",
   Disabled: "مُعطّلة",
   "Click to turn off": "انقر للإيقاف",
@@ -53,10 +53,10 @@ const addons: Record<string, string> = {
 
   "Browse by category": "تصفّح حسب الفئة",
   "Six places to start. Tap one and we'll filter the catalog for you.":
-    "ستة أماكن للبدء. اضغط على واحد وسنُرشّح الكتالوج لك.",
+    "ستّة أماكن للبدء. اضغط واحدًا وسنُصفّي الفهرس لك.",
   Streaming: "البث",
   "Where your video comes from": "من أين يأتي الفيديو الخاص بك",
-  Catalogs: "الكتالوجات",
+  Catalogs: "الفهارس",
   "Posters, ratings, lists": "الملصقات والتقييمات والقوائم",
   Subtitles: "الترجمات",
   "Captions in your language": "ترجمات بلغتك",
@@ -142,14 +142,14 @@ const addons: Record<string, string> = {
     "قد تحمل الروابط مفاتيح debrid أو رموزًا؛ أظهرها عندما تحتاج إلى النسخ",
   "Hidden by default. Manifest paths often carry API keys (debrid tokens, OMDB keys, etc.) you don't want over a shoulder.":
     "مخفي افتراضيًا. غالبًا ما تحمل مسارات الـ manifest مفاتيح API (رموز debrid، مفاتيح OMDB، إلخ) لا تريد أن تُرى من فوق كتفك.",
-  "Stremio addon, packaged into Harbor's catalog.": "إضافة Stremio، مُدمجة في كتالوج Harbor.",
+  "Stremio addon, packaged into Harbor's catalog.": "إضافة Stremio، ضمن فهرس Harbor.",
   "Version and capabilities come straight from the addon's manifest. Ratings and categories come from the":
     "يأتي الإصدار والإمكانات مباشرة من manifest الإضافة. وتأتي التقييمات والفئات من",
   "community API. Star, browse, and contribute on their site.": "واجهة برمجة المجتمع. قيّم وتصفّح وساهم على موقعهم.",
   "More like this": "أعمال مشابهة",
   "Recommended for you": "موصى به لك",
 
-  "Catalogs & metadata": "الكتالوجات والبيانات الوصفية",
+  "Catalogs & metadata": "الفهارس والبيانات الوصفية",
   Streams: "البثوث",
   Sports: "الرياضة",
   Tools: "الأدوات",

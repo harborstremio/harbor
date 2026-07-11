@@ -797,7 +797,7 @@ const misc: Record<string, string> = {
 
   "Add a TMDB key for the full Harbor": "أضف مفتاح TMDB لتجربة Harbor الكاملة",
   "Free key unlocks Trending, In Theaters, and per-service catalogs. 60 seconds.":
-    "المفتاح المجاني يفتح الرائج وفي دور السينما وكتالوجات كل خدمة. 60 ثانية.",
+    "المفتاح المجاني يفتح الرائج وفي دور السينما وفهارس كل خدمة. 60 ثانية.",
 
   "Built for desktop resolutions": "مصمَّم لدقّات شاشات سطح المكتب",
   "This instance of Harbor is made for desktop. Our standalone iOS and Android apps are coming soon, each with a bespoke, mobile-first experience built for its native platform.":
@@ -860,14 +860,14 @@ const misc: Record<string, string> = {
     "الواجهة البارزة، وأفضل 10، والرائج، وفي دور السينما، وصفوف كل خدمة. تُضاف إضافاتك في الأسفل.",
   "Classic Stremio": "Stremio الكلاسيكي",
   "Continue Watching, then your addon catalogs in install order. No hero, no Harbor rails.":
-    "متابعة المشاهدة، ثم كتالوجات إضافاتك بترتيب التثبيت. بلا واجهة بارزة، وبلا صفوف Harbor.",
+    "متابعة المشاهدة، ثم فهارس إضافاتك بترتيب التثبيت. بلا واجهة بارزة، وبلا صفوف Harbor.",
   "Pick a home layout": "اختر تخطيط الصفحة الرئيسية",
   "You can switch later in Settings under Library & metadata.":
     "يمكنك التبديل لاحقًا من الإعدادات ضمن المكتبة والبيانات الوصفية.",
 
   "Step 1 · Metadata": "الخطوة 1 · البيانات الوصفية",
   "Free, two-minute signup. Unlocks Trending, In Theaters Now, Top Rated, and per-streaming catalogs (Netflix, Disney+, Hulu, …). Your key stays on this machine.":
-    "تسجيل مجاني في دقيقتين. يفتح الرائج، وفي دور السينما الآن، والأعلى تقييمًا، وكتالوجات كل خدمة بث (Netflix و Disney+ و Hulu، …). يبقى مفتاحك على هذا الجهاز.",
+    "تسجيل مجاني في دقيقتين. يفتح الرائج، وفي دور السينما الآن، والأعلى تقييمًا، وفهارس كل خدمة بث (Netflix و Disney+ و Hulu، …). يبقى مفتاحك على هذا الجهاز.",
   "Get a free key at themoviedb.org": "احصل على مفتاح مجاني من themoviedb.org",
   "v3 API key": "مفتاح API الإصدار 3",
   Verify: "تحقّق",

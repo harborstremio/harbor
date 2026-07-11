@@ -80,7 +80,7 @@ const discover: Record<string, string> = {
   "Can't decide?": "محتار؟",
   "Surprise me": "فاجئني",
   "Pick a random title": "اختر عنوانًا عشوائيًا",
-  "Browse your catalogs": "تصفّح كتالوجاتك",
+  "Browse your catalogs": "تصفّح فهارسك",
   "Hide section": "إخفاء القسم",
   "Show section": "إظهار القسم",
 

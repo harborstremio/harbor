@@ -50,7 +50,7 @@ const catalog: Record<string, string> = {
   "Show every addon row": "إظهار كل صفوف الإضافات",
   "Show on home": "إظهار في الرئيسية",
   "Hide from home": "إخفاء من الرئيسية",
-  "Feature this catalog in the hero carousel": "إبراز هذا الكتالوج في شريط العرض الرئيسي",
+  "Feature this catalog in the hero carousel": "إبراز هذا الفهرس في شريط العرض الرئيسي",
   "Stop feeding the hero carousel (back to automatic)": "إيقاف تغذية شريط العرض الرئيسي (العودة إلى التلقائي)",
   "Needs artwork-rich titles to feed the hero": "يحتاج إلى عناوين غنية بالصور لتغذية العرض الرئيسي",
   "Needs at least 10 titles for the Top 10 look": "يحتاج إلى 10 عناوين على الأقل لمظهر أفضل 10",
@@ -77,37 +77,38 @@ const catalog: Record<string, string> = {
   "The best {genre} {media}, layered by mood. Browse trending, dive into a director's run, sort by decade, find quiet gems.":
     "أفضل {media} {genre}، مرتّبة حسب المزاج. تصفّح الرائج، وتعمّق في أعمال مخرج، ورتّب حسب العقد، واكتشف الجواهر الهادئة.",
 
-  // ── Catalogs page ──────────────────────────────────────────────────────
-  Catalog: "كتالوج",
-  Catalogs: "الكتالوجات",
+  // ── Catalogs page (Stremio AR: CATALOG = فهرس) ─────────────────────────
+  Catalog: "فهرس",
+  Catalogs: "الفهارس",
   Customize: "تخصيص",
   "Customize page": "تخصيص الصفحة",
-  "Search catalogs": "ابحث في الكتالوجات",
-  "No catalogs yet": "لا توجد كتالوجات بعد",
-  "No catalogs match your search.": "لا توجد كتالوجات مطابقة لبحثك.",
+  "Search catalogs": "ابحث في الفهارس",
+  "No catalogs yet": "لا فهارس بعد",
+  "No catalogs match your search.": "لا يوجد فهرس يطابق بحثك.",
   "Everything your addons offer, shown as posters. Scroll, search, or filter to what you want.":
-    "كل ما تقدّمه إضافاتك، معروضًا كملصقات. مرّر أو ابحث أو صفِّ لما تريد.",
+    "كل قوائم الأفلام والمسلسلات من إضافاتك، معروضة كملصقات. مرّر أو ابحث أو صفِّ حسب النوع.",
   "Install a Stremio addon and its catalogs show up here as poster rails, ready to browse.":
-    "ثبّت إضافة Stremio وستظهر كتالوجاتها هنا كصفوف ملصقات جاهزة للتصفّح.",
+    "ثبّت إضافة Stremio وستظهر فهارسها هنا كصفوف ملصقات جاهزة للتصفّح.",
   "Pin the catalogs you want up top, hide the ones you never open, and reorder your pinned rails. Your browse view updates instantly.":
-    "ثبّت الكتالوجات التي تريدها في الأعلى، وأخفِ ما لا تفتحه، وأعد ترتيب الصفوف المثبّتة. يتحدّث عرض التصفّح فورًا.",
+    "ثبّت الفهارس التي تريدها في الأعلى، وأخفِ ما لا تستخدمه، ورتّب الصفوف المثبّتة. يتحدّث العرض فورًا.",
   "Choose what shows, what stays hidden, and what sits up top.":
-    "اختر ما يظهر، وما يبقى مخفيًا، وما يجلس في الأعلى.",
-  "You've hidden every catalog that matched.": "لقد أخفيت كل الكتالوجات المطابقة.",
-  "You've hidden the one catalog that matched.": "لقد أخفيت الكتالوج الوحيد المطابق.",
-  "Show this catalog": "إظهار هذا الكتالوج",
-  "Hide this catalog": "إخفاء هذا الكتالوج",
+    "اختر أي الفهارس تظهر، وأيها تُخفى، وأيها تُثبَّت في الأعلى.",
+  "You've hidden every catalog that matched.": "أخفيت كل الفهارس المطابقة.",
+  "You've hidden the one catalog that matched.": "أخفيت الفهرس الوحيد المطابق.",
+  "Show this catalog": "إظهار هذا الفهرس",
+  "Hide this catalog": "إخفاء هذا الفهرس",
   "Show row": "إظهار الصف",
   "Hide row": "إخفاء الصف",
   "Pinned to top": "مثبّت في الأعلى",
   Unpin: "إلغاء التثبيت",
-  "Add to Home Screen": "إضافة إلى الشاشة الرئيسية",
+  "Add to Home Screen": "إضافة إلى الرئيسية",
   "Remove from Home": "إزالة من الرئيسية",
-  "All Done": "تم الكل",
+  "All Done": "تمّ الكل",
   "Undo All": "التراجع عن الكل",
   Up: "أعلى",
   Down: "أسفل",
   "All genres": "كل الأنواع",
+  "Browse addons": "تصفّح الإضافات",
 
   // ── Home / hero / continue watching ────────────────────────────────────
   "Featured {n}": "مميّز {n}",
@@ -123,7 +124,7 @@ const catalog: Record<string, string> = {
   "Next image": "الصورة التالية",
   "Previous image": "الصورة السابقة",
   "{title} image viewer": "عارض صور {title}",
-  "Delete custom source": "حذف المصدر المخصص",
+  "Delete custom source": "حذف المصدر المخصّص",
 };
 
 export default catalog;
