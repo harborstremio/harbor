@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
-import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
+import { effectiveBinding, isTypingTarget, matchesBinding, type HotkeyId } from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
 import { getLeaveConfirm, openLeaveConfirm } from "@/lib/player/leave-confirm";
@@ -97,8 +97,7 @@ export function useKeyboardShortcuts(params: {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e)) return;
 
-      const binding = eventToBinding(e);
-      const match = (id: HotkeyId): boolean => effectiveBinding(id, overrides) === binding;
+      const match = (id: HotkeyId): boolean => matchesBinding(e, effectiveBinding(id, overrides));
 
       if (e.key === "MediaPlayPause") {
         e.preventDefault();

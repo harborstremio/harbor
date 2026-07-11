@@ -111,17 +111,40 @@ export const HOTKEY_MAP: Record<HotkeyId, HotkeyDef> = Object.fromEntries(
   HOTKEYS.map((h) => [h.id, h]),
 ) as Record<HotkeyId, HotkeyDef>;
 
-export function eventToBinding(e: KeyboardEvent): string {
+const PHYSICAL_CODES = new Set([
+  "Backquote", "Backslash", "BracketLeft", "BracketRight", "Comma", "Equal",
+  "KeyA", "KeyB", "KeyC", "KeyD", "KeyE", "KeyF", "KeyG", "KeyH", "KeyI", "KeyJ", "KeyK", "KeyL", "KeyM",
+  "KeyN", "KeyO", "KeyP", "KeyQ", "KeyR", "KeyS", "KeyT", "KeyU", "KeyV", "KeyW", "KeyX", "KeyY", "KeyZ",
+  "Minus", "Period", "Quote", "Semicolon", "Slash",
+  "Digit0", "Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6", "Digit7", "Digit8", "Digit9",
+]);
+
+const LEGACY_CODE_KEYS: Record<string, readonly [string, string]> = {
+  Backquote: ["`", "~"], Backslash: ["\\", "|"], BracketLeft: ["[", "{"], BracketRight: ["]", "}"],
+  Comma: [",", "<"], Equal: ["=", "+"], Minus: ["-", "_"], Period: [".", ">"], Quote: ["'", "\""],
+  Semicolon: [";", ":"], Slash: ["/", "?"],
+};
+
+function bindingFrom(key: string, e: KeyboardEvent, isLetter: boolean): string {
   const mods: string[] = [];
-  let key = e.key;
-  const isLetter = key.length === 1 && /[a-zA-Z]/.test(key);
   if (e.ctrlKey) mods.push("ctrl");
   if (e.shiftKey && !isLetter) mods.push("shift");
   if (e.altKey) mods.push("alt");
   if (e.metaKey) mods.push("meta");
-  if (key === " ") key = "Space";
-  if (isLetter) key = key.toLowerCase();
   return mods.length === 0 ? key : mods.join("+") + "+" + key;
+}
+
+export function eventToBinding(e: KeyboardEvent): string {
+  const key = PHYSICAL_CODES.has(e.code) ? e.code : e.key === " " ? "Space" : e.key;
+  return bindingFrom(key, e, /^Key[A-Z]$/.test(key));
+}
+
+function legacyEventToBinding(e: KeyboardEvent): string {
+  let key = e.key === " " ? "Space" : e.key;
+  if (/^Key[A-Z]$/.test(e.code)) key = e.code.slice(3).toLowerCase();
+  else if (/^Digit\d$/.test(e.code)) key = e.code.slice(5);
+  else if (LEGACY_CODE_KEYS[e.code]) key = LEGACY_CODE_KEYS[e.code][e.shiftKey ? 1 : 0];
+  return bindingFrom(key, e, key.length === 1 && /[a-zA-Z]/.test(key));
 }
 
 export function isModifierOnly(e: KeyboardEvent): boolean {
@@ -139,7 +162,7 @@ export function isTypingTarget(e: KeyboardEvent): boolean {
 }
 
 export function matchesBinding(e: KeyboardEvent, binding: string): boolean {
-  return eventToBinding(e) === binding;
+  return eventToBinding(e) === binding || legacyEventToBinding(e) === binding;
 }
 
 export function effectiveBinding(id: HotkeyId, overrides: Record<string, string>): string {
@@ -161,6 +184,9 @@ export function formatBindingForDisplay(binding: string): string {
       if (p === "ArrowDown") return "↓";
       if (p === "ArrowLeft") return "←";
       if (p === "ArrowRight") return "→";
+      if (/^Key[A-Z]$/.test(p)) return p.slice(3);
+      if (/^Digit\d$/.test(p)) return p.slice(5);
+      if (LEGACY_CODE_KEYS[p]) return LEGACY_CODE_KEYS[p][0];
       if (p.length === 1) return p.toUpperCase();
       return p;
     })
@@ -172,10 +198,9 @@ export function findHotkeyMatch(
   overrides: Record<string, string>,
   scope: HotkeyScope,
 ): HotkeyId | null {
-  const binding = eventToBinding(e);
   for (const def of HOTKEYS) {
     if (def.scope !== scope) continue;
-    if (effectiveBinding(def.id, overrides) === binding) return def.id;
+    if (matchesBinding(e, effectiveBinding(def.id, overrides))) return def.id;
   }
   return null;
 }

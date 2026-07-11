@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { effectiveBinding, eventToBinding, isTypingTarget } from "@/lib/hotkeys";
+import { effectiveBinding, isTypingTarget, matchesBinding } from "@/lib/hotkeys";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 
@@ -10,7 +10,7 @@ export function SearchHotkey() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e)) return;
-      if (eventToBinding(e) !== binding) return;
+      if (!matchesBinding(e, binding)) return;
       e.preventDefault();
       setOpen(true);
     };

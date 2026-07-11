@@ -8,9 +8,9 @@ import { DownloadsButton } from "@/components/downloads-popover";
 import { RecordingPill } from "@/chrome/recording-pill";
 import {
   effectiveBinding,
-  eventToBinding,
   formatBindingForDisplay,
   isTypingTarget,
+  matchesBinding,
 } from "@/lib/hotkeys";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
@@ -320,7 +320,7 @@ function SearchPill() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e)) return;
-      if (eventToBinding(e) !== binding) return;
+      if (!matchesBinding(e, binding)) return;
       e.preventDefault();
       setOpen(true);
     };

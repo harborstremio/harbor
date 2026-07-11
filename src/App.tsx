@@ -74,7 +74,7 @@ import { FavoritesProvider } from "@/lib/iptv/favorites";
 import { MediaFavoritesProvider } from "@/lib/media-favorites";
 import { LocalWatchlistProvider } from "@/lib/local-watchlist";
 import { useSettings } from "@/lib/settings";
-import { effectiveBinding, eventToBinding } from "@/lib/hotkeys";
+import { effectiveBinding, matchesBinding } from "@/lib/hotkeys";
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import type { MetaType } from "@/lib/cinemeta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
@@ -559,17 +559,16 @@ useEffect(() => {
     const isDefaultUiScaleReset = (e: KeyboardEvent) =>
       usesZoomModifier(e) && e.key === "0";
     const onKey = (e: KeyboardEvent) => {
-      const binding = eventToBinding(e);
       const overrides = settings.hotkeys ?? {};
       const uiScaleUpCustom = "globalUiScaleUp" in overrides;
       const uiScaleDownCustom = "globalUiScaleDown" in overrides;
       const uiScaleResetCustom = "globalUiScaleReset" in overrides;
       const matchesUp =
-        effectiveBinding("globalUiScaleUp", overrides) === binding || (!uiScaleUpCustom && isDefaultUiScaleUp(e));
+        matchesBinding(e, effectiveBinding("globalUiScaleUp", overrides)) || (!uiScaleUpCustom && isDefaultUiScaleUp(e));
       const matchesDown =
-        effectiveBinding("globalUiScaleDown", overrides) === binding || (!uiScaleDownCustom && isDefaultUiScaleDown(e));
+        matchesBinding(e, effectiveBinding("globalUiScaleDown", overrides)) || (!uiScaleDownCustom && isDefaultUiScaleDown(e));
       const matchesReset =
-        effectiveBinding("globalUiScaleReset", overrides) === binding || (!uiScaleResetCustom && isDefaultUiScaleReset(e));
+        matchesBinding(e, effectiveBinding("globalUiScaleReset", overrides)) || (!uiScaleResetCustom && isDefaultUiScaleReset(e));
       if (!matchesUp && !matchesDown && !matchesReset) return;
       if (player && matchesReset) return;
       e.preventDefault();

@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 import { useProfiles } from "@/lib/profiles";
 import { useSearch } from "@/lib/search-context";
-import { effectiveBinding, eventToBinding, formatBindingForDisplay, isTypingTarget } from "@/lib/hotkeys";
+import { effectiveBinding, formatBindingForDisplay, isTypingTarget, matchesBinding } from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useParental } from "@/lib/parental";
@@ -194,7 +194,7 @@ function SearchPill({ onOpen }: { onOpen: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e)) return;
-      if (eventToBinding(e) !== binding) return;
+      if (!matchesBinding(e, binding)) return;
       e.preventDefault();
       onOpen();
     };

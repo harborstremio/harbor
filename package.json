@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test:hotkeys": "node --experimental-strip-types --test tests/hotkeys.test.ts",
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
