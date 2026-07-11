@@ -519,9 +519,13 @@ function Shell() {
       setUiScale(uiScaleRef.current + direction * UI_SCALE_STEP);
     };
     const usesZoomModifier = (e: KeyboardEvent | WheelEvent) => e.ctrlKey || e.metaKey;
-    const isDefaultUiScaleUp = (e: KeyboardEvent) => usesZoomModifier(e) && (e.key === "+" || e.key === "=");
-    const isDefaultUiScaleDown = (e: KeyboardEvent) => usesZoomModifier(e) && (e.key === "-" || e.key === "_");
-    const isDefaultUiScaleReset = (e: KeyboardEvent) => usesZoomModifier(e) && e.key === "0";
+    // Physical keys (Equal / minus / digit0) so scale works on Arabic layouts too
+    const isDefaultUiScaleUp = (e: KeyboardEvent) =>
+      usesZoomModifier(e) && (e.code === "Equal" || e.code === "NumpadAdd" || e.key === "+" || e.key === "=");
+    const isDefaultUiScaleDown = (e: KeyboardEvent) =>
+      usesZoomModifier(e) && (e.code === "Minus" || e.code === "NumpadSubtract" || e.key === "-" || e.key === "_");
+    const isDefaultUiScaleReset = (e: KeyboardEvent) =>
+      usesZoomModifier(e) && (e.code === "Digit0" || e.code === "Numpad0" || e.key === "0");
     const onKey = (e: KeyboardEvent) => {
       const binding = eventToBinding(e);
       const overrides = settings.hotkeys ?? {};

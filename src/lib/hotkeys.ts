@@ -415,12 +415,22 @@ export const HOTKEY_MAP: Record<HotkeyId, HotkeyDef> = Object.fromEntries(HOTKEY
 >;
 
 /**
- * Physical key → binding token. Prefer `e.code` over `e.key` so shortcuts keep
- * working when the OS layout is Arabic (or any non-Latin layout). With Arabic
- * active, pressing the F key yields `e.key === "ب"` (or similar) while
- * `e.code` stays `"KeyF"` — defaults like `f` / `Space` / `/` must match that.
+ * Global hotkeys use **physical key position** as if the keyboard were
+ * US-QWERTY English — not the character from the active OS layout.
+ *
+ * Spec / industry guidance:
+ * - W3C UI Events: `code` is based only on the key’s physical location and
+ *   does not vary with locale (https://www.w3.org/TR/uievents-code/).
+ * - MDN: use `code` for shortcuts/games that must stay stable across layouts.
+ * - Mozilla Hacks: prefer `code` for cross-layout controls (WASD, hotkeys).
+ *
+ * Arabic (and other non-Latin) layouts change `e.key` (e.g. KeyF → "ب") while
+ * `e.code` stays "KeyF". Mapping `code` → English tokens keeps defaults like
+ * `f`, `/`, `Space`, `shift+<` working without switching layout.
  */
-const CODE_TO_BINDING_KEY: Record<string, string> = {
+
+/** Unshifted US-QWERTY character for writing-system keys. */
+const CODE_TO_US_KEY: Record<string, string> = {
   Space: "Space",
   Slash: "/",
   Backslash: "\\",
@@ -435,24 +445,90 @@ const CODE_TO_BINDING_KEY: Record<string, string> = {
   Backquote: "`",
 };
 
+/** Shifted US-QWERTY for the same physical keys (e.g. Shift+Comma → "<"). */
+const CODE_TO_US_SHIFT_KEY: Record<string, string> = {
+  Digit1: "!",
+  Digit2: "@",
+  Digit3: "#",
+  Digit4: "$",
+  Digit5: "%",
+  Digit6: "^",
+  Digit7: "&",
+  Digit8: "*",
+  Digit9: "(",
+  Digit0: ")",
+  Minus: "_",
+  Equal: "+",
+  BracketLeft: "{",
+  BracketRight: "}",
+  Backslash: "|",
+  Semicolon: ":",
+  Quote: '"',
+  Comma: "<",
+  Period: ">",
+  Slash: "?",
+  Backquote: "~",
+};
+
+const NAMED_CODES = new Set([
+  "Escape",
+  "Enter",
+  "Tab",
+  "Backspace",
+  "Delete",
+  "Insert",
+  "Home",
+  "End",
+  "PageUp",
+  "PageDown",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "F1",
+  "F2",
+  "F3",
+  "F4",
+  "F5",
+  "F6",
+  "F7",
+  "F8",
+  "F9",
+  "F10",
+  "F11",
+  "F12",
+]);
+
 function keyTokenFromEvent(e: KeyboardEvent): { key: string; isLetter: boolean } {
   const code = e.code || "";
 
-  // KeyA…KeyZ — physical letter row (layout-independent)
-  if (code.length === 4 && code.startsWith("Key")) {
+  // Physical A–Z → English letter (layout-independent)
+  if (/^Key[A-Z]$/.test(code)) {
     return { key: code.slice(3).toLowerCase(), isLetter: true };
   }
-  // Digit0…Digit9
-  if (code.length === 6 && code.startsWith("Digit")) {
+
+  // Top-row digits; Shift uses US-QWERTY symbols (!@#…)
+  if (/^Digit[0-9]$/.test(code)) {
+    if (e.shiftKey && CODE_TO_US_SHIFT_KEY[code]) {
+      return { key: CODE_TO_US_SHIFT_KEY[code], isLetter: false };
+    }
     return { key: code.slice(5), isLetter: false };
   }
-  // Common punctuation used in defaults (/, -, =, …)
-  const fromCode = CODE_TO_BINDING_KEY[code];
-  if (fromCode) {
-    return { key: fromCode, isLetter: false };
+
+  // Punctuation / space: always US-QWERTY (Shift → < > ? etc.)
+  if (e.shiftKey && CODE_TO_US_SHIFT_KEY[code]) {
+    return { key: CODE_TO_US_SHIFT_KEY[code], isLetter: false };
+  }
+  if (CODE_TO_US_KEY[code]) {
+    return { key: CODE_TO_US_KEY[code], isLetter: false };
   }
 
-  // Named keys (Escape, ArrowLeft, Enter, F1, …) — e.key is stable across layouts
+  // Named keys: prefer stable `code` over `key`
+  if (NAMED_CODES.has(code)) {
+    return { key: code, isLetter: false };
+  }
+
+  // Fallback (rare / unknown codes)
   let key = e.key;
   if (key === " ") key = "Space";
   const isLetter = key.length === 1 && /[a-zA-Z]/.test(key);
