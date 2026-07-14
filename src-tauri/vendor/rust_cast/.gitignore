@@ -1,8 +1,0 @@
-.vscode
-.idea
-**/*.rs.bk
-target
-out
-*.iml
-node_modules
-Cargo.lock

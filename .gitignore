@@ -40,3 +40,9 @@ pnpm-debug.log*
 /src-tauri/fonts/*.otf
 /src-tauri/fonts/*.ttf
 local_docs/
+
+# Tizen
+.tizen/
+*.author
+*.sig
+*.wgt

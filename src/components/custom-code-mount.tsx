@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useView } from "@/lib/view";
+import { isWeb } from "@/lib/platform";
 import type { CustomTheme } from "@/lib/custom-themes";
 
 const STYLE_ID = "harbor-custom-css";
@@ -62,7 +63,7 @@ export function CustomCodeMount() {
   }, [themeExt?.css]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isWeb()) return;
     const code = (settings.customJs ?? "").trim();
     if (!code) return;
     try {
@@ -74,7 +75,7 @@ export function CustomCodeMount() {
   }, [settings.customJs]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || isWeb()) return;
     const code = (themeExt?.js ?? "").trim();
     if (!code) return;
     try {

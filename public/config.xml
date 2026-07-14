@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        id="https://harbor.tizen"
+        version="0.1.0"
+        viewModes="fullscreen">
+  <tizen:application id="HarborTV.HarborTV" package="com.harbor.tizen" required_version="6.5"/>
+  <content src="index.html"/>
+  <icon src="favicon.png"/>
+  <name>Harbor Tizen</name>
+  <tizen:profile name="tv"/>
+
+  <access origin="*"/>
+
+  <tizen:privilege name="http://tizen.org/privilege/internet"/>
+  <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+  <tizen:privilege name="http://tizen.org/privilege/tv.display"/>
+
+  <tizen:content-security-policy>default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; connect-src 'self' https: http:; media-src *;</tizen:content-security-policy>
+
+  <tizen:metadata key="http://samsung.com/tv/metadata/use.hide.vol.panel" value="true"/>
+</widget>

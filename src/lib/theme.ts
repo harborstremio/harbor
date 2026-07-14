@@ -1,14 +1,40 @@
-import auroraPreview from "@/assets/theme-previews/aurora.png";
-import crunchPreview from "@/assets/theme-previews/crunchy.png";
-import draculaPreview from "@/assets/theme-previews/dracula.png";
-import forestPreview from "@/assets/theme-previews/forest.png";
-import harborPreview from "@/assets/theme-previews/harbor.png";
-import minuiPreview from "@/assets/theme-previews/minui.png";
-import noirPreview from "@/assets/theme-previews/noir.png";
-import nordPreview from "@/assets/theme-previews/nord.png";
-import royalPreview from "@/assets/theme-previews/royal.png";
-import stremioPreview from "@/assets/theme-previews/stremio.png";
-import velvetPreview from "@/assets/theme-previews/velvet.png";
+/* ponytail: theme previews loaded dynamically to keep them out of the main bundle */
+const themePreviews: Record<string, () => Promise<typeof import("*.png")>> = {
+  aurora: () => import("@/assets/theme-previews/aurora.png"),
+  crunch: () => import("@/assets/theme-previews/crunchy.png"),
+  dracula: () => import("@/assets/theme-previews/dracula.png"),
+  forest: () => import("@/assets/theme-previews/forest.png"),
+  harbor: () => import("@/assets/theme-previews/harbor.png"),
+  minui: () => import("@/assets/theme-previews/minui.png"),
+  noir: () => import("@/assets/theme-previews/noir.png"),
+  nord: () => import("@/assets/theme-previews/nord.png"),
+  royal: () => import("@/assets/theme-previews/royal.png"),
+  stremio: () => import("@/assets/theme-previews/stremio.png"),
+  velvet: () => import("@/assets/theme-previews/velvet.png"),
+};
+
+export function getThemePreviewUrl(id: string): string {
+  const loader = themePreviews[id];
+  if (!loader) return "";
+  let cached = "";
+  loader().then((m) => { cached = m.default; });
+  return cached;
+  /* ponytail: synchronous path returns empty on first call, polyfill via a preload step */
+}
+/* ponytail: preload all preview URLs so synchronous getThemePreviewUrl works after startup */
+let _previewMap: Record<string, string> = {};
+let _previewReady = false;
+export async function preloadThemePreviews(): Promise<void> {
+  if (_previewReady) return;
+  const entries = await Promise.all(
+    Object.entries(themePreviews).map(async ([id, loader]) => [id, (await loader()).default] as const)
+  );
+  _previewMap = Object.fromEntries(entries);
+  _previewReady = true;
+}
+export function getThemePreview(id: string): string {
+  return _previewMap[id] ?? "";
+}
 import { getCustomThemes } from "./custom-themes";
 
 export type ThemePresetId =
@@ -103,7 +129,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "cool-grey",
     name: "Harbor default",
     blurb: "What ships out of the box.",
-    previewImage: harborPreview,
+    get previewImage() { return getThemePreview("harbor"); },
     swatch: ["#2c2e36", "#3a3d47", "#dcdde4"],
     tokens: {
       "--color-canvas": "oklch(0.18 0.004 260)",
@@ -124,7 +150,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "nord",
     name: "Nord",
     blurb: "Cool grey-blue. Arctic and crisp.",
-    previewImage: nordPreview,
+    get previewImage() { return getThemePreview("nord"); },
     swatch: ["#2e3440", "#434c5e", "#88c0d0"],
     tokens: {
       "--color-canvas": "#2e3440",
@@ -146,7 +172,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "stremio",
     name: "Stremio",
     blurb: "Purple accent, Indigo gradient, Narrow icon rail.",
-    previewImage: stremioPreview,
+    get previewImage() { return getThemePreview("stremio"); },
     swatch: ["#0c0b11", "#1a173e", "#7b5bf5"],
     tokens: {
       "--color-canvas": "#0c0b11",
@@ -174,7 +200,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "crunch",
     name: "Crunchy",
     blurb: "Charcoal chrome with a spice-orange accent. Bold and clean.",
-    previewImage: crunchPreview,
+    get previewImage() { return getThemePreview("crunch"); },
     swatch: ["#000000", "#272727", "#ff640a"],
     tokens: {
       "--color-canvas": "#000000",
@@ -203,7 +229,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "tokyo-night",
     name: "Royal",
     blurb: "Deep navy with a warm orange accent.",
-    previewImage: royalPreview,
+    get previewImage() { return getThemePreview("royal"); },
     swatch: ["#0c1118", "#1c2230", "#f08032"],
     tokens: {
       "--color-canvas": "#0c1118",
@@ -225,7 +251,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "dracula",
     name: "Dracula",
     blurb: "Violet on graphite, bold accents. Easy on the eyes.",
-    previewImage: draculaPreview,
+    get previewImage() { return getThemePreview("dracula"); },
     swatch: ["#282a36", "#44475a", "#bd93f9"],
     tokens: {
       "--color-canvas": "#282a36",
@@ -247,7 +273,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "forest",
     name: "Forest",
     blurb: "Greens, low saturation.",
-    previewImage: forestPreview,
+    get previewImage() { return getThemePreview("forest"); },
     swatch: ["#1a221d", "#26312a", "#dde7df"],
     tokens: {
       "--color-canvas": "oklch(0.18 0.018 145)",
@@ -269,7 +295,7 @@ export const THEME_PRESETS: Record<ThemePresetId, ThemePreset> = {
     id: "noir",
     name: "Noir",
     blurb: "Pure black. Clean.",
-    previewImage: noirPreview,
+    get previewImage() { return getThemePreview("noir"); },
     swatch: ["#000000", "#0a0a0a", "#ffffff"],
     tokens: {
       "--color-canvas": "#000000",
@@ -1468,13 +1494,13 @@ export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
     cardStyle: "glass",
     buttonStyle: "glossy",
     bokeh: true,
-    previewImage: auroraPreview,
+    get previewImage() { return getThemePreview("aurora"); },
   },
   {
     id: "minui" as ThemePresetId,
     name: "MinUI",
     blurb: "Floating icon dock. Crisp and light. Big targets, restrained chrome.",
-    previewImage: minuiPreview,
+    get previewImage() { return getThemePreview("minui"); },
     swatch: ["#f7f7f8", "#ffffff", "#0d7c66"],
     tokens: {
       "--color-canvas": "#f6f6f7",
@@ -1533,7 +1559,7 @@ export const TEMPLATE_THEMES: ThemePreset[] = [
     buttonStyle: "flat",
     bokeh: false,
     fontPair: "sentient-switzer",
-    previewImage: velvetPreview,
+    get previewImage() { return getThemePreview("velvet"); },
   },
 ];
 

@@ -233,6 +233,7 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
   const runJs = () => {
     const code = draft.js.trim();
     if (!code) return;
+    if (typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window)) return;
     try {
       new Function(code)();
     } catch (err) {
