@@ -487,16 +487,6 @@ pub fn run() {
             make_main_transparent(&app.handle());
             #[cfg(windows)]
             install_maximize_guard(&app.handle());
-            #[cfg(windows)]
-            {
-                use tauri::Manager;
-                if let Ok(res) = app.path().resource_dir() {
-                    let mpv = res.join("mpv.exe");
-                    if mpv.exists() {
-                        thumbs::set_bundled_mpv(mpv);
-                    }
-                }
-            }
             ensure_window_on_screen(&app.handle());
             #[cfg(target_os = "macos")]
             {
