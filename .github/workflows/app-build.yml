@@ -65,26 +65,8 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Prepare bundled sidecars
-        run: pnpm run setup:binaries
-
-      - name: Prepare Windows MPV runtime
-        if: matrix.platform.name == 'Windows'
-        shell: pwsh
-        run: |
-          pnpm run setup:libmpv
-
-          $tag = '20260610'
-          $asset = 'mpv-x86_64-20260610-git-304426c.7z'
-          $sha256 = 'facac536baa73c7b925771af5e39a3c9cb16b8d75b59a6e9800de89799dffca7'
-          curl.exe -L "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/$tag/$asset" -o mpv.7z
-          if ((Get-FileHash mpv.7z -Algorithm SHA256).Hash -ne $sha256.ToUpper()) {
-            throw 'MPV archive checksum mismatch'
-          }
-          7z x -y mpv.7z -ompv | Out-Null
-          $mpv = (Get-ChildItem -Recurse mpv -Filter mpv.exe | Select-Object -First 1).FullName
-          if (-not $mpv) { throw 'mpv.exe was not found in the archive' }
-          Copy-Item $mpv src-tauri/binaries/mpv-x86_64-pc-windows-msvc.exe
+      - name: Prepare build assets
+        run: pnpm run setup
 
       - name: Build app without installers
         run: pnpm tauri build --no-bundle

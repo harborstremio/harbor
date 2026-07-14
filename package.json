@@ -11,8 +11,10 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
+    "setup": "pnpm run setup:binaries && pnpm run setup:libmpv && pnpm run setup:mpv && pnpm run setup:fonts",
     "setup:binaries": "node scripts/fetch-binaries.mjs",
     "setup:libmpv": "node scripts/fetch-libmpv.mjs",
+    "setup:mpv": "node scripts/fetch-mpv.mjs",
     "setup:ffmpeg": "node scripts/fetch-ffmpeg.mjs",
     "setup:fonts": "node scripts/fetch-fonts.mjs"
   },
