@@ -155,13 +155,8 @@ function useViewPreloader() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
-    const win = window as Window & {
-      requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
-    };
     const schedule = (cb: () => void) =>
-      typeof win.requestIdleCallback === "function"
-        ? win.requestIdleCallback(cb, { timeout: 2500 })
-        : window.setTimeout(cb, 1200);
+      window.setTimeout(cb, 2000);
     schedule(() => {
       if (cancelled) return;
       void importDetail();
@@ -169,20 +164,6 @@ function useViewPreloader() {
       void importPlayer();
       void importSettings();
       void importAddons();
-      void importDiscover();
-      void importPerson();
-      void importFilter();
-      void importCalendar();
-      void importMovies();
-      void importShows();
-      void importLive();
-      void importAnime();
-      void importQueue();
-      void importAward();
-      void importAnimeAward();
-      void importService();
-      void importMatchDetail();
-      void importOnboarding();
     });
     return () => {
       cancelled = true;
@@ -725,6 +706,9 @@ function Shell() {
   useEffect(() => {
     void import("@/lib/addon-store").then(({ seedDefaultAddonsIfFirstRun }) =>
       seedDefaultAddonsIfFirstRun(),
+    );
+    void import("@/lib/theme").then(({ preloadThemePreviews }) =>
+      preloadThemePreviews(),
     );
   }, []);
 

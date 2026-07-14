@@ -96,16 +96,24 @@ type TogetherValue = {
 const Ctx = createContext<TogetherValue | null>(null);
 
 function loadOrInitClientId(): string {
-  let id = localStorage.getItem(CLIENT_ID_KEY);
-  if (!id) {
-    id = randomUuid();
-    localStorage.setItem(CLIENT_ID_KEY, id);
+  try {
+    let id = localStorage.getItem(CLIENT_ID_KEY);
+    if (!id) {
+      id = randomUuid();
+      localStorage.setItem(CLIENT_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return randomUuid();
   }
-  return id;
 }
 
 function loadOrInitName(): string {
-  return localStorage.getItem(NAME_KEY) ?? `Guest ${Math.floor(Math.random() * 9000 + 1000)}`;
+  try {
+    return localStorage.getItem(NAME_KEY) ?? `Guest ${Math.floor(Math.random() * 9000 + 1000)}`;
+  } catch {
+    return `Guest ${Math.floor(Math.random() * 9000 + 1000)}`;
+  }
 }
 
 function avatarIsShareable(a: string | null): boolean {
@@ -246,7 +254,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
   const setDisplayName = useCallback((n: string) => {
     const trimmed = n.trim().slice(0, 32) || `Guest ${Math.floor(Math.random() * 9000 + 1000)}`;
     setDisplayNameState(trimmed);
-    localStorage.setItem(NAME_KEY, trimmed);
+    try { localStorage.setItem(NAME_KEY, trimmed); } catch {}
     clientRef.current?.setName(trimmed);
   }, []);
 
