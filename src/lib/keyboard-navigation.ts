@@ -1,73 +1,77 @@
-import { useEffect, useRef, type RefObject } from 'react';
-import { SFX } from '@/lib/sfx';
-import { isModalOverlayOpen, modalOverlayClose } from '@/lib/modal-overlay';
+import { useEffect, useRef, type RefObject } from "react";
+import { SFX } from "@/lib/sfx";
+import { isModalOverlayOpen, modalOverlayClose } from "@/lib/modal-overlay";
 
-export type Dir = 'up' | 'down' | 'left' | 'right';
+export type Dir = "up" | "down" | "left" | "right";
 
 const SELECTOR = [
-  'a[href]',
-  'button:not([disabled])',
+  "a[href]",
+  "button:not([disabled])",
   'input:not([disabled]):not([type="hidden"])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
+  "select:not([disabled])",
+  "textarea:not([disabled])",
   '[tabindex]:not([tabindex="-1"])',
   '[contenteditable="true"]',
   '[data-focusable="true"]',
-].join(', ');
+].join(", ");
 
 const KEY_TO_DIR: Record<string, Dir> = {
-  ArrowUp: 'up',
-  ArrowDown: 'down',
-  ArrowLeft: 'left',
-  ArrowRight: 'right',
-  Up: 'up',
-  Down: 'down',
-  Left: 'left',
-  Right: 'right',
-  w: 'up',
-  W: 'up',
-  s: 'down',
-  S: 'down',
-  a: 'left',
-  A: 'left',
-  d: 'right',
-  D: 'right',
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  Up: "up",
+  Down: "down",
+  Left: "left",
+  Right: "right",
+  w: "up",
+  W: "up",
+  s: "down",
+  S: "down",
+  a: "left",
+  A: "left",
+  d: "right",
+  D: "right",
 };
 
 const CODE_TO_DIR: Record<string, Dir> = {
-  ArrowUp: 'up',
-  ArrowDown: 'down',
-  ArrowLeft: 'left',
-  ArrowRight: 'right',
-  KeyW: 'up',
-  KeyS: 'down',
-  KeyA: 'left',
-  KeyD: 'right',
+  ArrowUp: "up",
+  ArrowDown: "down",
+  ArrowLeft: "left",
+  ArrowRight: "right",
+  KeyW: "up",
+  KeyS: "down",
+  KeyA: "left",
+  KeyD: "right",
 };
 
 const KEYCODE_TO_DIR: Record<number, Dir> = {
-  38: 'up',
-  40: 'down',
-  37: 'left',
-  39: 'right',
-  19: 'up',
-  20: 'down',
-  21: 'left',
-  22: 'right',
-  87: 'up',
-  83: 'down',
-  65: 'left',
-  68: 'right',
+  38: "up",
+  40: "down",
+  37: "left",
+  39: "right",
+  19: "up",
+  20: "down",
+  21: "left",
+  22: "right",
+  87: "up",
+  83: "down",
+  65: "left",
+  68: "right",
 };
 
 const CENTER_KEYCODES = new Set([13, 23, 32]);
 const BACK_KEYCODES = new Set([27, 4, 461, 10009, 166]);
-const BACK_KEYS = new Set(['Escape', 'Esc', 'BrowserBack', 'GoBack', 'Back']);
+const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
 
 const MODAL_SELECTOR = '[role="dialog"], [aria-modal="true"]';
 const LOCAL_KEYBOARD_SELECTOR = [
-  '[role="listbox"]', '[role="menu"]', '[role="grid"]', '[role="tree"]', '[role="tablist"]',
-].join(', ');
+  '[role="listbox"]',
+  '[role="menu"]',
+  '[role="grid"]',
+  '[role="tree"]',
+  '[role="tablist"]',
+].join(", ");
 
 const AXIS_TOLERANCE = 24;
 
@@ -78,7 +82,7 @@ let focusStylesInjected = false;
 function isEditable(el: HTMLElement | null) {
   if (!el) return false;
   const tag = el.tagName;
-  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable;
 }
 
 /**
@@ -100,7 +104,11 @@ export function isVisible(el: HTMLElement) {
   if (el.closest('[hidden], [inert], [aria-hidden="true"]')) return false;
 
   const style = window.getComputedStyle(el);
-  if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0) {
+  if (
+    style.display === "none" ||
+    style.visibility === "hidden" ||
+    parseFloat(style.opacity) === 0
+  ) {
     return false;
   }
 
@@ -112,7 +120,7 @@ export function isVisible(el: HTMLElement) {
 }
 
 function isInSidebar(el: HTMLElement): boolean {
-  return !!el.closest('[data-harbor-sidebar]');
+  return !!el.closest("[data-harbor-sidebar]");
 }
 
 /** Horizontal top chrome (TopDock / Royal / etc.) — not the left sidebar. */
@@ -122,35 +130,47 @@ function isInTopChrome(el: HTMLElement): boolean {
 
 function isInNav(el: HTMLElement): boolean {
   if (isInTopChrome(el)) return false;
-  return !!el.closest('[data-tv-nav-zone], [data-harbor-sidebar], [data-harbor-nav]');
+  return !!el.closest("[data-tv-nav-zone], [data-harbor-sidebar], [data-harbor-nav]");
 }
 
 function isInHero(el: HTMLElement): boolean {
-  return !!el.closest('[data-tv-hero-zone]');
+  return !!el.closest("[data-tv-hero-zone]");
 }
 
-function zoneOf(el: HTMLElement): 'nav' | 'chrome' | 'hero' | 'content' {
-  if (isInTopChrome(el)) return 'chrome';
-  if (isInNav(el)) return 'nav';
-  if (isInHero(el)) return 'hero';
-  return 'content';
+function zoneOf(el: HTMLElement): "nav" | "chrome" | "hero" | "content" {
+  if (isInTopChrome(el)) return "chrome";
+  if (isInNav(el)) return "nav";
+  if (isInHero(el)) return "hero";
+  return "content";
 }
 
-function getSoundType(el: HTMLElement): 'light' | 'movie' {
-  if (isInNav(el)) return 'light';
-  if (el.closest('[role="dialog"], [role="menu"], [role="tablist"], [role="switch"], form, .settings-panel')) return 'light';
+function getSoundType(el: HTMLElement): "light" | "movie" {
+  if (isInNav(el)) return "light";
+  if (
+    el.closest(
+      '[role="dialog"], [role="menu"], [role="tablist"], [role="switch"], form, .settings-panel',
+    )
+  )
+    return "light";
 
-  const isMovieContainer = el.closest('[data-media-card], [data-movie-card], .media-card, [data-tv-hero-zone]');
-  if (isMovieContainer && (el.querySelector('img') || el.hasAttribute('data-media-card') || el.classList.contains('media-card'))) {
-    return 'movie';
+  const isMovieContainer = el.closest(
+    "[data-media-card], [data-movie-card], .media-card, [data-tv-hero-zone]",
+  );
+  if (
+    isMovieContainer &&
+    (el.querySelector("img") ||
+      el.hasAttribute("data-media-card") ||
+      el.classList.contains("media-card"))
+  ) {
+    return "movie";
   }
-  return 'light';
+  return "light";
 }
 
 function getTopFocusScope(): HTMLElement | null {
-  const scopes = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-tv-focus-scope]"),
-  ).filter(isVisible);
+  const scopes = Array.from(document.querySelectorAll<HTMLElement>("[data-tv-focus-scope]")).filter(
+    isVisible,
+  );
   return scopes.length ? scopes[scopes.length - 1]! : null;
 }
 
@@ -165,16 +185,24 @@ export function getFocusable(root: ParentNode = getTopFocusScope() ?? document):
   });
 }
 
-function getFocusableInZone(zone: 'nav' | 'chrome' | 'hero' | 'content', root: ParentNode = getTopFocusScope() ?? document): HTMLElement[] {
+function getFocusableInZone(
+  zone: "nav" | "chrome" | "hero" | "content",
+  root: ParentNode = getTopFocusScope() ?? document,
+): HTMLElement[] {
   return getFocusable(root).filter((el) => zoneOf(el) === zone);
 }
 
 function getRect(el: HTMLElement) {
   const r = el.getBoundingClientRect();
   return {
-    left: r.left, right: r.right, top: r.top, bottom: r.bottom,
-    width: r.width, height: r.height,
-    cx: r.left + r.width / 2, cy: r.top + r.height / 2,
+    left: r.left,
+    right: r.right,
+    top: r.top,
+    bottom: r.bottom,
+    width: r.width,
+    height: r.height,
+    cx: r.left + r.width / 2,
+    cy: r.top + r.height / 2,
   };
 }
 
@@ -221,7 +249,9 @@ function hasHorizontalNeighborInRow(
 function getActiveModal(target: HTMLElement | null): HTMLElement | null {
   const owned = target?.closest<HTMLElement>(MODAL_SELECTOR);
   if (owned && isVisible(owned)) return owned;
-  const visible = Array.from(document.querySelectorAll<HTMLElement>(MODAL_SELECTOR)).filter(isVisible);
+  const visible = Array.from(document.querySelectorAll<HTMLElement>(MODAL_SELECTOR)).filter(
+    isVisible,
+  );
   return visible[visible.length - 1] ?? null;
 }
 
@@ -242,7 +272,7 @@ function isBackKey(e: KeyboardEvent): boolean {
 }
 
 function getInitialFocus(list: HTMLElement[]) {
-  return list.find((el) => el.hasAttribute('data-tv-initial-focus')) ?? list[0] ?? null;
+  return list.find((el) => el.hasAttribute("data-tv-initial-focus")) ?? list[0] ?? null;
 }
 
 const NAV_FOCUS_SELECTOR =
@@ -282,9 +312,9 @@ function closeTopFocusScope(): boolean {
     return true;
   }
   // Player root traps focus but is not dismissible — skip it.
-  const scopes = Array.from(
-    document.querySelectorAll<HTMLElement>("[data-tv-focus-scope]"),
-  ).filter((el) => isVisible(el) && !el.hasAttribute("data-harbor-player"));
+  const scopes = Array.from(document.querySelectorAll<HTMLElement>("[data-tv-focus-scope]")).filter(
+    (el) => isVisible(el) && !el.hasAttribute("data-harbor-player"),
+  );
   const scope = scopes[scopes.length - 1] ?? null;
   if (!scope) return false;
   const closer = scope.querySelector<HTMLElement>(MODAL_CLOSE_SELECTOR);
@@ -294,11 +324,11 @@ function closeTopFocusScope(): boolean {
 }
 
 function ensureFocusStyles() {
-  if (focusStylesInjected || typeof document === 'undefined') return;
+  if (focusStylesInjected || typeof document === "undefined") return;
   focusStylesInjected = true;
 
-  const style = document.createElement('style');
-  style.setAttribute('data-tv-focus-styles', 'true');
+  const style = document.createElement("style");
+  style.setAttribute("data-tv-focus-styles", "true");
   style.textContent = `
     [data-tv-focused="true"] {
       outline: none !important;
@@ -316,12 +346,12 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
 
   if (lastFocusedEl && lastFocusedEl !== el) clearTvFocusRing();
 
-  el.focus({ preventScroll: true });
+  el.setAttribute("data-tv-focused", "true");
   lastFocusedEl = el;
   el.focus({ preventScroll: true });
 
   if (isInHero(el)) {
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     return;
   }
   // Fixed chrome must not scroll the page; opt in with data-tv-scroll-focus (e.g. settings nav).
@@ -337,18 +367,20 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
 }
 
 function clearTvFocusRing() {
-  lastFocusedEl?.removeAttribute('data-tv-focused');
+  lastFocusedEl?.removeAttribute("data-tv-focused");
   lastFocusedEl = null;
 }
 
 function enterSearchEditMode(el: HTMLElement) {
   activeSearchEditEl = el;
-  el.setAttribute('data-search-editing', 'true');
+  el.setAttribute("data-search-editing", "true");
   el.focus({ preventScroll: true });
 
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     const len = el.value.length;
-    try { el.setSelectionRange(len, len); } catch { }
+    try {
+      el.setSelectionRange(len, len);
+    } catch {}
   }
 }
 
@@ -356,7 +388,7 @@ function exitSearchEditMode() {
   if (!activeSearchEditEl) return;
   const el = activeSearchEditEl;
   activeSearchEditEl = null;
-  el.removeAttribute('data-search-editing');
+  el.removeAttribute("data-search-editing");
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     el.blur();
   }
@@ -367,27 +399,34 @@ function findBest(focused: HTMLElement, candidates: HTMLElement[], dir: Dir): HT
   const src = getRect(focused);
   let best: HTMLElement | null = null;
   let bestScore = Number.POSITIVE_INFINITY;
-  const horizontal = dir === 'left' || dir === 'right';
+  const horizontal = dir === "left" || dir === "right";
   const rowSlop = Math.max(24, src.height * 0.6);
 
   for (const el of candidates) {
     if (el === focused) continue;
     const dst = getRect(el);
 
-    if (dir === 'right' && dst.cx <= src.cx + AXIS_TOLERANCE) continue;
-    if (dir === 'left' && dst.cx >= src.cx - AXIS_TOLERANCE) continue;
-    if (dir === 'down' && dst.cy <= src.cy + AXIS_TOLERANCE) continue;
-    if (dir === 'up' && dst.cy >= src.cy - AXIS_TOLERANCE) continue;
+    if (dir === "right" && dst.cx <= src.cx + AXIS_TOLERANCE) continue;
+    if (dir === "left" && dst.cx >= src.cx - AXIS_TOLERANCE) continue;
+    if (dir === "down" && dst.cy <= src.cy + AXIS_TOLERANCE) continue;
+    if (dir === "up" && dst.cy >= src.cy - AXIS_TOLERANCE) continue;
 
     // Shelves: Left/Right stay on the current row — never hop to the next shelf.
     if (horizontal && Math.abs(dst.cy - src.cy) >= rowSlop) continue;
 
-    const primary = dir === 'right' ? Math.max(0, dst.left - src.right) :
-                    dir === 'left' ? Math.max(0, src.left - dst.right) :
-                    dir === 'down' ? Math.max(0, dst.top - src.bottom) : Math.max(0, src.top - dst.bottom);
+    const primary =
+      dir === "right"
+        ? Math.max(0, dst.left - src.right)
+        : dir === "left"
+          ? Math.max(0, src.left - dst.right)
+          : dir === "down"
+            ? Math.max(0, dst.top - src.bottom)
+            : Math.max(0, src.top - dst.bottom);
 
     const secondary = horizontal ? Math.abs(dst.cy - src.cy) : Math.abs(dst.cx - src.cx);
-    const axisOverlap = horizontal ? overlap(src.top, src.bottom, dst.top, dst.bottom) : overlap(src.left, src.right, dst.left, dst.right);
+    const axisOverlap = horizontal
+      ? overlap(src.top, src.bottom, dst.top, dst.bottom)
+      : overlap(src.left, src.right, dst.left, dst.right);
     const overlapBonus = axisOverlap > 0 ? axisOverlap * 10 : 0;
     const score = primary * 10 + secondary * 3 - overlapBonus;
 
@@ -413,7 +452,7 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
   const root = getActiveModal(active) ?? getTopFocusScope() ?? document;
   const scroll = dir === "left" || dir === "right" ? "nearest" : "center";
 
-  if (active && dir === 'left' && !isInSidebar(active)) {
+  if (active && dir === "left" && !isInSidebar(active)) {
     if (!hasHorizontalNeighborInRow(active, "left", root)) {
       const sidebarItems = getFocusable(root).filter(isInSidebar);
       const targetNav = findClosestByY(active, sidebarItems);
@@ -427,12 +466,12 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
     }
   }
 
-  if (active && dir === 'right' && !isInSidebar(active)) {
+  if (active && dir === "right" && !isInSidebar(active)) {
     // End of a shelf (loaded or still loading) — stay put; Down is how you leave the row.
     if (!hasHorizontalNeighborInRow(active, "right", root)) return;
   }
 
-  if (active && dir === 'right' && isInSidebar(active)) {
+  if (active && dir === "right" && isInSidebar(active)) {
     const contentItems = getFocusable(root).filter((el) => !isInSidebar(el));
     const targetContent = findClosestByY(active, contentItems);
     if (targetContent) {
@@ -443,8 +482,8 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
   }
 
   // Top chrome is its own nav strip — Down leaves to page content (like sidebar Right).
-  if (active && dir === 'down' && isInTopChrome(active)) {
-    const contentItems = getFocusableInZone('content', root);
+  if (active && dir === "down" && isInTopChrome(active)) {
+    const contentItems = getFocusableInZone("content", root);
     const first = getInitialFocus(contentItems);
     if (first) {
       SFX.navigate(dir, getSoundType(first));
@@ -453,7 +492,7 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
     }
   }
 
-  const zone = active ? zoneOf(active) : 'content';
+  const zone = active ? zoneOf(active) : "content";
   const all = getFocusableInZone(zone, root);
   if (!all.length) return;
 
@@ -474,9 +513,9 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
     return;
   }
 
-  if (zone === 'hero' && (dir === 'up' || dir === 'down')) {
-    if (dir === 'down') {
-      const contentItems = getFocusableInZone('content', root);
+  if (zone === "hero" && (dir === "up" || dir === "down")) {
+    if (dir === "down") {
+      const contentItems = getFocusableInZone("content", root);
       const first = getInitialFocus(contentItems);
       if (first) {
         SFX.navigate(dir, getSoundType(first));
@@ -497,9 +536,9 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
   if (dir === "left" || dir === "right") return;
 
   // Content with nowhere above → enter the top chrome strip.
-  if (dir === 'up' && zone === 'content') {
+  if (dir === "up" && zone === "content") {
     const topItems = getFocusable(root).filter(isInTopChrome);
-    const target = findBest(active, topItems, 'up') ?? findClosestByY(active, topItems);
+    const target = findBest(active, topItems, "up") ?? findClosestByY(active, topItems);
     if (target) {
       SFX.navigate(dir, getSoundType(target));
       focusElement(target, "none");
@@ -511,7 +550,10 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
     const ordered = getSpatialOrder(all);
     const idx = ordered.indexOf(active);
     if (idx >= 0) {
-      const next = dir === 'down' ? ordered[idx + 1] ?? ordered[0] : ordered[idx - 1] ?? ordered[ordered.length - 1];
+      const next =
+        dir === "down"
+          ? (ordered[idx + 1] ?? ordered[0])
+          : (ordered[idx - 1] ?? ordered[ordered.length - 1]);
       if (next) {
         SFX.navigate(dir, getSoundType(next));
         focusElement(next, scroll);
@@ -552,7 +594,9 @@ export function useTvFocusScope(open: boolean, rootRef: RefObject<HTMLElement | 
         : root.querySelector<HTMLElement>("[data-tv-focus-scope]");
       if (!scope || !isVisible(scope)) return;
       const target =
-        scope.querySelector<HTMLElement>("[data-tv-initial-focus]") ?? getFocusable(scope)[0] ?? null;
+        scope.querySelector<HTMLElement>("[data-tv-initial-focus]") ??
+        getFocusable(scope)[0] ??
+        null;
       if (target) focusElement(target);
     });
     return () => window.cancelAnimationFrame(id);
@@ -618,7 +662,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       const activeIsSearch = isSearchLikeField(active);
       const isEditingSearch = !!activeSearchEditEl && activeSearchEditEl === active;
 
-      if (e.key === 'Escape' && isEditingSearch) {
+      if (e.key === "Escape" && isEditingSearch) {
         e.preventDefault();
         e.stopPropagation();
         SFX.close();
@@ -648,16 +692,15 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
 
-      const isCenter = CENTER_KEYCODES.has(e.keyCode) || e.key === 'Enter' || e.code === 'Enter';
+      const isCenter = CENTER_KEYCODES.has(e.keyCode) || e.key === "Enter" || e.code === "Enter";
       if (!isCenter) return;
       if (isLocallyManaged(target)) return;
 
-      const currentActive = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const currentActive =
+        document.activeElement instanceof HTMLElement ? document.activeElement : null;
       if (!currentActive) return;
 
       if (isSearchLikeField(currentActive)) {
-        const isSettingsSearch = !!currentActive.closest('[data-settings-search]');
-        if (isSettingsSearch) return;
         e.preventDefault();
         e.stopPropagation();
         SFX.open();
@@ -667,29 +710,32 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
       if (isEditable(currentActive) && !isSearchLikeField(currentActive)) return;
 
-      const nativeClickable = currentActive.matches('button, a[href], input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"]');
-      if (e.key === ' ' && nativeClickable) return;
-      if (e.key === 'Enter' && nativeClickable) return;
+      const nativeClickable = currentActive.matches(
+        'button, a[href], input[type="button"], input[type="submit"], input[type="checkbox"], input[type="radio"]',
+      );
+      if (e.key === " " && nativeClickable) return;
+      if (e.key === "Enter" && nativeClickable) return;
 
       e.preventDefault();
       e.stopPropagation();
       currentActive.click();
     };
 
-    window.addEventListener('keydown', onKeyDown, true);
+    window.addEventListener("keydown", onKeyDown, true);
     return () => {
-      window.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener("keydown", onKeyDown, true);
       if (remoteBackOwner === owner) {
         remoteBackFns = {};
         remoteBackOwner = null;
       }
       if (activeSearchEditEl) {
-        activeSearchEditEl.removeAttribute('data-search-editing');
+        activeSearchEditEl.removeAttribute("data-search-editing");
         activeSearchEditEl = null;
       }
     };
-  }, [enabled]);
-
+    // onBack/onBackToNav are mirrored into refs — omit them so unstable inline
+    // callbacks (for example, in the player) do not rebind the capture listener.
+  }, [enabled, wrap, arrows]);
 }
 
 /**
@@ -702,8 +748,7 @@ export function dispatchTvNav(action: Dir | "select" | "back"): void {
     window.dispatchEvent(new Event("harbor:user-activity"));
   }
   if (action === "select") {
-    const active =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     if (active && !isEditable(active)) active.click();
     return;
   }

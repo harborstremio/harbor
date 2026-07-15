@@ -1,14 +1,16 @@
 {
   "name": "harbor",
-  "private": true,
   "version": "0.9.21",
-  "type": "module",
+  "private": true,
   "license": "MIT",
-  "packageManager": "pnpm@11.9.0",
+  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
+    "dev": "vp dev",
+    "build": "tsc -b && vp build",
+    "check": "vp check",
+    "fmt": "vp fmt",
+    "lint": "vp lint",
+    "preview": "vp preview",
     "tauri": "tauri",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
     "setup": "pnpm run setup:binaries && pnpm run setup:libmpv && pnpm run setup:mpv && pnpm run setup:fonts",
@@ -16,7 +18,8 @@
     "setup:libmpv": "node scripts/fetch-libmpv.mjs",
     "setup:mpv": "node scripts/fetch-mpv.mjs",
     "setup:ffmpeg": "node scripts/fetch-ffmpeg.mjs",
-    "setup:fonts": "node scripts/fetch-fonts.mjs"
+    "setup:fonts": "node scripts/fetch-fonts.mjs",
+    "prepare": "vp config"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -47,14 +50,11 @@
     "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
+    "@vitejs/plugin-react": "^6.0.3",
     "cheerio": "^1.2.0",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  }
+  "packageManager": "pnpm@11.9.0"
 }
