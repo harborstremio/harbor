@@ -167,6 +167,11 @@ jobs:
             rm -rf mpv-player mpv-player.7z
           fi
 
+      - name: Prepare player and font resources
+        run: |
+          pnpm run setup:mpv
+          pnpm run setup:fonts
+
       - name: harbor-core check
         working-directory: harbor-core
         run: |
