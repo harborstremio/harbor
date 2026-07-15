@@ -90,9 +90,31 @@ async fn deeplink_is_stremio_registered(app: tauri::AppHandle) -> Result<bool, S
         .map_err(|e| e.to_string())
 }
 
+pub fn check_path_security(path: &std::path::Path) -> Result<(), String> {
+    if path.components().any(|c| matches!(c, std::path::Component::ParentDir)) {
+        return Err("path traversal (..) blocked for security".to_string());
+    }
+    let lower = path.to_string_lossy().to_lowercase();
+    if lower.contains("c:\\windows")
+        || lower.contains("c:/windows")
+        || lower.contains("system32")
+        || lower.contains("start menu")
+        || lower.ends_with(".exe")
+        || lower.ends_with(".bat")
+        || lower.ends_with(".cmd")
+        || lower.ends_with(".ps1")
+        || lower.ends_with(".dll")
+        || lower.ends_with(".sys")
+    {
+        return Err("writing executable/system paths blocked for security".to_string());
+    }
+    Ok(())
+}
+
 #[tauri::command]
 async fn save_text_file(path: String, contents: String) -> Result<(), String> {
     let target = std::path::PathBuf::from(&path);
+    check_path_security(&target)?;
     if let Some(parent) = target.parent() {
         if !parent.as_os_str().is_empty() {
             std::fs::create_dir_all(parent).map_err(|e| format!("create folder: {}", e))?;

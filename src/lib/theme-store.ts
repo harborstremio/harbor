@@ -1,6 +1,6 @@
 import { parseThemeJson, saveCustomTheme, type CustomTheme } from "@/lib/custom-themes";
 
-const ORIGIN = "https://harbor.site";
+const ORIGIN = (import.meta.env.VITE_THEME_STORE_ORIGIN as string | undefined) || "";
 const API = `${ORIGIN}/themes/api`;
 const UPLOADS_KEY = "harbor.theme-uploads.v1";
 const CLIENT_KEY = "harbor.theme-client-id";
@@ -46,6 +46,7 @@ export function clientId(): string {
 }
 
 export async function browseThemes(sort = "top", q = ""): Promise<StoreTheme[]> {
+  if (!ORIGIN) return [];
   const url = `${API}/themes?sort=${encodeURIComponent(sort)}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
   const r = await fetch(url);
   if (!r.ok) throw new Error("Could not reach the theme library.");

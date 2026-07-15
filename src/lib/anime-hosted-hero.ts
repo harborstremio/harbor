@@ -1,7 +1,7 @@
 import type { Meta } from "@/lib/cinemeta";
 import { safeFetch } from "@/lib/safe-fetch";
 
-const HOSTED_URL = "https://harbor.site/api/hero/anime.json";
+const HOSTED_URL = (import.meta.env.VITE_ANIME_HERO_URL as string | undefined) || "";
 const CACHE_KEY = "harbor.anime.hero.hosted.v2";
 const TTL_MS = 3 * 60 * 60 * 1000;
 
@@ -61,6 +61,7 @@ export function peekHostedHero(): HostedHeroItem[] | null {
 }
 
 export async function fetchHostedHero(): Promise<HostedHeroItem[] | null> {
+  if (!HOSTED_URL) return null;
   const cached = readCache();
   if (cached) return cached;
   try {

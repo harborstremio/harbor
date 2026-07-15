@@ -1,6 +1,6 @@
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
-const HARBOR_LOGO = "https://harbor.site/discord/harbordiscord.png";
+const HARBOR_LOGO = (import.meta.env.VITE_DISCORD_LOGO_URL as string | undefined) || "";
 
 type DiscordConfig = {
   enabled: boolean;

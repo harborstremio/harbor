@@ -8,7 +8,7 @@ export type ParsedInvite = {
   roomCode: string;
 };
 
-export const WEB_JOIN_BASE = "https://app.harbor.site";
+export const WEB_JOIN_BASE = (import.meta.env.VITE_WEB_JOIN_BASE as string | undefined) || "http://localhost:1420";
 
 export function buildInviteUrl(relayUrl: string, roomCode: string, origin?: string): string {
   const local =

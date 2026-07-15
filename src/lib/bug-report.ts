@@ -1,8 +1,7 @@
 declare const __APP_VERSION__: string;
 
 const ENDPOINT =
-  (import.meta.env.VITE_BUG_REPORT_ENDPOINT as string | undefined) ||
-  "https://bugs.harbor.site";
+  (import.meta.env.VITE_BUG_REPORT_ENDPOINT as string | undefined) || "";
 
 export type Severity = "low" | "normal" | "high" | "critical";
 
@@ -118,6 +117,7 @@ export async function submitErrorReport(args: {
   message: string;
   detail?: string;
 }): Promise<{ id: string }> {
+  if (!ENDPOINT) throw new Error("Error reporting server is decoupled/disabled.");
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const winMatch = ua.match(/Windows NT ([\d.]+)/i);
   const macMatch = ua.match(/Mac OS X ([\d_.]+)/i);
@@ -178,6 +178,7 @@ export async function submitBugReport(
   input: BugReportInput,
   diag: Diagnostics,
 ): Promise<{ id: string }> {
+  if (!ENDPOINT) throw new Error("Bug reporting server is decoupled/disabled.");
   const fd = new FormData();
   fd.set("summary", input.summary);
   fd.set("severity", input.severity);

@@ -40,7 +40,7 @@ export async function aiSuggest(
     "Content-Type": "application/json",
   };
   if (!isGroq) {
-    headers["HTTP-Referer"] = "https://harbor.site";
+    headers["HTTP-Referer"] = (import.meta.env.VITE_APP_URL as string | undefined) || "http://localhost:1420";
     headers["X-Title"] = "Harbor";
   }
   const systemPrompt = webContext?.trim()

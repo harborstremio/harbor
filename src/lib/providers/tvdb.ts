@@ -3,7 +3,7 @@ import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch as tauriFetch } from "@/lib/safe-fetch";
 
 const BASE = "https://api4.thetvdb.com/v4";
-const PROXY_V4 = "https://harbor.site/api/tvdb/v4";
+const PROXY_V4 = (import.meta.env.VITE_TVDB_PROXY_V4 as string | undefined) || "";
 const TOKEN_KEY = "harbor.tvdb.token.v1";
 const TOKEN_TTL_MS = 23 * 60 * 60 * 1000;
 
@@ -131,6 +131,7 @@ registerCache("tvdb:response", () => responseCache.size);
 
 async function getJson<T>(apiKey: string, path: string): Promise<T | null> {
   const useProxy = !apiKey;
+  if (useProxy && !PROXY_V4) return null;
   const key = `${useProxy ? "proxy" : apiKey.slice(0, 6)}::${path}`;
   if (responseCache.has(key)) return responseCache.get(key) as T;
   const existing = responseInflight.get(key);

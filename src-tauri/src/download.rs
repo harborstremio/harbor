@@ -90,6 +90,9 @@ async fn run_download(
     cancel: &Arc<AtomicBool>,
     on_event: &Channel<DownloadEvent>,
 ) -> Result<(), DownloadEnd> {
+    if let Err(err) = crate::check_path_security(std::path::Path::new(dest)) {
+        return Err(DownloadEnd::Failed(format!("security check failed: {}", err)));
+    }
     let part = format!("{}.part", dest);
 
     if let Some(parent) = std::path::Path::new(dest).parent() {

@@ -53,8 +53,42 @@ pub struct HarborFetchResponse {
     pub content_type: Option<String>,
 }
 
+fn is_blocked_ssrf_url(url_str: &str) -> bool {
+    let Ok(parsed) = url::Url::parse(url_str) else {
+        return true;
+    };
+    let Some(host) = parsed.host_str() else {
+        return true;
+    };
+    let host_lower = host.to_ascii_lowercase();
+    if host_lower == "localhost"
+        || host_lower == "127.0.0.1"
+        || host_lower == "0.0.0.0"
+        || host_lower == "::1"
+        || host_lower == "[::1]"
+        || host_lower.starts_with("169.254.")
+        || host_lower.starts_with("192.168.")
+        || host_lower.starts_with("10.")
+    {
+        return true;
+    }
+    if host_lower.starts_with("172.") {
+        if let Some(second) = host_lower.split('.').nth(1) {
+            if let Ok(num) = second.parse::<u8>() {
+                if (16..=31).contains(&num) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
 #[tauri::command]
 pub async fn harbor_fetch(args: HarborFetchArgs) -> Result<HarborFetchResponse, String> {
+    if is_blocked_ssrf_url(&args.url) {
+        return Err("fetch target blocked by SSRF protection".to_string());
+    }
     let _permit = fetch_semaphore()
         .acquire()
         .await

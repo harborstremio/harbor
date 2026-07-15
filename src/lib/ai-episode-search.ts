@@ -29,7 +29,7 @@ export async function aiFindEpisodes(
     headers: {
       Authorization: `Bearer ${key.trim()}`,
       "Content-Type": "application/json",
-      "HTTP-Referer": "https://harbor.site",
+      "HTTP-Referer": (import.meta.env.VITE_APP_URL as string | undefined) || "http://localhost:1420",
       "X-Title": "Harbor",
     },
     body: JSON.stringify({

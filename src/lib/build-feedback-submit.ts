@@ -1,9 +1,10 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { APP_VERSION, IS_BETA_BUILD } from "@/lib/build-info";
 
-const URL = "https://bugs.harbor.site/v1/feedback";
+const URL = (import.meta.env.VITE_FEEDBACK_ENDPOINT as string | undefined) || "";
 
 export async function submitBuildFeedback(rating: number): Promise<boolean> {
+  if (!URL) return false;
   try {
     const res = await safeFetch(URL, {
       method: "POST",

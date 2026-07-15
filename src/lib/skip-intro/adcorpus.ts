@@ -1,7 +1,7 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import type { SkipSegment } from "./types";
 
-const CORPUS_URL = "https://harbor.site/updates/ad-segments.json";
+const CORPUS_URL = (import.meta.env.VITE_AD_CORPUS_URL as string | undefined) || "";
 const CORPUS_PUBKEY = "yszDA2+G0Rtep39h67iuhl8+5pCQkM+O4D4pMnpg4Ks=";
 
 type CorpusEntry = { content: string; source: string; ranges: Array<{ start: number; end: number }> };
@@ -25,6 +25,7 @@ export async function fetchAdSegments(
 }
 
 async function loadCorpus(fresh = false): Promise<CorpusEntry[]> {
+  if (!CORPUS_URL) return [];
   if (!fresh && entriesCache) return entriesCache;
   if (inflight) return inflight;
   inflight = (async () => {

@@ -1,8 +1,8 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { kitsuToTvdb } from "./anime-mapping";
 
-const PROXY = "https://harbor.site/api/tvdb/images";
-const ART_PROXY = "https://harbor.site/api/tvdb/artwork";
+const PROXY = (import.meta.env.VITE_TVDB_IMAGES_PROXY as string | undefined) || "";
+const ART_PROXY = (import.meta.env.VITE_TVDB_ARTWORK_PROXY as string | undefined) || "";
 
 export type TvdbImageMap = Record<string, string>;
 
@@ -13,6 +13,7 @@ export async function fetchTvdbArtwork(opts: {
   kitsuId?: number | null;
 }): Promise<TvdbArtwork> {
   const empty: TvdbArtwork = { backgrounds: [], clearLogos: [], posters: [] };
+  if (!ART_PROXY) return empty;
   let series: number | null = null;
   if (opts.kitsuId != null) series = await kitsuToTvdb(opts.kitsuId).catch(() => null);
   const q = new URLSearchParams();

@@ -1,6 +1,7 @@
 import {
   ANILIST_AUTHORIZE_URL,
   ANILIST_CLIENT_ID,
+  ANILIST_CLIENT_SECRET,
   ANILIST_PIN_REDIRECT_URI,
   ANILIST_TOKEN_EXCHANGE_URL,
 } from "./config";
@@ -57,7 +58,13 @@ async function exchangeCode(code: string): Promise<string> {
   const res = await post(ANILIST_TOKEN_EXCHANGE_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ code }),
+    body: JSON.stringify({
+      grant_type: "authorization_code",
+      client_id: ANILIST_CLIENT_ID,
+      client_secret: ANILIST_CLIENT_SECRET,
+      redirect_uri: ANILIST_PIN_REDIRECT_URI,
+      code,
+    }),
   });
   if (!res.ok) throw new Error("AniList rejected that code. Authorize again and paste the newest one.");
   const json = (await res.json()) as { access_token?: string };

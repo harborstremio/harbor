@@ -25,7 +25,10 @@ export function AutoExhaustedModal({
     `Streams tried: ${triedCount}\n` +
     `\nWhat happened: Harbor could not find a working stream automatically.\n` +
     `\n(Add any extra detail here)`;
-  const mailto = `mailto:bugs@harbor.site?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const SUPPORT_EMAIL = (import.meta.env.VITE_SUPPORT_EMAIL as string | undefined) || "";
+  const mailto = SUPPORT_EMAIL
+    ? `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    : "";
   return (
     <main data-tv-focus-scope className="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden bg-black px-6">
       <div className="w-full max-w-md rounded-2xl bg-elevated p-8 ring-1 ring-edge-soft">
@@ -51,12 +54,14 @@ export function AutoExhaustedModal({
           >
             Browse streams manually
           </button>
-          <button
-            onClick={() => openUrl(mailto)}
-            className="flex h-11 items-center justify-center rounded-full bg-elevated text-[13.5px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
-          >
-            Send a bug report
-          </button>
+          {SUPPORT_EMAIL && (
+            <button
+              onClick={() => openUrl(mailto)}
+              className="flex h-11 items-center justify-center rounded-full bg-elevated text-[13.5px] font-medium text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+            >
+              Send a bug report
+            </button>
+          )}
           <button
             onClick={goBack}
             data-tv-modal-close

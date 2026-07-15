@@ -33,7 +33,12 @@
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost data: blob: https: http:; media-src 'self' asset: https://asset.localhost blob: https: http:; connect-src 'self' ipc: http://ipc.localhost https: http: ws: wss:; font-src 'self' data:; object-src 'none'; frame-src 'none'; base-uri 'self'",
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": [
+          "$APPDATA/harbor/**",
+          "$APPCACHE/harbor/**",
+          "$LOCALAPPDATA/harbor/**",
+          "$TEMP/harbor/**"
+        ]
       }
     }
   },
@@ -110,7 +115,7 @@
       }
     },
     "updater": {
-      "endpoints": ["https://harbor.site/updates/latest.json"],
+      "endpoints": [],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEIyNjlEMjU4NjQ4OTM2MjAKUldRZ05vbGtXTkpwc3ZDQnlvZUYyL2VEWHgwODdJa2dkZ2xlNWk3emRWL1V0dXVrcUJlVmhCWEUK",
       "windows": {
         "installMode": "passive"

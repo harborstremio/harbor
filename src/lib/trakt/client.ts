@@ -39,6 +39,7 @@ async function refreshAccessToken(): Promise<TraktSession | null> {
     body: JSON.stringify({
       refresh_token: current.refreshToken,
       grant_type: "refresh_token",
+      client_id: TRAKT_CLIENT_ID,
     }),
   });
   if (!res.ok) {

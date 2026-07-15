@@ -1,4 +1,4 @@
-const BASE = "https://harbor.site/api/imdb";
+const BASE = (import.meta.env.VITE_IMDB_PROXY as string | undefined) || "";
 
 export type ParentalCategory = { category: string; severity: string };
 
@@ -9,7 +9,7 @@ const episodeCache = new Map<string, Map<string, number>>();
 const episodeInflight = new Map<string, Promise<Map<string, number>>>();
 
 export async function harborImdbEpisodes(seriesTt: string): Promise<Map<string, number>> {
-  if (!seriesTt.startsWith("tt")) return new Map();
+  if (!BASE || !seriesTt.startsWith("tt")) return new Map();
   const cached = episodeCache.get(seriesTt);
   if (cached) return cached;
   const pending = episodeInflight.get(seriesTt);

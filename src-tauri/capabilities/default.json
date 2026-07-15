@@ -35,7 +35,7 @@
         {
           "name": "binaries/yt-dlp",
           "sidecar": true,
-          "args": true
+          "args": false
         }
       ]
     },
@@ -58,47 +58,102 @@
     "process:default",
     {
       "identifier": "fs:allow-write-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-write-text-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-create",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-remove",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-exists",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-mkdir",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-read-dir",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-read-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-read-text-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "fs:allow-stat",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     },
     {
       "identifier": "opener:allow-reveal-item-in-dir",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "$APPDATA/harbor/**" },
+        { "path": "$APPCACHE/harbor/**" },
+        { "path": "$LOCALAPPDATA/harbor/**" },
+        { "path": "$TEMP/harbor/**" }
+      ]
     }
   ]
 }

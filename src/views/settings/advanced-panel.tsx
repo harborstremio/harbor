@@ -38,8 +38,8 @@ import { DesktopOnlyBlock } from "./player-panel/internals";
 import { useT } from "@/lib/i18n";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-const DOWNLOAD_URL = "https://harbor.site/download";
 const SOURCE_URL = "https://github.com/harborstremio/harbor";
+const DOWNLOAD_URL = (import.meta.env.VITE_DOWNLOAD_URL as string | undefined) || SOURCE_URL;
 
 export function AdvancedPanel() {
   const t = useT();
@@ -50,7 +50,7 @@ export function AdvancedPanel() {
       {isTauri && (
         <Section
           title={t("Updates")}
-          subtitle={t("Harbor checks harbor.site for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.")}
+          subtitle={t("Harbor checks your configured updates server for new versions and installs them in place. Nothing installs until you choose to, and a dismissed update never nags you again.")}
         >
           <div className="flex flex-col gap-2.5">
             <UpdatesRow />
@@ -138,7 +138,7 @@ export function AdvancedPanel() {
 
       <Section
         title={t("About")}
-        subtitle={t("Build identity. Useful when filing a bug report at bugs@harbor.site.")}
+        subtitle={t("Build identity. Useful when troubleshooting issues or filing bug reports.")}
       >
         <AboutRow />
       </Section>
@@ -203,7 +203,7 @@ function WebBuildBanner() {
           {t("Where your data lives")}
         </h2>
         <p className="text-[13.5px] leading-relaxed text-ink-muted">
-          {t("Everything you save here stays in this browser. Your Stremio login, API keys, watch progress, picker cache, dismissed tips. Harbor servers never see any of it. Clearing your browser data wipes it.")}
+          {t("Everything you save here stays in this browser. Your Stremio login, API keys, watch progress, picker cache, dismissed tips. External servers never see any of it. Clearing your browser data wipes it.")}
         </p>
         <p className="text-[13.5px] leading-relaxed text-ink-muted">
           {t("The web build can't run mpv, the trickplay generator, the local bandwidth probe, or your own Cloudflare relay. If you want HDR passthrough, TrueHD or DTS-HD audio, and smoother seeking, grab the desktop app.")}
@@ -330,7 +330,7 @@ function UpdatesRow() {
   const busy = u.status === "checking";
   const status =
     u.status === "checking"
-      ? t("Checking harbor.site for a newer build.")
+      ? t("Checking update server for a newer build.")
       : u.status === "downloading"
         ? t("Downloading {pct}%", { pct: Math.round(u.progress * 100) })
         : u.status === "downloaded"
@@ -585,7 +585,7 @@ function AboutRow() {
     <div className="flex flex-col gap-2 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5 text-[13px] text-ink-muted">
       <InfoLine label={t("Version")} value={`${__APP_VERSION__}${IS_BETA_BUILD ? " (Beta)" : ""}`} />
       <InfoLine label={t("Build")} value={isTauri ? t("Desktop (Tauri 2 / WebView2)") : t("Web")} />
-      <InfoLine label={t("Bug reports")} value="bugs@harbor.site" />
+      <InfoLine label={t("Source")} value="github.com/harborstremio/harbor" />
     </div>
   );
 }

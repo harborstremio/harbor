@@ -11,9 +11,9 @@ import type { Meta } from "@/lib/cinemeta";
 import { configureDiscord, setBrowsePresence, setPartyPresence, type BrowsePresence } from "./presence";
 import { useActivityHint } from "./activity-hint";
 
-const JOIN_BASE = "https://app.harbor.site";
+const JOIN_BASE = (import.meta.env.VITE_WEB_JOIN_BASE as string | undefined) || "http://localhost:1420";
 
-const AWARD_IMG = "https://harbor.site/discord/awards";
+const AWARD_IMG = (import.meta.env.VITE_AWARD_IMG_BASE as string | undefined) || "";
 const NORMAL_AWARD_IMG: Record<string, string> = {
   oscar: "oscar.png",
   emmy: "emmy.png",

@@ -2,7 +2,7 @@ import { safeFetch } from "@/lib/safe-fetch";
 import { fingerprint } from "@/lib/skip-intro/fingerprint";
 import type { PlayerStreamRef } from "@/lib/view";
 
-const REPORT_URL = "https://bugs.harbor.site/v1/adreport";
+const REPORT_URL = (import.meta.env.VITE_AD_REPORT_ENDPOINT as string | undefined) || "";
 
 export type AdRange = { startSec: number; endSec: number };
 

@@ -1,5 +1,6 @@
 import {
   TRAKT_API_BASE,
+  TRAKT_API_VERSION,
   TRAKT_CLIENT_ID,
   TRAKT_DEVICE_TOKEN_PROXY,
 } from "./config";
@@ -46,9 +47,14 @@ export type PollResult =
 async function pollOnce(deviceCode: string): Promise<PollResult> {
   const res = await fetch(TRAKT_DEVICE_TOKEN_PROXY, {
     method: "POST",
-    headers: baseHeaders(),
+    headers: {
+      "Content-Type": "application/json",
+      "trakt-api-version": TRAKT_API_VERSION,
+      "trakt-api-key": TRAKT_CLIENT_ID,
+    },
     body: JSON.stringify({
       code: deviceCode,
+      client_id: TRAKT_CLIENT_ID,
     }),
   });
   if (res.status === 200) {
