@@ -7,7 +7,12 @@ import { tmdbLiteMeta } from "@/lib/providers/tmdb/tmdb-lite";
 import { useContextMenu } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
-import { episodeFromVideoId, isAnimeCwItem, libraryMetaType, type LibraryItem } from "@/lib/stremio";
+import {
+  episodeFromVideoId,
+  isAnimeCwItem,
+  libraryMetaType,
+  type LibraryItem,
+} from "@/lib/stremio";
 import { useHasNewEpisode } from "@/lib/new-episodes";
 import { Tooltip } from "@/views/detail/tooltip";
 import { useProfiles } from "@/lib/profiles";
@@ -19,6 +24,7 @@ import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { fetchSeasonEpisodes } from "@/lib/series-episodes";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 type Props = {
   item: LibraryItem;
@@ -26,7 +32,11 @@ type Props = {
   onDismiss?: (item: LibraryItem) => void;
 };
 
-export const ContinueCard = memo(function ContinueCard({ item, watched = false, onDismiss }: Props) {
+export const ContinueCard = memo(function ContinueCard({
+  item,
+  watched = false,
+  onDismiss,
+}: Props) {
   const { openMeta, openPicker, openPlayer } = useView();
   const t = useT();
   const { settings, update } = useSettings();
@@ -285,133 +295,192 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
         onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
         className="flex w-full min-w-0 flex-col gap-2.5 text-start"
       >
-      <div className="harbor-poster relative aspect-[16/9] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] will-change-transform [transform:translate3d(0,0,0)] transition-transform duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:scale-[1.02]">
-        <div className="absolute inset-0 bg-gradient-to-br from-raised via-elevated to-surface" />
-        {src && (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            decoding="sync"
-            onError={() => setImgIdx((i) => i + 1)}
-            className="absolute inset-0 h-full w-full object-cover brightness-95"
-          />
-        )}
-        <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.45)]" />
-        {watched && (
-          <span
-            className="absolute start-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/22 text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm"
-            title={t("Watched on Trakt")}
-          >
-            <Check size={12} strokeWidth={3} />
-          </span>
-        )}
-        {newEpisode > 0 && (
-          <span className={`absolute top-2 ${watched ? "start-10" : "start-2"}`}>
-            <Tooltip
-              label={
-                newEpisode === 1
-                  ? t("1 new episode since you last watched")
-                  : t("{n} new episodes since you last watched", { n: newEpisode })
-              }
-              side="bottom"
-            >
-              <span className="flex h-6 items-center rounded-full bg-accent/90 px-2 text-[10px] font-bold tracking-[0.1em] text-canvas">
-                +{newEpisode}
-              </span>
-            </Tooltip>
-          </span>
-        )}
-        {logo && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+        <div className="harbor-poster relative aspect-[16/9] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] will-change-transform [transform:translate3d(0,0,0)] transition-transform duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:scale-[1.02]">
+          <div className="absolute inset-0 bg-gradient-to-br from-raised via-elevated to-surface" />
+          {src && (
             <img
-              src={logo}
+              key={src}
+              src={src}
               alt=""
-              loading="lazy"
-              decoding="async"
-              className="max-h-[55%] w-auto max-w-[78%] object-contain opacity-80 transition-opacity duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:opacity-25"
+              decoding="sync"
+              onError={() => setImgIdx((i) => i + 1)}
+              className="absolute inset-0 h-full w-full object-cover brightness-95"
             />
-          </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-canvas/80 to-transparent" />
-        {(sub || remaining || isExternal || upNext || episodeTitle) && (
-          <div className="absolute bottom-2 start-2 flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-md bg-canvas/95 px-2 py-1 text-[11px]">
-            {isExternal ? (
-              <img src={simklLogo} alt="" className="h-3.5 w-3.5 shrink-0 rounded-sm" title={t("Paused on Simkl")} />
-            ) : (
-              <Play size={11} fill="currentColor" className="shrink-0 text-ink" />
-            )}
-            {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
-            {upNext ? (
-              <>
-                {sub && <span className="shrink-0 text-ink-subtle">·</span>}
-                <span className="shrink-0 font-medium text-accent">{t("Up Next")}</span>
-              </>
-            ) : episodeTitle ? (
-              <>
-                {sub && <span className="shrink-0 text-ink-subtle">·</span>}
-                <span className="min-w-0 truncate text-ink-muted">{episodeTitle}</span>
-              </>
-            ) : (
-              remaining && (
+          )}
+          <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.45)]" />
+          {watched && (
+            <span
+              className="absolute start-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/22 text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm"
+              title={t("Watched on Trakt")}
+            >
+              <Check size={12} strokeWidth={3} />
+            </span>
+          )}
+          {newEpisode > 0 && (
+            <span className={`absolute top-2 ${watched ? "start-10" : "start-2"}`}>
+              <Tooltip
+                label={
+                  newEpisode === 1
+                    ? t("1 new episode since you last watched")
+                    : t("{n} new episodes since you last watched", { n: newEpisode })
+                }
+                side="bottom"
+              >
+                <span className="flex h-6 items-center rounded-full bg-accent/90 px-2 text-[10px] font-bold tracking-[0.1em] text-canvas">
+                  +{newEpisode}
+                </span>
+              </Tooltip>
+            </span>
+          )}
+          {logo && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+              <img
+                src={logo}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="max-h-[55%] w-auto max-w-[78%] object-contain opacity-80 transition-opacity duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:opacity-25"
+              />
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-canvas/80 to-transparent" />
+          {(sub || remaining || isExternal || upNext || episodeTitle) && (
+            <div className="absolute bottom-2 start-2 flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-md bg-canvas/95 px-2 py-1 text-[11px]">
+              {isExternal ? (
+                <img
+                  src={simklLogo}
+                  alt=""
+                  className="h-3.5 w-3.5 shrink-0 rounded-sm"
+                  title={t("Paused on Simkl")}
+                />
+              ) : (
+                <Play size={11} fill="currentColor" className="shrink-0 text-ink" />
+              )}
+              {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
+              {upNext ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}
-                  <span className="shrink-0 text-ink-muted">{remaining}</span>
+                  <span className="shrink-0 font-medium text-accent">{t("Up Next")}</span>
                 </>
-              )
-            )}
-          </div>
-        )}
-        {showWatcher && watcher && (
-          <div
-            className="absolute bottom-2.5 end-2 z-[1]"
-            title={t("Watched by {name}", { name: watcher.name })}
-          >
-            <span
-              className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-elevated text-[11px] font-bold text-white"
-              style={{ boxShadow: `0 0 0 2px ${watcher.color}, 0 2px 8px rgba(0,0,0,0.5)` }}
-            >
-              {watcher.avatar ? (
-                <img src={watcher.avatar} alt="" className="h-full w-full object-cover" draggable={false} />
+              ) : episodeTitle ? (
+                <>
+                  {sub && <span className="shrink-0 text-ink-subtle">·</span>}
+                  <span className="min-w-0 truncate text-ink-muted">{episodeTitle}</span>
+                </>
               ) : (
-                (watcher.name.trim()[0]?.toUpperCase() ?? "?")
+                remaining && (
+                  <>
+                    {sub && <span className="shrink-0 text-ink-subtle">·</span>}
+                    <span className="shrink-0 text-ink-muted">{remaining}</span>
+                  </>
+                )
               )}
-            </span>
+            </div>
+          )}
+          {showWatcher && watcher && (
+            <div
+              className="absolute bottom-2.5 end-2 z-[1]"
+              title={t("Watched by {name}", { name: watcher.name })}
+            >
+              <span
+                className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-elevated text-[11px] font-bold text-white"
+                style={{ boxShadow: `0 0 0 2px ${watcher.color}, 0 2px 8px rgba(0,0,0,0.5)` }}
+              >
+                {watcher.avatar ? (
+                  <img
+                    src={watcher.avatar}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    draggable={false}
+                  />
+                ) : (
+                  (watcher.name.trim()[0]?.toUpperCase() ?? "?")
+                )}
+              </span>
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
+            <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
           </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
-          <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
         </div>
-      </div>
-      <p className="truncate text-[13px] font-medium text-ink">
-        {translatedTitle || hydratedMeta?.name?.trim() || item.name}
-      </p>
+        <p className="truncate text-[13px] font-medium text-ink">
+          {translatedTitle || hydratedMeta?.name?.trim() || item.name}
+        </p>
       </button>
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
-        <button
-          type="button"
-          onClick={onPlay}
-          aria-label={t("Play")}
-          title={t("Play")}
-          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-canvas ring-1 ring-white/15 shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] transition-transform duration-150 hover:scale-[1.06]"
+        <ThreeLiquidGlassSurface
+          radius="9999px"
+          shaderRadius={1}
+          intensity={0.86}
+          className="pointer-events-auto h-14 w-14 border border-white/[0.10]"
+          contentClassName="h-full w-full"
+          style={{
+            background: "transparent",
+            boxShadow: "none",
+          }}
         >
-          <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
-        </button>
+          <button
+            type="button"
+            onClick={onPlay}
+            aria-label={t("Play")}
+            title={t("Play")}
+            className="
+              flex h-full w-full
+              items-center justify-center
+              rounded-full bg-transparent
+              text-ink outline-none
+              transition-transform duration-150
+              active:scale-95
+            "
+          >
+            <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
+          </button>
+        </ThreeLiquidGlassSurface>
       </div>
       {onDismiss && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDismiss(item);
-          }}
-          aria-label={t("Remove from Continue Watching")}
-          className="group/x absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
+        <div
+          className="
+            absolute end-0.5 top-0.5 z-10
+            flex h-11 w-11
+            items-center justify-center
+            opacity-0
+            transition-opacity duration-200
+            group-hover:opacity-100
+            focus-within:opacity-100
+          "
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-canvas/85 text-ink-muted ring-1 ring-white/12 backdrop-blur-sm transition-colors group-hover/x:bg-canvas group-hover/x:text-ink">
-            <X size={20} strokeWidth={2.4} />
-          </span>
-        </button>
+          <ThreeLiquidGlassSurface
+            radius="9999px"
+            shaderRadius={1}
+            intensity={0.74}
+            className="h-9 w-9 border border-white/[0.09]"
+            contentClassName="h-full w-full"
+            style={{
+              background: "transparent",
+              boxShadow: "none",
+            }}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss(item);
+              }}
+              aria-label={t("Remove from Continue Watching")}
+              className="
+                flex h-full w-full
+                items-center justify-center
+                rounded-full bg-transparent
+                text-ink-muted outline-none
+                transition-colors duration-150
+                hover:text-ink
+                active:scale-95
+              "
+            >
+              <X size={20} strokeWidth={2.4} />
+            </button>
+          </ThreeLiquidGlassSurface>
+        </div>
       )}
     </div>
   );
@@ -422,7 +491,10 @@ function downscaleTmdb(url?: string): string | undefined {
   return url.replace(/\/t\/p\/(original|w1280|w780|w500)\//, "/t/p/w300/");
 }
 
-function formatRemaining(t: (key: string, vars?: Record<string, string | number>) => string, ms: number) {
+function formatRemaining(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  ms: number,
+) {
   const minutes = Math.max(0, Math.round(ms / 60000));
   if (minutes < 60) return t("{m}m left", { m: minutes });
   const h = Math.floor(minutes / 60);

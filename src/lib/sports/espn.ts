@@ -1,5 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
-import { getUiLanguage } from "@/lib/i18n/store";
+import { getUiLanguage } from "@/lib/i18n";
 
 export type SportsSide = {
   name: string;
@@ -82,7 +82,15 @@ export type SportsMatchDetail = SportsGame & {
 
 const BASE = "https://site.api.espn.com/apis/site/v2/sports";
 
-export type LeagueDef = { key: string; label: string; labelEn: string; tag: string; path: string; logo: string; group: string };
+export type LeagueDef = {
+  key: string;
+  label: string;
+  labelEn: string;
+  tag: string;
+  path: string;
+  logo: string;
+  group: string;
+};
 
 /** Returns the label in the current UI language */
 export function getLeagueLabel(league: LeagueDef): string {
@@ -98,63 +106,255 @@ const TL = "https://a.espncdn.com/i/teamlogos/leagues/500";
 const LL = "https://a.espncdn.com/i/leaguelogos/soccer/500";
 export const LEAGUES: LeagueDef[] = [
   // ⚽ كرة القدم
-  { key: "ROSHN",      label: "الدوري السعودي",    labelEn: "Saudi Pro League",     tag: "KSA",   path: "soccer/ksa.1",                       logo: `${LL}/2488.png`,   group: "soccer" },
-  { key: "EPL",        label: "الدوري الإنجليزي",  labelEn: "Premier League",       tag: "EPL",   path: "soccer/eng.1",                       logo: `${LL}/23.png`,     group: "soccer" },
-  { key: "UCL",        label: "دوري الأبطال",       labelEn: "Champions League",     tag: "UCL",   path: "soccer/uefa.champions",              logo: `${LL}/2.png`,      group: "soccer" },
-  { key: "LALIGA",     label: "الدوري الإسباني",   labelEn: "La Liga",              tag: "ESP",   path: "soccer/esp.1",                       logo: `${LL}/15.png`,     group: "soccer" },
-  { key: "SERIEA",     label: "الدوري الإيطالي",   labelEn: "Serie A",              tag: "ITA",   path: "soccer/ita.1",                       logo: `${LL}/12.png`,     group: "soccer" },
-  { key: "BUNDESLIGA", label: "الدوري الألماني",   labelEn: "Bundesliga",           tag: "GER",   path: "soccer/ger.1",                       logo: `${LL}/10.png`,     group: "soccer" },
-  { key: "LIGUE1",     label: "الدوري الفرنسي",    labelEn: "Ligue 1",              tag: "FRA",   path: "soccer/fra.1",                       logo: `${LL}/9.png`,      group: "soccer" },
-  { key: "MLS",        label: "دوري MLS",           labelEn: "MLS",                  tag: "MLS",   path: "soccer/usa.1",                       logo: `${LL}/19.png`,     group: "soccer" },
-  { key: "UEL",        label: "الدوري الأوروبي",   labelEn: "Europa League",        tag: "UEL",   path: "soccer/uefa.europa",                 logo: `${LL}/2310.png`,   group: "soccer" },
-  { key: "UECLUE",     label: "دوري المؤتمر",      labelEn: "Conference League",    tag: "UECL",  path: "soccer/uefa.europa.conf",            logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/20296.png",    group: "soccer" },
-  { key: "WORLDCUP",   label: "كأس العالم",         labelEn: "World Cup",            tag: "WC",    path: "soccer/fifa.world",                  logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/4.png",        group: "soccer" },
-  { key: "ARABIANGCC", label: "كأس آسيا / الخليج",  labelEn: "AFC Asian Cup",        tag: "AFC",   path: "soccer/afc.asian.cup",               logo: "https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500/2243.png", group: "soccer" },
+  {
+    key: "ROSHN",
+    label: "الدوري السعودي",
+    labelEn: "Saudi Pro League",
+    tag: "KSA",
+    path: "soccer/ksa.1",
+    logo: `${LL}/2488.png`,
+    group: "soccer",
+  },
+  {
+    key: "EPL",
+    label: "الدوري الإنجليزي",
+    labelEn: "Premier League",
+    tag: "EPL",
+    path: "soccer/eng.1",
+    logo: `${LL}/23.png`,
+    group: "soccer",
+  },
+  {
+    key: "UCL",
+    label: "دوري الأبطال",
+    labelEn: "Champions League",
+    tag: "UCL",
+    path: "soccer/uefa.champions",
+    logo: `${LL}/2.png`,
+    group: "soccer",
+  },
+  {
+    key: "LALIGA",
+    label: "الدوري الإسباني",
+    labelEn: "La Liga",
+    tag: "ESP",
+    path: "soccer/esp.1",
+    logo: `${LL}/15.png`,
+    group: "soccer",
+  },
+  {
+    key: "SERIEA",
+    label: "الدوري الإيطالي",
+    labelEn: "Serie A",
+    tag: "ITA",
+    path: "soccer/ita.1",
+    logo: `${LL}/12.png`,
+    group: "soccer",
+  },
+  {
+    key: "BUNDESLIGA",
+    label: "الدوري الألماني",
+    labelEn: "Bundesliga",
+    tag: "GER",
+    path: "soccer/ger.1",
+    logo: `${LL}/10.png`,
+    group: "soccer",
+  },
+  {
+    key: "LIGUE1",
+    label: "الدوري الفرنسي",
+    labelEn: "Ligue 1",
+    tag: "FRA",
+    path: "soccer/fra.1",
+    logo: `${LL}/9.png`,
+    group: "soccer",
+  },
+  {
+    key: "MLS",
+    label: "دوري MLS",
+    labelEn: "MLS",
+    tag: "MLS",
+    path: "soccer/usa.1",
+    logo: `${LL}/19.png`,
+    group: "soccer",
+  },
+  {
+    key: "UEL",
+    label: "الدوري الأوروبي",
+    labelEn: "Europa League",
+    tag: "UEL",
+    path: "soccer/uefa.europa",
+    logo: `${LL}/2310.png`,
+    group: "soccer",
+  },
+  {
+    key: "UECLUE",
+    label: "دوري المؤتمر",
+    labelEn: "Conference League",
+    tag: "UECL",
+    path: "soccer/uefa.europa.conf",
+    logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/20296.png",
+    group: "soccer",
+  },
+  {
+    key: "WORLDCUP",
+    label: "كأس العالم",
+    labelEn: "World Cup",
+    tag: "WC",
+    path: "soccer/fifa.world",
+    logo: "https://a.espncdn.com/i/leaguelogos/soccer/500/4.png",
+    group: "soccer",
+  },
+  {
+    key: "ARABIANGCC",
+    label: "كأس آسيا / الخليج",
+    labelEn: "AFC Asian Cup",
+    tag: "AFC",
+    path: "soccer/afc.asian.cup",
+    logo: "https://a.espncdn.com/combiner/i?img=/i/leaguelogos/soccer/500/2243.png",
+    group: "soccer",
+  },
 
   // 🏀 كرة السلة
-  { key: "NBA",        label: "NBA",                labelEn: "NBA",                  tag: "NBA",   path: "basketball/nba",                     logo: `${TL}/nba.png`,    group: "basketball" },
-  { key: "NCAAB",      label: "NCAA كرة السلة",     labelEn: "NCAA Basketball",      tag: "NCAA",  path: "basketball/mens-college-basketball", logo: `${TL}/ncaa.png`,   group: "basketball" },
+  {
+    key: "NBA",
+    label: "NBA",
+    labelEn: "NBA",
+    tag: "NBA",
+    path: "basketball/nba",
+    logo: `${TL}/nba.png`,
+    group: "basketball",
+  },
+  {
+    key: "NCAAB",
+    label: "NCAA كرة السلة",
+    labelEn: "NCAA Basketball",
+    tag: "NCAA",
+    path: "basketball/mens-college-basketball",
+    logo: `${TL}/ncaa.png`,
+    group: "basketball",
+  },
 
   // 🏈 كرة القدم الأمريكية
-  { key: "NFL",        label: "NFL",                labelEn: "NFL",                  tag: "NFL",   path: "football/nfl",                       logo: `${TL}/nfl.png`,    group: "football" },
-  { key: "NCAAF",      label: "NCAA أمريكية",       labelEn: "NCAA Football",        tag: "NCAAF", path: "football/college-football",          logo: `${TL}/ncaa.png`,   group: "football" },
+  {
+    key: "NFL",
+    label: "NFL",
+    labelEn: "NFL",
+    tag: "NFL",
+    path: "football/nfl",
+    logo: `${TL}/nfl.png`,
+    group: "football",
+  },
+  {
+    key: "NCAAF",
+    label: "NCAA أمريكية",
+    labelEn: "NCAA Football",
+    tag: "NCAAF",
+    path: "football/college-football",
+    logo: `${TL}/ncaa.png`,
+    group: "football",
+  },
 
   // ⚾ البيسبول
-  { key: "MLB",        label: "MLB",                labelEn: "MLB",                  tag: "MLB",   path: "baseball/mlb",                       logo: `${TL}/mlb.png`,    group: "baseball" },
+  {
+    key: "MLB",
+    label: "MLB",
+    labelEn: "MLB",
+    tag: "MLB",
+    path: "baseball/mlb",
+    logo: `${TL}/mlb.png`,
+    group: "baseball",
+  },
 
   // 🏒 الهوكي
-  { key: "NHL",        label: "NHL",                labelEn: "NHL",                  tag: "NHL",   path: "hockey/nhl",                         logo: `${TL}/nhl.png`,    group: "hockey" },
+  {
+    key: "NHL",
+    label: "NHL",
+    labelEn: "NHL",
+    tag: "NHL",
+    path: "hockey/nhl",
+    logo: `${TL}/nhl.png`,
+    group: "hockey",
+  },
 
   // 🥊 فنون قتالية
-  { key: "UFC",        label: "UFC / MMA",          labelEn: "UFC / MMA",            tag: "UFC",   path: "mma/ufc",                            logo: "https://a.espncdn.com/i/teamlogos/leagues/500/ufc.png",                                              group: "combat" },
+  {
+    key: "UFC",
+    label: "UFC / MMA",
+    labelEn: "UFC / MMA",
+    tag: "UFC",
+    path: "mma/ufc",
+    logo: "https://a.espncdn.com/i/teamlogos/leagues/500/ufc.png",
+    group: "combat",
+  },
 
   // 🏎 السباقات
-  { key: "F1",         label: "فورمولا 1",          labelEn: "Formula 1",            tag: "F1",    path: "racing/f1",                          logo: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/f1.png",                               group: "motorsport" },
-  { key: "NASCAR",     label: "NASCAR",             labelEn: "NASCAR",               tag: "NASCAR",path: "racing/nascar-premier",              logo: "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-NASCAR.png",               group: "motorsport" },
+  {
+    key: "F1",
+    label: "فورمولا 1",
+    labelEn: "Formula 1",
+    tag: "F1",
+    path: "racing/f1",
+    logo: "https://a.espncdn.com/combiner/i?img=/i/teamlogos/leagues/500/f1.png",
+    group: "motorsport",
+  },
+  {
+    key: "NASCAR",
+    label: "NASCAR",
+    labelEn: "NASCAR",
+    tag: "NASCAR",
+    path: "racing/nascar-premier",
+    logo: "https://a.espncdn.com/combiner/i?img=/redesign/assets/img/icons/ESPN-icon-NASCAR.png",
+    group: "motorsport",
+  },
 
   // 🎾 التنس
-  { key: "TENNIS",     label: "التنس (ATP/WTA)",    labelEn: "Tennis (ATP/WTA)",     tag: "ATP",   path: "tennis/atp",                         logo: "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-tennis.png", group: "tennis" },
+  {
+    key: "TENNIS",
+    label: "التنس (ATP/WTA)",
+    labelEn: "Tennis (ATP/WTA)",
+    tag: "ATP",
+    path: "tennis/atp",
+    logo: "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-tennis.png",
+    group: "tennis",
+  },
 
   // 🏌 الغولف
-  { key: "PGA",        label: "بطولة PGA",          labelEn: "PGA Tour",             tag: "PGA",   path: "golf/pga",                           logo: "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-golf.png",    group: "golf" },
+  {
+    key: "PGA",
+    label: "بطولة PGA",
+    labelEn: "PGA Tour",
+    tag: "PGA",
+    path: "golf/pga",
+    logo: "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-golf.png",
+    group: "golf",
+  },
 
   // 🏉 الرغبي
-  { key: "RUGBY",      label: "كأس العالم للرغبي",  labelEn: "Rugby World Cup",      tag: "RWC",   path: "rugby/164205",                       logo: "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-rugby.png",group: "rugby" },
+  {
+    key: "RUGBY",
+    label: "كأس العالم للرغبي",
+    labelEn: "Rugby World Cup",
+    tag: "RWC",
+    path: "rugby/164205",
+    logo: "https://a.espncdn.com/redesign/assets/img/icons/ESPN-icon-rugby.png",
+    group: "rugby",
+  },
 ];
 const BY_KEY = new Map(LEAGUES.map((l) => [l.key, l] as const));
 export const DEFAULT_SPORTS_LEAGUES = ["ROSHN", "EPL", "UCL", "NBA", "NFL"];
 
 export const LEAGUE_GROUPS: { key: string; label: string; labelEn: string; icon: string }[] = [
-  { key: "soccer",     label: "كرة القدم",    labelEn: "Soccer",       icon: "⚽" },
-  { key: "basketball", label: "كرة السلة",    labelEn: "Basketball",   icon: "🏀" },
-  { key: "football",   label: "الأمريكية",    labelEn: "Football",     icon: "🏈" },
-  { key: "baseball",   label: "البيسبول",     labelEn: "Baseball",     icon: "⚾" },
-  { key: "hockey",     label: "الهوكي",       labelEn: "Hockey",       icon: "🏒" },
-  { key: "combat",     label: "فنون قتالية",  labelEn: "Combat",       icon: "🥊" },
-  { key: "motorsport", label: "السباقات",     labelEn: "Motorsport",   icon: "🏎" },
-  { key: "tennis",     label: "التنس",        labelEn: "Tennis",       icon: "🎾" },
-  { key: "golf",       label: "الغولف",       labelEn: "Golf",         icon: "🏌" },
-  { key: "rugby",      label: "الرغبي",       labelEn: "Rugby",        icon: "🏉" },
+  { key: "soccer", label: "كرة القدم", labelEn: "Soccer", icon: "⚽" },
+  { key: "basketball", label: "كرة السلة", labelEn: "Basketball", icon: "🏀" },
+  { key: "football", label: "الأمريكية", labelEn: "Football", icon: "🏈" },
+  { key: "baseball", label: "البيسبول", labelEn: "Baseball", icon: "⚾" },
+  { key: "hockey", label: "الهوكي", labelEn: "Hockey", icon: "🏒" },
+  { key: "combat", label: "فنون قتالية", labelEn: "Combat", icon: "🥊" },
+  { key: "motorsport", label: "السباقات", labelEn: "Motorsport", icon: "🏎" },
+  { key: "tennis", label: "التنس", labelEn: "Tennis", icon: "🎾" },
+  { key: "golf", label: "الغولف", labelEn: "Golf", icon: "🏌" },
+  { key: "rugby", label: "الرغبي", labelEn: "Rugby", icon: "🏉" },
 ];
 
 const TTL = 10_000;
@@ -166,7 +366,7 @@ function toSide(c: Record<string, unknown> | undefined, group?: string): SportsS
   // For individual-sport athletes (MMA, racing, tennis, golf)
   const athlete = (c?.athlete ?? {}) as Record<string, unknown>;
   const isAthlete = c?.type === "athlete";
-  
+
   // For racing (F1, NASCAR), use order/position instead of score
   let scoreValue = typeof c?.score === "string" ? c.score : String(c?.score ?? "");
   if (!scoreValue && typeof c?.order === "number") {
@@ -175,12 +375,13 @@ function toSide(c: Record<string, unknown> | undefined, group?: string): SportsS
     const suffix = order === 1 ? "st" : order === 2 ? "nd" : order === 3 ? "rd" : "th";
     scoreValue = `${order}${suffix}`;
   }
-  
+
   if (isAthlete) {
-    let logoUrl = typeof athlete.flag === "object" && athlete.flag !== null
-      ? ((athlete.flag as Record<string, unknown>).href as string) ?? ""
-      : "";
-      
+    let logoUrl =
+      typeof athlete.flag === "object" && athlete.flag !== null
+        ? (((athlete.flag as Record<string, unknown>).href as string) ?? "")
+        : "";
+
     if (group === "combat" && c?.id) {
       logoUrl = `https://a.espncdn.com/i/headshots/mma/players/full/${c.id}.png`;
     }
@@ -311,15 +512,21 @@ function parseEvents(events: unknown[], def: LeagueDef): SportsGame[] {
       let comp = allComps.find((c) => c.featured === true);
       if (!comp && (def.key === "F1" || def.key === "NASCAR")) {
         const raceComp = allComps.find((c) => {
-          const typeAbbr = ((c.type as Record<string, unknown>)?.abbreviation as string)?.toUpperCase();
+          const typeAbbr = (
+            (c.type as Record<string, unknown>)?.abbreviation as string
+          )?.toUpperCase();
           return typeAbbr === "RACE" || typeAbbr === "R" || typeAbbr?.includes("MAIN");
         });
         const qualComp = allComps.find((c) => {
-          const typeAbbr = ((c.type as Record<string, unknown>)?.abbreviation as string)?.toUpperCase();
+          const typeAbbr = (
+            (c.type as Record<string, unknown>)?.abbreviation as string
+          )?.toUpperCase();
           return typeAbbr?.includes("QUAL") || typeAbbr === "Q";
         });
         const sprintComp = allComps.find((c) => {
-          const typeAbbr = ((c.type as Record<string, unknown>)?.abbreviation as string)?.toUpperCase();
+          const typeAbbr = (
+            (c.type as Record<string, unknown>)?.abbreviation as string
+          )?.toUpperCase();
           return typeAbbr?.includes("SPRINT") || typeAbbr === "S";
         });
         comp = raceComp || qualComp || sprintComp || allComps[allComps.length - 1];
@@ -339,8 +546,10 @@ function parseEvents(events: unknown[], def: LeagueDef): SportsGame[] {
       let away: Record<string, unknown> | undefined;
 
       if (isAthleteType) {
-        const sorted = [...cs].sort((a, b) =>
-          Number((a as Record<string, unknown>).order ?? 99) - Number((b as Record<string, unknown>).order ?? 99)
+        const sorted = [...cs].sort(
+          (a, b) =>
+            Number((a as Record<string, unknown>).order ?? 99) -
+            Number((b as Record<string, unknown>).order ?? 99),
         );
         home = sorted[0];
         away = sorted[1];
@@ -359,7 +568,10 @@ function parseEvents(events: unknown[], def: LeagueDef): SportsGame[] {
       const awayId = String((away as Record<string, unknown>).id ?? "");
       if (homeId.startsWith("-") && awayId.startsWith("-")) continue;
 
-      const idStr = def.group === "combat" ? `${ev.id}|${comp.id}` : String(ev.id ?? `${def.key}-${out.length}`);
+      const idStr =
+        def.group === "combat"
+          ? `${ev.id}|${comp.id}`
+          : String(ev.id ?? `${def.key}-${out.length}`);
 
       out.push({
         id: idStr,
@@ -398,7 +610,11 @@ function rank(s: SportsGame["state"]): number {
 export function sortGames(games: SportsGame[]): SportsGame[] {
   return games
     .slice()
-    .sort((a, b) => rank(a.state) - rank(b.state) || (a.state === "post" ? b.startMs - a.startMs : a.startMs - b.startMs));
+    .sort(
+      (a, b) =>
+        rank(a.state) - rank(b.state) ||
+        (a.state === "post" ? b.startMs - a.startMs : a.startMs - b.startMs),
+    );
 }
 
 export function liveCount(games: SportsGame[]): number {
@@ -406,17 +622,22 @@ export function liveCount(games: SportsGame[]): number {
 }
 
 export async function fetchSports(leagues: string[]): Promise<SportsGame[]> {
-  const lists = await Promise.all(leagues.map((l) => fetchLeague(l).catch(() => [] as SportsGame[])));
+  const lists = await Promise.all(
+    leagues.map((l) => fetchLeague(l).catch(() => [] as SportsGame[])),
+  );
   return sortGames(lists.flat());
 }
 
-export async function fetchMatchSummary(leagueTag: string, eventId: string): Promise<SportsMatchDetail | null> {
-  const def = Array.from(BY_KEY.values()).find(l => l.tag === leagueTag);
+export async function fetchMatchSummary(
+  leagueTag: string,
+  eventId: string,
+): Promise<SportsMatchDetail | null> {
+  const def = Array.from(BY_KEY.values()).find((l) => l.tag === leagueTag);
   if (!def) return null;
 
   let actualEventId = eventId;
   let compId = "";
-  
+
   if (def.group === "combat" && eventId.includes("|")) {
     [actualEventId, compId] = eventId.split("|");
   }
@@ -429,7 +650,7 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
     const event = data.events?.find((e: any) => e.id === actualEventId);
     const comp = event?.competitions?.find((c: any) => c.id === compId);
     if (!comp) return null;
-    
+
     const cs = comp.competitors || [];
     const isAthleteType = cs.some((x: any) => x.type === "athlete");
     let homeRaw, awayRaw;
@@ -444,22 +665,24 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
     if (!homeRaw || !awayRaw) return null;
 
     const gameSide = (c: any) => ({
-       id: c.id,
-       name: c.athlete?.displayName || "",
-       abbr: c.athlete?.shortName || "",
-       score: typeof c.score === "string" ? c.score : String(c.score || ""),
-       winner: c.winner === true,
-       logo: c.id ? `https://a.espncdn.com/i/headshots/mma/players/full/${c.id}.png` : ""
+      id: c.id,
+      name: c.athlete?.displayName || "",
+      abbr: c.athlete?.shortName || "",
+      score: typeof c.score === "string" ? c.score : String(c.score || ""),
+      winner: c.winner === true,
+      logo: c.id ? `https://a.espncdn.com/i/headshots/mma/players/full/${c.id}.png` : "",
     });
 
     const home = gameSide(homeRaw);
     const away = gameSide(awayRaw);
-    
+
     // Fetch deep profiles
     const fetchProfile = async (id: string): Promise<MMAFighterProfile | undefined> => {
       if (!id) return undefined;
       try {
-        const r = await safeFetch(`https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/athletes/${id}`);
+        const r = await safeFetch(
+          `https://sports.core.api.espn.com/v2/sports/mma/leagues/ufc/athletes/${id}`,
+        );
         if (!r.ok) return undefined;
         const d = await r.json();
         return {
@@ -468,7 +691,8 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
           weight: d.displayWeight || "-",
           reach: d.displayReach || "-",
           stance: d.stance?.text || "-",
-          fullImage: d.images?.[0]?.href || `https://a.espncdn.com/i/headshots/mma/players/full/${id}.png`
+          fullImage:
+            d.images?.[0]?.href || `https://a.espncdn.com/i/headshots/mma/players/full/${id}.png`,
         };
       } catch {
         return undefined;
@@ -477,19 +701,19 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
 
     const [homeProfile, awayProfile] = await Promise.all([
       fetchProfile(homeRaw.id),
-      fetchProfile(awayRaw.id)
+      fetchProfile(awayRaw.id),
     ]);
-    
+
     const allStats: MatchTeamStatRow[] = [];
     const hRecords = homeRaw.records || [];
     const aRecords = awayRaw.records || [];
     if (hRecords.length > 0) {
       hRecords.forEach((hr: any) => {
         const ar = aRecords.find((a: any) => a.name === hr.name);
-        allStats.push({ 
-          label: hr.name === "overall" ? "Overall Record" : hr.name, 
-          homeValue: hr.summary || "0", 
-          awayValue: ar?.summary || "0" 
+        allStats.push({
+          label: hr.name === "overall" ? "Overall Record" : hr.name,
+          homeValue: hr.summary || "0",
+          awayValue: ar?.summary || "0",
         });
       });
     }
@@ -498,7 +722,7 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
     return {
       id: eventId,
       league: def.tag,
-      state: (t.state === "in" || t.state === "post") ? t.state : "pre",
+      state: t.state === "in" || t.state === "post" ? t.state : "pre",
       detail: t.shortDetail || t.detail || "",
       startMs: Date.parse(event.date || "") || 0,
       home,
@@ -510,14 +734,14 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
       allStats,
       events: [],
       homeProfile,
-      awayProfile
+      awayProfile,
     };
   }
 
   const res = await safeFetch(`${BASE}/${def.path}/summary?event=${actualEventId}`);
   if (!res.ok) return null;
   const data = await res.json();
-  
+
   const header = data.header?.competitions?.[0] || {};
   const teams = header.competitors || [];
   const homeHeader = teams.find((t: any) => t.homeAway === "home") || teams[0];
@@ -551,8 +775,12 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
   };
 
   const rosters = data.rosters || [];
-  const homeRosterData = rosters.find((r: any) => r.homeAway === "home" || r.team?.id === homeHeader.team?.id);
-  const awayRosterData = rosters.find((r: any) => r.homeAway === "away" || r.team?.id === awayHeader.team?.id);
+  const homeRosterData = rosters.find(
+    (r: any) => r.homeAway === "home" || r.team?.id === homeHeader.team?.id,
+  );
+  const awayRosterData = rosters.find(
+    (r: any) => r.homeAway === "away" || r.team?.id === awayHeader.team?.id,
+  );
 
   const parseRoster = (rData: any): MatchPlayer[] => {
     if (!rData || !Array.isArray(rData.roster)) return [];
@@ -622,7 +850,7 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
   };
 
   const allStats: MatchTeamStatRow[] = [];
-  
+
   const processStatItem = (hStat: any, aStatsList: any[]) => {
     if (Array.isArray(hStat.stats)) {
       const aCat = aStatsList?.find((s: any) => s.name === hStat.name);
@@ -631,15 +859,15 @@ export async function fetchMatchSummary(leagueTag: string, eventId: string): Pro
       }
       return;
     }
-    
+
     if (!hStat.name) return;
     const name = hStat.name;
     const label = hStat.label || hStat.displayName || hStat.name;
     const hVal = hStat.displayValue || "0";
-    
+
     const aStat = aStatsList?.find((s: any) => s.name === name);
     const aVal = aStat?.displayValue || "0";
-    
+
     allStats.push({ label, homeValue: hVal, awayValue: aVal });
   };
 

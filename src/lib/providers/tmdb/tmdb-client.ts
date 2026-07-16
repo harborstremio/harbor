@@ -12,15 +12,8 @@ export function setTmdbLanguage(lang: string): void {
   tmdbLanguage = lang.trim();
 }
 
-function arabicModeActive(): boolean {
-  if (typeof document === "undefined") return false;
-  const el = document.documentElement;
-  return el.lang.toLowerCase().startsWith("ar") || el.dir === "rtl";
-}
-
 export function effectiveTmdbLanguage(): string {
-  if (tmdbLanguage) return tmdbLanguage;
-  return arabicModeActive() ? "ar" : "";
+  return tmdbLanguage;
 }
 
 export function tmdbLanguageIso(): string {
@@ -33,9 +26,13 @@ function logTmdbFailure(path: string, status: number, body: string): void {
   if (now - lastFailureLogged < 1000) return;
   lastFailureLogged = now;
   if (status === 401) {
-    console.warn(`[tmdb] 401 unauthorized on ${path} — TMDB key invalid or revoked. ${body.slice(0, 200)}`);
+    console.warn(
+      `[tmdb] 401 unauthorized on ${path} — TMDB key invalid or revoked. ${body.slice(0, 200)}`,
+    );
   } else if (status === 429) {
-    console.warn(`[tmdb] 429 rate-limited on ${path} — TMDB throttling this IP/key. ${body.slice(0, 200)}`);
+    console.warn(
+      `[tmdb] 429 rate-limited on ${path} — TMDB throttling this IP/key. ${body.slice(0, 200)}`,
+    );
   } else if (status === 404) {
     console.warn(`[tmdb] 404 not found on ${path} — TMDB does not have this resource.`);
   } else {

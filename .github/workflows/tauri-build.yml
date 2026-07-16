@@ -1,4 +1,4 @@
-name: tauri-build
+name: Tauri Build
 
 on:
   workflow_dispatch:
@@ -10,6 +10,7 @@ jobs:
   build:
     name: ${{ matrix.platform.name }} (${{ matrix.platform.target }})
     runs-on: ${{ matrix.platform.runner }}
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +37,8 @@ jobs:
             bundle: deb,appimage
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Install Linux deps
         if: contains(matrix.platform.runner, 'ubuntu')
@@ -57,25 +59,29 @@ jobs:
         run: |
           brew install mpv pkg-config dylibbundler
           # Make pkg-config find libmpv from homebrew
-          echo "PKG_CONFIG_PATH=$(brew --prefix mpv)/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=$(brew --prefix mpv)/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> "$GITHUB_ENV"
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.platform.target }}
 
-      - uses: Swatinem/rust-cache@v2
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
             harbor-core
             src-tauri
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
-      - name: Install JS deps
+      - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
       # ARM64 links against libmpv too, but there is no bare ARM64 libmpv-2.dll
@@ -100,7 +106,7 @@ jobs:
             $tag = '20260610'
             $asset = "mpv-dev-aarch64-$tag-git-304426c.7z"
             $sha = 'd9dd60db1c7b24db2e19d041f70abf0a4995f3e9eadf80a34e54f72300df6ed4'
-            curl.exe -L "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/$tag/$asset" -o mpv-dev.7z
+            curl.exe --fail --location --retry 3 --retry-all-errors "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/$tag/$asset" -o mpv-dev.7z
             $got = (Get-FileHash mpv-dev.7z -Algorithm SHA256).Hash
             if ($got -ne $sha.ToUpper()) { throw "libmpv checksum mismatch: got $got" }
             7z x -y mpv-dev.7z -ompv-dev | Out-Null
@@ -121,31 +127,31 @@ jobs:
           TARGET="${{ matrix.platform.target }}"
           EXT=""
           if [[ "$TARGET" == *"windows"* ]]; then EXT=".exe"; fi
-          
+
           echo "Downloading yt-dlp..."
           if [[ "$TARGET" == *"windows"* ]]; then
-            curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"
+            curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"
           elif [[ "$TARGET" == *"apple"* ]]; then
-            curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos" -o "yt-dlp-${TARGET}${EXT}"
+            curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos" -o "yt-dlp-${TARGET}${EXT}"
           else
-            curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "yt-dlp-${TARGET}${EXT}"
+            curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "yt-dlp-${TARGET}${EXT}"
           fi
           chmod +x "yt-dlp-${TARGET}${EXT}" || true
 
           echo "Fetching ffmpeg and ffprobe..."
           if [[ "$TARGET" == *"windows"* ]]; then
             if [[ "$TARGET" == *"aarch64"* ]]; then FFARCH="winarm64"; else FFARCH="win64"; fi
-            curl -L "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${FFARCH}-gpl.zip" -o ffmpeg.zip
+            curl --fail --location --retry 3 --retry-all-errors "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-${FFARCH}-gpl.zip" -o ffmpeg.zip
             unzip -j ffmpeg.zip "*/bin/ffmpeg.exe" "*/bin/ffprobe.exe"
             mv ffmpeg.exe "ffmpeg-${TARGET}${EXT}"
             mv ffprobe.exe "ffprobe-${TARGET}${EXT}"
           elif [[ "$TARGET" == *"apple"* ]]; then
             if [[ "$TARGET" == *"aarch64"* ]]; then
-              curl -L "https://www.osxexperts.net/ffmpeg6arm.zip" -o ffmpeg.zip
-              curl -L "https://www.osxexperts.net/ffprobe6arm.zip" -o ffprobe.zip
+              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffmpeg6arm.zip" -o ffmpeg.zip
+              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffprobe6arm.zip" -o ffprobe.zip
             else
-              curl -L "https://www.osxexperts.net/ffmpeg6intel.zip" -o ffmpeg.zip
-              curl -L "https://www.osxexperts.net/ffprobe6intel.zip" -o ffprobe.zip
+              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffmpeg6intel.zip" -o ffmpeg.zip
+              curl --fail --location --retry 3 --retry-all-errors "https://www.osxexperts.net/ffprobe6intel.zip" -o ffprobe.zip
             fi
             unzip ffmpeg.zip
             unzip ffprobe.zip
@@ -153,7 +159,7 @@ jobs:
             mv ffprobe "ffprobe-${TARGET}${EXT}"
             chmod +x "ffmpeg-${TARGET}${EXT}" "ffprobe-${TARGET}${EXT}" || true
           else
-            curl -L "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz" -o ffmpeg.tar.xz
+            curl --fail --location --retry 3 --retry-all-errors "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz" -o ffmpeg.tar.xz
             tar -xf ffmpeg.tar.xz --strip-components=1 --wildcards '*/ffmpeg' '*/ffprobe'
             mv ffmpeg "ffmpeg-${TARGET}${EXT}"
             mv ffprobe "ffprobe-${TARGET}${EXT}"
@@ -164,7 +170,7 @@ jobs:
           # for the ARM64 target.
           if [[ "$TARGET" == *"aarch64"* && "$TARGET" == *"windows"* ]]; then
             echo "Fetching ARM64 mpv.exe..."
-            curl -L "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-aarch64-20260610-git-304426c.7z" -o mpv-player.7z
+            curl --fail --location --retry 3 --retry-all-errors "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-aarch64-20260610-git-304426c.7z" -o mpv-player.7z
             7z x -y mpv-player.7z -o./mpv-player >/dev/null
             cp "$(find mpv-player -name mpv.exe | head -1)" "mpv-x86_64-pc-windows-msvc.exe"
             rm -rf mpv-player mpv-player.7z
@@ -210,7 +216,7 @@ jobs:
 
       - name: Upload artifacts
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: harbor-${{ matrix.platform.name }}
           path: |

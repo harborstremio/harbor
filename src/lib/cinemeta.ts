@@ -24,6 +24,7 @@ export type Meta = {
   releaseDate?: string;
   inTheaters?: boolean;
   imdbRating?: string;
+  adult?: boolean;
   providerBadge?: { name: string; logo: string; tint: string };
   sourceRank?: number;
   tmdbScore?: number;
@@ -55,10 +56,7 @@ export function isAddonNativeMeta(meta: Meta): boolean {
   if (!meta.addonOrigin) return false;
   const id = meta.id || "";
   const resolvable =
-    /^tt\d/.test(id) ||
-    id.startsWith("tmdb:") ||
-    id.startsWith("kitsu:") ||
-    id.startsWith("mal:");
+    /^tt\d/.test(id) || id.startsWith("tmdb:") || id.startsWith("kitsu:") || id.startsWith("mal:");
   return !resolvable;
 }
 

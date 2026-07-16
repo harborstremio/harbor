@@ -8,6 +8,7 @@ import {
 import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
+import { resolveUiLanguage } from "@/lib/i18n";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -50,13 +51,16 @@ function sanitizeCustomColors(c: unknown): CustomColors | null {
 
 export function sanitizeTheme(t: Partial<ThemeSettings> | undefined): ThemeSettings {
   if (!t) return DEFAULT_THEME;
-  const isBuiltIn = typeof t.preset === "string" && t.preset !== "custom" && isKnownPreset(t.preset);
+  const isBuiltIn =
+    typeof t.preset === "string" && t.preset !== "custom" && isKnownPreset(t.preset);
   const isUserPreset = typeof t.preset === "string" && t.preset.startsWith("user:");
   const isPreset = isBuiltIn || isUserPreset;
   const isCustom = t.preset === "custom";
   const fontOk = typeof t.fontPair === "string" && t.fontPair in FONT_PAIRS;
   const dimOk = typeof t.backgroundDim === "number" && t.backgroundDim >= 0 && t.backgroundDim <= 1;
-  const imgOk = t.backgroundImage == null || (typeof t.backgroundImage === "string" && t.backgroundImage.length < 3_000_000);
+  const imgOk =
+    t.backgroundImage == null ||
+    (typeof t.backgroundImage === "string" && t.backgroundImage.length < 3_000_000);
   const customColors = sanitizeCustomColors(t.customColors);
   const preset: ThemeSettings["preset"] = isPreset
     ? (t.preset as ThemeSettings["preset"])
@@ -78,6 +82,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
   if (!raw) {
     return {
       ...DEFAULT,
+      uiLanguage: resolveUiLanguage(undefined),
       seekBackStepSec: sanitizeSeekStep(legacySeekStep("back"), DEFAULT.seekBackStepSec),
       seekForwardStepSec: sanitizeSeekStep(legacySeekStep("forward"), DEFAULT.seekForwardStepSec),
     };
@@ -147,6 +152,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     return {
       ...DEFAULT,
       ...parsed,
+      uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
       subProvidersEnabled: {
         ...DEFAULT.subProvidersEnabled,
@@ -227,7 +233,9 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         },
       },
       webhookRules: Array.isArray(parsed.webhookRules) ? parsed.webhookRules : [],
-      customStreamFilters: Array.isArray(parsed.customStreamFilters) ? parsed.customStreamFilters : DEFAULT.customStreamFilters,
+      customStreamFilters: Array.isArray(parsed.customStreamFilters)
+        ? parsed.customStreamFilters
+        : DEFAULT.customStreamFilters,
       animeFavoriteGenres: Array.isArray(parsed.animeFavoriteGenres)
         ? parsed.animeFavoriteGenres.filter((g): g is number => typeof g === "number")
         : DEFAULT.animeFavoriteGenres,
@@ -243,6 +251,6 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         : DEFAULT.tmdbImageLangs,
     };
   } catch {
-    return DEFAULT;
+    return { ...DEFAULT, uiLanguage: resolveUiLanguage(undefined) };
   }
 }

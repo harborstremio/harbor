@@ -1,9 +1,13 @@
 name: App build
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  pull_request:
+    paths-ignore:
+      - .github/ISSUE_TEMPLATE/**
+      - docs/**
+      - "**/*.md"
 
 permissions:
   contents: read
@@ -16,6 +20,7 @@ jobs:
   build:
     name: ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.runner }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -28,7 +33,8 @@ jobs:
             runner: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
 
       - name: Install Linux build dependencies
         if: matrix.platform.name == 'Linux'
@@ -49,15 +55,21 @@ jobs:
         if: matrix.platform.name == 'macOS'
         run: brew install mpv pkg-config
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
 
-      - uses: Swatinem/rust-cache@v2
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri
+          workspaces: |
+            harbor-core
+            src-tauri
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           cache: pnpm

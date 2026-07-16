@@ -76,7 +76,6 @@ const LOCAL_KEYBOARD_SELECTOR = [
 const AXIS_TOLERANCE = 24;
 
 let activeSearchEditEl: HTMLElement | null = null;
-let lastFocusedEl: HTMLElement | null = null;
 let focusStylesInjected = false;
 
 function isEditable(el: HTMLElement | null) {
@@ -91,12 +90,25 @@ function isEditable(el: HTMLElement | null) {
  */
 export function isSearchLikeField(el: HTMLElement | null) {
   if (!el) return false;
-  if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return false;
 
-  const type = (el.getAttribute("type") || "").toLowerCase();
+  if (el instanceof HTMLTextAreaElement) return true;
+  if (!(el instanceof HTMLInputElement)) return false;
+
+  const type = (el.getAttribute("type") || "text").toLowerCase();
   const role = (el.getAttribute("role") || "").toLowerCase();
   const inputMode = (el.getAttribute("inputmode") || "").toLowerCase();
-  return type === "search" || role === "searchbox" || inputMode === "search";
+
+  // Home search commonly uses type="search", while Settings search may use
+  // type="text". Treat text-entry fields as TV edit fields so navigation only
+  // focuses them; typing starts after Enter, Space, or remote Select.
+  const textEntryTypes = new Set(["text", "search", "email", "url", "tel", "password"]);
+
+  return (
+    textEntryTypes.has(type) ||
+    role === "searchbox" ||
+    inputMode === "search" ||
+    inputMode === "text"
+  );
 }
 
 export function isVisible(el: HTMLElement) {
@@ -276,11 +288,31 @@ function getInitialFocus(list: HTMLElement[]) {
 }
 
 const NAV_FOCUS_SELECTOR =
-  "[data-tv-top-chrome] button, [data-tv-top-chrome] a[href], [data-harbor-nav][data-active], [data-harbor-nav], [data-tv-nav-zone] button, [data-harbor-sidebar] button, [data-tv-nav-zone] a[href], [data-tv-nav-zone] [data-focusable='true']";
+  "[data-harbor-nav], [data-tv-nav-zone] button, [data-harbor-sidebar] button, [data-tv-nav-zone] a[href], [data-harbor-sidebar] a[href], [data-tv-nav-zone] [data-focusable='true'], [data-harbor-sidebar] [data-focusable='true']";
 
 function focusNavChrome() {
-  const nav = document.querySelector<HTMLElement>(NAV_FOCUS_SELECTOR);
-  if (nav) focusElement(nav);
+  const navItems = Array.from(document.querySelectorAll<HTMLElement>(NAV_FOCUS_SELECTOR)).filter(
+    (el) => isVisible(el) && isInNav(el),
+  );
+
+  const activeNav =
+    navItems.find(
+      (el) =>
+        el.matches('[data-active], [aria-current="page"]') ||
+        !!el.closest('[data-active], [aria-current="page"]'),
+    ) ??
+    navItems[0] ??
+    null;
+
+  if (activeNav) {
+    focusElement(activeNav, "center");
+    return;
+  }
+
+  const topChrome = document.querySelector<HTMLElement>(
+    "[data-tv-top-chrome] button, [data-tv-top-chrome] a[href]",
+  );
+  if (topChrome && isVisible(topChrome)) focusElement(topChrome, "none");
 }
 
 /** Focus the page's primary control (Play, etc.) or first content focusable. */
@@ -337,26 +369,160 @@ function ensureFocusStyles() {
       z-index: 20;
       position: relative;
     }
+
+    /*
+     * Text fields are often nested inside a label/card. Put the TV focus ring
+     * on that visible container so Settings search looks like every other item.
+     */
+    [data-tv-search-nav-focused="true"] {
+      outline: none !important;
+      box-shadow:
+        0 0 0 3px var(--tv-focus-accent, var(--accent, #f97316)),
+        0 0 0 6px #ffffff,
+        0 0 0 9px rgba(0, 0, 0, 0.35) !important;
+      transition: box-shadow 120ms ease;
+      z-index: 20;
+      position: relative;
+    }
+
+    [data-tv-search-nav-focused="true"] [data-tv-focused="true"] {
+      box-shadow: none !important;
+    }
+
+    /*
+     * Editing mode is white only. The orange navigation marker is removed
+     * when Enter/Space/mouse activates the text field.
+     */
+    [data-tv-search-editing-focused="true"],
+    [data-search-editing="true"]:not([data-tv-focused="true"]) {
+      outline: none !important;
+      box-shadow:
+        0 0 0 4px #ffffff,
+        0 0 0 8px rgba(0, 0, 0, 0.35) !important;
+      transition: box-shadow 120ms ease;
+      z-index: 20;
+      position: relative;
+    }
+
+    [data-tv-search-editing-focused="true"] [data-search-editing="true"] {
+      box-shadow: none !important;
+    }
   `;
   document.head.appendChild(style);
+}
+
+function scrollNavItemIntoView(el: HTMLElement, mode: "center" | "nearest" = "center") {
+  const sidebarRoot =
+    el.closest<HTMLElement>("[data-harbor-sidebar]") ??
+    el.closest<HTMLElement>("[data-tv-nav-zone]");
+  if (!sidebarRoot) return;
+
+  let scroller: HTMLElement | null = el.parentElement;
+
+  while (scroller) {
+    const canScroll = scroller.scrollHeight > scroller.clientHeight + 1;
+    if (canScroll) break;
+
+    if (scroller === sidebarRoot) {
+      scroller = null;
+      break;
+    }
+
+    scroller = scroller.parentElement;
+  }
+
+  if (!scroller && sidebarRoot.scrollHeight > sidebarRoot.clientHeight + 1) {
+    scroller = sidebarRoot;
+  }
+
+  if (!scroller) return;
+
+  const itemRect = el.getBoundingClientRect();
+  const scrollerRect = scroller.getBoundingClientRect();
+
+  if (mode === "center") {
+    const itemCenter = itemRect.top + itemRect.height / 2;
+    const scrollerCenter = scrollerRect.top + scrollerRect.height / 2;
+
+    scroller.scrollTo({
+      top: scroller.scrollTop + itemCenter - scrollerCenter,
+      behavior: "smooth",
+    });
+    return;
+  }
+
+  const edgePadding = 12;
+
+  if (itemRect.top < scrollerRect.top + edgePadding) {
+    scroller.scrollBy({
+      top: itemRect.top - scrollerRect.top - edgePadding,
+      behavior: "smooth",
+    });
+  } else if (itemRect.bottom > scrollerRect.bottom - edgePadding) {
+    scroller.scrollBy({
+      top: itemRect.bottom - scrollerRect.bottom + edgePadding,
+      behavior: "smooth",
+    });
+  }
+}
+
+function getSearchFocusVisual(el: HTMLElement): HTMLElement | null {
+  if (!isSearchLikeField(el)) return null;
+
+  return (
+    el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ??
+    el.parentElement
+  );
+}
+
+function clearSearchVisualFocus() {
+  document
+    .querySelectorAll<HTMLElement>(
+      '[data-tv-search-nav-focused="true"], [data-tv-search-editing-focused="true"]',
+    )
+    .forEach((el) => {
+      el.removeAttribute("data-tv-search-nav-focused");
+      el.removeAttribute("data-tv-search-editing-focused");
+    });
 }
 
 function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "center") {
   ensureFocusStyles();
 
-  if (lastFocusedEl && lastFocusedEl !== el) clearTvFocusRing();
+  // Remove stale TV focus markers while keeping the marker on the new item.
+  clearTvFocusRing(el);
 
   el.setAttribute("data-tv-focused", "true");
-  lastFocusedEl = el;
+
+  if (isSearchLikeField(el) && activeSearchEditEl !== el) {
+    // Navigation focus is not editing mode.
+    el.removeAttribute("data-search-editing");
+    setSearchNavMode(el);
+
+    // Settings text fields are commonly inside a label/card. Mark that visible
+    // wrapper so it receives the same orange + white focus as other nav items.
+    const visual = getSearchFocusVisual(el);
+    visual?.setAttribute("data-tv-search-nav-focused", "true");
+  }
+
   el.focus({ preventScroll: true });
 
   if (isInHero(el)) {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     return;
   }
-  // Fixed chrome must not scroll the page; opt in with data-tv-scroll-focus (e.g. settings nav).
-  if (scroll === "none" || isInTopChrome(el)) return;
-  if ((isInSidebar(el) || isInNav(el)) && !el.closest("[data-tv-scroll-focus]")) return;
+  // Fixed top chrome must not scroll the page.
+  if (isInTopChrome(el)) return;
+
+  // Sidebar/nav focus scrolls only its own vertical container, never the page.
+  // This still runs for "none" because that option blocks page scroll, not nav scrolling.
+  if (isInSidebar(el) || isInNav(el)) {
+    scrollNavItemIntoView(el, scroll === "nearest" ? "nearest" : "center");
+    return;
+  }
+
+  if (scroll === "none") return;
+
   // Vertical moves center the focused row/card; horizontal stays nearest so
   // Left/Right in a shelf doesn't yank the page up/down.
   el.scrollIntoView({
@@ -366,14 +532,48 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
   });
 }
 
-function clearTvFocusRing() {
-  lastFocusedEl?.removeAttribute("data-tv-focused");
-  lastFocusedEl = null;
+function clearTvFocusRing(except?: HTMLElement) {
+  document.querySelectorAll<HTMLElement>('[data-tv-focused="true"]').forEach((focused) => {
+    if (focused !== except) focused.removeAttribute("data-tv-focused");
+  });
+
+  clearSearchVisualFocus();
+}
+
+function setSearchNavMode(el: HTMLElement) {
+  if (!isSearchLikeField(el)) return;
+
+  el.setAttribute("data-search-nav-mode", "true");
+
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    el.readOnly = true;
+  }
+}
+
+function clearSearchNavMode(el: HTMLElement) {
+  if (!isSearchLikeField(el)) return;
+
+  el.removeAttribute("data-search-nav-mode");
+
+  if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+    el.readOnly = false;
+  }
 }
 
 function enterSearchEditMode(el: HTMLElement) {
   activeSearchEditEl = el;
+  clearSearchNavMode(el);
+
+  // Editing mode is separate from TV navigation focus.
+  clearTvFocusRing();
+  el.removeAttribute("data-tv-focused");
   el.setAttribute("data-search-editing", "true");
+
+  const visual = getSearchFocusVisual(el);
+  if (visual && visual !== el) {
+    visual.setAttribute("data-tv-search-editing-focused", "true");
+  }
+
   el.focus({ preventScroll: true });
 
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
@@ -389,6 +589,7 @@ function exitSearchEditMode() {
   const el = activeSearchEditEl;
   activeSearchEditEl = null;
   el.removeAttribute("data-search-editing");
+  setSearchNavMode(el);
   if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
     el.blur();
   }
@@ -639,8 +840,17 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       }
       const handled = onBackRef.current ? onBackRef.current() : false;
       if (!handled) {
-        if (onBackToNavRef.current) onBackToNavRef.current();
-        else focusNavChrome();
+        if (onBackToNavRef.current) {
+          onBackToNavRef.current();
+
+          // Let React/App finish restoring the nav, then focus and center
+          // the active orange item so the orange and white markers stay together.
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(focusNavChrome);
+          });
+        } else {
+          focusNavChrome();
+        }
       }
       return true;
     };
@@ -661,6 +871,33 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
       const activeIsSearch = isSearchLikeField(active);
       const isEditingSearch = !!activeSearchEditEl && activeSearchEditEl === active;
+
+      const isSearchOverlayAutoText =
+        !!active &&
+        active.matches("[data-tv-text-auto]") &&
+        !!active.closest("[data-search-overlay]");
+
+      /*
+       * Search Overlay is a direct typing surface, not a TV navigation surface.
+       * Keep the global Back/Escape behavior, but pass every other key directly
+       * to the input, including arrows, text, Enter and Backspace.
+       */
+      if (isSearchOverlayAutoText) {
+        clearSearchNavMode(active);
+        activeSearchEditEl = active;
+        active.removeAttribute("data-tv-focused");
+        active.setAttribute("data-search-editing", "true");
+        clearSearchVisualFocus();
+
+        if (isBackKey(e)) {
+          e.preventDefault();
+          e.stopPropagation();
+          active.removeAttribute("data-search-editing");
+          activeSearchEditEl = null;
+          runBack();
+        }
+        return;
+      }
 
       if (e.key === "Escape" && isEditingSearch) {
         e.preventDefault();
@@ -692,7 +929,28 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
 
-      const isCenter = CENTER_KEYCODES.has(e.keyCode) || e.key === "Enter" || e.code === "Enter";
+      const isCenter =
+        CENTER_KEYCODES.has(e.keyCode) ||
+        e.key === "Enter" ||
+        e.code === "Enter" ||
+        e.key === " " ||
+        e.code === "Space";
+
+      if (activeIsSearch && !isEditingSearch && !isCenter) {
+        const wouldEditText =
+          e.key.length === 1 ||
+          e.key === "Backspace" ||
+          e.key === "Delete" ||
+          e.key === "Home" ||
+          e.key === "End";
+
+        if (wouldEditText) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        return;
+      }
+
       if (!isCenter) return;
       if (isLocallyManaged(target)) return;
 
@@ -721,9 +979,59 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       currentActive.click();
     };
 
+    const onBeforeInput = (e: InputEvent) => {
+      const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      if (!active || !isSearchLikeField(active)) return;
+      if (!active.hasAttribute("data-search-nav-mode")) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const onPointerDown = (e: PointerEvent) => {
+      const pointerTarget = e.target instanceof HTMLElement ? e.target : null;
+      const clickedTextField = pointerTarget?.closest<HTMLElement>("input, textarea");
+      const clickedSearch =
+        clickedTextField && isSearchLikeField(clickedTextField) ? clickedTextField : null;
+
+      if (activeSearchEditEl && activeSearchEditEl !== clickedSearch) {
+        activeSearchEditEl.removeAttribute("data-search-editing");
+        setSearchNavMode(activeSearchEditEl);
+        activeSearchEditEl = null;
+      }
+
+      clearTvFocusRing();
+
+      // Mouse/touch on any supported search/text field enters editing mode
+      // immediately without requiring Enter or Space.
+      if (clickedSearch) {
+        clearSearchNavMode(clickedSearch);
+
+        window.requestAnimationFrame(() => {
+          enterSearchEditMode(clickedSearch);
+        });
+        return;
+      }
+
+      // Clicking anywhere else exits TV navigation focus.
+      window.requestAnimationFrame(() => {
+        clearTvFocusRing();
+
+        const focused =
+          document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        if (focused && !isEditable(focused)) focused.blur();
+      });
+    };
+
     window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("beforeinput", onBeforeInput, true);
+    window.addEventListener("pointerdown", onPointerDown, true);
+
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("beforeinput", onBeforeInput, true);
+      window.removeEventListener("pointerdown", onPointerDown, true);
       if (remoteBackOwner === owner) {
         remoteBackFns = {};
         remoteBackOwner = null;
@@ -732,6 +1040,10 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         activeSearchEditEl.removeAttribute("data-search-editing");
         activeSearchEditEl = null;
       }
+
+      document.querySelectorAll<HTMLElement>('[data-search-nav-mode="true"]').forEach((field) => {
+        clearSearchNavMode(field);
+      });
     };
     // onBack/onBackToNav are mirrored into refs — omit them so unstable inline
     // callbacks (for example, in the player) do not rebind the capture listener.
@@ -749,6 +1061,13 @@ export function dispatchTvNav(action: Dir | "select" | "back"): void {
   }
   if (action === "select") {
     const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    if (active && isSearchLikeField(active)) {
+      SFX.open();
+      enterSearchEditMode(active);
+      return;
+    }
+
     if (active && !isEditable(active)) active.click();
     return;
   }

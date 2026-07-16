@@ -1,0 +1,130 @@
+name: Bug report
+description: Report broken behavior, a regression, crash, or reliability problem in Harbor.
+title: "[Bug]: "
+labels:
+  - bug
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Harbor. Search existing issues first and keep this report focused on one problem.
+        Do not include passwords, API keys, tokens, private stream URLs, or personal data.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      description: Which part of Harbor is affected?
+      options:
+        - Playback, player, or mpv
+        - Subtitles, audio, or synchronization
+        - Streams, addons, debrid, or P2P
+        - Anime, seasons, or episode ordering
+        - Library, watch history, or Continue Watching
+        - Accounts or tracking services
+        - Search, discovery, or metadata
+        - Interface, themes, or accessibility
+        - Downloads or local media
+        - IPTV, casting, or TV mode
+        - Performance, crashes, or responsiveness
+        - Installation, updates, or platform integration
+        - Other or not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Harbor version
+      description: Enter the numeric version only, without a leading "v" or channel name.
+      placeholder: 0.9.21
+    validations:
+      required: true
+
+  - type: dropdown
+    id: channel
+    attributes:
+      label: Release channel
+      options:
+        - Stable
+        - Beta
+    validations:
+      required: true
+
+  - type: input
+    id: commit
+    attributes:
+      label: Commit
+      description: For a development build, provide the commit SHA separately.
+      placeholder: abc1234
+
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation source
+      options:
+        - GitHub Releases
+        - In-app updater
+        - Built from source
+        - Other or not sure
+    validations:
+      required: true
+
+  - type: input
+    id: system
+    attributes:
+      label: System
+      description: Enter your operating system and version. Add the CPU architecture only if you know it.
+      placeholder: Windows 11 24H2
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe what happened and what you expected instead.
+      placeholder: Harbor did ... instead of ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      description: List the actions that reliably trigger the problem.
+      placeholder: |
+        1. Open Harbor.
+        2. Go to ...
+        3. Select ...
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste only the relevant section. Remove tokens, credentials, private URLs, and personal data.
+      render: shell
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Workaround
+      description: If you found a safe temporary workaround, describe it here.
+
+  - type: upload
+    id: attachments
+    attributes:
+      label: Screenshots, recordings, or supporting files
+      description: Upload useful evidence after removing secrets, private URLs, and personal data.
+    validations:
+      required: false
+      accept: ".png,.jpg,.jpeg,.gif,.webp,.svg,.mp4,.mov,.webm,.log,.txt,.json,.zip"

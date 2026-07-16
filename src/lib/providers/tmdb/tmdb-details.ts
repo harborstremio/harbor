@@ -5,6 +5,7 @@ import { pickLogo, fetchMovieAssets } from "./tmdb-images";
 import { imageLangParam, imageLangRank } from "./tmdb-image-lang";
 import { pickTrailers, type Video } from "./tmdb-trailers";
 import type { PersonRef } from "./tmdb-people";
+import { genresFromIds } from "./tmdb-meta-mappers";
 
 export type CastEntry = {
   id: number;
@@ -128,11 +129,7 @@ const PRODUCER_JOBS = new Set(["Producer", "Executive Producer"]);
 
 type RawImageEntry = { file_path?: string; vote_average?: number };
 
-function urlsFromImages(
-  entries: RawImageEntry[] | undefined,
-  size: string,
-  max: number,
-): string[] {
+function urlsFromImages(entries: RawImageEntry[] | undefined, size: string, max: number): string[] {
   if (!entries?.length) return [];
   const seen = new Set<string>();
   const out: string[] = [];
@@ -194,7 +191,8 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
   const settings = loadStoredSettings();
   const metaLang = effectiveTmdbLanguage() || "en";
   const raw = await get<any>(key, `${kind}/${id}`, {
-    append_to_response: "credits,aggregate_credits,recommendations,similar,videos,external_ids,images,keywords,translations",
+    append_to_response:
+      "credits,aggregate_credits,recommendations,similar,videos,external_ids,images,keywords,translations",
     language: metaLang,
     include_image_language: imageLangParam(),
   });
@@ -234,7 +232,12 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
     name: c.name,
     character:
       c.character ??
-      (c.roles?.length ? c.roles.map((r: any) => r.character).filter(Boolean).join(", ") : ""),
+      (c.roles?.length
+        ? c.roles
+            .map((r: any) => r.character)
+            .filter(Boolean)
+            .join(", ")
+        : ""),
     profilePath: c.profile_path ?? null,
     order: c.order ?? 999,
   }));
@@ -261,7 +264,10 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
   const composer = byJob((j) => j === "Original Music Composer" || j === "Music");
   const cinematography = byJob((j) => j === "Director of Photography" || j === "Cinematography");
   const editor = byJob((j) => j === "Editor");
-  const creators: PersonRef[] = (raw.created_by ?? []).map((c: any) => ({ id: c.id, name: c.name }));
+  const creators: PersonRef[] = (raw.created_by ?? []).map((c: any) => ({
+    id: c.id,
+    name: c.name,
+  }));
 
   const toMeta = (r: any): Meta => ({
     id: kind === "movie" ? `tmdb:movie:${r.id}` : `tmdb:tv:${r.id}`,
@@ -273,6 +279,8 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
     releaseInfo: (r.release_date ?? r.first_air_date)?.slice(0, 4),
     releaseDate: r.release_date ?? r.first_air_date,
     imdbRating: r.vote_average > 0 ? Number(r.vote_average).toFixed(1) : undefined,
+    adult: r.adult,
+    genres: genresFromIds(r.genre_ids, kind),
   });
 
   const recommendations: Meta[] = (raw.recommendations?.results ?? []).map(toMeta);
@@ -291,15 +299,16 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
       airDate: s.air_date ?? null,
     }));
 
-  const runtime = kind === "movie"
-    ? raw.runtime
-      ? `${raw.runtime} min`
-      : undefined
-    : raw.episode_run_time?.[0]
-      ? `${raw.episode_run_time[0]} min episodes`
-      : seasons.length > 0
-        ? `${seasons.length} season${seasons.length === 1 ? "" : "s"}`
-        : undefined;
+  const runtime =
+    kind === "movie"
+      ? raw.runtime
+        ? `${raw.runtime} min`
+        : undefined
+      : raw.episode_run_time?.[0]
+        ? `${raw.episode_run_time[0]} min episodes`
+        : seasons.length > 0
+          ? `${seasons.length} season${seasons.length === 1 ? "" : "s"}`
+          : undefined;
 
   let overview = raw.overview ?? "";
   let tagline = raw.tagline ?? "";
@@ -324,8 +333,8 @@ export async function tmdbDetails(key: string, meta: Meta): Promise<TmdbDetail |
     id: raw.id,
     imdbId: raw.external_ids?.imdb_id ?? null,
     title: settings.translateTitles
-      ? (raw.title || raw.name)
-      : (raw.original_title || raw.original_name || raw.title || raw.name),
+      ? raw.title || raw.name
+      : raw.original_title || raw.original_name || raw.title || raw.name,
     originalTitle: raw.original_title ?? raw.original_name ?? "",
     tagline,
     overview,

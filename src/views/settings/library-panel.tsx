@@ -107,7 +107,9 @@ export function LibraryPanel({
   const [mdblistDraft, setMdblistDraft] = useState(settings.mdblistKey);
   const [posterSrvDraft, setPosterSrvDraft] = useState(settings.posterBaseUrl);
   const [auddDraft, setAuddDraft] = useState(settings.auddKey);
-  const [extraSaved, setExtraSaved] = useState<"mdblist" | "postersrv" | "ai" | "audd" | null>(null);
+  const [extraSaved, setExtraSaved] = useState<"mdblist" | "postersrv" | "ai" | "audd" | null>(
+    null,
+  );
   const [tmdbGuide, setTmdbGuide] = useState(false);
   const [tvdbGuide, setTvdbGuide] = useState(false);
   const extraTimerRef = useRef<number | null>(null);
@@ -125,59 +127,67 @@ export function LibraryPanel({
     <>
       <TmdbGuideModal open={tmdbGuide} onClose={() => setTmdbGuide(false)} />
       <TvdbGuideModal open={tvdbGuide} onClose={() => setTvdbGuide(false)} />
-      <Section
-        title={t("Home layout")}
-        subtitle={t("How the Home page assembles its rails.")}
-      >
-        <HomeModePicker
-          value={settings.homeMode}
-          onChange={(v) => update({ homeMode: v })}
-        />
+      <Section title={t("Home layout")} subtitle={t("How the Home page assembles its rails.")}>
+        <HomeModePicker value={settings.homeMode} onChange={(v) => update({ homeMode: v })} />
         <ToggleRow
           label={t("Show every addon row")}
-          sub={t("By default, addon rails that duplicate the built-in ones (Trending, Popular, Top Rated, etc.) are merged so you don't see the same row twice. Turn this on to show every one, duplicates and all.")}
+          sub={t(
+            "By default, addon rails that duplicate the built-in ones (Trending, Popular, Top Rated, etc.) are merged so you don't see the same row twice. Turn this on to show every one, duplicates and all.",
+          )}
           value={settings.homeShowAllAddonRows}
           onChange={(v) => update({ homeShowAllAddonRows: v })}
           preview={<HomeRowPreview kind="all-addon-rows" />}
         />
         <ToggleRow
           label={t("Watchlist shows only saved titles")}
-          sub={t("Keep the Library Watchlist tab limited to titles you added in Stremio. Turn this off to also include anything Stremio auto-added when you pressed play.")}
+          sub={t(
+            "Keep the Library Watchlist tab limited to titles you added in Stremio. Turn this off to also include anything Stremio auto-added when you pressed play.",
+          )}
           value={settings.libraryBookmarkedOnly}
           onChange={(v) => update({ libraryBookmarkedOnly: v })}
           preview={<HomeRowPreview kind="watchlist-saved" />}
         />
         <ToggleRow
           label={t("Show Playlists tab")}
-          sub={t("Adds a Playlists item to the navigation for browsing movies and shows from your M3U or Xtream playlists (the same ones you add for Live TV). Off by default to keep the nav tidy.")}
+          sub={t(
+            "Adds a Playlists item to the navigation for browsing movies and shows from your M3U or Xtream playlists (the same ones you add for Live TV). Off by default to keep the nav tidy.",
+          )}
           value={settings.showPlaylistsTab}
           onChange={(v) => update({ showPlaylistsTab: v })}
           preview={<HomeRowPreview kind="playlists-tab" />}
         />
         <ToggleRow
           label={t("Keep anime in the Anime room only")}
-          sub={t("Hides anime from the Home Continue Watching row. It still appears in the Anime tab's own Continue Watching.")}
+          sub={t(
+            "Hides anime from the Home Continue Watching row. It still appears in the Anime tab's own Continue Watching.",
+          )}
           value={settings.animeOnlyInAnimeRoom}
           onChange={(v) => update({ animeOnlyInAnimeRoom: v })}
           preview={<HomeRowPreview kind="anime-room" />}
         />
         <ToggleRow
           label={t("Advance Continue Watching to the next episode")}
-          sub={t("When you finish an episode, the Home Continue Watching card moves on to the next episode instead of sitting at 0 minutes left.")}
+          sub={t(
+            "When you finish an episode, the Home Continue Watching card moves on to the next episode instead of sitting at 0 minutes left.",
+          )}
           value={settings.cwAdvanceNext}
           onChange={(v) => update({ cwAdvanceNext: v })}
           preview={<HomeRowPreview kind="cw-advance" />}
         />
         <ToggleRow
           label={t("Hide watched titles in catalogs")}
-          sub={t("Movies you've watched and shows you've made progress on stop appearing in the built-in catalog rows, using your local watch history (and Trakt if connected). Continue Watching is never touched.")}
+          sub={t(
+            "Movies you've watched and shows you've made progress on stop appearing in the built-in catalog rows, using your local watch history (and Trakt if connected). Continue Watching is never touched.",
+          )}
           value={settings.hideWatchedInCatalogs}
           onChange={(v) => update({ hideWatchedInCatalogs: v })}
           preview={<HomeRowPreview kind="hide-watched" />}
         />
         <ToggleRow
           label={t("Hide unreleased titles")}
-          sub={t("Movies and shows with a future release date stop appearing in the built-in home catalog rows, so Home only shows what you can watch right now.")}
+          sub={t(
+            "Movies and shows with a future release date stop appearing in the built-in home catalog rows, so Home only shows what you can watch right now.",
+          )}
           value={settings.hideUnreleased}
           onChange={(v) => update({ hideUnreleased: v })}
         />
@@ -185,18 +195,24 @@ export function LibraryPanel({
 
       <Section
         title={t("Home languages")}
-        subtitle={t("Only show titles in these original languages on the Home catalogs. Leave all off to show everything.")}
+        subtitle={t(
+          "Only show titles in these original languages on the Home catalogs. Leave all off to show everything.",
+        )}
       >
         <HomeLanguagePicker />
       </Section>
 
       <Section
         title={t("Spoilers")}
-        subtitle={t("Blur episode artwork, titles, and descriptions for episodes you have not watched yet, on both shows and anime. Hover an episode to peek.")}
+        subtitle={t(
+          "Blur episode artwork, titles, and descriptions for episodes you have not watched yet, on both shows and anime. Hover an episode to peek.",
+        )}
       >
         <ToggleRow
           label={t("Blur spoilers")}
-          sub={t("Hides spoiler-prone episode details in episode lists until you have watched them.")}
+          sub={t(
+            "Hides spoiler-prone episode details in episode lists until you have watched them.",
+          )}
           value={settings.hideSpoilers}
           onChange={(v) => update({ hideSpoilers: v })}
         />
@@ -219,7 +235,9 @@ export function LibraryPanel({
             />
             <ToggleRow
               label={t("Blur episode images on detail page")}
-              sub={t("Blurs the hero image and stills on the episode detail page until you click reveal.")}
+              sub={t(
+                "Blurs the hero image and stills on the episode detail page until you click reveal.",
+              )}
               value={!!settings.blurEpisodes}
               onChange={(v) => update({ blurEpisodes: v })}
             />
@@ -242,11 +260,15 @@ export function LibraryPanel({
 
       <Section
         title={t("Episode cards")}
-        subtitle={t("Show the IMDb rating and synopsis on episodes across the list, grid, and panel layouts.")}
+        subtitle={t(
+          "Show the IMDb rating and synopsis on episodes across the list, grid, and panel layouts.",
+        )}
       >
         <ToggleRow
           label={t("Show IMDb rating on episodes")}
-          sub={t("Shows each episode's rating. Add your free OMDb API key for real IMDb scores; without it, ratings fall back to TMDB.")}
+          sub={t(
+            "Shows each episode's rating. Add your free OMDb API key for real IMDb scores; without it, ratings fall back to TMDB.",
+          )}
           value={settings.showEpisodeRating}
           onChange={(v) => update({ showEpisodeRating: v })}
           preview={<EpisodeCardPreview kind="rating" />}
@@ -260,14 +282,18 @@ export function LibraryPanel({
         />
         <ToggleRow
           label={t("High-quality episode images")}
-          sub={t("Loads full-resolution episode artwork (original) instead of lighter w300 images. Turn off for slow connections or low-end devices.")}
+          sub={t(
+            "Loads full-resolution episode artwork (original) instead of lighter w300 images. Turn off for slow connections or low-end devices.",
+          )}
           value={settings.hdEpisodeImages}
           onChange={(v) => update({ hdEpisodeImages: v })}
           preview={<EpisodeCardPreview kind="hd" />}
         />
         <ToggleRow
           label={t("Group episodes by story arc")}
-          sub={t("Adds a Seasons/Arcs switch on shows that have a story-arc grouping (like One Piece), so you can browse by saga instead of scrolling seasons. Needs a TMDB key. Off by default.")}
+          sub={t(
+            "Adds a Seasons/Arcs switch on shows that have a story-arc grouping (like One Piece), so you can browse by saga instead of scrolling seasons. Needs a TMDB key. Off by default.",
+          )}
           value={settings.episodeArcGroups}
           onChange={(v) => update({ episodeArcGroups: v })}
         />
@@ -281,7 +307,9 @@ export function LibraryPanel({
       >
         <ToggleRow
           label={t("Hover preview")}
-          sub={t("Rest the cursor on a poster to peek at the rating, story, and quick actions without opening it.")}
+          sub={t(
+            "Rest the cursor on a poster to peek at the rating, story, and quick actions without opening it.",
+          )}
           value={settings.hoverPreviewEnabled}
           onChange={(v) => update({ hoverPreviewEnabled: v })}
         />
@@ -291,33 +319,37 @@ export function LibraryPanel({
               value={settings.cardHoverStyle}
               customHoverId={settings.customHoverId}
               onChange={(style, customId) =>
-                update(customId != null ? { cardHoverStyle: style, customHoverId: customId } : { cardHoverStyle: style })
+                update(
+                  customId != null
+                    ? { cardHoverStyle: style, customHoverId: customId }
+                    : { cardHoverStyle: style },
+                )
               }
             />
             {settings.cardHoverStyle === "default" && (
               <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-            <span className="text-[13px] text-ink-muted">{t("Open preview")}</span>
-            <div className="flex gap-1.5">
-              {(
-                [
-                  { v: "over", label: t("On the card") },
-                  { v: "side", label: t("To the side") },
-                ] as const
-              ).map((o) => (
-                <button
-                  key={o.v}
-                  type="button"
-                  onClick={() => update({ hoverPreviewPlacement: o.v })}
-                  className={`rounded-lg border px-3 py-1.5 text-[12.5px] font-semibold transition-colors ${
-                    settings.hoverPreviewPlacement === o.v
-                      ? "border-accent bg-accent/15 text-accent"
-                      : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-edge hover:text-ink"
-                  }`}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
+                <span className="text-[13px] text-ink-muted">{t("Open preview")}</span>
+                <div className="flex gap-1.5">
+                  {(
+                    [
+                      { v: "over", label: t("On the card") },
+                      { v: "side", label: t("To the side") },
+                    ] as const
+                  ).map((o) => (
+                    <button
+                      key={o.v}
+                      type="button"
+                      onClick={() => update({ hoverPreviewPlacement: o.v })}
+                      className={`rounded-lg border px-3 py-1.5 text-[12.5px] font-semibold transition-colors ${
+                        settings.hoverPreviewPlacement === o.v
+                          ? "border-accent bg-accent/15 text-accent"
+                          : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-edge hover:text-ink"
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -326,7 +358,9 @@ export function LibraryPanel({
 
       <Section
         title={t("Continue Watching screenshots")}
-        subtitle={t("When you back out of a title, Harbor saves a frame so the Continue Watching card looks like the spot you left. Tune how long they stick around, or wipe them all.")}
+        subtitle={t(
+          "When you back out of a title, Harbor saves a frame so the Continue Watching card looks like the spot you left. Tune how long they stick around, or wipe them all.",
+        )}
       >
         <CwSnapshotShowcase />
         <RetentionPicker
@@ -335,7 +369,9 @@ export function LibraryPanel({
         />
         <ToggleRow
           label={t("Full quality frames")}
-          sub={t("Save sharper frames instead of light thumbnails. They look crisper on the card but take more space, so fewer are kept before the oldest roll off.")}
+          sub={t(
+            "Save sharper frames instead of light thumbnails. They look crisper on the card but take more space, so fewer are kept before the oldest roll off.",
+          )}
           value={settings.cwSnapshotFullQuality}
           onChange={(v) => update({ cwSnapshotFullQuality: v })}
         />
@@ -344,7 +380,9 @@ export function LibraryPanel({
 
       <Section
         title={t("Region & language")}
-        subtitle={t("Used for streaming availability and the Now Playing release window. Pick a country and Harbor can match the interface, metadata, and subtitle languages to it.")}
+        subtitle={t(
+          "Used for streaming availability and the Now Playing release window. Pick a country and Harbor can match metadata and subtitle languages to it.",
+        )}
       >
         <RegionField />
       </Section>
@@ -353,7 +391,9 @@ export function LibraryPanel({
 
       <Section
         title={t("Metadata providers")}
-        subtitle={t("A free TMDB key is highly recommended. It unlocks the full Harbor experience. The rest are optional, and Cinemeta works out of the box without any.")}
+        subtitle={t(
+          "A free TMDB key is highly recommended. It unlocks the full Harbor experience. The rest are optional, and Cinemeta works out of the box without any.",
+        )}
       >
         <KeyField
           label={t("TMDB · catalogs and rails")}
@@ -368,7 +408,9 @@ export function LibraryPanel({
             <HoverTooltip
               side="top"
               align="center"
-              label={t("TMDB asks for an app URL when you create the key. Put any URL at all, like https://harbor.app. The only thing you need back is the API key.")}
+              label={t(
+                "TMDB asks for an app URL when you create the key. Put any URL at all, like https://harbor.app. The only thing you need back is the API key.",
+              )}
             >
               <button
                 type="button"
@@ -393,7 +435,9 @@ export function LibraryPanel({
         />
         <ToggleRow
           label={t("Use free IMDb data without a TMDB key")}
-          sub={t("With no TMDB key, the About panel pulls cast, crew, and title info from a free IMDb source. TMDB is still used whenever a key is set.")}
+          sub={t(
+            "With no TMDB key, the About panel pulls cast, crew, and title info from a free IMDb source. TMDB is still used whenever a key is set.",
+          )}
           value={settings.imdbApiFallback}
           onChange={(v) => update({ imdbApiFallback: v })}
         />
@@ -408,10 +452,8 @@ export function LibraryPanel({
           help={
             <>
               Free at{" "}
-              <ExtLink href="https://www.omdbapi.com/apikey.aspx">
-                omdbapi.com/apikey.aspx
-              </ExtLink>
-              . They email an activation link the first time. Click it, then come back and save.
+              <ExtLink href="https://www.omdbapi.com/apikey.aspx">omdbapi.com/apikey.aspx</ExtLink>.
+              They email an activation link the first time. Click it, then come back and save.
             </>
           }
         />
@@ -425,9 +467,8 @@ export function LibraryPanel({
           iconSrc={rpdbLogo}
           help={
             <>
-              Paid plan at{" "}
-              <ExtLink href="https://ratingposterdb.com">ratingposterdb.com</ExtLink>. Once
-              saved, every poster gets re-rendered with IMDb, Rotten Tomatoes, and Metacritic
+              Paid plan at <ExtLink href="https://ratingposterdb.com">ratingposterdb.com</ExtLink>.
+              Once saved, every poster gets re-rendered with IMDb, Rotten Tomatoes, and Metacritic
               stamped on it.
             </>
           }
@@ -483,12 +524,15 @@ export function LibraryPanel({
           iconSrc={rpdbLogo}
           help={
             <>
-              Leave empty to use your RPDB key above. Or paste{" "}
-              <strong>Better Posters</strong> (<code>https://btttr.cc</code>), a bare
-              RPDB-compatible server (your RPDB key is still sent), or a full URL template using{" "}
-              <code>{"{imdbId}"}</code>, <code>{"{tmdbId}"}</code>, <code>{"{type}"}</code>, or{" "}
-              <code>{"{id}"}</code>. PostersPlus needs the template form, e.g.{" "}
-              <code>{"postersplus.elfhosted.com/poster?tmdb_id={tmdbId}&imdb_id={imdbId}&type={type}"}</code>.
+              Leave empty to use your RPDB key above. Or paste <strong>Better Posters</strong> (
+              <code>https://btttr.cc</code>), a bare RPDB-compatible server (your RPDB key is still
+              sent), or a full URL template using <code>{"{imdbId}"}</code>,{" "}
+              <code>{"{tmdbId}"}</code>, <code>{"{type}"}</code>, or <code>{"{id}"}</code>.
+              PostersPlus needs the template form, e.g.{" "}
+              <code>
+                {"postersplus.elfhosted.com/poster?tmdb_id={tmdbId}&imdb_id={imdbId}&type={type}"}
+              </code>
+              .
             </>
           }
         />
@@ -500,7 +544,9 @@ export function LibraryPanel({
         />
         <ToggleRow
           label={t("Prefer my installed metadata addon")}
-          sub={t("Use a custom meta addon you installed (e.g. a localized Cinemeta) for titles and descriptions instead of the built-in Cinemeta. Falls back to Cinemeta if yours has no data.")}
+          sub={t(
+            "Use a custom meta addon you installed (e.g. a localized Cinemeta) for titles and descriptions instead of the built-in Cinemeta. Falls back to Cinemeta if yours has no data.",
+          )}
           value={settings.preferCustomMetaAddon}
           onChange={(v) => update({ preferCustomMetaAddon: v })}
         />
@@ -515,10 +561,8 @@ export function LibraryPanel({
           help={
             <>
               Fills in where TMDB comes up empty (anime, older catalog). Free at{" "}
-              <ExtLink href="https://fanart.tv/get-an-api-key/">
-                fanart.tv/get-an-api-key
-              </ExtLink>
-              . Use the "personal" key, not the project one.
+              <ExtLink href="https://fanart.tv/get-an-api-key/">fanart.tv/get-an-api-key</ExtLink>.
+              Use the "personal" key, not the project one.
             </>
           }
         />
@@ -534,7 +578,9 @@ export function LibraryPanel({
             <HoverTooltip
               side="top"
               align="center"
-              label={t("The free tier is $0 for personal use. Just pick the first option, no payment needed.")}
+              label={t(
+                "The free tier is $0 for personal use. Just pick the first option, no payment needed.",
+              )}
             >
               <button
                 type="button"
@@ -571,7 +617,9 @@ export function LibraryPanel({
             />
             <ToggleRow
               label={t("Show ratings on detail pages")}
-              sub={t("Detail pages show every available rating regardless of the card score toggles below. Turn this off to hide ratings on detail pages too.")}
+              sub={t(
+                "Detail pages show every available rating regardless of the card score toggles below. Turn this off to hide ratings on detail pages too.",
+              )}
               value={settings.showDetailRatings}
               onChange={(v) => update({ showDetailRatings: v })}
             />
@@ -642,24 +690,22 @@ export function LibraryPanel({
               leading={<ImdbBadge />}
               value={settings.showImdbBadge}
               onChange={(v) => update({ showImdbBadge: v })}
-              lockReason={
-                !settings.tmdbKey
-                  ? t("Add a TMDB key above to unlock this.")
+              lockReason={!settings.tmdbKey ? t("Add a TMDB key above to unlock this.") : undefined}
+              note={
+                settings.rpdbKey
+                  ? t("RPDB already paints scores onto the poster. Toggle to override.")
                   : undefined
               }
-              note={settings.rpdbKey ? t("RPDB already paints scores onto the poster. Toggle to override.") : undefined}
             />
             <ToggleRow
               label={t("Show TMDB score on cards")}
-              sub={t("Falls back to the TMDB rating only when a title has no IMDb score yet (mostly brand-new or unreleased). Off by default so cards prefer IMDb.")}
+              sub={t(
+                "Falls back to the TMDB rating only when a title has no IMDb score yet (mostly brand-new or unreleased). Off by default so cards prefer IMDb.",
+              )}
               leading={<TmdbBadge />}
               value={settings.showTmdbBadge}
               onChange={(v) => update({ showTmdbBadge: v })}
-              lockReason={
-                !settings.tmdbKey
-                  ? t("Add a TMDB key above to unlock this.")
-                  : undefined
-              }
+              lockReason={!settings.tmdbKey ? t("Add a TMDB key above to unlock this.") : undefined}
             />
             <ToggleRow
               label={t("Show Rotten Tomatoes score on cards")}
@@ -668,11 +714,13 @@ export function LibraryPanel({
               value={settings.showRtBadge}
               onChange={(v) => update({ showRtBadge: v })}
               lockReason={
-                !settings.omdbKey
-                  ? t("Add an OMDb key above to unlock this.")
+                !settings.omdbKey ? t("Add an OMDb key above to unlock this.") : undefined
+              }
+              note={
+                settings.rpdbKey
+                  ? t("RPDB already paints scores onto the poster. Toggle to override.")
                   : undefined
               }
-              note={settings.rpdbKey ? t("RPDB already paints scores onto the poster. Toggle to override.") : undefined}
             />
             <ToggleRow
               label={t("Show audience score on cards")}
@@ -680,11 +728,15 @@ export function LibraryPanel({
               leading={<PopcornBadge />}
               value={settings.showPopcornBadge}
               onChange={(v) => update({ showPopcornBadge: v })}
-              lockReason={!settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined}
+              lockReason={
+                !settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined
+              }
             />
             <ToggleRow
               label={t("Show MAL score on cards")}
-              sub={t("MyAnimeList scores for anime titles. RPDB doesn't cover anime, so this stays optional.")}
+              sub={t(
+                "MyAnimeList scores for anime titles. RPDB doesn't cover anime, so this stays optional.",
+              )}
               leading={<MalBadge />}
               value={settings.showMalBadge}
               onChange={(v) => update({ showMalBadge: v })}
@@ -692,9 +744,13 @@ export function LibraryPanel({
             {settings.showMalBadge && (
               <div className="flex items-center justify-between gap-4 rounded-xl bg-canvas/40 px-4 py-3">
                 <div className="flex min-w-0 flex-col gap-0.5">
-                  <span className="text-[13.5px] font-medium text-ink">{t("Anime card rating source")}</span>
+                  <span className="text-[13.5px] font-medium text-ink">
+                    {t("Anime card rating source")}
+                  </span>
                   <span className="text-[12px] leading-snug text-ink-muted">
-                    {t("Pick which score anime cards show. IMDb falls back to MAL when a title has no IMDb rating yet.")}
+                    {t(
+                      "Pick which score anime cards show. IMDb falls back to MAL when a title has no IMDb rating yet.",
+                    )}
                   </span>
                 </div>
                 <div className="flex shrink-0 gap-1.5">
@@ -723,7 +779,9 @@ export function LibraryPanel({
             )}
             <ToggleRow
               label={t("Show DUB badge on anime cards")}
-              sub={t("Flags anime with an English dub. Also tags dub / sub / dual on stream sources.")}
+              sub={t(
+                "Flags anime with an English dub. Also tags dub / sub / dual on stream sources.",
+              )}
               value={settings.showDubBadge}
               onChange={(v) => update({ showDubBadge: v })}
             />
@@ -733,7 +791,9 @@ export function LibraryPanel({
               leading={<MetacriticBadge />}
               value={settings.showMetacriticBadge}
               onChange={(v) => update({ showMetacriticBadge: v })}
-              lockReason={!settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined}
+              lockReason={
+                !settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined
+              }
             />
             <ToggleRow
               label={t("Show Letterboxd score on cards")}
@@ -741,7 +801,9 @@ export function LibraryPanel({
               leading={<LetterboxdBadge />}
               value={settings.showLetterboxdBadge}
               onChange={(v) => update({ showLetterboxdBadge: v })}
-              lockReason={!settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined}
+              lockReason={
+                !settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined
+              }
             />
             <ToggleRow
               label={t("Show MDBList score on cards")}
@@ -749,7 +811,9 @@ export function LibraryPanel({
               leading={<MdblistBadge />}
               value={settings.showMdblistBadge}
               onChange={(v) => update({ showMdblistBadge: v })}
-              lockReason={!settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined}
+              lockReason={
+                !settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined
+              }
             />
             <ToggleRow
               label={t("Show Trakt score on cards")}
@@ -757,7 +821,9 @@ export function LibraryPanel({
               leading={<TraktBadge />}
               value={settings.showTraktBadge}
               onChange={(v) => update({ showTraktBadge: v })}
-              lockReason={!settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined}
+              lockReason={
+                !settings.mdblistKey ? t("Add an MDBList API key to unlock this.") : undefined
+              }
             />
             <ToggleRow
               label={t("Show SIMKL score on cards")}
@@ -768,7 +834,9 @@ export function LibraryPanel({
             />
             <ToggleRow
               label={t("Mark watched button")}
-              sub={t("Show a button on the detail page to mark a title or episode as watched. Syncs to Trakt and Simkl if connected.")}
+              sub={t(
+                "Show a button on the detail page to mark a title or episode as watched. Syncs to Trakt and Simkl if connected.",
+              )}
               value={settings.showWatchedButton}
               onChange={(v) => update({ showWatchedButton: v })}
             />
@@ -846,11 +914,15 @@ export function LibraryPanel({
 
       <Section
         title={t("Content filters")}
-        subtitle={t("Hide entire categories. Toggling these also removes the matching sidebar entries and rails.")}
+        subtitle={t(
+          "Hide entire categories. Toggling these also removes the matching sidebar entries and rails.",
+        )}
       >
         <ToggleRow
           label={t("Hide anime")}
-          sub={t("Removes the Anime tab and any Trending/Popular/Upcoming/New anime rows from Home.")}
+          sub={t(
+            "Removes the Anime tab and any Trending/Popular/Upcoming/New anime rows from Home.",
+          )}
           value={settings.hideContent.anime}
           onChange={(v) => pushHideContent("anime", v)}
         />
@@ -870,11 +942,15 @@ export function LibraryPanel({
 
       <Section
         title={t("Local library")}
-        subtitle={t("Options for the Library → Local tab: folders you scan from your own drive. When you export metadata, Harbor writes a Kodi-style .nfo and downloads artwork next to each file at the sizes below.")}
+        subtitle={t(
+          "Options for the Library → Local tab: folders you scan from your own drive. When you export metadata, Harbor writes a Kodi-style .nfo and downloads artwork next to each file at the sizes below.",
+        )}
       >
         <ToggleRow
           label={t("Show an “on disk” badge on cards")}
-          sub={t("Marks movies and shows across Home, the catalogs, and detail pages when a matching file already exists in your local library.")}
+          sub={t(
+            "Marks movies and shows across Home, the catalogs, and detail pages when a matching file already exists in your local library.",
+          )}
           value={settings.showLocalLibraryBadge}
           onChange={(v) => update({ showLocalLibraryBadge: v })}
         />
@@ -882,7 +958,9 @@ export function LibraryPanel({
           <div className="flex min-w-0 flex-col gap-0.5">
             <span className="text-[13.5px] font-medium text-ink">{t("Minimum file size")}</span>
             <span className="text-[12px] leading-snug text-ink-muted">
-              {t("Files smaller than this are skipped when scanning a folder, so clips and samples stay out. Set to 0 to include everything.")}
+              {t(
+                "Files smaller than this are skipped when scanning a folder, so clips and samples stay out. Set to 0 to include everything.",
+              )}
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -900,9 +978,13 @@ export function LibraryPanel({
         </div>
         <div className="flex flex-col gap-2 rounded-xl bg-canvas/40 px-4 py-3.5">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[13.5px] font-medium text-ink">{t("When a title is in your local library")}</span>
+            <span className="text-[13.5px] font-medium text-ink">
+              {t("When a title is in your local library")}
+            </span>
             <span className="text-[12px] leading-snug text-ink-muted">
-              {t("What Play does when a movie or episode also exists on your disk. Autoplay always prefers the local copy unless set to Stream.")}
+              {t(
+                "What Play does when a movie or episode also exists on your disk. Autoplay always prefers the local copy unless set to Stream.",
+              )}
             </span>
           </div>
           <Segmented
@@ -936,7 +1018,6 @@ export function LibraryPanel({
           />
         </div>
       </Section>
-
     </>
   );
 }
@@ -1223,8 +1304,16 @@ function PreviewCard({
           phase === "anime" ? "opacity-100" : "opacity-0"
         }`}
       />
-      <PreviewBadgeRow nodes={normal.slice(0, cap)} badgePos={badgePos} visible={phase === "normal"} />
-      <PreviewBadgeRow nodes={anime.slice(0, cap)} badgePos={badgePos} visible={phase === "anime"} />
+      <PreviewBadgeRow
+        nodes={normal.slice(0, cap)}
+        badgePos={badgePos}
+        visible={phase === "normal"}
+      />
+      <PreviewBadgeRow
+        nodes={anime.slice(0, cap)}
+        badgePos={badgePos}
+        visible={phase === "anime"}
+      />
       {watchlistBadge !== "off" && (
         <span
           className={`absolute z-10 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-canvas/85 text-ink ring-1 ring-edge-soft/70 ${WL_PREVIEW_POS[watchlistBadge]}`}
@@ -1267,7 +1356,9 @@ function HomeModePicker({
             type="button"
             onClick={() => onChange(opt.id)}
             className={`group relative h-[180px] overflow-hidden rounded-2xl border bg-canvas text-start transition-all ${
-              selected ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]" : "border-edge-soft hover:border-edge"
+              selected
+                ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
+                : "border-edge-soft hover:border-edge"
             }`}
           >
             <img
@@ -1306,9 +1397,7 @@ function HomeModePicker({
                 selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
               }`}
             >
-              <span className="text-[15px] font-semibold tracking-tight text-ink">
-                {opt.label}
-              </span>
+              <span className="text-[15px] font-semibold tracking-tight text-ink">{opt.label}</span>
               <span className="max-w-[88%] text-[12px] leading-relaxed text-ink-muted">
                 {opt.sub}
               </span>
@@ -1320,13 +1409,7 @@ function HomeModePicker({
   );
 }
 
-function RetentionPicker({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (v: number) => void;
-}) {
+function RetentionPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const options: Array<{ days: number; label: string }> = [
     { days: 0, label: "None" },
     { days: 7, label: "1 week" },
@@ -1435,8 +1518,20 @@ function PlacementPicker({
     normal: string;
     anime: string;
   }> = [
-    { id: "top", label: "Top", sub: "Floats over the artwork", normal: previewPoster1, anime: previewPoster3 },
-    { id: "bottom", label: "Bottom", sub: "Sits above the title strip", normal: previewPoster2, anime: previewPoster4 },
+    {
+      id: "top",
+      label: "Top",
+      sub: "Floats over the artwork",
+      normal: previewPoster1,
+      anime: previewPoster3,
+    },
+    {
+      id: "bottom",
+      label: "Bottom",
+      sub: "Sits above the title strip",
+      normal: previewPoster2,
+      anime: previewPoster4,
+    },
   ];
   return (
     <div className="grid grid-cols-2 gap-3">

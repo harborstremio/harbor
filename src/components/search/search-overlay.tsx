@@ -34,13 +34,32 @@ export function SearchOverlay() {
   const [aiRunSignal, setAiRunSignal] = useState(0);
   const { settings, update } = useSettings();
 
-
   useEffect(() => {
     if (!open) return;
-    const id = window.setTimeout(() => inputRef.current?.focus(), 30);
+
+    const id = window.setTimeout(() => {
+      const input = inputRef.current;
+      if (!input) return;
+
+      // Search Overlay opens directly in typing mode. It must never inherit
+      // the read-only TV navigation state used by Settings/Home text fields.
+      input.readOnly = false;
+      input.removeAttribute("data-search-nav-mode");
+      input.removeAttribute("data-tv-focused");
+      input.setAttribute("data-search-editing", "true");
+      input.focus({ preventScroll: true });
+
+      const len = input.value.length;
+      try {
+        input.setSelectionRange(len, len);
+      } catch {}
+    }, 30);
+
     document.body.style.overflow = "hidden";
+
     return () => {
       window.clearTimeout(id);
+      inputRef.current?.removeAttribute("data-search-editing");
       document.body.style.overflow = "";
     };
   }, [open]);
@@ -179,7 +198,9 @@ export function SearchOverlay() {
               />
             )}
           </div>
-          {status === "loading" && <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />}
+          {status === "loading" && (
+            <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />
+          )}
           <Hint />
           {(settings.aiSearchKey.trim() || settings.aiGroqKey.trim()) && (
             <AiModeButton
@@ -242,7 +263,12 @@ export function SearchOverlay() {
           )}
 
           {trimmed && !directInput && (
-            <AiSearchSection query={trimmed} onClose={close} onActive={setAiActive} runSignal={aiRunSignal} />
+            <AiSearchSection
+              query={trimmed}
+              onClose={close}
+              onActive={setAiActive}
+              runSignal={aiRunSignal}
+            />
           )}
 
           {trimmed && !directInput && hasResults && !aiActive && results && (
@@ -262,9 +288,13 @@ export function SearchOverlay() {
 
           {noResults && !directInput && !aiActive && (
             <div className="flex flex-col items-center gap-3 pt-16 text-center">
-              <span className="text-[17px] font-semibold text-ink">{t("No matches for \"{query}\"", { query: trimmed })}</span>
+              <span className="text-[17px] font-semibold text-ink">
+                {t('No matches for "{query}"', { query: trimmed })}
+              </span>
               <span className="max-w-[44ch] text-[14px] text-ink-muted">
-                {t("Try a different spelling, a person's name, a year like \"1972\", or a genre like \"Horror\".")}
+                {t(
+                  'Try a different spelling, a person\'s name, a year like "1972", or a genre like "Horror".',
+                )}
               </span>
             </div>
           )}

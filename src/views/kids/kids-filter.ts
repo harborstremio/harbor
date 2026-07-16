@@ -10,3 +10,25 @@ export function dropUnreleased(metas: Meta[]): Meta[] {
     return !Number.isFinite(y) || y <= yearNow;
   });
 }
+
+const UNSAFE_CINEMETA_GENRE = /^(action|biography|crime|history|horror|romance|thriller|war)$/i;
+
+export function dropUnsafeGenres(metas: Meta[]): Meta[] {
+  return metas.filter(
+    (meta) => !meta.genres?.some((genre) => /^(horror|thriller)$/i.test(genre.trim())),
+  );
+}
+
+export function dropAdultContent(metas: Meta[]): Meta[] {
+  return metas.filter((meta) => !meta.adult);
+}
+
+export function dropUnsafeCinemetaKids(metas: Meta[]): Meta[] {
+  return dropAdultContent(metas).filter((meta) => {
+    const genres = meta.genres ?? [];
+    return (
+      !genres.some((genre) => UNSAFE_CINEMETA_GENRE.test(genre.trim())) &&
+      (genres.includes("Family") || (genres.includes("Animation") && genres.includes("Comedy")))
+    );
+  });
+}

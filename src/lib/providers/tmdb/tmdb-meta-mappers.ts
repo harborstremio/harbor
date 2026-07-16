@@ -13,6 +13,7 @@ export type RawMovie = {
   release_date?: string;
   vote_average?: number;
   genre_ids?: number[];
+  adult?: boolean;
   original_language?: string;
 };
 
@@ -26,6 +27,7 @@ export type RawSeries = {
   first_air_date?: string;
   vote_average?: number;
   genre_ids?: number[];
+  adult?: boolean;
   original_language?: string;
 };
 
@@ -43,7 +45,10 @@ const TV_GENRE_NAME = new Map<number, string>(
   Object.entries(TV_GENRES).map(([name, id]) => [id, name]),
 );
 
-function genresFromIds(ids: number[] | undefined, kind: "movie" | "tv"): string[] | undefined {
+export function genresFromIds(
+  ids: number[] | undefined,
+  kind: "movie" | "tv",
+): string[] | undefined {
   if (!ids || ids.length === 0) return undefined;
   const lookup = kind === "movie" ? MOVIE_GENRE_NAME : TV_GENRE_NAME;
   const names: string[] = [];
@@ -68,6 +73,7 @@ export const movieMeta = (m: RawMovie): Meta => {
     releaseInfo: year(m.release_date),
     releaseDate: m.release_date,
     imdbRating: rating(m.vote_average),
+    adult: m.adult,
     genres: genresFromIds(m.genre_ids, "movie"),
   };
 };
@@ -86,6 +92,7 @@ export const seriesMeta = (s: RawSeries): Meta => {
     releaseInfo: year(s.first_air_date),
     releaseDate: s.first_air_date,
     imdbRating: rating(s.vote_average),
+    adult: s.adult,
     genres: genresFromIds(s.genre_ids, "tv"),
   };
 };

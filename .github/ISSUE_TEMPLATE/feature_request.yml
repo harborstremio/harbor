@@ -1,0 +1,73 @@
+name: Feature request
+description: Suggest an improvement or new capability for Harbor.
+title: "[Feature]: "
+labels:
+  - enhancement
+  - needs-triage
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the feature you would like to see in Harbor and how it would improve your experience.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      description: Which part of Harbor does this request relate to?
+      options:
+        - Playback, player, or mpv
+        - Subtitles, audio, or synchronization
+        - Streams, addons, debrid, or P2P
+        - Anime, seasons, or episode ordering
+        - Library, watch history, or Continue Watching
+        - Accounts or tracking services
+        - Search, discovery, or metadata
+        - Interface, themes, or accessibility
+        - Downloads or local media
+        - IPTV, casting, or TV mode
+        - Performance, crashes, or responsiveness
+        - Installation, updates, or platform integration
+        - Other or not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature
+    attributes:
+      label: Feature description
+      description: What would you like Harbor to support?
+      placeholder: Harbor should allow users to ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: How would you use this feature, and what would it improve?
+      placeholder: This would be useful when ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Additional context
+      description: Add screenshots, mockups, links, examples, or other relevant details.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to help implement or test this feature.

@@ -1,11 +1,13 @@
 import { Copy, Minus, Square, X } from "lucide-react";
+import { useSettings } from "@/lib/settings";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 export function WindowControlButtons({ t }: { t: (key: string) => string }) {
+  const { settings } = useSettings();
   const maxed = useMaximized();
-  if (!IS_TAURI) return null;
+  if (!IS_TAURI || settings.useNativeTitleBar) return null;
   return (
     <div className="pointer-events-auto flex items-center gap-1">
       <button

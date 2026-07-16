@@ -14,6 +14,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 const GAP = 20;
 const EAGER_COUNT = 6;
@@ -526,6 +527,7 @@ function EdgeArrow({
 }) {
   const t = useT();
   const label = t(side === "left" ? "Scroll left" : "Scroll right");
+
   if (always) {
     return (
       <div
@@ -533,13 +535,68 @@ function EdgeArrow({
           side === "left" ? "start-0 justify-start" : "end-0 justify-end"
         } ${visible ? "opacity-100" : "opacity-0"}`}
       >
+        <ThreeLiquidGlassSurface
+          radius="9999px"
+          shaderRadius={1}
+          intensity={1}
+          className={`h-11 w-11 pointer-events-auto ${
+            visible
+              ? "opacity-0 group-hover/row:opacity-100 focus-within:opacity-100"
+              : "pointer-events-none opacity-0"
+          }`}
+          contentClassName="flex h-full w-full items-center justify-center"
+        >
+          <button
+            type="button"
+            onClick={onClick}
+            aria-label={label}
+            tabIndex={visible ? 0 : -1}
+            className="
+      flex h-full w-full
+      items-center justify-center
+      rounded-full bg-transparent
+      text-ink outline-none
+    "
+          >
+            {side === "left" ? (
+              <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
+            ) : (
+              <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
+            )}
+          </button>
+        </ThreeLiquidGlassSurface>
+      </div>
+    );
+  }
+
+  const sideClass = side === "left" ? "start-0 justify-start" : "end-0 justify-end";
+
+  return (
+    <div
+      className={`pointer-events-none absolute inset-y-0 z-30 flex w-14 items-center ${sideClass}`}
+    >
+      <ThreeLiquidGlassSurface
+        radius="9999px"
+        shaderRadius={1}
+        intensity={1}
+        className={`h-11 w-11 pointer-events-auto ${
+          visible
+            ? "opacity-0 group-hover/row:opacity-100 focus-within:opacity-100"
+            : "pointer-events-none opacity-0"
+        }`}
+        contentClassName="flex h-full w-full items-center justify-center"
+      >
         <button
+          type="button"
           onClick={onClick}
           aria-label={label}
           tabIndex={visible ? 0 : -1}
-          className={`harbor-row-arrow mx-1 flex h-12 w-12 items-center justify-center rounded-full border border-edge-soft/50 bg-canvas/90 text-ink shadow-[0_6px_20px_-6px_rgba(0,0,0,0.6)] backdrop-blur-md transition-transform duration-150 hover:scale-110 active:scale-95 ${
-            visible ? "pointer-events-auto" : "pointer-events-none"
-          }`}
+          className="
+      flex h-full w-full
+      items-center justify-center
+      rounded-full bg-transparent
+      text-ink outline-none
+    "
         >
           {side === "left" ? (
             <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
@@ -547,26 +604,7 @@ function EdgeArrow({
             <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
           )}
         </button>
-      </div>
-    );
-  }
-  const sideClass = side === "left" ? "start-0 justify-start" : "end-0 justify-end";
-  return (
-    <div className={`pointer-events-none absolute inset-y-0 z-30 flex w-14 items-center ${sideClass}`}>
-      <button
-        onClick={onClick}
-        aria-label={label}
-        tabIndex={visible ? 0 : -1}
-        className={`harbor-row-arrow pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-canvas/85 text-ink backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-canvas ${
-          visible ? "opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100" : "pointer-events-none opacity-0"
-        }`}
-      >
-        {side === "left" ? (
-          <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
-        ) : (
-          <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
-        )}
-      </button>
+      </ThreeLiquidGlassSurface>
     </div>
   );
 }

@@ -5,13 +5,13 @@ import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
 import { ScrollRootContext } from "@/components/row";
 import { TmdbNudge } from "@/components/nudge";
 import { topMovies, type Meta } from "@/lib/cinemeta";
-import { recentlyPlayed } from "@/lib/playback-history";
 import { listPager } from "@/lib/list-pager";
+import { recentlyPlayed } from "@/lib/playback-history";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory } from "@/lib/view";
 import { KidsDoodles } from "./kids/kids-doodles";
-import { dropUnreleased } from "./kids/kids-filter";
+import { dropAdultContent, dropUnreleased, dropUnsafeCinemetaKids } from "./kids/kids-filter";
 import { KidsFranchiseRail } from "./kids/kids-franchise-rail";
 import { KidsHero } from "./kids/kids-hero";
 import { buildKidsHero, kidsSpecs } from "./kids/kids-specs";
@@ -55,7 +55,7 @@ export function Kids({ active = true }: { active?: boolean }) {
       if (settings.tmdbKey) {
         const heroPool = await buildKidsHero(settings.tmdbKey, seen).catch(() => [] as Meta[]);
         if (cancelled) return;
-        setHero(dropUnreleased(heroPool));
+        setHero(dropAdultContent(dropUnreleased(heroPool)));
         const specs = kidsSpecs(settings.tmdbKey);
         const firstPages = await Promise.all(
           specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
@@ -73,34 +73,27 @@ export function Kids({ active = true }: { active?: boolean }) {
           .filter((r) => r.metas.length > 0);
         setRows(built);
       } else {
-        const [anim, family] = await Promise.all([
-          topMovies("Animation").catch(() => [] as Meta[]),
-          topMovies("Family").catch(() => [] as Meta[]),
-        ]);
+        const [animation, family] = await Promise.all(
+          ["Animation", "Family"].map((genre) =>
+            topMovies(genre)
+              .then(dropUnreleased)
+              .then(dropUnsafeCinemetaKids)
+              .catch(() => [] as Meta[]),
+          ),
+        );
         if (cancelled) return;
-        setHero(dropUnreleased(anim.filter((m) => m.background)).slice(0, 5));
-        const built: KidsRow[] = [];
-        if (anim.length > 0) {
-          built.push({
-            key: "cinemeta-animation",
-            title: "Animated Movies",
-            metas: anim.slice(0, 30),
+        setHero(animation.filter((m) => m.background).slice(0, 5));
+        setRows(
+          [
+            { key: "cinemeta-animation", title: "Animated Movies", metas: animation },
+            { key: "cinemeta-family", title: "Family Movies", metas: family },
+          ].map((row) => ({
+            ...row,
             page: 1,
             hasMore: false,
-            fetcher: listPager(anim),
-          });
-        }
-        if (family.length > 0) {
-          built.push({
-            key: "cinemeta-family",
-            title: "Family Movies",
-            metas: family.slice(0, 30),
-            page: 1,
-            hasMore: false,
-            fetcher: listPager(family),
-          });
-        }
-        setRows(built);
+            fetcher: listPager(row.metas),
+          })),
+        );
       }
     })().catch(console.error);
     return () => {
@@ -144,7 +137,7 @@ export function Kids({ active = true }: { active?: boolean }) {
     for (const m of hero) seen.add(m.id);
     return rows
       .map((r) => {
-        const dedupedMetas = dropUnreleased(r.metas).filter((m) => {
+        const dedupedMetas = dropAdultContent(dropUnreleased(r.metas)).filter((m) => {
           if (seen.has(m.id)) return false;
           seen.add(m.id);
           return true;
@@ -158,16 +151,41 @@ export function Kids({ active = true }: { active?: boolean }) {
     <main ref={scrollCb} data-kids="on" className="relative h-full overflow-y-auto bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
         <KidsHero featured={hero} />
-        <div className="relative z-10 -mt-[14vh] flex w-full flex-col gap-6 px-12 pb-32 pt-3">
+        <div className="relative z-10 mt-[-14vh] flex w-full flex-col gap-6 px-12 pb-32 pt-3">
           <div aria-hidden className="kids-page-glow pointer-events-none absolute inset-0 -z-10" />
           <KidsDoodles />
           <div className="relative">
             <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-10 bottom-0">
-              <img src="/kids/doodles/lilleaflitter.png" alt="" draggable={false} className="absolute left-[2%] top-6 h-11 w-auto -rotate-12 opacity-90" />
-              <img src="/kids/doodles/lilpurpocto.png" alt="" draggable={false} className="absolute left-[26%] top-9 h-12 w-auto opacity-90" />
-              <img src="/kids/doodles/lilwhitestar.png" alt="" draggable={false} className="absolute left-[46%] top-3 h-6 w-auto opacity-80" />
-              <img src="/kids/doodles/lilorangestar2.png" alt="" draggable={false} className="absolute left-[56%] top-11 h-9 w-auto opacity-90" />
-              <img src="/kids/doodles/lilpurplestar.png" alt="" draggable={false} className="absolute left-[67%] top-4 h-14 w-auto opacity-85" />
+              <img
+                src="/kids/doodles/lilleaflitter.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[2%] top-6 h-11 w-auto -rotate-12 opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilpurpocto.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[26%] top-9 h-12 w-auto opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilwhitestar.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[46%] top-3 h-6 w-auto opacity-80"
+              />
+              <img
+                src="/kids/doodles/lilorangestar2.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[56%] top-11 h-9 w-auto opacity-90"
+              />
+              <img
+                src="/kids/doodles/lilpurplestar.png"
+                alt=""
+                draggable={false}
+                className="absolute left-[67%] top-4 h-14 w-auto opacity-85"
+              />
             </div>
             <CatalogCustomizeBar
               editMode={pageRows.editMode}
@@ -193,7 +211,7 @@ export function Kids({ active = true }: { active?: boolean }) {
             src="/kids/octofooter.svg"
             alt=""
             draggable={false}
-            className="pointer-events-none absolute bottom-0 end-0 w-[clamp(150px,18vw,280px)] opacity-95"
+            className="pointer-events-none absolute bottom-0 inset-e-0 w-[clamp(150px,18vw,280px)] opacity-95"
           />
         </div>
         <BackToTop scrollRef={scrollRef} />

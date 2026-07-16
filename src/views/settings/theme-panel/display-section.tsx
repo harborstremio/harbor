@@ -17,11 +17,15 @@ export function DisplaySection() {
     <>
       <Section
         title={t("Poster card style")}
-        subtitle={t("Tune the size and corner radius of every poster across Home, Discover, and your library. The preview updates live.")}
+        subtitle={t(
+          "Tune the size and corner radius of every poster across Home, Discover, and your library. The preview updates live.",
+        )}
       >
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start">
           <div className="flex shrink-0 flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-6 sm:w-[250px]">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Live preview")}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+              {t("Live preview")}
+            </span>
             <div className="flex justify-center py-1">
               <img
                 src={previewPoster}
@@ -63,7 +67,9 @@ export function DisplaySection() {
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Size")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Size")}
+              </span>
               <Segmented
                 value={posterSizeKey(settings.posterScale)}
                 options={POSTER_SIZES.map((p) => ({ value: p.value, label: p.label }))}
@@ -73,15 +79,21 @@ export function DisplaySection() {
               />
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Corner radius")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Corner radius")}
+              </span>
               <Segmented
                 value={radiusKey(settings.posterRadius)}
                 options={POSTER_RADII.map((p) => ({ value: p.value, label: t(p.label) }))}
-                onChange={(v) => update({ posterRadius: POSTER_RADII.find((p) => p.value === v)?.px ?? 12 })}
+                onChange={(v) =>
+                  update({ posterRadius: POSTER_RADII.find((p) => p.value === v)?.px ?? 12 })
+                }
               />
             </div>
             <div className="flex flex-col gap-2">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{t("Load effect")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                {t("Load effect")}
+              </span>
               <Segmented
                 value={settings.posterEffect}
                 options={[
@@ -92,7 +104,9 @@ export function DisplaySection() {
                 onChange={(v) => update({ posterEffect: v as "blur" | "fade" | "off" })}
               />
               <p className="text-[12px] leading-relaxed text-ink-subtle">
-                {t("How posters appear as they load. Blur up looks smoothest; Fade is lighter on older or low-power devices; Instant turns it off.")}
+                {t(
+                  "How posters appear as they load. Blur up looks smoothest; Fade is lighter on older or low-power devices; Instant turns it off.",
+                )}
               </p>
             </div>
           </div>
@@ -102,7 +116,7 @@ export function DisplaySection() {
         title={t("Sound Effects (SFX)")}
         subtitle={t("Choose your preferred audio feedback for navigation and actions.")}
       >
-        <div className="flex max-w-sm flex-col gap-4">
+        <div className="flex w-full flex-col gap-4">
           <ToggleRow
             label={t("Enable sound effects")}
             sub={t("Play sounds for navigation and actions.")}
@@ -166,7 +180,9 @@ export function DisplaySection() {
       </Section>
       <Section
         title={t("Title text")}
-        subtitle={t("Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.")}
+        subtitle={t(
+          "Resize the row titles on Home and the title shown in the player, without scaling the rest of the interface. You can also lead the player title with the series name instead of the episode.",
+        )}
       >
         <SizeSlider
           label={t("Row titles")}
@@ -188,10 +204,14 @@ export function DisplaySection() {
 
       <Section
         title={t("Accessibility")}
-        subtitle={t("Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.")}
+        subtitle={t(
+          "Make everything bigger and easier to read: sidebar, menus, popups, every page. The whole interface scales live as you drag, so you can see the change right here. Great on 4K and ultrawide monitors, or whenever the text feels small.",
+        )}
       >
         <div className="flex items-center gap-4 px-1 py-1.5">
-          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Interface scale")}</span>
+          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
+            {t("Interface scale")}
+          </span>
           <input
             type="range"
             min={0.8}
@@ -217,11 +237,15 @@ export function DisplaySection() {
 
       <Section
         title={t("Stream format chips")}
-        subtitle={t("The little 4K · HDR · codec · audio chips that ride along each stream in the play picker.")}
+        subtitle={t(
+          "The little 4K · HDR · codec · audio chips that ride along each stream in the play picker.",
+        )}
       >
         <ToggleRow
           label={t("Show format chips on stream rows")}
-          sub={t("The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.")}
+          sub={t(
+            "The picker tags each stream with resolution, HDR flavor, codec, and audio format. Off hides them all.",
+          )}
           value={settings.showQualityBadge}
           onChange={(v) => update({ showQualityBadge: v })}
         />
@@ -248,7 +272,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Home hero shadow")}
-        subtitle={t("How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.")}
+        subtitle={t(
+          "How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.",
+        )}
       >
         <div className="flex items-center gap-4 px-1 py-1.5">
           <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Shadow")}</span>
@@ -277,7 +303,9 @@ export function DisplaySection() {
 
       <Section
         title={t("Trailer quality")}
-        subtitle={t("How sharp the trailer is when you hit the preview button. Auto picks from your connection speed. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.")}
+        subtitle={t(
+          "How sharp the trailer is when you hit the preview button. Auto picks from your connection speed. 1080p and Best merge separate video and audio with the bundled ffmpeg, so they take a beat longer to start.",
+        )}
       >
         <Segmented
           value={settings.trailerQuality}
@@ -292,14 +320,18 @@ export function DisplaySection() {
         />
         <ToggleRow
           label={t("Autoplay trailer on detail pages")}
-          sub={t("Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.")}
+          sub={t(
+            "Plays a muted trailer in the backdrop when you open a title. Click the speaker to unmute. Falls back to the image when no trailer is available.",
+          )}
           value={settings.detailTrailerAutoplay}
           onChange={(v) => update({ detailTrailerAutoplay: v })}
         />
         {settings.detailTrailerAutoplay && (
           <ToggleRow
             label={t("Start trailers with audio")}
-            sub={t("Detail page trailers begin unmuted. Falls back to muted if the browser blocks sound until you interact.")}
+            sub={t(
+              "Detail page trailers begin unmuted. Falls back to muted if the browser blocks sound until you interact.",
+            )}
             value={settings.detailTrailerAudio}
             onChange={(v) => update({ detailTrailerAudio: v })}
           />
@@ -355,7 +387,8 @@ const POSTER_RADII = [
 ];
 
 function radiusKey(px: number): string {
-  return POSTER_RADII.reduce((best, p) => (Math.abs(p.px - px) < Math.abs(best.px - px) ? p : best)).value;
+  return POSTER_RADII.reduce((best, p) => (Math.abs(p.px - px) < Math.abs(best.px - px) ? p : best))
+    .value;
 }
 
 function PxField({

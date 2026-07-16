@@ -10,12 +10,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: vite-plus-check-${{ github.workflow }}-${{ github.ref }}
+  group: code-quality-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Check
+  quality:
+    name: Frontend
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -27,18 +27,133 @@ jobs:
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: true
-          run-install: false
+          run-install: |
+            args:
+              - --frozen-lockfile
 
-      - name: Install dependencies
-        run: vp install --frozen-lockfile
-
-      - name: Check
+      - name: Check changed files
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
         run: |
-          if [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE_SHA="${GITHUB_SHA}^1"
+          elif [[ -z "${BASE_SHA:-}" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
             BASE_SHA="$(git rev-list --max-parents=0 "$GITHUB_SHA")"
           fi
-          git diff --name-only --diff-filter=ACMR -z "$BASE_SHA" "$GITHUB_SHA" | xargs -0 -r vp check
+
+          mapfile -d '' changed_files < <(
+            git diff --name-only --diff-filter=ACMR -z "$BASE_SHA" "$GITHUB_SHA"
+          )
+
+          format_files=()
+          code_files=()
+          for file in "${changed_files[@]}"; do
+            case "$file" in
+              *.cjs | *.css | *.html | *.js | *.json | *.jsonc | *.jsx | *.md | *.mdx | *.mjs | *.scss | *.toml | *.ts | *.tsx | *.yaml | *.yml)
+                format_files+=("$file")
+                ;;
+            esac
+            case "$file" in
+              *.cjs | *.js | *.jsx | *.mjs | *.ts | *.tsx)
+                code_files+=("$file")
+                ;;
+            esac
+          done
+
+          if (( ${#format_files[@]} )); then
+            vp fmt --check "${format_files[@]}"
+          else
+            echo "No changed files require formatting checks."
+          fi
+
+          if (( ${#code_files[@]} )); then
+            vp check --no-fmt "${code_files[@]}"
+          else
+            echo "No changed JavaScript or TypeScript files require lint checks."
+          fi
+
+      - name: Typecheck
+        run: vp run typecheck
+
+      - name: Test
+        run: vp run test
+
+  native:
+    name: Native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect native changes
+        id: native-changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            BASE_SHA="${GITHUB_SHA}^1"
+          elif [[ -z "${BASE_SHA:-}" || "$BASE_SHA" == "0000000000000000000000000000000000000000" ]]; then
+            BASE_SHA="$(git rev-list --max-parents=0 "$GITHUB_SHA")"
+          fi
+
+          if git diff --quiet "$BASE_SHA" "$GITHUB_SHA" -- \
+            src-tauri \
+            harbor-core \
+            .github/workflows/ci.yml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip native check
+        if: steps.native-changes.outputs.changed != 'true'
+        run: echo "No native build inputs changed; skipping cargo check."
+
+      - name: Install Linux build dependencies
+        if: steps.native-changes.outputs.changed == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2-dev \
+            libayatana-appindicator3-dev \
+            libgtk-3-dev \
+            libmpv-dev \
+            librsvg2-dev \
+            libssl-dev \
+            libwebkit2gtk-4.1-dev \
+            pkg-config
+
+      - name: Setup Rust
+        if: steps.native-changes.outputs.changed == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        if: steps.native-changes.outputs.changed == 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            harbor-core
+            src-tauri
+
+      - name: Check Tauri application
+        if: steps.native-changes.outputs.changed == 'true'
+        env:
+          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
+        run: cargo check --manifest-path src-tauri/Cargo.toml
+
+      - name: Test Tauri application
+        if: steps.native-changes.outputs.changed == 'true'
+        env:
+          TAURI_CONFIG: '{"bundle":{"externalBin":[]}}'
+        run: cargo test --manifest-path src-tauri/Cargo.toml

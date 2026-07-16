@@ -8,8 +8,11 @@
     "dev": "vp dev",
     "build": "tsc -b && vp build",
     "check": "vp check",
+    "test": "node --test tests/*.test.ts",
+    "typecheck": "tsc -b --pretty false",
     "fmt": "vp fmt",
     "lint": "vp lint",
+    "i18n:check": "node scripts/check-i18n.mjs",
     "preview": "vp preview",
     "tauri": "tauri",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
@@ -42,7 +45,8 @@
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
@@ -50,6 +54,7 @@
     "@tauri-apps/cli": "^2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^6.0.3",
     "cheerio": "^1.2.0",
     "typescript": "~5.8.3",

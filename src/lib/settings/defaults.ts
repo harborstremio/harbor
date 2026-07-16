@@ -4,7 +4,7 @@ import type { Settings } from "./types";
 export const STORAGE_KEY = "harbor.settings";
 
 export const DEFAULT: Settings = {
-  soundTheme: 'none',
+  soundTheme: "none",
   sfxVolume: 50,
   playerVolumeSfx: false,
   blurComments: false,
@@ -307,7 +307,15 @@ export const DEFAULT: Settings = {
   cwSnapshotFullQuality: false,
   streamFilterLevel: "strict",
   blockTrackers: true,
-  homeRows: { order: [], hidden: [], renamed: {}, numerals: [], heroSource: null, customSources: [], listRows: [] },
+  homeRows: {
+    order: [],
+    hidden: [],
+    renamed: {},
+    numerals: [],
+    heroSource: null,
+    customSources: [],
+    listRows: [],
+  },
   navCustomization: { order: [], hidden: [], renamed: {} },
   hotkeys: {},
   animeFavoriteGenres: [],
@@ -376,7 +384,6 @@ export const DEFAULT: Settings = {
   wrappedButton: true,
   feedLocaleBias: true,
   uiLanguage: "en",
-  arabicWelcomeSeen: false,
   cropMode: "fit",
   customLists: [],
   pauseListStatusOnPause: false,
@@ -387,7 +394,12 @@ export const DEFAULT: Settings = {
     mode: "public",
     username: "",
     encodedConfig: "",
-    selectedCatalogs: ["letterboxd-watchlist", "letterboxd-liked", "letterboxd-popular", "letterboxd-top250"],
+    selectedCatalogs: [
+      "letterboxd-watchlist",
+      "letterboxd-liked",
+      "letterboxd-popular",
+      "letterboxd-top250",
+    ],
     hiddenCatalogs: [],
     catalogOrder: [],
     showRatingsOnPosters: true,

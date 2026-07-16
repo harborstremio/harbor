@@ -8,7 +8,7 @@ import { tmdbDetails, type TmdbDetail } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { CollectionRow } from "./detail/collection-row";
-import { dropUnreleased } from "./kids/kids-filter";
+import { dropAdultContent, dropUnreleased, dropUnsafeGenres } from "./kids/kids-filter";
 import { KidsEpisodes } from "./kids-detail/kids-episodes";
 
 export function KidsDetailView({
@@ -50,7 +50,13 @@ export function KidsDetailView({
   const genres = (detail?.genres?.length ? detail.genres : base?.genres) ?? [];
   const runtime = detail?.runtime;
   const year = meta.releaseInfo || base?.releaseInfo;
-  const recs = dropUnreleased(dedupe([...(detail?.recommendations ?? []), ...(detail?.similar ?? [])], meta.id));
+  const recs = dropAdultContent(
+    dropUnsafeGenres(
+      dropUnreleased(
+        dedupe([...(detail?.recommendations ?? []), ...(detail?.similar ?? [])], meta.id),
+      ),
+    ),
+  );
 
   const onPlay = () => {
     const isSeries = meta.type === "series";

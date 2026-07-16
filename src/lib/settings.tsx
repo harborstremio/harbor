@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { applyTheme, isKnownPreset, nextColorTheme } from "@/lib/theme";
 import { applyAppIcon } from "@/lib/app-icon";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
@@ -76,7 +85,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     void loadBgImage().then((img) => {
       if (cancelled || !img) return;
-      setSettings((s) => (s.theme.backgroundImage ? s : { ...s, theme: { ...s.theme, backgroundImage: img } }));
+      setSettings((s) =>
+        s.theme.backgroundImage ? s : { ...s, theme: { ...s.theme, backgroundImage: img } },
+      );
     });
     return () => {
       cancelled = true;
@@ -91,7 +102,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       try {
         localStorage.setItem(STORAGE_KEY, raw);
         seedSharedFromLegacy();
-        setSettings(loadEffective(sourceRef.current.profileId, sourceRef.current.linked));
+        const restored = loadEffective(sourceRef.current.profileId, sourceRef.current.linked);
+        setUiLanguage(restored.uiLanguage);
+        setSettings(restored);
       } catch {}
     });
     return () => {
@@ -110,7 +123,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const fileTimerRef = useRef(0);
   useEffect(() => {
     try {
-      const json = persistEffective(settings, sourceRef.current.profileId, sourceRef.current.linked);
+      const json = persistEffective(
+        settings,
+        sourceRef.current.profileId,
+        sourceRef.current.linked,
+      );
       window.clearTimeout(fileTimerRef.current);
       fileTimerRef.current = window.setTimeout(() => void writeSettingsFile(json), 600);
     } catch (e) {
@@ -133,7 +150,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (tmdbLangRef.current === eff) return;
     tmdbLangRef.current = eff;
     window.location.reload();
-  }, [settings.tmdbLanguage, settings.uiLanguage]);
+  }, [settings.tmdbLanguage]);
 
   const imgLangRef = useRef<string | null>(null);
   useEffect(() => {
@@ -158,7 +175,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const scale = settings.uiScale > 0 ? settings.uiScale : 1;
-    const root = document.getElementById("root") as (HTMLElement & { style: CSSStyleDeclaration & { zoom?: string } }) | null;
+    const root = document.getElementById("root") as
+      | (HTMLElement & { style: CSSStyleDeclaration & { zoom?: string } })
+      | null;
     if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
       void import("@tauri-apps/api/webview")
         .then(({ getCurrentWebview }) => getCurrentWebview().setZoom(scale))
@@ -232,11 +251,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       for (const f of legacy) if (f.dataUrl) await saveFontData(f.id, f.dataUrl).catch(() => {});
       setSettings((s) => ({
         ...s,
-        customFonts: (s.customFonts ?? []).map((f) => ({ id: f.id, name: f.name, format: f.format })),
+        customFonts: (s.customFonts ?? []).map((f) => ({
+          id: f.id,
+          name: f.name,
+          format: f.format,
+        })),
       }));
     })();
   }, [settings.customFonts]);
-
 
   useEffect(() => {
     void import("@/lib/privacy/blocklist").then(({ setTrackerBlocking }) => {
@@ -254,8 +276,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     window.__harborStremioDeeplink = settings.stremioDeeplinkInstall;
     if (!("__TAURI_INTERNALS__" in window)) return;
     void import("@tauri-apps/api/core").then(({ invoke }) => {
-      void invoke("deeplink_set_stremio", { enabled: settings.stremioDeeplinkInstall }).catch(
-        (e) => console.warn("[harbor] deeplink_set_stremio failed", e),
+      void invoke("deeplink_set_stremio", { enabled: settings.stremioDeeplinkInstall }).catch((e) =>
+        console.warn("[harbor] deeplink_set_stremio failed", e),
       );
     });
   }, [settings.stremioDeeplinkInstall]);
@@ -285,7 +307,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         },
       }).catch((e) => console.warn("[harbor] tray_set_prefs failed", e));
     });
-  }, [settings.closeToTray, settings.trayAlwaysOnTop, settings.pauseMinimized, settings.pauseUnfocused]);
+  }, [
+    settings.closeToTray,
+    settings.trayAlwaysOnTop,
+    settings.pauseMinimized,
+    settings.pauseUnfocused,
+  ]);
 
   useEffect(() => {
     if (!("__TAURI_INTERNALS__" in window)) return;
@@ -296,21 +323,26 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       else unlisteners.push(u);
     };
     void import("@tauri-apps/api/event").then(({ listen }) => {
-      void listen<{ closeToTray: boolean; alwaysOnTop: boolean; pauseMinimized: boolean; pauseUnfocused: boolean }>(
-        "harbor://tray-prefs",
-        (e) => {
-          const p = e.payload;
-          setSettings((s) => ({
-            ...s,
-            closeToTray: p.closeToTray,
-            trayAlwaysOnTop: p.alwaysOnTop,
-            pauseMinimized: p.pauseMinimized,
-            pauseUnfocused: p.pauseUnfocused,
-          }));
-        },
-      ).then(track);
+      void listen<{
+        closeToTray: boolean;
+        alwaysOnTop: boolean;
+        pauseMinimized: boolean;
+        pauseUnfocused: boolean;
+      }>("harbor://tray-prefs", (e) => {
+        const p = e.payload;
+        setSettings((s) => ({
+          ...s,
+          closeToTray: p.closeToTray,
+          trayAlwaysOnTop: p.alwaysOnTop,
+          pauseMinimized: p.pauseMinimized,
+          pauseUnfocused: p.pauseUnfocused,
+        }));
+      }).then(track);
       void listen("harbor://cycle-theme", () => {
-        setSettings((s) => ({ ...s, theme: { ...s.theme, preset: nextColorTheme(s.theme.preset) } }));
+        setSettings((s) => ({
+          ...s,
+          theme: { ...s.theme, preset: nextColorTheme(s.theme.preset) },
+        }));
       }).then(track);
       void listen<string>("harbor://set-theme", (e) => {
         const id = e.payload;

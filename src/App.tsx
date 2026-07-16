@@ -774,7 +774,14 @@ function Shell() {
 
   useEffect(() => {
     if (!activeProfile) return;
-    if (!activeProfile.kid && topKind === "kids") setView("home");
+    if (activeProfile.kid) {
+      // Reset to the Kids home so a page already open (e.g. an adult title and
+      // its related titles) cannot persist across the switch into a kid profile;
+      // setView("kids") clears the whole navigation stack, back history included.
+      setView("kids");
+    } else if (topKind === "kids") {
+      setView("home");
+    }
   }, [activeProfile?.id]);
 
   const playerActive = !!player;

@@ -1,4 +1,4 @@
-name: harbor-core
+name: Harbor Core
 
 on:
   push:
@@ -10,10 +10,18 @@ on:
       - "harbor-core/**"
       - ".github/workflows/harbor-core.yml"
 
+permissions:
+  contents: read
+
+concurrency:
+  group: harbor-core-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: cargo test (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -25,11 +33,14 @@ jobs:
       run:
         working-directory: harbor-core
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v2
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
         with:
           workspaces: harbor-core
       - run: cargo check --all-targets
@@ -39,18 +50,22 @@ jobs:
   wasm:
     name: cargo check (wasm32)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: harbor-core
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
         with:
           workspaces: harbor-core
       - run: cargo check --target wasm32-unknown-unknown
       - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        run: curl --fail --location --retry 3 --retry-all-errors https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
       - run: wasm-pack build --target bundler --out-dir pkg

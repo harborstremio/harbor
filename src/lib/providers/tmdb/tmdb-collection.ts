@@ -43,6 +43,7 @@ async function run(key: string, id: number): Promise<TmdbCollection | null> {
         releaseInfo: (p.release_date ?? "").slice(0, 4) || undefined,
         releaseDate: p.release_date || undefined,
         imdbRating: p.vote_average > 0 ? Number(p.vote_average).toFixed(1) : undefined,
+        adult: p.adult,
       }),
     )
     .sort((a: Meta, b: Meta) => (a.releaseDate ?? "zzz").localeCompare(b.releaseDate ?? "zzz"));

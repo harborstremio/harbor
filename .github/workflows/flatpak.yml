@@ -1,8 +1,9 @@
-name: flatpak
+name: Flatpak
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
+    branches: [main]
     paths:
       - flatpak/**
       - src-tauri/**
@@ -17,11 +18,21 @@ on:
       - pnpm-workspace.yaml
       - .github/workflows/flatpak.yml
 
+permissions:
+  contents: read
+
+concurrency:
+  group: flatpak-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Install Flatpak tooling
         run: sudo apt-get update && sudo apt-get install -y flatpak flatpak-builder appstream desktop-file-utils ostree
       - name: Configure Flathub
@@ -46,7 +57,8 @@ jobs:
         run: |
           ostree init --repo=.flatpak-work/validation-repo --mode=archive-z2
           flatpak build-import-bundle --update-appstream --no-update-summary .flatpak-work/validation-repo Harbor.flatpak
-      - uses: actions/upload-artifact@v4
+      - name: Upload Flatpak bundle
+        uses: actions/upload-artifact@v7
         with:
           name: Harbor-flatpak-x86_64
           path: Harbor.flatpak

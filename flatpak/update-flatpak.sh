@@ -110,6 +110,7 @@ PY
 
 mv "$node_output" flatpak/node-sources.json
 mv "$cargo_output" flatpak/cargo-sources.json
+vp fmt flatpak/node-sources.json
 
 python3 - "$metadata" "$manifest" "$version" "$release_date" "$pnpm_version" "$pnpm_sha256" <<'PY'
 import os
