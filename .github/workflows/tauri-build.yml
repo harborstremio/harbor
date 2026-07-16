@@ -198,6 +198,9 @@ jobs:
             mkdir -p "$APP_DIR/Contents/Frameworks"
             dylibbundler -od -b -x "$APP_DIR/Contents/MacOS/harbor" -d "$APP_DIR/Contents/Frameworks" -p @executable_path/../Frameworks/ || true
             
+            echo "Re-signing Harbor.app so Apple Silicon AMFI kernel accepts the modified dylibs..."
+            codesign --force --deep --sign - "$APP_DIR" || true
+            
             echo "Rebuilding standalone compressed DMG with self-contained Frameworks..."
             DMG_DIR="src-tauri/target/${{ matrix.platform.target }}/release/bundle/dmg"
             rm -rf "$DMG_DIR"/*.dmg
