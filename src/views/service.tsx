@@ -114,7 +114,7 @@ export function ServiceView({ service }: { service: StreamingService }) {
   }, [bucket]);
 
   return (
-    <main ref={scrollRef} className="absolute inset-0 overflow-y-auto pb-14">
+    <main ref={scrollRef} data-tv-content-zone className="absolute inset-0 overflow-y-auto pb-14">
       <div className="relative px-12 pt-28 pb-12">
         <div
           aria-hidden

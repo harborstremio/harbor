@@ -48,7 +48,12 @@ export function Lightbox({
       role="dialog"
       aria-modal="true"
       aria-label={t("{title} image viewer", { title })}
+      data-tv-focus-scope
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onClose();
+      }}
+      tabIndex={0}
     >
       <div
         className="absolute start-8 top-8 flex flex-col gap-1"

@@ -151,16 +151,33 @@ export function SettingsJumpBar({
     el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const step = 120;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      e.stopPropagation();
+      rail.scrollLeft += step;
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      e.stopPropagation();
+      rail.scrollLeft -= step;
+    }
+  };
+
   return (
     <div className="pointer-events-none fixed bottom-5 left-[calc(50%+144px)] z-30 flex -translate-x-1/2 justify-center px-4 rtl:left-[calc(50%-144px)]">
       <div
         ref={railRef}
+        tabIndex={0}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onWheel={onWheel}
-        className={`pointer-events-auto flex max-w-[min(640px,72vw)] select-none items-center gap-1 overflow-x-auto rounded-full border border-edge bg-surface/85 px-1.5 py-1.5 shadow-[0_10px_34px_rgba(0,0,0,0.4)] backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
+        onKeyDown={onKeyDown}
+        className={`pointer-events-auto flex max-w-[min(640px,72vw)] select-none items-center gap-1 overflow-x-auto rounded-full border border-edge bg-surface/85 px-1.5 py-1.5 shadow-[0_10px_34px_rgba(0,0,0,0.4)] backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden outline-none focus-visible:ring-2 focus-visible:ring-accent/60 ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
       >
         <span className="shrink-0 ps-2.5 pe-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
           {t("On this page")}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useSettings } from "@/lib/settings";
 import {
   usePlaybackPositionGated,
@@ -14,6 +14,8 @@ import { fmtTime } from "./transport-utils";
 
 const BUFFER_PAD_SEC = 4;
 const PENDING_MAX_MS = 2500;
+const KEY_SEEK_SMALL_SEC = 5;
+const KEY_SEEK_LARGE_SEC = 30;
 
 export function SeekBar({
   durationSec,
@@ -129,16 +131,68 @@ export function SeekBar({
     setScrub(null);
   };
 
+  const commitKeyboardSeek = useCallback(() => {
+    if (scrub != null) {
+      onSeek(scrub);
+      setPending(scrub);
+      pendingAtRef.current = Date.now();
+    }
+    setScrub(null);
+    setHover(null);
+  }, [scrub, onSeek]);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      e.stopPropagation();
+      const isLarge = e.key === "ArrowUp" || e.key === "ArrowDown";
+      const step = isLarge ? KEY_SEEK_LARGE_SEC : KEY_SEEK_SMALL_SEC;
+      const dir = (e.key === "ArrowLeft" || e.key === "ArrowDown") ? -1 : 1;
+      const current = scrub ?? position;
+      const next = Math.max(0, Math.min(dur, current + dir * step));
+      setHover(next);
+      setScrub(next);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      e.stopPropagation();
+      commitKeyboardSeek();
+    } else if (e.key === "Escape") {
+      setScrub(null);
+      setHover(null);
+    }
+  };
+
+  const onFocus = () => {
+    if (scrub == null) setHover(position);
+  };
+
+  const onBlur = () => {
+    setHover(null);
+    setScrub(null);
+  };
+
+  const isKeyboardScrubbing = scrub != null && hover != null;
+
   return (
     <div dir="ltr" className="pointer-events-auto group/seek relative h-12">
       <div
         ref={ref}
+        tabIndex={0}
+        role="slider"
+        aria-label="Seek"
+        aria-valuemin={0}
+        aria-valuemax={Math.round(dur)}
+        aria-valuenow={Math.round(value)}
+        aria-valuetext={fmtTime(value)}
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
         onPointerMove={onMove}
         onPointerLeave={onLeave}
         onPointerDown={onDown}
         onPointerUp={onUp}
         onPointerCancel={onCancel}
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 cursor-pointer"
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
       >
         <SeekBarVisual
           settings={settings}

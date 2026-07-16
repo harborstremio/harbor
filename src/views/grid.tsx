@@ -80,7 +80,7 @@ export function GridView({ grid }: { grid: GridSpec }) {
   );
 
   return (
-    <main ref={scrollRef} className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
+    <main ref={scrollRef} data-tv-content-zone className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
       {hero ? (
         <>
           <section className="relative h-[66vh] min-h-[460px] w-full overflow-hidden">

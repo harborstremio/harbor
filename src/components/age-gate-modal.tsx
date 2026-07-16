@@ -564,8 +564,14 @@ export function AgeGateModal({
 
   return (
     <div
+      data-tv-focus-scope
+      role="dialog"
+      aria-modal="true"
       onClick={(e) => {
         if (e.target === e.currentTarget && !verified) onClose();
+      }}
+      onKeyDown={(e) => {
+        if ((e.key === "Enter" || e.key === " ") && !verified) onClose();
       }}
       className="fixed inset-0 z-[200] flex items-center justify-center bg-black/72 px-4 backdrop-blur-md animate-fade-in"
     >

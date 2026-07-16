@@ -83,7 +83,7 @@ export function DownloadsView() {
   const groups = useMemo(() => buildGroups(items), [items]);
 
   return (
-    <main className="flex-1 overflow-y-auto bg-canvas px-5 pb-24 pt-24 sm:px-8 lg:px-12 lg:pt-28">
+    <main data-tv-content-zone className="flex-1 overflow-y-auto bg-canvas px-5 pb-24 pt-24 sm:px-8 lg:px-12 lg:pt-28">
       <div className="mx-auto w-full max-w-3xl">
         <header className="mb-8">
           <h1 className="text-[28px] font-semibold tracking-tight text-ink">Downloads</h1>

@@ -34,7 +34,7 @@ export function FilterView({ filter }: { filter: MetaFilter }) {
   return (
     <SeenIdsProvider value={seenRef}>
       <SpotlightGateContext.Provider value={gate}>
-        <main ref={scrollRef} className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
+        <main ref={scrollRef} data-tv-content-zone className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
           <Header filter={filter} />
           <div className="flex flex-col gap-12 px-12 pb-24">
             <Rails filter={filter} />

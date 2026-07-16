@@ -59,7 +59,7 @@ export function KidsDetailView({
   };
 
   return (
-    <div ref={scrollRef} className="relative h-full overflow-y-auto bg-canvas">
+    <div ref={scrollRef} data-tv-content-zone className="relative h-full overflow-y-auto bg-canvas">
       <section className="relative h-[66vh] min-h-[460px] w-full overflow-hidden">
         {backdrop && (
           <img

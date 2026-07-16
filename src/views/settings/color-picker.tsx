@@ -255,6 +255,13 @@ function CustomColorPanel({
     <div className="flex flex-col gap-2.5">
       <div
         ref={slRef}
+        tabIndex={0}
+        role="slider"
+        aria-label="Saturation and brightness"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(hsv.s * 100)}
+        aria-valuetext={`Saturation ${Math.round(hsv.s * 100)}%, Brightness ${Math.round(hsv.v * 100)}%`}
         onPointerDown={(e) => {
           slRef.current?.setPointerCapture(e.pointerId);
           onSLMove(e.clientX, e.clientY);
@@ -263,7 +270,35 @@ function CustomColorPanel({
           if (e.buttons !== 1) return;
           onSLMove(e.clientX, e.clientY);
         }}
-        className="relative h-36 w-full cursor-crosshair touch-none rounded-lg ring-1 ring-edge-soft"
+        onKeyDown={(e) => {
+          const step = 0.01;
+          const largeStep = 0.05;
+          let s = hsv.s;
+          let v = hsv.v;
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            e.stopPropagation();
+            s = Math.max(0, s - step);
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            e.stopPropagation();
+            s = Math.min(1, s + step);
+          } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            e.stopPropagation();
+            v = Math.max(0, v - largeStep);
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            e.stopPropagation();
+            v = Math.min(1, v + largeStep);
+          }
+          if (s !== hsv.s || v !== hsv.v) {
+            const next = { h: hsv.h, s, v };
+            setHsv(next);
+            emit(next);
+          }
+        }}
+        className="relative h-36 w-full cursor-crosshair touch-none rounded-lg ring-1 ring-edge-soft outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
         style={{
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${baseHue})`,
         }}
@@ -276,6 +311,13 @@ function CustomColorPanel({
       </div>
       <div
         ref={hueRef}
+        tabIndex={0}
+        role="slider"
+        aria-label="Hue"
+        aria-valuemin={0}
+        aria-valuemax={360}
+        aria-valuenow={Math.round(hsv.h)}
+        aria-valuetext={`${Math.round(hsv.h)}°`}
         onPointerDown={(e) => {
           hueRef.current?.setPointerCapture(e.pointerId);
           onHueMove(e.clientX);
@@ -284,7 +326,34 @@ function CustomColorPanel({
           if (e.buttons !== 1) return;
           onHueMove(e.clientX);
         }}
-        className="relative h-3 w-full cursor-pointer touch-none rounded-full ring-1 ring-edge-soft"
+        onKeyDown={(e) => {
+          const step = 1;
+          const largeStep = 10;
+          let h = hsv.h;
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            e.stopPropagation();
+            h = Math.max(0, h - step);
+          } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            e.stopPropagation();
+            h = Math.min(360, h + step);
+          } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            e.stopPropagation();
+            h = Math.max(0, h - largeStep);
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            e.stopPropagation();
+            h = Math.min(360, h + largeStep);
+          }
+          if (h !== hsv.h) {
+            const next = { h, s: hsv.s, v: hsv.v };
+            setHsv(next);
+            emit(next);
+          }
+        }}
+        className="relative h-3 w-full cursor-pointer touch-none rounded-full ring-1 ring-edge-soft outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
         style={{
           background:
             "linear-gradient(to right, #ff0000 0%, #ffff00 16.67%, #00ff00 33.33%, #00ffff 50%, #0000ff 66.67%, #ff00ff 83.33%, #ff0000 100%)",

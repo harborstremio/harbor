@@ -169,9 +169,13 @@ function ConfirmDialog({
 
   return createPortal(
     <div
+      data-tv-focus-scope
       className="animate-fade-in fixed inset-0 z-[220] flex items-center justify-center bg-canvas/80 p-4 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onCancel();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onCancel();
       }}
     >
       <div

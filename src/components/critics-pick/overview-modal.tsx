@@ -70,7 +70,12 @@ export function OverviewModal({
       role="dialog"
       aria-modal="true"
       aria-label={t("{title} overview", { title })}
+      data-tv-focus-scope
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onClose();
+      }}
+      tabIndex={0}
       className="fixed inset-0 z-[120] flex items-center justify-center bg-canvas/85 p-8 backdrop-blur-sm"
     >
       <div

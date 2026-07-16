@@ -35,6 +35,8 @@ const KEYCODE_TO_DIR: Record<number, Dir> = {
 const CENTER_KEYCODES = new Set([13, 23, 32]);
 const BACK_KEYCODES = new Set([27, 4, 461, 10009, 166]);
 const BACK_KEYS = new Set(['Escape', 'Esc', 'BrowserBack', 'GoBack', 'Back']);
+const MENU_KEYCODES = new Set([93, 457, 10182]);
+const MENU_KEYS = new Set(['ContextMenu']);
 
 const MODAL_SELECTOR = '[role="dialog"], [aria-modal="true"]';
 const LOCAL_KEYBOARD_SELECTOR = [
@@ -311,6 +313,18 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
 function clearTvFocusRing() {
   lastFocusedEl?.removeAttribute('data-tv-focused');
   lastFocusedEl = null;
+}
+
+function dispatchContextMenu() {
+  const focused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  if (!focused) return;
+  const rect = focused.getBoundingClientRect();
+  focused.dispatchEvent(new MouseEvent('contextmenu', {
+    bubbles: true,
+    cancelable: true,
+    clientX: rect.left + rect.width / 2,
+    clientY: rect.top + rect.height / 2,
+  }));
 }
 
 function enterSearchEditMode(el: HTMLElement) {
@@ -603,6 +617,14 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         e.preventDefault();
         e.stopPropagation();
         runBack();
+        return;
+      }
+
+      if (MENU_KEYS.has(e.key) || MENU_KEYCODES.has(e.keyCode)) {
+        e.preventDefault();
+        e.stopPropagation();
+        SFX.open();
+        dispatchContextMenu();
         return;
       }
 

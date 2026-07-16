@@ -164,13 +164,31 @@ export function BuildFeedback() {
           onKeyDown={(e) => {
             if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
               e.preventDefault();
+              e.stopPropagation();
               setValue((v) => Math.max(0, v - 1));
             } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
               e.preventDefault();
+              e.stopPropagation();
               setValue((v) => Math.min(STOPS.length - 1, v + 1));
+            } else if (e.key === "PageUp") {
+              e.preventDefault();
+              e.stopPropagation();
+              setValue((v) => Math.min(STOPS.length - 1, v + 2));
+            } else if (e.key === "PageDown") {
+              e.preventDefault();
+              e.stopPropagation();
+              setValue((v) => Math.max(0, v - 2));
+            } else if (e.key === "Home") {
+              e.preventDefault();
+              e.stopPropagation();
+              setValue(0);
+            } else if (e.key === "End") {
+              e.preventDefault();
+              e.stopPropagation();
+              setValue(STOPS.length - 1);
             }
           }}
-          className="relative h-12 flex-1 cursor-pointer touch-none select-none outline-none"
+          className="relative h-12 flex-1 cursor-pointer touch-none select-none outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
         >
           <div
             className="absolute inset-x-0 top-1/2 h-3 -translate-y-1/2 rounded-full opacity-90 ring-1 ring-inset ring-black/10"

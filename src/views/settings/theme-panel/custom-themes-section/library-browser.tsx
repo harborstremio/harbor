@@ -60,6 +60,7 @@ export function LibraryBrowser({
       className="fixed inset-0 z-[210] flex flex-col bg-canvas"
       role="dialog"
       aria-label="Theme library"
+      data-tv-focus-scope
     >
       <header data-tauri-drag-region className="flex shrink-0 items-center justify-between gap-4 border-b border-edge-soft bg-surface/40 px-10 py-5">
         <div className="flex items-center gap-4">

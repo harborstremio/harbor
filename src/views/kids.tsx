@@ -155,7 +155,7 @@ export function Kids({ active = true }: { active?: boolean }) {
   }, [rows, hero]);
 
   return (
-    <main ref={scrollCb} data-kids="on" className="relative h-full overflow-y-auto bg-canvas">
+    <main ref={scrollCb} data-kids="on" data-tv-content-zone className="relative h-full overflow-y-auto bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
         <KidsHero featured={hero} />
         <div className="relative z-10 -mt-[14vh] flex w-full flex-col gap-6 px-12 pb-32 pt-3">

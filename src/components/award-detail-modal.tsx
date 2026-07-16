@@ -91,6 +91,7 @@ export function AwardDetailModal({
       ref={ref}
       role="dialog"
       aria-label={TYPE_TITLE[type]}
+      data-tv-focus-scope
       style={{ top: pos.top, left: pos.left, width: TOOLTIP_WIDTH, maxHeight: TOOLTIP_MAX_HEIGHT }}
       className="fixed z-[135] flex flex-col overflow-hidden rounded-2xl border border-edge bg-elevated/97 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
     >

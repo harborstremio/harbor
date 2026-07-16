@@ -36,8 +36,15 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
 
   return createPortal(
     <div
+      data-tv-focus-scope
+      role="dialog"
+      aria-modal="true"
       className="animate-fade-in fixed inset-0 z-[210] flex items-center justify-center bg-canvas/80"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") onClose();
+      }}
+      tabIndex={0}
     >
       <form
         onClick={(e) => e.stopPropagation()}

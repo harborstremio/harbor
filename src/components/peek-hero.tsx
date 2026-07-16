@@ -34,6 +34,7 @@ export function PeekHero({ slides }: { slides: Meta[] }) {
   const velocity = useRef(0);
   const moved = useRef(false);
   const widthRef = useRef(0);
+  const pauseTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const el = ref.current;
@@ -114,12 +115,29 @@ export function PeekHero({ slides }: { slides: Meta[] }) {
     }
   };
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (slides.length < 2) return;
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    setPaused(true);
+    clearTimeout(pauseTimer.current);
+    pauseTimer.current = setTimeout(() => setPaused(false), 15000);
+    if (e.key === "ArrowLeft") {
+      setActive((prev) => Math.max(0, prev - 1));
+    } else {
+      setActive((prev) => Math.min(slides.length - 1, prev + 1));
+    }
+  };
+
   return (
     <div
       ref={ref}
+      data-tv-hero-zone
+      tabIndex={-1}
       className="flex flex-col gap-5"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onKeyDown={onKeyDown}
     >
       <div
         ref={trackRef}

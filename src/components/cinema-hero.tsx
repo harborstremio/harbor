@@ -45,6 +45,7 @@ export function CinemaHero({
   const velocity = useRef(0);
   const moved = useRef(false);
   const widthRef = useRef(0);
+  const pauseTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const el = ref.current;
@@ -124,6 +125,20 @@ export function CinemaHero({
     }
   };
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (slides.length < 2) return;
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    setPaused(true);
+    clearTimeout(pauseTimer.current);
+    pauseTimer.current = setTimeout(() => setPaused(false), 15000);
+    if (e.key === "ArrowLeft") {
+      setActive((prev) => Math.max(0, prev - 1));
+    } else {
+      setActive((prev) => Math.min(slides.length - 1, prev + 1));
+    }
+  };
+
   if (slides.length === 0) {
     return (
       <section className="harbor-bleed-stremio relative h-[78vh] min-h-[640px] animate-pulse bg-elevated/30" />
@@ -135,9 +150,12 @@ export function CinemaHero({
   return (
     <section
       ref={ref}
+      data-tv-hero-zone
+      tabIndex={-1}
       className="harbor-bleed-stremio relative h-[78vh] min-h-[640px] overflow-hidden bg-canvas"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onKeyDown={onKeyDown}
     >
       <div
         ref={viewportRef}

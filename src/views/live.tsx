@@ -245,14 +245,14 @@ export function LiveView({ active }: { active: boolean }) {
 
   if (sources.length === 0) {
     return (
-      <main data-rail-flush className="relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-20">
+      <main data-rail-flush data-tv-content-zone className="relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-20">
         <PlaylistEmpty onSave={(entry) => addPlaylist(entry)} />
       </main>
     );
   }
 
   return (
-    <main data-rail-flush className={`relative flex min-h-0 flex-1 ${immersive ? "pt-0" : "pt-20"}`}>
+    <main data-rail-flush data-tv-content-zone className={`relative flex min-h-0 flex-1 ${immersive ? "pt-0" : "pt-20"}`}>
       {playlist && sortedGroups.length > 0 && mode !== "multiview" && mode !== "home" && state.kind !== "error" && (
         <CategorySidebar
           groups={sortedGroups}

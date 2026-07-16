@@ -772,6 +772,7 @@ export function Home({ active = true }: { active?: boolean }) {
   return (
     <main
       ref={scrollCb}
+      data-tv-content-zone
       className="flex-1 overflow-y-auto overflow-x-hidden px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28"
     >
       <ScrollRootContext.Provider value={scrollEl}>

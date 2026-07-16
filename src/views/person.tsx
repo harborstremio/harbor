@@ -117,6 +117,7 @@ export function PersonView({ personId }: { personId: number }) {
   return (
     <main
       ref={scrollRef}
+      data-tv-content-zone
       className="absolute inset-0 z-40 overflow-y-auto bg-canvas"
     >
 

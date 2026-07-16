@@ -230,7 +230,7 @@ export function Movies({ active = true }: { active?: boolean }) {
   }, [rows, hero, top10]);
 
   return (
-    <main ref={scrollCb} className="relative h-full overflow-y-auto bg-canvas">
+    <main ref={scrollCb} data-tv-content-zone className="relative h-full overflow-y-auto bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
         <CinemaHero slides={hero} eyebrow={t("Featured tonight")} />
         <div className="relative flex w-full flex-col gap-12 px-12 pb-32 pt-12">

@@ -298,6 +298,27 @@ export function Row({
     };
   }, [scrollKey, rememberRowScroll]);
 
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const activeEl = document.activeElement;
+      if (!activeEl || !track.contains(activeEl)) return;
+
+      const dir = e.key === "ArrowLeft" ? -1 : 1;
+      userInteractedRef.current = true;
+      const delta = (isRtlTrack(track) ? -dir : dir) * track.clientWidth * 0.8;
+      track.scrollBy({ left: delta, behavior: "smooth" });
+
+      e.stopPropagation();
+    };
+
+    track.addEventListener("keydown", onKeyDown);
+    return () => track.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const scroll = (dir: -1 | 1) => {
     const el = trackRef.current;
     if (!el) return;

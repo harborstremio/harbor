@@ -125,7 +125,7 @@ export function CollectionsView() {
   }, [remoteQuery, page, done, searchActive, settings.tmdbKey, curatedNames]);
 
   return (
-    <main ref={scrollRef} className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
+    <main ref={scrollRef} data-tv-content-zone className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
       <div className="mx-auto flex w-full max-w-[1700px] flex-col px-12 pb-24">
         <div className="flex items-center gap-5 pt-24">
           {!layoutHasGlobalBack() && (

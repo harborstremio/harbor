@@ -195,7 +195,7 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
     { id: "fullscreen", slot: "bottom-right", order: 70 },
   ],
   options: {
-    volumeStyle: "slider",
+    volumeStyle: "stepper",
     timeFormat: "start-end",
   },
 };
@@ -229,7 +229,7 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "pip", slot: "bottom-right", order: 60 },
   ],
   options: {
-    volumeStyle: "slider",
+    volumeStyle: "stepper",
     timeFormat: "start-end",
   },
 };

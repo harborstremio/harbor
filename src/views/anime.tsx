@@ -596,6 +596,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
   return (
     <main
       ref={scrollCb}
+      data-tv-content-zone
       className="flex-1 overflow-y-auto overflow-x-hidden px-12 pt-28 pb-14"
     >
       <ScrollRootContext.Provider value={scrollEl}>

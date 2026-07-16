@@ -167,7 +167,7 @@ export function EpisodeDetailView({
 
   if (error) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-6 px-12">
+      <main data-tv-content-zone className="flex min-h-screen flex-col items-center justify-center gap-6 px-12">
         <div className="max-w-md text-center">
           <h2 className="mb-4 text-[24px] font-semibold text-ink">{t("Episode Not Found")}</h2>
           <p className="mb-6 text-[14px] text-ink-muted">{error}</p>
@@ -195,7 +195,7 @@ export function EpisodeDetailView({
 
   if (loading || !episodeData || !seriesMeta) {
     return (
-      <main className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
+      <main data-tv-content-zone className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
         <section className="relative">
           <div className="relative h-[78vh] min-h-[640px] animate-pulse overflow-hidden bg-elevated">
             <div className="absolute inset-0 flex items-center justify-center">
@@ -213,6 +213,7 @@ export function EpisodeDetailView({
   return (
     <main
       ref={scrollRef}
+      data-tv-content-zone
       className="absolute inset-0 z-30 overflow-y-auto bg-canvas"
     >
       <section className="relative">

@@ -87,6 +87,7 @@ import { MalProvider } from "@/lib/mal/provider";
 import { SimklProvider } from "@/lib/simkl/provider";
 import { LetterboxdProvider } from "@/lib/stremboxd/provider";
 import { focusTvPageDefault, useKeyboardNavigation } from "@/lib/keyboard-navigation";
+import { VirtualKeyboard, useVirtualKeyboard } from "@/components/virtual-keyboard";
 import { SFX } from "@/lib/sfx";
 
 const importAnime = () => import("@/views/anime");
@@ -429,6 +430,7 @@ function Shell() {
     layout === "forest" ||
     layout === "stremio";
   useViewPreloader();
+  const vk = useVirtualKeyboard();
 
 
   const handleTvBack = useCallback(() => {
@@ -1121,6 +1123,13 @@ function Shell() {
       <WebhookLoopMount />
       <MemoryHud />
       {!player && <OfflineBanner />}
+      {vk.open && vk.activeInput && (
+        <VirtualKeyboard
+          onInput={vk.handleInput}
+          onClose={vk.handleClose}
+          initialValue={vk.activeInput.value}
+        />
+      )}
     </div>
   );
 }

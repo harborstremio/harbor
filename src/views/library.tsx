@@ -107,6 +107,7 @@ export function LibraryView({ active }: { active: boolean }) {
   return (
     <main
       ref={scrollRef}
+      data-tv-content-zone
       className="flex-1 overflow-y-auto px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28"
     >
       <div data-tauri-drag-region className="flex flex-col gap-7">

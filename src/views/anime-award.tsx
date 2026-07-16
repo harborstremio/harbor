@@ -54,7 +54,7 @@ export function AnimeAwardView({ sourceId }: { sourceId: AwardSourceId }) {
   const noResults = filtered && filteredCategories.length === 0;
 
   return (
-    <main ref={scrollRef} className="relative h-full overflow-y-auto bg-canvas">
+    <main ref={scrollRef} data-tv-content-zone className="relative h-full overflow-y-auto bg-canvas">
       <Banner data={data} tint={tint} totalWins={totalWins} />
 
       <div className="relative mx-auto flex max-w-[1100px] flex-col gap-10 px-12 pb-32 pt-12">

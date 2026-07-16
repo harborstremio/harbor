@@ -157,7 +157,7 @@ export function CalendarView() {
   }
 
   return (
-    <main className="flex h-full flex-col overflow-hidden">
+    <main data-tv-content-zone className="flex h-full flex-col overflow-hidden">
       <header className="shrink-0 border-b border-edge-soft px-12 pb-5 pt-24">
         <div className="flex items-end justify-between gap-6">
           <div className="flex flex-col gap-1.5">

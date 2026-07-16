@@ -171,7 +171,7 @@ export function QueueView() {
           : "transition-[transform,opacity] duration-200 ease-out";
 
   return (
-    <main className="min-w-0 flex-1 overflow-hidden pb-12 pt-20">
+    <main data-tv-content-zone className="min-w-0 flex-1 overflow-hidden pb-12 pt-20">
       <div className="mx-auto flex h-full min-w-0 max-w-[1180px] flex-col gap-5 px-6 sm:px-12">
         <header className="flex shrink-0 items-baseline gap-3">
           <h1 className="font-display text-[20px] font-medium tracking-tight text-ink">

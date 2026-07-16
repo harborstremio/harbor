@@ -76,7 +76,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
   );
 
   return (
-    <main className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
+    <main data-tv-content-zone className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
       <div data-tauri-drag-region className="flex flex-col gap-8">
         <header className="flex flex-col gap-5">
           <div className="flex items-end justify-between gap-4">

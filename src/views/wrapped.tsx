@@ -60,7 +60,7 @@ export function WrappedView({ active }: { active: boolean }) {
   }, [active, traktConnected]);
 
   return (
-    <main className="h-full w-full overflow-y-auto bg-canvas px-5 pb-28 pt-24 sm:px-8 lg:px-12 lg:pt-28">
+    <main data-tv-content-zone className="h-full w-full overflow-y-auto bg-canvas px-5 pb-28 pt-24 sm:px-8 lg:px-12 lg:pt-28">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div className="flex flex-col gap-1.5">
           <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">

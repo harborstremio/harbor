@@ -368,7 +368,7 @@ export function Discover({ active = true }: { active?: boolean }) {
   );
 
   return (
-    <main ref={scrollCb} className="flex-1 overflow-y-auto px-12 pb-20 pt-28">
+    <main ref={scrollCb} data-tv-content-zone className="flex-1 overflow-y-auto px-12 pb-20 pt-28">
       <ScrollRootContext.Provider value={scrollEl}>
         <div data-tauri-drag-region className="flex flex-col gap-14">
           {pageRows.editMode || !hiddenFeatured ? (

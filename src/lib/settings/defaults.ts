@@ -253,7 +253,7 @@ export const DEFAULT: Settings = {
   playerEscExitsFullscreen: true,
   playerConfirmLeave: true,
   tvNavigation: true,
-  playerTvNavigation: false,
+  playerTvNavigation: true,
   playerHdrStage: "auto",
   opensubtitlesApiKey: "",
   jimakuToken: "",

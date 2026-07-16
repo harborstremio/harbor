@@ -58,6 +58,7 @@ export function BetaThemesModal({
       className="fixed inset-0 z-[215] flex flex-col bg-canvas/95 backdrop-blur-md"
       role="dialog"
       aria-label="Beta themes"
+      data-tv-focus-scope
     >
       <header
         data-tauri-drag-region

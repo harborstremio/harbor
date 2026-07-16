@@ -92,6 +92,7 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
       style={SUITE_CHROME}
       role="dialog"
       aria-label="Theme cheat sheet"
+      data-tv-focus-scope
     >
       <header
         data-tauri-drag-region

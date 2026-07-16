@@ -1750,3 +1750,32 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   }
 }
 
+/* ── TV remote focus: expose hover-hidden content ── */
+
+.group:has([data-tv-focused="true"]) .group-hover\:opacity-100,
+[data-tv-focused="true"] .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.group:has([data-tv-focused="true"]) .group-hover\:opacity-0,
+[data-tv-focused="true"] .group-hover\:opacity-0 {
+  opacity: 0;
+}
+
+.group:has([data-tv-focused="true"]) .invisible.group-hover\:visible,
+[data-tv-focused="true"] .invisible.group-hover\:visible {
+  visibility: visible;
+}
+
+.group:has([data-tv-focused="true"]) .translate-y-full.group-hover\:translate-y-0,
+[data-tv-focused="true"] .translate-y-full.group-hover\:translate-y-0 {
+  transform: translateY(0);
+}
+
+.group:has([data-tv-focused="true"]) .group-hover\:scale-100,
+[data-tv-focused="true"] .group-hover\:scale-100 {
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
