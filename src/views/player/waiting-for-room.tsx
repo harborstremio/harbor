@@ -70,7 +70,10 @@ export function WaitingForRoom(props: {
                   key={p.id}
                   className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] ${readyPillClass(p.ready, stale)}`}
                 >
-                  <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${readyDotClass(p.ready, stale)}`} />
+                  <span
+                    aria-hidden
+                    className={`h-1.5 w-1.5 rounded-full ${readyDotClass(p.ready, stale)}`}
+                  />
                   {p.name}
                   {p.id === clientId && t(" (you)")}
                   {!p.ready && stale && t(" · still loading")}

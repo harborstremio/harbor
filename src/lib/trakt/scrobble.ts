@@ -1,5 +1,7 @@
-import { traktRequest } from "./client";
-import type { ScrobbleAction, ScrobbleResponse, TraktTarget } from "./types";
+import { traktRequest, TraktApiError } from "./client";
+import type { ScrobbleAction, TraktTarget } from "./types";
+
+export type ScrobbleOutcome = "recorded" | "already-recorded" | "failed";
 
 function scrobbleBody(target: TraktTarget, progress: number) {
   const clamped = Math.max(0, Math.min(100, Number(progress.toFixed(2))));
@@ -20,23 +22,27 @@ async function send(
   action: ScrobbleAction,
   target: TraktTarget,
   progress: number,
-): Promise<ScrobbleResponse | null> {
-  if (target.kind === "show") return null;
+): Promise<ScrobbleOutcome> {
+  if (target.kind === "show") return "failed";
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      return await traktRequest<ScrobbleResponse>(`/scrobble/${action}`, {
+      await traktRequest(`/scrobble/${action}`, {
         method: "POST",
         body: scrobbleBody(target, progress),
       });
-    } catch {
+      return "recorded";
+    } catch (error) {
+      if (action === "stop" && error instanceof TraktApiError && error.status === 409) {
+        return "already-recorded";
+      }
       if (attempt === 0 && action === "stop") {
         await new Promise((r) => setTimeout(r, 800));
         continue;
       }
-      return null;
+      return "failed";
     }
   }
-  return null;
+  return "failed";
 }
 
 export function scrobbleStart(target: TraktTarget, progress: number) {

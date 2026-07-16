@@ -52,8 +52,17 @@ export function SubtitleMenu(props: Props) {
       }),
     );
     offs.push(
-      listen<{ url: string; lang?: string; title?: string }>("modal://subtitle/add", (e) => {
-        propsRef.current.onAddSubtitle(e.payload.url, e.payload.lang, e.payload.title);
+      listen<{
+        url: string;
+        lang?: string;
+        title?: string;
+        format?: "srt" | "vtt" | "ass" | "ssa" | "sub";
+        encoding?: string;
+      }>("modal://subtitle/add", (e) => {
+        propsRef.current.onAddSubtitle(e.payload.url, e.payload.lang, e.payload.title, {
+          format: e.payload.format,
+          encoding: e.payload.encoding,
+        });
       }),
     );
     offs.push(listen("modal://closed", () => setOpen(false)));

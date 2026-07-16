@@ -15,7 +15,7 @@
   --color-raised: oklch(0.32 0.004 260);
   --color-ink: oklch(0.97 0.003 260);
   --color-ink-muted: oklch(0.72 0.003 260);
-  --color-ink-subtle: oklch(0.5 0.003 260);
+  --color-ink-subtle: oklch(0.65 0.003 260);
   --color-edge: oklch(0.36 0.004 260 / 0.55);
   --color-edge-soft: oklch(0.36 0.004 260 / 0.25);
   --color-accent: oklch(0.78 0.13 60);
@@ -55,9 +55,15 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: transparent;
+  background: var(--color-canvas);
   color: var(--color-ink);
   overflow: hidden;
+}
+
+html[data-mpv-embed="1"],
+html[data-mpv-embed="1"] body,
+html[data-mpv-embed="1"] #root {
+  background: transparent;
 }
 
 html[data-os="linux"]:not([data-mpv-embed="1"]),
@@ -69,6 +75,19 @@ html[data-os="linux"]:not([data-mpv-embed="1"]) #root {
 body {
   user-select: none;
   cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
 }
 
 :root[data-player-black="on"] {
@@ -590,9 +609,64 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
 }
 
 .animate-home-hearth {
-  animation: harbor-home-hearth 2.6s var(--ease-in-out) both;
+  animation: harbor-home-hearth 520ms var(--ease-out) 360ms both;
   transform-origin: center;
   transform-box: fill-box;
+}
+
+@keyframes harbor-home-roof-build {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes harbor-home-walls-build {
+  from {
+    opacity: 0;
+    transform: scaleX(0.45);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes harbor-home-door-build {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-home-roof-build,
+.animate-home-walls-build,
+.animate-home-door-build {
+  animation-duration: 480ms;
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: both;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+.animate-home-roof-build {
+  animation-name: harbor-home-roof-build;
+}
+.animate-home-walls-build {
+  animation-name: harbor-home-walls-build;
+  animation-delay: 70ms;
+}
+.animate-home-door-build {
+  animation-name: harbor-home-door-build;
+  animation-delay: 150ms;
 }
 
 @keyframes harbor-reel-spin {
@@ -628,7 +702,7 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
 }
 
 .animate-tv-scan {
-  animation: harbor-tv-scan 2.4s var(--ease-in-out) both;
+  animation: harbor-tv-scan 1.5s var(--ease-in-out) infinite;
 }
 
 @keyframes harbor-anger-pop {
@@ -648,7 +722,7 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
 }
 
 .animate-anger-pop {
-  animation: harbor-anger-pop 1.4s var(--ease-in-out) both;
+  animation: harbor-anger-pop 1.1s var(--ease-in-out) infinite;
   transform-origin: center;
   transform-box: fill-box;
 }
@@ -772,13 +846,13 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
 }
 
 .animate-book-a {
-  animation: harbor-book-wobble-a 1.6s var(--ease-in-out) both;
+  animation: harbor-book-wobble-a 1.6s var(--ease-in-out) infinite;
 }
 .animate-book-b {
-  animation: harbor-book-wobble-b 1.4s var(--ease-in-out) both;
+  animation: harbor-book-wobble-b 1.4s var(--ease-in-out) infinite;
 }
 .animate-book-c {
-  animation: harbor-book-wobble-c 1.8s var(--ease-in-out) both;
+  animation: harbor-book-wobble-c 1.8s var(--ease-in-out) infinite;
 }
 
 @keyframes harbor-block-drop {
@@ -830,6 +904,158 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
 
 .animate-gear-spin {
   animation: harbor-gear-spin 1.6s var(--ease-out) both;
+}
+
+@keyframes harbor-clapper {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  45% {
+    transform: rotate(-32deg);
+  }
+  70% {
+    transform: rotate(-28deg);
+  }
+}
+
+.animate-clapper {
+  animation: harbor-clapper 950ms var(--ease-out) infinite;
+  transform-box: fill-box;
+  transform-origin: left bottom;
+}
+
+@keyframes harbor-calendar-date {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: translateY(0) scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1.08);
+  }
+}
+
+.animate-calendar-date {
+  animation: harbor-calendar-date 850ms var(--ease-out) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes harbor-loader-boat {
+  0%,
+  100% {
+    transform: translateY(1px) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(1.2deg);
+  }
+}
+
+@keyframes harbor-loader-wave {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes harbor-loader-cargo {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.harbor-loader-boat {
+  animation: harbor-loader-boat 1.8s var(--ease-in-out) infinite;
+  transform-origin: center;
+}
+
+.harbor-loader-wave {
+  stroke-dasharray: 10 6;
+  animation: harbor-loader-wave 1s linear infinite;
+}
+
+.harbor-loader-cargo {
+  animation: harbor-loader-cargo 900ms var(--ease-in-out) infinite;
+}
+
+@keyframes harbor-kids-kernels {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-2.75px) scale(1.08);
+  }
+  65% {
+    transform: translateY(0.5px) scale(0.97);
+  }
+}
+
+.animate-kids-kernels {
+  animation: harbor-kids-kernels 650ms var(--ease-out) infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+@keyframes harbor-vod-play {
+  0%,
+  58%,
+  100% {
+    transform: translateX(0) scale(1);
+  }
+  18% {
+    transform: translateX(2px) scale(1.08);
+  }
+  34% {
+    transform: translateX(0.5px) scale(0.98);
+  }
+}
+
+.animate-vod-play {
+  animation: harbor-vod-play 800ms var(--ease-out) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes harbor-vod-ring {
+  from {
+    opacity: 0.75;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+.animate-vod-ring {
+  animation: harbor-vod-ring 900ms ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes harbor-download-arrow {
+  0%,
+  100% {
+    transform: translateY(-1px);
+  }
+  55% {
+    transform: translateY(2.5px);
+  }
+}
+
+.animate-download-arrow {
+  animation: harbor-download-arrow 700ms var(--ease-out) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .harbor-key {

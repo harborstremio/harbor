@@ -1,7 +1,8 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { StrictMode } from "react";
+import { StrictMode, useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "@/App";
+import { StartupLoader } from "@/components/startup-loader";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { ModalOverlayApp } from "@/views/modal-overlay-app";
 import { HdrOverlayApp } from "@/views/hdr-overlay-app";
@@ -74,10 +75,70 @@ if (!isPip && !isModal && !isHdrOverlay) {
         ? "windows"
         : "web";
 }
-if (import.meta.env.DEV) console.log("[harbor] entry: pip =", isPip, "modal =", isModal, "hdr =", isHdrOverlay, "remote =", isRemote, "label =", (() => { try { return getCurrentWindow().label; } catch { return "?"; } })());
+if (import.meta.env.DEV)
+  console.log(
+    "[harbor] entry: pip =",
+    isPip,
+    "modal =",
+    isModal,
+    "hdr =",
+    isHdrOverlay,
+    "remote =",
+    isRemote,
+    "label =",
+    (() => {
+      try {
+        return getCurrentWindow().label;
+      } catch {
+        return "?";
+      }
+    })(),
+  );
 if (import.meta.env.DEV && !isPip && !isModal && !isHdrOverlay && !isRemote) {
   void import("./lib/streams/__fixtures__/verify").then((m) => m.logVerificationReport());
 }
+
+function StartupReady() {
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      document.getElementById("harbor-boot")?.remove();
+      const root = document.getElementById("root");
+      if (root instanceof HTMLElement) {
+        root.removeAttribute("data-startup-hidden");
+        root.inert = false;
+      }
+    });
+  }, []);
+  return null;
+}
+
+function MainRoot() {
+  const [appReady, setAppReady] = useState(false);
+  const [startupVisible, setStartupVisible] = useState(true);
+  const markAppReady = useCallback(() => setAppReady(true), []);
+  const revealApplication = useCallback(() => {
+    setStartupVisible(false);
+    document.getElementById("harbor-boot")?.remove();
+    const root = document.getElementById("root");
+    if (root instanceof HTMLElement) {
+      root.removeAttribute("data-startup-hidden");
+      root.inert = false;
+    }
+    if ("__TAURI_INTERNALS__" in window) {
+      void import("@tauri-apps/api/core").then(({ invoke }) =>
+        invoke("harbor_startup_ready").catch(() => {}),
+      );
+    }
+  }, []);
+
+  return (
+    <>
+      <App onReady={markAppReady} />
+      {startupVisible && <StartupLoader ready={appReady} onComplete={revealApplication} />}
+    </>
+  );
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     {isHdrOverlay ? (
@@ -89,14 +150,8 @@ createRoot(document.getElementById("root")!).render(
     ) : isRemote ? (
       <RemoteApp />
     ) : (
-      <App />
+      <MainRoot />
     )}
+    {(isHdrOverlay || isModal || isPip || isRemote) && <StartupReady />}
   </StrictMode>,
 );
-
-requestAnimationFrame(() => {
-  const boot = document.getElementById("harbor-boot");
-  if (!boot) return;
-  boot.classList.add("gone");
-  setTimeout(() => boot.remove(), 260);
-});

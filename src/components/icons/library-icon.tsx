@@ -19,7 +19,7 @@ export function LibraryIcon({ active = false }: { active?: boolean }) {
           <rect x="3.5" y="6" width="4" height="15" rx="0.7" />
           <path d="M3.5 9.5 L7.5 9.5" />
         </g>
-        <g className={active ? "animate-book-b" : ""}>
+        <g className={active ? "animate-book-b text-accent" : ""}>
           <rect x="9" y="8" width="4" height="13" rx="0.7" />
           <path d="M9 11 L13 11" />
         </g>

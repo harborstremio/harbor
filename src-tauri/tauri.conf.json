@@ -18,6 +18,7 @@
         "height": 800,
         "minWidth": 960,
         "minHeight": 600,
+        "visible": false,
         "decorations": false,
         "transparent": false,
         "backgroundColor": [0, 0, 0, 255],

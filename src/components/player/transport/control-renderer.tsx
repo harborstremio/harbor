@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
 import {
   getCustomIcon,
@@ -122,7 +123,7 @@ export type ControlContext = {
   onSubDelay: (sec: number) => void;
   onAudioDelay: (sec: number) => void;
   onEnterSync?: () => void;
-  onAddSubtitle: (url: string, lang?: string, title?: string) => void;
+  onAddSubtitle: SubtitleAddHandler;
   onRate: (r: number) => void;
   onPiP: () => void;
   onFullscreen: () => void;

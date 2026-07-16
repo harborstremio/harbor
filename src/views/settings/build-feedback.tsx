@@ -1,4 +1,5 @@
-import { Angry, Frown, Github, Laugh, Meh, Smile, ThumbsUp } from "lucide-react";
+import { Angry, Frown, Laugh, Meh, Smile, ThumbsUp } from "lucide-react";
+import { Github } from "@/components/icons/github-icon";
 import { useRef, useState, type ComponentType } from "react";
 import { BetaTag } from "@/components/beta-tag";
 import { APP_VERSION, IS_BETA_BUILD } from "@/lib/build-info";
@@ -9,7 +10,11 @@ import { useT } from "@/lib/i18n";
 const KEY = "harbor.build.rating.v1";
 const REPO_ISSUE = "https://github.com/harborstremio/harbor/issues/new";
 
-type Stop = { label: string; Icon: ComponentType<{ size?: number; strokeWidth?: number }>; color: string };
+type Stop = {
+  label: string;
+  Icon: ComponentType<{ size?: number; strokeWidth?: number }>;
+  color: string;
+};
 const STOPS: Stop[] = [
   { label: "Much worse", Icon: Angry, color: "#f04444" },
   { label: "Worse", Icon: Frown, color: "#f59e0b" },
@@ -17,7 +22,8 @@ const STOPS: Stop[] = [
   { label: "Better", Icon: Smile, color: "#34d399" },
   { label: "Much better", Icon: Laugh, color: "#22c55e" },
 ];
-const TRACK = "linear-gradient(to right, #f04444 0%, #f59e0b 27%, #9aa3af 50%, #34d399 73%, #22c55e 100%)";
+const TRACK =
+  "linear-gradient(to right, #f04444 0%, #f59e0b 27%, #9aa3af 50%, #34d399 73%, #22c55e 100%)";
 
 function readSaved(): number | null {
   try {
@@ -34,6 +40,7 @@ export function BuildFeedback() {
   const t = useT();
   const [value, setValue] = useState(() => readSaved() ?? 2);
   const [committed, setCommitted] = useState<number | null>(() => readSaved());
+  const [isDragging, setIsDragging] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
 
@@ -89,7 +96,9 @@ export function BuildFeedback() {
         {negative ? (
           <div className="flex flex-col items-start gap-2.5 rounded-lg border border-edge-soft bg-elevated/40 p-3.5">
             <p className="text-[13px] leading-relaxed text-ink-muted">
-              {t("Sorry this one is not better. Tell us what went wrong and we will fix it for you.")}
+              {t(
+                "Sorry this one is not better. Tell us what went wrong and we will fix it for you.",
+              )}
             </p>
             <button
               type="button"
@@ -148,6 +157,7 @@ export function BuildFeedback() {
           onPointerDown={(e) => {
             e.currentTarget.setPointerCapture(e.pointerId);
             dragging.current = true;
+            setIsDragging(true);
             setFromX(e.clientX);
           }}
           onPointerMove={(e) => {
@@ -155,6 +165,7 @@ export function BuildFeedback() {
           }}
           onPointerUp={(e) => {
             dragging.current = false;
+            setIsDragging(false);
             try {
               e.currentTarget.releasePointerCapture(e.pointerId);
             } catch {
@@ -187,9 +198,15 @@ export function BuildFeedback() {
           <span
             aria-hidden
             className={`absolute top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-canvas shadow-[0_4px_14px_-2px_rgba(0,0,0,0.55)] ring-2 transition-all duration-150 ${
-              dragging.current ? "scale-110" : ""
+              isDragging ? "scale-110" : ""
             }`}
-            style={{ left: `${(value / (STOPS.length - 1)) * 100}%`, color: cur.color, "--tw-ring-color": cur.color } as React.CSSProperties}
+            style={
+              {
+                left: `${(value / (STOPS.length - 1)) * 100}%`,
+                color: cur.color,
+                "--tw-ring-color": cur.color,
+              } as React.CSSProperties
+            }
           >
             <cur.Icon size={19} strokeWidth={2.1} />
           </span>

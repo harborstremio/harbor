@@ -9,10 +9,20 @@ import { useT } from "@/lib/i18n";
 import { useParental } from "@/lib/parental";
 import { useSettings } from "@/lib/settings";
 import { useView, type View } from "@/lib/view";
+import { HoverNavIcon } from "@/chrome/hover-nav-icon";
 
 const FROST = "#88c0d0";
 const RAIL = "linear-gradient(180deg, #8fbcbb59, #88c0d033 44%, #b48ead2b 78%, #81a1c14d)";
-const PRIMARY_IDS = new Set(["home", "discover", "movies", "shows", "kids", "anime", "live", "vod"]);
+const PRIMARY_IDS = new Set([
+  "home",
+  "discover",
+  "movies",
+  "shows",
+  "kids",
+  "anime",
+  "live",
+  "vod",
+]);
 
 export function NordSidebar() {
   const { view, setView, chromeHidden } = useView();
@@ -50,12 +60,16 @@ export function NordSidebar() {
         className={`relative z-[60] flex w-[78px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
           collapsed ? "" : "lg:w-56"
         } ${
-          chromeHidden ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0" : "translate-x-0 opacity-100"
+          chromeHidden
+            ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0"
+            : "translate-x-0 opacity-100"
         }`}
       >
         <div
           className="relative flex min-h-0 flex-1 flex-col"
-          style={{ background: "linear-gradient(180deg, var(--color-elevated), var(--color-canvas) 46%)" }}
+          style={{
+            background: "linear-gradient(180deg, var(--color-elevated), var(--color-canvas) 46%)",
+          }}
         >
           <GlacierEdge />
 
@@ -91,12 +105,19 @@ export function NordSidebar() {
                 style={{
                   background: RAIL,
                   maskImage: "linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent)",
-                  WebkitMaskImage: "linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent)",
+                  WebkitMaskImage:
+                    "linear-gradient(180deg, transparent, #000 7%, #000 93%, transparent)",
                 }}
               />
 
               {primary.map((item) => (
-                <Station key={item.id} item={item} active={view === item.view} collapsed={collapsed} onClick={() => go(item)} />
+                <Station
+                  key={item.id}
+                  item={item}
+                  active={view === item.view}
+                  collapsed={collapsed}
+                  onClick={() => go(item)}
+                />
               ))}
 
               {collections.map((item) => (
@@ -131,8 +152,12 @@ export function NordSidebar() {
                 </div>
                 {!collapsed && (
                   <div className="hidden min-w-0 lg:block">
-                    <div className="truncate text-[13px] font-medium text-ink-muted">{t("chrome.locked")}</div>
-                    <div className="truncate text-[11.5px] text-ink-subtle">{t("chrome.parentalOn")}</div>
+                    <div className="truncate text-[13px] font-medium text-ink-muted">
+                      {t("chrome.locked")}
+                    </div>
+                    <div className="truncate text-[11.5px] text-ink-subtle">
+                      {t("chrome.parentalOn")}
+                    </div>
                   </div>
                 )}
               </div>
@@ -193,7 +218,10 @@ function Station({
             <span
               aria-hidden
               className="absolute inset-0 rounded-full"
-              style={{ background: FROST, boxShadow: `0 0 0 4px ${FROST}1c, 0 0 16px 1px ${FROST}73` }}
+              style={{
+                background: FROST,
+                boxShadow: `0 0 0 4px ${FROST}1c, 0 0 16px 1px ${FROST}73`,
+              }}
             />
           ) : (
             <span
@@ -201,7 +229,9 @@ function Station({
               className="absolute inset-0 rounded-full bg-canvas ring-[1.5px] ring-[#4c566a] transition-all duration-200 group-hover:ring-[#88c0d0]"
             />
           )}
-          <span className="relative overflow-hidden [&_svg]:h-[24px] [&_svg]:w-[24px]">{item.render(false)}</span>
+          <span className="relative overflow-hidden [&_svg]:h-[24px] [&_svg]:w-[24px]">
+            <HoverNavIcon render={item.render} />
+          </span>
           {gated && (
             <span
               className="absolute -bottom-0.5 -end-0.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle"
@@ -230,7 +260,10 @@ function FrostLine({ className }: { className?: string }) {
     <div
       aria-hidden
       className={`h-px w-full ${className ?? ""}`}
-      style={{ background: "linear-gradient(90deg, transparent, #88c0d03d 20%, #88c0d03d 80%, transparent)" }}
+      style={{
+        background:
+          "linear-gradient(90deg, transparent, #88c0d03d 20%, #88c0d03d 80%, transparent)",
+      }}
     />
   );
 }

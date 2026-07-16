@@ -2,7 +2,7 @@ import { Check, Sparkles } from "lucide-react";
 import type { TrackInfo } from "@/lib/player/bridge";
 import { useContextMenu } from "@/lib/context-menu";
 import { isImageSubTrack } from "@/lib/player/sub-format";
-import { languageName } from "@/lib/subtitles/language";
+import { subtitleTrackLanguageLabel, subtitleTrackTitle } from "@/lib/subtitles/track-label";
 import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
 import { useImportedSubs } from "@/lib/player/imported-subs";
 import { useT } from "@/lib/i18n";
@@ -34,12 +34,15 @@ export function VariantRow({
   if (track.hearingImpaired) tags.push({ label: tr("HI/SDH"), tone: "warn" });
   if (track.default) tags.push({ label: tr("Default"), tone: "default" });
   if (isImageSubTrack(track)) tags.push({ label: tr("Position and size only"), tone: "warn" });
-  const sourceLabel = isImported ? tr("Imported") : track.external ? tr("External") : tr("Embedded");
+  const sourceLabel = isImported
+    ? tr("Imported")
+    : track.external
+      ? tr("External")
+      : tr("Embedded");
   const codec = track.codec?.toUpperCase();
   const release = pickReleaseHint(track);
-  const titleText =
-    track.title?.trim() || (track.external ? tr("External subtitle") : tr("Embedded track"));
-  const langName = track.lang ? languageName(track.lang) : tr("Unknown");
+  const titleText = subtitleTrackTitle(track);
+  const langName = subtitleTrackLanguageLabel(track);
 
   return (
     <button

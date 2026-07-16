@@ -12,7 +12,10 @@ const XLINK = "http://www.w3.org/1999/xlink";
 function InstallBoat({ logo }: { logo: string | null }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<string | null>(logo);
-  logoRef.current = logo;
+
+  useEffect(() => {
+    logoRef.current = logo;
+  }, [logo]);
 
   useEffect(() => {
     const host = ref.current;
@@ -54,7 +57,7 @@ function InstallBoat({ logo }: { logo: string | null }) {
 
 export function InstallOverlay({ phase, logo }: { phase: OverlayPhase; logo: string | null }) {
   const installing = phase.kind === "installing";
-  const name = phase.kind === "success" ? phase.name : phase.name ?? "Resolving manifest";
+  const name = phase.kind === "success" ? phase.name : (phase.name ?? "Resolving manifest");
   const cargoLogo = logo ?? (phase.kind === "success" ? phase.logo : null);
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center bg-canvas/92 backdrop-blur-xl animate-in fade-in duration-200">
@@ -73,8 +76,12 @@ export function InstallOverlay({ phase, logo }: { phase: OverlayPhase; logo: str
               Added to Harbor
             </span>
           )}
-          <span className="font-display text-[24px] leading-none tracking-tight text-ink">{name}</span>
-          {!installing && <span className="text-[12.5px] text-ink-muted">Saved to your library.</span>}
+          <span className="font-display text-[24px] leading-none tracking-tight text-ink">
+            {name}
+          </span>
+          {!installing && (
+            <span className="text-[12.5px] text-ink-muted">Saved to your library.</span>
+          )}
         </div>
       </div>
     </div>

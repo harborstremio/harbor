@@ -90,7 +90,30 @@ export function isRtl(language: string): boolean {
   return directionForLanguage(language) === "rtl";
 }
 
-let current = detectUiLanguage();
+function storedUiLanguage(): unknown {
+  if (typeof localStorage === "undefined") return undefined;
+  try {
+    const profileState = JSON.parse(localStorage.getItem("harbor.profiles.v1") ?? "null") as {
+      activeId?: string | null;
+      profiles?: Array<{ id: string; settingsLinked?: boolean }>;
+    } | null;
+    const activeId = profileState?.activeId ?? "default";
+    const activeProfile = profileState?.profiles?.find((profile) => profile.id === activeId);
+    const preferredKey =
+      activeProfile?.settingsLinked === false
+        ? `harbor.settings.${activeId}`
+        : "harbor.settings.shared";
+    for (const key of [preferredKey, "harbor.settings.shared", "harbor.settings"]) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const language = (JSON.parse(raw) as { uiLanguage?: unknown }).uiLanguage;
+      if (typeof language === "string") return language;
+    }
+  } catch {}
+  return undefined;
+}
+
+let current = resolveUiLanguage(storedUiLanguage());
 const listeners = new Set<() => void>();
 
 function applyDocument(language: UiLanguage): void {
@@ -98,6 +121,8 @@ function applyDocument(language: UiLanguage): void {
   document.documentElement.lang = language;
   document.documentElement.dir = directionForLanguage(language);
 }
+
+applyDocument(current);
 
 export function getUiLanguage(): UiLanguage {
   return current;

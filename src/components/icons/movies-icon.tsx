@@ -25,21 +25,14 @@ export function MoviesIcon({ active = false }: { active?: boolean }) {
         strokeLinecap="round"
         opacity="0.4"
       />
-      <g
-        style={{
-          transformOrigin: "3px 11px",
-          transformBox: "fill-box",
-          transform: active ? "rotate(-32deg)" : "rotate(0deg)",
-          transition: "transform 320ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-      >
+      <g className={active ? "animate-clapper" : ""}>
         <rect
           x="3"
           y="6"
           width="18"
           height="5"
           rx="0.9"
-          stroke="currentColor"
+          stroke={active ? "var(--color-accent)" : "currentColor"}
           strokeWidth="1.6"
           fill="currentColor"
           fillOpacity="0.12"

@@ -1705,6 +1705,8 @@
   "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.": "تحميل صورة البطل المميّز بأعلى دقة. يستهلك بيانات أكثر.",
   "Loaded {name}": "تم تحميل {name}",
   "Loading": "جارٍ التحميل",
+  "Loading video": "جارٍ تحميل المقطع",
+  "Selecting best source": "جارٍ اختيار أفضل مصدر",
   "Loading {label}": "جارٍ تحميل {label}",
   "Loading environment details…": "جاري تحميل تفاصيل بيئة التشغيل…",
   "Loading episode details...": "جاري تحميل تفاصيل الحلقة...",

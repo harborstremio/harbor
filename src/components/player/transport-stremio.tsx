@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
 import {
   controlsInSlot,
@@ -40,7 +41,7 @@ export type TransportStremioProps = {
   onSubDelay: (sec: number) => void;
   onAudioDelay: (sec: number) => void;
   onEnterSync?: () => void;
-  onAddSubtitle: (url: string, lang?: string, title?: string) => void;
+  onAddSubtitle: SubtitleAddHandler;
   onRate: (r: number) => void;
   cropMode?: string;
   onCropMode?: (id: string) => void;
@@ -162,8 +163,17 @@ export function TransportStremio(p: TransportStremioProps) {
   const controlsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    onMenuOpenChange?.(audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen);
-  }, [audioMenuOpen, subtitleMenuOpen, speedMenuOpen, aspectMenuOpen, anime4kMenuOpen, onMenuOpenChange]);
+    onMenuOpenChange?.(
+      audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen,
+    );
+  }, [
+    audioMenuOpen,
+    subtitleMenuOpen,
+    speedMenuOpen,
+    aspectMenuOpen,
+    anime4kMenuOpen,
+    onMenuOpenChange,
+  ]);
 
   useEffect(() => {
     const refresh = () => setConfig(readPlayerChromeConfig("stremio"));
@@ -330,9 +340,7 @@ export function TransportStremio(p: TransportStremioProps) {
             setCastModalOpen(false);
             castModalPlay(m, ep);
           }}
-          currentEpisode={
-            season != null && episode != null ? { season, episode } : null
-          }
+          currentEpisode={season != null && episode != null ? { season, episode } : null}
         />
       )}
     </>

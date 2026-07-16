@@ -1,7 +1,8 @@
-import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
+import { createRequestScheduler } from "@/lib/request-scheduler";
+import { safeFetch } from "@/lib/safe-fetch";
 import { imageRequestLang } from "./tmdb-image-lang";
 
-const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const tmdbRequests = createRequestScheduler({ concurrency: 6 });
 
 export const TMDB = "https://api.themoviedb.org/3";
 export const IMG = "https://image.tmdb.org/t/p";
@@ -58,14 +59,10 @@ async function readJsonBody(res: Response, path: string): Promise<string> {
 }
 
 async function tmdbHttpFetch(url: string): Promise<Response> {
-  const init = {
+  return safeFetch(url, {
     method: "GET",
     headers: { Accept: "application/json" },
-  };
-  if (isTauri) {
-    return (await tauriHttpFetch(url, init as unknown as RequestInit)) as unknown as Response;
-  }
-  return await fetch(url, init);
+  });
 }
 
 async function fetchTmdbOnce<T>(
@@ -102,9 +99,16 @@ export async function get<T>(
   const target = url.toString();
   for (let attempt = 0; attempt < 4; attempt += 1) {
     try {
-      const { status, data } = await fetchTmdbOnce<T>(target, path);
+      const backoffMs = Math.min(2000, 250 * 2 ** attempt);
+      const { status, data } = await tmdbRequests.schedule(target, async () => {
+        const result = await fetchTmdbOnce<T>(target, path);
+        if (result.status === 429 || (result.status >= 500 && result.status < 600)) {
+          tmdbRequests.pauseFor(backoffMs);
+        }
+        return result;
+      });
       if (status === 429 || (status >= 500 && status < 600)) {
-        await new Promise((r) => setTimeout(r, Math.min(2000, 250 * 2 ** attempt)));
+        await new Promise((r) => setTimeout(r, backoffMs));
         continue;
       }
       return data;

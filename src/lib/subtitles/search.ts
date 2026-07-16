@@ -5,6 +5,7 @@ import { searchWyzie } from "./providers/wyzie";
 import { searchAddons } from "./providers/addons";
 import { searchOpenSubtitlesV3 } from "./providers/opensubtitles-v3";
 import { langScore, normalizeLang } from "./language";
+import { SUBTITLE_PROVIDER_TIMEOUT_MS, withSubtitleTimeout } from "./autoload";
 
 export type SearchOptions = {
   providers?: { wyzie?: boolean; addons?: boolean; opensubtitles?: boolean };
@@ -28,12 +29,27 @@ export async function searchSubtitles(
   const wyzieOn = want.wyzie === true;
   const addonsOn = want.addons ?? true;
   const osOn = want.opensubtitles ?? true;
-  dinfo("[subs] search", { q, providers: { osOn, addonsOn, wyzieOn }, addons: opts.addons?.length ?? 0 });
+  dinfo("[subs] search", {
+    q,
+    providers: { osOn, addonsOn, wyzieOn },
+    addons: opts.addons?.length ?? 0,
+  });
   const tasks: Array<{ name: string; p: Promise<SubResult[]> }> = [];
-  if (osOn) tasks.push({ name: "opensubtitles-v3", p: searchOpenSubtitlesV3(q) });
-  if (wyzieOn) tasks.push({ name: "wyzie", p: searchWyzie(q) });
+  if (osOn)
+    tasks.push({
+      name: "opensubtitles-v3",
+      p: withSubtitleTimeout(searchOpenSubtitlesV3(q), SUBTITLE_PROVIDER_TIMEOUT_MS, []),
+    });
+  if (wyzieOn)
+    tasks.push({
+      name: "wyzie",
+      p: withSubtitleTimeout(searchWyzie(q), SUBTITLE_PROVIDER_TIMEOUT_MS, []),
+    });
   if (addonsOn && opts.addons && opts.addons.length > 0)
-    tasks.push({ name: "addons", p: searchAddons(opts.addons, q) });
+    tasks.push({
+      name: "addons",
+      p: withSubtitleTimeout(searchAddons(opts.addons, q), SUBTITLE_PROVIDER_TIMEOUT_MS, []),
+    });
   const settled = await Promise.allSettled(tasks.map((t) => t.p));
   const all: SubResult[] = [];
   settled.forEach((r, i) => {
@@ -49,7 +65,8 @@ export async function searchSubtitles(
   return ranked;
 }
 
-const RELEASE_GROUP_RX = /[-.][A-Z0-9]{2,}$|\b(EVO|RARBG|YTS|YIFY|FGT|PSA|TBS|GalaxyRG|GalaxyTV|MeGusta|ION10|EZTV|NTb|FLUX|TEPES|KOGi|SMURF|RZeroX|d3g|TGx)\b/gi;
+const RELEASE_GROUP_RX =
+  /[-.][A-Z0-9]{2,}$|\b(EVO|RARBG|YTS|YIFY|FGT|PSA|TBS|GalaxyRG|GalaxyTV|MeGusta|ION10|EZTV|NTb|FLUX|TEPES|KOGi|SMURF|RZeroX|d3g|TGx)\b/gi;
 
 function extractReleaseGroup(text: string | null | undefined): string | null {
   if (!text) return null;
@@ -62,8 +79,10 @@ function extractReleaseGroup(text: string | null | undefined): string | null {
 function sourceTokens(source: string | null | undefined): string[] {
   if (!source) return [];
   const s = source.toLowerCase();
-  if (s.includes("bluray") || s === "remux" || s.includes("bdrip")) return ["bluray", "bdrip", "remux"];
-  if (s.includes("web-dl") || s === "webdl" || s.includes("webrip")) return ["web-dl", "webdl", "webrip", "web"];
+  if (s.includes("bluray") || s === "remux" || s.includes("bdrip"))
+    return ["bluray", "bdrip", "remux"];
+  if (s.includes("web-dl") || s === "webdl" || s.includes("webrip"))
+    return ["web-dl", "webdl", "webrip", "web"];
   if (s.includes("hdtv")) return ["hdtv"];
   if (s.includes("dvd")) return ["dvd", "dvdrip"];
   return [s];
@@ -105,11 +124,7 @@ function sourcePriority(source: SubResult["source"]): number {
   }
 }
 
-function dedupAndRank(
-  results: SubResult[],
-  preferred: string[],
-  hints?: StreamHints,
-): SubResult[] {
+function dedupAndRank(results: SubResult[], preferred: string[], hints?: StreamHints): SubResult[] {
   const seen = new Set<string>();
   const filtered: SubResult[] = [];
   for (const r of results) {

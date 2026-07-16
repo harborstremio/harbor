@@ -1,4 +1,5 @@
 import type { TrackInfo } from "@/lib/player/bridge";
+import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 
 export type SubtitleMenuProps = {
   tracks: TrackInfo[];
@@ -7,7 +8,7 @@ export type SubtitleMenuProps = {
   onSelect: (id: string | null) => void;
   onDelay: (sec: number) => void;
   onEnterSync?: () => void;
-  onAddSubtitle: (url: string, lang?: string, title?: string) => void | Promise<boolean>;
+  onAddSubtitle: SubtitleAddHandler;
   metaImdbId?: string | null;
   metaTitle?: string | null;
   metaReleaseDate?: string | null;

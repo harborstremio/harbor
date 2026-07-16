@@ -83,7 +83,7 @@ export function SearchSection(props: SubtitleMenuProps) {
       };
 
       // Log search attempt for debugging (will appear in terminal)
-      console.log('[SUBTITLES SEARCH] Starting with:', {
+      console.log("[SUBTITLES SEARCH] Starting with:", {
         hasImdbId: !!metaImdbId,
         addonsCount: addons?.length ?? 0,
         providers: searchOpts.providers,
@@ -93,11 +93,14 @@ export function SearchSection(props: SubtitleMenuProps) {
       const r = await searchSubtitles(searchQuery, searchOpts);
 
       // Log results by source (will appear in terminal)
-      const bySource = r.reduce((acc, sub) => {
-        acc[sub.source] = (acc[sub.source] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      console.log('[SUBTITLES SEARCH] Complete:', {
+      const bySource = r.reduce(
+        (acc, sub) => {
+          acc[sub.source] = (acc[sub.source] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
+      console.log("[SUBTITLES SEARCH] Complete:", {
         total: r.length,
         bySource,
         addonResults: bySource.addon || 0,
@@ -195,7 +198,12 @@ export function SearchSection(props: SubtitleMenuProps) {
             lang={lang}
             items={items}
             defaultOpen={i === 0}
-            onAdd={(r) => onAddSubtitle(r.url, r.lang, r.title)}
+            onAdd={(r) =>
+              onAddSubtitle(r.url, r.lang, r.title, {
+                format: r.format,
+                encoding: r.encoding,
+              })
+            }
           />
         ))}
       </div>
@@ -212,7 +220,7 @@ function LangGroup({
   lang: string;
   items: SubResult[];
   defaultOpen: boolean;
-  onAdd: (r: SubResult) => void | Promise<boolean>;
+  onAdd: (r: SubResult) => void | Promise<boolean | void>;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -234,9 +242,9 @@ function LangGroup({
         />
       </button>
       {open &&
-        items.slice(0, 30).map((r) => (
-          <ResultRow key={r.id} result={r} lang={lang} onAdd={() => onAdd(r)} />
-        ))}
+        items
+          .slice(0, 30)
+          .map((r) => <ResultRow key={r.id} result={r} lang={lang} onAdd={() => onAdd(r)} />)}
     </div>
   );
 }
@@ -248,7 +256,7 @@ function ResultRow({
 }: {
   result: SubResult;
   lang: string;
-  onAdd: () => void | Promise<boolean>;
+  onAdd: () => void | Promise<boolean | void>;
 }) {
   const t = useT();
   const { open } = useContextMenu();
@@ -305,18 +313,17 @@ function ResultRow({
   };
 
   // Enhanced source display with color coding
-  const sourceColor = {
-    addon: "text-blue-400",
-    opensubtitles: "text-emerald-400",
-    wyzie: "text-purple-400",
-    jimaku: "text-amber-400",
-  }[result.source] || "text-ink-subtle";
+  const sourceColor =
+    {
+      addon: "text-blue-400",
+      opensubtitles: "text-emerald-400",
+      wyzie: "text-purple-400",
+      jimaku: "text-amber-400",
+    }[result.source] || "text-ink-subtle";
 
   return (
     <div
-      onContextMenu={(e) =>
-        open(e, { kind: "subtitle", label: result.title || lang, download })
-      }
+      onContextMenu={(e) => open(e, { kind: "subtitle", label: result.title || lang, download })}
       className={`group flex w-full items-start gap-3 px-4 py-2.5 transition-colors duration-300 ${
         added ? "bg-emerald-400/12" : "hover:bg-canvas/60"
       }`}
@@ -391,8 +398,9 @@ function ResultRow({
             void download();
           }
         }}
-        className={`mt-0.5 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors ${saved ? "text-accent" : "text-ink-subtle hover:bg-elevated hover:text-ink"
-          }`}
+        className={`mt-0.5 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors ${
+          saved ? "text-accent" : "text-ink-subtle hover:bg-elevated hover:text-ink"
+        }`}
       >
         {busy ? (
           <Loader2 size={13} className="animate-spin" />
@@ -418,10 +426,11 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`flex h-7 items-center rounded-full px-2.5 text-[11.5px] font-semibold transition-colors ${active
+      className={`flex h-7 items-center rounded-full px-2.5 text-[11.5px] font-semibold transition-colors ${
+        active
           ? "bg-elevated text-ink ring-1 ring-edge"
           : "bg-raised text-ink-muted hover:bg-elevated/80"
-        }`}
+      }`}
     >
       {children}
     </button>

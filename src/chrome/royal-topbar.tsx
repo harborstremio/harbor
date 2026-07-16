@@ -11,13 +11,19 @@ import { useT } from "@/lib/i18n";
 import { useTvFocusScope } from "@/lib/keyboard-navigation";
 import { useProfiles } from "@/lib/profiles";
 import { useSearch } from "@/lib/search-context";
-import { effectiveBinding, eventToBinding, formatBindingForDisplay, isTypingTarget } from "@/lib/hotkeys";
+import {
+  effectiveBinding,
+  eventToBinding,
+  formatBindingForDisplay,
+  isTypingTarget,
+} from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
+import { HoverNavIcon } from "@/chrome/hover-nav-icon";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -45,7 +51,8 @@ export function RoyalTopbar() {
   };
 
   const navigate = (item: NavItem) => {
-    const needsPin = locked && (item.pinGated || (item.parentalKey && hiddenTabs[item.parentalKey]));
+    const needsPin =
+      locked && (item.pinGated || (item.parentalKey && hiddenTabs[item.parentalKey]));
     if (needsPin) setPinFor(item.view);
     else setView(item.view);
   };
@@ -59,17 +66,17 @@ export function RoyalTopbar() {
       label,
       active,
       onSelect: () => navigate(item),
-        node: (
-          <button
-            type="button"
-            data-harbor-nav={item.view}
-            onClick={() => navigate(item)}
-            aria-label={label}
-            title={label}
-            className={`relative flex h-9 items-center gap-2 whitespace-nowrap rounded-md px-2.5 text-[13.5px] font-medium leading-none transition-colors duration-150 ${
-              active ? "text-accent" : "text-ink-muted hover:text-ink"
-            }`}
-          >
+      node: (
+        <button
+          type="button"
+          data-harbor-nav={item.view}
+          onClick={() => navigate(item)}
+          aria-label={label}
+          title={label}
+          className={`relative flex h-9 items-center gap-2 whitespace-nowrap rounded-md px-2.5 text-[13.5px] font-medium leading-none transition-colors duration-150 ${
+            active ? "text-accent" : "text-ink-muted hover:text-ink"
+          }`}
+        >
           {active && (
             <span
               aria-hidden
@@ -77,7 +84,7 @@ export function RoyalTopbar() {
             />
           )}
           <span className="grid h-[18px] w-[18px] place-items-center [&_svg]:h-[18px] [&_svg]:w-[18px]">
-            {item.render(false)}
+            <HoverNavIcon render={item.render} />
           </span>
           <span className="hidden xl:inline">{label}</span>
         </button>
@@ -90,7 +97,9 @@ export function RoyalTopbar() {
       <header
         aria-hidden={chromeHidden}
         className={`fixed inset-x-0 top-0 z-[60] flex h-20 items-center px-4 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          chromeHidden ? "pointer-events-none -translate-y-1.5 opacity-0" : "translate-y-0 opacity-100"
+          chromeHidden
+            ? "pointer-events-none -translate-y-1.5 opacity-0"
+            : "translate-y-0 opacity-100"
         }`}
       >
         <div
@@ -138,12 +147,28 @@ export function RoyalTopbar() {
             {IS_TAURI && !settings.useNativeTitleBar && (
               <div className="ms-0.5 flex items-center gap-1">
                 <WinBtn onClick={minimize} label={t("chrome.minimize")}>
-                  <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3 6.5h7"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </WinBtn>
-                <WinBtn onClick={toggleMaximize} label={maxed ? t("chrome.restore") : t("chrome.maximize")}>
+                <WinBtn
+                  onClick={toggleMaximize}
+                  label={maxed ? t("chrome.restore") : t("chrome.maximize")}
+                >
                   {maxed ? (
                     <>
-                      <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
+                      <rect
+                        x="2.5"
+                        y="4.5"
+                        width="6"
+                        height="6"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                        rx="1"
+                      />
                       <path
                         d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
                         stroke="currentColor"
@@ -152,11 +177,24 @@ export function RoyalTopbar() {
                       />
                     </>
                   ) : (
-                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
+                    <rect
+                      x="3"
+                      y="3"
+                      width="7"
+                      height="7"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      rx="1.2"
+                    />
                   )}
                 </WinBtn>
                 <WinBtn onClick={close} label={t("common.close")} danger>
-                  <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <path
+                    d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
                 </WinBtn>
               </div>
             )}
@@ -183,7 +221,10 @@ export function RoyalTopbar() {
 
 function Filigree() {
   return (
-    <span aria-hidden className="harbor-royal-filigree relative mx-1 h-6 w-px shrink-0 overflow-hidden">
+    <span
+      aria-hidden
+      className="harbor-royal-filigree relative mx-1 h-6 w-px shrink-0 overflow-hidden"
+    >
       <span className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-accent)_42%,transparent)]" />
       <span className="harbor-royal-glint absolute inset-x-0 top-0 h-1.5 bg-[linear-gradient(to_bottom,transparent,color-mix(in_srgb,var(--color-accent)_85%,white),transparent)]" />
     </span>
@@ -334,7 +375,13 @@ function RoyalProfileMenu({
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => dismiss(() => (p.passwordHash ? openPicker({ kind: "unlock", profileId: p.id }) : selectProfile(p.id)))}
+                  onClick={() =>
+                    dismiss(() =>
+                      p.passwordHash
+                        ? openPicker({ kind: "unlock", profileId: p.id })
+                        : selectProfile(p.id),
+                    )
+                  }
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 text-start transition-colors hover:bg-elevated"
                 >
                   <span
@@ -353,7 +400,11 @@ function RoyalProfileMenu({
               <Users size={13} strokeWidth={2.2} /> {t("profile.whoWatching")}
             </MenuItem>
             {activeProfile && (
-              <MenuItem onClick={() => dismiss(() => openPicker({ kind: "edit", profileId: activeProfile.id }))}>
+              <MenuItem
+                onClick={() =>
+                  dismiss(() => openPicker({ kind: "edit", profileId: activeProfile.id }))
+                }
+              >
                 <Pencil size={13} strokeWidth={2.2} /> {t("Edit profile")}
               </MenuItem>
             )}

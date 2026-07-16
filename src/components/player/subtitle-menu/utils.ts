@@ -1,5 +1,5 @@
 import type { TrackInfo } from "@/lib/player/bridge";
-import { languageName } from "@/lib/subtitles/language";
+import { subtitleTrackLanguageLabel, subtitleTrackTitle } from "@/lib/subtitles/track-label";
 import type { Group, SubtitleMenuProps } from "./types";
 
 export function buildOverlayState(props: SubtitleMenuProps) {
@@ -18,8 +18,7 @@ export function buildOverlayState(props: SubtitleMenuProps) {
 export function groupByLang(tracks: TrackInfo[]): Group[] {
   const map = new Map<string, Group>();
   for (const t of tracks) {
-    const code = (t.lang || "").trim();
-    const display = code ? languageName(code) : "Unknown";
+    const display = subtitleTrackLanguageLabel(t);
     const key = display.toLowerCase();
     let g = map.get(key);
     if (!g) {
@@ -32,9 +31,7 @@ export function groupByLang(tracks: TrackInfo[]): Group[] {
 }
 
 export function variantTitle(t: TrackInfo): string {
-  if (t.title && t.title.trim() && t.title !== t.lang) return t.title;
-  if (t.external) return "External";
-  return "Embedded";
+  return subtitleTrackTitle(t);
 }
 
 export function variantSubtitle(t: TrackInfo): string {

@@ -17,22 +17,62 @@ export function buildTmdbSpecs(settings: Settings): RowSpec[] {
   const key = settings.tmdbKey;
   const region = settings.region;
   return [
-    { key: "tmdb-trending-movies", type: "movie", name: "Trending This Week", fetcher: (p) => tmdbTrending(key, "movie", "week", p) },
-    { key: "tmdb-now-playing", type: "movie", name: "In Theaters Now", noDedup: true, fetcher: (p) => tmdbMovieRow(key, "now_playing", region, p) },
-    { key: "tmdb-popular-movies", type: "movie", name: "Popular Movies", fetcher: (p) => tmdbMovieRow(key, "popular", region, p) },
-    { key: "tmdb-trending-tv", type: "series", name: "Trending Series", fetcher: (p) => tmdbTrending(key, "tv", "week", p) },
-    { key: "tmdb-on-the-air", type: "series", name: "On The Air", noDedup: true, fetcher: (p) => tmdbSeriesRow(key, "on_the_air", p) },
-    { key: "tmdb-popular-tv", type: "series", name: "Popular Series", fetcher: (p) => tmdbSeriesRow(key, "popular", p) },
-    { key: "tmdb-top-rated-tv", type: "series", name: "Top Rated Series", fetcher: (p) => tmdbSeriesRow(key, "top_rated", p) },
-    { key: "tmdb-top-rated-movies", type: "movie", name: "Top Rated Movies", fetcher: (p) => tmdbMovieRow(key, "top_rated", region, p) },
+    {
+      key: "tmdb-trending-movies",
+      type: "movie",
+      name: "Trending This Week",
+      fetcher: (p) => tmdbTrending(key, "movie", "week", p),
+    },
+    {
+      key: "tmdb-now-playing",
+      type: "movie",
+      name: "In Theaters Now",
+      noDedup: true,
+      fetcher: (p) => tmdbMovieRow(key, "now_playing", region, p),
+    },
+    {
+      key: "tmdb-popular-movies",
+      type: "movie",
+      name: "Popular Movies",
+      fetcher: (p) => tmdbMovieRow(key, "popular", region, p),
+    },
+    {
+      key: "tmdb-trending-tv",
+      type: "series",
+      name: "Trending Series",
+      fetcher: (p) => tmdbTrending(key, "tv", "week", p),
+    },
+    {
+      key: "tmdb-on-the-air",
+      type: "series",
+      name: "On The Air",
+      noDedup: true,
+      fetcher: (p) => tmdbSeriesRow(key, "on_the_air", p),
+    },
+    {
+      key: "tmdb-popular-tv",
+      type: "series",
+      name: "Popular Series",
+      fetcher: (p) => tmdbSeriesRow(key, "popular", p),
+    },
+    {
+      key: "tmdb-top-rated-tv",
+      type: "series",
+      name: "Top Rated Series",
+      fetcher: (p) => tmdbSeriesRow(key, "top_rated", p),
+    },
+    {
+      key: "tmdb-top-rated-movies",
+      type: "movie",
+      name: "Top Rated Movies",
+      fetcher: (p) => tmdbMovieRow(key, "top_rated", region, p),
+    },
   ];
 }
 
 export async function buildTmdbRows(settings: Settings) {
   const specs = buildTmdbSpecs(settings);
-  const firstPages = await Promise.all(
-    specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
-  );
+  const firstPages = await Promise.all(specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])));
   const rows: HomeRow[] = specs
     .map((spec, i) => ({
       key: spec.key,
@@ -94,12 +134,14 @@ export async function buildCinemetaRows() {
     topSeries("Comedy").catch(() => [] as Meta[]),
     topSeries("Crime").catch(() => [] as Meta[]),
   ]);
-  const make = (
-    key: string,
-    type: "movie" | "series",
-    name: string,
-    metas: Meta[],
-  ): HomeRow => ({ key, type, name, metas, page: 1, hasMore: false });
+  const make = (key: string, type: "movie" | "series", name: string, metas: Meta[]): HomeRow => ({
+    key,
+    type,
+    name,
+    metas,
+    page: 1,
+    hasMore: false,
+  });
   const rows: HomeRow[] = [
     make("cm-top-movies", "movie", "Top 10 on Stremio", movies.slice(0, 10)),
     make("cm-popular", "movie", "Popular Movies", movies.slice(10, 40)),
@@ -120,8 +162,9 @@ export async function buildCinemetaRows() {
     make("cm-comedy-tv", "series", "Comedy Series", sComedy.slice(0, 30)),
     make("cm-crime-tv", "series", "Crime Series", sCrime.slice(0, 30)),
   ].filter((r) => r.metas.length > 0);
-  const hero = [movies[0], series[0], mDrama[0], mComedy[0], mAction[0], mScifi[0]]
-    .filter(Boolean) as Meta[];
+  const hero = [movies[0], series[0], mDrama[0], mComedy[0], mAction[0], mScifi[0]].filter(
+    Boolean,
+  ) as Meta[];
   return { rows, hero };
 }
 
@@ -236,6 +279,13 @@ export function mergeRows(
   opts: { dedup?: boolean } = {},
 ): HomeRow[] {
   const dedup = opts.dedup ?? true;
+  const addonTypesByName = new Map<string, Set<string>>();
+  for (const addon of addons) {
+    const name = addon.name.trim().toLowerCase();
+    const types = addonTypesByName.get(name) ?? new Set<string>();
+    types.add(addon.type);
+    addonTypesByName.set(name, types);
+  }
   const seen = new Set<string>();
   const out: HomeRow[] = [];
   for (const r of built) {
@@ -252,10 +302,15 @@ export function mergeRows(
     const more = a.more;
     const origin = a.metas[0]?.addonOrigin;
     const canPage = !!more && step > 0;
+    const sameNameTypes = addonTypesByName.get(a.name.trim().toLowerCase());
+    const name =
+      sameNameTypes && sameNameTypes.size > 1
+        ? `${a.name}: ${a.type === "movie" ? "Movies" : a.type === "series" ? "Series" : a.type}`
+        : a.name;
     out.push({
       key: a.key,
       type: a.type as "movie" | "series",
-      name: a.name,
+      name,
       metas: a.metas,
       page: 1,
       hasMore: canPage,

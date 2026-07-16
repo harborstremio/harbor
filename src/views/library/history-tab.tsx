@@ -107,17 +107,16 @@ export function HistoryTab() {
   const [type, setType] = useState<TypeKey>("all");
   const [query, setQuery] = useState("");
   const [flat, setFlat] = useState(() => localStorage.getItem("harbor.history.flat") === "1");
+  useEffect(() => {
+    try {
+      localStorage.setItem("harbor.history.flat", flat ? "1" : "0");
+    } catch {}
+  }, [flat]);
   const toggleFlat = useCallback(() => {
-    setFlat((v) => {
-      const next = !v;
-      try {
-        localStorage.setItem("harbor.history.flat", next ? "1" : "0");
-      } catch {}
-      return next;
-    });
+    setFlat((v) => !v);
   }, []);
-  const [view, setView] = useState<HistoryView>(
-    () => (localStorage.getItem("harbor.history.view") === "episodes" ? "episodes" : "posters"),
+  const [view, setView] = useState<HistoryView>(() =>
+    localStorage.getItem("harbor.history.view") === "episodes" ? "episodes" : "posters",
   );
   const setViewPersist = useCallback((next: HistoryView) => {
     setView(next);
@@ -236,17 +235,23 @@ function HistoryViewToggle({
   return (
     <div className="flex items-center gap-1 rounded-full bg-elevated/40 p-0.5 ring-1 ring-edge-soft/60">
       <button
+        type="button"
         onClick={() => view !== "posters" && onChange("posters")}
         className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-          view === "posters" ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
+          view === "posters"
+            ? "bg-ink text-canvas"
+            : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         {t("Posters")}
       </button>
       <button
+        type="button"
         onClick={() => view !== "episodes" && onChange("episodes")}
         className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-          view === "episodes" ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
+          view === "episodes"
+            ? "bg-ink text-canvas"
+            : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         {t("Episodes")}
@@ -287,8 +292,7 @@ function filterHistory(items: LibraryItem[]): LibraryItem[] {
     .filter((i) => i.state?.flaggedWatched === 1 || (i.state?.timeOffset ?? 0) > 0)
     .sort(
       (a, b) =>
-        Date.parse(b.state?.lastWatched ?? b._mtime) -
-        Date.parse(a.state?.lastWatched ?? a._mtime),
+        Date.parse(b.state?.lastWatched ?? b._mtime) - Date.parse(a.state?.lastWatched ?? a._mtime),
     );
 }
 
@@ -341,7 +345,7 @@ function mergeHistory(stremio: LibraryItem[], trakt: HistoryItem[]): HistoryEntr
       meta: {
         id,
         type: h.type === "movie" ? "movie" : "series",
-        name: h.type === "movie" ? h.title : (h.showImdb ? "" : h.title),
+        name: h.type === "movie" ? h.title : h.showImdb ? "" : h.title,
       },
       date: parseTs(h.watchedAt),
       progress: 0,

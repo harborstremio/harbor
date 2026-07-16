@@ -1,4 +1,5 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { decodeSubtitleBytes } from "./encoding";
 
 export type SubCue = {
   start: number;
@@ -8,12 +9,21 @@ export type SubCue = {
 
 export type SubFormat = "srt" | "vtt" | "ass" | "ssa" | "sub";
 
-export async function fetchAndParse(url: string): Promise<SubCue[]> {
+export type SubtitleDecodeOptions = {
+  encoding?: string;
+  lang?: string;
+  format?: SubFormat;
+};
+
+export async function fetchAndParse(
+  url: string,
+  options: SubtitleDecodeOptions = {},
+): Promise<SubCue[]> {
   const res = await fetch(url, { method: "GET" });
   if (!res.ok) throw new Error(`subtitle fetch ${res.status}`);
   const buf = await res.arrayBuffer();
-  const text = decodeText(new Uint8Array(buf));
-  return parseSubtitle(text);
+  const text = decodeSubtitleBytes(new Uint8Array(buf), options);
+  return parseSubtitle(text, options.format);
 }
 
 export function parseSubtitle(raw: string, format?: SubFormat): SubCue[] {
@@ -164,19 +174,9 @@ function cleanInline(s: string): string {
 
 function toSec(h: string, m: string, s: string, ms: string): number {
   const padded = (ms + "000").slice(0, 3);
-  return parseInt(h, 10) * 3600 + parseInt(m, 10) * 60 + parseInt(s, 10) + parseInt(padded, 10) / 1000;
-}
-
-function decodeText(bytes: Uint8Array): string {
-  if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder("utf-16le").decode(bytes.slice(2));
-  if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder("utf-16be").decode(bytes.slice(2));
-  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) return new TextDecoder("utf-8").decode(bytes.slice(3));
-  try {
-    const out = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-    return out;
-  } catch {
-    return new TextDecoder("windows-1252").decode(bytes);
-  }
+  return (
+    parseInt(h, 10) * 3600 + parseInt(m, 10) * 60 + parseInt(s, 10) + parseInt(padded, 10) / 1000
+  );
 }
 
 export function findActiveCue(cues: SubCue[], timeSec: number): SubCue | null {

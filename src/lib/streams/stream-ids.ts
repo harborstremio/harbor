@@ -18,11 +18,12 @@ export function buildStreamIds(
   if (!episode && defaultVideoId) push(defaultVideoId);
 
   const animeMeta = /^(kitsu|mal|anilist|anidb):/.test(metaId) || episode?.kitsuStreamId != null;
-  const mappedImdb =
-    episode?.imdbSeason != null && episode?.imdbEpisode != null ? (episode.imdbId ?? imdbId) : null;
-  const imdbEpAligned = !animeMeta || episode!.episode === episode!.imdbEpisode;
-  if (mappedImdb && mappedImdb.startsWith("tt") && imdbEpAligned) {
-    push(`${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
+  if (episode?.imdbSeason != null && episode.imdbEpisode != null) {
+    const mappedImdb = episode.imdbId ?? imdbId;
+    const imdbEpAligned = !animeMeta || episode.episode === episode.imdbEpisode;
+    if (mappedImdb?.startsWith("tt") && imdbEpAligned) {
+      push(`${mappedImdb}:${episode.imdbSeason}:${episode.imdbEpisode}`);
+    }
   }
 
   if (episode?.kitsuStreamId) {

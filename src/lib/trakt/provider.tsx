@@ -15,17 +15,9 @@ import {
   type PollHandle,
   type PollResult,
 } from "./device-auth";
-import {
-  getSession,
-  setSession,
-  subscribeSession,
-} from "./session";
+import { getSession, setSession, subscribeSession } from "./session";
 import { stremioIdToTraktTarget, type TraktEpisodeRef } from "./ids";
-import {
-  scrobblePause,
-  scrobbleStart,
-  scrobbleStop,
-} from "./scrobble";
+import { scrobblePause, scrobbleStart, scrobbleStop } from "./scrobble";
 import { pushWatched } from "./history";
 import type { DeviceCode, TraktSession, TraktTarget } from "./types";
 
@@ -53,10 +45,7 @@ type Value = {
   cancelConnect: () => void;
   disconnect: () => void;
   scrobble: (action: "start" | "pause" | "stop", args: ScrobbleArgs) => Promise<void>;
-  resolveTarget: (
-    metaId: string,
-    episode?: TraktEpisodeRef,
-  ) => TraktTarget | null;
+  resolveTarget: (metaId: string, episode?: TraktEpisodeRef) => TraktTarget | null;
 };
 
 const Ctx = createContext<Value | null>(null);
@@ -119,13 +108,10 @@ export function TraktProvider({ children }: { children: ReactNode }) {
     setConnectState({ kind: "idle" });
   }, []);
 
-  const resolveTarget = useCallback(
-    (metaId: string, episode?: TraktEpisodeRef) => {
-      const r = stremioIdToTraktTarget(metaId, episode);
-      return r.ok ? r.target : null;
-    },
-    [],
-  );
+  const resolveTarget = useCallback((metaId: string, episode?: TraktEpisodeRef) => {
+    const r = stremioIdToTraktTarget(metaId, episode);
+    return r.ok ? r.target : null;
+  }, []);
 
   const scrobble = useCallback(
     async (action: "start" | "pause" | "stop", args: ScrobbleArgs) => {
@@ -136,8 +122,8 @@ export function TraktProvider({ children }: { children: ReactNode }) {
       if (action === "start") await scrobbleStart(target, progress);
       else if (action === "pause") await scrobblePause(target, progress);
       else {
-        const res = await scrobbleStop(target, progress);
-        if (!res) await pushWatched(target);
+        const outcome = await scrobbleStop(target, progress);
+        if (outcome === "failed") await pushWatched(target);
       }
     },
     [resolveTarget],

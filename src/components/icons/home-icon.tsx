@@ -8,9 +8,15 @@ export function HomeIcon({ active = false }: { active?: boolean }) {
         strokeLinejoin="round"
         fill="none"
       >
-        <path d="M4 11 L12 4 L20 11" />
-        <path d="M5.5 10 L5.5 20.5 Q5.5 21 6 21 L18 21 Q18.5 21 18.5 20.5 L18.5 10" />
-        <path d="M9.5 21 L9.5 14.5 Q9.5 14 10 14 L14 14 Q14.5 14 14.5 14.5 L14.5 21" />
+        <path d="M4 11 L12 4 L20 11" className={active ? "animate-home-roof-build" : ""} />
+        <path
+          d="M5.5 10 L5.5 20.5 Q5.5 21 6 21 L18 21 Q18.5 21 18.5 20.5 L18.5 10"
+          className={active ? "animate-home-walls-build" : ""}
+        />
+        <path
+          d="M9.5 21 L9.5 14.5 Q9.5 14 10 14 L14 14 Q14.5 14 14.5 14.5 L14.5 21"
+          className={active ? "animate-home-door-build" : ""}
+        />
       </g>
       <circle
         cx="12"

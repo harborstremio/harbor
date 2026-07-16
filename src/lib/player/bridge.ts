@@ -1,4 +1,5 @@
 import type { SubCue } from "@/lib/subtitles/parser";
+import type { SubtitleLoadMetadata } from "./subtitle-load";
 
 export type TrackInfo = {
   id: string;
@@ -24,6 +25,18 @@ export type Chapter = {
 };
 
 export type PlayerStatus = "idle" | "loading" | "ready" | "playing" | "paused" | "ended" | "error";
+
+export function loadingSurfaceFor(input: {
+  forceShow: boolean;
+  everPlayed: boolean;
+  buffering: boolean;
+  status: PlayerStatus;
+  errorCode: PlayerSnapshot["errorCode"];
+}): "startup" | "buffering" | null {
+  if (input.errorCode != null || input.status === "ended") return null;
+  if (input.forceShow || !input.everPlayed) return "startup";
+  return input.buffering ? "buffering" : null;
+}
 
 export type PlayerSnapshot = {
   status: PlayerStatus;
@@ -81,11 +94,18 @@ export type PlayerBridge = {
   setStretch: (on: boolean) => void;
   setVideoEq: (name: string, value: number) => void;
   setAnime4kShaders: (shaders: string[]) => void;
-  addSubtitle: (url: string, lang?: string, title?: string, select?: boolean) => Promise<boolean>;
+  addSubtitle: (
+    url: string,
+    lang?: string,
+    title?: string,
+    select?: boolean,
+    metadata?: SubtitleLoadMetadata,
+  ) => Promise<boolean>;
   getSelectedTrackCues: () => SubCue[] | null;
   getSelectedTrackUrl: () => string | null;
   setAudioNormalize: (on: boolean) => void;
   setAudioProfile?: (profile: string) => void;
+  setHdrToSdr?: (on: boolean, oled: boolean) => void;
   setAudioDevice?: (name: string) => void;
   setMediaInfo?: (info: { title: string; artist?: string; artwork?: string }) => void;
   screenshot: (path: string) => Promise<{ ok: boolean; path?: string; error?: string }>;

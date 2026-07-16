@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
 import type { Meta } from "@/lib/cinemeta";
 import { consumeRecentStubEvent } from "@/lib/dead-streams";
+import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
 import { type PlayEpisode } from "@/lib/view";
-import { LogoOrText } from "./logo-or-text";
+import { Topbar } from "@/chrome/topbar";
+import { LoaderLogoOrText } from "../player/loader-logo-or-text";
 
 export function AutoPlayTransition({
   meta,
@@ -22,6 +24,7 @@ export function AutoPlayTransition({
   download?: boolean;
 }) {
   void resolving;
+  const t = useT();
   const kid = useActiveKid();
   const backdrop = episode?.still || meta.background || meta.poster;
   const [stubNotice, setStubNotice] = useState<string | null>(null);
@@ -37,7 +40,7 @@ export function AutoPlayTransition({
       data-tv-focus-scope
       className={`fixed inset-0 z-[120] overflow-hidden ${kid ? "bg-[#0c4a6e]" : "bg-black"}`}
     >
-      <div data-tauri-drag-region className="absolute inset-x-0 top-0 z-20 h-16" />
+      <Topbar connecting />
       {backdrop && (
         <img
           src={backdrop}
@@ -93,12 +96,7 @@ export function AutoPlayTransition({
         </div>
       )}
       <div className="relative flex h-full flex-col items-center justify-center gap-7 px-8 text-center">
-        <LogoOrText
-          logo={meta.logo ?? null}
-          fallbackText={meta.name}
-          imgClass="max-h-44 w-auto max-w-[72%] animate-loader-pulse object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.65)]"
-          textClass="animate-loader-pulse font-display text-[64px] font-medium leading-[0.96] tracking-tight text-white drop-shadow-[0_18px_45px_rgba(0,0,0,0.7)]"
-        />
+        <LoaderLogoOrText logo={meta.logo ?? null} fallbackText={meta.name} />
         {episode && (
           <p className="text-[12.5px] font-semibold uppercase tracking-[0.32em] text-white/70">
             S{episode.imdbSeason ?? episode.season} · E
@@ -110,16 +108,14 @@ export function AutoPlayTransition({
           size="md"
           caption={
             download
-              ? "Preparing download"
+              ? t("Preparing download")
               : attemptIdx && attemptIdx > 0
-                ? `Trying source ${attemptIdx + 1}`
-                : "Connecting"
+                ? `${t("Trying source")} ${attemptIdx + 1}`
+                : t("Selecting best source")
           }
         />
         {stubNotice && (
-          <p className="max-w-md text-[13px] leading-relaxed text-amber-200/80">
-            {stubNotice}
-          </p>
+          <p className="max-w-md text-[13px] leading-relaxed text-amber-200/80">{stubNotice}</p>
         )}
       </div>
       <button
@@ -135,7 +131,7 @@ export function AutoPlayTransition({
             strokeLinecap="round"
           />
         </svg>
-        Cancel
+        {t("Cancel")}
       </button>
     </main>
   );

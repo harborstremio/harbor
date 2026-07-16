@@ -2,12 +2,23 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { type Meta } from "@/lib/cinemeta";
-import { library, libraryMetaType, removeStremioLibraryItem, type LibraryItem } from "@/lib/stremio";
+import {
+  library,
+  libraryMetaType,
+  removeStremioLibraryItem,
+  type LibraryItem,
+} from "@/lib/stremio";
 import { fetchWatchlist } from "@/lib/trakt/watchlist";
 import { useTrakt } from "@/lib/trakt/provider";
 import { traktItemToMeta } from "@/lib/trakt/to-meta";
 import type { TraktItem } from "@/lib/trakt/types";
-import { readLocalEntries, removeFromWatchlist, setWatchlistAggregate, subscribeWatchlist, type LocalEntry } from "@/lib/watchlist";
+import {
+  readLocalEntries,
+  removeFromWatchlist,
+  setWatchlistAggregate,
+  subscribeWatchlist,
+  type LocalEntry,
+} from "@/lib/watchlist";
 import { useT } from "@/lib/i18n";
 import {
   applyFilter,
@@ -124,14 +135,13 @@ export function WatchlistTab() {
   const [type, setType] = useState<TypeKey>("all");
   const [query, setQuery] = useState("");
   const [flat, setFlat] = useState(() => localStorage.getItem("harbor.watchlist.flat") === "1");
+  useEffect(() => {
+    try {
+      localStorage.setItem("harbor.watchlist.flat", flat ? "1" : "0");
+    } catch {}
+  }, [flat]);
   const toggleFlat = useCallback(() => {
-    setFlat((v) => {
-      const next = !v;
-      try {
-        localStorage.setItem("harbor.watchlist.flat", next ? "1" : "0");
-      } catch {}
-      return next;
-    });
+    setFlat((v) => !v);
   }, []);
   const counts = useMemo(() => countByType(merged), [merged]);
   const visible = useMemo(() => applyFilter(merged, type, query), [merged, type, query]);
@@ -180,7 +190,12 @@ export function WatchlistTab() {
         <GroupedGrid groups={sortedGroups(visible, settings.librarySort)} onRemove={handleRemove} />
       ) : flat ? (
         <GroupedGrid
-          groups={[{ label: "Everything", items: [...visible].sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity)) }]}
+          groups={[
+            {
+              label: "Everything",
+              items: [...visible].sort((a, b) => (b.date ?? -Infinity) - (a.date ?? -Infinity)),
+            },
+          ]}
           onRemove={handleRemove}
         />
       ) : (
@@ -229,7 +244,11 @@ function mergeWatchlist(
   stremio: LibraryItem[],
   trakt: TraktItem[],
 ): WatchlistMerged[] {
-  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .trim();
   const byKey = new Map<string, WatchlistMerged>();
   const setOrUpgrade = (key: string, entry: WatchlistMerged) => {
     const existing = byKey.get(key);
@@ -252,7 +271,12 @@ function mergeWatchlist(
       background: item.background,
     };
     const dedupKey = `${item.type}:${norm(item.name ?? "")}`;
-    setOrUpgrade(dedupKey, { key: item._id, meta, date: parseTs(item._mtime), stremioId: item._id });
+    setOrUpgrade(dedupKey, {
+      key: item._id,
+      meta,
+      date: parseTs(item._mtime),
+      stremioId: item._id,
+    });
   }
   for (const t of trakt) {
     const m = traktItemToMeta(t);
@@ -264,7 +288,10 @@ function mergeWatchlist(
   for (const e of localEntries) {
     let dupById = false;
     for (const v of byKey.values()) {
-      if (v.meta.id === e.id) { dupById = true; break; }
+      if (v.meta.id === e.id) {
+        dupById = true;
+        break;
+      }
     }
     if (dupById) continue;
     const nameKey = e.name ? `${e.type}:${norm(e.name)}` : null;

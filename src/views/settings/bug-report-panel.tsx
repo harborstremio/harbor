@@ -1,4 +1,5 @@
-import { AtSign, Github, User } from "lucide-react";
+import { AtSign, User } from "lucide-react";
+import { Github } from "@/components/icons/github-icon";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAuth } from "@/lib/auth";
@@ -48,7 +49,13 @@ export function BugReportPanel() {
       hasRpdb: !!settings.rpdbKey,
       hasTrakt: !!settings.traktAccessToken,
       hasStremio: !!auth.authKey,
-      debridCount: [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(Boolean).length,
+      debridCount: [
+        settings.rdKey,
+        settings.tbKey,
+        settings.adKey,
+        settings.pmKey,
+        settings.dlKey,
+      ].filter(Boolean).length,
       addonCount: 0,
       iptvCount: settings.iptvPlaylists.length,
     }).then((d) => {
@@ -119,7 +126,9 @@ export function BugReportPanel() {
     <div className="flex flex-col gap-6">
       <Section
         title={t("What broke?")}
-        subtitle={t("A specific summary lands faster than a long paragraph. Steps to reproduce help most of all.")}
+        subtitle={t(
+          "A specific summary lands faster than a long paragraph. Steps to reproduce help most of all.",
+        )}
       >
         <Field label={t("Summary")} required>
           <input
@@ -167,21 +176,27 @@ export function BugReportPanel() {
 
       <Section
         title={t("Screenshots and recordings")}
-        subtitle={t("Drop a clip of the bug if you can. A 5-second screen recording usually says more than five paragraphs.")}
+        subtitle={t(
+          "Drop a clip of the bug if you can. A 5-second screen recording usually says more than five paragraphs.",
+        )}
       >
         <FileDrop files={files} onChange={setFiles} />
       </Section>
 
       <Section
         title={t("Player log")}
-        subtitle={t("If a stream or the video player misbehaves, export the player log and attach it above. It saves to your Downloads folder.")}
+        subtitle={t(
+          "If a stream or the video player misbehaves, export the player log and attach it above. It saves to your Downloads folder.",
+        )}
       >
         <ExportLogButton />
       </Section>
 
       <Section
         title={t("Credit (optional)")}
-        subtitle={t("Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.")}
+        subtitle={t(
+          "Bug reporters get listed in the release notes when their report leads to a shipped fix. Leave blank to stay anonymous.",
+        )}
       >
         <div className="flex flex-col divide-y divide-edge overflow-hidden rounded-xl border border-edge bg-canvas focus-within:border-ink-subtle sm:flex-row sm:divide-y-0 sm:divide-x">
           <CreditField
@@ -231,7 +246,11 @@ export function BugReportPanel() {
 
       <div className="sticky bottom-3 z-10 flex items-center justify-end gap-3 rounded-2xl border border-edge-soft bg-elevated/85 px-5 py-3 backdrop-blur">
         <span className="me-auto text-[11.5px] text-ink-subtle">
-          {canSubmit ? t("Ready to send") : summary.trim().length < 6 ? t("Summary needs at least 6 characters") : t("Preparing…")}
+          {canSubmit
+            ? t("Ready to send")
+            : summary.trim().length < 6
+              ? t("Summary needs at least 6 characters")
+              : t("Preparing…")}
         </span>
         <button
           type="button"
@@ -266,7 +285,11 @@ function ExportLogButton() {
 
   const pill =
     state === "exporting"
-      ? { dot: "bg-amber-400 animate-pulse", text: t("Exporting"), chip: "bg-amber-500/15 text-amber-300" }
+      ? {
+          dot: "bg-amber-400 animate-pulse",
+          text: t("Exporting"),
+          chip: "bg-amber-500/15 text-amber-300",
+        }
       : state === "done"
         ? { dot: "bg-emerald-400", text: t("Exported"), chip: "bg-emerald-500/15 text-emerald-400" }
         : state === "error"

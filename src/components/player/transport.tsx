@@ -1,6 +1,7 @@
 import { Settings2 } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
 import { CastModal } from "./cast-modal";
 import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
@@ -110,7 +111,7 @@ export function Transport({
   onSubDelay: (sec: number) => void;
   onAudioDelay: (sec: number) => void;
   onEnterSync?: () => void;
-  onAddSubtitle: (url: string, lang?: string, title?: string) => void;
+  onAddSubtitle: SubtitleAddHandler;
   onRate: (r: number) => void;
   cropMode?: string;
   onCropMode?: (id: string) => void;
@@ -157,7 +158,8 @@ export function Transport({
   const t = useT();
   const { settings } = useSettings();
   const kid = useActiveKid();
-  const isStremioLayout = resolveChromeTheme(settings.theme, settings.playerChromeTheme) === "stremio";
+  const isStremioLayout =
+    resolveChromeTheme(settings.theme, settings.playerChromeTheme) === "stremio";
   const playing = snap.status === "playing";
   const showEpisodeNav = hasPrevEp || hasNextEp;
   const [audioMenuOpen, setAudioMenuOpen] = useState(false);
@@ -178,8 +180,17 @@ export function Transport({
   const [compact, setCompact] = useState(false);
   const [tight, setTight] = useState(false);
   useEffect(() => {
-    onMenuOpenChange?.(audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen);
-  }, [audioMenuOpen, subtitleMenuOpen, speedMenuOpen, aspectMenuOpen, anime4kMenuOpen, onMenuOpenChange]);
+    onMenuOpenChange?.(
+      audioMenuOpen || subtitleMenuOpen || speedMenuOpen || aspectMenuOpen || anime4kMenuOpen,
+    );
+  }, [
+    audioMenuOpen,
+    subtitleMenuOpen,
+    speedMenuOpen,
+    aspectMenuOpen,
+    anime4kMenuOpen,
+    onMenuOpenChange,
+  ]);
   useEffect(() => {
     const refresh = () => setChromeConfig(readPlayerChromeConfig("default"));
     const onStorage = (e: StorageEvent) => {
@@ -456,9 +467,11 @@ export function Transport({
             </>
           )}
         </div>
-        <div className={`pointer-events-auto grid items-center ${
-          compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
-        }`}>
+        <div
+          className={`pointer-events-auto grid items-center ${
+            compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
+          }`}
+        >
           <div className="flex min-w-0 items-center gap-2 justify-self-start">
             {controlsInSlot(chromeConfig, "bottom-left").map((c) => (
               <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
@@ -492,9 +505,7 @@ export function Transport({
             setCastModalOpen(false);
             castModalPlay(m, ep);
           }}
-          currentEpisode={
-            season != null && episode != null ? { season, episode } : null
-          }
+          currentEpisode={season != null && episode != null ? { season, episode } : null}
         />
       )}
     </>

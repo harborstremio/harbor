@@ -133,7 +133,10 @@ fn cache_dir(session: &str) -> PathBuf {
 async fn drop_shadow(shadow: &mut Shadow) {
     let _ = shadow.writer_tx.send(json!({"command": ["quit"]})).await;
     tokio::time::sleep(Duration::from_millis(80)).await;
-    let _ = shadow.child.kill().await;
+    if shadow.child.try_wait().ok().flatten().is_none() {
+        let _ = shadow.child.start_kill();
+    }
+    let _ = shadow.child.wait().await;
     let _ = std::fs::remove_file(&shadow.pipe);
     let _ = std::fs::remove_dir_all(&shadow.cache_dir);
 }
@@ -349,6 +352,7 @@ async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shad
     ];
 
     let mut cmd = Command::new(&bin);
+    cmd.kill_on_drop(true);
     cmd.args(&args)
         .stdin(Stdio::null())
         .stdout(Stdio::null())

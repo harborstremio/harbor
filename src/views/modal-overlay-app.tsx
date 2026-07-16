@@ -70,8 +70,8 @@ function ModalRouter() {
         state={payload.state as SubtitleModalState}
         onSelect={(id) => modalOverlayEmitAction("modal://subtitle/select", { id })}
         onDelay={(sec) => modalOverlayEmitAction("modal://subtitle/delay", { sec })}
-        onAddSubtitle={(url, lang, title) =>
-          modalOverlayEmitAction("modal://subtitle/add", { url, lang, title })
+        onAddSubtitle={(url, lang, title, metadata) =>
+          modalOverlayEmitAction("modal://subtitle/add", { url, lang, title, ...metadata })
         }
         onClose={close}
       />

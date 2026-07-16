@@ -6,9 +6,8 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from "react";
-import * as THREE from "three";
 
-type ThreeLiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
+export type LiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
 
   /**
@@ -29,7 +28,7 @@ type ThreeLiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   shaderRadius?: number;
 
   /**
-   * تشغيل تأثير Three.js عند الضغط أو التركيز.
+   * تشغيل تأثير WebGL عند الضغط أو التركيز.
    * المرور بالماوس وحده لا يشغّل التأثير.
    */
   interactive?: boolean;
@@ -88,12 +87,73 @@ type AttachOptions = {
   lensStrength: number;
 };
 
+const VERTEX_SHADER = `
+  attribute vec2 aPosition;
+  varying vec2 vUv;
+
+  void main() {
+    vUv = aPosition * 0.5 + 0.5;
+    gl_Position = vec4(aPosition, 0.0, 1.0);
+  }
+`;
+
+function clamp(value: number, minimum: number, maximum: number): number {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+function compileShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader {
+  const shader = gl.createShader(type);
+  if (!shader) throw new Error("Unable to allocate liquid-glass shader");
+
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    const message = gl.getShaderInfoLog(shader) || "Unknown shader compilation error";
+    gl.deleteShader(shader);
+    throw new Error(message);
+  }
+
+  return shader;
+}
+
+function createProgram(gl: WebGLRenderingContext, fragmentSource: string): WebGLProgram {
+  const vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER);
+  let fragmentShader: WebGLShader;
+
+  try {
+    fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+  } catch {
+    fragmentShader = compileShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      fragmentSource.replace("precision highp float;", "precision mediump float;"),
+    );
+  }
+
+  const program = gl.createProgram();
+  if (!program) throw new Error("Unable to allocate liquid-glass program");
+
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  gl.deleteShader(vertexShader);
+  gl.deleteShader(fragmentShader);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const message = gl.getProgramInfoLog(program) || "Unknown shader link error";
+    gl.deleteProgram(program);
+    throw new Error(message);
+  }
+
+  return program;
+}
+
 class SharedLiquidGlassEngine {
-  private readonly renderer: THREE.WebGLRenderer;
-  private readonly scene: THREE.Scene;
-  private readonly camera: THREE.OrthographicCamera;
-  private readonly geometry: THREE.PlaneGeometry;
-  private readonly material: THREE.ShaderMaterial;
+  private readonly rendererCanvas: HTMLCanvasElement;
+  private readonly gl: WebGLRenderingContext;
+  private readonly program: WebGLProgram;
+  private readonly uniformLocations: Record<keyof GlassUniforms, WebGLUniformLocation | null>;
   private readonly uniforms: GlassUniforms;
 
   private targetCanvas: HTMLCanvasElement | null = null;
@@ -109,18 +169,15 @@ class SharedLiquidGlassEngine {
   private pressedTarget = 0;
 
   constructor() {
-    this.renderer = new THREE.WebGLRenderer({
+    this.rendererCanvas = document.createElement("canvas");
+    const gl = this.rendererCanvas.getContext("webgl", {
       alpha: true,
-      antialias: true,
+      antialias: false,
       premultipliedAlpha: true,
-      powerPreference: "high-performance",
+      powerPreference: "low-power",
     });
-
-    this.renderer.setClearColor(0x000000, 0);
-    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    if (!gl) throw new Error("WebGL 1 is unavailable");
+    this.gl = gl;
 
     this.uniforms = {
       uTime: { value: 0 },
@@ -134,20 +191,7 @@ class SharedLiquidGlassEngine {
       uLens: { value: 1.2 },
     };
 
-    this.material = new THREE.ShaderMaterial({
-      uniforms: this.uniforms,
-      transparent: true,
-      depthTest: false,
-      depthWrite: false,
-      vertexShader: `
-        varying vec2 vUv;
-
-        void main() {
-          vUv = uv;
-          gl_Position = vec4(position.xy, 0.0, 1.0);
-        }
-      `,
-      fragmentShader: `
+    const fragmentShader = `
         precision highp float;
 
         varying vec2 vUv;
@@ -576,15 +620,70 @@ class SharedLiquidGlassEngine {
 
           gl_FragColor = vec4(color, alpha);
         }
-      `,
+      `;
+
+    this.program = createProgram(gl, fragmentShader);
+    const positionBuffer = gl.createBuffer();
+    if (!positionBuffer) throw new Error("Unable to allocate liquid-glass geometry");
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    gl.useProgram(this.program);
+
+    const positionLocation = gl.getAttribLocation(this.program, "aPosition");
+    if (positionLocation < 0) throw new Error("Liquid-glass position attribute is unavailable");
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    this.uniformLocations = {
+      uTime: gl.getUniformLocation(this.program, "uTime"),
+      uActive: gl.getUniformLocation(this.program, "uActive"),
+      uPressed: gl.getUniformLocation(this.program, "uPressed"),
+      uAspect: gl.getUniformLocation(this.program, "uAspect"),
+      uRadius: gl.getUniformLocation(this.program, "uRadius"),
+      uIntensity: gl.getUniformLocation(this.program, "uIntensity"),
+      uRefraction: gl.getUniformLocation(this.program, "uRefraction"),
+      uSpectrum: gl.getUniformLocation(this.program, "uSpectrum"),
+      uLens: gl.getUniformLocation(this.program, "uLens"),
+    };
+
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(0, 0, 0, 0);
+
+    this.rendererCanvas.addEventListener("webglcontextlost", (event) => {
+      event.preventDefault();
+      if (this.frameId !== null) cancelAnimationFrame(this.frameId);
+      this.frameId = null;
+      this.targetContext?.clearRect(
+        0,
+        0,
+        this.targetCanvas?.width ?? 0,
+        this.targetCanvas?.height ?? 0,
+      );
+      this.targetCanvas = null;
+      this.targetContext = null;
+      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+      if (sharedEngine === this) sharedEngine = null;
     });
 
-    this.geometry = new THREE.PlaneGeometry(2, 2);
-
-    const mesh = new THREE.Mesh(this.geometry, this.material);
-
-    this.scene.add(mesh);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
   }
+
+  private handleVisibilityChange = (): void => {
+    if (document.hidden) {
+      if (this.frameId !== null) cancelAnimationFrame(this.frameId);
+      this.frameId = null;
+      return;
+    }
+
+    if (this.targetCanvas && this.frameId === null) {
+      this.lastFrameTime = performance.now();
+      this.frameId = requestAnimationFrame(this.renderFrame);
+    }
+  };
 
   attach(canvas: HTMLCanvasElement, options: AttachOptions): void {
     /*
@@ -600,15 +699,15 @@ class SharedLiquidGlassEngine {
     this.detaching = false;
     this.activeTarget = 1;
 
-    this.uniforms.uRadius.value = THREE.MathUtils.clamp(options.radius, 0, 1);
+    this.uniforms.uRadius.value = clamp(options.radius, 0, 1);
 
-    this.uniforms.uIntensity.value = THREE.MathUtils.clamp(options.intensity, 0, 1.5);
+    this.uniforms.uIntensity.value = clamp(options.intensity, 0, 1.5);
 
-    this.uniforms.uRefraction.value = THREE.MathUtils.clamp(options.refractionStrength, 0, 1.8);
+    this.uniforms.uRefraction.value = clamp(options.refractionStrength, 0, 1.8);
 
-    this.uniforms.uSpectrum.value = THREE.MathUtils.clamp(options.spectralStrength, 0, 2.5);
+    this.uniforms.uSpectrum.value = clamp(options.spectralStrength, 0, 2.5);
 
-    this.uniforms.uLens.value = THREE.MathUtils.clamp(options.lensStrength, 0, 2.5);
+    this.uniforms.uLens.value = clamp(options.lensStrength, 0, 2.5);
 
     this.resize(canvas);
 
@@ -670,7 +769,7 @@ class SharedLiquidGlassEngine {
 
     const performanceRatio = Math.sqrt(maximumPixels / area);
 
-    const pixelRatio = THREE.MathUtils.clamp(Math.min(rawPixelRatio, performanceRatio), 0.65, 1.5);
+    const pixelRatio = clamp(Math.min(rawPixelRatio, performanceRatio), 0.65, 1.5);
 
     const width = Math.max(1, Math.round(rect.width * pixelRatio));
 
@@ -686,8 +785,9 @@ class SharedLiquidGlassEngine {
 
     this.uniforms.uAspect.value = rect.width / Math.max(rect.height, 1);
 
-    this.renderer.setPixelRatio(1);
-    this.renderer.setSize(width, height, false);
+    this.rendererCanvas.width = width;
+    this.rendererCanvas.height = height;
+    this.gl.viewport(0, 0, width, height);
   }
 
   private renderFrame = (now: number): void => {
@@ -715,11 +815,19 @@ class SharedLiquidGlassEngine {
     this.uniforms.uActive.value = this.active;
     this.uniforms.uPressed.value = this.pressed;
 
-    this.renderer.render(this.scene, this.camera);
+    const gl = this.gl;
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(this.program);
+    for (const [name, uniform] of Object.entries(this.uniforms) as Array<
+      [keyof GlassUniforms, { value: number }]
+    >) {
+      gl.uniform1f(this.uniformLocations[name], uniform.value);
+    }
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    context.drawImage(this.renderer.domElement, 0, 0, canvas.width, canvas.height);
+    context.drawImage(this.rendererCanvas, 0, 0, canvas.width, canvas.height);
 
     const finishedDetaching = this.detaching && this.active < 0.012 && this.pressed < 0.012;
 
@@ -739,16 +847,27 @@ class SharedLiquidGlassEngine {
 }
 
 let sharedEngine: SharedLiquidGlassEngine | null = null;
+let webGlUnavailable = false;
 
-function getSharedEngine(): SharedLiquidGlassEngine {
-  if (!sharedEngine) {
+function prefersReducedMotion(): boolean {
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+function getSharedEngine(): SharedLiquidGlassEngine | null {
+  if (webGlUnavailable || prefersReducedMotion()) return null;
+  if (sharedEngine) return sharedEngine;
+
+  try {
     sharedEngine = new SharedLiquidGlassEngine();
+  } catch {
+    webGlUnavailable = true;
+    return null;
   }
 
   return sharedEngine;
 }
 
-export function ThreeLiquidGlassSurface({
+export function LiquidGlassSurface({
   children,
   className = "",
   contentClassName = "",
@@ -770,7 +889,7 @@ export function ThreeLiquidGlassSurface({
   onFocus,
   onBlur,
   ...wrapperProps
-}: ThreeLiquidGlassSurfaceProps) {
+}: LiquidGlassSurfaceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const focusedRef = useRef(false);
@@ -780,7 +899,7 @@ export function ThreeLiquidGlassSurface({
 
     if (!canvas) return;
 
-    getSharedEngine().attach(canvas, {
+    getSharedEngine()?.attach(canvas, {
       radius: shaderRadius,
       intensity,
       refractionStrength,
@@ -931,3 +1050,6 @@ export function ThreeLiquidGlassSurface({
     </div>
   );
 }
+
+/** Compatibility alias while call sites migrate to the implementation-neutral name. */
+export const ThreeLiquidGlassSurface = LiquidGlassSurface;

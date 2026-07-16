@@ -77,6 +77,7 @@ const AXIS_TOLERANCE = 24;
 
 let activeSearchEditEl: HTMLElement | null = null;
 let focusStylesInjected = false;
+let hasTvNavigationIntent = false;
 
 function isEditable(el: HTMLElement | null) {
   if (!el) return false;
@@ -317,6 +318,7 @@ function focusNavChrome() {
 
 /** Focus the page's primary control (Play, etc.) or first content focusable. */
 export function focusTvPageDefault(): void {
+  if (!hasTvNavigationIntent) return;
   ensureFocusStyles();
   const scope = getTopFocusScope();
   if (scope) {
@@ -364,7 +366,7 @@ function ensureFocusStyles() {
   style.textContent = `
     [data-tv-focused="true"] {
       outline: none !important;
-      box-shadow: 0 0 0 4px var(--tv-focus-ring, #ffffff), 0 0 0 8px rgba(0,0,0,0.35) !important;
+      box-shadow: inset 0 0 0 2px var(--color-accent) !important;
       transition: box-shadow 120ms ease;
       z-index: 20;
       position: relative;
@@ -376,10 +378,7 @@ function ensureFocusStyles() {
      */
     [data-tv-search-nav-focused="true"] {
       outline: none !important;
-      box-shadow:
-        0 0 0 3px var(--tv-focus-accent, var(--accent, #f97316)),
-        0 0 0 6px #ffffff,
-        0 0 0 9px rgba(0, 0, 0, 0.35) !important;
+      box-shadow: inset 0 0 0 2px var(--color-accent) !important;
       transition: box-shadow 120ms ease;
       z-index: 20;
       position: relative;
@@ -389,16 +388,11 @@ function ensureFocusStyles() {
       box-shadow: none !important;
     }
 
-    /*
-     * Editing mode is white only. The orange navigation marker is removed
-     * when Enter/Space/mouse activates the text field.
-     */
+    /* Editing keeps the same theme-aware cue without the navigation marker. */
     [data-tv-search-editing-focused="true"],
     [data-search-editing="true"]:not([data-tv-focused="true"]) {
       outline: none !important;
-      box-shadow:
-        0 0 0 4px #ffffff,
-        0 0 0 8px rgba(0, 0, 0, 0.35) !important;
+      box-shadow: inset 0 0 0 2px var(--color-accent) !important;
       transition: box-shadow 120ms ease;
       z-index: 20;
       position: relative;
@@ -649,6 +643,7 @@ function getSpatialOrder(list: HTMLElement[]) {
 }
 
 export function moveFocus(dir: Dir, wrap: boolean = true): void {
+  hasTvNavigationIntent = true;
   const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const root = getActiveModal(active) ?? getTopFocusScope() ?? document;
   const scroll = dir === "left" || dir === "right" ? "nearest" : "center";

@@ -76,7 +76,10 @@ type ProfilesValue = {
     color: ProfileColor;
     kid?: KidConfig | null;
   }) => Profile;
-  updateProfile: (id: string, patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>) => void;
+  updateProfile: (
+    id: string,
+    patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>,
+  ) => void;
   deleteProfile: (id: string) => void;
 };
 
@@ -158,7 +161,10 @@ function readProfilePromptInterval(): ProfilePromptInterval {
   try {
     const raw = readLaunchSettingsRaw();
     if (!raw) return "launch";
-    const parsed = JSON.parse(raw) as { profilePromptInterval?: unknown; skipProfileScreen?: unknown };
+    const parsed = JSON.parse(raw) as {
+      profilePromptInterval?: unknown;
+      skipProfileScreen?: unknown;
+    };
     const v = parsed.profilePromptInterval;
     if (v === "launch" || v === "15m" || v === "30m" || v === "never") return v;
     return parsed.skipProfileScreen === true ? "never" : "launch";
@@ -260,7 +266,11 @@ function readState(): ProfilesState {
           next.avatar = identity.avatar;
         }
       }
-      if (next.kid == null && typeof next.avatar === "string" && next.avatar.startsWith("/kids/avatars/")) {
+      if (
+        next.kid == null &&
+        typeof next.avatar === "string" &&
+        next.avatar.startsWith("/kids/avatars/")
+      ) {
         next.avatar = null;
       }
       return next;
@@ -385,28 +395,25 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   const createProfile = useCallback<ProfilesValue["createProfile"]>(
     ({ name, avatar, color, kid }) => {
-      let created!: Profile;
-      setState((s) => {
-        const primary = s.profiles.find((p) => p.isPrimary) ?? s.profiles[0];
-        created = {
-          id: newId(),
-          name: name.trim().slice(0, 32) || "Profile",
-          avatar: avatar ?? null,
-          color,
-          isPrimary: false,
-          shareStremioWith: primary?.id ?? null,
-          passwordHash: null,
-          hideContent: null,
-          lockedTabs: null,
-          kid: kid ?? null,
-          settingsLinked: true,
-          createdAt: Date.now(),
-        };
-        return { ...s, profiles: [...s.profiles, created] };
-      });
+      const primary = state.profiles.find((p) => p.isPrimary) ?? state.profiles[0];
+      const created: Profile = {
+        id: newId(),
+        name: name.trim().slice(0, 32) || "Profile",
+        avatar: avatar ?? null,
+        color,
+        isPrimary: false,
+        shareStremioWith: primary?.id ?? null,
+        passwordHash: null,
+        hideContent: null,
+        lockedTabs: null,
+        kid: kid ?? null,
+        settingsLinked: true,
+        createdAt: Date.now(),
+      };
+      setState((s) => ({ ...s, profiles: [...s.profiles, created] }));
       return created;
     },
-    [],
+    [state.profiles],
   );
 
   const updateProfile = useCallback<ProfilesValue["updateProfile"]>((id, patch) => {
@@ -424,14 +431,10 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
-  const deleteProfile = useCallback<ProfilesValue["deleteProfile"]>((id) => {
-    setState((s) => {
-      const target = s.profiles.find((p) => p.id === id);
-      if (!target || target.isPrimary) return s;
-      const profiles = s.profiles
-        .filter((p) => p.id !== id)
-        .map((p) => (p.shareStremioWith === id ? { ...p, shareStremioWith: null } : p));
-      const activeId = s.activeId === id ? profiles[0]?.id ?? null : s.activeId;
+  const deleteProfile = useCallback<ProfilesValue["deleteProfile"]>(
+    (id) => {
+      const target = state.profiles.find((p) => p.id === id);
+      if (!target || target.isPrimary) return;
       try {
         localStorage.removeItem(`harbor.auth.${id}`);
         localStorage.removeItem(`harbor.favorites.v1.${id}`);
@@ -447,9 +450,16 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       } catch {
         /* ignore */
       }
-      return { profiles, activeId };
-    });
-  }, []);
+      setState((s) => {
+        const profiles = s.profiles
+          .filter((p) => p.id !== id)
+          .map((p) => (p.shareStremioWith === id ? { ...p, shareStremioWith: null } : p));
+        const activeId = s.activeId === id ? (profiles[0]?.id ?? null) : s.activeId;
+        return { profiles, activeId };
+      });
+    },
+    [state.profiles],
+  );
 
   const value = useMemo<ProfilesValue>(
     () => ({
@@ -509,10 +519,7 @@ export function profileInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function stremioSourceProfileId(
-  active: Profile | null,
-  profiles: Profile[],
-): string | null {
+export function stremioSourceProfileId(active: Profile | null, profiles: Profile[]): string | null {
   if (!active) return null;
   if (!active.shareStremioWith) return active.id;
   const exists = profiles.some((p) => p.id === active.shareStremioWith);

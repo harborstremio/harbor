@@ -158,11 +158,11 @@ export function CinematicPlayerLoader({
           <div className="flex w-full max-w-sm flex-col items-center gap-3">
             <StreamLoadingBar key={src.url} ready={ready} done={done} />
             <p className="text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
-              {snap.buffering ? t("Buffering") : t("Preparing stream")}
+              {t("Loading video")}
             </p>
           </div>
         ) : (
-          <HarborLoader size="md" caption={isLocal ? t("Loading") : t("Connecting")} />
+          <HarborLoader size="md" caption={isLocal ? t("Loading") : t("Loading video")} />
         )}
         {!kid && showEngineActivity && (
           <p className="text-[12.5px] font-medium tracking-wide text-white/50 tabular-nums">

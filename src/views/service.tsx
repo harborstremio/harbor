@@ -23,19 +23,103 @@ type Category = {
 
 const CATEGORIES: Category[] = [
   { id: "all", label: "All", fetchMovies: true, fetchTv: true, movieGenres: [], tvGenres: [] },
-  { id: "movies", label: "Movies", fetchMovies: true, fetchTv: false, movieGenres: [], tvGenres: [] },
+  {
+    id: "movies",
+    label: "Movies",
+    fetchMovies: true,
+    fetchTv: false,
+    movieGenres: [],
+    tvGenres: [],
+  },
   { id: "tv", label: "TV Shows", fetchMovies: false, fetchTv: true, movieGenres: [], tvGenres: [] },
-  { id: "docs", label: "Documentaries", fetchMovies: true, fetchTv: true, movieGenres: [99], tvGenres: [99] },
-  { id: "anim", label: "Animation", fetchMovies: true, fetchTv: true, movieGenres: [16], tvGenres: [16] },
-  { id: "kids", label: "Kids & Family", fetchMovies: true, fetchTv: true, movieGenres: [10751], tvGenres: [10751] },
-  { id: "reality", label: "Reality", fetchMovies: false, fetchTv: true, movieGenres: [], tvGenres: [10764] },
-  { id: "action", label: "Action", fetchMovies: true, fetchTv: true, movieGenres: [28], tvGenres: [10759] },
-  { id: "comedy", label: "Comedy", fetchMovies: true, fetchTv: true, movieGenres: [35], tvGenres: [35] },
-  { id: "drama", label: "Drama", fetchMovies: true, fetchTv: true, movieGenres: [18], tvGenres: [18] },
-  { id: "horror", label: "Horror", fetchMovies: true, fetchTv: true, movieGenres: [27], tvGenres: [9648] },
-  { id: "scifi", label: "Sci-Fi & Fantasy", fetchMovies: true, fetchTv: true, movieGenres: [878], tvGenres: [10765] },
-  { id: "thriller", label: "Thriller", fetchMovies: true, fetchTv: false, movieGenres: [53], tvGenres: [] },
-  { id: "romance", label: "Romance", fetchMovies: true, fetchTv: false, movieGenres: [10749], tvGenres: [] },
+  {
+    id: "docs",
+    label: "Documentaries",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [99],
+    tvGenres: [99],
+  },
+  {
+    id: "anim",
+    label: "Animation",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [16],
+    tvGenres: [16],
+  },
+  {
+    id: "kids",
+    label: "Kids & Family",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [10751],
+    tvGenres: [10751],
+  },
+  {
+    id: "reality",
+    label: "Reality",
+    fetchMovies: false,
+    fetchTv: true,
+    movieGenres: [],
+    tvGenres: [10764],
+  },
+  {
+    id: "action",
+    label: "Action",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [28],
+    tvGenres: [10759],
+  },
+  {
+    id: "comedy",
+    label: "Comedy",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [35],
+    tvGenres: [35],
+  },
+  {
+    id: "drama",
+    label: "Drama",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [18],
+    tvGenres: [18],
+  },
+  {
+    id: "horror",
+    label: "Horror",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [27],
+    tvGenres: [9648],
+  },
+  {
+    id: "scifi",
+    label: "Sci-Fi & Fantasy",
+    fetchMovies: true,
+    fetchTv: true,
+    movieGenres: [878],
+    tvGenres: [10765],
+  },
+  {
+    id: "thriller",
+    label: "Thriller",
+    fetchMovies: true,
+    fetchTv: false,
+    movieGenres: [53],
+    tvGenres: [],
+  },
+  {
+    id: "romance",
+    label: "Romance",
+    fetchMovies: true,
+    fetchTv: false,
+    movieGenres: [10749],
+    tvGenres: [],
+  },
 ];
 
 const MAX_PER_BUCKET = 200;
@@ -73,9 +157,6 @@ export function ServiceView({ service }: { service: StreamingService }) {
           if (batch === 0) return { movies: b.movies, series: b.series };
           const movies = dedupe([...prev.movies, ...b.movies]);
           const series = dedupe([...prev.series, ...b.series]);
-          if (movies.length >= MAX_PER_BUCKET && series.length >= MAX_PER_BUCKET) {
-            setHasMore(false);
-          }
           return {
             movies: movies.slice(0, MAX_PER_BUCKET),
             series: series.slice(0, MAX_PER_BUCKET),
@@ -93,6 +174,12 @@ export function ServiceView({ service }: { service: StreamingService }) {
       cancelled = true;
     };
   }, [batch, service, category.id, settings.tmdbKey, settings.region, meta]);
+
+  useEffect(() => {
+    if (bucket.movies.length >= MAX_PER_BUCKET && bucket.series.length >= MAX_PER_BUCKET) {
+      setHasMore(false);
+    }
+  }, [bucket.movies.length, bucket.series.length]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -132,7 +219,10 @@ export function ServiceView({ service }: { service: StreamingService }) {
               <ServiceLogo service={service} height={56} />
             </div>
             <p className="max-w-xl text-[14.5px] leading-relaxed text-ink-muted">
-              {t("The most-watched movies and series on {name} right now in {region}.", { name: meta.name, region: settings.region })}
+              {t("The most-watched movies and series on {name} right now in {region}.", {
+                name: meta.name,
+                region: settings.region,
+              })}
             </p>
           </div>
         </div>
@@ -145,7 +235,10 @@ export function ServiceView({ service }: { service: StreamingService }) {
         {loading && (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-5 gap-y-9">
             {Array.from({ length: 18 }).map((_, i) => (
-              <div key={i} className="aspect-[2/3] animate-pulse rounded-xl border border-edge-soft bg-elevated/30" />
+              <div
+                key={i}
+                className="aspect-[2/3] animate-pulse rounded-xl border border-edge-soft bg-elevated/30"
+              />
             ))}
           </div>
         )}
@@ -158,7 +251,11 @@ export function ServiceView({ service }: { service: StreamingService }) {
               <>
                 {bucket.movies.length >= 10 ? (
                   <>
-                    <Row title={t("Top 10 Movies on {name}", { name: meta.name })} min={180} shape="rank">
+                    <Row
+                      title={t("Top 10 Movies on {name}", { name: meta.name })}
+                      min={180}
+                      shape="rank"
+                    >
                       {bucket.movies.slice(0, 10).map((m, i) => (
                         <TopRankCard key={m.id} meta={m} rank={i + 1} />
                       ))}
@@ -180,7 +277,11 @@ export function ServiceView({ service }: { service: StreamingService }) {
                 ) : null}
                 {bucket.series.length >= 10 ? (
                   <>
-                    <Row title={t("Top 10 Series on {name}", { name: meta.name })} min={180} shape="rank">
+                    <Row
+                      title={t("Top 10 Series on {name}", { name: meta.name })}
+                      min={180}
+                      shape="rank"
+                    >
                       {bucket.series.slice(0, 10).map((m, i) => (
                         <TopRankCard key={m.id} meta={m} rank={i + 1} />
                       ))}
@@ -334,7 +435,11 @@ function ScrollArrow({
           : "pointer-events-none opacity-0"
       }`}
     >
-      {side === "left" ? <ChevronLeft size={16} strokeWidth={2.4} /> : <ChevronRight size={16} strokeWidth={2.4} />}
+      {side === "left" ? (
+        <ChevronLeft size={16} strokeWidth={2.4} />
+      ) : (
+        <ChevronRight size={16} strokeWidth={2.4} />
+      )}
     </button>
   );
 }
@@ -352,13 +457,7 @@ function EdgeFade({ side, visible }: { side: "left" | "right"; visible: boolean 
   );
 }
 
-function CategoryFab({
-  active,
-  onChange,
-}: {
-  active: Category;
-  onChange: (c: Category) => void;
-}) {
+function CategoryFab({ active, onChange }: { active: Category; onChange: (c: Category) => void }) {
   const t = useT();
   const [open, setOpen] = useState(false);
 
@@ -468,7 +567,9 @@ async function fetchCategoryBatch(
   const startPage = batch * PAGE_BATCH + 1;
   const pages = Array.from({ length: PAGE_BATCH }, (_, i) => startPage + i);
   const moviePromise: Promise<any[][]> = cat.fetchMovies
-    ? Promise.all(pages.map((p) => fetchPage(key, "movie", providerIds, region, p, cat.movieGenres)))
+    ? Promise.all(
+        pages.map((p) => fetchPage(key, "movie", providerIds, region, p, cat.movieGenres)),
+      )
     : Promise.resolve([]);
   const tvPromise: Promise<any[][]> = cat.fetchTv
     ? Promise.all(pages.map((p) => fetchPage(key, "tv", providerIds, region, p, cat.tvGenres)))

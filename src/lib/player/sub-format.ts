@@ -1,8 +1,12 @@
-import type { TrackInfo } from "./bridge";
+type SubtitleFormatTrack = {
+  codec?: string;
+  title?: string;
+  label?: string;
+};
 
-export function isAssTrack(track: TrackInfo | null | undefined): boolean {
+export function isAssTrack(track: SubtitleFormatTrack | null | undefined): boolean {
   if (!track) return false;
-  const codec = (track.codec ?? "").toUpperCase();
+  const codec = `${track.codec ?? ""} ${track.title ?? ""} ${track.label ?? ""}`.toUpperCase();
   if (
     codec.includes("ASS") ||
     codec.includes("SSA") ||
@@ -11,18 +15,19 @@ export function isAssTrack(track: TrackInfo | null | undefined): boolean {
   ) {
     return true;
   }
-  const title = (track.title ?? "").toLowerCase();
-  return /\.(ass|ssa)$/.test(title);
+  return /\.(ass|ssa)\b/i.test(`${track.title ?? ""} ${track.label ?? ""}`);
 }
 
-export function isImageSubTrack(track: TrackInfo | null | undefined): boolean {
+export function isImageSubTrack(track: SubtitleFormatTrack | null | undefined): boolean {
   if (!track) return false;
-  const codec = (track.codec ?? "").toUpperCase();
+  const codec = `${track.codec ?? ""} ${track.title ?? ""} ${track.label ?? ""}`
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "");
   return (
     codec.includes("PGS") ||
     codec.includes("HDMV") ||
-    codec.includes("DVD_SUB") ||
-    codec.includes("DVD SUBTITLES") ||
+    codec.includes("DVDSUB") ||
+    codec.includes("DVDSUBTITLE") ||
     codec.includes("DVB") ||
     codec.includes("VOBSUB") ||
     codec.includes("XSUB")

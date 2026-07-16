@@ -67,10 +67,11 @@ export function usePlayerBridge(params: {
   }, [svpOn]);
   const isLiveLike =
     !!src.meta.id?.startsWith("iptv:") ||
-    (!!src.meta.type && !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+    (!!src.meta.type &&
+      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
   const chosenEngine =
     isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
-  const bridgeKey = `${chosenEngine}|${anime4kOn}|${settings.playerHdrToSdr}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
+  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
   const [bridgeReady, setBridgeReady] = useState(false);
   useEffect(() => {
     const host = videoMountRef.current;
@@ -143,6 +144,14 @@ export function usePlayerBridge(params: {
       if (probe.available) setAutoFallbackTried(true);
     })();
   }, [engine, autoFallbackTried, snap.errorCode, snap.noAudio, settings.playerEngine]);
+
+  useEffect(() => {
+    if (!bridgeReady || engine !== "mpv") return;
+    bridgeRef.current?.setHdrToSdr?.(
+      settings.playerHdrToSdr,
+      settings.playerDisplayPanel === "oled",
+    );
+  }, [bridgeReady, engine, settings.playerHdrToSdr, settings.playerDisplayPanel, bridgeRef]);
 
   return { snap, engine, bridgeReady, bridgeKey, embedActive };
 }

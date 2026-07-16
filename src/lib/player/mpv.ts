@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
-import { isWindowsDesktop } from "@/lib/platform";
+import { subtitleDownloadArgs } from "./subtitle-load";
+import { isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import {
   emptySnapshot,
@@ -89,13 +90,16 @@ async function applyHeaderProps(headers?: Record<string, string>): Promise<void>
     else fields.push(`${k}: ${v}`);
   }
   await invoke("mpv_set_property", { name: "user-agent", value: ua }).catch(() => {});
-  await invoke("mpv_set_property", { name: "http-header-fields", value: fields.join(",") }).catch(() => {});
+  await invoke("mpv_set_property", { name: "http-header-fields", value: fields.join(",") }).catch(
+    () => {},
+  );
 }
 
 export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let host: HTMLElement | null = null;
   let snap: PlayerSnapshot = { ...emptySnapshot };
   let profileAf = "";
+  let hdrToSdr = mpvOptions?.hdrToSdr ?? true;
   const applyAudioFilters = () => {
     const parts: string[] = [];
     if (snap.audioNormalize) parts.push("dynaudnorm=f=500:g=31:p=0.9:m=4");
@@ -166,11 +170,13 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           const id = String(t.id ?? "");
           const lang = (t.lang ?? t.language) as string | undefined;
           const title = t.title as string | undefined;
-          const codecDesc = (t["codec-desc"] as string | undefined) || (t.codec as string | undefined);
+          const codecDesc =
+            (t["codec-desc"] as string | undefined) || (t.codec as string | undefined);
           const channels = t["demux-channels"] as string | undefined;
-          const channelCount = typeof t["demux-channel-count"] === "number"
-            ? (t["demux-channel-count"] as number)
-            : undefined;
+          const channelCount =
+            typeof t["demux-channel-count"] === "number"
+              ? (t["demux-channel-count"] as number)
+              : undefined;
           const external = t.external === true;
           const externalFilename = t["external-filename"] as string | undefined;
           const forced = t.forced === true;
@@ -201,7 +207,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             forced,
             default: isDefault,
             hearingImpaired,
-            url: external && externalFilename ? (urlByExternalFilename.get(externalFilename) ?? undefined) : undefined,
+            url:
+              external && externalFilename
+                ? (urlByExternalFilename.get(externalFilename) ?? undefined)
+                : undefined,
           };
           if (type === "audio") audio.push(info);
           else if (type === "sub") subs.push(info);
@@ -217,6 +226,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       if (name === "dheight" && typeof data === "number") snap.videoHeight = data;
       if (name === "video-params/gamma" && typeof data === "string" && data) snap.hdrGamma = data;
       if (name === "demuxer-cache-duration" && typeof data === "number") snap.bufferedSec = data;
+      if (name === "paused-for-cache" && typeof data === "boolean") snap.buffering = data;
       if (name === "af") {
         const repr = typeof data === "string" ? data : JSON.stringify(data ?? "");
         snap.audioNormalize = repr.includes("dynaudnorm");
@@ -291,6 +301,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.positionSec = 0;
       snap.durationSec = 0;
       snap.bufferedSec = 0;
+      snap.buffering = false;
       snap.hdrGamma = "";
       pendingTracks = {};
       urlByExternalFilename.clear();
@@ -310,14 +321,23 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             await applyHeaderProps(src.headers);
             const startAt =
               typeof src.startAtSec === "number" && src.startAtSec > 0 ? src.startAtSec : 0;
-            const cmd: Array<string | number> = ["loadfile", src.url, "replace", 0, `start=${startAt}`];
+            const cmd: Array<string | number> = [
+              "loadfile",
+              src.url,
+              "replace",
+              0,
+              `start=${startAt}`,
+            ];
             await invoke("mpv_command", { cmd });
             for (const s of src.subtitles ?? []) {
               try {
                 let url = s.url;
                 if (/^https?:/i.test(url)) {
                   try {
-                    url = await invoke<string>("sub_download", { url: s.url });
+                    url = await invoke<string>(
+                      "sub_download",
+                      subtitleDownloadArgs(s.url, { lang: s.lang }),
+                    );
                   } catch {
                     /* fall back to remote URL */
                   }
@@ -345,7 +365,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             startAtSec: src.startAtSec ?? null,
             subtitles: (src.subtitles ?? []).map((s) => ({ url: s.url, lang: s.lang ?? null })),
             anime4k: opts.anime4k,
-            hdrToSdr: opts.hdrToSdr,
+            hdrToSdr,
             embed: opts.embed === true,
             anime4kShaders: opts.anime4kShaders ?? [],
             d3d11Flip: opts.d3d11Flip === true,
@@ -357,7 +377,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         });
         mpvStarted = true;
         if (opts.embed) {
-          await invoke("mpv_set_property", { name: "sub-visibility", value: false }).catch(() => {});
+          await invoke("mpv_set_property", { name: "sub-visibility", value: false }).catch(
+            () => {},
+          );
         }
         if (opts.embed && opts.getEmbedRect && geomTimer == null) {
           let lastRect: MpvRect | null = null;
@@ -493,13 +515,19 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     },
     setAnime4kShaders(shaders) {
       const sep = isWindowsDesktop() ? ";" : ":";
-      invoke("mpv_set_property", { name: "glsl-shaders", value: shaders.filter(Boolean).join(sep) }).catch(() => {});
+      invoke("mpv_set_property", {
+        name: "glsl-shaders",
+        value: shaders.filter(Boolean).join(sep),
+      }).catch(() => {});
     },
-    async addSubtitle(url, lang, title, select): Promise<boolean> {
+    async addSubtitle(url, lang, title, select, metadata): Promise<boolean> {
       let mpvUrl = url;
       if (/^https?:/i.test(url)) {
         try {
-          mpvUrl = await invoke<string>("sub_download", { url });
+          mpvUrl = await invoke<string>(
+            "sub_download",
+            subtitleDownloadArgs(url, { ...metadata, lang }),
+          );
         } catch (e) {
           console.warn("[mpv] sub_download failed, falling back to URL", e);
         }
@@ -535,6 +563,38 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       profileAf = AUDIO_PROFILE_AF[profile] ?? "";
       applyAudioFilters();
     },
+    setHdrToSdr(on, oled) {
+      hdrToSdr = on;
+      const properties: Array<[string, string]> = on
+        ? [
+            ["tone-mapping", "spline"],
+            ["gamut-mapping-mode", "perceptual"],
+            ["hdr-compute-peak", "yes"],
+            ["hdr-contrast-recovery", "0.30"],
+            ["hdr-peak-percentile", "99.995"],
+            ["dither-depth", "auto"],
+            ["target-trc", "bt.1886"],
+            ["target-prim", "bt.709"],
+            ["target-contrast", oled ? "inf" : "auto"],
+          ]
+        : [
+            ["tone-mapping", "auto"],
+            ["gamut-mapping-mode", "auto"],
+            ["hdr-compute-peak", "auto"],
+            ["hdr-contrast-recovery", "0"],
+            ["hdr-peak-percentile", "0"],
+            ["dither-depth", "auto"],
+            ["target-trc", "auto"],
+            ["target-prim", "auto"],
+            ["target-contrast", "auto"],
+          ];
+      if (isWindowsDesktop() || isMacDesktop()) {
+        properties.push(["target-colorspace-hint", "yes"]);
+      }
+      for (const [name, value] of properties) {
+        void invoke("mpv_set_property", { name, value }).catch(() => {});
+      }
+    },
     setAudioDevice(name) {
       invoke("mpv_set_property", {
         name: "audio-device",
@@ -553,8 +613,12 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
     },
     setAbLoop(a, b) {
-      invoke("mpv_set_property", { name: "ab-loop-a", value: a == null ? "no" : a }).catch(() => {});
-      invoke("mpv_set_property", { name: "ab-loop-b", value: b == null ? "no" : b }).catch(() => {});
+      invoke("mpv_set_property", { name: "ab-loop-a", value: a == null ? "no" : a }).catch(
+        () => {},
+      );
+      invoke("mpv_set_property", { name: "ab-loop-b", value: b == null ? "no" : b }).catch(
+        () => {},
+      );
     },
     async requestPiP() {},
     async exitPiP() {},

@@ -9,12 +9,22 @@ import { isRtl, useT, useUiLanguage } from "@/lib/i18n";
 import { useParental } from "@/lib/parental";
 import { useSettings } from "@/lib/settings";
 import { useView, type View } from "@/lib/view";
+import { HoverNavIcon } from "@/chrome/hover-nav-icon";
 
 const SUN = "oklch(0.9 0.12 100)";
 const LEAF = "oklch(0.8 0.15 145)";
 const MIST = "oklch(0.72 0.05 150)";
 
-const PRIMARY_IDS = new Set<string>(["home", "discover", "movies", "shows", "kids", "anime", "live", "vod"]);
+const PRIMARY_IDS = new Set<string>([
+  "home",
+  "discover",
+  "movies",
+  "shows",
+  "kids",
+  "anime",
+  "live",
+  "vod",
+]);
 
 export function ForestSidebar() {
   const { view, setView, chromeHidden } = useView();
@@ -52,15 +62,23 @@ export function ForestSidebar() {
         className={`relative z-[60] flex w-[78px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
           collapsed ? "" : "lg:w-60"
         } ${
-          chromeHidden ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0" : "translate-x-0 opacity-100"
+          chromeHidden
+            ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0"
+            : "translate-x-0 opacity-100"
         }`}
       >
         <div
           className="relative flex min-h-0 flex-1 flex-col"
-          style={{ background: "linear-gradient(180deg, var(--color-elevated), var(--color-canvas) 50%)" }}
+          style={{
+            background: "linear-gradient(180deg, var(--color-elevated), var(--color-canvas) 50%)",
+          }}
         >
           <Canopy />
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 end-0 w-px" style={{ background: tint(LEAF, 0.12) }} />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 end-0 w-px"
+            style={{ background: tint(LEAF, 0.12) }}
+          />
 
           <div
             data-tauri-drag-region
@@ -88,7 +106,13 @@ export function ForestSidebar() {
 
           <nav className="relative z-10 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-2.5 pb-4 pt-2 [scrollbar-width:none] lg:px-3 [&::-webkit-scrollbar]:hidden">
             {primary.map((item) => (
-              <NavRow key={item.id} item={item} active={view === item.view} collapsed={collapsed} onClick={() => go(item)} />
+              <NavRow
+                key={item.id}
+                item={item}
+                active={view === item.view}
+                collapsed={collapsed}
+                onClick={() => go(item)}
+              />
             ))}
 
             {!collapsed && <SectionLabel>{t("chrome.sectionLibrary")}</SectionLabel>}
@@ -124,8 +148,12 @@ export function ForestSidebar() {
                 </div>
                 {!collapsed && (
                   <div className="hidden min-w-0 lg:block">
-                    <div className="truncate text-[13px] font-medium text-ink-muted">{t("chrome.locked")}</div>
-                    <div className="truncate text-[11.5px] text-ink-subtle">{t("chrome.parentalOn")}</div>
+                    <div className="truncate text-[13px] font-medium text-ink-muted">
+                      {t("chrome.locked")}
+                    </div>
+                    <div className="truncate text-[11.5px] text-ink-subtle">
+                      {t("chrome.parentalOn")}
+                    </div>
                   </div>
                 )}
               </div>
@@ -178,25 +206,29 @@ function NavRow({
       title={gated ? t("chrome.lockedShort", { label }) : label}
       className={`group relative flex h-12 items-center justify-center gap-3.5 transition-colors duration-200 ${
         collapsed ? "" : "lg:justify-start lg:px-4"
-      } ${
-        active ? "text-accent" : "text-ink-muted hover:text-ink"
-      }`}
+      } ${active ? "text-accent" : "text-ink-muted hover:text-ink"}`}
     >
       {active ? (
         <span
           aria-hidden
           className="absolute inset-y-0 -start-1 end-2"
-          style={{ background: `radial-gradient(70% 140% at ${glowX} 50%, ${tint(LEAF, 0.22)}, transparent 72%)` }}
+          style={{
+            background: `radial-gradient(70% 140% at ${glowX} 50%, ${tint(LEAF, 0.22)}, transparent 72%)`,
+          }}
         />
       ) : (
         <span
           aria-hidden
           className="absolute inset-y-0 -start-1 end-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
-          style={{ background: `radial-gradient(70% 140% at ${glowX} 50%, ${tint(LEAF, 0.1)}, transparent 72%)` }}
+          style={{
+            background: `radial-gradient(70% 140% at ${glowX} 50%, ${tint(LEAF, 0.1)}, transparent 72%)`,
+          }}
         />
       )}
-      <span className={`relative ${gated ? "opacity-70" : ""} ${active ? "drop-shadow-[0_0_8px_var(--color-accent-soft)]" : ""}`}>
-        {item.render(false)}
+      <span
+        className={`relative ${gated ? "opacity-70" : ""} ${active ? "drop-shadow-[0_0_8px_var(--color-accent-soft)]" : ""}`}
+      >
+        <HoverNavIcon render={item.render} />
         {gated && (
           <span
             className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle"
@@ -231,7 +263,9 @@ function MossLine({ className }: { className?: string }) {
     <div
       aria-hidden
       className={`h-px w-full ${className ?? ""}`}
-      style={{ background: `linear-gradient(90deg, transparent, ${tint(LEAF, 0.22)} 22%, ${tint(LEAF, 0.22)} 78%, transparent)` }}
+      style={{
+        background: `linear-gradient(90deg, transparent, ${tint(LEAF, 0.22)} 22%, ${tint(LEAF, 0.22)} 78%, transparent)`,
+      }}
     />
   );
 }
@@ -241,15 +275,26 @@ function Canopy() {
     <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       <span
         className="harbor-forest-ray absolute -top-12 left-[-12%] h-[360px] w-[130px] rotate-[20deg] blur-[42px]"
-        style={{ background: `linear-gradient(180deg, ${tint(SUN, 0.17)}, transparent 70%)`, opacity: 0.5 }}
+        style={{
+          background: `linear-gradient(180deg, ${tint(SUN, 0.17)}, transparent 70%)`,
+          opacity: 0.5,
+        }}
       />
       <span
         className="harbor-forest-ray absolute -top-20 left-[28%] h-[440px] w-[95px] rotate-[15deg] blur-[50px]"
-        style={{ background: `linear-gradient(180deg, ${tint(LEAF, 0.16)}, transparent 72%)`, opacity: 0.45, animationDelay: "1.7s" }}
+        style={{
+          background: `linear-gradient(180deg, ${tint(LEAF, 0.16)}, transparent 72%)`,
+          opacity: 0.45,
+          animationDelay: "1.7s",
+        }}
       />
       <span
         className="harbor-forest-ray absolute -top-10 left-[64%] h-[320px] w-[80px] rotate-[23deg] blur-[44px]"
-        style={{ background: `linear-gradient(180deg, ${tint(SUN, 0.12)}, transparent 74%)`, opacity: 0.4, animationDelay: "3.2s" }}
+        style={{
+          background: `linear-gradient(180deg, ${tint(SUN, 0.12)}, transparent 74%)`,
+          opacity: 0.4,
+          animationDelay: "3.2s",
+        }}
       />
       <span
         className="absolute inset-x-0 bottom-0 h-44"

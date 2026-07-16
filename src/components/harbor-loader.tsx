@@ -3,7 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import whiteBoat from "@/assets/lottie/addons-boat-white.json";
 import darkBoat from "@/assets/lottie/addons-boat-dark.json";
 import harborBoat from "@/assets/lottie/harbor-loader.json";
-import { prefetchTopAddonLogos, prefetchedTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
+import {
+  prefetchTopAddonLogos,
+  prefetchedTopAddonLogos,
+} from "@/lib/providers/addon-logo-prefetch";
 
 type Size = "sm" | "md" | "lg" | "xl";
 
@@ -19,7 +22,8 @@ const XLINK = "http://www.w3.org/1999/xlink";
 function darkBackground(): boolean {
   if (typeof document === "undefined") return true;
   const probe = document.createElement("div");
-  probe.style.cssText = "background-color:var(--color-canvas);position:absolute;opacity:0;pointer-events:none";
+  probe.style.cssText =
+    "background-color:var(--color-canvas);position:absolute;opacity:0;pointer-events:none";
   document.body.appendChild(probe);
   const m = getComputedStyle(probe).backgroundColor.match(/[\d.]+/g);
   probe.remove();
@@ -49,21 +53,26 @@ export function HarborLoader({
   className = "",
   keyed = false,
   logos,
+  onReady,
 }: {
   size?: Size;
   caption?: string;
   className?: string;
   keyed?: boolean;
   logos?: string[];
+  onReady?: () => void;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const cargo = keyed || logos !== undefined;
   const fetched = useTopAddonLogos(keyed && logos === undefined);
   const effective = logos ?? fetched;
   const logosRef = useRef<string[]>([]);
-  logosRef.current = effective;
   const cycleRef = useRef(0);
   const [dark] = useState(darkBackground);
+
+  useEffect(() => {
+    logosRef.current = effective;
+  }, [effective]);
 
   const paint = useCallback(() => {
     const root = ref.current;
@@ -87,9 +96,11 @@ export function HarborLoader({
   }, []);
 
   useEffect(() => {
-    if (!ref.current) return;
+    const container = ref.current;
+    if (!container) return;
+    container.replaceChildren();
     const anim: AnimationItem = lottie.loadAnimation({
-      container: ref.current,
+      container,
       renderer: "svg",
       loop: true,
       autoplay: true,
@@ -98,6 +109,7 @@ export function HarborLoader({
     const onLoaded = () => {
       cycleRef.current = 0;
       paint();
+      onReady?.();
     };
     const onLoop = () => {
       cycleRef.current += 3;
@@ -109,8 +121,9 @@ export function HarborLoader({
       anim.removeEventListener("DOMLoaded", onLoaded);
       anim.removeEventListener("loopComplete", onLoop);
       anim.destroy();
+      container.replaceChildren();
     };
-  }, [dark, paint, cargo]);
+  }, [dark, paint, cargo, onReady]);
 
   useEffect(() => {
     paint();

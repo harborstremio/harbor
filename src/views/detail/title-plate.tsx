@@ -31,7 +31,15 @@ function LogoLayer({
   );
 }
 
-export function TitlePlate({ title, logo, loading }: { title: string; logo?: string; loading: boolean }) {
+export function TitlePlate({
+  title,
+  logo,
+  loading,
+}: {
+  title: string;
+  logo?: string;
+  loading: boolean;
+}) {
   const [failed, setFailed] = useState<Set<string>>(() => new Set());
   const active = logo && !failed.has(logo) ? logo : undefined;
   const [layers, setLayers] = useState<{ id: number; url: string }[]>([]);
@@ -49,8 +57,9 @@ export function TitlePlate({ title, logo, loading }: { title: string; logo?: str
       setLayers((prev) => (prev.length === 0 ? prev : []));
       return;
     }
+    const id = nextId.current++;
     setLayers((prev) =>
-      prev[prev.length - 1]?.url === active ? prev : [...prev, { id: nextId.current++, url: active }],
+      prev[prev.length - 1]?.url === active ? prev : [...prev, { id, url: active }],
     );
   }, [active]);
 

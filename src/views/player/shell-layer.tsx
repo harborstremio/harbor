@@ -124,7 +124,16 @@ export function ShellLayer({
       engine={engine}
       useOverlayPopups={false}
       onMenuOpenChange={onMenuOpenChange}
-      capabilities={bridgeRef.current?.capabilities() ?? { engine: "html5", pictureInPicture: false, airplay: false, chromecast: false, hdrPassthrough: false, hardwareDecode: true }}
+      capabilities={
+        bridgeRef.current?.capabilities() ?? {
+          engine: "html5",
+          pictureInPicture: false,
+          airplay: false,
+          chromecast: false,
+          hdrPassthrough: false,
+          hardwareDecode: true,
+        }
+      }
       visible={visible}
       fullscreen={fullscreen}
       drawMode={drawMode}
@@ -162,8 +171,10 @@ export function ShellLayer({
       }}
       onEnterSync={onEnterSync}
       onAudioDelay={(s) => bridgeRef.current?.setAudioDelay(s)}
-      onAddSubtitle={(url, lang, title2) => {
-        const p = bridgeRef.current?.addSubtitle(url, lang, title2) ?? Promise.resolve(false);
+      onAddSubtitle={(url, lang, title2, metadata) => {
+        const p =
+          bridgeRef.current?.addSubtitle(url, lang, title2, true, metadata) ??
+          Promise.resolve(false);
         void p.then((ok) => {
           if (ok) rememberSubChoice({ lang });
         });
@@ -181,9 +192,7 @@ export function ShellLayer({
       onPiP={onPiP}
       onFullscreen={onFullscreen}
       onCast={() => {
-        const btn = (document.querySelector(
-          '[aria-label="Cast"]',
-        ) as HTMLElement | null);
+        const btn = document.querySelector('[aria-label="Cast"]') as HTMLElement | null;
         if (btn) {
           const r = btn.getBoundingClientRect();
           openCastMenu({ right: r.right, bottom: r.top });

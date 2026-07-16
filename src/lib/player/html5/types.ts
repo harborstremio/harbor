@@ -1,4 +1,5 @@
 import type { SubCue } from "@/lib/subtitles/parser";
+import type { SubtitleLoadMetadata } from "../subtitle-load";
 
 export type SubTrack = {
   id: string;
@@ -8,6 +9,7 @@ export type SubTrack = {
   external: boolean;
   cues: SubCue[] | null;
   loading: boolean;
+  metadata?: SubtitleLoadMetadata;
 };
 
 export type AudioTrackList = {

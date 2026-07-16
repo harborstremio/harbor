@@ -20,8 +20,17 @@ export function PlaylistVodIcon({ active = false }: { active?: boolean }) {
       />
       <path
         d="M10 9.1v5.8l5-2.9z"
-        fill="currentColor"
+        fill={active ? "var(--color-accent)" : "currentColor"}
         opacity={active ? 1 : 0.92}
+        className={active ? "animate-vod-play" : ""}
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="7"
+        stroke="var(--color-accent)"
+        strokeWidth="1.25"
+        className={active ? "animate-vod-ring" : "opacity-0"}
       />
     </svg>
   );

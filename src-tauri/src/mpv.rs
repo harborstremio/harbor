@@ -171,6 +171,7 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     ("dheight", 15, PropertyKind::Int64),
     ("video-params/gamma", 16, PropertyKind::String),
     ("demuxer-cache-duration", 17, PropertyKind::Double),
+    ("paused-for-cache", 18, PropertyKind::Flag),
 ];
 
 #[derive(Clone, Copy)]
@@ -375,6 +376,10 @@ fn apply_pre_init(
         opt("hdr-contrast-recovery", "0.30");
         opt("hdr-peak-percentile", "99.995");
         opt("dither-depth", "auto");
+        opt("target-trc", "bt.1886");
+        opt("target-prim", "bt.709");
+        #[cfg(any(windows, target_os = "macos"))]
+        opt("target-colorspace-hint", "yes");
     } else {
         #[cfg(windows)]
         {
@@ -1603,7 +1608,26 @@ fn sub_cache_dir() -> PathBuf {
     dir
 }
 
-fn sub_extension(url: &str, content_type: Option<&str>) -> &'static str {
+fn subtitle_extension(
+    url: &str,
+    content_type: Option<&str>,
+    format_hint: Option<&str>,
+    bytes: &[u8],
+) -> &'static str {
+    match format_hint.unwrap_or_default().trim().to_ascii_lowercase().as_str() {
+        "ass" | "ssa" => return "ass",
+        "vtt" | "webvtt" => return "vtt",
+        "srt" | "subrip" => return "srt",
+        _ => {}
+    }
+    let head_len = bytes.len().min(1024);
+    let head = String::from_utf8_lossy(&bytes[..head_len]).to_ascii_lowercase();
+    if head.contains("[script info]") || head.contains("[v4+ styles]") || head.contains("[v4 styles]") {
+        return "ass";
+    }
+    if head.trim_start_matches('\u{feff}').starts_with("webvtt") {
+        return "vtt";
+    }
     let lower = url.to_lowercase();
     if lower.ends_with(".vtt") || content_type.is_some_and(|c| c.contains("vtt")) {
         return "vtt";
@@ -1614,8 +1638,141 @@ fn sub_extension(url: &str, content_type: Option<&str>) -> &'static str {
     "srt"
 }
 
+fn normalize_subtitle_bytes(bytes: &[u8], encoding_hint: Option<&str>, lang: Option<&str>) -> Vec<u8> {
+    if let Ok(text) = std::str::from_utf8(bytes) {
+        return text.trim_start_matches('\u{feff}').as_bytes().to_vec();
+    }
+
+    let hinted = encoding_hint
+        .and_then(|label| encoding_rs::Encoding::for_label(label.trim().as_bytes()));
+    let language = lang.unwrap_or_default().trim().to_ascii_lowercase();
+    let encoding = hinted.or_else(|| {
+        if matches!(language.as_str(), "ar" | "ara" | "arabic") {
+            encoding_rs::Encoding::for_label(b"windows-1256")
+        } else {
+            encoding_rs::Encoding::for_label(b"windows-1252")
+        }
+    });
+    let Some(encoding) = encoding else {
+        return String::from_utf8_lossy(bytes).into_owned().into_bytes();
+    };
+    let (text, _, _) = encoding.decode(bytes);
+    text.trim_start_matches('\u{feff}').as_bytes().to_vec()
+}
+
+fn prepare_subtitle_download(
+    url: &str,
+    content_type: Option<&str>,
+    format_hint: Option<&str>,
+    encoding_hint: Option<&str>,
+    lang: Option<&str>,
+    bytes: &[u8],
+) -> (&'static str, Vec<u8>) {
+    let normalized = normalize_subtitle_bytes(bytes, encoding_hint, lang);
+    let extension = subtitle_extension(url, content_type, format_hint, &normalized);
+    (extension, normalized)
+}
+
+#[cfg(test)]
+mod subtitle_download_tests {
+    use super::{normalize_subtitle_bytes, prepare_subtitle_download, subtitle_extension};
+
+    #[test]
+    fn uses_explicit_ass_format_when_download_url_has_no_extension() {
+        let body = b"[Script Info]\nTitle: Styled\n[V4+ Styles]\n";
+        assert_eq!(
+            subtitle_extension(
+                "https://example.test/download?id=42",
+                Some("application/octet-stream"),
+                Some("ass"),
+                body,
+            ),
+            "ass",
+        );
+    }
+
+    #[test]
+    fn detects_ass_from_content_when_provider_omits_format() {
+        let body = b"[Script Info]\nTitle: Styled\n[V4+ Styles]\n";
+        assert_eq!(
+            subtitle_extension(
+                "https://example.test/download?id=42",
+                Some("text/plain"),
+                None,
+                body,
+            ),
+            "ass",
+        );
+    }
+
+    #[test]
+    fn converts_windows_1256_arabic_to_utf8() {
+        let windows_1256 = [
+            0xe3, 0xd1, 0xcd, 0xc8, 0xc7, 0x20, 0xc8, 0xc7, 0xe1, 0xda, 0xc7, 0xe1,
+            0xe3,
+        ];
+        let utf8 = normalize_subtitle_bytes(&windows_1256, Some("windows-1256"), Some("ar"));
+        assert_eq!(String::from_utf8(utf8).unwrap(), "مرحبا بالعالم");
+    }
+
+    #[test]
+    fn uses_arabic_language_as_legacy_encoding_fallback() {
+        let windows_1256 = [
+            0xe3, 0xd1, 0xcd, 0xc8, 0xc7, 0x20, 0xc8, 0xc7, 0xe1, 0xda, 0xc7, 0xe1,
+            0xe3,
+        ];
+        let utf8 = normalize_subtitle_bytes(&windows_1256, None, Some("ara"));
+        assert_eq!(String::from_utf8(utf8).unwrap(), "مرحبا بالعالم");
+    }
+
+    #[test]
+    fn converts_utf16_little_endian_bom_to_utf8() {
+        let utf16 = [0xff, 0xfe, b'H', 0x00, b'i', 0x00];
+        let utf8 = normalize_subtitle_bytes(&utf16, None, None);
+        assert_eq!(String::from_utf8(utf8).unwrap(), "Hi");
+    }
+
+    #[test]
+    fn detects_ass_after_utf16_normalization() {
+        let text = "[Script Info]\nTitle: Styled\n";
+        let mut utf16 = vec![0xff, 0xfe];
+        for unit in text.encode_utf16() {
+            utf16.extend_from_slice(&unit.to_le_bytes());
+        }
+        let normalized = normalize_subtitle_bytes(&utf16, None, None);
+        assert_eq!(
+            subtitle_extension("https://example.test/download", None, None, &normalized),
+            "ass",
+        );
+    }
+
+    #[test]
+    fn download_preparation_detects_utf16_ass_before_writing() {
+        let text = "[Script Info]\nTitle: Styled\n";
+        let mut utf16 = vec![0xff, 0xfe];
+        for unit in text.encode_utf16() {
+            utf16.extend_from_slice(&unit.to_le_bytes());
+        }
+        let (extension, normalized) = prepare_subtitle_download(
+            "https://example.test/download",
+            None,
+            None,
+            None,
+            None,
+            &utf16,
+        );
+        assert_eq!(extension, "ass");
+        assert_eq!(String::from_utf8(normalized).unwrap(), text);
+    }
+}
+
 #[tauri::command]
-pub async fn sub_download(url: String) -> Result<String, String> {
+pub async fn sub_download(
+    url: String,
+    format: Option<String>,
+    encoding: Option<String>,
+    lang: Option<String>,
+) -> Result<String, String> {
     use std::io::Read;
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(15))
@@ -1640,9 +1797,8 @@ pub async fn sub_download(url: String) -> Result<String, String> {
         .get(reqwest::header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_lowercase());
-    let ext = sub_extension(&url, ct.as_deref());
     let raw = res.bytes().await.map_err(|e| format!("read: {}", e))?;
-    let bytes: Vec<u8> = if raw.len() >= 2 && raw[0] == 0x1f && raw[1] == 0x8b {
+    let unpacked: Vec<u8> = if raw.len() >= 2 && raw[0] == 0x1f && raw[1] == 0x8b {
         let mut decoder = flate2::read::GzDecoder::new(&raw[..]);
         let mut decoded = Vec::with_capacity(raw.len() * 4);
         decoder
@@ -1652,6 +1808,14 @@ pub async fn sub_download(url: String) -> Result<String, String> {
     } else {
         raw.to_vec()
     };
+    let (ext, bytes) = prepare_subtitle_download(
+        &url,
+        ct.as_deref(),
+        format.as_deref(),
+        encoding.as_deref(),
+        lang.as_deref(),
+        &unpacked,
+    );
     let id = Uuid::new_v4();
     let path = sub_cache_dir().join(format!("{}.{}", id, ext));
     std::fs::write(&path, &bytes).map_err(|e| format!("write: {}", e))?;

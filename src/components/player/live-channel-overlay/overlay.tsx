@@ -7,10 +7,7 @@ import {
   promoteTopChannelsToFront,
   rowsForRegion,
 } from "@/lib/iptv/top-networks";
-import {
-  sortChannelsByGroupRelevance,
-  sortGroupsByRelevance,
-} from "@/lib/iptv/group-relevance";
+import { sortChannelsByGroupRelevance, sortGroupsByRelevance } from "@/lib/iptv/group-relevance";
 import { computeTvgIdCounts, epgProgramsForChannel } from "@/lib/iptv/epg-resolver";
 import { FAVORITES_GROUP_KEY, useFavorites } from "@/lib/iptv/favorites";
 import { getCachedPlaylist } from "@/lib/iptv/store";
@@ -176,14 +173,13 @@ export function LiveChannelOverlay({
       return "timeline";
     }
   });
+  useEffect(() => {
+    try {
+      localStorage.setItem("harbor.guide.style", guideStyle);
+    } catch {}
+  }, [guideStyle]);
   const toggleGuideStyle = () => {
-    setGuideStyle((s) => {
-      const next = s === "timeline" ? "list" : "timeline";
-      try {
-        localStorage.setItem("harbor.guide.style", next);
-      } catch {}
-      return next;
-    });
+    setGuideStyle((s) => (s === "timeline" ? "list" : "timeline"));
   };
 
   useEffect(() => {
@@ -201,7 +197,10 @@ export function LiveChannelOverlay({
   useScrollMemory(`live-overlay:${source.id}`, scrollRef, true);
 
   return (
-    <div data-tv-focus-scope className="pointer-events-auto absolute inset-0 z-[60] flex flex-col bg-canvas/95 text-ink">
+    <div
+      data-tv-focus-scope
+      className="pointer-events-auto absolute inset-0 z-[60] flex flex-col bg-canvas/95 text-ink"
+    >
       <div className="flex shrink-0 items-start gap-3 px-6 pt-6">
         <button
           onClick={onClose}
@@ -215,11 +214,7 @@ export function LiveChannelOverlay({
         <CurrentChannelInfo channel={currentChannel} current={currentProgram} now={nowMs} />
       </div>
       <div className="flex shrink-0 items-center gap-2.5 px-6 pt-4 pb-3">
-        <InlineSourceSwitcher
-          sources={sources}
-          selectedId={source.id}
-          onSelect={onSelectSource}
-        />
+        <InlineSourceSwitcher sources={sources} selectedId={source.id} onSelect={onSelectSource} />
         <div className="flex h-11 flex-1 items-center gap-2.5 rounded-xl border border-edge-soft/55 bg-elevated px-3.5">
           <Search size={15} strokeWidth={2} className="text-ink-subtle" />
           <input
@@ -238,6 +233,7 @@ export function LiveChannelOverlay({
           />
           {query && (
             <button
+              type="button"
               onClick={() => setQuery("")}
               className="text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
             >
@@ -246,12 +242,21 @@ export function LiveChannelOverlay({
           )}
         </div>
         <button
+          type="button"
           onClick={toggleGuideStyle}
-          title={guideStyle === "timeline" ? t("Switch to channel list (hide program guide)") : t("Switch to program guide")}
+          title={
+            guideStyle === "timeline"
+              ? t("Switch to channel list (hide program guide)")
+              : t("Switch to program guide")
+          }
           aria-label={t("Toggle guide layout")}
           className="flex h-11 shrink-0 items-center gap-2 rounded-xl border border-edge-soft/55 bg-elevated px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
         >
-          {guideStyle === "timeline" ? <List size={15} strokeWidth={2} /> : <CalendarRange size={15} strokeWidth={2} />}
+          {guideStyle === "timeline" ? (
+            <List size={15} strokeWidth={2} />
+          ) : (
+            <CalendarRange size={15} strokeWidth={2} />
+          )}
           {guideStyle === "timeline" ? t("List") : t("Guide")}
         </button>
       </div>
@@ -293,8 +298,8 @@ export function LiveChannelOverlay({
               {inFavorites && favorites.count === 0
                 ? t("No favorites yet. Star a channel to pin it here.")
                 : inFavorites && loadingFavorites
-                ? t("Loading favorites…")
-                : t("No channels match. Try a different category or clear the search.")}
+                  ? t("Loading favorites…")
+                  : t("No channels match. Try a different category or clear the search.")}
             </div>
           )}
         </div>

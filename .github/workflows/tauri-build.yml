@@ -103,6 +103,10 @@ jobs:
             pnpm run setup:libmpv
           }
 
+      - name: Fetch mpv (Windows x64)
+        if: matrix.platform.target == 'x86_64-pc-windows-msvc'
+        run: pnpm run setup:mpv
+
       - name: Fetch external binaries
         shell: bash
         run: |

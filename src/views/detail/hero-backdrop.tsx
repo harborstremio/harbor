@@ -39,9 +39,8 @@ export function HeroBackdrop({ url }: { url: string }) {
   const [layers, setLayers] = useState<{ id: number; url: string }[]>([{ id: 0, url }]);
   const nextId = useRef(1);
   useEffect(() => {
-    setLayers((prev) =>
-      prev[prev.length - 1]?.url === url ? prev : [...prev, { id: nextId.current++, url }],
-    );
+    const id = nextId.current++;
+    setLayers((prev) => (prev[prev.length - 1]?.url === url ? prev : [...prev, { id, url }]));
   }, [url]);
   const settle = (id: number) =>
     setLayers((prev) => {

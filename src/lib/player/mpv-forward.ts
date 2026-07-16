@@ -1,6 +1,12 @@
 import { invoke } from "@tauri-apps/api/core";
-import { emptySnapshot, type PlayerBridge, type PlayerCapabilities, type PlayerSnapshot } from "./bridge";
+import {
+  emptySnapshot,
+  type PlayerBridge,
+  type PlayerCapabilities,
+  type PlayerSnapshot,
+} from "./bridge";
 import { isWindowsDesktop } from "@/lib/platform";
+import { subtitleDownloadArgs } from "./subtitle-load";
 
 export type ForwardingBridge = PlayerBridge & {
   pushSnapshot: (snap: PlayerSnapshot) => void;
@@ -77,9 +83,17 @@ export function createForwardingMpvBridge(): ForwardingBridge {
       const sep = isWindowsDesktop() ? ";" : ":";
       void set("glsl-shaders", shaders.filter(Boolean).join(sep));
     },
-    async addSubtitle(url, lang, title, select) {
+    async addSubtitle(url, lang, title, select, metadata) {
       try {
-        await invoke("mpv_sub_add", { url, lang: lang ?? null, title: title ?? null, select: select ?? true });
+        const resolvedUrl = /^https?:/i.test(url)
+          ? await invoke<string>("sub_download", subtitleDownloadArgs(url, { ...metadata, lang }))
+          : url;
+        await invoke("mpv_sub_add", {
+          url: resolvedUrl,
+          lang: lang ?? null,
+          title: title ?? null,
+          select: select ?? true,
+        });
         return true;
       } catch {
         return false;
@@ -90,8 +104,12 @@ export function createForwardingMpvBridge(): ForwardingBridge {
     setAudioDevice(name) {
       void set("audio-device", name && name !== "auto" ? name : "auto");
     },
-    getSelectedTrackCues() { return null; },
-    getSelectedTrackUrl() { return null; },
+    getSelectedTrackCues() {
+      return null;
+    },
+    getSelectedTrackUrl() {
+      return null;
+    },
     setMediaInfo() {},
     async screenshot(path) {
       try {

@@ -131,8 +131,12 @@ const FilterView = lazy(() => importFilter().then((m) => ({ default: m.FilterVie
 const GridView = lazy(() => importGrid().then((m) => ({ default: m.GridView })));
 const PersonView = lazy(() => importPerson().then((m) => ({ default: m.PersonView })));
 const CollectionView = lazy(() => importCollection().then((m) => ({ default: m.CollectionView })));
-const EpisodeDetailView = lazy(() => importEpisodeDetail().then((m) => ({ default: m.EpisodeDetailView })));
-const CollectionsView = lazy(() => import("@/views/collections").then((m) => ({ default: m.CollectionsView })));
+const EpisodeDetailView = lazy(() =>
+  importEpisodeDetail().then((m) => ({ default: m.EpisodeDetailView })),
+);
+const CollectionsView = lazy(() =>
+  import("@/views/collections").then((m) => ({ default: m.CollectionsView })),
+);
 const PlayPicker = lazy(() => importPlayPicker().then((m) => ({ default: m.PlayPicker })));
 const PlayerView = lazy(() => importPlayer().then((m) => ({ default: m.PlayerView })));
 const Movies = lazy(() => importMovies().then((m) => ({ default: m.Movies })));
@@ -146,10 +150,14 @@ const Settings = lazy(() => importSettings().then((m) => ({ default: m.Settings 
 const Shows = lazy(() => importShows().then((m) => ({ default: m.Shows })));
 const LibraryView = lazy(() => importLibrary().then((m) => ({ default: m.LibraryView })));
 const LiveView = lazy(() => importLive().then((m) => ({ default: m.LiveView })));
-const MatchDetailView = lazy(() => importMatchDetail().then((m) => ({ default: m.MatchDetailView })));
+const MatchDetailView = lazy(() =>
+  importMatchDetail().then((m) => ({ default: m.MatchDetailView })),
+);
 const PlaylistVodView = lazy(() => importVod().then((m) => ({ default: m.PlaylistVodView })));
 const DownloadsView = lazy(() => importDownloads().then((m) => ({ default: m.DownloadsView })));
-const OnboardingModal = lazy(() => importOnboarding().then((m) => ({ default: m.OnboardingModal })));
+const OnboardingModal = lazy(() =>
+  importOnboarding().then((m) => ({ default: m.OnboardingModal })),
+);
 
 function useViewPreloader() {
   useEffect(() => {
@@ -237,88 +245,88 @@ function useIdleEvict(active: boolean, pin = false): boolean {
   return alive;
 }
 
-export function App() {
+export function App({ onReady }: { onReady?: () => void }) {
   if (isWeb() && isMobileDevice()) return <MobileNotice />;
   return (
     <SettingsProvider>
       <ProfilesProvider>
-      <ParentalProvider>
-      <TraktProvider>
-      <AnilistProvider>
-      <MalProvider>
-      <SimklProvider>
-      <LetterboxdProvider>
-      <RankingsProvider>
-        <AuthProvider>
-          <OnboardingProvider>
-            <TogetherProvider>
-              <ViewProvider>
-                <SearchProvider>
-                <DvrProvider>
-                <FavoritesProvider>
-                <MediaFavoritesProvider>
-                <LocalWatchlistProvider>
-                <ContextMenuProvider>
-                  <TopRankModalProvider>
-                    <HarborErrorBoundary>
-                      <RemoteHostMount />
-                      <ProfileIdentitySync />
-                      <SettingsProfileBridge />
-                      <TrackerProfileBridge />
-                      <AnilistAvatarSync />
-                      <MalAvatarSync />
-                      <MiddleClickScroll />
-                      <ThemeBackdrop />
-                      <WatchlistSync />
-                      <Shell />
-                      <Suspense fallback={null}>
-                        <OnboardingModal />
-                      </Suspense>
-                      <TogetherInviteToast />
-                      <TogetherFloater />
-                      <TogetherHostLeavingPrompt />
-                      <TogetherSummonToast />
-                      <TogetherParticipantLeftToast />
-                      <AnilistSyncToast />
-                      <MalSyncToast />
-                      <ListToastHost />
-                      <TogetherLeaveForLiveModal />
-                      <TogetherLocationPublisher />
-                      <DiscordPresence />
-                      <ContextMenu />
-                      <WatchLocalModal />
-                      <LocalEpisodesModal />
-                      <HoverPreview />
-                      <CustomHoverCssMount />
-                      <TopRankModal />
-                      <ProfilePickerModal />
-                      <CurfewGuard />
-                      <SearchOverlay />
-                      <SearchHotkey />
-                      <EmbedViewportRoot />
-                      <InstallerViewportRoot />
-                      <UpdateRoot />
-                    </HarborErrorBoundary>
-                    <ErrorView />
-                    <DevErrorTrigger />
-                  </TopRankModalProvider>
-                </ContextMenuProvider>
-                </LocalWatchlistProvider>
-                </MediaFavoritesProvider>
-                </FavoritesProvider>
-                </DvrProvider>
-                </SearchProvider>
-              </ViewProvider>
-            </TogetherProvider>
-          </OnboardingProvider>
-        </AuthProvider>
-      </RankingsProvider>
-      </LetterboxdProvider>
-      </SimklProvider>
-      </MalProvider>
-      </AnilistProvider>
-      </TraktProvider>
-      </ParentalProvider>
+        <ParentalProvider>
+          <TraktProvider>
+            <AnilistProvider>
+              <MalProvider>
+                <SimklProvider>
+                  <LetterboxdProvider>
+                    <RankingsProvider>
+                      <AuthProvider>
+                        <OnboardingProvider>
+                          <TogetherProvider>
+                            <ViewProvider>
+                              <SearchProvider>
+                                <DvrProvider>
+                                  <FavoritesProvider>
+                                    <MediaFavoritesProvider>
+                                      <LocalWatchlistProvider>
+                                        <ContextMenuProvider>
+                                          <TopRankModalProvider>
+                                            <HarborErrorBoundary>
+                                              <RemoteHostMount />
+                                              <ProfileIdentitySync />
+                                              <SettingsProfileBridge />
+                                              <TrackerProfileBridge />
+                                              <AnilistAvatarSync />
+                                              <MalAvatarSync />
+                                              <MiddleClickScroll />
+                                              <ThemeBackdrop />
+                                              <WatchlistSync />
+                                              <Shell onReady={onReady} />
+                                              <Suspense fallback={null}>
+                                                <OnboardingModal />
+                                              </Suspense>
+                                              <TogetherInviteToast />
+                                              <TogetherFloater />
+                                              <TogetherHostLeavingPrompt />
+                                              <TogetherSummonToast />
+                                              <TogetherParticipantLeftToast />
+                                              <AnilistSyncToast />
+                                              <MalSyncToast />
+                                              <ListToastHost />
+                                              <TogetherLeaveForLiveModal />
+                                              <TogetherLocationPublisher />
+                                              <DiscordPresence />
+                                              <ContextMenu />
+                                              <WatchLocalModal />
+                                              <LocalEpisodesModal />
+                                              <HoverPreview />
+                                              <CustomHoverCssMount />
+                                              <TopRankModal />
+                                              <ProfilePickerModal />
+                                              <CurfewGuard />
+                                              <SearchOverlay />
+                                              <SearchHotkey />
+                                              <EmbedViewportRoot />
+                                              <InstallerViewportRoot />
+                                              <UpdateRoot />
+                                            </HarborErrorBoundary>
+                                            <ErrorView />
+                                            <DevErrorTrigger />
+                                          </TopRankModalProvider>
+                                        </ContextMenuProvider>
+                                      </LocalWatchlistProvider>
+                                    </MediaFavoritesProvider>
+                                  </FavoritesProvider>
+                                </DvrProvider>
+                              </SearchProvider>
+                            </ViewProvider>
+                          </TogetherProvider>
+                        </OnboardingProvider>
+                      </AuthProvider>
+                    </RankingsProvider>
+                  </LetterboxdProvider>
+                </SimklProvider>
+              </MalProvider>
+            </AnilistProvider>
+          </TraktProvider>
+        </ParentalProvider>
       </ProfilesProvider>
     </SettingsProvider>
   );
@@ -361,7 +369,11 @@ function TogetherLocationPublisher() {
           kind: "player" as const,
           meta: metaToLoc(player.meta),
           episode: player.episode
-            ? { season: player.episode.season, episode: player.episode.episode, name: player.episode.name }
+            ? {
+                season: player.episode.season,
+                episode: player.episode.episode,
+                name: player.episode.name,
+              }
             : undefined,
         };
       }
@@ -370,7 +382,11 @@ function TogetherLocationPublisher() {
           kind: "picker" as const,
           meta: metaToLoc(picker.meta),
           episode: picker.episode
-            ? { season: picker.episode.season, episode: picker.episode.episode, name: picker.episode.name }
+            ? {
+                season: picker.episode.season,
+                episode: picker.episode.episode,
+                name: picker.episode.name,
+              }
             : undefined,
         };
       }
@@ -413,8 +429,10 @@ function DiscordPresence() {
 }
 
 function filterReactKey(f: MetaFilter): string {
-  if (f.kind === "year" || f.kind === "runtime") return `filter-${f.kind}-${f.mediaType}-${f.value}`;
-  if (f.kind === "country" || f.kind === "language") return `filter-${f.kind}-${f.mediaType}-${f.iso}`;
+  if (f.kind === "year" || f.kind === "runtime")
+    return `filter-${f.kind}-${f.mediaType}-${f.value}`;
+  if (f.kind === "country" || f.kind === "language")
+    return `filter-${f.kind}-${f.mediaType}-${f.iso}`;
   return `filter-${f.kind}-${f.mediaType}-${f.id}`;
 }
 
@@ -428,8 +446,34 @@ function parseDeepLinkEpisode(videoId?: string): { season: number; episode: numb
   return { season, episode };
 }
 
-function Shell() {
-  const { topKind, service, meta, metaLiveContext, metaEpisodeHint, episodeDetail, personId, collectionId, filter, grid, awardType, animeAwardSource, picker, player, setView, canGoBack, goBack, canGoForward, goForward, openMeta, openPlayer, exitPlayback, exitPickerToDetail, stackKinds, chromeHidden } = useView();
+function Shell({ onReady }: { onReady?: () => void }) {
+  const {
+    topKind,
+    service,
+    meta,
+    metaLiveContext,
+    metaEpisodeHint,
+    episodeDetail,
+    personId,
+    collectionId,
+    filter,
+    grid,
+    awardType,
+    animeAwardSource,
+    picker,
+    player,
+    setView,
+    canGoBack,
+    goBack,
+    canGoForward,
+    goForward,
+    openMeta,
+    openPlayer,
+    exitPlayback,
+    exitPickerToDetail,
+    stackKinds,
+    chromeHidden,
+  } = useView();
   const { settings, update } = useSettings();
   const { setOpen: setSearchOpen, open: searchOpen } = useSearch();
   const uiScaleRef = useRef(settings.uiScale);
@@ -449,6 +493,10 @@ function Shell() {
     layout === "stremio";
   useViewPreloader();
 
+  useEffect(() => {
+    if (topKind === "home") return;
+    onReady?.();
+  }, [onReady, topKind]);
 
   const handleTvBack = useCallback(() => {
     if (searchOpen) {
@@ -474,7 +522,16 @@ function Shell() {
       return true;
     }
     return false;
-  }, [searchOpen, setSearchOpen, topKind, exitPlayback, exitPickerToDetail, picker, canGoBack, goBack]);
+  }, [
+    searchOpen,
+    setSearchOpen,
+    topKind,
+    exitPlayback,
+    exitPickerToDetail,
+    picker,
+    canGoBack,
+    goBack,
+  ]);
 
   const handleTvBackToNav = useCallback(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -503,7 +560,6 @@ function Shell() {
     const volume = settings.sfxVolume ?? 50;
 
     SFX.setVolume(volume / 100);
-
   }, [settings.soundTheme, settings.sfxVolume]);
 
   useEffect(() => {
@@ -517,7 +573,7 @@ function Shell() {
       if (!target) return;
 
       const interactive = target.closest(
-        'a[href], button, [data-focusable="true"], [role="button"]'
+        'a[href], button, [data-focusable="true"], [role="button"]',
       ) as HTMLElement | null;
 
       if (!interactive) return;
@@ -533,17 +589,17 @@ function Shell() {
       if (!target) return;
 
       const btn = target.closest(
-        'button, a[href], [data-focusable="true"], [role="button"]'
+        'button, a[href], [data-focusable="true"], [role="button"]',
       ) as HTMLElement | null;
 
       if (!btn) return;
 
       const isCloseAction =
         btn.matches(
-          '[data-harbor-back], [data-back], [data-close], [data-tv-modal-close], .close-btn, .back-btn'
+          "[data-harbor-back], [data-back], [data-close], [data-tv-modal-close], .close-btn, .back-btn",
         ) ||
         !!btn.closest(
-          '[data-harbor-back], [data-back], [data-close], [data-tv-modal-close], .close-btn, .back-btn'
+          "[data-harbor-back], [data-back], [data-close], [data-tv-modal-close], .close-btn, .back-btn",
         );
 
       const isMovieCard =
@@ -553,10 +609,9 @@ function Shell() {
         !!btn.querySelector("img") ||
         !!btn.closest("[data-tv-hero-zone]");
 
-      const isMenuOrSettings =
-        !!btn.closest(
-          '.settings-panel, [role="menu"], [role="dialog"], [data-settings-root], [data-settings-panel]'
-        );
+      const isMenuOrSettings = !!btn.closest(
+        '.settings-panel, [role="menu"], [role="dialog"], [data-settings-root], [data-settings-panel]',
+      );
 
       if (isCloseAction) {
         SFX.close();
@@ -630,8 +685,7 @@ function Shell() {
       usesZoomModifier(e) && (e.key === "+" || e.key === "=");
     const isDefaultUiScaleDown = (e: KeyboardEvent) =>
       usesZoomModifier(e) && (e.key === "-" || e.key === "_");
-    const isDefaultUiScaleReset = (e: KeyboardEvent) =>
-      usesZoomModifier(e) && e.key === "0";
+    const isDefaultUiScaleReset = (e: KeyboardEvent) => usesZoomModifier(e) && e.key === "0";
     const onKey = (e: KeyboardEvent) => {
       const binding = eventToBinding(e);
       const overrides = settings.hotkeys ?? {};
@@ -639,11 +693,14 @@ function Shell() {
       const uiScaleDownCustom = "globalUiScaleDown" in overrides;
       const uiScaleResetCustom = "globalUiScaleReset" in overrides;
       const matchesUp =
-        effectiveBinding("globalUiScaleUp", overrides) === binding || (!uiScaleUpCustom && isDefaultUiScaleUp(e));
+        effectiveBinding("globalUiScaleUp", overrides) === binding ||
+        (!uiScaleUpCustom && isDefaultUiScaleUp(e));
       const matchesDown =
-        effectiveBinding("globalUiScaleDown", overrides) === binding || (!uiScaleDownCustom && isDefaultUiScaleDown(e));
+        effectiveBinding("globalUiScaleDown", overrides) === binding ||
+        (!uiScaleDownCustom && isDefaultUiScaleDown(e));
       const matchesReset =
-        effectiveBinding("globalUiScaleReset", overrides) === binding || (!uiScaleResetCustom && isDefaultUiScaleReset(e));
+        effectiveBinding("globalUiScaleReset", overrides) === binding ||
+        (!uiScaleResetCustom && isDefaultUiScaleReset(e));
       if (!matchesUp && !matchesDown && !matchesReset) return;
       if (player && matchesReset) return;
       e.preventDefault();
@@ -716,9 +773,7 @@ function Shell() {
 
   useEffect(() => {
     if (topKind !== "live") {
-      void import("@/lib/multiview/bridge").then(({ mvStopAll }) =>
-        mvStopAll().catch(() => {}),
-      );
+      void import("@/lib/multiview/bridge").then(({ mvStopAll }) => mvStopAll().catch(() => {}));
     }
   }, [topKind]);
 
@@ -730,28 +785,41 @@ function Shell() {
 
   useEffect(() => {
     let dispose: (() => void) | null = null;
-    void import("@/lib/deep-link").then(({ startDeepLinkBridge, onDeepLinkInstall, onDeepLinkOpen, onOpenLocalFile }) => {
-      void startDeepLinkBridge().then((stopBridge) => {
-        const stopListener = onDeepLinkInstall(() => {
-          if (window.__harborInstallerOpen) return;
-          setView("addons");
+    void import("@/lib/deep-link").then(
+      ({ startDeepLinkBridge, onDeepLinkInstall, onDeepLinkOpen, onOpenLocalFile }) => {
+        void startDeepLinkBridge().then((stopBridge) => {
+          const stopListener = onDeepLinkInstall(() => {
+            if (window.__harborInstallerOpen) return;
+            setView("addons");
+          });
+          const stopOpen = onDeepLinkOpen(({ type, id, videoId }) => {
+            const hint = parseDeepLinkEpisode(videoId);
+            openMeta(
+              { id, type: type as MetaType, name: "" },
+              hint ? { episodeHint: hint } : undefined,
+            );
+          });
+          const stopFile = onOpenLocalFile((path) => {
+            const name = (path.replace(/\\/g, "/").split("/").pop() || "Video").replace(
+              /\.[^.]+$/,
+              "",
+            );
+            openPlayer({
+              meta: { id: `local:${path}`, type: "movie", name },
+              url: path,
+              title: name,
+              notWebReady: true,
+            });
+          });
+          dispose = () => {
+            stopBridge();
+            stopListener();
+            stopOpen();
+            stopFile();
+          };
         });
-        const stopOpen = onDeepLinkOpen(({ type, id, videoId }) => {
-          const hint = parseDeepLinkEpisode(videoId);
-          openMeta({ id, type: type as MetaType, name: "" }, hint ? { episodeHint: hint } : undefined);
-        });
-        const stopFile = onOpenLocalFile((path) => {
-          const name = (path.replace(/\\/g, "/").split("/").pop() || "Video").replace(/\.[^.]+$/, "");
-          openPlayer({ meta: { id: `local:${path}`, type: "movie", name }, url: path, title: name, notWebReady: true });
-        });
-        dispose = () => {
-          stopBridge();
-          stopListener();
-          stopOpen();
-          stopFile();
-        };
-      });
-    });
+      },
+    );
     return () => {
       dispose?.();
     };
@@ -835,7 +903,8 @@ function Shell() {
 
   useEffect(() => {
     const root = document.documentElement;
-    if (playerActive || pickerTop || immersive || settingsTop || chromeHidden) root.dataset.chromeHidden = "true";
+    if (playerActive || pickerTop || immersive || settingsTop || chromeHidden)
+      root.dataset.chromeHidden = "true";
     else delete root.dataset.chromeHidden;
   }, [playerActive, pickerTop, immersive, settingsTop, chromeHidden]);
 
@@ -886,30 +955,48 @@ function Shell() {
 
   return (
     <div data-kids={kidsTop || kid ? "on" : undefined} className="relative flex h-full">
-      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "sidebar" && <Sidebar />}
-      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "dracula" && <DraculaSidebar />}
-      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "nord" && <NordSidebar />}
-      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "forest" && <ForestSidebar />}
-      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "stremio" && <StremioRail />}
+      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "sidebar" && (
+        <Sidebar />
+      )}
+      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "dracula" && (
+        <DraculaSidebar />
+      )}
+      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "nord" && (
+        <NordSidebar />
+      )}
+      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "forest" && (
+        <ForestSidebar />
+      )}
+      {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "stremio" && (
+        <StremioRail />
+      )}
       {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && <TopDock />}
-      {!settingsTop && !playerActive && !pickerTop && layout === "cinematic" && <CinematicOverlay />}
+      {!settingsTop && !playerActive && !pickerTop && layout === "cinematic" && (
+        <CinematicOverlay />
+      )}
       {!settingsTop && !playerActive && !pickerTop && layout === "royal" && <RoyalTopbar />}
       {!settingsTop && !playerActive && !pickerTop && layout === "rail" && <SideRail />}
       {!playerActive && !pickerTop && layout === "minui" && <MinUIDock />}
       {!playerActive && !pickerTop && layout === "topdock" && <FloatingBack offsetTop={92} />}
       {!playerActive && !pickerTop && layout === "cinematic" && <FloatingBack offsetTop={92} />}
       {!playerActive && !pickerTop && layout === "royal" && <FloatingBack offsetTop={92} />}
-      {!playerActive && !pickerTop && layout === "rail" && <FloatingBack offsetLeft={settings.sidebarCollapsed ? 88 : 220} offsetTop={28} />}
-      {!playerActive && !pickerTop && layout === "custom" && <FloatingBack offsetLeft={20} offsetTop={20} />}
+      {!playerActive && !pickerTop && layout === "rail" && (
+        <FloatingBack offsetLeft={settings.sidebarCollapsed ? 88 : 220} offsetTop={28} />
+      )}
+      {!playerActive && !pickerTop && layout === "custom" && (
+        <FloatingBack offsetLeft={20} offsetTop={20} />
+      )}
       {!playerActive && !pickerTop && layout === "custom" && (
         <div className="fixed end-3 top-3 z-[120]">
           <WindowControls />
         </div>
       )}
       {!playerActive && <WindowResizeEdges />}
-      <div className={`relative flex min-h-0 min-w-0 flex-1 flex-col ${playerActive ? "invisible" : ""}`}>
+      <div
+        className={`relative flex min-h-0 min-w-0 flex-1 flex-col ${playerActive ? "invisible" : ""}`}
+      >
         <div className={layer(homeTop)}>
-          <Home active={homeTop} />
+          <Home active={homeTop} onReady={onReady} />
         </div>
         {settingsAlive && (
           <div className={layer(settingsTop)}>
@@ -1027,9 +1114,18 @@ function Shell() {
           <div className={layer(detailTop)}>
             <Suspense fallback={null}>
               {kid ? (
-                <KidsDetailView key={`kid-meta-${meta.id}`} meta={meta} episodeHint={metaEpisodeHint ?? undefined} />
+                <KidsDetailView
+                  key={`kid-meta-${meta.id}`}
+                  meta={meta}
+                  episodeHint={metaEpisodeHint ?? undefined}
+                />
               ) : (
-                <DetailView key={`meta-${meta.id}`} meta={meta} liveContext={metaLiveContext} episodeHint={metaEpisodeHint ?? undefined} />
+                <DetailView
+                  key={`meta-${meta.id}`}
+                  meta={meta}
+                  liveContext={metaLiveContext}
+                  episodeHint={metaEpisodeHint ?? undefined}
+                />
               )}
             </Suspense>
           </div>
@@ -1127,7 +1223,10 @@ function Shell() {
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent"
         />
-        {!immersive && (themeHasTopbar || (settingsTop && layout !== "minui" && layout !== "custom")) && <Topbar />}
+        {!immersive &&
+          (themeHasTopbar || (settingsTop && layout !== "minui" && layout !== "custom")) && (
+            <Topbar />
+          )}
         {!immersive && layout === "rail" && !settingsTop && (
           <div
             aria-hidden
@@ -1137,7 +1236,10 @@ function Shell() {
       </div>
       {player && (
         <Suspense fallback={null}>
-          <PlayerView key={player.meta.id.startsWith("iptv:") ? "player-live" : `player-${player.meta.id}`} src={player} />
+          <PlayerView
+            key={player.meta.id.startsWith("iptv:") ? "player-live" : `player-${player.meta.id}`}
+            src={player}
+          />
         </Suspense>
       )}
       <CustomCodeMount />

@@ -25,10 +25,22 @@ export function TopRow({
     return (
       <div className="absolute inset-x-0 top-0 z-30 flex h-[88px] items-center justify-between bg-gradient-to-b from-black/35 via-black/15 to-transparent px-6">
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <SlotZone slot="top-left" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="top-left"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
         <div className="flex items-center gap-1">
-          <SlotZone slot="top-right" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="top-right"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
       </div>
     );
@@ -36,10 +48,22 @@ export function TopRow({
   return (
     <div className="absolute inset-x-0 top-0 z-30 flex items-start justify-between bg-gradient-to-b from-black/55 via-black/15 to-transparent px-7 pt-4 pb-8">
       <div className="flex items-start gap-2">
-        <SlotZone slot="top-left" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+        <SlotZone
+          slot="top-left"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
       </div>
       <div className="flex items-start gap-2">
-        <SlotZone slot="top-right" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+        <SlotZone
+          slot="top-right"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
       </div>
     </div>
   );
@@ -89,9 +113,10 @@ function CyclingBackdrop({ bg }: { bg: string | null }) {
   const idRef = useRef(0);
   useEffect(() => {
     if (!bg) return;
+    const id = idRef.current++;
     setLayers((cur) => {
       if (cur.length && cur[cur.length - 1].url === bg) return cur;
-      return [...cur, { url: bg, id: idRef.current++ }].slice(-2);
+      return [...cur, { url: bg, id }].slice(-2);
     });
     const tid = setTimeout(() => setLayers((cur) => cur.slice(-1)), 2600);
     return () => clearTimeout(tid);
@@ -139,11 +164,23 @@ export function DefaultLayout({
           <LiveSeekRowMock />
         ) : (
           <>
-            <SlotZone slot="seek-leading" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+            <SlotZone
+              slot="seek-leading"
+              config={config}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              renderOne={renderOne}
+            />
             <div className="flex-1">
               <SeekBarPlaceholder />
             </div>
-            <SlotZone slot="seek-trailing" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+            <SlotZone
+              slot="seek-trailing"
+              config={config}
+              selectedId={selectedId}
+              onSelect={onSelect}
+              renderOne={renderOne}
+            />
           </>
         )}
       </div>
@@ -153,13 +190,31 @@ export function DefaultLayout({
         }`}
       >
         <div className="flex min-w-0 items-center gap-2 justify-self-start">
-          <SlotZone slot="bottom-left" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="bottom-left"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
         <div className="flex items-center gap-1.5">
-          <SlotZone slot="bottom-center" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="bottom-center"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
         <div className="flex items-center gap-1.5 justify-self-end">
-          <SlotZone slot="bottom-right" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+          <SlotZone
+            slot="bottom-right"
+            config={config}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            renderOne={renderOne}
+          />
         </div>
       </div>
     </>
@@ -179,10 +234,28 @@ export function StremioLayout({ config, selectedId, onSelect, renderOne, isLive 
         )}
       </div>
       <div className="flex items-center gap-1">
-        <SlotZone slot="bottom-left" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
-        <SlotZone slot="bottom-center" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+        <SlotZone
+          slot="bottom-left"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
+        <SlotZone
+          slot="bottom-center"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
         <div className="flex-1" />
-        <SlotZone slot="bottom-right" config={config} selectedId={selectedId} onSelect={onSelect} renderOne={renderOne} />
+        <SlotZone
+          slot="bottom-right"
+          config={config}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          renderOne={renderOne}
+        />
       </div>
     </>
   );
@@ -227,7 +300,10 @@ function SlotZone({
     .sort((a, b) => a.order - b.order);
   const items = allInSlot
     .map((c) => ({ c, rendered: renderOne(c.id) }))
-    .filter((x): x is { c: typeof allInSlot[number]; rendered: NonNullable<React.ReactNode> } => x.rendered != null);
+    .filter(
+      (x): x is { c: (typeof allInSlot)[number]; rendered: NonNullable<React.ReactNode> } =>
+        x.rendered != null,
+    );
   if (items.length === 0) return null;
   return (
     <>

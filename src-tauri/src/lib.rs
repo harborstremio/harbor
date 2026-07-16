@@ -60,6 +60,13 @@ fn harbor_flush_done() {
 }
 
 #[tauri::command]
+fn harbor_startup_ready(window: tauri::WebviewWindow) {
+    if window.label() == "main" {
+        let _ = window.set_focus();
+    }
+}
+
+#[tauri::command]
 fn close_aux_windows(app: tauri::AppHandle) {
     use tauri::Manager;
     for (label, window) in app.webview_windows() {
@@ -485,6 +492,13 @@ pub fn run() {
     });
 
     app_builder
+        .on_page_load(|webview, payload| {
+            if webview.label() == "main"
+                && matches!(payload.event(), tauri::webview::PageLoadEvent::Finished)
+            {
+                let _ = webview.window().show();
+            }
+        })
         .setup(move |app| {
             #[cfg(windows)]
             {
@@ -585,6 +599,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             harbor_flush_done,
+            harbor_startup_ready,
             close_aux_windows,
             power::power_inhibit,
             harbor_set_webview_memory_low,

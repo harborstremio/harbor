@@ -1,21 +1,38 @@
 use std::collections::HashMap;
+use std::future::Future;
 use std::sync::OnceLock;
 use std::time::Duration;
 
 use serde::{Deserialize, Serialize};
-use tokio::sync::Semaphore;
+use tokio::sync::{Semaphore, SemaphorePermit};
 
 const BROWSER_UA: &str =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+const DEFAULT_TIMEOUT_MS: u64 = 30_000;
 
-/// Maximum concurrent HTTP fetch requests. This caps the number of DNS
-/// lookups that can happen simultaneously, preventing systemd-resolved
-/// from being overwhelmed by a burst of requests to different hosts.
+/// Maximum concurrent HTTP fetch requests. This caps native work and DNS
+/// lookups when the interface starts a burst of provider requests.
 const MAX_CONCURRENT_FETCHES: usize = 10;
 
 fn fetch_semaphore() -> &'static Semaphore {
     static SEM: OnceLock<Semaphore> = OnceLock::new();
     SEM.get_or_init(|| Semaphore::new(MAX_CONCURRENT_FETCHES))
+}
+
+async fn acquire_fetch_permit() -> Result<SemaphorePermit<'static>, String> {
+    fetch_semaphore()
+        .acquire()
+        .await
+        .map_err(|error| format!("semaphore: {error}"))
+}
+
+async fn run_with_deadline<T>(
+    duration: Duration,
+    work: impl Future<Output = Result<T, String>>,
+) -> Result<T, String> {
+    tokio::time::timeout(duration, work)
+        .await
+        .unwrap_or_else(|_| Err(format!("timeout after {} ms", duration.as_millis())))
 }
 
 fn http_client() -> Result<&'static reqwest::Client, String> {
@@ -89,10 +106,12 @@ pub async fn harbor_fetch(args: HarborFetchArgs) -> Result<HarborFetchResponse, 
     if is_blocked_ssrf_url(&args.url) {
         return Err("fetch target blocked by SSRF protection".to_string());
     }
-    let _permit = fetch_semaphore()
-        .acquire()
-        .await
-        .map_err(|e| format!("semaphore: {e}"))?;
+    let timeout = Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS));
+    run_with_deadline(timeout, harbor_fetch_inner(args)).await
+}
+
+async fn harbor_fetch_inner(args: HarborFetchArgs) -> Result<HarborFetchResponse, String> {
+    let _permit = acquire_fetch_permit().await?;
 
     let client = http_client()?;
 

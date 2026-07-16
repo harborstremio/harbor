@@ -30,8 +30,16 @@ serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["io"] }
 axum = { version = "0.8", features = ["ws"] }
-reqwest = { version = "0.12", default-features = false, features = ["native-tls", "stream", "multipart", "json", "gzip", "hickory-dns"] }
+reqwest = { version = "0.12", default-features = false, features = [
+  "native-tls",
+  "stream",
+  "multipart",
+  "json",
+  "gzip",
+  "hickory-dns",
+] }
 flate2 = "1"
+encoding_rs = "0.8"
 uuid = { version = "1", features = ["v4"] }
 futures-util = "0.3"
 libmpv2 = "4"
@@ -43,7 +51,12 @@ hound = "3.5"
 discord-rich-presence = "1.1"
 rust_cast = { path = "vendor/rust_cast", version = "0.20" }
 mdns-sd = "0.13"
-rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+rustls = { version = "0.23", default-features = false, features = [
+  "ring",
+  "std",
+  "tls12",
+  "logging",
+] }
 harbor-core = { path = "../harbor-core" }
 librqbit = { version = "=8.1.1", default-features = false, features = ["rust-tls"] }
 url = "2"
@@ -51,7 +64,19 @@ realfft = "3"
 hickory-resolver = "0.25"
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell", "Win32_Graphics_Gdi", "Win32_Graphics_Dxgi", "Win32_Graphics_Dxgi_Common", "Win32_System_Threading", "Win32_System_ProcessStatus", "Win32_System_Diagnostics_ToolHelp", "Win32_System_SystemInformation", "Win32_System_LibraryLoader"] }
+windows = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_UI_Shell",
+  "Win32_Graphics_Gdi",
+  "Win32_Graphics_Dxgi",
+  "Win32_Graphics_Dxgi_Common",
+  "Win32_System_Threading",
+  "Win32_System_ProcessStatus",
+  "Win32_System_Diagnostics_ToolHelp",
+  "Win32_System_SystemInformation",
+  "Win32_System_LibraryLoader",
+] }
 window-vibrancy = "0.6"
 wasapi = "0.15"
 webview2-com = "0.37"
@@ -65,8 +90,20 @@ debug = "line-tables-only"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
-objc2-foundation = { version = "0.3", features = ["NSGeometry", "NSThread", "NSValue", "NSDictionary", "NSString"] }
-objc2-app-kit = { version = "0.3", features = ["NSWindow", "NSView", "NSOpenGL", "NSOpenGLView", "NSResponder"] }
+objc2-foundation = { version = "0.3", features = [
+  "NSGeometry",
+  "NSThread",
+  "NSValue",
+  "NSDictionary",
+  "NSString",
+] }
+objc2-app-kit = { version = "0.3", features = [
+  "NSWindow",
+  "NSView",
+  "NSOpenGL",
+  "NSOpenGLView",
+  "NSResponder",
+] }
 objc2-web-kit = { version = "0.3", features = ["WKWebView"] }
 core-foundation = "0.10"
 core-video = "0.4"

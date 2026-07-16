@@ -1,5 +1,6 @@
 import { SubtitleMenuBody } from "@/components/player/subtitle-menu";
 import type { TrackInfo } from "@/lib/player/bridge";
+import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 
 export type SubtitleModalState = {
   tracks: TrackInfo[];
@@ -16,7 +17,7 @@ type Props = {
   state: SubtitleModalState;
   onSelect: (id: string | null) => void;
   onDelay: (sec: number) => void;
-  onAddSubtitle: (url: string, lang?: string, title?: string) => void;
+  onAddSubtitle: SubtitleAddHandler;
   onClose: () => void;
 };
 
