@@ -27,10 +27,6 @@ jobs:
         platform:
           - name: Windows
             runner: windows-latest
-          - name: macOS
-            runner: macos-latest
-          - name: Linux
-            runner: ubuntu-22.04
 
     steps:
       - name: Checkout
