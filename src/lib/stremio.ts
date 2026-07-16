@@ -101,7 +101,13 @@ async function call<T>(path: string, body: object): Promise<T> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const json = await res.json();
+  if (!res.ok) throw new Error(`Request failed (HTTP ${res.status})`);
+  let json: { error?: { message?: string }; result?: T };
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error(`Request failed: invalid response from server`);
+  }
   if (json.error) throw new Error(json.error.message ?? "Request failed");
   return json.result as T;
 }

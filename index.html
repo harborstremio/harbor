@@ -46,6 +46,20 @@
         transition: opacity 280ms ease-out;
       }
       #harbor-boot.gone { opacity: 0; }
+      #harbor-boot.error { pointer-events: auto; }
+      #harbor-boot.error svg { display: none; }
+      #harbor-boot .boot-error {
+        display: none;
+        color: #f87171;
+        font-family: monospace;
+        font-size: 14px;
+        text-align: center;
+        max-width: 80vw;
+        word-break: break-all;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      #harbor-boot.error .boot-error { display: block; }
       #harbor-boot svg {
         width: 96px;
         height: auto;
@@ -78,6 +92,40 @@
             document.head.appendChild(s);
           }
         } catch (e) {}
+
+        window.__harborBootErrors = [];
+        var bootEl = document.getElementById('harbor-boot');
+        var errorEl = null;
+
+        function showBootError(msg) {
+          window.__harborBootErrors.push(msg);
+          if (!bootEl) return;
+          if (!errorEl) {
+            errorEl = document.createElement('div');
+            errorEl.className = 'boot-error';
+            bootEl.appendChild(errorEl);
+          }
+          errorEl.textContent = window.__harborBootErrors.join('\n\n');
+          bootEl.classList.add('error');
+          bootEl.style.pointerEvents = 'auto';
+        }
+
+        window.addEventListener('error', function(e) {
+          var src = e.filename || '';
+          var name = src.split('/').pop() || src;
+          showBootError('[' + name + ':' + e.lineno + ':' + e.colno + '] ' + (e.message || 'Unknown error'));
+        }, true);
+
+        window.addEventListener('unhandledrejection', function(e) {
+          showBootError('[Promise] ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason || 'Unknown rejection')));
+        });
+
+        setTimeout(function() {
+          if (!bootEl) return;
+          if (!bootEl.classList.contains('gone')) {
+            showBootError('[BOOT TIMEOUT] App nao iniciou apos 15 segundos. Verifique os erros acima.');
+          }
+        }, 15000);
       })();
     </script>
   </head>

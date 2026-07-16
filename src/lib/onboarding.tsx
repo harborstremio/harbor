@@ -18,7 +18,12 @@ const Ctx = createContext<OnboardingValue | null>(null);
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [flags, setFlags] = useState<Flags>(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw: string | null = null;
+    try {
+      raw = localStorage.getItem(STORAGE_KEY);
+    } catch {
+      return DEFAULT;
+    }
     if (!raw) return DEFAULT;
     try {
       const parsed = JSON.parse(raw) as Partial<Flags>;
@@ -29,7 +34,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(flags));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(flags));
+    } catch {
+      /* ignore */
+    }
   }, [flags]);
 
   const finishOnboarding = useCallback(() => setFlags((f) => ({ ...f, onboarded: true })), []);

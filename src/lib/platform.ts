@@ -9,10 +9,12 @@ type DesktopPlatform = "linux" | "macos" | "windows" | null;
 function detectedDesktopPlatform(): DesktopPlatform {
   if (!isTauri()) return null;
 
-  const platform = nativePlatform();
-  if (platform === "linux" || platform === "macos" || platform === "windows") {
-    return platform;
-  }
+  try {
+    const platform = nativePlatform();
+    if (platform === "linux" || platform === "macos" || platform === "windows") {
+      return platform;
+    }
+  } catch {}
   return null;
 }
 

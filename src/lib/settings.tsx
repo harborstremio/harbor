@@ -70,7 +70,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     settingsRef.current = settings;
   }, [settings]);
 
-  setTmdbLanguage(settings.tmdbLanguage);
+  useEffect(() => {
+    setTmdbLanguage(settings.tmdbLanguage);
+  }, [settings.tmdbLanguage]);
 
   useEffect(() => {
     let cancelled = false;

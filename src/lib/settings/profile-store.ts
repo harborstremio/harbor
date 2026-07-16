@@ -30,9 +30,13 @@ export function seedSharedFromLegacy(): void {
 
 export function loadEffective(profileId: string, linked: boolean): Settings {
   const key = sourceKeyFor(profileId, linked);
-  if (localStorage.getItem(key) != null) return loadStoredSettings(key);
-  if (localStorage.getItem(SHARED_KEY) != null) return loadStoredSettings(SHARED_KEY);
-  if (localStorage.getItem(MIRROR_KEY) != null) return loadStoredSettings(MIRROR_KEY);
+  try {
+    if (localStorage.getItem(key) != null) return loadStoredSettings(key);
+    if (localStorage.getItem(SHARED_KEY) != null) return loadStoredSettings(SHARED_KEY);
+    if (localStorage.getItem(MIRROR_KEY) != null) return loadStoredSettings(MIRROR_KEY);
+  } catch {
+    return loadStoredSettings(key);
+  }
   return loadStoredSettings(key);
 }
 

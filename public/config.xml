@@ -16,7 +16,7 @@
   <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
   <tizen:privilege name="http://tizen.org/privilege/tv.display"/>
 
-  <tizen:content-security-policy>default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; connect-src 'self' https: http:; media-src *;</tizen:content-security-policy>
+  <tizen:content-security-policy>default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; connect-src 'self' https: http:; media-src *; worker-src 'self' blob:;</tizen:content-security-policy>
 
   <tizen:metadata key="http://samsung.com/tv/metadata/use.hide.vol.panel" value="true"/>
 </widget>

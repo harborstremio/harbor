@@ -74,7 +74,16 @@ export function sanitizeTheme(t: Partial<ThemeSettings> | undefined): ThemeSetti
 }
 
 export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
-  const raw = localStorage.getItem(rawKey);
+  let raw: string | null = null;
+  try {
+    raw = localStorage.getItem(rawKey);
+  } catch {
+    return {
+      ...DEFAULT,
+      seekBackStepSec: sanitizeSeekStep(legacySeekStep("back"), DEFAULT.seekBackStepSec),
+      seekForwardStepSec: sanitizeSeekStep(legacySeekStep("forward"), DEFAULT.seekForwardStepSec),
+    };
+  }
   if (!raw) {
     return {
       ...DEFAULT,
