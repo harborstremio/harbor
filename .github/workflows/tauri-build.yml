@@ -55,7 +55,7 @@ jobs:
       - name: Install Mac deps
         if: contains(matrix.platform.runner, 'macos')
         run: |
-          brew install mpv pkg-config
+          brew install mpv pkg-config dylibbundler
           # Make pkg-config find libmpv from homebrew
           echo "PKG_CONFIG_PATH=$(brew --prefix mpv)/lib/pkgconfig:${PKG_CONFIG_PATH:-}" >> $GITHUB_ENV
 
@@ -188,6 +188,22 @@ jobs:
         with:
           tauriScript: pnpm tauri
           args: --target ${{ matrix.platform.target }}
+
+      - name: Bundle macOS dylibs and recreate standalone dmg
+        if: contains(matrix.platform.runner, 'macos') && success()
+        run: |
+          echo "Running dylibbundler on Harbor.app to embed libmpv and dependencies..."
+          APP_DIR=$(find src-tauri/target/${{ matrix.platform.target }}/release/bundle/macos -name "*.app" | head -1)
+          if [ -n "$APP_DIR" ]; then
+            mkdir -p "$APP_DIR/Contents/Frameworks"
+            dylibbundler -od -b -x "$APP_DIR/Contents/MacOS/harbor" -d "$APP_DIR/Contents/Frameworks" -p @executable_path/../Frameworks/ || true
+            
+            echo "Rebuilding standalone compressed DMG with self-contained Frameworks..."
+            DMG_DIR="src-tauri/target/${{ matrix.platform.target }}/release/bundle/dmg"
+            rm -rf "$DMG_DIR"/*.dmg
+            mkdir -p "$DMG_DIR"
+            hdiutil create -volname "Harbor" -srcfolder "$APP_DIR" -ov -format UDZO "$DMG_DIR/Harbor_${{ matrix.platform.name }}.dmg"
+          fi
 
       - name: Upload artifacts
         if: success()
