@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
 import { applyMotionInterp } from "@/lib/player/motion-interp";
-import { applyRtxHdr } from "@/lib/player/rtx-hdr";
+import { applyRtxHdr, resetRtxHdrState } from "@/lib/player/rtx-hdr";
 import { applySubStyle } from "@/lib/player/sub-style";
 import type { useSettings } from "@/lib/settings";
 
@@ -12,10 +12,21 @@ export function useSubStyleApply(params: {
   imageNativeActive: boolean;
   bridgeReady: boolean;
   mediaReady: boolean;
+  sourceGamma: string;
   bridgeKey: string | number;
+  svpActive: boolean;
 }) {
-  const { engine, settings, assNativeActive, imageNativeActive, bridgeReady, mediaReady, bridgeKey } =
-    params;
+  const {
+    engine,
+    settings,
+    assNativeActive,
+    imageNativeActive,
+    bridgeReady,
+    mediaReady,
+    sourceGamma,
+    bridgeKey,
+    svpActive,
+  } = params;
 
   useEffect(() => {
     if (engine !== "mpv") return;
@@ -45,21 +56,28 @@ export function useSubStyleApply(params: {
     settings.subBold,
   ]);
 
+  useEffect(() => () => resetRtxHdrState(), [bridgeKey]);
+
   useEffect(() => {
     if (engine !== "mpv") return;
     if ((isMacDesktop() || isLinuxDesktop()) && settings.playerMpvEmbed) return;
     if (!bridgeReady) return;
-    const svpActive = settings.playerSvp && !!settings.svpVpyPath;
+    if (!mediaReady || !sourceGamma) {
+      void applyRtxHdr(false, svpActive, settings.playerHdrToSdr, bridgeKey);
+      return;
+    }
     void applyMotionInterp(settings.playerMotionInterp && !svpActive);
-    void applyRtxHdr(settings.playerRtxHdr, svpActive);
+    void applyRtxHdr(settings.playerRtxHdr, svpActive, settings.playerHdrToSdr, bridgeKey);
   }, [
     engine,
     bridgeReady,
+    mediaReady,
+    sourceGamma,
     bridgeKey,
+    svpActive,
     settings.playerMpvEmbed,
     settings.playerMotionInterp,
+    settings.playerHdrToSdr,
     settings.playerRtxHdr,
-    settings.playerSvp,
-    settings.svpVpyPath,
   ]);
 }

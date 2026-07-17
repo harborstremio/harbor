@@ -4361,6 +4361,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["anime4k disable key", "ctrl 0", "upscaling off", "stop shaders"],
   },
   {
+    label: "Toggle RTX Video HDR",
+    section: "hotkeys",
+    anchorTitle: "Player",
+    keywords: ["rtx hdr hotkey", "ctrl h", "nvidia video hdr", "hdr enhancement toggle"],
+  },
+  {
     label: "Seek back",
     section: "hotkeys",
     anchorTitle: "Player",

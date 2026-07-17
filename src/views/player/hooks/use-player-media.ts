@@ -41,6 +41,7 @@ export function usePlayerMedia(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
   bridgeReady: boolean;
   bridgeKey: string | number;
+  svpActive: boolean;
   videoMountRef: RefObject<HTMLDivElement | null>;
   toggleFullscreen: () => void;
   castActiveRef: RefObject<boolean>;
@@ -56,6 +57,7 @@ export function usePlayerMedia(params: {
     bridgeRef,
     bridgeReady,
     bridgeKey,
+    svpActive,
     videoMountRef,
     toggleFullscreen,
     castActiveRef,
@@ -146,7 +148,9 @@ export function usePlayerMedia(params: {
     imageNativeActive,
     bridgeReady,
     mediaReady: mpvMediaReadyForStyle,
+    sourceGamma: snap.hdrGamma,
     bridgeKey,
+    svpActive,
   });
   useEffect(() => {
     if (!subEmbed && !hdrNativeSurface) return;

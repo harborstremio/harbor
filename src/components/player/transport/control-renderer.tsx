@@ -60,6 +60,7 @@ import { SpeedMenu } from "./speed-menu";
 import { AspectMenu } from "./aspect-menu";
 import { Anime4kMenu } from "./anime4k-menu";
 import { HdrToggleBigBtn } from "./hdr-toggle-btn";
+import { RtxHdrToggleBigBtn } from "./rtx-hdr-toggle-btn";
 import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
 import { DrawToggle } from "./draw-toggle";
 import { CastButton } from "./cast-button";
@@ -461,6 +462,10 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     case "hdr-toggle": {
       if (ctx.tight || ctx.engine === "html5") return null;
       return <HdrToggleBigBtn />;
+    }
+    case "rtx-hdr-toggle": {
+      if (ctx.tight || ctx.engine === "html5") return null;
+      return <RtxHdrToggleBigBtn meta={ctx.meta} />;
     }
     case "draw-toggle": {
       if (ctx.compact || !ctx.showDraw) return null;

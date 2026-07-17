@@ -3,6 +3,8 @@ import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
 import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
+import { isWindowsDesktop } from "@/lib/platform";
+import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
 import { useSettings } from "@/lib/settings";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
@@ -24,6 +26,7 @@ export function useKeyboardShortcuts(params: {
   cycleSubtitles: () => void;
   setShowStats: (updater: (prev: boolean) => boolean) => void;
   metaId: string;
+  svpActive: boolean;
   onNextEp?: () => void;
   onPrevEp?: () => void;
   hasNextEp?: boolean;
@@ -60,6 +63,7 @@ export function useKeyboardShortcuts(params: {
     cycleSubtitles,
     setShowStats,
     metaId,
+    svpActive,
     onNextEp,
     onPrevEp,
     hasNextEp,
@@ -236,6 +240,14 @@ export function useKeyboardShortcuts(params: {
         onAnime4kOff();
         return;
       }
+      if (match("playerRtxHdrToggle")) {
+        e.preventDefault();
+        if (e.repeat) return;
+        if (!isWindowsDesktop() || isRtxHdrBlocked(settings.playerHdrToSdr, svpActive)) return;
+        if (bridgeRef.current?.capabilities().engine !== "mpv") return;
+        update({ playerRtxHdr: !settings.playerRtxHdr });
+        return;
+      }
       if (match("playerPanscanUp") && onPanscanUp) {
         e.preventDefault();
         onPanscanUp();
@@ -402,7 +414,44 @@ export function useKeyboardShortcuts(params: {
       window.removeEventListener("blur", onBlur);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [closePlayer, togglePip, drawMode, snap.muted, snap.volume, snap.rate, snap.durationSec, snap.subDelaySec, overrides, seekBackStepSec, seekForwardStepSec, seekTo, toggleSwitcher, toggleEpisodePanel, toggleGuide, toggleDvr, toggleSleep, onScreenshot, onGifRecord, onClipRecord, onToggleCrop, onPanscanUp, onPanscanDown, onPrevChannel, onToggleAnime4k, onAnime4kOn, onAnime4kOff, onFrameStep, onVolumeFeedback, settings.playerEscExitsFullscreen, settings.playerConfirmLeave, settings.playerVolumeSfx, update]);
+  }, [
+    closePlayer,
+    togglePip,
+    drawMode,
+    snap.muted,
+    snap.volume,
+    snap.rate,
+    snap.durationSec,
+    snap.subDelaySec,
+    overrides,
+    seekBackStepSec,
+    seekForwardStepSec,
+    seekTo,
+    toggleSwitcher,
+    toggleEpisodePanel,
+    toggleGuide,
+    toggleDvr,
+    toggleSleep,
+    onScreenshot,
+    onGifRecord,
+    onClipRecord,
+    onToggleCrop,
+    onPanscanUp,
+    onPanscanDown,
+    onPrevChannel,
+    onToggleAnime4k,
+    onAnime4kOn,
+    onAnime4kOff,
+    onFrameStep,
+    onVolumeFeedback,
+    settings.playerEscExitsFullscreen,
+    settings.playerConfirmLeave,
+    settings.playerVolumeSfx,
+    settings.playerHdrToSdr,
+    settings.playerRtxHdr,
+    svpActive,
+    update,
+  ]);
 
   return { holdSpeedActive };
 }

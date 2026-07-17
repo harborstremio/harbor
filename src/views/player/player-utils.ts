@@ -56,6 +56,7 @@ export async function pickBridge(
   mpvOpts: {
     anime4k: boolean;
     hdrToSdr: boolean;
+    rtxHdr?: boolean;
     embed?: boolean;
     anime4kShaders?: string[];
     d3d11Flip?: boolean;
@@ -68,14 +69,19 @@ export async function pickBridge(
   if (want === "mpv") {
     const probe = await probeMpv();
     if (probe.available) return { bridge: createMpvBridge(mpvOpts), engine: "mpv" };
-    console.warn("[harbor] mpv requested but libmpv probe failed; falling back to in-webview html5 decode (high memory)");
+    console.warn(
+      "[harbor] mpv requested but libmpv probe failed; falling back to in-webview html5 decode (high memory)",
+    );
     return { bridge: createHtml5Bridge(), engine: "html5" };
   }
   const isDesktop = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   if (isDesktop || notWebReady) {
     const probe = await probeMpv();
     if (probe.available) return { bridge: createMpvBridge(mpvOpts), engine: "mpv" };
-    if (isDesktop) console.warn("[harbor] desktop libmpv probe failed; falling back to in-webview html5 decode (high memory)");
+    if (isDesktop)
+      console.warn(
+        "[harbor] desktop libmpv probe failed; falling back to in-webview html5 decode (high memory)",
+      );
   }
   return { bridge: createHtml5Bridge(), engine: "html5" };
 }
