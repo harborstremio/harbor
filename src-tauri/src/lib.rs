@@ -48,6 +48,7 @@ mod webview_helpers;
 
 pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
     crash_report::mark_clean_exit();
+    thumbs::shutdown(app);
     cast_server::stop();
     torrent_engine::stop();
     discord_rp::shutdown(app);

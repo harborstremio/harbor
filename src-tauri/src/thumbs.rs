@@ -22,6 +22,8 @@ const THUMB_WIDTH: u32 = 240;
 const SCREENSHOT_QUALITY: u32 = 72;
 const REQUEST_TIMEOUT_MS: u64 = 12000;
 const SEEK_WAIT_MS: u64 = 4000;
+const SHADOW_QUIT_GRACE: Duration = Duration::from_millis(80);
+const SHADOW_KILL_WAIT: Duration = Duration::from_secs(2);
 const THUMB_CACHE_MAX_BYTES: usize = 48 * 1024 * 1024;
 const THUMB_CACHE_MAX_ENTRIES: usize = 160;
 
@@ -118,6 +120,7 @@ impl ThumbCache {
 
 pub struct ThumbsState {
     inner: Arc<Mutex<Inner>>,
+    spawn_lock: Arc<Mutex<()>>,
 }
 
 struct Inner {
@@ -154,6 +157,7 @@ impl ThumbsState {
                 wanted: None,
                 active_worker: None,
             })),
+            spawn_lock: Arc::new(Mutex::new(())),
         }
     }
 }
@@ -228,11 +232,18 @@ fn cache_dir(session: &str) -> PathBuf {
 
 async fn drop_shadow(shadow: &mut Shadow) {
     let _ = shadow.writer_tx.try_send(json!({"command": ["quit"]}));
-    tokio::time::sleep(Duration::from_millis(80)).await;
+    tokio::time::sleep(SHADOW_QUIT_GRACE).await;
     if shadow.child.try_wait().ok().flatten().is_none() {
-        let _ = shadow.child.start_kill();
+        if let Err(error) = shadow.child.start_kill() {
+            eprintln!("[thumbs] failed to kill shadow mpv: {error}");
+        }
+        if tokio::time::timeout(SHADOW_KILL_WAIT, shadow.child.wait())
+            .await
+            .is_err()
+        {
+            eprintln!("[thumbs] shadow mpv did not exit after kill request");
+        }
     }
-    let _ = shadow.child.wait().await;
     let _ = tokio::fs::remove_file(&shadow.pipe).await;
     let _ = tokio::fs::remove_dir_all(&shadow.cache_dir).await;
 }
@@ -261,6 +272,7 @@ pub async fn thumbs_set_url(state: State<'_, ThumbsState>, url: String) -> Resul
         inner.active_worker = None;
         shadow
     };
+    let _spawn_guard = state.spawn_lock.lock().await;
     if let Some(mut s) = shadow {
         drop_shadow(&mut s).await;
     }
@@ -269,6 +281,7 @@ pub async fn thumbs_set_url(state: State<'_, ThumbsState>, url: String) -> Resul
 
 #[tauri::command]
 pub async fn thumbs_spawn_eager(state: State<'_, ThumbsState>) -> Result<(), String> {
+    let _spawn_guard = state.spawn_lock.lock().await;
     let (url, session, pending) = {
         let inner = state.inner.lock().await;
         if inner.shadow.is_some() {
@@ -322,12 +335,13 @@ pub async fn thumbs_get(
         inner.next_worker_id = inner.next_worker_id.wrapping_add(1);
         inner.active_worker = Some(worker_id);
         let arc = inner_arc.clone();
-        tokio::spawn(worker(arc, worker_id));
+        let spawn_lock = state.spawn_lock.clone();
+        tokio::spawn(worker(arc, spawn_lock, worker_id));
     }
     Ok(None)
 }
 
-async fn worker(inner_arc: Arc<Mutex<Inner>>, worker_id: u64) {
+async fn worker(inner_arc: Arc<Mutex<Inner>>, spawn_lock: Arc<Mutex<()>>, worker_id: u64) {
     loop {
         let (bucket, url, session, pending, shadow) = {
             let mut inner = inner_arc.lock().await;
@@ -367,6 +381,20 @@ async fn worker(inner_arc: Arc<Mutex<Inner>>, worker_id: u64) {
             )
         };
         if !shadow {
+            let _spawn_guard = spawn_lock.lock().await;
+            let should_spawn = {
+                let inner = inner_arc.lock().await;
+                inner.active_worker == Some(worker_id)
+                    && inner.session.as_deref() == Some(session.as_str())
+                    && inner.shadow.is_none()
+            };
+            if !should_spawn {
+                let mut inner = inner_arc.lock().await;
+                if inner.active_worker == Some(worker_id) {
+                    inner.active_worker = None;
+                }
+                return;
+            }
             let new_shadow = match spawn_shadow(&url, &session, pending.clone()).await {
                 Ok(shadow) => shadow,
                 Err(_) => {
@@ -499,20 +527,34 @@ async fn generate_thumb(
 
 #[tauri::command]
 pub async fn thumbs_stop(state: State<'_, ThumbsState>) -> Result<(), String> {
-    let shadow = {
-        let mut inner = state.inner.lock().await;
-        let shadow = inner.shadow.take();
-        inner.url = None;
-        inner.session = None;
-        inner.cache.clear();
-        inner.wanted = None;
-        inner.active_worker = None;
-        shadow
-    };
-    if let Some(mut s) = shadow {
-        drop_shadow(&mut s).await;
-    }
+    state.stop().await;
     Ok(())
+}
+
+impl ThumbsState {
+    async fn stop(&self) {
+        let shadow = {
+            let mut inner = self.inner.lock().await;
+            let shadow = inner.shadow.take();
+            inner.url = None;
+            inner.session = None;
+            inner.cache.clear();
+            inner.wanted = None;
+            inner.active_worker = None;
+            shadow
+        };
+        let _spawn_guard = self.spawn_lock.lock().await;
+        if let Some(mut s) = shadow {
+            drop_shadow(&mut s).await;
+        }
+    }
+}
+
+pub(crate) fn shutdown(app: &tauri::AppHandle) {
+    use tauri::Manager;
+
+    let state = app.state::<ThumbsState>();
+    tauri::async_runtime::block_on(state.stop());
 }
 
 async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shadow, String> {
@@ -736,7 +778,7 @@ fn spawn_ipc(
 
 #[cfg(test)]
 mod cache_tests {
-    use super::{send_ipc_message, ThumbCache};
+    use super::{send_ipc_message, ThumbCache, ThumbsState};
     use serde_json::json;
     use std::time::Duration;
 
@@ -783,5 +825,28 @@ mod cache_tests {
             send_ipc_message(&tx, json!({"second": true}), Duration::from_millis(10)).await;
 
         assert_eq!(result, Err("mpv IPC writer timeout".to_string()));
+    }
+
+    #[tokio::test]
+    async fn stop_clears_thumbnail_session_state() {
+        let state = ThumbsState::new();
+        {
+            let mut inner = state.inner.lock().await;
+            inner.url = Some("https://example.com/video".into());
+            inner.session = Some("session".into());
+            inner.cache.insert(1, "thumbnail".into());
+            inner.wanted = Some(1);
+            inner.active_worker = Some(1);
+        }
+
+        state.stop().await;
+
+        let inner = state.inner.lock().await;
+        assert!(inner.shadow.is_none());
+        assert!(inner.url.is_none());
+        assert!(inner.session.is_none());
+        assert_eq!(inner.cache.len(), 0);
+        assert!(inner.wanted.is_none());
+        assert!(inner.active_worker.is_none());
     }
 }
