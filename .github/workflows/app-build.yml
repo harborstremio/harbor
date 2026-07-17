@@ -27,6 +27,8 @@ jobs:
         platform:
           - name: Windows
             runner: windows-latest
+          - name: macOS
+            runner: macos-14
 
     steps:
       - name: Checkout
