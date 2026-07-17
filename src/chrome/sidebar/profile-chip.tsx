@@ -59,16 +59,16 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
       <button
         onClick={() => setMenuOpen((o) => !o)}
         aria-label={activeProfile?.name ?? user?.email ?? t("profile.fallback")}
-        className={`flex w-full items-center justify-center gap-3.5 rounded-xl py-2.5 text-start transition-colors hover:bg-elevated/60 ${
-          collapsed ? "" : "lg:justify-start lg:px-3"
+        className={`flex w-full items-center justify-center gap-4 rounded-xl py-3 text-start transition-colors hover:bg-elevated/60 ${
+          collapsed ? "" : "lg:justify-start lg:px-4"
         }`}
       >
         <ProfileAvatar profile={activeProfile} user={user} fallbackAvatar={harborAvatar} />
         <div className={`hidden min-w-0 flex-1 ${collapsed ? "" : "lg:block"}`}>
-          <div className="truncate text-[14.5px] font-medium tracking-tight text-ink">
+          <div className="truncate text-[18px] font-medium tracking-tight text-ink">
             {activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback")}
           </div>
-          <div className="truncate text-[12px] text-ink-subtle">
+          <div className="truncate text-[16px] text-ink-subtle">
             <SubtitleText active={activeProfile} profiles={profiles} user={user} />
           </div>
         </div>
@@ -84,28 +84,28 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
           <TvModalClose onClose={() => setMenuOpen(false)} label={t("common.close")} />
           {otherProfiles.length > 0 && (
             <div className="flex flex-col gap-0.5 border-b border-edge-soft p-1.5">
-              <span className="px-2.5 pb-1 pt-1 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
+              <span className="px-2.5 pb-1 pt-1 text-[14px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
                 {t("profile.switch")}
               </span>
               {otherProfiles.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => requestSwitch(p)}
-                  className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-raised"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-start transition-colors hover:bg-raised"
                 >
                   <span className="relative inline-flex shrink-0">
                     <ProfileAvatar profile={p} user={null} fallbackAvatar={null} compact />
                     {p.passwordHash && (
-                      <span className="absolute -bottom-0.5 -end-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink shadow-sm ring-1 ring-edge">
-                        <Lock size={8} strokeWidth={2.6} />
+                      <span className="absolute -bottom-0.5 -end-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-canvas text-ink shadow-sm ring-1 ring-edge">
+                        <Lock size={10} strokeWidth={2.6} />
                       </span>
                     )}
                   </span>
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-[13.5px] font-medium text-ink">{p.name}</span>
+                    <span className="truncate text-[18px] font-medium text-ink">{p.name}</span>
                     {p.isPrimary && (
                       <span
-                        className="text-[9px] font-bold uppercase tracking-[0.18em]"
+                        className="text-[12px] font-bold uppercase tracking-[0.18em]"
                         style={{ color: p.color }}
                       >
                         {t("profile.primary")}
@@ -123,9 +123,9 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
                 openPicker({ kind: "list" });
                 setMenuOpen(false);
               }}
-              className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+              className="flex items-center gap-3 px-4 py-3 text-start text-[18px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
             >
-              <Users size={14} strokeWidth={2.2} />
+              <Users size={18} strokeWidth={2.2} />
               {t("profile.whoWatching")}
             </button>
             {activeProfile && (
@@ -134,9 +134,9 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
                   openPicker({ kind: "edit", profileId: activeProfile.id });
                   setMenuOpen(false);
                 }}
-                className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <Pencil size={14} strokeWidth={2.2} />
+className="flex items-center gap-3 px-4 py-3 text-start text-[18px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            >
+              <Pencil size={18} strokeWidth={2.2} />
                 {t("profile.editThis")}
               </button>
             )}
@@ -146,9 +146,9 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
                   openPicker({ kind: "create" });
                   setMenuOpen(false);
                 }}
-                className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <Plus size={14} strokeWidth={2.2} />
+className="flex items-center gap-3 px-4 py-3 text-start text-[18px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            >
+              <Plus size={18} strokeWidth={2.2} />
                 {t("profile.new")}
               </button>
             )}
@@ -158,10 +158,10 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
                   signOut();
                   setMenuOpen(false);
                 }}
-                className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <LogOut size={14} strokeWidth={2.2} />
-                {t("profile.signOut")}
+className="flex items-center gap-3 border-t border-edge-soft px-4 py-3 text-start text-[18px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            >
+              <LogOut size={18} strokeWidth={2.2} />
+              {t("profile.signOut")}
               </button>
             ) : (
               <button
@@ -169,10 +169,10 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
                   setAuthOpen(true);
                   setMenuOpen(false);
                 }}
-                className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <LogIn size={14} strokeWidth={2.2} />
-                {t("profile.signIn")}
+className="flex items-center gap-3 border-t border-edge-soft px-4 py-3 text-start text-[18px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+            >
+              <LogIn size={18} strokeWidth={2.2} />
+              {t("profile.signIn")}
               </button>
             )}
           </div>
@@ -211,7 +211,7 @@ function ProfileAvatar({
   fallbackAvatar: string | null;
   compact?: boolean;
 }) {
-  const dim = compact ? "h-9 w-9" : "h-12 w-12";
+  const dim = compact ? "h-10 w-10" : "h-16 w-16";
   const src = profile?.avatar ?? fallbackAvatar ?? user?.avatar ?? null;
   const ringStyle = profile?.color ? { boxShadow: `0 0 0 2px ${profile.color}` } : undefined;
   return (

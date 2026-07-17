@@ -32,8 +32,8 @@ export function Sidebar() {
         aria-hidden={chromeHidden}
         data-harbor-sidebar
         data-tv-nav-zone
-        className={`relative z-[60] flex w-[72px] shrink-0 flex-col border-e border-edge-soft bg-canvas transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
-          collapsed ? "" : "lg:w-60"
+        className={`relative z-[60] flex w-[92px] shrink-0 flex-col border-e border-edge-soft bg-canvas transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
+          collapsed ? "" : "lg:w-72"
         } ${
           chromeHidden
             ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0"
@@ -43,8 +43,8 @@ export function Sidebar() {
         {kid && <KidsSidebarDoodles />}
         <div
           data-tauri-drag-region
-          className={`flex h-20 shrink-0 items-center justify-center gap-0.5 px-3 text-ink ${
-            collapsed ? "" : "lg:justify-start lg:px-7"
+          className={`flex h-24 shrink-0 items-center justify-center gap-1 px-4 text-ink ${
+            collapsed ? "" : "lg:justify-start lg:px-8"
           }`}
         >
           {customMark ? (
@@ -52,10 +52,10 @@ export function Sidebar() {
               src={customMark}
               alt=""
               draggable={false}
-              className={`h-9 w-9 shrink-0 object-contain ${collapsed ? "" : "lg:h-10 lg:w-10"}`}
+              className={`h-12 w-12 shrink-0 object-contain ${collapsed ? "" : "lg:h-14 lg:w-14"}`}
             />
           ) : (
-            <HarborMark className={`h-9 w-9 shrink-0 ${collapsed ? "" : "lg:h-10 lg:w-10"}`} />
+            <HarborMark className={`h-12 w-12 shrink-0 ${collapsed ? "" : "lg:h-14 lg:w-14"}`} />
           )}
           {!collapsed &&
             (customWordmark ? (
@@ -63,11 +63,11 @@ export function Sidebar() {
                 src={customWordmark}
                 alt=""
                 draggable={false}
-                className="hidden h-8 w-auto object-contain lg:inline-block"
+                className="hidden h-11 w-auto object-contain lg:inline-block"
               />
             ) : kid ? (
               <span
-                className="hidden whitespace-nowrap text-[42px] font-bold leading-none tracking-tight lg:inline-flex lg:items-center"
+                className="hidden whitespace-nowrap text-[58px] font-bold leading-none tracking-tight lg:inline-flex lg:items-center"
                 style={{
                   fontFamily: '"Fredoka", "Baloo 2", system-ui, sans-serif',
                   transform: "translateY(1px)",
@@ -85,7 +85,7 @@ export function Sidebar() {
               </span>
             ) : (
               <span
-                className="hidden whitespace-nowrap text-[44px] font-medium leading-none tracking-tight lg:inline"
+                className="hidden whitespace-nowrap text-[60px] font-medium leading-none tracking-tight lg:inline"
                 style={{
                   fontFamily: '"Fraunces", "Iowan Old Style", "Georgia", serif',
                   transform: "translateY(2px)",
@@ -110,11 +110,11 @@ export function Sidebar() {
           hiddenTabs={hiddenTabs}
           onPinNav={(v) => setPendingPinView(v)}
         />
-        <div className={`relative p-2 ${collapsed ? "" : "lg:p-4"}`}>
+        <div className={`relative p-3 ${collapsed ? "" : "lg:p-6"}`}>
           <div
             aria-hidden
-            className={`pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-edge-soft/55 to-transparent ${
-              collapsed ? "" : "lg:inset-x-4"
+            className={`pointer-events-none absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-edge-soft/55 to-transparent ${
+              collapsed ? "" : "lg:inset-x-6"
             }`}
           />
           <div className={`flex pb-1 ${collapsed ? "justify-center" : ""}`}>
@@ -126,13 +126,13 @@ export function Sidebar() {
                 collapsed ? "" : "lg:justify-start lg:px-3"
               }`}
             >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-edge-soft bg-elevated/50 text-ink-subtle">
-                <Lock size={17} />
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-edge-soft bg-elevated/50 text-ink-subtle">
+                <Lock size={23} />
               </div>
               {!collapsed && (
                 <div className="hidden min-w-0 flex-1 lg:block">
-                  <div className="truncate text-[13.5px] font-medium text-ink-muted">{t("chrome.locked")}</div>
-                  <div className="truncate text-[12px] text-ink-subtle">{t("chrome.parentalOn")}</div>
+                  <div className="truncate text-[18px] font-medium text-ink-muted">{t("chrome.locked")}</div>
+                  <div className="truncate text-[16px] text-ink-subtle">{t("chrome.parentalOn")}</div>
                 </div>
               )}
             </div>
@@ -225,9 +225,10 @@ function ScrollableNav({
     <div className="relative flex min-h-0 flex-1 flex-col">
       <div
         ref={ref}
-        className="flex flex-1 flex-col overflow-y-auto px-4 pt-3 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        data-tv-scroll-focus
+        className="flex flex-1 flex-col overflow-y-auto px-6 pt-5 pb-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           {primary.map((item) => (
             <NavItem
               key={item.id}
@@ -239,10 +240,10 @@ function ScrollableNav({
             />
           ))}
         </div>
-        <div data-tauri-drag-region className="py-2.5">
-          <div className="mx-3 h-px bg-gradient-to-r from-transparent via-edge-soft/55 to-transparent" />
+        <div data-tauri-drag-region className="py-4">
+          <div className="mx-4 h-px bg-gradient-to-r from-transparent via-edge-soft/55 to-transparent" />
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           {collections.map((item) => {
             const gated = !!item.pinGated && locked;
             return (
@@ -260,18 +261,18 @@ function ScrollableNav({
         <div data-tauri-drag-region className="flex-1 min-h-2" />
       </div>
       {overflow.top && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-canvas to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-canvas to-transparent" />
       )}
       {overflow.bottom && (
         <>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-canvas via-canvas/85 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-canvas via-canvas/85 to-transparent" />
           <button
             type="button"
             onClick={scrollDown}
             aria-label={t("chrome.scrollForMore")}
-            className="absolute bottom-1 left-1/2 flex h-4 w-7 -translate-x-1/2 items-center justify-center text-ink-subtle/55 transition-colors hover:text-ink-muted"
+            className="absolute bottom-2 left-1/2 flex h-6 w-10 -translate-x-1/2 items-center justify-center text-ink-subtle/55 transition-colors hover:text-ink-muted"
           >
-            <ChevronDown size={11} strokeWidth={2} />
+            <ChevronDown size={16} strokeWidth={2} />
           </button>
         </>
       )}
@@ -310,9 +311,9 @@ function NavItem({
       data-active={active ? "" : undefined}
       aria-label={gated ? t("chrome.lockedRequiresPin", { label: text }) : text}
       title={gated ? t("chrome.lockedShort", { label: text }) : text}
-      className={`relative flex items-center justify-center gap-4 transition-colors duration-150 ${
-        big ? "h-[68px] rounded-2xl text-[20px] font-bold" : "h-14 rounded-xl text-[16px]"
-      } ${collapsed ? "" : big ? "lg:justify-start lg:px-5" : "lg:justify-start lg:px-4"} ${
+      className={`relative flex items-center justify-center gap-5 transition-colors duration-150 ${
+        big ? "h-[96px] rounded-3xl text-[28px] font-bold" : "h-[72px] rounded-xl text-[22px]"
+      } ${collapsed ? "" : big ? "lg:justify-start lg:px-6" : "lg:justify-start lg:px-5"} ${
         collapsed
           ? active
             ? "text-accent"
@@ -322,11 +323,11 @@ function NavItem({
             : "text-ink-muted hover:bg-elevated/50 hover:text-ink"
       }`}
     >
-      <span className={`relative ${big ? "scale-110" : ""} ${gated ? "opacity-70" : ""}`}>
+      <span className={`relative [&_svg]:h-10 [&_svg]:w-10 ${big ? "scale-110" : ""} ${gated ? "opacity-70" : ""}`}>
         {render(hovered)}
         {gated && (
-          <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle ring-1 ring-edge">
-            <Lock size={9} strokeWidth={2.4} />
+          <span className="absolute -bottom-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full bg-canvas text-ink-subtle ring-1 ring-edge">
+            <Lock size={12} strokeWidth={2.4} />
           </span>
         )}
       </span>

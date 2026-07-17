@@ -42,16 +42,16 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   const hideSearch = view === "addons" || connecting || topKind === "picker";
   const sidebarOffset =
     layout === "stremio"
-      ? "ps-[80px]"
+      ? "ps-[112px]"
       : settings.sidebarCollapsed
-        ? "ps-[84px]"
-        : "ps-[84px] lg:ps-[260px]";
+        ? "ps-[104px]"
+        : "ps-[104px] lg:ps-[308px]";
   const searchWidth = canGoBack
     ? "w-[14rem] sm:w-[18rem] lg:w-[22rem] xl:w-[24rem]"
     : "w-[14rem] sm:w-[20rem] lg:w-[24rem] xl:w-[28rem] hover:w-[18rem] sm:hover:w-[24rem] lg:hover:w-[28rem] xl:hover:w-[34rem] focus-within:w-[18rem] sm:focus-within:w-[24rem] lg:focus-within:w-[28rem] xl:focus-within:w-[34rem]";
   const dragProps = IS_TAURI && !fullscreen ? { "data-tauri-drag-region": true } : {};
   return (
-    <header className={`fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-20`}>
+    <header className={`fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-24`}>
       <div
         {...dragProps}
         className="relative z-10 grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-8"
@@ -68,16 +68,16 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
             <button
               onClick={() => setView("home")}
               aria-label={t("common.back")}
-              className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-edge-soft/60 bg-canvas/85 ps-3 pe-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+              className="flex h-14 shrink-0 items-center gap-2 rounded-full border border-edge-soft/60 bg-canvas/85 ps-4 pe-5 text-[18px] font-medium text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
             >
-              <ArrowLeft size={15} strokeWidth={2.2} className="dir-icon" />
+              <ArrowLeft size={20} strokeWidth={2.2} className="dir-icon" />
               {t("common.back")}
             </button>
           )}
           {onLiveRoot && (
             <div className="flex items-center gap-1.5 text-ink">
-              <HarborMark className="h-7 w-7" />
-              <span className="font-display text-[18px] font-semibold leading-none tracking-tight">
+              <HarborMark className="h-10 w-10" />
+              <span className="font-display text-[24px] font-semibold leading-none tracking-tight">
                 {t("Live")}
               </span>
             </div>
@@ -100,12 +100,12 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
           {IS_TAURI && !settings.useNativeTitleBar && (
             <div className="ms-1 flex items-center gap-2">
               <Control label={t("chrome.minimize")} onClick={minimize}>
-                <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
+                <svg width="22" height="22" viewBox="0 0 13 13" fill="none">
                   <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
                 </svg>
               </Control>
               <Control label={fullscreen ? t("chrome.restore") : t("chrome.maximize")} onClick={() => void toggleWindowFullscreen()}>
-                <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
+                <svg width="22" height="22" viewBox="0 0 13 13" fill="none">
                   {fullscreen ? (
                     <>
                       <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
@@ -117,7 +117,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
                 </svg>
               </Control>
               <Control label={t("common.close")} onClick={kid ? () => setCloseConfirm(true) : close} danger>
-                <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
+                <svg width="22" height="22" viewBox="0 0 13 13" fill="none">
                   <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
                 </svg>
               </Control>
@@ -289,7 +289,7 @@ export function TogetherButton({
             </div>
           </>
         ) : (
-          <Users size={17} strokeWidth={1.9} />
+          <Users size={22} strokeWidth={1.9} />
         )}
       </button>
       {modalOpen && (
@@ -333,11 +333,11 @@ function SearchPill() {
       type="button"
       data-tauri-drag-region="false"
       onClick={() => setOpen(true)}
-      className="harbor-search-pill flex h-11 w-full items-center gap-3 rounded-full border border-edge-soft/60 bg-elevated/80 px-5 text-start opacity-80 transition-[opacity,background-color] duration-200 hover:bg-elevated hover:opacity-100"
+      className="harbor-search-pill flex h-14 w-full items-center gap-3 rounded-full border border-edge-soft/60 bg-elevated/80 px-5 text-start opacity-80 transition-[opacity,background-color] duration-200 hover:bg-elevated hover:opacity-100"
     >
-      <Search size={16} strokeWidth={1.75} className="text-ink-subtle" />
-      <span className="flex-1 truncate text-[14px] text-ink-subtle">{t("search.placeholder")}</span>
-      <kbd className="hidden shrink-0 rounded-md border border-edge-soft bg-canvas/50 px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-ink-subtle sm:inline">
+      <Search size={20} strokeWidth={1.75} className="text-ink-subtle" />
+      <span className="flex-1 truncate text-[18px] text-ink-subtle">{t("search.placeholder")}</span>
+      <kbd className="hidden shrink-0 rounded-md border border-edge-soft bg-canvas/50 px-1.5 py-0.5 font-mono text-[14px] font-medium text-ink-subtle sm:inline">
         {formatBindingForDisplay(binding)}
       </kbd>
     </button>
@@ -359,7 +359,7 @@ function Control({
     <button
       aria-label={label}
       onClick={onClick}
-      className={`harbor-win-control ${danger ? "harbor-win-close" : ""} flex h-11 w-12 items-center justify-center rounded-xl bg-elevated/70 text-ink-muted transition-colors duration-150 ${
+      className={`harbor-win-control ${danger ? "harbor-win-close" : ""} flex h-14 w-14 items-center justify-center rounded-xl bg-elevated/70 text-ink-muted transition-colors duration-150 ${
         danger ? "hover:bg-[#e5484d] hover:text-white" : "hover:bg-elevated hover:text-ink"
       }`}
     >

@@ -112,7 +112,7 @@ export function Row({
   title,
   titleExtra,
   className = "",
-  min = 144,
+  min = 210,
   shape = "portrait",
   scrollKey,
   arrowsAlways = false,
@@ -464,37 +464,35 @@ export function Row({
   return (
     <div className={`flex min-w-0 flex-col gap-5 ps-[9px] ${className}`}>
       {(title || onViewAll || headerRight) && (
-        <div className="flex items-baseline justify-between gap-4 pe-1">
+        <div className="flex items-baseline justify-between gap-4 pe-1 group/row-header">
           {title && (
             <div className="flex min-w-0 items-center gap-2">
               <h3
                 className={`truncate font-medium tracking-tight ${titleClassName}`}
-                style={{ fontSize: `${Math.round(17 * settings.rowTitleScale * titleScale)}px` }}
+                style={{ fontSize: `${Math.round(24 * (settings.tvNavigation ? 1.3 : 1) * settings.rowTitleScale * titleScale)}px` }}
               >
                 {title}
               </h3>
               {titleExtra}
-            </div>
-          )}
-          {(onViewAll || headerRight) && (
-            <div className="flex shrink-0 items-center gap-3">
-              {headerRight}
               {onViewAll && (
                 <button
                   type="button"
                   onClick={onViewAll}
-                  className="group/va inline-flex shrink-0 items-center gap-1 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+                  className="inline-flex shrink-0 items-center gap-1 font-medium text-ink-subtle transition-all duration-200 max-w-0 overflow-hidden opacity-0 group-focus-within/row-header:max-w-[200px] group-focus-within/row-header:opacity-100 group-focus-within/row-header:ms-2 text-[12.5px] hover:text-ink"
                 >
                   {t(viewAllLabel)}
                   <ChevronRight
                     size={14}
                     strokeWidth={2.2}
-                    className="dir-icon transition-transform duration-200 group-hover/va:translate-x-0.5"
+                    className="dir-icon transition-transform duration-200 translate-x-0 group-hover:translate-x-0.5"
                   />
                 </button>
               )}
             </div>
           )}
+          <div className="flex shrink-0 items-center gap-3">
+            {headerRight}
+          </div>
         </div>
       )}
       <div ref={containerRef} className="group/row relative min-w-0">

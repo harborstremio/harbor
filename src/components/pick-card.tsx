@@ -552,6 +552,7 @@ export const PickCard = memo(function PickCard({
             badges={cardBadges}
             limit={settings.cardBadgeLimit}
             placement={settings.badgePlacement}
+            tvMode={settings.tvNavigation}
           />
         )}
         </div>
@@ -659,10 +660,12 @@ function ScoreStack({
   badges,
   limit = 3,
   placement = "bottom",
+  tvMode = false,
 }: {
   badges: CardBadge[];
   limit?: number;
   placement?: "top" | "bottom";
+  tvMode?: boolean;
 }) {
   const shown = badges.slice(0, Math.max(1, limit));
   if (shown.length === 0) return null;
@@ -671,6 +674,8 @@ function ScoreStack({
     <div
       style={scale < 1 ? { transform: `scale(${scale})`, transformOrigin: "right" } : undefined}
       className={`absolute end-1.5 flex items-center gap-1 whitespace-nowrap rounded-md bg-canvas/95 px-1.5 py-0.5 text-[10px] font-semibold text-ink ${
+        tvMode ? "!text-sm" : ""
+      } ${
         placement === "top" ? "top-1.5" : "bottom-1.5"
       }`}
     >

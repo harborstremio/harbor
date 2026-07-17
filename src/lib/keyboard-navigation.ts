@@ -276,7 +276,7 @@ function ensureFocusStyles() {
   style.textContent = `
     [data-tv-focused="true"] {
       outline: none !important;
-      box-shadow: 0 0 0 4px var(--tv-focus-ring, #ffffff), 0 0 0 8px rgba(0,0,0,0.35) !important;
+      box-shadow: 0 0 0 5px var(--tv-focus-ring, #3b82f6), 0 0 0 10px rgba(0,0,0,0.4) !important;
       transition: box-shadow 120ms ease;
       z-index: 20;
       position: relative;
@@ -557,7 +557,15 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
   arrowsRef.current = arrows;
 
   useEffect(() => {
-    if (!enabled) clearTvFocusRing();
+    if (!enabled) {
+      clearTvFocusRing();
+      document.documentElement.removeAttribute("data-tv-navigation");
+      return;
+    }
+    document.documentElement.dataset.tvNavigation = "true";
+    return () => {
+      document.documentElement.removeAttribute("data-tv-navigation");
+    };
   }, [enabled]);
 
   useEffect(() => {

@@ -1779,3 +1779,28 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+/* ── TV focus ring (static fallback) ── */
+
+[data-tv-focused="true"] {
+  outline: none !important;
+  box-shadow: 0 0 0 5px #3b82f6, 0 0 0 10px rgba(0,0,0,0.4) !important;
+  border-radius: 4px;
+  transition: box-shadow 150ms ease-out;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── TV navigation: disable text selection ── */
+
+[data-tv-navigation="true"],
+[data-tv-navigation="true"] * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* ── TV navigation: global base font size ── */
+
+html[data-tv-navigation="true"] {
+  font-size: 18px;
+}
+

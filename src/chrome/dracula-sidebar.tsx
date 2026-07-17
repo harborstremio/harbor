@@ -45,8 +45,8 @@ export function DraculaSidebar() {
       <aside
         aria-hidden={chromeHidden}
         data-tv-nav-zone
-        className={`relative z-[60] flex w-[78px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
-          collapsed ? "" : "lg:w-64"
+        className={`relative z-[60] flex w-[100px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
+          collapsed ? "" : "lg:w-80"
         } ${
           chromeHidden ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0" : "translate-x-0 opacity-100"
         }`}
@@ -64,8 +64,8 @@ export function DraculaSidebar() {
 
           <div
             data-tauri-drag-region
-            className={`relative flex h-20 shrink-0 items-center justify-center px-3 ${
-              collapsed ? "" : "lg:justify-start lg:px-6"
+            className={`relative flex h-24 shrink-0 items-center justify-center px-4 ${
+              collapsed ? "" : "lg:justify-start lg:px-8"
             }`}
           >
             <button
@@ -74,10 +74,10 @@ export function DraculaSidebar() {
               aria-label={t("chrome.harborHome")}
               className="flex items-center gap-2 text-ink"
             >
-              <HarborMark className="harbor-dracula-moon h-7 w-7 shrink-0 text-accent drop-shadow-[0_0_10px_var(--color-accent-soft)] lg:h-[26px] lg:w-[26px]" />
+              <HarborMark className="harbor-dracula-moon h-10 w-10 shrink-0 text-accent drop-shadow-[0_0_10px_var(--color-accent-soft)] lg:h-[36px] lg:w-[36px]" />
               {!collapsed && (
                 <span
-                  className="hidden text-[40px] font-medium leading-none tracking-tight lg:inline"
+                  className="hidden text-[56px] font-medium leading-none tracking-tight lg:inline"
                   style={{ fontFamily: "var(--font-display)", transform: "translateY(1px)" }}
                 >
                   Harb
@@ -90,7 +90,7 @@ export function DraculaSidebar() {
             </button>
           </div>
 
-          <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-3 pb-4 pt-1 [scrollbar-width:none] lg:px-4 [&::-webkit-scrollbar]:hidden">
+          <nav data-tv-scroll-focus className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-3 pb-4 pt-1 [scrollbar-width:none] lg:px-4 [&::-webkit-scrollbar]:hidden">
             {primary.filter(isVisible).map((item) => (
               <NavPill
                 key={item.id}
@@ -113,7 +113,7 @@ export function DraculaSidebar() {
             ))}
           </nav>
 
-          <div className={`relative px-3 pb-3 pt-1 ${collapsed ? "" : "lg:px-4"}`}>
+          <div className={`relative px-4 pb-4 pt-2 ${collapsed ? "" : "lg:px-6"}`}>
             <div
               aria-hidden
               className="pointer-events-none mb-2 h-px bg-gradient-to-r from-transparent via-edge-soft to-transparent"
@@ -127,13 +127,13 @@ export function DraculaSidebar() {
                   collapsed ? "" : "lg:justify-start lg:px-3"
                 }`}
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full ring-1 ring-edge-soft text-ink-subtle">
-                  <Lock size={16} />
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full ring-1 ring-edge-soft text-ink-subtle">
+                  <Lock size={22} />
                 </div>
                 {!collapsed && (
                   <div className="hidden min-w-0 lg:block">
-                    <div className="truncate text-[13px] font-medium text-ink-muted">{t("chrome.locked")}</div>
-                    <div className="truncate text-[11.5px] text-ink-subtle">{t("chrome.parentalOn")}</div>
+                    <div className="truncate text-[18px] font-medium text-ink-muted">{t("chrome.locked")}</div>
+                    <div className="truncate text-[16px] text-ink-subtle">{t("chrome.parentalOn")}</div>
                   </div>
                 )}
               </div>
@@ -182,8 +182,8 @@ function NavPill({
       onClick={onClick}
       aria-label={gated ? t("chrome.lockedRequiresPin", { label }) : label}
       title={gated ? t("chrome.lockedShort", { label }) : label}
-      className={`group relative flex h-12 items-center justify-center gap-3.5 rounded-[18px] transition-colors duration-200 ${
-        collapsed ? "" : "lg:justify-start lg:px-4"
+      className={`group relative flex h-[72px] items-center justify-center gap-5 rounded-[24px] transition-colors duration-200 ${
+        collapsed ? "" : "lg:justify-start lg:px-5"
       } ${
         active ? "text-accent" : "text-ink-muted hover:text-ink"
       }`}
@@ -191,7 +191,7 @@ function NavPill({
       {active ? (
         <span
           aria-hidden
-          className="absolute inset-0 rounded-[18px]"
+          className="absolute inset-0 rounded-[24px]"
           style={{
             background: "var(--color-accent-soft)",
             boxShadow: "inset 0 0 0 1px var(--color-accent-soft), 0 6px 20px -14px var(--color-accent)",
@@ -200,19 +200,19 @@ function NavPill({
       ) : (
         <span
           aria-hidden
-          className="absolute inset-0 rounded-[18px] bg-elevated/0 transition-colors duration-200 group-hover:bg-elevated/50"
+          className="absolute inset-0 rounded-[24px] bg-elevated/0 transition-colors duration-200 group-hover:bg-elevated/50"
         />
       )}
-      <span className={`relative ${gated ? "opacity-70" : ""}`}>
+      <span className={`relative [&_svg]:h-10 [&_svg]:w-10 ${gated ? "opacity-70" : ""}`}>
         {item.render(false)}
         {gated && (
-          <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle ring-1 ring-edge">
-            <Lock size={9} strokeWidth={2.4} />
+          <span className="absolute -bottom-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full bg-canvas text-ink-subtle ring-1 ring-edge">
+            <Lock size={12} strokeWidth={2.4} />
           </span>
         )}
       </span>
       {!collapsed && (
-        <span className="relative hidden flex-1 text-[17px] font-medium tracking-tight lg:inline">
+        <span className="relative hidden flex-1 text-[22px] font-medium tracking-tight lg:inline">
           {label}
         </span>
       )}

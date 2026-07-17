@@ -49,8 +49,8 @@ export function ForestSidebar() {
       <aside
         aria-hidden={chromeHidden}
         data-tv-nav-zone
-        className={`relative z-[60] flex w-[78px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
-          collapsed ? "" : "lg:w-60"
+        className={`relative z-[60] flex w-[100px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
+          collapsed ? "" : "lg:w-72"
         } ${
           chromeHidden ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0" : "translate-x-0 opacity-100"
         }`}
@@ -64,8 +64,8 @@ export function ForestSidebar() {
 
           <div
             data-tauri-drag-region
-            className={`relative z-10 flex h-20 shrink-0 items-center justify-center px-3 ${
-              collapsed ? "" : "lg:justify-start lg:px-6"
+            className={`relative z-10 flex h-24 shrink-0 items-center justify-center px-4 ${
+              collapsed ? "" : "lg:justify-start lg:px-8"
             }`}
           >
             <button
@@ -74,10 +74,10 @@ export function ForestSidebar() {
               aria-label={t("chrome.harborHome")}
               className="flex items-center gap-2.5 text-ink"
             >
-              <HarborMark className="h-[26px] w-[26px] shrink-0 drop-shadow-[0_0_11px_var(--color-accent-soft)]" />
+              <HarborMark className="h-[36px] w-[36px] shrink-0 drop-shadow-[0_0_11px_var(--color-accent-soft)]" />
               {!collapsed && (
                 <span
-                  className="hidden text-[27px] font-medium leading-none lg:inline"
+                  className="hidden text-[38px] font-medium leading-none lg:inline"
                   style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.2px" }}
                 >
                   Harbor
@@ -86,7 +86,7 @@ export function ForestSidebar() {
             </button>
           </div>
 
-          <nav className="relative z-10 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-2.5 pb-4 pt-2 [scrollbar-width:none] lg:px-3 [&::-webkit-scrollbar]:hidden">
+          <nav data-tv-scroll-focus className="relative z-10 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pb-4 pt-2 [scrollbar-width:none] lg:px-5 [&::-webkit-scrollbar]:hidden">
             {primary.map((item) => (
               <NavRow key={item.id} item={item} active={view === item.view} collapsed={collapsed} onClick={() => go(item)} />
             ))}
@@ -105,7 +105,7 @@ export function ForestSidebar() {
             ))}
           </nav>
 
-          <div className={`relative z-10 shrink-0 px-2.5 pb-3 pt-1 ${collapsed ? "" : "lg:px-3"}`}>
+          <div className={`relative z-10 shrink-0 px-3 pb-4 pt-2 ${collapsed ? "" : "lg:px-5"}`}>
             <MossLine className="mb-2" />
             <div className={`mb-1 flex ${collapsed ? "justify-center" : ""}`}>
               <CollapseToggle collapsed={collapsed} />
@@ -117,15 +117,15 @@ export function ForestSidebar() {
                 }`}
               >
                 <div
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-subtle"
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-ink-subtle"
                   style={{ boxShadow: "inset 0 0 0 1.5px var(--color-edge)" }}
                 >
-                  <Lock size={16} />
+                  <Lock size={22} />
                 </div>
                 {!collapsed && (
                   <div className="hidden min-w-0 lg:block">
-                    <div className="truncate text-[13px] font-medium text-ink-muted">{t("chrome.locked")}</div>
-                    <div className="truncate text-[11.5px] text-ink-subtle">{t("chrome.parentalOn")}</div>
+                    <div className="truncate text-[18px] font-medium text-ink-muted">{t("chrome.locked")}</div>
+                    <div className="truncate text-[16px] text-ink-subtle">{t("chrome.parentalOn")}</div>
                   </div>
                 )}
               </div>
@@ -176,8 +176,8 @@ function NavRow({
       onClick={onClick}
       aria-label={gated ? t("chrome.lockedRequiresPin", { label }) : label}
       title={gated ? t("chrome.lockedShort", { label }) : label}
-      className={`group relative flex h-12 items-center justify-center gap-3.5 transition-colors duration-200 ${
-        collapsed ? "" : "lg:justify-start lg:px-4"
+      className={`group relative flex h-[72px] items-center justify-center gap-5 transition-colors duration-200 ${
+        collapsed ? "" : "lg:justify-start lg:px-5"
       } ${
         active ? "text-accent" : "text-ink-muted hover:text-ink"
       }`}
@@ -195,19 +195,19 @@ function NavRow({
           style={{ background: `radial-gradient(70% 140% at ${glowX} 50%, ${tint(LEAF, 0.1)}, transparent 72%)` }}
         />
       )}
-      <span className={`relative ${gated ? "opacity-70" : ""} ${active ? "drop-shadow-[0_0_8px_var(--color-accent-soft)]" : ""}`}>
+      <span className={`relative [&_svg]:h-10 [&_svg]:w-10 ${gated ? "opacity-70" : ""} ${active ? "drop-shadow-[0_0_8px_var(--color-accent-soft)]" : ""}`}>
         {item.render(false)}
         {gated && (
           <span
-            className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle"
+            className="absolute -bottom-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full bg-canvas text-ink-subtle"
             style={{ boxShadow: "0 0 0 1px var(--color-edge)" }}
           >
-            <Lock size={9} strokeWidth={2.4} />
+            <Lock size={12} strokeWidth={2.4} />
           </span>
         )}
       </span>
       {!collapsed && (
-        <span className="relative hidden flex-1 text-start text-[16px] font-medium tracking-tight lg:inline">
+        <span className="relative hidden flex-1 text-start text-[22px] font-medium tracking-tight lg:inline">
           {label}
         </span>
       )}
@@ -219,7 +219,7 @@ function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <span
       data-tauri-drag-region
-      className="hidden px-4 pb-1 pt-5 text-[10.5px] font-semibold uppercase leading-none tracking-[0.18em] text-ink-subtle lg:block"
+      className="hidden px-4 pb-1 pt-5 text-[14px] font-semibold uppercase leading-none tracking-[0.18em] text-ink-subtle lg:block"
     >
       {children}
     </span>

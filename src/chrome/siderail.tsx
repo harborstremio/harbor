@@ -53,18 +53,18 @@ export function SideRail() {
         aria-hidden={chromeHidden}
         data-tv-nav-zone
         className={`relative z-[60] flex shrink-0 flex-col border-e border-edge-soft bg-canvas/40 transition-[opacity,width] duration-300 ${
-          collapsed ? "w-[68px]" : "w-[200px]"
+          collapsed ? "w-[90px]" : "w-[260px]"
         } ${chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"}`}
       >
         <div
           data-tauri-drag-region
-          className={`relative flex h-20 shrink-0 items-end pb-3.5 ${
-            collapsed ? "justify-center px-3" : "px-7"
+          className={`relative flex h-24 shrink-0 items-end pb-4 ${
+            collapsed ? "justify-center px-4" : "px-8"
           }`}
         >
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-20"
+            className="pointer-events-none absolute inset-x-0 top-0 h-24"
             style={{ background: "radial-gradient(120% 78% at 24% 4%, var(--color-accent-soft), transparent 66%)" }}
           />
           <button
@@ -73,10 +73,10 @@ export function SideRail() {
             className="relative flex items-center gap-2 text-accent"
             aria-label={t("chrome.harborHome")}
           >
-            <HarborMark className="h-[22px] w-[22px] shrink-0 drop-shadow-[0_0_10px_var(--color-accent-soft)]" />
+            <HarborMark className="h-[32px] w-[32px] shrink-0 drop-shadow-[0_0_10px_var(--color-accent-soft)]" />
             {!collapsed && (
               <span
-                className="text-[25px] font-medium leading-none tracking-tight"
+                className="text-[36px] font-medium leading-none tracking-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 Harbor
@@ -85,7 +85,7 @@ export function SideRail() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div data-tv-scroll-focus className="flex-1 overflow-y-auto py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <nav className="flex flex-col gap-0.5">
             {primary.map((item) => (
               <RailItem key={item.id} label={item.label} active={view === item.view} collapsed={collapsed} onClick={() => navigate(item)} />
@@ -113,7 +113,7 @@ export function SideRail() {
           )}
         </div>
 
-        <div className={`relative flex flex-col gap-2 py-4 ${collapsed ? "px-2" : "px-4"}`}>
+        <div className={`relative flex flex-col gap-3 py-5 ${collapsed ? "px-3" : "px-5"}`}>
           <span
             aria-hidden
             className="absolute inset-x-0 top-0 h-px"
@@ -124,9 +124,9 @@ export function SideRail() {
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label={t("common.search")}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-elevated/50 hover:text-ink"
+              className="flex h-12 w-12 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-elevated/50 hover:text-ink"
             >
-              <Search size={15} strokeWidth={1.8} />
+              <Search size={20} strokeWidth={1.8} />
             </button>
             {!collapsed && <RecordingPill />}
             {!collapsed && view !== "live" && <TogetherButton variant="ghost" popoverPlacement="above-left" />}
@@ -187,8 +187,8 @@ function RailItem({
       onClick={onClick}
       aria-label={translated}
       title={collapsed ? translated : undefined}
-      className={`group relative flex h-10 items-center text-[16px] tracking-tight transition-colors ${
-        collapsed ? "justify-center px-2" : "ps-7 pe-3 text-start"
+      className={`group relative flex h-[56px] items-center text-[22px] tracking-tight transition-colors ${
+        collapsed ? "justify-center px-2" : "ps-8 pe-4 text-start"
       } ${active ? "text-accent" : "text-ink-muted hover:text-ink"}`}
       style={{ fontFamily: "var(--font-display)" }}
     >
@@ -202,7 +202,7 @@ function RailItem({
       {active && (
         <span
           aria-hidden
-          className="absolute start-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-e-full"
+          className="absolute start-0 top-1/2 h-7 w-[4px] -translate-y-1/2 rounded-e-full"
           style={{ background: "var(--color-accent)", boxShadow: "0 0 12px 0 var(--color-accent)" }}
         />
       )}
@@ -215,7 +215,7 @@ function GoldRule({ collapsed }: { collapsed: boolean }) {
   return (
     <div
       aria-hidden
-      className={`my-4 h-px ${collapsed ? "mx-3" : "mx-7"}`}
+      className={`my-5 h-px ${collapsed ? "mx-4" : "mx-8"}`}
       style={{ background: "linear-gradient(90deg, transparent, var(--color-accent-soft), transparent)" }}
     />
   );
@@ -236,9 +236,9 @@ function WinBtn({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated/60 hover:text-ink"
+      className="flex h-9 w-9 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated/60 hover:text-ink"
     >
-      <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+      <svg width="16" height="16" viewBox="0 0 13 13" fill="none">
         {children}
       </svg>
     </button>

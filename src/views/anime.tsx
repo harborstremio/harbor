@@ -632,7 +632,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
             </div>
           )}
           {cwItems.length > 0 && (
-            <Row title={t("Continue Watching")} min={260} shape="landscape" scrollKey="anime:cw">
+            <Row title={t("Continue Watching")} min={380} shape="landscape" scrollKey="anime:cw">
               {cwItems.map((item) => (
                 <ContinueCard
                   key={item._id}

@@ -242,13 +242,13 @@ export function Settings() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto pt-28 pb-16"
       >
-        <div data-tauri-drag-region className="mx-auto flex max-w-3xl flex-col gap-10 px-12">
+        <div data-tauri-drag-region className="mx-auto flex max-w-4xl flex-col gap-12 px-16">
           {!(active === "relay" && relayMode !== "panel") && (
             <header className="flex flex-col gap-2">
-              <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
+              <h1 className="font-display text-[52px] font-medium leading-[1.05] tracking-tight text-ink">
                 {t(SECTION_META[active].label)}
               </h1>
-              <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
+              <p className="text-[18px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
             </header>
           )}
 

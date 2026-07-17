@@ -1177,33 +1177,33 @@ export function SettingsNav({
           onChange(id);
           setQuery("");
         }}
-        className={`group flex h-14 w-full items-center gap-3 rounded-xl px-2.5 text-start transition-colors ${
+        className={`group flex h-18 w-full items-center gap-4 rounded-xl px-3 text-start transition-colors ${
           isActive
             ? "bg-raised text-ink shadow-[inset_0_0_0_1px_var(--color-edge)]"
             : "text-ink-muted hover:bg-elevated/70 hover:text-ink"
         }`}
       >
         <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+          className={`flex h-13 w-13 shrink-0 items-center justify-center rounded-xl transition-colors ${
             isActive
               ? "bg-elevated text-ink shadow-[inset_0_0_0_1px_var(--color-edge-soft)]"
               : "bg-canvas/60 text-ink-subtle group-hover:text-ink-muted"
           }`}
         >
-          <Icon size={20} strokeWidth={1.6} />
+          <Icon size={28} strokeWidth={1.6} />
         </span>
-        <span className="flex-1 truncate text-[14.5px] font-medium">{t(label)}</span>
+        <span className="flex-1 truncate text-[17px] font-medium">{t(label)}</span>
         {(chip || debridChipLocal) && (
           <span className="flex shrink-0 gap-1">
             {debridChipLocal && (
-              <span className="rounded-md bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-accent">
-                {debridChipLocal}
-              </span>
+                <span className="rounded-md bg-accent/15 px-1.5 py-0.5 text-[12px] font-semibold tracking-wide text-accent">
+                  {debridChipLocal}
+                </span>
             )}
             {chip && (
               <span
-                className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium tracking-wide ${
-                  chip === "live" || chip === "via relay"
+                  className={`rounded-md px-1.5 py-0.5 text-[12px] font-medium tracking-wide ${
+                    chip === "live" || chip === "via relay"
                     ? "bg-accent/15 text-accent"
                     : "bg-canvas/70 text-ink-subtle"
                 }`}
@@ -1221,7 +1221,7 @@ export function SettingsNav({
     <nav
       data-harbor-sidebar
       data-tv-scroll-focus
-      className="relative flex w-72 shrink-0 flex-col bg-surface pt-24 shadow-[1px_0_0_var(--color-edge)]"
+      className="relative flex w-80 shrink-0 flex-col bg-surface pt-24 shadow-[1px_0_0_var(--color-edge)]"
     >
       <div data-tauri-drag-region className="h-3 shrink-0" />
       {showBack && (
@@ -1229,9 +1229,9 @@ export function SettingsNav({
           <button
             type="button"
             onClick={() => (canGoBack ? goBack() : setView("home"))}
-            className="flex h-10 w-full items-center gap-2 rounded-xl px-3 text-start text-[13.5px] font-semibold text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
+            className="flex h-14 w-full items-center gap-3 rounded-xl px-3 text-start text-[16px] font-semibold text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="dir-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="dir-icon">
               <path d="M15 5l-7 7 7 7" />
             </svg>
             {t("Back")}
@@ -1239,8 +1239,8 @@ export function SettingsNav({
         </div>
       )}
       <div className="px-3 pb-3">
-        <div className="flex h-10 items-center gap-2 rounded-xl bg-elevated/70 px-3 shadow-[inset_0_0_0_1px_var(--color-edge-soft)]">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-ink-subtle">
+        <div className="flex h-14 items-center gap-3 rounded-xl bg-elevated/70 px-4 shadow-[inset_0_0_0_1px_var(--color-edge-soft)]">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-ink-subtle">
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
@@ -1249,7 +1249,7 @@ export function SettingsNav({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("Search settings")}
-            className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-subtle"
+            className="min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-ink-subtle"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 if (matches && matches.length > 0) {
@@ -1272,24 +1272,24 @@ export function SettingsNav({
               className="shrink-0 text-ink-subtle transition-colors hover:text-ink"
               aria-label={t("Clear")}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
           )}
         </div>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-8">
+      <div data-tv-scroll-focus className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-8">
         {matches && (
           <div className="flex flex-col gap-1">
             {matches.length === 0 && (!optionMatches || optionMatches.length === 0) && (
-              <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
+              <div className="px-3.5 pb-1.5 pt-1 text-[13px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
                 {t("No matches")}
               </div>
             )}
             {matches.length > 0 && (
               <>
-                <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
+                <div className="px-3.5 pb-1.5 pt-1 text-[13px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
                   {matches.length === 1 ? t("{n} tab", { n: matches.length }) : t("{n} tabs", { n: matches.length })}
                 </div>
                 {matches.map(renderItem)}
@@ -1297,7 +1297,7 @@ export function SettingsNav({
             )}
             {optionMatches && optionMatches.length > 0 && (
               <>
-                <div className="px-3.5 pb-1.5 pt-3 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
+                <div className="px-3.5 pb-1.5 pt-3 text-[13px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
                   {optionMatches.length === 1 ? t("{n} option", { n: optionMatches.length }) : t("{n} options", { n: optionMatches.length })}
                 </div>
                 {optionMatches.map((o) => (
@@ -1307,17 +1307,17 @@ export function SettingsNav({
                       onChange(o.section, o.anchorTitle ? settingsAnchor(o.anchorTitle) : undefined);
                       setQuery("");
                     }}
-                    className="group flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-start text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
+                    className="group flex w-full items-center gap-4 rounded-xl px-3 py-2.5 text-start text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-canvas/60 text-ink-subtle group-hover:text-ink-muted">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-canvas/60 text-ink-subtle group-hover:text-ink-muted">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="11" cy="11" r="7" />
                         <path d="m20 20-3.5-3.5" />
                       </svg>
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13.5px] font-medium text-ink">{t(o.label)}</span>
-                      <span className="block truncate text-[11px] text-ink-subtle">
+                      <span className="block truncate text-[16px] font-medium text-ink">{t(o.label)}</span>
+                      <span className="block truncate text-[13px] text-ink-subtle">
                         {t(sectionLabel.get(o.section) ?? o.section)}
                       </span>
                     </span>
@@ -1330,7 +1330,7 @@ export function SettingsNav({
         {!matches && NAV_GROUPS.map((group, gi) => (
           <div key={gi} className="flex flex-col gap-1">
             {group.heading && (
-              <div className="px-3.5 pb-1.5 pt-1 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
+              <div className="px-3.5 pb-1.5 pt-1 text-[13px] font-semibold uppercase tracking-[0.12em] text-ink-subtle/80">
                 {t(group.heading)}
               </div>
             )}
@@ -1345,24 +1345,24 @@ export function SettingsNav({
                     onChange(id);
                     markSectionSeen(id);
                   }}
-                  className={`group flex h-14 w-full items-center gap-3 rounded-xl px-2.5 text-start transition-colors ${
+                  className={`group flex h-18 w-full items-center gap-4 rounded-xl px-3 text-start transition-colors ${
                     isActive
                       ? "bg-raised text-ink shadow-[inset_0_0_0_1px_var(--color-edge)]"
                       : "text-ink-muted hover:bg-elevated/70 hover:text-ink"
                   }`}
                 >
                   <span
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                    className={`flex h-13 w-13 shrink-0 items-center justify-center rounded-xl transition-colors ${
                       isActive
                         ? "bg-elevated text-ink shadow-[inset_0_0_0_1px_var(--color-edge-soft)]"
                         : "bg-canvas/60 text-ink-subtle group-hover:text-ink-muted"
                     }`}
                   >
-                    <Icon size={20} strokeWidth={1.6} />
+                    <Icon size={28} strokeWidth={1.6} />
                   </span>
-                  <span className="flex-1 truncate text-[14.5px] font-medium">{t(label)}</span>
+                  <span className="flex-1 truncate text-[17px] font-medium">{t(label)}</span>
                   {isNew(id) && (
-                    <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent/15 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-accent ring-1 ring-accent/30">
+                    <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent/15 px-2 py-0.5 text-[11.5px] font-bold uppercase tracking-[0.12em] text-accent ring-1 ring-accent/30">
                       <span className="h-1 w-1 rounded-full bg-accent" />
                       {t("New")}
                     </span>
@@ -1370,13 +1370,13 @@ export function SettingsNav({
                   {(chip || debridChip) && (
                     <span className="flex shrink-0 gap-1">
                       {debridChip && (
-                        <span className="rounded-md bg-accent/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-accent">
+                        <span className="rounded-md bg-accent/15 px-1.5 py-0.5 text-[12px] font-semibold tracking-wide text-accent">
                           {debridChip}
                         </span>
                       )}
                       {chip && (
                         <span
-                          className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium tracking-wide ${
+                          className={`rounded-md px-1.5 py-0.5 text-[12px] font-medium tracking-wide ${
                             chip === "live" || chip === "via relay"
                               ? "bg-accent/15 text-accent"
                               : "bg-canvas/70 text-ink-subtle"

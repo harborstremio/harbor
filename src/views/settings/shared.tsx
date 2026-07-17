@@ -42,7 +42,7 @@ export function ExtLink({ href, children }: { href: string; children: React.Reac
       onClick={() => openUrl(href)}
       className="inline-flex items-center gap-1 text-ink underline-offset-4 hover:underline"
     >
-      {children} <ExternalLink size={12} />
+      {children} <ExternalLink size={16} />
     </button>
   );
 }
@@ -61,10 +61,10 @@ export function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={settingsAnchor(title)} className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-[19px] font-medium tracking-tight text-ink">{title}</h2>
-        {subtitle && <p className="text-[13.5px] leading-relaxed text-ink-muted">{subtitle}</p>}
+    <section id={settingsAnchor(title)} className="scroll-mt-28 flex flex-col gap-6 rounded-2xl border border-edge-soft bg-elevated/40 p-8">
+      <div className="flex flex-col gap-1.5">
+        <h2 className="text-[24px] font-medium tracking-tight text-ink">{title}</h2>
+        {subtitle && <p className="text-[16px] leading-relaxed text-ink-muted">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -129,11 +129,11 @@ export function KeyField({
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+           <label className="text-[15px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
             {label}
           </label>
           {badge && (
-            <span className="rounded-full bg-accent/15 px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent">
+            <span className="rounded-full bg-accent/15 px-2.5 py-[4px] text-[12px] font-semibold uppercase tracking-wider text-accent">
               {badge}
             </span>
           )}
@@ -141,7 +141,7 @@ export function KeyField({
         <div className="flex items-center gap-3">
           {headerExtra}
           {!headerExtra && value.length > 0 && !showSave && (
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-accent transition-colors">
+              <span className="flex items-center gap-1.5 text-[14px] font-medium text-accent transition-colors">
               <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_6px_rgba(0,200,140,0.5)]" />
               {saved ? t("Saved") : t("Active")}
             </span>
@@ -149,7 +149,7 @@ export function KeyField({
         </div>
       </div>
       <div
-        className={`flex h-14 items-center gap-3 rounded-2xl border bg-elevated px-4 transition-all ${
+        className={`flex h-18 items-center gap-4 rounded-2xl border bg-elevated px-5 transition-all ${
           focused
             ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
             : "border-edge hover:border-edge"
@@ -157,9 +157,9 @@ export function KeyField({
       >
         {iconSrc ? (
           iconBg ? (
-            <span
-              className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md p-1"
-              style={{ backgroundColor: iconBg }}
+              <span
+               className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md p-1"
+               style={{ backgroundColor: iconBg }}
             >
               <img src={iconSrc} alt="" draggable={false} className="h-full w-full object-contain" />
             </span>
@@ -168,12 +168,12 @@ export function KeyField({
               src={iconSrc}
               alt=""
               draggable={false}
-              className="h-7 w-7 shrink-0 rounded-md object-contain"
+              className="h-9 w-9 shrink-0 rounded-md object-contain"
             />
           )
         ) : (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle ring-1 ring-edge-soft">
-            <Key size={14} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle ring-1 ring-edge-soft">
+            <Key size={18} />
           </span>
         )}
         <input
@@ -194,17 +194,17 @@ export function KeyField({
           placeholder={placeholder}
           spellCheck={false}
           autoComplete="off"
-          className="h-full flex-1 bg-transparent text-[15px] tracking-wide text-ink placeholder:text-ink-subtle/55 outline-none"
+          className="h-full flex-1 bg-transparent text-[18px] tracking-wide text-ink placeholder:text-ink-subtle/55 outline-none"
         />
         {value.length > 0 && (
           <button
             type="button"
             onClick={() => setReveal((v) => !v)}
             aria-label={reveal ? t("Hide") : t("Show")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-canvas/40 hover:text-ink"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-canvas/40 hover:text-ink"
           >
             {reveal ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"
                   stroke="currentColor"
@@ -213,10 +213,9 @@ export function KeyField({
                   strokeLinejoin="round"
                 />
                 <circle cx="12" cy="12" r="2.7" stroke="currentColor" strokeWidth="1.6" />
-                <path d="M4 4l16 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"
                   stroke="currentColor"
@@ -238,7 +237,7 @@ export function KeyField({
             type="button"
             onClick={onSave}
             disabled={!showSave && !saved}
-            className={`relative flex h-10 items-center justify-center overflow-hidden rounded-xl px-4 text-[13.5px] font-semibold transition-all ${
+            className={`relative flex h-12 items-center justify-center overflow-hidden rounded-xl px-4 text-[16px] font-semibold transition-all ${
               saved
                 ? "bg-accent/15 text-accent"
                 : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
@@ -249,7 +248,7 @@ export function KeyField({
                 saved ? "translate-y-0 opacity-100" : "absolute translate-y-3 opacity-0"
               }`}
             >
-              <Check size={14} strokeWidth={2.6} />
+              <Check size={16} strokeWidth={2.6} />
               {t("Saved")}
             </span>
             <span
@@ -262,7 +261,7 @@ export function KeyField({
           </button>
         </div>
       </div>
-      <p className="text-[12.5px] leading-relaxed text-ink-subtle">{help}</p>
+      <p className="text-[15px] leading-relaxed text-ink-subtle">{help}</p>
     </div>
   );
 }
@@ -313,7 +312,7 @@ export function ToggleRow({
       onFocus={openPreview}
       onBlur={closePreview}
       disabled={locked}
-      className={`relative flex items-center justify-between gap-4 rounded-xl border bg-canvas/40 px-4 py-3 text-start transition-colors ${
+      className={`relative flex items-center justify-between gap-5 rounded-xl border bg-canvas/40 px-5 py-4 text-start transition-colors ${
         locked
           ? "cursor-not-allowed border-edge-soft/40 opacity-60"
           : "border-edge-soft hover:border-edge"
@@ -324,16 +323,16 @@ export function ToggleRow({
         <span className={`relative ${locked ? "saturate-50 opacity-70" : ""}`}>
           {leading}
           {locked && (
-            <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas ring-1 ring-edge text-ink-subtle">
-              <Lock size={9} strokeWidth={2.4} />
+            <span className="absolute -bottom-1 -end-1 flex h-5 w-5 items-center justify-center rounded-full bg-canvas ring-1 ring-edge text-ink-subtle">
+              <Lock size={12} strokeWidth={2.4} />
             </span>
           )}
         </span>
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-[14px] font-medium text-ink">{label}</span>
+          <span className="text-[17px] font-medium text-ink">{label}</span>
           {subText && (
             <span
-              className={`text-[12.5px] ${
+              className={`text-[15px] ${
                 lockReason ? "text-accent/85" : note ? "text-ink-muted" : "text-ink-subtle"
               }`}
             >
@@ -345,19 +344,19 @@ export function ToggleRow({
       <span className="flex shrink-0 items-center gap-2.5">
         {preview && (
           <Eye
-            size={13}
+            size={16}
             className={`transition-colors ${hover ? "text-accent" : "text-ink-subtle/55"}`}
           />
         )}
         <span
           aria-hidden
-          className={`relative h-6 w-10 rounded-full transition-colors ${
+          className={`relative h-7 w-12 rounded-full transition-colors ${
             effective ? "bg-ink" : "bg-edge"
           }`}
         >
           <span
-            className={`absolute start-[2px] top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
-              effective ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0"
+            className={`absolute start-[3px] top-0.5 h-6 w-6 rounded-full bg-canvas transition-transform ${
+              effective ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"
             }`}
           />
         </span>
@@ -383,7 +382,7 @@ export function Segmented<T extends string>({
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
-          className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
+          className={`rounded-full px-5 py-2 text-[15px] font-semibold transition-colors ${
             value === o.value
               ? "bg-ink text-canvas"
               : "text-ink-muted hover:bg-raised hover:text-ink"

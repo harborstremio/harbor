@@ -37,7 +37,7 @@ export function StremioRail() {
       <aside
         aria-hidden={chromeHidden}
         data-tv-nav-zone
-        className={`relative z-[60] flex w-20 shrink-0 flex-col transition-[opacity,transform] duration-[320ms] ease-[cubic-bezier(0.32,0.72,0.24,1)] ${
+        className={`relative z-[60] flex w-28 shrink-0 flex-col transition-[opacity,transform] duration-[320ms] ease-[cubic-bezier(0.32,0.72,0.24,1)] ${
           chromeHidden
             ? "pointer-events-none -translate-x-2 rtl:translate-x-2 opacity-0"
             : "translate-x-0 opacity-100"
@@ -45,20 +45,20 @@ export function StremioRail() {
       >
         <div
           data-tauri-drag-region
-          className="flex h-[5.5rem] shrink-0 items-center justify-center text-white/90"
+          className="flex h-[6.5rem] shrink-0 items-center justify-center text-white/90"
         >
           {customMark ? (
             <img
               src={customMark}
               alt=""
               draggable={false}
-              className="h-10 w-10 object-contain"
+              className="h-14 w-14 object-contain"
             />
           ) : (
-            <HarborMark className="h-10 w-10" />
+            <HarborMark className="h-14 w-14" />
           )}
         </div>
-        <nav className="flex flex-1 flex-col items-center gap-3 overflow-y-auto px-2 pb-3 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <nav data-tv-scroll-focus className="flex flex-1 flex-col items-center gap-4 overflow-y-auto px-3 pb-3 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {visible.map((item) => {
             const active = view === item.view;
             const gated = !!item.pinGated && locked;
@@ -75,11 +75,11 @@ export function StremioRail() {
             );
           })}
         </nav>
-        <div className="shrink-0 px-1 pb-3 pt-1">
+        <div className="shrink-0 px-2 pb-4 pt-1">
           {locked ? (
-            <div className="flex h-16 flex-col items-center justify-center gap-1 rounded-xl text-white/35">
-              <Lock size={16} />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">
+            <div className="flex h-[5.5rem] flex-col items-center justify-center gap-2 rounded-xl text-white/35">
+              <Lock size={22} />
+              <span className="text-[14px] font-semibold uppercase tracking-[0.14em]">
                 {t("chrome.locked")}
               </span>
             </div>
@@ -123,10 +123,10 @@ function RailAvatar() {
       onClick={() => openPicker({ kind: "list" })}
       aria-label={label}
       title={label}
-      className="group flex h-16 w-full flex-col items-center justify-center gap-1 rounded-xl text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/85"
+      className="group flex h-[5.5rem] w-full flex-col items-center justify-center gap-2 rounded-xl text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/85"
     >
       <span
-        className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-elevated"
+        className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-elevated"
         style={ring}
       >
         {src ? (
@@ -140,7 +140,7 @@ function RailAvatar() {
           <CatAvatar className="h-full w-full" />
         )}
       </span>
-      <span className="max-w-[5rem] truncate text-[10px] font-semibold leading-none opacity-0 transition-opacity group-hover:opacity-100">
+      <span className="max-w-[7rem] truncate text-[14px] font-semibold leading-none opacity-0 transition-opacity group-hover:opacity-100">
         {label}
       </span>
     </button>
@@ -171,22 +171,22 @@ function RailTab({
       onMouseLeave={() => setHovered(false)}
       aria-label={gated ? t("chrome.lockedRequiresPin", { label: translated }) : translated}
       title={gated ? t("chrome.lockedShort", { label: translated }) : translated}
-      className={`group flex h-[4.5rem] w-full flex-col items-center justify-center gap-1.5 rounded-xl transition-colors duration-150 ${
+      className={`group flex h-[5.5rem] w-full flex-col items-center justify-center gap-2 rounded-xl transition-colors duration-150 ${
         active
           ? "text-accent"
           : "text-white/35 hover:bg-white/[0.05] hover:text-white/85"
       }`}
     >
-      <span className={`relative flex h-7 w-7 items-center justify-center ${gated ? "opacity-70" : ""}`}>
+      <span className={`relative flex h-10 w-10 items-center justify-center [&_svg]:h-full [&_svg]:w-full ${gated ? "opacity-70" : ""}`}>
         {render(hovered)}
         {gated && (
-          <span className="absolute -bottom-1 -end-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-canvas text-white/55 ring-1 ring-white/15">
-            <Lock size={8} strokeWidth={2.4} />
+          <span className="absolute -bottom-1 -end-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-canvas text-white/55 ring-1 ring-white/15">
+            <Lock size={10} strokeWidth={2.4} />
           </span>
         )}
       </span>
       <span
-        className={`text-[10.5px] font-semibold leading-none tracking-[0.02em] transition-opacity duration-150 ${
+        className={`text-[14px] font-semibold leading-none tracking-[0.02em] transition-opacity duration-150 ${
           active ? "opacity-100" : "opacity-0 group-hover:opacity-60"
         }`}
       >

@@ -253,7 +253,7 @@ export function Shows({ active = true }: { active?: boolean }) {
           </div>
           {!settings.tmdbKey && <TmdbNudge />}
           {cwItems.length > 0 && (
-            <Row title={t("Pick up where you left off")} min={260} shape="landscape" scrollKey="shows:cw">
+            <Row title={t("Pick up where you left off")} min={380} shape="landscape" scrollKey="shows:cw">
               {cwItems.map((it) => (
                 <ContinueCard
                   key={it._id}

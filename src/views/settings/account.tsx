@@ -75,13 +75,13 @@ export function AccountStub() {
   }, [user]);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <Section
         title={t("Harbor identity")}
         subtitle={t("How you appear in Watch Together, sessions, and chat. Sits on top of your Stremio account.")}
       >
-        <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
-          <div className="flex items-center gap-5">
+        <div className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-canvas/40 p-6">
+          <div className="flex items-center gap-6">
             <AvatarRing
               src={effectiveAvatar}
               size={88}
@@ -94,7 +94,7 @@ export function AccountStub() {
               onChange={onPickFile}
               className="hidden"
             />
-            <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
               {editingName ? (
                 <div className="flex items-center gap-2">
                   <input
@@ -111,14 +111,14 @@ export function AccountStub() {
                         setEditingName(false);
                       }
                     }}
-                    className="h-10 flex-1 rounded-xl border border-ink bg-elevated px-3 text-[15px] font-semibold text-ink outline-none"
+                    className="h-12 flex-1 rounded-xl border border-ink bg-elevated px-4 text-[18px] font-semibold text-ink outline-none"
                   />
                   <button
                     onClick={() => {
                       pushDisplayName(nameDraft.trim() || displayName);
                       setEditingName(false);
                     }}
-                    className="h-10 rounded-xl bg-ink px-4 text-[12.5px] font-semibold text-canvas"
+                    className="h-12 rounded-xl bg-ink px-5 text-[15px] font-semibold text-canvas"
                   >
                     {t("Save")}
                   </button>
@@ -126,17 +126,17 @@ export function AccountStub() {
               ) : (
                 <button
                   onClick={() => setEditingName(true)}
-                  className="flex flex-wrap items-baseline gap-x-2 gap-y-0 self-start rounded-lg px-1 py-0.5 text-start transition-colors hover:bg-canvas/50"
+                   className="flex flex-wrap items-baseline gap-x-2 gap-y-0 self-start rounded-lg px-1 py-0.5 text-start transition-colors hover:bg-canvas/50"
                 >
-                  <span className="font-display text-[24px] font-medium leading-tight tracking-tight text-ink">
+                  <span className="font-display text-[30px] font-medium leading-tight tracking-tight text-ink">
                     {displayName}
                   </span>
                   {user && (
-                    <span className="text-[13px] text-ink-subtle">
+                    <span className="text-[16px] text-ink-subtle">
                       ({user.fullname || user.email.split("@")[0]})
                     </span>
                   )}
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-subtle">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-subtle">
                     <path
                       d="M16.5 4.5l3 3-11 11H5.5v-3l11-11z"
                       stroke="currentColor"
@@ -150,9 +150,9 @@ export function AccountStub() {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => fileRef.current?.click()}
-                  className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                  className="flex h-11 items-center gap-2 rounded-lg border border-edge-soft px-4 text-[15px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
                     <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                   </svg>
                   {t("Upload photo")}
@@ -160,7 +160,7 @@ export function AccountStub() {
                 {customAvatar && (
                   <button
                     onClick={() => pushIdentity({ harborAvatar: null })}
-                    className="flex h-9 items-center rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
+                    className="flex h-11 items-center rounded-lg border border-edge-soft px-4 text-[15px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:text-danger"
                   >
                     {stremioAvatar ? t("Reset to Stremio avatar") : t("Reset to default")}
                   </button>
@@ -183,7 +183,7 @@ export function AccountStub() {
         title={t("Profiles")}
         subtitle={t("Everyone who uses this Harbor gets their own watch history, avatar, color, and optional PIN. Switch anytime.")}
       >
-        <div className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
+        <div className="flex flex-col gap-6 rounded-2xl border border-edge-soft bg-canvas/40 p-6">
           <ProfilesStrip />
           <StartupDefaults />
           <SettingsScopeCard />
@@ -195,49 +195,49 @@ export function AccountStub() {
         subtitle={t("Library, watch progress, and addon collection sync from this account.")}
       >
         {user ? (
-          <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-edge-soft bg-canvas/40 p-5">
+          <div className="relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-edge-soft bg-canvas/40 p-6">
             <img
               src={stremioWordmark}
               alt=""
               aria-hidden
-              className="pointer-events-none absolute end-5 bottom-4 h-9 w-auto opacity-45 select-none"
+              className="pointer-events-none absolute end-5 bottom-4 h-12 w-auto opacity-45 select-none"
               style={{ filter: "invert(1) grayscale(1) brightness(1.1)" }}
               draggable={false}
             />
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 flex-col">
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+                <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
                   {t("Email")}
                 </span>
-                <span className="truncate font-mono text-[14.5px] text-ink">
+                <span className="truncate font-mono text-[17px] text-ink">
                   {reveal ? user.email : maskedEmail}
                 </span>
               </div>
               <button
                 onClick={() => setReveal((v) => !v)}
-                className="flex h-9 shrink-0 items-center rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="flex h-11 shrink-0 items-center rounded-lg border border-edge-soft px-4 text-[15px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {reveal ? t("Hide") : t("Reveal")}
               </button>
             </div>
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 flex-col">
-                <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+                <span className="text-[13px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
                   {t("Stremio ID")}
                 </span>
-                <span className="truncate font-mono text-[12.5px] text-ink-muted">{user._id}</span>
+                <span className="truncate font-mono text-[15px] text-ink-muted">{user._id}</span>
               </div>
             </div>
             <div className="mt-1 flex items-center gap-2 border-t border-edge-soft/60 pt-3">
               <button
                 onClick={() => setShowAuth(true)}
-                className="flex h-10 items-center gap-1.5 rounded-xl border border-edge-soft px-4 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="flex h-12 items-center gap-2 rounded-xl border border-edge-soft px-5 text-[15px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Re-authenticate")}
               </button>
               <button
                 onClick={signOut}
-                className="flex h-10 items-center gap-1.5 rounded-xl border border-edge-soft px-4 text-[12.5px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:bg-danger/10 hover:text-danger"
+                className="flex h-12 items-center gap-2 rounded-xl border border-edge-soft px-5 text-[15px] font-medium text-ink-subtle transition-colors hover:border-danger/40 hover:bg-danger/10 hover:text-danger"
               >
                 {t("Sign out")}
               </button>
@@ -246,14 +246,14 @@ export function AccountStub() {
         ) : (
           <div className="flex items-center justify-between gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
             <div className="flex flex-col">
-              <span className="text-[14px] font-medium text-ink">{t("Not signed in")}</span>
-              <span className="text-[12.5px] text-ink-subtle">
+              <span className="text-[17px] font-medium text-ink">{t("Not signed in")}</span>
+              <span className="text-[15px] text-ink-subtle">
                 {t("Sign in to sync your library, watch progress, and addons.")}
               </span>
             </div>
             <button
               onClick={() => setShowAuth(true)}
-              className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-4 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02]"
+              className="flex h-12 items-center gap-2 rounded-xl bg-ink px-5 text-[16px] font-semibold text-canvas transition-transform hover:scale-[1.02]"
             >
               {t("Sign in")}
             </button>

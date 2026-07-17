@@ -37,7 +37,7 @@ export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
       <>
         <Row
           title={t("Continue Watching")}
-          min={260}
+          min={380}
           shape="landscape"
           scrollKey="home:cw"
           headerRight={signInButton}

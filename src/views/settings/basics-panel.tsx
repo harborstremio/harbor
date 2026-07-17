@@ -31,7 +31,7 @@ export function BasicsPanel() {
         <SignInRow email={user?.email ?? null} signedIn={!!user} onManage={() => setActive("account")} />
 
         <LaunchRow
-          icon={<Zap size={19} strokeWidth={2} />}
+          icon={<Zap size={24} strokeWidth={2} />}
           title={t("Streaming quality")}
           sub={
             debridCount > 0
@@ -53,21 +53,21 @@ export function BasicsPanel() {
 
       <div className="flex flex-col gap-2.5">
         <LaunchRow
-          icon={<MonitorPlay size={19} strokeWidth={2} />}
+          icon={<MonitorPlay size={24} strokeWidth={2} />}
           title={t("Player engine")}
           sub={t("Auto is best for most people. mpv handles the trickiest 4K, HDR, and audio formats.")}
           status={ENGINE_LABEL[settings.playerEngine] ?? settings.playerEngine}
           onClick={() => setActive("player")}
         />
         <LaunchRow
-          icon={<Languages size={19} strokeWidth={2} />}
+          icon={<Languages size={24} strokeWidth={2} />}
           title={t("Languages")}
           sub={t("Pick which audio and subtitle languages Harbor reaches for first.")}
           status={langLabel}
           onClick={() => setActive("language")}
         />
         <LaunchRow
-          icon={<Palette size={19} strokeWidth={2} />}
+          icon={<Palette size={24} strokeWidth={2} />}
           title={t("Theme & appearance")}
           sub={t("Recolor everything, swap fonts, resize posters, set a wallpaper.")}
           status={prettyPreset(settings.theme.preset)}
@@ -105,22 +105,22 @@ function SignInRow({
       <button
         type="button"
         onClick={onManage}
-        className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-5 py-4 text-start transition-colors hover:border-edge hover:bg-elevated/60"
-      >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
-          <LogIn size={19} strokeWidth={2} />
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="text-[15px] font-semibold text-ink">{t("Sign in to Stremio")}</span>
-          <span className="text-[12.5px] leading-snug text-ink-muted">
+          className="group flex items-center gap-5 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-5 text-start transition-colors hover:border-edge hover:bg-elevated/60"
+        >
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent/15 text-accent">
+            <LogIn size={24} strokeWidth={2} />
+          </span>
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="text-[18px] font-semibold text-ink">{t("Sign in to Stremio")}</span>
+            <span className="text-[15px] leading-snug text-ink-muted">
             {t("Sync your library, watch progress, and installed addons across every device.")}
           </span>
         </div>
-        <span className="shrink-0 rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-accent">
+        <span className="shrink-0 rounded-full bg-accent/15 px-3 py-1 text-[14px] font-semibold tracking-wide text-accent">
           {t("Recommended")}
         </span>
         <ChevronRight
-          size={18}
+          size={22}
           className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
         />
       </button>
@@ -128,13 +128,13 @@ function SignInRow({
   }
 
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-5 py-4">
-      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-canvas/60 text-ink-muted">
-        <LogIn size={19} strokeWidth={2} />
+    <div className="flex items-center gap-5 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-5">
+      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-canvas/60 text-ink-muted">
+        <LogIn size={24} strokeWidth={2} />
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[15px] font-semibold text-ink">{t("Stremio account")}</span>
-        <span className="flex items-center gap-2 text-[12.5px] leading-snug text-ink-muted">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="text-[18px] font-semibold text-ink">{t("Stremio account")}</span>
+        <span className="flex items-center gap-2 text-[15px] leading-snug text-ink-muted">
           <span className="truncate tracking-wide">
             {email ? (reveal ? email : maskEmail(email)) : t("Your library and watch progress sync here.")}
           </span>
@@ -143,9 +143,9 @@ function SignInRow({
               type="button"
               onClick={() => setReveal((r) => !r)}
               aria-label={reveal ? t("Hide email") : t("Show email")}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas/50 hover:text-ink"
-            >
-              {reveal ? <EyeOff size={14} /> : <Eye size={14} />}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas/50 hover:text-ink"
+              >
+                {reveal ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           )}
         </span>
@@ -153,10 +153,10 @@ function SignInRow({
       <button
         type="button"
         onClick={onManage}
-        className="group flex shrink-0 items-center gap-1 rounded-full bg-canvas/70 px-3 py-1.5 text-[12px] font-semibold text-ink-muted transition-colors hover:text-ink"
+        className="group flex shrink-0 items-center gap-1.5 rounded-full bg-canvas/70 px-4 py-2 text-[15px] font-semibold text-ink-muted transition-colors hover:text-ink"
       >
         {t("Manage")}
-        <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+        <ChevronRight size={18} className="transition-transform group-hover:translate-x-0.5" />
       </button>
     </div>
   );
@@ -181,22 +181,22 @@ function LaunchRow({
     <button
       type="button"
       onClick={onClick}
-      className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 px-5 py-4 text-start transition-colors hover:border-edge hover:bg-elevated/60"
+      className="group flex items-center gap-5 rounded-2xl border border-edge-soft bg-elevated/40 px-6 py-5 text-start transition-colors hover:border-edge hover:bg-elevated/60"
     >
       <span
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
+        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-colors ${
           highlight ? "bg-accent/15 text-accent" : "bg-canvas/60 text-ink-muted"
         }`}
       >
         {icon}
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[15px] font-semibold text-ink">{title}</span>
-        <span className="text-[12.5px] leading-snug text-ink-muted">{sub}</span>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="text-[18px] font-semibold text-ink">{title}</span>
+        <span className="text-[15px] leading-snug text-ink-muted">{sub}</span>
       </div>
       {status && (
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide ${
+          className={`shrink-0 rounded-full px-3 py-1 text-[14px] font-semibold tracking-wide ${
             highlight ? "bg-accent/15 text-accent" : "bg-canvas/70 text-ink-subtle"
           }`}
         >
@@ -204,7 +204,7 @@ function LaunchRow({
         </span>
       )}
       <ChevronRight
-        size={18}
+        size={22}
         className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
       />
     </button>

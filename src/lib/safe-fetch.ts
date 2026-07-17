@@ -4,68 +4,9 @@ import { TrackerBlockedError, isBlockedUrl, noteBlocked } from "./privacy/blockl
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
-// Torrentio + TorBox sit behind Cloudflare that blocks datacenter IPs, so on web they
-// MUST be fetched directly from the browser's residential IP (they set CORS, so it
-// works) — proxying them through the VPS gets 403'd. EVERYTHING ELSE routes through the
-// VPS /api-proxy: it's required for addons that send no CORS header at all (OpenSubtitles)
-// and for the CORS-less debrid REST APIs, and it's fine for the rest (Cinemeta, Comet).
-const DIRECT_HOSTS = new Set([
-  "torrentio.strem.fun",
-  "stremio.torbox.app",
-  "api.strem.io",
-]);
-
-const PROXY_HOSTS = new Set([
-  "v3-cinemeta.strem.io",
-  "opensubtitles-v3.strem.io",
-  "opensubtitles.strem.io",
-  "opensubtitles.stremio.homes",
-  "api.torbox.app",
-  "api.real-debrid.com",
-  "api.alldebrid.com",
-  "debrid-link.com",
-  "www.premiumize.me",
-]);
-
-const PROXY_SUFFIXES = [
-  ".elfhosted.com",
-  ".strem.fun",
-  ".strem.io",
-  ".stremio.homes",
-  ".baby-beamup.club",
-  ".workers.dev",
-  ".debridio.com",
-  ".code.run",
-  ".fly.dev",
-  ".onrender.com",
-  ".vercel.app",
-  ".netlify.app",
-  ".railway.app",
-  ".deno.dev",
-];
-
 function rewriteForWeb(url: string, init?: RequestInit): { url: string; init?: RequestInit } {
   if (isTauri) return { url, init };
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return { url, init };
-  }
-  if (DIRECT_HOSTS.has(parsed.hostname)) return { url, init };
-  const proxiable =
-    PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
-  if (!proxiable) return { url, init };
-
-  const proxied = `/api-proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
-  if (!init?.headers) return { url: proxied, init };
-  const out = new Headers(init.headers as HeadersInit);
-  const auth = out.get("authorization");
-  if (auth) {
-    out.delete("authorization");
-    out.set("x-harbor-auth", auth);
-  }
-  return { url: proxied, init: { ...init, headers: out } };
+  return { url, init };
 }
 
 type HarborFetchResponse = {

@@ -40,7 +40,7 @@ export function ProfileBlock({ onOpenSettings }: { onOpenSettings: () => void })
         className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-elevated/50"
       >
         <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-edge-soft"
+          className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-edge-soft"
           style={{ background: color }}
         >
           {avatar ? (
@@ -54,7 +54,7 @@ export function ProfileBlock({ onOpenSettings }: { onOpenSettings: () => void })
             <CatAvatar className="h-full w-full" />
           )}
         </span>
-        <span className="truncate text-[13px] text-ink">{name}</span>
+        <span className="truncate text-[18px] text-ink">{name}</span>
       </button>
       {open && (
         <div
