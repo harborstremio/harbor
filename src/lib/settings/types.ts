@@ -60,6 +60,12 @@ export type Settings = {
   soundTheme: "none" | "glass" | "modern" | "retro" | "cinematic";
   sfxVolume: number;
   playerVolumeSfx: boolean;
+  liquidGlassEnabled: boolean;
+  liquidGlassOpacity: number;
+  posterGlassFrameEnabled: boolean;
+  posterDockEnabled: boolean;
+  posterDockScale: number;
+  posterDockStrength: number;
   blurComments: boolean;
   blurEpisodes: boolean;
   tmdbKey: string;
