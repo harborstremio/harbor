@@ -12,13 +12,11 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
 
-      // Custom plugin to rename index.android.html to index.html for Tauri
       {
         name: "android-html-rename",
         enforce: "post",
         generateBundle(_, bundle) {
           if (isAndroid && bundle["index.android.html"]) {
-            // Rename the file key in Vite's internal bundle map
             bundle["index.html"] = bundle["index.android.html"];
             bundle["index.html"].fileName = "index.html";
             delete bundle["index.android.html"];
@@ -28,6 +26,16 @@ export default defineConfig(({ mode }) => {
     ],
 
     build: {
+      // I hate this but its the only way to get the android build to work with tauri
+      outDir: isAndroid
+        ? resolve(
+            __dirname,
+            "src-tauri/gen/android/app/src/main/assets"
+          )
+        : resolve(__dirname, "dist"),
+
+      emptyOutDir: !isAndroid,
+
       rollupOptions: {
         input: isAndroid
           ? resolve(__dirname, "index.android.html")
@@ -35,6 +43,8 @@ export default defineConfig(({ mode }) => {
 
         output: {
           entryFileNames: "assets/[name]-[hash].js",
+          chunkFileNames: "assets/[name]-[hash].js",
+          assetFileNames: "assets/[name]-[hash][extname]",
         },
       },
     },
@@ -45,7 +55,9 @@ export default defineConfig(({ mode }) => {
 
     resolve: {
       alias: {
-        "@": isAndroid ? resolve(__dirname, "src-android") : resolve(__dirname, "src"),
+        "@": isAndroid
+          ? resolve(__dirname, "src-android")
+          : resolve(__dirname, "src"),
       },
     },
   };

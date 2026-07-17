@@ -38,4 +38,5 @@ pnpm-debug.log*
 /src-tauri/libmpv/libmpv-2.dll
 /src-tauri/fonts/*.otf
 /src-tauri/fonts/*.ttf
+/src-tauri/gen
 local_docs/
