@@ -132,7 +132,9 @@ export function isVisible(el: HTMLElement) {
 }
 
 function isInSidebar(el: HTMLElement): boolean {
-  return !!el.closest("[data-harbor-sidebar]");
+  if (el.closest("[data-tv-top-chrome]")) return false;
+
+  return !!el.closest("[data-harbor-sidebar], [data-harbor-nav], [data-tv-nav-zone]");
 }
 
 /** Horizontal top chrome (TopDock / Royal / etc.) — not the left sidebar. */
@@ -287,9 +289,19 @@ function getInitialFocus(list: HTMLElement[]) {
   return list.find((el) => el.hasAttribute("data-tv-initial-focus")) ?? list[0] ?? null;
 }
 
-const NAV_FOCUS_SELECTOR =
-  "[data-harbor-nav], [data-tv-nav-zone] button, [data-harbor-sidebar] button, [data-tv-nav-zone] a[href], [data-harbor-sidebar] a[href], [data-tv-nav-zone] [data-focusable='true'], [data-harbor-sidebar] [data-focusable='true']";
+const NAV_FOCUS_SELECTOR = [
+  "[data-tv-nav-zone] button",
+  "[data-harbor-sidebar] button",
+  "[data-harbor-nav] button",
 
+  "[data-tv-nav-zone] a[href]",
+  "[data-harbor-sidebar] a[href]",
+  "[data-harbor-nav] a[href]",
+
+  "[data-tv-nav-zone] [data-focusable='true']",
+  "[data-harbor-sidebar] [data-focusable='true']",
+  "[data-harbor-nav] [data-focusable='true']",
+].join(", ");
 function focusNavChrome() {
   const navItems = Array.from(document.querySelectorAll<HTMLElement>(NAV_FOCUS_SELECTOR)).filter(
     (el) => isVisible(el) && isInNav(el),

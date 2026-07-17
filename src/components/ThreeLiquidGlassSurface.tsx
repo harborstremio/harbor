@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import * as THREE from "three";
+import { useSettings } from "@/lib/settings";
 
 type ThreeLiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
@@ -63,6 +64,34 @@ type ThreeLiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   lensStrength?: number;
 
   /**
+   * قوة الحبيبات/التجمعات الضوئية المتحركة داخل الزجاج.
+   *
+   * 1 = الشكل الحالي كاملًا
+   * 0 = حذف الحبيبات من هذا العنصر فقط
+   * 0.25 = حبيبات خفيفة
+   */
+  causticsStrength?: number;
+
+  /**
+   * سرعة الحركة السائلة داخل الزجاج.
+   *
+   * 1 = السرعة الحالية
+   * 0.5 = أبطأ
+   * 0 = ثابتة بدون حركة
+   * 1.5 = أسرع
+   */
+  motionSpeed?: number;
+
+  /**
+   * قوة حركة وتمدد الشكل السائل.
+   *
+   * 1 = القوة الحالية
+   * 0.4 = حركة خفيفة
+   * 0 = بدون حركة سائلة
+   */
+  motionStrength?: number;
+
+  /**
    * كلاس المحتوى الداخلي.
    */
   contentClassName?: string;
@@ -78,6 +107,9 @@ type GlassUniforms = {
   uRefraction: { value: number };
   uSpectrum: { value: number };
   uLens: { value: number };
+  uCaustics: { value: number };
+  uMotionSpeed: { value: number };
+  uMotionStrength: { value: number };
 };
 
 type AttachOptions = {
@@ -86,6 +118,9 @@ type AttachOptions = {
   refractionStrength: number;
   spectralStrength: number;
   lensStrength: number;
+  causticsStrength: number;
+  motionSpeed: number;
+  motionStrength: number;
 };
 
 class SharedLiquidGlassEngine {
@@ -132,6 +167,9 @@ class SharedLiquidGlassEngine {
       uRefraction: { value: 1.42 },
       uSpectrum: { value: 1.48 },
       uLens: { value: 1.2 },
+      uCaustics: { value: 1.0 },
+      uMotionSpeed: { value: 1.0 },
+      uMotionStrength: { value: 1.0 },
     };
 
     this.material = new THREE.ShaderMaterial({
@@ -161,6 +199,9 @@ class SharedLiquidGlassEngine {
         uniform float uRefraction;
         uniform float uSpectrum;
         uniform float uLens;
+        uniform float uCaustics;
+        uniform float uMotionSpeed;
+        uniform float uMotionStrength;
 
         const float TAU = 6.283185307179586;
 
@@ -197,6 +238,11 @@ class SharedLiquidGlassEngine {
         }
 
         void main() {
+          /*
+           * سرعة الحركة مستقلة لكل عنصر.
+           */
+          float motionTime = uTime * uMotionSpeed;
+
           vec2 basePoint = (vUv - 0.5) * 2.0;
           vec2 shapePoint = vec2(
             basePoint.x * uAspect,
@@ -232,29 +278,30 @@ class SharedLiquidGlassEngine {
           float waveA = sin(
             shapePoint.x * 5.8 +
             shapePoint.y * 3.4 +
-            uTime * 0.98
+            motionTime * 0.98
           );
 
           float waveB = sin(
             shapePoint.y * 8.1 -
             shapePoint.x * 2.8 -
-            uTime * 0.76
+            motionTime * 0.76
           );
 
           float waveC = sin(
             length(shapePoint) * 12.8 -
-            uTime * 1.16
+            motionTime * 1.16
           );
 
           float waveD = sin(
             shapePoint.x * 11.0 -
             shapePoint.y * 7.2 +
-            uTime * 0.61
+            motionTime * 0.61
           );
 
           float distortionAmount =
             (0.0065 + uActive * 0.0165) *
-            uRefraction;
+            uRefraction *
+            uMotionStrength;
 
           vec2 warpedPoint = shapePoint;
 
@@ -328,18 +375,18 @@ class SharedLiquidGlassEngine {
             sin(
               warpedPoint.x * 9.4 +
               warpedPoint.y * 5.4 +
-              uTime * 1.08
+              motionTime * 1.08
             ) +
             sin(
               warpedPoint.y * 11.2 -
               warpedPoint.x * 3.8 -
-              uTime * 0.86
+              motionTime * 0.86
             );
 
           causticWave +=
             sin(
               length(warpedPoint) * 16.4 -
-              uTime * 1.24
+              motionTime * 1.24
             ) *
             0.78;
 
@@ -347,7 +394,7 @@ class SharedLiquidGlassEngine {
             sin(
               warpedPoint.x * 14.0 +
               warpedPoint.y * 2.7 -
-              uTime * 0.54
+              motionTime * 0.54
             ) *
             0.32;
 
@@ -356,9 +403,14 @@ class SharedLiquidGlassEngine {
             7.5
           );
 
+          /*
+           * uCaustics يتحكم بالحبيبات والتجمعات الضوئية
+           * لكل عنصر بشكل مستقل.
+           */
           caustics *=
             (0.22 + uActive * 0.78) *
-            uRefraction;
+            uRefraction *
+            uCaustics;
 
           /*
            * طيف رئيسي يمر قطريًا.
@@ -370,13 +422,16 @@ class SharedLiquidGlassEngine {
             dot(normalizedPoint, spectrumAxisA);
 
           spectrumCoordinateA +=
-            waveA * 0.030 +
-            waveB * 0.020 +
-            sin(uTime * 0.44) * 0.065;
+            (
+              waveA * 0.030 +
+              waveB * 0.020 +
+              sin(motionTime * 0.44) * 0.065
+            ) *
+            uMotionStrength;
 
           float spectrumBandA = band(
             spectrumCoordinateA,
-            sin(uTime * 0.38) * 0.20,
+            sin(motionTime * 0.38) * 0.20,
             0.18
           );
 
@@ -391,13 +446,16 @@ class SharedLiquidGlassEngine {
             dot(normalizedPoint, spectrumAxisB);
 
           spectrumCoordinateB +=
-            waveC * 0.024 -
-            waveD * 0.018 -
-            cos(uTime * 0.36) * 0.055;
+            (
+              waveC * 0.024 -
+              waveD * 0.018 -
+              cos(motionTime * 0.36) * 0.055
+            ) *
+            uMotionStrength;
 
           float spectrumBandB = band(
             spectrumCoordinateB,
-            cos(uTime * 0.31) * 0.16,
+            cos(motionTime * 0.31) * 0.16,
             0.19
           );
 
@@ -406,13 +464,16 @@ class SharedLiquidGlassEngine {
            */
           float spectrumCoordinateC =
             radialDistance +
-            waveA * 0.024 -
-            waveC * 0.020;
+            (
+              waveA * 0.024 -
+              waveC * 0.020
+            ) *
+            uMotionStrength;
 
           float spectrumBandC =
             band(
               spectrumCoordinateC,
-              0.72 + sin(uTime * 0.28) * 0.035,
+              0.72 + sin(motionTime * 0.28) * 0.035,
               0.105
             ) *
             lensRing;
@@ -427,18 +488,18 @@ class SharedLiquidGlassEngine {
 
           vec3 spectrumColorA = spectralPalette(
             spectrumCoordinateA * 0.92 +
-            uTime * 0.031
+            motionTime * 0.031
           );
 
           vec3 spectrumColorB = spectralPalette(
             spectrumCoordinateB * 0.88 -
-            uTime * 0.025 +
+            motionTime * 0.025 +
             0.23
           );
 
           vec3 spectrumColorC = spectralPalette(
             spectrumCoordinateC * 1.34 +
-            uTime * 0.042 +
+            motionTime * 0.042 +
             0.48
           );
 
@@ -488,7 +549,7 @@ class SharedLiquidGlassEngine {
               waveC * 0.4
             ) *
               0.12 +
-            uTime * 0.018
+            motionTime * 0.018
           );
 
           vec3 color = vec3(0.0);
@@ -527,7 +588,7 @@ class SharedLiquidGlassEngine {
           color +=
             spectralPalette(
               radialDistance * 1.7 -
-              uTime * 0.022
+              motionTime * 0.022
             ) *
             outerLensRing *
             0.075 *
@@ -609,6 +670,12 @@ class SharedLiquidGlassEngine {
     this.uniforms.uSpectrum.value = THREE.MathUtils.clamp(options.spectralStrength, 0, 2.5);
 
     this.uniforms.uLens.value = THREE.MathUtils.clamp(options.lensStrength, 0, 2.5);
+
+    this.uniforms.uCaustics.value = THREE.MathUtils.clamp(options.causticsStrength, 0, 1.5);
+
+    this.uniforms.uMotionSpeed.value = THREE.MathUtils.clamp(options.motionSpeed, 0, 3);
+
+    this.uniforms.uMotionStrength.value = THREE.MathUtils.clamp(options.motionStrength, 0, 2);
 
     this.resize(canvas);
 
@@ -761,6 +828,9 @@ export function ThreeLiquidGlassSurface({
   refractionStrength = 1.42,
   spectralStrength = 1.48,
   lensStrength = 1.2,
+  causticsStrength = 1,
+  motionSpeed = 1,
+  motionStrength = 1,
   onPointerEnter,
   onPointerMove,
   onPointerLeave,
@@ -771,28 +841,93 @@ export function ThreeLiquidGlassSurface({
   onBlur,
   ...wrapperProps
 }: ThreeLiquidGlassSurfaceProps) {
+  const { settings } = useSettings();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  /*
+   * الإعداد العام الوحيد لأسطح Liquid Glass هو الشفافية.
+   * تمت إزالة liquidGlassEffectStrength من Settings،
+   * لذلك تبقى قوة الانكسار والطيف والعدسة حسب خصائص كل عنصر.
+   */
+  const globalOpacity = Math.min(1, Math.max(0, (settings.liquidGlassOpacity ?? 100) / 100));
+
+  const globalEffectStrength = 1;
+
+  const effectiveIntensity = intensity * globalEffectStrength;
+
+  const effectiveRefractionStrength = refractionStrength * globalEffectStrength;
+
+  const effectiveSpectralStrength = spectralStrength * globalEffectStrength;
+
+  const effectiveLensStrength = lensStrength * globalEffectStrength;
+
+  const effectiveCausticsStrength = causticsStrength * globalEffectStrength;
+
+  const effectiveMotionStrength = motionStrength * globalEffectStrength;
+
+  /*
+   * العناصر الدائمة مثل الناف بار تحتاج محركًا مستقلًا.
+   * لو استخدمت المحرك المشترك، الضغط على أي زر زجاجي
+   * ينقل المحرك من الناف بار إلى الزر ويمسح تأثيره.
+   */
+  const dedicatedEngineRef = useRef<SharedLiquidGlassEngine | null>(null);
+
   const focusedRef = useRef(false);
+
+  /*
+   * يميّز التركيز الناتج عن الماوس/اللمس
+   * عن التركيز الناتج عن الكيبورد أو ريموت التلفاز.
+   */
+  const pointerInteractionRef = useRef(false);
+
+  const getEngine = useCallback(() => {
+    if (alwaysActive) {
+      if (!dedicatedEngineRef.current) {
+        dedicatedEngineRef.current = new SharedLiquidGlassEngine();
+      }
+
+      return dedicatedEngineRef.current;
+    }
+
+    return getSharedEngine();
+  }, [alwaysActive]);
 
   const activate = useCallback(() => {
     const canvas = canvasRef.current;
 
     if (!canvas) return;
 
-    getSharedEngine().attach(canvas, {
+    getEngine().attach(canvas, {
       radius: shaderRadius,
-      intensity,
-      refractionStrength,
-      spectralStrength,
-      lensStrength,
+      intensity: effectiveIntensity,
+      refractionStrength: effectiveRefractionStrength,
+      spectralStrength: effectiveSpectralStrength,
+      lensStrength: effectiveLensStrength,
+      causticsStrength: effectiveCausticsStrength,
+      motionSpeed,
+      motionStrength: effectiveMotionStrength,
     });
-  }, [intensity, lensStrength, refractionStrength, shaderRadius, spectralStrength]);
+  }, [
+    effectiveCausticsStrength,
+    effectiveIntensity,
+    effectiveLensStrength,
+    effectiveMotionStrength,
+    effectiveRefractionStrength,
+    effectiveSpectralStrength,
+    getEngine,
+    motionSpeed,
+    shaderRadius,
+  ]);
 
   const deactivateWhenIdle = () => {
     const canvas = canvasRef.current;
 
     if (!canvas || alwaysActive || focusedRef.current) {
+      return;
+    }
+
+    if (alwaysActive) {
+      dedicatedEngineRef.current?.detach(canvas);
       return;
     }
 
@@ -807,11 +942,26 @@ export function ThreeLiquidGlassSurface({
     }
 
     return () => {
-      if (canvas) {
-        sharedEngine?.release(canvas);
+      if (!canvas) return;
+
+      if (alwaysActive) {
+        dedicatedEngineRef.current?.release(canvas);
+        dedicatedEngineRef.current = null;
+        return;
       }
+
+      sharedEngine?.release(canvas);
     };
   }, [activate, alwaysActive]);
+
+  const webkitBlur = 0.25 * globalOpacity;
+  const standardBlur = 3.25 * globalOpacity;
+
+  const topSurfaceAlpha = 0.007 * globalOpacity;
+  const bottomSurfaceAlpha = 0.0015 * globalOpacity;
+
+  const topEdgeAlpha = 0.06 * globalOpacity;
+  const bottomEdgeAlpha = 0.034 * globalOpacity;
 
   const glassStyle: CSSProperties = {
     position: "relative",
@@ -824,16 +974,22 @@ export function ThreeLiquidGlassSurface({
      * Blur خفيف وخلفية شبه شفافة تعطي سطحًا زجاجيًا واضحًا،
      * مع بقاء الخلفية ظاهرة من خلال العنصر.
      */
-    WebkitBackdropFilter: "blur(0.25px) saturate(1.42) brightness(1.014) contrast(1.04)",
+    WebkitBackdropFilter:
+      globalOpacity <= 0
+        ? "none"
+        : `blur(${webkitBlur}px) saturate(1.42) brightness(1.014) contrast(1.04)`,
 
-    backdropFilter: "blur(3.25px) saturate(1.42) brightness(1.014) contrast(1.04)",
+    backdropFilter:
+      globalOpacity <= 0
+        ? "none"
+        : `blur(${standardBlur}px) saturate(1.42) brightness(1.014) contrast(1.04)`,
 
-    background: "linear-gradient(145deg, rgba(255,255,255,0.007), rgba(255,255,255,0.0015))",
+    background: `linear-gradient(145deg, rgba(255,255,255,${topSurfaceAlpha}), rgba(255,255,255,${bottomSurfaceAlpha}))`,
 
     /*
      * حافة داخلية خفيفة فقط، بدون ضوء أو ظل خارجي.
      */
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.034)",
+    boxShadow: `inset 0 1px 0 rgba(255,255,255,${topEdgeAlpha}), inset 0 -1px 0 rgba(0,0,0,${bottomEdgeAlpha})`,
 
     ...style,
   };
@@ -856,8 +1012,10 @@ export function ThreeLiquidGlassSurface({
         onPointerMove?.(event);
       }}
       onPointerLeave={(event) => {
+        pointerInteractionRef.current = false;
+
         if (interactive) {
-          sharedEngine?.setPressed(false);
+          getEngine().setPressed(false);
           deactivateWhenIdle();
         }
 
@@ -865,36 +1023,60 @@ export function ThreeLiquidGlassSurface({
       }}
       onPointerDown={(event) => {
         /*
-         * التأثير يعمل عند الضغط فقط،
-         * أو عند التركيز بالكيبورد/الريموت.
+         * الـFocus الذي سيأتي بعد PointerDown ناتج عن الماوس/اللمس،
+         * لذلك لا نتركه يُبقي التأثير شغالًا.
          */
+        pointerInteractionRef.current = true;
+        focusedRef.current = false;
+
         if (interactive) {
           activate();
-          sharedEngine?.setPressed(true);
+          getEngine().setPressed(true);
         }
 
         onPointerDown?.(event);
       }}
       onPointerUp={(event) => {
         if (interactive) {
-          sharedEngine?.setPressed(false);
-          deactivateWhenIdle();
+          getEngine().setPressed(false);
         }
+
+        /*
+         * ننتظر فريمًا واحدًا حتى ينتهي focus الناتج عن الضغط،
+         * ثم نطفئ تأثير الزر.
+         */
+        requestAnimationFrame(() => {
+          pointerInteractionRef.current = false;
+          focusedRef.current = false;
+
+          if (interactive) {
+            deactivateWhenIdle();
+          }
+        });
 
         onPointerUp?.(event);
       }}
       onPointerCancel={(event) => {
+        pointerInteractionRef.current = false;
+        focusedRef.current = false;
+
         if (interactive) {
-          sharedEngine?.setPressed(false);
+          getEngine().setPressed(false);
           deactivateWhenIdle();
         }
 
         onPointerCancel?.(event);
       }}
       onFocus={(event) => {
-        focusedRef.current = true;
+        /*
+         * ضغط الماوس يسبب Focus تلقائيًا.
+         * لا نعامله كتصفح كيبورد/ريموت.
+         */
+        const focusCameFromPointer = pointerInteractionRef.current;
 
-        if (interactive) {
+        focusedRef.current = !focusCameFromPointer;
+
+        if (interactive && !focusCameFromPointer) {
           activate();
         }
 
@@ -902,9 +1084,10 @@ export function ThreeLiquidGlassSurface({
       }}
       onBlur={(event) => {
         focusedRef.current = false;
+        pointerInteractionRef.current = false;
 
         if (interactive) {
-          sharedEngine?.setPressed(false);
+          getEngine().setPressed(false);
           deactivateWhenIdle();
         }
 
@@ -923,7 +1106,7 @@ export function ThreeLiquidGlassSurface({
         "
         style={{
           mixBlendMode: "screen",
-          opacity: 0.98,
+          opacity: 0.98 * globalOpacity,
         }}
       />
 
