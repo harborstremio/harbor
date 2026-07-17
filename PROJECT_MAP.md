@@ -52,17 +52,21 @@ Any AI modifying this codebase **MUST STRICTLY ENFORCE AND PRESERVE** the follow
   ```
 - Without this, Windows WebView2 renders an opaque `#0d0f14` background, obscuring the native `mpv` video surface completely (`Black Screen Bug`).
 
-### ⚡ Rule 4: Keep CI Workflows Restricted to Windows x86_64 (`tauri-build.yml`)
+### ⚡ Rule 4: Keep CI Workflows Restricted to Windows x86_64 & Apple Silicon (`tauri-build.yml`)
 
-- In `.github/workflows/tauri-build.yml` and `.github/workflows/app-build.yml`, the build matrix **MUST** only contain:
+- In `.github/workflows/tauri-build.yml`, the build matrix **MUST** only contain:
   ```yaml
   platform:
     - name: Windows
       runner: windows-latest
       target: x86_64-pc-windows-msvc
       bundle: msi
+    - name: macOS Apple Silicon
+      runner: macos-14
+      target: aarch64-apple-darwin
+      bundle: dmg
   ```
-- Do **NOT** add back `macOS`, `Linux`, or `ARM64` runners unless explicitly instructed by the user.
+- Do **NOT** add back `macOS Intel (x86_64)`, `Linux`, or `ARM64 Windows` runners unless explicitly instructed by the user.
 
 ### 👤 Rule 5: Git Author Identity
 
@@ -139,7 +143,7 @@ harbor/
 | :--------------------------------------------------- | :---------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **1. Direct Authentication & Proxy Decoupling**      |  `[x] COMPLETED`  | Eliminated `harbor.site` / `bugs.harbor.site` proxies from `src/lib/trakt/config.ts`, `src/lib/trakt/client.ts`, and `src/lib/anilist/config.ts`. All OAuth tokens exchange directly with official servers (`f42f713`).    |
 | **2. SSRF Protection & Network Sandbox**             |  `[x] COMPLETED`  | Implemented `is_blocked_ssrf_url` inside `src-tauri/src/http_fetch.rs` (`harbor_fetch`) to block local network scanning and private IP fetches (`127.0.0.1`, `192.168.x.x`, `10.x.x.x`).                                   |
-| **3. CI/CD Windows x86_64 Optimization**             |  `[x] COMPLETED`  | Stripped `macOS`, `Linux`, and `Flatpak` build matrices from `.github/workflows/tauri-build.yml` (`4ee4f5c`, `dd8ec4d`), ensuring automated builds run exclusively for Windows x86_64.                                     |
+| **3. CI/CD Windows & Apple Silicon Optimization**    |  `[x] COMPLETED`  | Stripped `macOS Intel`, `Linux`, and `Flatpak` build matrices (`4ee4f5c`, `dd8ec4d`), ensuring automated builds run exclusively for Windows x86_64 (`msi`) and macOS Apple Silicon (`dmg`).                                |
 | **4. Windows MPV Embed Webview Transparency**        |  `[x] COMPLETED`  | Enabled `isWindowsDesktop()` inside `use-mpv-embed.ts` (`dd8ec4d`) and synchronized with `index.css` rules so native video renders cleanly behind `WebView2`.                                                              |
 | **5. Sandbox Capability Hardening (`default.json`)** | `[/] IN PROGRESS` | Eliminate `["**"]` wildcard access across all filesystem and shell capabilities in `src-tauri/capabilities/default.json` and restrict `assetProtocol.scope` in `tauri.conf.json` to safe `$APPDATA/harbor/**` directories. |
 | **6. Backend IPC Path Traversal Protection**         |   `[ ] PENDING`   | Add explicit path normalization and sandbox verification inside `src-tauri/src/lib.rs` (`save_text_file`) and `src-tauri/src/download.rs` (`download_start`) to block `../` directory traversal vulnerabilities.           |
