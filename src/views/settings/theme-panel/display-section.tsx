@@ -113,8 +113,8 @@ export function DisplaySection() {
         </div>
       </Section>
       <Section
-        title={t("Liquid Glass")}
-        subtitle={t("Choose whether to use Liquid Glass effects across the entire theme.")}
+        title={t("Glass Effect")}
+        subtitle={t("Choose whether to use Glass effects across the entire theme.")}
       >
         <div className="flex w-full flex-col gap-5">
           <div className="grid w-full grid-cols-2 gap-2 rounded-xl border border-edge-soft bg-surface p-1.5">
@@ -128,7 +128,7 @@ export function DisplaySection() {
                   : "bg-edge-soft/50 text-ink-muted hover:bg-edge-soft hover:text-ink"
               }`}
             >
-              {t("Liquid Glass")}
+              {t("Glass Effect")}
             </button>
 
             <button
@@ -141,7 +141,7 @@ export function DisplaySection() {
                   : "bg-edge-soft/50 text-ink-muted hover:bg-edge-soft hover:text-ink"
               }`}
             >
-              {t("Without Liquid Glass")}
+              {t("Without Glass Effect")}
             </button>
           </div>
 
