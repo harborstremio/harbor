@@ -88,7 +88,6 @@ export function LiquidGlassSurface({
   const transitionMs = normalizedSpeed <= 0 ? 0 : Math.round(250 / Math.max(0.35, normalizedSpeed));
   const motionDistance = normalizedMotion * 2.4;
 
-  const webkitBlur = 0.25 * globalOpacity;
   const standardBlur = 3.25 * globalOpacity;
 
   const topSurfaceAlpha = 0.007 * globalOpacity * normalizedIntensity;
@@ -105,14 +104,12 @@ export function LiquidGlassSurface({
   const causticsAlpha = 0.05 * globalOpacity * normalizedIntensity * normalizedCaustics * activeMix;
 
   const blurValue = `blur(${standardBlur}px) saturate(1.42) brightness(1.014) contrast(1.04)`;
-  const webkitBlurValue = `blur(${webkitBlur}px) saturate(1.42) brightness(1.014) contrast(1.04)`;
 
   const glassStyle: CSSProperties = {
     position: "relative",
     isolation: "isolate",
     overflow: "hidden",
     borderRadius: radius,
-    WebkitBackdropFilter: variant === "surface" && backdropBlur ? webkitBlurValue : undefined,
     backdropFilter: variant === "surface" && backdropBlur ? blurValue : undefined,
     background: `linear-gradient(145deg, rgba(255,255,255,${alpha(
       topSurfaceAlpha,
@@ -138,7 +135,6 @@ export function LiquidGlassSurface({
     zIndex: 0,
     borderRadius: "inherit",
     pointerEvents: "none",
-    WebkitBackdropFilter: variant === "overlay" && backdropBlur ? webkitBlurValue : undefined,
     backdropFilter: variant === "overlay" && backdropBlur ? blurValue : undefined,
     background: [
       `radial-gradient(120% 92% at 50% -14%, rgba(255,255,255,${alpha(
