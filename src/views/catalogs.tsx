@@ -1,11 +1,13 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Check, Pin, Puzzle, Search, SlidersHorizontal, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { listBrowseCatalogs, type BrowseCatalog } from "@/lib/catalog-browse";
+import { queryKeys } from "@/lib/query";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { CatalogShelf } from "./catalogs/catalog-shelf";
+import { CatalogShelf, prefetchCatalogShelf } from "./catalogs/catalog-shelf";
 import { CatalogManageList } from "./catalogs/catalog-manage-list";
 import { AddonFilterSelect } from "./catalogs/addon-filter-select";
 import { useCatalogList } from "./catalogs/use-catalog-list";
@@ -18,31 +20,32 @@ const TYPE_LABELS: Record<string, string> = {
   channel: "Channels",
 };
 
+/** First N shelves load eagerly + prefetched so posters appear without waiting for IO. */
+const EAGER_SHELF_COUNT = 8;
+
 export function Catalogs({ active = true }: { active?: boolean }) {
   const t = useT();
   const { authKey } = useAuth();
   const { setView } = useView();
   const { settings, update } = useSettings();
-  const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [addonFilter, setAddonFilter] = useState("all");
   const [customize, setCustomize] = useState(false);
-  void active;
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    void listBrowseCatalogs(authKey).then((list) => {
-      if (cancelled) return;
-      setCatalogs(list);
-      setLoading(false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [authKey]);
+  const {
+    data: catalogs = [],
+    isPending: loading,
+    isFetching,
+  } = useQuery({
+    queryKey: queryKeys.catalog.list(authKey),
+    queryFn: () => listBrowseCatalogs(authKey),
+    enabled: active,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    retry: 1,
+  });
 
   const pinned = settings.catalogsPinned ?? [];
   const hidden = settings.catalogsHidden ?? [];
@@ -52,6 +55,21 @@ export function Catalogs({ active = true }: { active?: boolean }) {
     pinned,
     hidden,
   );
+
+  // Prefetch poster pages for the shelves the user will see first.
+  useEffect(() => {
+    if (!active || catalogs.length === 0) return;
+    const visible: BrowseCatalog[] = [...pinnedCats, ...groups.flatMap((g) => g.cats)];
+    const seen = new Set<string>();
+    let n = 0;
+    for (const c of visible) {
+      if (seen.has(c.key)) continue;
+      seen.add(c.key);
+      prefetchCatalogShelf(queryClient, c);
+      n += 1;
+      if (n >= EAGER_SHELF_COUNT) break;
+    }
+  }, [active, catalogs, pinnedCats, groups, queryClient]);
 
   const togglePin = (key: string) =>
     update({
@@ -74,6 +92,16 @@ export function Catalogs({ active = true }: { active?: boolean }) {
     () => (customize ? 0 : catalogs.filter((c) => hiddenSet.has(c.key)).length),
     [customize, catalogs, hiddenSet],
   );
+
+  const eagerKeys = useMemo(() => {
+    const keys = new Set<string>();
+    const order = [...pinnedCats, ...groups.flatMap((g) => g.cats)];
+    for (const c of order) {
+      if (keys.size >= EAGER_SHELF_COUNT) break;
+      keys.add(c.key);
+    }
+    return keys;
+  }, [pinnedCats, groups]);
 
   return (
     <main className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
@@ -159,9 +187,9 @@ export function Catalogs({ active = true }: { active?: boolean }) {
           )}
         </header>
 
-        {loading ? (
+        {loading && catalogs.length === 0 ? (
           <ShelfSkeletons />
-        ) : catalogs.length === 0 ? (
+        ) : catalogs.length === 0 && !isFetching ? (
           <EmptyState onOpenAddons={() => setView("addons")} />
         ) : customize ? (
           filtered.length === 0 ? (
@@ -196,7 +224,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                 </div>
                 <div className="flex flex-col gap-7">
                   {pinnedCats.map((c) => (
-                    <CatalogShelf key={c.key} catalog={c} />
+                    <CatalogShelf key={c.key} catalog={c} eager={eagerKeys.has(c.key)} />
                   ))}
                 </div>
               </section>
@@ -221,7 +249,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                 </div>
                 <div className="flex flex-col gap-7">
                   {g.cats.map((c) => (
-                    <CatalogShelf key={c.key} catalog={c} />
+                    <CatalogShelf key={c.key} catalog={c} eager={eagerKeys.has(c.key)} />
                   ))}
                 </div>
               </section>

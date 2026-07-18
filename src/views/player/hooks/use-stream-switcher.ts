@@ -80,89 +80,104 @@ export function useStreamSwitcher(params: {
       swapAcRef.current?.abort();
       const ac = new AbortController();
       swapAcRef.current = ac;
-      const hint = src.episode
-        ? { season: src.episode.season ?? null, episode: src.episode.episode ?? null }
-        : undefined;
-      const r = await resolveStream(stream, debrids, ac.signal, true, false, hint);
-      if (ac.signal.aborted) return;
-      if (!r.ok) {
-        console.warn(`[player] stream swap failed: ${r.code}`);
-        setSwapResolvingKey(null);
-        return;
-      }
-      let playUrl = r.data.url;
-      if (r.data.headers && Object.keys(r.data.headers).length > 0) {
-        try {
-          const proxied = await registerStreamProxy(r.data.url, r.data.headers);
-          playUrl = proxied.url;
-        } catch {
-          setSwapResolvingKey(null);
+      // Pause the current stream up front: the swap loader covers the whole
+      // stage, so the old stream's audio must not keep playing behind it.
+      // Resumed below when the swap fails before the new stream took over.
+      const bridgeAtStart = bridgeRef.current;
+      const resumeOnFailure =
+        snapRef.current.status === "playing"
+          ? () => bridgeAtStart?.play().catch(() => {})
+          : () => {};
+      bridgeAtStart?.pause();
+      try {
+        const hint = src.episode
+          ? { season: src.episode.season ?? null, episode: src.episode.episode ?? null }
+          : undefined;
+        const r = await resolveStream(stream, debrids, ac.signal, true, false, hint);
+        if (ac.signal.aborted) return;
+        if (!r.ok) {
+          console.warn(`[player] stream swap failed: ${r.code}`);
+          resumeOnFailure();
           return;
         }
-      }
-      const b = bridgeRef.current;
-      if (!b) {
-        setSwapResolvingKey(null);
-        return;
-      }
-      try {
-        const current = getPlaybackPosition();
-        const savedSec =
-          readResumeMs(src.meta.id, src.episode?.season, src.episode?.episode) / 1000;
-        const curDur = snapRef.current.durationSec;
-        const currentIsStub = curDur > 0 && curDur < SHORT_PLAYBACK_SEC;
-        const resumeAt = !currentIsStub && current > 5 ? current : savedSec;
-        await b.load({
-          url: playUrl,
-          subtitles: r.data.subtitles,
-          notWebReady: r.data.notWebReady,
-          startAtSec: resumeAt > 5 ? resumeAt : undefined,
-        });
-        await b.play().catch(() => {});
-      } catch (e) {
-        console.warn("[player] stream swap failed", e);
-      }
-      setLiveUrl(playUrl);
-      setLiveStreamRef({
-        infoHash: stream.infoHash ?? null,
-        fileIdx: stream.fileIdx ?? null,
-        addonId: stream.addonId ?? null,
-        title: stream.title ?? null,
-        parsedTitle: stream.parsedTitle ?? null,
-        resolution: stream.resolution ?? null,
-        source: stream.source ?? null,
-        size: stream.size ?? null,
-        bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
-        cachedSlugs: Object.entries(stream.cached ?? {})
-          .filter(([, v]) => v === true)
-          .map(([k]) => k),
-      });
-      if (src.meta.id && !src.meta.id.startsWith("iptv:")) {
-        savePlayback(
-          src.meta.id,
-          {
-            infoHash: stream.infoHash ?? null,
-            fileIdx: stream.fileIdx ?? null,
-            addonId: stream.addonId ?? null,
+        let playUrl = r.data.url;
+        if (r.data.headers && Object.keys(r.data.headers).length > 0) {
+          try {
+            const proxied = await registerStreamProxy(r.data.url, r.data.headers);
+            playUrl = proxied.url;
+          } catch {
+            resumeOnFailure();
+            return;
+          }
+        }
+        const b = bridgeRef.current;
+        if (!b) return;
+        try {
+          const current = getPlaybackPosition();
+          const savedSec =
+            readResumeMs(src.meta.id, src.episode?.season, src.episode?.episode) / 1000;
+          const curDur = snapRef.current.durationSec;
+          const currentIsStub = curDur > 0 && curDur < SHORT_PLAYBACK_SEC;
+          const resumeAt = !currentIsStub && current > 5 ? current : savedSec;
+          await b.load({
             url: playUrl,
-            title: src.meta.name,
-            parsedTitle: stream.parsedTitle ?? null,
-            resolution: stream.resolution ?? null,
-            source: stream.source ?? null,
-            size: stream.size ?? null,
-            bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
-            cachedSlugs: Object.entries(stream.cached ?? {})
-              .filter(([, v]) => v === true)
-              .map(([k]) => k),
-          },
-          src.episode?.season,
-          src.episode?.episode,
-        );
+            subtitles: r.data.subtitles,
+            notWebReady: r.data.notWebReady,
+            startAtSec: resumeAt > 5 ? resumeAt : undefined,
+          });
+          await b.play().catch(() => {});
+        } catch (e) {
+          // The old stream is already gone here (load stops it), so there is
+          // nothing to resume; the bridge error state drives the UI.
+          console.warn("[player] stream swap failed", e);
+          return;
+        }
+        setLiveUrl(playUrl);
+        setLiveStreamRef({
+          infoHash: stream.infoHash ?? null,
+          fileIdx: stream.fileIdx ?? null,
+          addonId: stream.addonId ?? null,
+          title: stream.title ?? null,
+          parsedTitle: stream.parsedTitle ?? null,
+          resolution: stream.resolution ?? null,
+          source: stream.source ?? null,
+          size: stream.size ?? null,
+          bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
+          cachedSlugs: Object.entries(stream.cached ?? {})
+            .filter(([, v]) => v === true)
+            .map(([k]) => k),
+        });
+        if (src.meta.id && !src.meta.id.startsWith("iptv:")) {
+          savePlayback(
+            src.meta.id,
+            {
+              infoHash: stream.infoHash ?? null,
+              fileIdx: stream.fileIdx ?? null,
+              addonId: stream.addonId ?? null,
+              url: playUrl,
+              title: src.meta.name,
+              parsedTitle: stream.parsedTitle ?? null,
+              resolution: stream.resolution ?? null,
+              source: stream.source ?? null,
+              size: stream.size ?? null,
+              bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
+              cachedSlugs: Object.entries(stream.cached ?? {})
+                .filter(([, v]) => v === true)
+                .map(([k]) => k),
+            },
+            src.episode?.season,
+            src.episode?.episode,
+          );
+        }
+        setSwitcherOpen(false);
+        checkShownRef.current = false;
+        setStreamCheckOpen(false);
+      } finally {
+        // The swap loader is keyed on swapResolvingKey, so it must always
+        // clear — but only the latest swap may clear it, or an aborted swap
+        // would hide the loader of the one that superseded it.
+        if (swapAcRef.current === ac) setSwapResolvingKey(null);
       }
-      setSwapResolvingKey(null);
-      setSwitcherOpen(false);
-      checkShownRef.current = false;
-      setStreamCheckOpen(false);
     },
     [debrids],
   );

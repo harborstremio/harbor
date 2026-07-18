@@ -108,6 +108,11 @@ export function PlayPicker({
   useEffect(() => {
     prefetchSegments(meta, episode);
   }, [meta, episode]);
+  // Warm the player chunk while the best source resolves, so the lazy
+  // PlayerView mounts instantly instead of flashing a blank screen.
+  useEffect(() => {
+    void import("@/views/player");
+  }, []);
   const imdbId = resolvedImdb.id;
   const streamIds = useStreamIds(meta, episode, imdbId);
   const localMatch = useMemo(() => {

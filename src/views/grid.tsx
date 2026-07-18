@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { BackToTop } from "@/components/back-to-top";
 import { PickCard } from "@/components/pick-card";
+import { VirtualGrid } from "@/components/virtual-grid";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { layoutHasGlobalBack } from "@/lib/theme";
@@ -58,11 +59,16 @@ export function GridView({ grid }: { grid: GridSpec }) {
 
   const body = (
     <>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-8">
-        {metas.map((m, i) => (
-          <PickCard key={`${m.id}-${i}`} meta={m} kids={!!hero} />
-        ))}
-      </div>
+      <VirtualGrid
+        items={metas}
+        scrollRef={scrollRef}
+        minColumnWidth={150}
+        gapX={16}
+        gapY={32}
+        estimateRowHeight={260}
+        getKey={(m, i) => `${m.id}-${i}`}
+        renderItem={(m) => <PickCard meta={m} kids={!!hero} />}
+      />
       {!done && <div ref={sentinelRef} className="h-24" />}
       {done &&
         metas.length === 0 &&

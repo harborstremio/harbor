@@ -1,8 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Lock } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { ProfileChip } from "@/chrome/sidebar/profile-chip";
 import { useT } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
+import { preloadNavPage } from "@/lib/query";
 import { useSettings } from "@/lib/settings";
 import { useHarborLogo } from "@/lib/harbor-logo";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
@@ -193,9 +196,14 @@ function ScrollableNav({
   onPinNav: (v: View) => void;
 }) {
   const { settings } = useSettings();
+  const { authKey } = useAuth();
+  const queryClient = useQueryClient();
   const kid = useActiveKid();
   const t = useT();
   const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
+  const warm = (view: View) => {
+    preloadNavPage(queryClient, view, settings.tmdbKey, settings.region, authKey, settings);
+  };
   const isItemVisible = (item: NavItem) => {
     if (kid) return item.view === "kids";
     if (item.view === "kids") return false;
@@ -254,6 +262,7 @@ function ScrollableNav({
               big={!!kid}
               active={view === item.view}
               onClick={() => setView(item.view)}
+              onIntent={() => warm(item.view)}
             />
           ))}
         </div>
@@ -302,6 +311,7 @@ function NavItem({
   label,
   active,
   onClick,
+  onIntent,
   gated,
   collapsed,
   big,
@@ -311,6 +321,8 @@ function NavItem({
   label: string;
   active?: boolean;
   onClick?: () => void;
+  /** TanStack Query preload on hover/focus. */
+  onIntent?: () => void;
   gated?: boolean;
   collapsed?: boolean;
   big?: boolean;
@@ -322,7 +334,11 @@ function NavItem({
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => {
+        setHovered(true);
+        onIntent?.();
+      }}
+      onFocus={() => onIntent?.()}
       onMouseLeave={() => setHovered(false)}
       data-harbor-nav={view}
       data-active={active ? "" : undefined}

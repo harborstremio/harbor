@@ -29,6 +29,7 @@ import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
 import { AnilistRowControls } from "./anime/anilist-row-controls";
 import { MalRowControls } from "./anime/mal-row-controls";
 import { AnilistTopRow, AnilistTrendingRow } from "./anime/anilist-top-row";
+import { useCatalogPage, type CatalogRowSpec } from "@/lib/catalog-page";
 import {
   EMPTY_ROW,
   ROW_MAX_PAGES,
@@ -82,85 +83,42 @@ function cleanMeta(m: Meta): Meta {
 export function AnimeView({ active = true }: { active?: boolean }) {
   const t = useT();
   const { settings, update } = useSettings();
-  const [rowsByKey, setRowsByKey] = useState<Record<string, RowState>>(() => {
-    const init: Record<string, RowState> = {};
-    for (const s of SPECS) init[s.key] = EMPTY_ROW;
-    return init;
+
+  const animeSpecs = useMemo<CatalogRowSpec[]>(
+    () =>
+      SPECS.map((s) => ({
+        key: s.key,
+        title: s.title,
+        fetcher: s.fetcher,
+        minVisible: ROW_MIN_VISIBLE,
+      })),
+    [],
+  );
+
+  const { rowsByKey: catalogRowsByKey, loadMore } = useCatalogPage({
+    pageId: "anime",
+    scope: "jikan",
+    specs: animeSpecs,
+    enabled: active,
+    maxPerRow: 80,
   });
-  const rowsRef = useRef(rowsByKey);
-  const loadingRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    rowsRef.current = rowsByKey;
-  }, [rowsByKey]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const BATCH = 6;
-      const GAP_MS = 350;
-      for (let i = 0; i < SPECS.length; i += BATCH) {
-        if (cancelled) return;
-        const batch = SPECS.slice(i, i + BATCH);
-        await Promise.all(
-          batch.map(async (s) => {
-            try {
-              const metas = await s.fetcher(1);
-              if (cancelled) return;
-              setRowsByKey((prev) => ({
-                ...prev,
-                [s.key]: { metas, page: 1, hasMore: metas.length >= ROW_MIN_VISIBLE, ready: true },
-              }));
-            } catch {
-              if (cancelled) return;
-              setRowsByKey((prev) => ({
-                ...prev,
-                [s.key]: { metas: [], page: 1, hasMore: false, ready: true },
-              }));
-            }
-          }),
-        );
-        if (i + BATCH < SPECS.length) {
-          await new Promise((r) => setTimeout(r, GAP_MS));
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const loadMore = useCallback((key: string) => {
-    if (loadingRef.current.has(key)) return;
-    const spec = SPECS.find((s) => s.key === key);
-    const row = rowsRef.current[key];
-    if (!spec || !row || !row.hasMore || row.metas.length >= 80) return;
-    loadingRef.current.add(key);
-    const next = row.page + 1;
-    spec
-      .fetcher(next)
-      .then((more) => {
-        setRowsByKey((prev) => {
-          const cur = prev[key];
-          if (!cur) return prev;
-          const ids = new Set(cur.metas.map((m) => m.id));
-          const fresh = more.filter((m) => !ids.has(m.id));
-          return {
-            ...prev,
-            [key]: {
-              ...cur,
-              metas: [...cur.metas, ...fresh],
-              page: next,
-              hasMore: more.length >= ROW_MIN_VISIBLE && cur.metas.length + fresh.length < 80,
-            },
-          };
-        });
-      })
-      .catch(() => {})
-      .finally(() => {
-        loadingRef.current.delete(key);
-      });
-  }, []);
+  // Keep anime-compatible RowState shape (ready flag for skeletons).
+  const rowsByKey = useMemo(() => {
+    const map: Record<string, RowState> = {};
+    for (const s of SPECS) {
+      const r = catalogRowsByKey[s.key];
+      map[s.key] = r
+        ? {
+            metas: r.metas,
+            page: r.page,
+            hasMore: r.hasMore && r.page < ROW_MAX_PAGES,
+            ready: r.ready,
+          }
+        : EMPTY_ROW;
+    }
+    return map;
+  }, [catalogRowsByKey]);
 
   const filterSig = `${settings.animeExcludeOrigins.join(",")}|${settings.animeHideWatchedPicks}`;
   const [heroSeed, setHeroSeed] = useState(() => Math.floor(Math.random() * 0x7fffffff));

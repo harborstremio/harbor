@@ -1,7 +1,9 @@
 import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
-import { browseFetcher, listBrowseCatalogs, type BrowseCatalog } from "@/lib/catalog-browse";
+import { browseFetcher, listBrowseCatalogs } from "@/lib/catalog-browse";
+import { queryKeys } from "@/lib/query";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
@@ -144,20 +146,16 @@ export function CatalogBrowser() {
   const t = useT();
   const { authKey } = useAuth();
   const { openGrid } = useView();
-  const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
   const [type, setType] = useState("");
   const [catKey, setCatKey] = useState("");
   const [genre, setGenre] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    void listBrowseCatalogs(authKey).then((list) => {
-      if (!cancelled) setCatalogs(list);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [authKey]);
+  // Shares the TanStack Query entry the catalogs prefetch already warms.
+  const { data: catalogs = [] } = useQuery({
+    queryKey: queryKeys.catalog.list(authKey),
+    queryFn: () => listBrowseCatalogs(authKey),
+    staleTime: 5 * 60_000,
+  });
 
   const types = useMemo(() => {
     const seen = new Set<string>();
