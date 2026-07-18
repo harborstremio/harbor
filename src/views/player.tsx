@@ -135,7 +135,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const bridgeRef = useRef<PlayerBridge | null>(null);
   const selfFrameReadyRef = useRef(false);
   const { fullscreen, toggleFullscreen } = useFullscreen();
-  const { snap, engine, bridgeReady, bridgeKey, embedActive } = usePlayerBridge({
+  const { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive } = usePlayerBridge({
     bridgeRef,
     videoMountRef,
     src,
@@ -320,6 +320,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       bridgeRef,
       bridgeReady,
       bridgeKey,
+      svpActive,
       videoMountRef,
       toggleFullscreen,
       castActiveRef: cast.castActiveRef,
@@ -615,6 +616,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     bridgeRef,
     snap,
     metaId: src.meta.id,
+    svpActive,
     drawMode,
     setDrawMode,
     closePlayer,

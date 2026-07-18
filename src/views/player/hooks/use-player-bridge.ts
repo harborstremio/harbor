@@ -8,6 +8,7 @@ import type { Settings } from "@/lib/settings";
 import { setPlaybackClock } from "@/lib/player/playback-clock";
 import { isWindowsDesktop } from "@/lib/platform";
 import { svpEnsureRunning } from "@/lib/svp";
+import { isAnimeMedia, isSvpActiveForMedia } from "@/lib/player/svp-policy";
 import { pickBridge } from "../player-utils";
 
 function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean {
@@ -48,20 +49,9 @@ export function usePlayerBridge(params: {
 
   const hdrOpaqueWindow = isWindowsDesktop() && settings.playerHdrOpaqueWindow;
   const embedActive = settings.playerMpvEmbed && !hdrOpaqueWindow;
-  const isAnimeSrc =
-    !!src.meta.id?.startsWith("kitsu:") ||
-    !!src.meta.id?.startsWith("mal:") ||
-    !!src.meta.id?.startsWith("anilist:") ||
-    !!src.meta.id?.startsWith("anidb:") ||
-    (src.meta.genres ?? []).some((g) => {
-      const l = g.toLowerCase();
-      return l === "anime" || l === "animation";
-    });
+  const isAnimeSrc = isAnimeMedia(src.meta);
   const anime4kOn = settings.playerAnime4k && (!settings.playerAnime4kAnimeOnly || isAnimeSrc);
-  const svpOn =
-    settings.playerSvp &&
-    !!settings.svpVpyPath &&
-    (settings.svpScope === "all" || (settings.svpScope === "anime" ? isAnimeSrc : !isAnimeSrc));
+  const svpOn = isSvpActiveForMedia(settings, src.meta);
   useEffect(() => {
     if (svpOn) void svpEnsureRunning().catch(() => {});
   }, [svpOn]);
@@ -98,6 +88,7 @@ export function usePlayerBridge(params: {
       const { bridge: choose, engine: chosen } = await pickBridge(want, src.notWebReady === true, {
         anime4k: anime4kOn,
         hdrToSdr: settings.playerHdrToSdr,
+        rtxHdr: settings.playerRtxHdr && !settings.playerHdrToSdr && !svpOn,
         embed: embedActive,
         d3d11Flip: settings.playerD3d11Flip,
         anime4kShaders: anime4kShadersFor(
@@ -156,5 +147,5 @@ export function usePlayerBridge(params: {
     );
   }, [bridgeReady, engine, settings.playerHdrToSdr, settings.playerDisplayPanel, bridgeRef]);
 
-  return { snap, engine, bridgeReady, bridgeKey, embedActive };
+  return { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive: svpOn };
 }
