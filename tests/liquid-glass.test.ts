@@ -27,7 +27,7 @@ test("liquid glass does not keep a GPU render loop alive", () => {
   assert.doesNotMatch(source, /requestAnimationFrame/);
   assert.doesNotMatch(source, /<canvas/);
   assert.match(source, /linear-gradient/);
-  assert.match(source, /backdropFilter: variant === "overlay" && backdropBlur/);
+  assert.match(source, /backdropFilter:\s+variant === "overlay" && backdropBlur/);
   assert.doesNotMatch(source, /WebkitBackdropFilter/);
 });
 
