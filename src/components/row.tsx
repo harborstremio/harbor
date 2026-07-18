@@ -15,7 +15,7 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
-import { MagnifiedDockItem } from "@/components/magnified-dock-item";
+import { MagnifiedDockItem } from "@/lib/magnified-dock-item";
 import { useMotionValue, type MotionValue } from "framer-motion";
 
 const GAP = 20;
@@ -545,7 +545,23 @@ export function Row({
             }}
             onClickCapture={onClickCapture}
             onDragStart={(e) => e.preventDefault()}
-            className="harbor-row-track grid grid-flow-col items-start gap-5 overflow-x-auto p-5 -m-5 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] [&>*]:[scroll-snap-align:start] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] [overscroll-behavior-x:contain] [&_img]:select-none [&_img]:[-webkit-user-drag:none]"
+            className="
+              harbor-row-track
+              grid grid-flow-col items-end gap-5
+              overflow-x-auto
+              px-16 pb-8 pt-28
+              -mx-16 -mb-8 -mt-28
+              scroll-ps-16 scroll-pe-16
+              [scroll-snap-type:x_mandatory]
+              *:snap-start
+              [&::-webkit-scrollbar]:hidden
+              [-ms-overflow-style:none]
+              [scrollbar-width:none]
+              [overflow-anchor:none]
+              overscroll-x-contain
+              [&_img]:select-none
+              [&_img]:[-webkit-user-drag:none]
+            "
             style={{
               gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px`,
               willChange: "transform",
@@ -608,7 +624,7 @@ function EdgeArrow({
     return (
       <div
         className={`pointer-events-none absolute inset-y-0 z-30 flex w-14 items-center transition-opacity duration-200 ${
-          side === "left" ? "start-0 justify-start" : "end-0 justify-end"
+          side === "left" ? "inset-s-0 justify-start" : "inset-e-0 justify-end"
         } ${visible ? "opacity-100" : "opacity-0"}`}
       >
         {liquidGlassEnabled ? (

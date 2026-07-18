@@ -40,12 +40,8 @@ import { ClapperMini } from "./icons/clapper-mini";
 import { ImdbIcon } from "./icons/imdb-icon";
 import { MalLogo } from "./icons/mal-logo";
 import { Poster, useLocalizedPoster } from "./poster";
-import { PosterGlassFrame } from "@/components/PosterGlassFrame";
-import {
-  CardHoverOverlay,
-  cardHoverPosterClass,
-  type CardHoverStyle,
-} from "./pick-card/card-hover";
+
+import { CardHoverOverlay, type CardHoverStyle } from "./pick-card/card-hover";
 import { CustomHoverOverlay, customHoverPosterProps } from "./pick-card/custom-hover";
 import { getCustomHover } from "@/lib/custom-hover";
 import { RtBadge } from "./rt-badge";
@@ -512,20 +508,15 @@ export const PickCard = memo(function PickCard({
             : "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] will-change-transform group-hover:[-webkit-transform:translate3d(0,-0.5rem,0)] group-hover:[transform:translate3d(0,-0.5rem,0)]"
         }`}
       >
-        <PosterGlassFrame
-          posterSrc={posterSrc}
-          radius="var(--poster-radius,12px)"
-          className={customProps ? customProps.className : cardHoverPosterClass(inCardHover)}
-        >
-          <Poster
-            src={posterSrc}
-            seed={meta.id}
-            lowResImdb={imdbId}
-            ratio="portrait"
-            onError={() => setImgIdx((i) => i + 1)}
-            className="harbor-card-ring rounded-[var(--poster-radius,12px)] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]"
-          />
-        </PosterGlassFrame>
+        <Poster
+          src={posterSrc}
+          seed={meta.id}
+          lowResImdb={imdbId}
+          ratio="portrait"
+          onError={() => setImgIdx((i) => i + 1)}
+          className="harbor-card-ring rounded-[var(--poster-radius,12px)] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]"
+        />
+
         {activeCustom ? (
           <CustomHoverOverlay
             config={activeCustom}
