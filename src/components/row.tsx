@@ -15,6 +15,8 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { MagnifiedDockItem } from "@/components/magnified-dock-item";
+import { useMotionValue, type MotionValue } from "framer-motion";
 
 const GAP = 20;
 const EAGER_COUNT = 6;
@@ -30,11 +32,19 @@ function LazyChild({
   eager,
   shape,
   span,
+  mouseX,
+  magnified,
+  dockScale,
+  dockStrength,
 }: {
   children: ReactNode;
   eager: boolean;
   shape: RowShape;
   span?: string;
+  mouseX: MotionValue<number>;
+  magnified: boolean;
+  dockScale: number;
+  dockStrength: number;
 }) {
   const root = useContext(RowTrackContext);
   const [visible, setVisible] = useState(eager);
@@ -69,6 +79,8 @@ function LazyChild({
     };
   }, [root, visible]);
 
+  const content = visible ? children : <Skeleton shape={shape} />;
+
   return (
     <div
       ref={ref}
@@ -78,7 +90,20 @@ function LazyChild({
         containIntrinsicSize: visible ? undefined : "auto 200px",
       }}
     >
-      {visible ? children : <Skeleton shape={shape} />}
+      {magnified ? (
+        <MagnifiedDockItem
+          mouseX={mouseX}
+          enabled
+          scaleFactor={dockScale}
+          distance={180 + dockStrength * 1.1}
+          spread={18 + dockStrength * 0.45}
+          lift={6 + dockStrength * 0.14}
+        >
+          {content}
+        </MagnifiedDockItem>
+      ) : (
+        content
+      )}
     </div>
   );
 }
@@ -146,6 +171,15 @@ export function Row({
   const effMin = Math.max(72, Math.round(min * settings.posterScale));
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  const dockMouseX = useMotionValue<number>(Number.NEGATIVE_INFINITY);
+
+  const dockEnabled = shape === "portrait" && (settings.posterDockEnabled ?? false);
+
+  const dockScale = Math.max(1.05, Math.min(1.6, (settings.posterDockScale ?? 134) / 100));
+
+  const dockStrength = Math.max(0, Math.min(100, settings.posterDockStrength ?? 70));
+
   const [trackEl, setTrackEl] = useState<HTMLDivElement | null>(null);
   const trackCb = useCallback((el: HTMLDivElement | null) => {
     trackRef.current = el;
@@ -223,6 +257,8 @@ export function Row({
     let saveTimer: number | null = null;
     let scrollRaf: number | null = null;
     const onScroll = () => {
+      dockMouseX.set(Number.NEGATIVE_INFINITY);
+
       if (scrollRaf == null) {
         scrollRaf = requestAnimationFrame(() => {
           scrollRaf = null;
@@ -358,6 +394,8 @@ export function Row({
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    dockMouseX.set(Number.NEGATIVE_INFINITY);
+
     if (e.button !== 0 || e.pointerType === "touch") return;
     if (!(e.target as Element).closest("button")) return;
     const el = trackRef.current;
@@ -378,7 +416,15 @@ export function Row({
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
     const el = trackRef.current;
+
+    if (dockEnabled && e.pointerType !== "touch" && e.buttons === 0 && !d.active) {
+      dockMouseX.set(e.clientX);
+    }
+
     if (!d.active || !el) return;
+
+    dockMouseX.set(Number.NEGATIVE_INFINITY);
+
     const dx = e.clientX - d.startX;
     if (!d.moved && Math.abs(dx) < 6) return;
     if (!d.moved) {
@@ -483,11 +529,23 @@ export function Row({
             ref={trackCb}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
+            onPointerUp={(event) => {
+              endDrag(event);
+
+              if (dockEnabled && event.pointerType !== "touch") {
+                dockMouseX.set(event.clientX);
+              }
+            }}
+            onPointerCancel={(event) => {
+              endDrag(event);
+              dockMouseX.set(Number.NEGATIVE_INFINITY);
+            }}
+            onPointerLeave={() => {
+              dockMouseX.set(Number.NEGATIVE_INFINITY);
+            }}
             onClickCapture={onClickCapture}
             onDragStart={(e) => e.preventDefault()}
-            className="harbor-row-track grid grid-flow-col items-start gap-5 overflow-x-auto p-5 -m-5 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] *:snap-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] overscroll-x-contain [&_img]:select-none [&_img]:[-webkit-user-drag:none]"
+            className="harbor-row-track grid grid-flow-col items-start gap-5 overflow-x-auto p-5 -m-5 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] [&>*]:[scroll-snap-align:start] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] [overscroll-behavior-x:contain] [&_img]:select-none [&_img]:[-webkit-user-drag:none]"
             style={{
               gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px`,
               willChange: "transform",
@@ -500,7 +558,15 @@ export function Row({
                 ? (child.props as { style?: { gridColumn?: string } }).style?.gridColumn
                 : undefined;
               return (
-                <LazyChild eager={i < EAGER_COUNT} shape={shape} span={span}>
+                <LazyChild
+                  eager={i < EAGER_COUNT}
+                  shape={shape}
+                  span={span}
+                  mouseX={dockMouseX}
+                  magnified={dockEnabled}
+                  dockScale={dockScale}
+                  dockStrength={dockStrength}
+                >
                   {child}
                 </LazyChild>
               );
@@ -525,22 +591,81 @@ function EdgeArrow({
   always?: boolean;
   onClick: () => void;
 }) {
+  const { settings } = useSettings();
+  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+
   const t = useT();
   const label = t(side === "left" ? "Scroll left" : "Scroll right");
+
+  const icon =
+    side === "left" ? (
+      <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
+    ) : (
+      <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
+    );
 
   if (always) {
     return (
       <div
         className={`pointer-events-none absolute inset-y-0 z-30 flex w-14 items-center transition-opacity duration-200 ${
-          side === "left" ? "inset-s-0 justify-start" : "inset-e-0 justify-end"
+          side === "left" ? "start-0 justify-start" : "end-0 justify-end"
         } ${visible ? "opacity-100" : "opacity-0"}`}
       >
+        {liquidGlassEnabled ? (
+          <ThreeLiquidGlassSurface
+            radius="9999px"
+            shaderRadius={1}
+            intensity={1}
+            className={`h-11 w-11 pointer-events-auto ${
+              visible
+                ? "opacity-0 group-hover/row:opacity-100 focus-within:opacity-100"
+                : "pointer-events-none opacity-0"
+            }`}
+            contentClassName="flex h-full w-full items-center justify-center"
+          >
+            <button
+              type="button"
+              onClick={onClick}
+              aria-label={label}
+              tabIndex={visible ? 0 : -1}
+              className="
+                flex h-full w-full
+                items-center justify-center
+                rounded-full bg-transparent
+                text-ink outline-none
+              "
+            >
+              {icon}
+            </button>
+          </ThreeLiquidGlassSurface>
+        ) : (
+          <button
+            type="button"
+            onClick={onClick}
+            aria-label={label}
+            tabIndex={visible ? 0 : -1}
+            className={`harbor-row-arrow mx-1 flex h-12 w-12 items-center justify-center rounded-full border border-edge-soft/50 bg-canvas/90 text-ink shadow-[0_6px_20px_-6px_rgba(0,0,0,0.6)] backdrop-blur-md transition-transform duration-150 hover:scale-110 active:scale-95 ${
+              visible ? "pointer-events-auto" : "pointer-events-none"
+            }`}
+          >
+            {icon}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  const sideClass = side === "left" ? "start-0 justify-start" : "end-0 justify-end";
+
+  return (
+    <div
+      className={`pointer-events-none absolute inset-y-0 z-30 flex w-14 items-center ${sideClass}`}
+    >
+      {liquidGlassEnabled ? (
         <ThreeLiquidGlassSurface
           radius="9999px"
           shaderRadius={1}
           intensity={1}
-          variant="overlay"
-          backdropBlur
           className={`h-11 w-11 pointer-events-auto ${
             visible
               ? "opacity-0 group-hover/row:opacity-100 focus-within:opacity-100"
@@ -554,61 +679,30 @@ function EdgeArrow({
             aria-label={label}
             tabIndex={visible ? 0 : -1}
             className="
-      flex h-full w-full
-      items-center justify-center
-      rounded-full bg-transparent
-      text-ink outline-none
-    "
+              flex h-full w-full
+              items-center justify-center
+              rounded-full bg-transparent
+              text-ink outline-none
+            "
           >
-            {side === "left" ? (
-              <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
-            ) : (
-              <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
-            )}
+            {icon}
           </button>
         </ThreeLiquidGlassSurface>
-      </div>
-    );
-  }
-
-  const sideClass = side === "left" ? "start-0 justify-start" : "end-0 justify-end";
-
-  return (
-    <div
-      className={`pointer-events-none absolute inset-y-0 z-30 flex w-14 items-center ${sideClass}`}
-    >
-      <ThreeLiquidGlassSurface
-        radius="9999px"
-        shaderRadius={1}
-        intensity={1}
-        variant="overlay"
-        backdropBlur
-        className={`h-11 w-11 pointer-events-auto ${
-          visible
-            ? "opacity-0 group-hover/row:opacity-100 focus-within:opacity-100"
-            : "pointer-events-none opacity-0"
-        }`}
-        contentClassName="flex h-full w-full items-center justify-center"
-      >
+      ) : (
         <button
           type="button"
           onClick={onClick}
           aria-label={label}
           tabIndex={visible ? 0 : -1}
-          className="
-      flex h-full w-full
-      items-center justify-center
-      rounded-full bg-transparent
-      text-ink outline-none
-    "
+          className={`harbor-row-arrow pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-canvas/85 text-ink backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-canvas ${
+            visible
+              ? "opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100"
+              : "pointer-events-none opacity-0"
+          }`}
         >
-          {side === "left" ? (
-            <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
-          ) : (
-            <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
-          )}
+          {icon}
         </button>
-      </ThreeLiquidGlassSurface>
+      )}
     </div>
   );
 }

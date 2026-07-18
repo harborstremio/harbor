@@ -12,6 +12,7 @@ import { readinessScore, type EngineStats } from "@/lib/torrent/engine-stats";
 import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
 import { StreamLoadingBar } from "./stream-loading-bar";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { useSettings } from "@/lib/settings";
 
 const LOADER_BUBBLES = [8, 20, 33, 47, 60, 72, 85, 94];
 
@@ -37,6 +38,9 @@ export function CinematicPlayerLoader({
   onShowingChange?: (showing: boolean) => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+
   const kid = useActiveKid();
   const isLocal = isLocalUrl(src.url);
   const isInfoHash =
@@ -79,6 +83,24 @@ export function CinematicPlayerLoader({
     return () => window.clearTimeout(timer);
   }, [showing]);
   if (!mounted) return null;
+
+  const cancelButton = (
+    <button
+      onClick={onCancel}
+      className="absolute bottom-10 left-1/2 z-10 flex h-11 -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-black/45 px-6 text-[13.5px] font-medium text-white/75 backdrop-blur-md transition-colors hover:border-white/30 hover:bg-black/60 hover:text-white"
+    >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+        <path
+          d="M3.5 3.5l7 7M10.5 3.5l-7 7"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+        />
+      </svg>
+      {t("Cancel")}
+    </button>
+  );
+
   const backdrop = src.episode?.still || src.meta.background || src.meta.poster;
   return (
     <div
@@ -158,11 +180,11 @@ export function CinematicPlayerLoader({
           <div className="flex w-full max-w-sm flex-col items-center gap-3">
             <StreamLoadingBar key={src.url} ready={ready} done={done} />
             <p className="text-[12.5px] font-medium uppercase tracking-[0.18em] text-white/70">
-              {t("Loading video")}
+              {snap.buffering ? t("Buffering") : t("Preparing stream")}
             </p>
           </div>
         ) : (
-          <HarborLoader size="md" caption={isLocal ? t("Loading") : t("Loading video")} />
+          <HarborLoader size="md" caption={isLocal ? t("Loading") : t("Connecting")} />
         )}
         {!kid && showEngineActivity && (
           <p className="text-[12.5px] font-medium tracking-wide text-white/50 tabular-nums">
@@ -177,32 +199,24 @@ export function CinematicPlayerLoader({
           </p>
         )}
       </div>
-      <ThreeLiquidGlassSurface
-        radius="9999px"
-        shaderRadius={1}
-        intensity={1.05}
-        refractionStrength={1.18}
-        contentClassName="h-full w-full"
-        style={{
-          background: "transparent",
-          boxShadow: "none",
-        }}
-      >
-        <button
-          onClick={onCancel}
-          className="absolute bottom-10 left-1/2 z-10 flex h-11 -translate-x-1/2 cursor-pointer items-center gap-2 rounded-full border border-white/15 bg-black/45 px-6 text-[13.5px] font-medium text-white/75 backdrop-blur-md transition-colors hover:border-white/30 hover:bg-black/60 hover:text-white"
+      {liquidGlassEnabled ? (
+        <ThreeLiquidGlassSurface
+          radius="9999px"
+          shaderRadius={1}
+          intensity={1.05}
+          refractionStrength={1.18}
+          spectralStrength={1.08}
+          contentClassName="h-full w-full"
+          style={{
+            background: "transparent",
+            boxShadow: "none",
+          }}
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-            <path
-              d="M3.5 3.5l7 7M10.5 3.5l-7 7"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-            />
-          </svg>
-          {t("Cancel")}
-        </button>
-      </ThreeLiquidGlassSurface>
+          {cancelButton}
+        </ThreeLiquidGlassSurface>
+      ) : (
+        cancelButton
+      )}
     </div>
   );
 }

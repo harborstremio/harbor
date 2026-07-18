@@ -32,8 +32,6 @@ type Props = {
   onDismiss?: (item: LibraryItem) => void;
 };
 
-let backdropBlurHasWarmed = false;
-
 export const ContinueCard = memo(function ContinueCard({
   item,
   watched = false,
@@ -42,11 +40,8 @@ export const ContinueCard = memo(function ContinueCard({
   const { openMeta, openPicker, openPlayer } = useView();
   const t = useT();
   const { settings, update } = useSettings();
+  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
   const { profiles, activeProfile } = useProfiles();
-  const [hasActivatedGlass, setHasActivatedGlass] = useState(false);
-  const [shouldRevealGlass, setShouldRevealGlass] = useState(false);
-  const hasActivatedGlassRef = useRef(false);
-  const revealFrameRef = useRef<number | null>(null);
   const watcherId = getWatchedBy(item._id);
   const watcher = watcherId ? profiles.find((p) => p.id === watcherId) : null;
   const showWatcher = !!watcher && watcher.id !== activeProfile?.id;
@@ -76,42 +71,6 @@ export const ContinueCard = memo(function ContinueCard({
     : isAnimeCwItem(item) && ep
       ? ep.episode
       : null;
-
-  useEffect(
-    () => () => {
-      if (revealFrameRef.current !== null) {
-        cancelAnimationFrame(revealFrameRef.current);
-      }
-    },
-    [],
-  );
-
-  const activateGlass = () => {
-    if (hasActivatedGlassRef.current) return;
-
-    hasActivatedGlassRef.current = true;
-    setHasActivatedGlass(true);
-
-    if (backdropBlurHasWarmed) {
-      setShouldRevealGlass(true);
-      return;
-    }
-
-    backdropBlurHasWarmed = true;
-    revealFrameRef.current = requestAnimationFrame(() => {
-      revealFrameRef.current = requestAnimationFrame(() => {
-        revealFrameRef.current = null;
-        setShouldRevealGlass(true);
-      });
-    });
-  };
-
-  const glassSurfaceRevealClass = shouldRevealGlass
-    ? "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
-    : "opacity-0";
-  const glassContentRevealClass = shouldRevealGlass
-    ? "scale-95 opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:scale-100 group-hover:opacity-100 focus-within:scale-100 focus-within:opacity-100"
-    : "scale-95 opacity-0";
   const sub =
     animeEp && Number.isFinite(animeEp) && animeEp > 0
       ? `Ep ${animeEp}`
@@ -330,11 +289,7 @@ export const ContinueCard = memo(function ContinueCard({
   };
 
   return (
-    <div
-      className="group relative w-full min-w-0"
-      onPointerEnter={activateGlass}
-      onFocusCapture={activateGlass}
-    >
+    <div className="group relative w-full min-w-0">
       <button
         ref={cardRef}
         onClick={onClick}
@@ -453,38 +408,61 @@ export const ContinueCard = memo(function ContinueCard({
           {translatedTitle || hydratedMeta?.name?.trim() || item.name}
         </p>
       </button>
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center">
-        <ThreeLiquidGlassSurface
-          radius="9999px"
-          shaderRadius={1}
-          intensity={0.86}
-          variant="overlay"
-          backdropBlur={hasActivatedGlass}
-          className="pointer-events-none h-14 w-14 group-hover:pointer-events-auto focus-within:pointer-events-auto"
-          surfaceClassName={`border border-white/[0.10] ${glassSurfaceRevealClass}`}
-          contentClassName={`h-full w-full ${glassContentRevealClass}`}
-          style={{
-            background: "transparent",
-            boxShadow: "none",
-          }}
-        >
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
+        {liquidGlassEnabled ? (
+          <ThreeLiquidGlassSurface
+            radius="9999px"
+            shaderRadius={1}
+            intensity={0.86}
+            className="pointer-events-auto h-14 w-14 border border-white/[0.10]"
+            contentClassName="h-full w-full"
+            style={{
+              background: "transparent",
+              boxShadow: "none",
+            }}
+          >
+            <button
+              type="button"
+              onClick={onPlay}
+              aria-label={t("Play")}
+              title={t("Play")}
+              className="
+                flex h-full w-full
+                items-center justify-center
+                rounded-full bg-transparent
+                text-ink outline-none
+                transition-transform duration-150
+                active:scale-95
+              "
+            >
+              <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
+            </button>
+          </ThreeLiquidGlassSurface>
+        ) : (
           <button
             type="button"
             onClick={onPlay}
             aria-label={t("Play")}
             title={t("Play")}
             className="
-              flex h-full w-full
+              pointer-events-auto
+              flex h-14 w-14
               items-center justify-center
-              rounded-full bg-transparent
-              text-ink outline-none
+              rounded-full
+              border border-white/15
+              bg-canvas/90
+              text-ink
+              shadow-[0_12px_30px_-12px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.16)]
+              backdrop-blur-xl
+              outline-none
               transition-transform duration-150
+              hover:scale-105
               active:scale-95
             "
           >
             <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
           </button>
-        </ThreeLiquidGlassSurface>
+        )}
       </div>
       {onDismiss && (
         <div
@@ -492,22 +470,45 @@ export const ContinueCard = memo(function ContinueCard({
             absolute end-0.5 top-0.5 z-10
             flex h-11 w-11
             items-center justify-center
+            opacity-0
+            transition-opacity duration-200
+            group-hover:opacity-100
+            focus-within:opacity-100
           "
         >
-          <ThreeLiquidGlassSurface
-            radius="9999px"
-            shaderRadius={1}
-            intensity={0.74}
-            variant="overlay"
-            backdropBlur={hasActivatedGlass}
-            className="pointer-events-none h-9 w-9 group-hover:pointer-events-auto focus-within:pointer-events-auto"
-            surfaceClassName={`border border-white/[0.09] ${glassSurfaceRevealClass}`}
-            contentClassName={`h-full w-full ${glassContentRevealClass}`}
-            style={{
-              background: "transparent",
-              boxShadow: "none",
-            }}
-          >
+          {liquidGlassEnabled ? (
+            <ThreeLiquidGlassSurface
+              radius="9999px"
+              shaderRadius={1}
+              intensity={0.74}
+              className="h-9 w-9 border border-white/[0.09]"
+              contentClassName="h-full w-full"
+              style={{
+                background: "transparent",
+                boxShadow: "none",
+              }}
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDismiss(item);
+                }}
+                aria-label={t("Remove from Continue Watching")}
+                className="
+                  flex h-full w-full
+                  items-center justify-center
+                  rounded-full bg-transparent
+                  text-ink-muted outline-none
+                  transition-colors duration-150
+                  hover:text-ink
+                  active:scale-95
+                "
+              >
+                <X size={20} strokeWidth={2.4} />
+              </button>
+            </ThreeLiquidGlassSurface>
+          ) : (
             <button
               type="button"
               onClick={(e) => {
@@ -516,10 +517,15 @@ export const ContinueCard = memo(function ContinueCard({
               }}
               aria-label={t("Remove from Continue Watching")}
               className="
-                flex h-full w-full
+                flex h-9 w-9
                 items-center justify-center
-                rounded-full bg-transparent
-                text-ink-muted outline-none
+                rounded-full
+                border border-white/15
+                bg-canvas/90
+                text-ink-muted
+                shadow-[0_8px_24px_-10px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.14)]
+                backdrop-blur-xl
+                outline-none
                 transition-colors duration-150
                 hover:text-ink
                 active:scale-95
@@ -527,7 +533,7 @@ export const ContinueCard = memo(function ContinueCard({
             >
               <X size={20} strokeWidth={2.4} />
             </button>
-          </ThreeLiquidGlassSurface>
+          )}
         </div>
       )}
     </div>

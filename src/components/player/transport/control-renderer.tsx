@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
-import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
 import {
   getCustomIcon,
@@ -27,6 +26,7 @@ import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
 import { renderCustomIconControl } from "./custom-icon-renderer";
 import { realQualityLabel } from "@/lib/player/resolution-label";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { useSettings } from "@/lib/settings";
 
 function getControlState(id: PlayerControlId, ctx: ControlContext): string | undefined {
   const preview = ctx.previewStates?.[id];
@@ -60,7 +60,6 @@ import { SpeedMenu } from "./speed-menu";
 import { AspectMenu } from "./aspect-menu";
 import { Anime4kMenu } from "./anime4k-menu";
 import { HdrToggleBigBtn } from "./hdr-toggle-btn";
-import { RtxHdrToggleBigBtn } from "./rtx-hdr-toggle-btn";
 import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
 import { DrawToggle } from "./draw-toggle";
 import { CastButton } from "./cast-button";
@@ -124,7 +123,7 @@ export type ControlContext = {
   onSubDelay: (sec: number) => void;
   onAudioDelay: (sec: number) => void;
   onEnterSync?: () => void;
-  onAddSubtitle: SubtitleAddHandler;
+  onAddSubtitle: (url: string, lang?: string, title?: string) => void;
   onRate: (r: number) => void;
   onPiP: () => void;
   onFullscreen: () => void;
@@ -152,6 +151,94 @@ export type ControlContext = {
   onAnime4kMode?: (id: string) => void;
   anime4kAvailable?: boolean;
 };
+
+function PlayPauseControl({
+  ctx,
+  t,
+}: {
+  ctx: ControlContext;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+}) {
+  const { settings } = useSettings();
+  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+
+  const sizeClass = ctx.tight ? "h-12 w-12" : ctx.compact ? "h-14 w-14" : "h-16 w-16";
+
+  const iconSize = ctx.tight ? 28 : ctx.compact ? 32 : 36;
+
+  const icon = ctx.playing ? (
+    <PauseCircle size={iconSize} strokeWidth={1.5} />
+  ) : (
+    <PlayCircle size={iconSize} strokeWidth={1.5} />
+  );
+
+  if (!liquidGlassEnabled) {
+    return (
+      <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
+        <button
+          type="button"
+          onClick={ctx.onPlayPause}
+          data-tv-initial-focus
+          aria-label={ctx.playing ? t("Pause") : t("Play")}
+          className={`
+            shrink-0
+            flex items-center justify-center
+            rounded-full
+            bg-white text-black
+            shadow-[0_10px_30px_-12px_rgba(0,0,0,0.75)]
+            outline-none
+            transition-transform duration-150
+            hover:scale-105
+            active:scale-95
+            ${sizeClass}
+          `}
+        >
+          {icon}
+        </button>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
+      <ThreeLiquidGlassSurface
+        radius="9999px"
+        shaderRadius={1}
+        intensity={1.05}
+        refractionStrength={1.18}
+        spectralStrength={1.08}
+        className={`
+          shrink-0 rounded-full
+          border border-white/[0.10]
+          ${sizeClass}
+        `}
+        contentClassName="h-full w-full"
+        style={{
+          background: "transparent",
+          boxShadow: "none",
+        }}
+      >
+        <button
+          type="button"
+          onClick={ctx.onPlayPause}
+          data-tv-initial-focus
+          aria-label={ctx.playing ? t("Pause") : t("Play")}
+          className="
+            flex h-full w-full
+            items-center justify-center
+            rounded-full
+            bg-transparent
+            text-white outline-none
+            transition-transform duration-150
+            active:scale-95
+          "
+        >
+          {icon}
+        </button>
+      </ThreeLiquidGlassSurface>
+    </Tooltip>
+  );
+}
 
 export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNode {
   const t = ctx.t ?? translate;
@@ -309,53 +396,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       return <SeekStepBtn direction="back" seconds={10} onSeekStep={ctx.onSeekStep} />;
     }
     case "play-pause": {
-      const sizeClass = ctx.tight ? "h-12 w-12" : ctx.compact ? "h-14 w-14" : "h-16 w-16";
-
-      const iconSize = ctx.tight ? 28 : ctx.compact ? 32 : 36;
-
-      return (
-        <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
-          <ThreeLiquidGlassSurface
-            radius="9999px"
-            shaderRadius={1}
-            intensity={1.05}
-            refractionStrength={1.18}
-            className={`
-              shrink-0 rounded-full
-              border border-white/[0.10]
-              ${sizeClass}
-            `}
-            contentClassName="h-full w-full"
-            style={{
-              background: "transparent",
-              boxShadow: "none",
-            }}
-          >
-            <button
-              type="button"
-              onClick={ctx.onPlayPause}
-              data-player-play-pause
-              data-tv-initial-focus
-              aria-label={ctx.playing ? t("Pause") : t("Play")}
-              className="
-                relative flex h-full w-full
-                items-center justify-center
-                rounded-full
-                bg-transparent
-                text-white outline-none
-                transition-transform duration-150
-                active:scale-95
-              "
-            >
-              {ctx.playing ? (
-                <PauseCircle size={iconSize} strokeWidth={1.5} />
-              ) : (
-                <PlayCircle size={iconSize} strokeWidth={1.5} />
-              )}
-            </button>
-          </ThreeLiquidGlassSurface>
-        </Tooltip>
-      );
+      return <PlayPauseControl ctx={ctx} t={t} />;
     }
     case "seek-forward": {
       if (ctx.tight || ctx.isLiveChannel) return null;
@@ -462,10 +503,6 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     case "hdr-toggle": {
       if (ctx.tight || ctx.engine === "html5") return null;
       return <HdrToggleBigBtn />;
-    }
-    case "rtx-hdr-toggle": {
-      if (ctx.tight || ctx.engine === "html5") return null;
-      return <RtxHdrToggleBigBtn meta={ctx.meta} />;
     }
     case "draw-toggle": {
       if (ctx.compact || !ctx.showDraw) return null;
