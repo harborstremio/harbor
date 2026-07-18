@@ -2,9 +2,19 @@ name: Tauri Build
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore:
+      - .github/ISSUE_TEMPLATE/**
+      - docs/**
+      - "**/*.md"
 
 permissions:
   contents: write
+
+concurrency:
+  group: tauri-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:

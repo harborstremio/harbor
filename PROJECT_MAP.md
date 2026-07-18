@@ -66,6 +66,7 @@ Any AI modifying this codebase **MUST STRICTLY ENFORCE AND PRESERVE** the follow
       target: aarch64-apple-darwin
       bundle: dmg
   ```
+- `tauri-build.yml` is configured with `on: push (branches: [main])` and `concurrency: cancel-in-progress: true` so standalone installer builds (`.msi` + `.dmg`) run automatically upon pushing or merging code to `main`.
 - Do **NOT** add back `macOS Intel (x86_64)`, `Linux`, or `ARM64 Windows` runners unless explicitly instructed by the user.
 
 ### 👤 Rule 5: Git Author Identity
