@@ -287,6 +287,29 @@ export function StreamingSourcesPanel({
       </Section>
 
       <Section
+        title={t("CORS Proxy")}
+        subtitle={t("On Tizen and web, debrid APIs and some addons block browser requests (no CORS headers). Point Harbor at your own CORS proxy (e.g. ") + "npm run proxy" + t(") to unblock them.")}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[14px] font-medium text-ink">{t("Proxy URL")}</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="url"
+                className="flex-1 rounded-xl border border-edge-soft bg-canvas px-4 py-2.5 text-[14px] text-ink placeholder:text-ink-faint focus:border-ink focus:outline-none"
+                placeholder="http://192.168.1.100:3141"
+                value={settings.proxyUrl}
+                onChange={(e) => update({ proxyUrl: e.target.value })}
+              />
+            </div>
+            <p className="text-[12px] text-ink-subtle">
+              {t("Leave empty to fetch directly (will fail on debrid APIs without a proxy).")}
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section
         title={t("Streaming catalogs")}
         subtitle={t("Top titles per service. Toggle off the ones you don't pay for.")}
       >

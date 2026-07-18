@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "proxy": "node scripts/proxy-server.mjs",
     "wgt": "npm run build && node scripts/package.mjs"
   },
   "dependencies": {

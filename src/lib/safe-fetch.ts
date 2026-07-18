@@ -4,9 +4,77 @@ import { TrackerBlockedError, isBlockedUrl, noteBlocked } from "./privacy/blockl
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
+// Domains with CORS headers that should always fetch directly.
+const DIRECT_HOSTS = new Set([
+  "torrentio.strem.fun",
+  "stremio.torbox.app",
+  "api.strem.io",
+  "v3-cinemeta.strem.io",
+]);
+
+// Debrid APIs — NO CORS headers. Must route through proxy on Tizen/web.
+const PROXY_HOSTS = new Set([
+  "api.real-debrid.com",
+  "api.alldebrid.com",
+  "debrid-link.com",
+  "www.premiumize.me",
+  "api.torbox.app",
+]);
+
+// Addon hosting platforms that may lack CORS headers.
+const PROXY_SUFFIXES = [
+  ".elfhosted.com",
+  ".strem.fun",
+  ".strem.io",
+  ".stremio.homes",
+  ".baby-beamup.club",
+  ".workers.dev",
+  ".debridio.com",
+  ".code.run",
+  ".fly.dev",
+  ".onrender.com",
+  ".vercel.app",
+  ".netlify.app",
+  ".railway.app",
+  ".deno.dev",
+];
+
+let proxyUrl: string | null = null;
+
+export function setProxyUrl(url: string): void {
+  proxyUrl = url ? url.replace(/\/+$/, "") : null;
+}
+
 function rewriteForWeb(url: string, init?: RequestInit): { url: string; init?: RequestInit } {
   if (isTauri) return { url, init };
-  return { url, init };
+  if (!proxyUrl) return { url, init };
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return { url, init };
+  }
+
+  if (DIRECT_HOSTS.has(parsed.hostname)) return { url, init };
+
+  const proxiable =
+    PROXY_HOSTS.has(parsed.hostname) || PROXY_SUFFIXES.some((s) => parsed.hostname.endsWith(s));
+
+  if (!proxiable) return { url, init };
+
+  const proxied = `${proxyUrl}/proxy/${parsed.hostname}${parsed.pathname}${parsed.search}`;
+
+  if (!init?.headers) return { url: proxied, init };
+
+  const out = new Headers(init.headers as HeadersInit);
+  const auth = out.get("authorization");
+  if (auth) {
+    out.delete("authorization");
+    out.set("x-harbor-auth", auth);
+  }
+
+  return { url: proxied, init: { ...init, headers: out } };
 }
 
 type HarborFetchResponse = {

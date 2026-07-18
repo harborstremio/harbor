@@ -20,6 +20,7 @@ export const DEFAULT: Settings = {
   adKey: "",
   pmKey: "",
   dlKey: "",
+  proxyUrl: "",
   region: "US",
   preferredLanguages: ["English"],
   requirePreferredLanguage: false,

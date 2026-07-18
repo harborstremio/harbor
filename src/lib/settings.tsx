@@ -3,6 +3,7 @@ import { applyTheme, isKnownPreset, nextColorTheme } from "@/lib/theme";
 import { applyAppIcon } from "@/lib/app-icon";
 import { getCustomThemes, subscribeCustomThemes } from "@/lib/custom-themes";
 import { loadBgImage, saveBgImage } from "@/lib/theme-storage";
+import { setProxyUrl } from "@/lib/safe-fetch";
 import { effectiveTmdbLanguage, setTmdbLanguage } from "@/lib/providers/tmdb/tmdb-client";
 import { setPosterBaseUrl } from "@/lib/providers/rpdb";
 import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
@@ -149,6 +150,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const t = window.setTimeout(() => window.location.reload(), 1200);
     return () => window.clearTimeout(t);
   }, [settings.tmdbImageLangs]);
+
+  useEffect(() => {
+    setProxyUrl(settings.proxyUrl);
+  }, [settings.proxyUrl]);
 
   useEffect(() => {
     applyTheme(settings.theme);

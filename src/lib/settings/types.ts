@@ -72,6 +72,7 @@ export type Settings = {
   adKey: string;
   pmKey: string;
   dlKey: string;
+  proxyUrl: string;
   region: string;
   preferredLanguages: string[];
   requirePreferredLanguage: boolean;
