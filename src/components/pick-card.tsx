@@ -41,11 +41,7 @@ import { ImdbIcon } from "./icons/imdb-icon";
 import { MalLogo } from "./icons/mal-logo";
 import { Poster, useLocalizedPoster } from "./poster";
 
-import {
-  CardHoverOverlay,
-  cardHoverPosterClass,
-  type CardHoverStyle,
-} from "./pick-card/card-hover";
+import { CardHoverOverlay, type CardHoverStyle } from "./pick-card/card-hover";
 import { CustomHoverOverlay, customHoverPosterProps } from "./pick-card/custom-hover";
 import { getCustomHover } from "@/lib/custom-hover";
 import { RtBadge } from "./rt-badge";

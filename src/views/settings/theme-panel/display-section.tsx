@@ -174,22 +174,6 @@ export function DisplaySection() {
       </Section>
 
       <Section
-        title={t("Glass Poster")}
-        subtitle={t("Add a realistic glass frame around posters.")}
-      >
-        <ToggleRow
-          label={t("Poster glass frame")}
-          sub={t("Enable or disable the glass frame around posters.")}
-          value={settings.posterGlassFrameEnabled ?? false}
-          onChange={(value) =>
-            update({
-              posterGlassFrameEnabled: value,
-            })
-          }
-        />
-      </Section>
-
-      <Section
         title={t("Dock Magnification")}
         subtitle={t("Magnify posters on hover and smoothly move nearby items like the macOS Dock.")}
       >
