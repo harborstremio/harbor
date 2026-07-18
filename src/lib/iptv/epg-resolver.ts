@@ -4,10 +4,30 @@ import { epgOffsetHoursPref } from "./settings-bridge";
 import type { EpgIndex, EpgProgram, IptvChannel } from "./types";
 
 const NOISE_WORDS = new Set([
-  "hd", "fhd", "uhd", "4k", "sd", "raw", "alt", "backup",
-  "channel", "channels", "network", "tv",
-  "the", "and", "of", "for",
-  "us", "usa", "uk", "ca", "mx", "br", "am", "fm",
+  "hd",
+  "fhd",
+  "uhd",
+  "4k",
+  "sd",
+  "raw",
+  "alt",
+  "backup",
+  "channel",
+  "channels",
+  "network",
+  "tv",
+  "the",
+  "and",
+  "of",
+  "for",
+  "us",
+  "usa",
+  "uk",
+  "ca",
+  "mx",
+  "br",
+  "am",
+  "fm",
 ]);
 
 function tokenize(name: string): string[] {

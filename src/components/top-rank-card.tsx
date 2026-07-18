@@ -108,7 +108,13 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
   );
 });
 
-export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta: Meta; rank: number }) {
+export const AnimeRankCard = memo(function AnimeRankCard({
+  meta,
+  rank,
+}: {
+  meta: Meta;
+  rank: number;
+}) {
   const { openMeta } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();

@@ -223,7 +223,7 @@ export function useCustomLists(): CustomList[] {
 
 export function useList(id: string | null): CustomList | null {
   const lists = useCustomLists();
-  return useMemo(() => (id ? lists.find((l) => l.id === id) ?? null : null), [lists, id]);
+  return useMemo(() => (id ? (lists.find((l) => l.id === id) ?? null) : null), [lists, id]);
 }
 
 export function useListsContaining(itemId: string | undefined): Set<string> {

@@ -24,7 +24,18 @@ export function useRoomInvite(params: {
   hostSourceForMedia: SourceDescriptor | null;
   expectHostSource: boolean;
 } {
-  const { meta, episode, inSession, roomSnapshot, clientId, hostSource, lastInviteProto, wasInvitedTo, claimHost, sendInvite } = params;
+  const {
+    meta,
+    episode,
+    inSession,
+    roomSnapshot,
+    clientId,
+    hostSource,
+    lastInviteProto,
+    wasInvitedTo,
+    claimHost,
+    sendInvite,
+  } = params;
 
   const inviteKey = `${meta.id}|${episode?.season ?? ""}|${episode?.episode ?? ""}`;
   const foreignHost = !!roomSnapshot.hostClientId && roomSnapshot.hostClientId !== clientId;
@@ -45,7 +56,8 @@ export function useRoomInvite(params: {
       ? hostSource!.descriptor
       : null;
   const expectHostSource =
-    isRoomGuest && (hostSourceForMedia != null || (wasInvitedTo(inviteKey) && lastInviteProto >= 2));
+    isRoomGuest &&
+    (hostSourceForMedia != null || (wasInvitedTo(inviteKey) && lastInviteProto >= 2));
 
   return { inviteKey, canInvite, inviteSentRef, hostSourceForMedia, expectHostSource };
 }

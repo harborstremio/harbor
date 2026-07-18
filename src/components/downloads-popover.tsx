@@ -109,7 +109,10 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
           {downloading ? (
             <span className="mt-0.5 flex items-center gap-2">
               <span className="h-1 flex-1 overflow-hidden rounded-full bg-canvas">
-                <span className="block h-full rounded-full bg-accent transition-[width]" style={{ width: `${pct}%` }} />
+                <span
+                  className="block h-full rounded-full bg-accent transition-[width]"
+                  style={{ width: `${pct}%` }}
+                />
               </span>
               <span className="shrink-0 text-[10.5px] tabular-nums text-ink-subtle">{pct}%</span>
             </span>
@@ -126,7 +129,7 @@ function DownloadRow({ d, t, onOpen }: { d: DownloadItem; t: T; onOpen: () => vo
               {d.status === "done"
                 ? t("Completed")
                 : d.status === "error"
-                  ? d.error ?? t("Failed")
+                  ? (d.error ?? t("Failed"))
                   : d.status === "interrupted"
                     ? t("Interrupted")
                     : t("Canceled")}

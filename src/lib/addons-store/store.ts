@@ -8,10 +8,7 @@ import { isAdultText } from "./adult-filter";
 import { fetchCommunityAddons, fetchManifest } from "./community";
 import { CURATED_ADDONS, type CuratedEntry } from "./curated";
 
-const ALWAYS_HIDDEN_IDS = new Set<string>([
-  "org.stremio.opensubtitles",
-  "com.opensubtitles.v3",
-]);
+const ALWAYS_HIDDEN_IDS = new Set<string>(["org.stremio.opensubtitles", "com.opensubtitles.v3"]);
 
 function normalizeAddonName(name: string | undefined): string {
   if (!name) return "";
@@ -19,7 +16,10 @@ function normalizeAddonName(name: string | undefined): string {
     .toLowerCase()
     .replace(/\[[^\]]*\]/g, "")
     .replace(/\|.*$/g, "")
-    .replace(/\b(rd|tb|ad|premiumize|debrid|elfhosted|community|official|free|paid|sponsored|by\s+\S+)\b/g, "")
+    .replace(
+      /\b(rd|tb|ad|premiumize|debrid|elfhosted|community|official|free|paid|sponsored|by\s+\S+)\b/g,
+      "",
+    )
     .replace(/[^a-z0-9]+/g, "")
     .trim();
 }
@@ -93,9 +93,7 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
         fetchCommunityAddons(),
         listAddons({ limit: 200, sort_by: "stars", order: "desc" })
           .then((r) =>
-            r.addons.map(
-              (a): Addon => ({ manifest: a.manifest, transportUrl: a.manifestUrl }),
-            ),
+            r.addons.map((a): Addon => ({ manifest: a.manifest, transportUrl: a.manifestUrl })),
           )
           .catch(() => [] as Addon[]),
       ]);
@@ -264,15 +262,14 @@ export function useAddonsCatalog(adultsAllowed: boolean): {
 
 export function isAdultAddon(r: ResolvedAddon): boolean {
   if (r.curated) return r.curated.nsfw === true;
-  return (
-    r.manifest?.behaviorHints?.adult === true ||
-    isAdultText(r.manifest?.id, r.manifest?.name)
-  );
+  return r.manifest?.behaviorHints?.adult === true || isAdultText(r.manifest?.id, r.manifest?.name);
 }
 
 function manifestText(r: ResolvedAddon): string {
   const m = r.manifest;
-  return [m?.name ?? "", m?.description ?? "", m?.id ?? "", r.transportUrl ?? ""].join(" ").toLowerCase();
+  return [m?.name ?? "", m?.description ?? "", m?.id ?? "", r.transportUrl ?? ""]
+    .join(" ")
+    .toLowerCase();
 }
 
 function hasResource(r: ResolvedAddon, name: string): boolean {
@@ -280,12 +277,17 @@ function hasResource(r: ResolvedAddon, name: string): boolean {
   return rs.some((x) => (typeof x === "string" ? x === name : x.name === name));
 }
 
-const ANIME_RX = /\banime\b|\bkitsu\b|\bmal\b|\bjikan\b|\bmyanimelist\b|\banidb\b|\banilist\b|\bmanga\b/i;
-const SPORTS_RX = /\bsports?\b|\bnfl\b|\bnba\b|\bnhl\b|\bmlb\b|\bsoccer\b|\bfootball\b|\bf1\b|\bformula\s*1\b|\bcricket\b|\bbasketball\b|\bufc\b|\bmma\b|\bwwe\b|\bdazn\b|\besports?\b|\bsporttv\b|\bdaddylive\b/i;
-const LIVE_TV_RX = /\biptv\b|\blive\s*tv\b|\bchannel\b|\bm3u\b|\bplutotv\b|\bpluto\.tv\b|\busatv\b|\bota\b|\bbroadcast\b/i;
-const DEBRID_RX = /\bdebrid\b|\brealdebrid\b|\breal-debrid\b|\btorbox\b|\balldebrid\b|\bpremiumize\b|\bdebridlink\b|\beasydebrid\b|\boffcloud\b|\bmediafusion\b|\bcomet\b|\btorrentio\b|\bjackettio\b|\bknightcrawler\b|\baiostreams\b|\bstreamfusion\b/i;
+const ANIME_RX =
+  /\banime\b|\bkitsu\b|\bmal\b|\bjikan\b|\bmyanimelist\b|\banidb\b|\banilist\b|\bmanga\b/i;
+const SPORTS_RX =
+  /\bsports?\b|\bnfl\b|\bnba\b|\bnhl\b|\bmlb\b|\bsoccer\b|\bfootball\b|\bf1\b|\bformula\s*1\b|\bcricket\b|\bbasketball\b|\bufc\b|\bmma\b|\bwwe\b|\bdazn\b|\besports?\b|\bsporttv\b|\bdaddylive\b/i;
+const LIVE_TV_RX =
+  /\biptv\b|\blive\s*tv\b|\bchannel\b|\bm3u\b|\bplutotv\b|\bpluto\.tv\b|\busatv\b|\bota\b|\bbroadcast\b/i;
+const DEBRID_RX =
+  /\bdebrid\b|\brealdebrid\b|\breal-debrid\b|\btorbox\b|\balldebrid\b|\bpremiumize\b|\bdebridlink\b|\beasydebrid\b|\boffcloud\b|\bmediafusion\b|\bcomet\b|\btorrentio\b|\bjackettio\b|\bknightcrawler\b|\baiostreams\b|\bstreamfusion\b/i;
 const USENET_RX = /\busenet\b|\bnzb\b|\beasynews\b|\bsabnzbd\b|\bnzbget\b/i;
-const SUBS_FOREIGN_RX = /\bsubdl\b|\bsubscene\b|\bopensubtitles\b|\bsubtitle\b|\bsubtitles\b|\bcaption\b|\bwyzie\b/i;
+const SUBS_FOREIGN_RX =
+  /\bsubdl\b|\bsubscene\b|\bopensubtitles\b|\bsubtitle\b|\bsubtitles\b|\bcaption\b|\bwyzie\b/i;
 
 export function categorizeAddon(r: ResolvedAddon): string {
   if (isAdultAddon(r)) return "adult";
@@ -300,7 +302,10 @@ export function categorizeAddon(r: ResolvedAddon): string {
   const hasCatalog = hasResource(r, "catalog");
   const hasMeta = hasResource(r, "meta");
 
-  if (ids.some((i) => i.startsWith("kitsu") || i.startsWith("mal") || i.startsWith("anidb")) || ANIME_RX.test(text)) {
+  if (
+    ids.some((i) => i.startsWith("kitsu") || i.startsWith("mal") || i.startsWith("anidb")) ||
+    ANIME_RX.test(text)
+  ) {
     if (hasStream || hasMeta || hasCatalog) return "anime";
   }
   if (LIVE_TV_RX.test(text) || types.includes("tv") || types.includes("channel")) return "live-tv";
@@ -329,7 +334,11 @@ export function matchesRail(r: ResolvedAddon, railId: string): boolean {
     case "streams-debrid":
       return hasStream && DEBRID_RX.test(text);
     case "streams-free":
-      return hasStream && !DEBRID_RX.test(text) && (USENET_RX.test(text) || /\btorrent\b|\bp2p\b/i.test(text));
+      return (
+        hasStream &&
+        !DEBRID_RX.test(text) &&
+        (USENET_RX.test(text) || /\btorrent\b|\bp2p\b/i.test(text))
+      );
     case "anime":
       return (
         (hasStream || hasMeta || hasCatalog) &&
@@ -341,9 +350,11 @@ export function matchesRail(r: ResolvedAddon, railId: string): boolean {
     case "metadata":
       return (hasCatalog || hasMeta) && !hasSub && !hasStream;
     case "sports":
-      return SPORTS_RX.test(text) ||
+      return (
+        SPORTS_RX.test(text) ||
         LIVE_TV_RX.test(text) ||
-        (m.types ?? []).some((t) => t === "tv" || t === "channel");
+        (m.types ?? []).some((t) => t === "tv" || t === "channel")
+      );
     default:
       return false;
   }

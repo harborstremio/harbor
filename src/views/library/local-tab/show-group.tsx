@@ -45,7 +45,9 @@ export function groupLocal(items: LocalEntry[]): LocalGroup[] {
   }
   for (const g of out) {
     if (g.kind !== "show") continue;
-    g.episodes.sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0));
+    g.episodes.sort(
+      (a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0),
+    );
     g.head = g.episodes.find((e) => e.poster) ?? g.episodes[0];
   }
   return out;
@@ -68,7 +70,8 @@ export function ShowGroupCard({
   const episodeIds = episodes.map((e) => e.id);
   const isSelected = episodeIds.every((id) => selected.has(id));
   const needsReview = episodes.some((e) => e.needsReview);
-  const countLabel = episodes.length === 1 ? t("1 episode") : t("{n} episodes", { n: episodes.length });
+  const countLabel =
+    episodes.length === 1 ? t("1 episode") : t("{n} episodes", { n: episodes.length });
   const onActivate = () => {
     if (selectMode) {
       onToggleSelect(episodeIds);
@@ -83,7 +86,10 @@ export function ShowGroupCard({
     });
   };
   return (
-    <div className="group relative flex flex-col gap-2 text-start" onMouseLeave={() => setConfirm(false)}>
+    <div
+      className="group relative flex flex-col gap-2 text-start"
+      onMouseLeave={() => setConfirm(false)}
+    >
       <div
         role="button"
         tabIndex={0}
@@ -119,10 +125,16 @@ export function ShowGroupCard({
         {selectMode && (
           <span
             className={`absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-md ${
-              isSelected ? "bg-accent text-white" : "bg-canvas/80 text-ink-subtle ring-1 ring-edge-soft"
+              isSelected
+                ? "bg-accent text-white"
+                : "bg-canvas/80 text-ink-subtle ring-1 ring-edge-soft"
             }`}
           >
-            {isSelected ? <CheckSquare size={14} strokeWidth={2.4} /> : <Square size={14} strokeWidth={2.2} />}
+            {isSelected ? (
+              <CheckSquare size={14} strokeWidth={2.4} />
+            ) : (
+              <Square size={14} strokeWidth={2.2} />
+            )}
           </span>
         )}
         {!selectMode && (
@@ -142,7 +154,10 @@ export function ShowGroupCard({
                 <Wand2 size={11} strokeWidth={2.2} />
               </CardIconButton>
               {head.tmdbId != null && (
-                <CardIconButton title={t("Export .nfo and artwork")} onClick={() => onExport(episodes)}>
+                <CardIconButton
+                  title={t("Export .nfo and artwork")}
+                  onClick={() => onExport(episodes)}
+                >
                   <Download size={11} strokeWidth={2.2} />
                 </CardIconButton>
               )}
@@ -164,14 +179,21 @@ export function ShowGroupCard({
                 }`}
                 aria-label={confirm ? t("Confirm remove") : t("Remove from library")}
               >
-                {confirm ? <RefreshCw size={11} strokeWidth={2.4} /> : <Trash2 size={11} strokeWidth={2.2} />}
+                {confirm ? (
+                  <RefreshCw size={11} strokeWidth={2.4} />
+                ) : (
+                  <Trash2 size={11} strokeWidth={2.2} />
+                )}
               </button>
             </div>
           </>
         )}
       </div>
       <button type="button" onClick={onActivate} className="text-start">
-        <p className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent" title={head.title}>
+        <p
+          className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent"
+          title={head.title}
+        >
           {head.title}
         </p>
         <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">{countLabel}</p>

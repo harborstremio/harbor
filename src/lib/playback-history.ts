@@ -145,7 +145,10 @@ export type WatchedSet = { ids: Set<string>; titles: Set<string> };
 
 export function watchTitleKey(name: string | null | undefined): string {
   if (!name) return "";
-  return name.toLowerCase().replace(/\(\d{4}\)/g, "").replace(/[^a-z0-9]+/g, "");
+  return name
+    .toLowerCase()
+    .replace(/\(\d{4}\)/g, "")
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 export function recentlyPlayed(): WatchedSet {
@@ -162,7 +165,12 @@ export function recentlyPlayed(): WatchedSet {
   return { ids, titles };
 }
 
-export function playbackEntries(): Array<{ metaId: string; savedAt: number; title?: string; parsedTitle?: string }> {
+export function playbackEntries(): Array<{
+  metaId: string;
+  savedAt: number;
+  title?: string;
+  parsedTitle?: string;
+}> {
   const out: Array<{ metaId: string; savedAt: number; title?: string; parsedTitle?: string }> = [];
   for (const [key, entry] of Object.entries(readAll())) {
     const metaId = key.split("|")[0];
@@ -198,11 +206,8 @@ export function streamMatchesSource(
   e: PlaybackEntry,
 ): boolean {
   const sBinge = s.behaviorHints?.bingeGroup ?? null;
-  if (e.bingeGroup && sBinge) return sBinge === e.bingeGroup;    
-  return (                                                       
-    !!e.addonId &&
-    s.addonId === e.addonId &&
-    e.resolution === s.resolution &&
-    e.source === s.source
+  if (e.bingeGroup && sBinge) return sBinge === e.bingeGroup;
+  return (
+    !!e.addonId && s.addonId === e.addonId && e.resolution === s.resolution && e.source === s.source
   );
 }

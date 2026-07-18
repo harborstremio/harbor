@@ -12,8 +12,6 @@ export async function applyMotionInterp(on: boolean): Promise<void> {
         ["video-sync", "audio"],
       ];
   await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
+    props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
   );
 }

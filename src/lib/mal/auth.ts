@@ -14,7 +14,10 @@ function generateVerifier(): string {
 let storedVerifier: string | null = null;
 
 export function buildAuthorizeUrl(): string {
-  if (!MAL_CLIENT_ID) throw new Error("MAL_CLIENT_ID not configured. Set VITE_MAL_CLIENT_ID in your .env or register an app at https://myanimelist.net/apiconfig.");
+  if (!MAL_CLIENT_ID)
+    throw new Error(
+      "MAL_CLIENT_ID not configured. Set VITE_MAL_CLIENT_ID in your .env or register an app at https://myanimelist.net/apiconfig.",
+    );
   const verifier = generateVerifier();
   storedVerifier = verifier;
 
@@ -109,7 +112,7 @@ export async function refreshAccessToken(): Promise<MalSession | null> {
       setSession(null);
       return null;
     }
-    const data = await res.json() as {
+    const data = (await res.json()) as {
       access_token: string;
       refresh_token: string;
       expires_in: number;

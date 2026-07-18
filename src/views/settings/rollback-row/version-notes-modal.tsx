@@ -37,7 +37,9 @@ export function VersionNotesModal({
       >
         <div className="flex items-center justify-between gap-3 border-b border-edge-soft px-5 pb-3.5 pt-4">
           <div className="flex min-w-0 items-center gap-2.5">
-            <h2 className="font-display text-[20px] font-medium tabular-nums text-ink">{entry.version}</h2>
+            <h2 className="font-display text-[20px] font-medium tabular-nums text-ink">
+              {entry.version}
+            </h2>
             {entry.channel === "beta" && <BetaTag force />}
             {entry.channel === "stable" && (
               <span className="inline-flex shrink-0 items-center rounded-md bg-ink/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-ink-muted ring-1 ring-edge">
@@ -58,7 +60,9 @@ export function VersionNotesModal({
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           {entry.notes ? (
-            <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-ink-muted">{entry.notes}</p>
+            <p className="whitespace-pre-line text-[13.5px] leading-relaxed text-ink-muted">
+              {entry.notes}
+            </p>
           ) : (
             <p className="text-[13px] text-ink-subtle">
               {t("No notes were published for this build.")}

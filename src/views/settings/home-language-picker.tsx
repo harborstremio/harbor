@@ -44,7 +44,9 @@ export function HomeLanguagePicker() {
           ) : (
             <>
               <span className="font-semibold tabular-nums text-ink">{count}</span>{" "}
-              {t(count === 1 ? "language. Home filters to it." : "languages. Home filters to these.")}
+              {t(
+                count === 1 ? "language. Home filters to it." : "languages. Home filters to these.",
+              )}
             </>
           )}
         </span>
@@ -79,7 +81,9 @@ export function HomeLanguagePicker() {
                 </span>
                 <span
                   className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full transition-all ${
-                    on ? "bg-accent text-canvas" : "bg-transparent text-transparent ring-1 ring-edge-soft"
+                    on
+                      ? "bg-accent text-canvas"
+                      : "bg-transparent text-transparent ring-1 ring-edge-soft"
                   }`}
                 >
                   <Check size={10} strokeWidth={3} />

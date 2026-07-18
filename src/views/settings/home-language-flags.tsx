@@ -49,7 +49,9 @@ export function LangFlags({ codes }: { codes: string[] }) {
     <span className="flex items-center gap-1">
       {codes.map((c, i) => (
         <span key={c} className="flex items-center gap-1">
-          {i > 0 && <span className="text-[11px] font-light leading-none text-ink-subtle/60">/</span>}
+          {i > 0 && (
+            <span className="text-[11px] font-light leading-none text-ink-subtle/60">/</span>
+          )}
           <Flag code={c} />
         </span>
       ))}

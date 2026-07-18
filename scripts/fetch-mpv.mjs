@@ -63,12 +63,14 @@ const temp = mkdtempSync(join(tmpdir(), "harbor-mpv-"));
 try {
   console.log(`[mpv] fetching ${url}`);
   const response = await fetch(url, { redirect: "follow" });
-  if (!response.ok) throw new Error(`[mpv] download failed (${response.status} ${response.statusText})`);
+  if (!response.ok)
+    throw new Error(`[mpv] download failed (${response.status} ${response.statusText})`);
 
   const archive = join(temp, spec.asset);
   const bytes = Buffer.from(await response.arrayBuffer());
   const digest = createHash("sha256").update(bytes).digest("hex");
-  if (digest !== spec.sha256) throw new Error(`[mpv] checksum mismatch (expected ${spec.sha256}, got ${digest})`);
+  if (digest !== spec.sha256)
+    throw new Error(`[mpv] checksum mismatch (expected ${spec.sha256}, got ${digest})`);
   writeFileSync(archive, bytes);
 
   const extracted = join(temp, "extracted");

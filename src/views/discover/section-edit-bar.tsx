@@ -17,7 +17,9 @@ export function SectionEditBar({
         onClick={onToggle}
         title={hidden ? t("Show section") : t("Hide section")}
         className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-          hidden ? "bg-danger/15 text-danger hover:bg-danger/25" : "text-ink-muted hover:bg-raised hover:text-ink"
+          hidden
+            ? "bg-danger/15 text-danger hover:bg-danger/25"
+            : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         {hidden ? <EyeOff size={14} strokeWidth={2.2} /> : <Eye size={14} strokeWidth={2.2} />}

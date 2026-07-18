@@ -19,7 +19,6 @@ type Props = {
 };
 
 export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Props) {
-
   const t = useT();
   const open = useSyncBarOpen();
   const [localDelay, setLocalDelay] = useState(delaySec);
@@ -103,7 +102,9 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
                 onEnterSync();
               }}
               disabled={!syncAvailable}
-              title={syncAvailable ? t("Sync subtitles via text") : t("Select a subtitle track to sync")}
+              title={
+                syncAvailable ? t("Sync subtitles via text") : t("Select a subtitle track to sync")
+              }
               aria-label={t("Sync via text")}
               className={`flex h-10 items-center gap-2 rounded-xl px-3.5 text-[13px] font-semibold transition-all ${
                 syncAvailable
@@ -119,29 +120,15 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
 
         {/* Center Side: Sync Controls */}
         <div className="flex items-center gap-[2px] rounded-xl bg-raised p-[2px] shadow-inner">
-          <StepBtn
-            label="−0.5s"
-            onClick={() => applyDelay(localDelay - 0.5)}
-            wide
-          />
-          <StepBtn
-            label="−0.1s"
-            onClick={() => applyDelay(localDelay - 0.1)}
-          />
-          
+          <StepBtn label="−0.5s" onClick={() => applyDelay(localDelay - 0.5)} wide />
+          <StepBtn label="−0.1s" onClick={() => applyDelay(localDelay - 0.1)} />
+
           <div className="mx-1.5 flex h-10 w-[96px] items-center justify-center rounded-lg bg-elevated">
             <DelayDisplay value={localDelay} nonZero={isNonZero} onReset={() => applyDelay(0)} />
           </div>
 
-          <StepBtn
-            label="+0.1s"
-            onClick={() => applyDelay(localDelay + 0.1)}
-          />
-          <StepBtn
-            label="+0.5s"
-            onClick={() => applyDelay(localDelay + 0.5)}
-            wide
-          />
+          <StepBtn label="+0.1s" onClick={() => applyDelay(localDelay + 0.1)} />
+          <StepBtn label="+0.5s" onClick={() => applyDelay(localDelay + 0.5)} wide />
         </div>
 
         {/* Right Side: Save & Discard (Fixed width to match left side) */}
@@ -184,15 +171,7 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StepBtn({
-  label,
-  onClick,
-  wide,
-}: {
-  label: string;
-  onClick: () => void;
-  wide?: boolean;
-}) {
+function StepBtn({ label, onClick, wide }: { label: string; onClick: () => void; wide?: boolean }) {
   return (
     <button
       type="button"

@@ -27,12 +27,7 @@ export function AnimeIcon({ active = false }: { active?: boolean }) {
           active ? "animate-anger-pop" : "opacity-0"
         }`}
       >
-        <g
-          stroke="var(--color-danger)"
-          strokeWidth="2.6"
-          strokeLinecap="round"
-          fill="none"
-        >
+        <g stroke="var(--color-danger)" strokeWidth="2.6" strokeLinecap="round" fill="none">
           <path d="M12 3 L12 21" />
           <path d="M3 12 L21 12" />
           <path d="M5.5 5.5 L18.5 18.5" />

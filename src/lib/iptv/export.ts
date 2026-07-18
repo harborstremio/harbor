@@ -33,7 +33,9 @@ export function buildM3u(channels: IptvChannel[], epgUrl?: string | null): strin
       if (attrs.some(([key]) => key.toLowerCase() === k.toLowerCase())) continue;
       attrs.push([k, v]);
     }
-    const attrStr = attrs.length ? " " + attrs.map(([k, v]) => `${k}="${escapeAttr(v)}"`).join(" ") : "";
+    const attrStr = attrs.length
+      ? " " + attrs.map(([k, v]) => `${k}="${escapeAttr(v)}"`).join(" ")
+      : "";
     const duration = typeof ch.durationSec === "number" && ch.durationSec > 0 ? ch.durationSec : -1;
     lines.push(`#EXTINF:${duration}${attrStr},${ch.name}`);
     lines.push(ch.url);
@@ -46,7 +48,11 @@ function escapeAttr(value: string): string {
 }
 
 export function suggestExportFilename(playlistName: string): string {
-  const safe = playlistName.trim().replace(/[^a-z0-9-]+/gi, "-").replace(/^-+|-+$/g, "") || "playlist";
+  const safe =
+    playlistName
+      .trim()
+      .replace(/[^a-z0-9-]+/gi, "-")
+      .replace(/^-+|-+$/g, "") || "playlist";
   const stamp = new Date().toISOString().slice(0, 10);
   return `${safe}-${stamp}.m3u`;
 }
@@ -69,7 +75,8 @@ export function parseXtreamCreds(url: string): XtreamCreds | null {
     const password = params.get("password");
     const type = params.get("type");
     const output = params.get("output");
-    if (!username && !password && !u.pathname.includes("get.php") && !u.pathname.includes("/live/")) return null;
+    if (!username && !password && !u.pathname.includes("get.php") && !u.pathname.includes("/live/"))
+      return null;
     return {
       host: `${u.protocol}//${u.hostname}`,
       port: u.port || undefined,

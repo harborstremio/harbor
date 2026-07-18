@@ -79,14 +79,8 @@ export function scoreStream(
     reasons.push({ signal: "zero-seeders-soft", delta: -8 });
   }
 
-  const expectedYear = opts.releaseDate
-    ? parseInt(opts.releaseDate.slice(0, 4), 10)
-    : null;
-  if (
-    expectedYear != null &&
-    Number.isFinite(expectedYear) &&
-    s.year != null
-  ) {
+  const expectedYear = opts.releaseDate ? parseInt(opts.releaseDate.slice(0, 4), 10) : null;
+  if (expectedYear != null && Number.isFinite(expectedYear) && s.year != null) {
     const diff = Math.abs(s.year - expectedYear);
     if (diff !== 0) {
       const releaseMs = opts.releaseDate ? Date.parse(opts.releaseDate) : NaN;
@@ -97,11 +91,17 @@ export function scoreStream(
       if (diff === 1) {
         const delta = isRecent ? -75 : -18;
         score += delta;
-        reasons.push({ signal: `year-off-by-1:${s.year}vs${expectedYear}${isRecent ? "-recent" : ""}`, delta });
+        reasons.push({
+          signal: `year-off-by-1:${s.year}vs${expectedYear}${isRecent ? "-recent" : ""}`,
+          delta,
+        });
       } else {
         const delta = isRecent ? -150 : -70;
         score += delta;
-        reasons.push({ signal: `year-mismatch:${s.year}vs${expectedYear}${isRecent ? "-recent" : ""}`, delta });
+        reasons.push({
+          signal: `year-mismatch:${s.year}vs${expectedYear}${isRecent ? "-recent" : ""}`,
+          delta,
+        });
       }
     }
   }
@@ -216,7 +216,9 @@ export function scoreStream(
     reasons.push(bitratePenalty);
   }
 
-  const expectedMin = opts.runtimeMinutes ? expectedMinSizeBytes(s.resolution, opts.runtimeMinutes) : null;
+  const expectedMin = opts.runtimeMinutes
+    ? expectedMinSizeBytes(s.resolution, opts.runtimeMinutes)
+    : null;
   const hasValidSize = !!s.size && !!expectedMin && s.size >= expectedMin;
 
   const sizePenalty = sizeMislabelPenalty(s, expectedMin);

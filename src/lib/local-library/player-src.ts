@@ -20,7 +20,11 @@ export function localPlayerSrc(entry: LocalEntry): PlayerSrc {
     },
     imdbId: entry.imdbId ?? undefined,
     episode: epLabel
-      ? { season: entry.season as number, episode: entry.episode as number, imdbId: entry.imdbId ?? undefined }
+      ? {
+          season: entry.season as number,
+          episode: entry.episode as number,
+          imdbId: entry.imdbId ?? undefined,
+        }
       : undefined,
     url: entry.path,
     title: entry.title,

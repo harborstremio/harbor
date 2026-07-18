@@ -40,11 +40,36 @@ export function useExitSnapshot(params: {
   resolvedImdbVerified: boolean;
   seekPreviewEnabled: boolean;
 }) {
-  const { src, engine, status, durationSec, videoMountRef, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled } = params;
+  const {
+    src,
+    engine,
+    status,
+    durationSec,
+    videoMountRef,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    seekPreviewEnabled,
+  } = params;
   const { settings } = useSettings();
   const fullQuality = settings.cwSnapshotFullQuality;
-  const latest = useRef({ src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality });
-  latest.current = { src, engine, durationSec, resolvedImdbId, resolvedImdbVerified, seekPreviewEnabled, fullQuality };
+  const latest = useRef({
+    src,
+    engine,
+    durationSec,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    seekPreviewEnabled,
+    fullQuality,
+  });
+  latest.current = {
+    src,
+    engine,
+    durationSec,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    seekPreviewEnabled,
+    fullQuality,
+  };
   const lastGoodRef = useRef<Cached | null>(null);
   const capturedKeyRef = useRef<string | null>(null);
 
@@ -64,7 +89,12 @@ export function useExitSnapshot(params: {
   );
 
   const captureExitSnapshot = useCallback(async () => {
-    const { src: s, durationSec: dur, resolvedImdbId: resolved, resolvedImdbVerified: verified } = latest.current;
+    const {
+      src: s,
+      durationSec: dur,
+      resolvedImdbId: resolved,
+      resolvedImdbVerified: verified,
+    } = latest.current;
     const id = snapshotId(s, resolved, verified);
     if (!id) {
       persist(lastGoodRef.current);
@@ -98,7 +128,12 @@ export function useExitSnapshot(params: {
   useEffect(() => {
     if (status !== "playing") return;
     const tick = async () => {
-      const { src: s, durationSec: dur, resolvedImdbId: resolved, resolvedImdbVerified: verified } = latest.current;
+      const {
+        src: s,
+        durationSec: dur,
+        resolvedImdbId: resolved,
+        resolvedImdbVerified: verified,
+      } = latest.current;
       const id = snapshotId(s, resolved, verified);
       if (!id) return;
       const cur = getPlaybackPosition();

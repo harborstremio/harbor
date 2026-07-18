@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  tmdbCollection,
-  tmdbSearchCollections,
-  type TmdbCollection,
-} from "@/lib/providers/tmdb";
+import { tmdbCollection, tmdbSearchCollections, type TmdbCollection } from "@/lib/providers/tmdb";
 
 const FEED_QUERY = "collection";
 const PAGES_PER_PULL = 4;

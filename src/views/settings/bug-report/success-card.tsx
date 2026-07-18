@@ -1,13 +1,7 @@
 import { Check, GitPullRequest } from "lucide-react";
 import { openUrl } from "@/lib/window";
 
-export function SuccessCard({
-  id,
-  onAnother,
-}: {
-  id: string;
-  onAnother: () => void;
-}) {
+export function SuccessCard({ id, onAnother }: { id: string; onAnother: () => void }) {
   return (
     <section className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-8">
       <div className="flex items-start gap-3.5">

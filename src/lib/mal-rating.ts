@@ -35,7 +35,8 @@ async function jikanScore(malId: number): Promise<string | null> {
       const r = await fetch(`${JIKAN}/anime/${malId}`);
       if (!r.ok) return null;
       const j = (await r.json()) as { data?: { score?: number } };
-      const score = typeof j?.data?.score === "number" && j.data.score > 0 ? j.data.score.toFixed(1) : null;
+      const score =
+        typeof j?.data?.score === "number" && j.data.score > 0 ? j.data.score.toFixed(1) : null;
       const c = readCache();
       c[malId] = { score, t: Date.now() };
       writeCache(c);

@@ -121,8 +121,10 @@ export async function tmdbCriticData(
     const genres = (raw.genres ?? []).map((g: any) => g.name).filter(Boolean);
 
     return {
-      tagline: typeof raw.tagline === "string" && raw.tagline.trim() ? raw.tagline.trim() : undefined,
-      overview: typeof raw.overview === "string" && raw.overview.trim() ? raw.overview.trim() : undefined,
+      tagline:
+        typeof raw.tagline === "string" && raw.tagline.trim() ? raw.tagline.trim() : undefined,
+      overview:
+        typeof raw.overview === "string" && raw.overview.trim() ? raw.overview.trim() : undefined,
       reviews,
       cast,
       crew,

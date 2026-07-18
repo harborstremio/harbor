@@ -18,14 +18,17 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
     return { w: r?.width || 0, h: r?.height || 0 };
   };
 
-  const clamp = useCallback((o: { x: number; y: number }, z: number, n: { w: number; h: number }) => {
-    const f = frameSize();
-    if (!n.w || !f.w) return { x: 0, y: 0 };
-    const scale = Math.max(f.w / n.w, f.h / n.h) * z;
-    const maxX = Math.max(0, (n.w * scale - f.w) / 2);
-    const maxY = Math.max(0, (n.h * scale - f.h) / 2);
-    return { x: Math.max(-maxX, Math.min(maxX, o.x)), y: Math.max(-maxY, Math.min(maxY, o.y)) };
-  }, []);
+  const clamp = useCallback(
+    (o: { x: number; y: number }, z: number, n: { w: number; h: number }) => {
+      const f = frameSize();
+      if (!n.w || !f.w) return { x: 0, y: 0 };
+      const scale = Math.max(f.w / n.w, f.h / n.h) * z;
+      const maxX = Math.max(0, (n.w * scale - f.w) / 2);
+      const maxY = Math.max(0, (n.h * scale - f.h) / 2);
+      return { x: Math.max(-maxX, Math.min(maxX, o.x)), y: Math.max(-maxY, Math.min(maxY, o.y)) };
+    },
+    [],
+  );
 
   const commit = useCallback(
     (o: { x: number; y: number }, z: number, n: { w: number; h: number }) => {
@@ -79,7 +82,16 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
   };
   const onMove = (e: React.PointerEvent) => {
     if (!drag.current) return;
-    setOffset(clamp({ x: drag.current.ox + (e.clientX - drag.current.x), y: drag.current.oy + (e.clientY - drag.current.y) }, zoom, nat));
+    setOffset(
+      clamp(
+        {
+          x: drag.current.ox + (e.clientX - drag.current.x),
+          y: drag.current.oy + (e.clientY - drag.current.y),
+        },
+        zoom,
+        nat,
+      ),
+    );
   };
   const onUp = () => {
     if (!drag.current) return;
@@ -87,7 +99,9 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
     commit(offset, zoom, nat);
   };
 
-  const dispScale = nat.w ? Math.max((frameSize().w || 1) / nat.w, (frameSize().h || 1) / nat.h) * zoom : 1;
+  const dispScale = nat.w
+    ? Math.max((frameSize().w || 1) / nat.w, (frameSize().h || 1) / nat.h) * zoom
+    : 1;
 
   return (
     <div className="flex flex-col gap-3">
@@ -124,7 +138,11 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
             </div>
           </>
         ) : (
-          <button type="button" onClick={pick} className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-subtle transition-colors hover:text-ink">
+          <button
+            type="button"
+            onClick={pick}
+            className="flex h-full w-full flex-col items-center justify-center gap-2 text-ink-subtle transition-colors hover:text-ink"
+          >
             <ImagePlus size={28} strokeWidth={1.6} />
             <span className="text-[13px] font-medium">Add a cover image</span>
             <span className="text-[11.5px]">A 16:9 shot of your theme looks best</span>
@@ -149,7 +167,11 @@ export function CoverCropper({ onChange }: { onChange: (blob: Blob | null) => vo
             }}
             className="h-1.5 flex-1 cursor-pointer accent-accent"
           />
-          <button type="button" onClick={pick} className="shrink-0 text-[12px] font-medium text-ink-muted transition-colors hover:text-ink">
+          <button
+            type="button"
+            onClick={pick}
+            className="shrink-0 text-[12px] font-medium text-ink-muted transition-colors hover:text-ink"
+          >
             Replace
           </button>
         </div>

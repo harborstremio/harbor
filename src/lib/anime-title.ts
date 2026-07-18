@@ -1,4 +1,9 @@
-import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, type AniZipMapping } from "@/lib/providers/anizip";
+import {
+  aniZipByAnilist,
+  aniZipByKitsu,
+  aniZipByMal,
+  type AniZipMapping,
+} from "@/lib/providers/anizip";
 
 export type AnimeTitleLang = "english" | "romaji" | "native";
 
@@ -51,7 +56,8 @@ export async function resolvePreferredAnimeTitle(
         if (res.ok) {
           const j = await res.json();
           const attr = j?.data?.attributes;
-          if (attr?.titles) return getTitleFromKitsu(attr.titles, lang) || attr.canonicalTitle || null;
+          if (attr?.titles)
+            return getTitleFromKitsu(attr.titles, lang) || attr.canonicalTitle || null;
         }
       } catch {
         /* ignore */

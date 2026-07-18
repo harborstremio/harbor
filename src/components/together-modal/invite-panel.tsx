@@ -51,7 +51,9 @@ export function InvitePanel({
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-edge bg-canvas/60 p-3.5">
       <div className="flex flex-col gap-1.5">
-        <span className="text-[10.5px] uppercase tracking-wider text-ink-subtle">{t("Invite link")}</span>
+        <span className="text-[10.5px] uppercase tracking-wider text-ink-subtle">
+          {t("Invite link")}
+        </span>
         <input
           readOnly
           value={inviteUrl}

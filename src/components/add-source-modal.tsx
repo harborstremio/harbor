@@ -70,8 +70,12 @@ export function AddSourceModal({
       <div className="flex w-full max-w-[420px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-0.5">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Add Custom Source")}</h2>
-            <p className="text-[12.5px] leading-relaxed text-ink-muted">{t("Provide a JSON link or paste it directly.")}</p>
+            <h2 className="text-[19px] font-medium tracking-tight text-ink">
+              {t("Add Custom Source")}
+            </h2>
+            <p className="text-[12.5px] leading-relaxed text-ink-muted">
+              {t("Provide a JSON link or paste it directly.")}
+            </p>
           </div>
           <button
             onClick={onClose}

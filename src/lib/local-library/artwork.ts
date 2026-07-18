@@ -4,10 +4,9 @@ import { IMG } from "@/lib/providers/tmdb/tmdb-client";
 
 export type ArtworkPaths = { poster?: string; logo?: string; backdrop?: string };
 
-function pickByLang<T extends { file_path?: string; iso_639_1?: string | null; vote_average?: number }>(
-  entries: T[] | undefined,
-  originalLang?: string | null,
-): string | undefined {
+function pickByLang<
+  T extends { file_path?: string; iso_639_1?: string | null; vote_average?: number },
+>(entries: T[] | undefined, originalLang?: string | null): string | undefined {
   if (!entries?.length) return undefined;
   const ranked = entries
     .map((e) => ({ e, r: imageLangRank(e.iso_639_1 ?? null, originalLang) }))

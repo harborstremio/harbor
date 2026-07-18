@@ -1,4 +1,14 @@
-import { ChevronDown, ChevronUp, Code2, PanelLeft, PanelTop, Plus, RotateCcw, Shapes, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Code2,
+  PanelLeft,
+  PanelTop,
+  Plus,
+  RotateCcw,
+  Shapes,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import type { ChromeConfig, ChromeNavId } from "@/lib/theme";
 import { NAV_CATALOG, NAV_LABELS } from "./chrome-config";
@@ -52,69 +62,69 @@ export function CustomChromeBuilder({
 
       {!dirty && (
         <>
-      <Field label="Position">
-        <div className="grid grid-cols-2 gap-2">
-          <PosButton
-            active={config.position === "sidebar"}
-            icon={<PanelLeft size={16} strokeWidth={2} />}
-            label="Sidebar"
-            onClick={() => onChange({ ...config, position: "sidebar" })}
-          />
-          <PosButton
-            active={config.position === "topbar"}
-            icon={<PanelTop size={16} strokeWidth={2} />}
-            label="Top bar"
-            onClick={() => onChange({ ...config, position: "topbar" })}
-          />
-        </div>
-      </Field>
+          <Field label="Position">
+            <div className="grid grid-cols-2 gap-2">
+              <PosButton
+                active={config.position === "sidebar"}
+                icon={<PanelLeft size={16} strokeWidth={2} />}
+                label="Sidebar"
+                onClick={() => onChange({ ...config, position: "sidebar" })}
+              />
+              <PosButton
+                active={config.position === "topbar"}
+                icon={<PanelTop size={16} strokeWidth={2} />}
+                label="Top bar"
+                onClick={() => onChange({ ...config, position: "topbar" })}
+              />
+            </div>
+          </Field>
 
-      <Field label="Brand name">
-        <input
-          type="text"
-          value={config.brand}
-          onChange={(e) => onChange({ ...config, brand: e.target.value })}
-          placeholder="Harbor"
-          className="h-12 rounded-lg border border-edge-soft bg-canvas/60 px-3.5 text-[15px] text-ink placeholder:text-ink-subtle transition-colors focus:border-accent/70 focus:bg-canvas/80 focus:outline-none"
-        />
-      </Field>
-
-      <Field label="Menu items">
-        <div className="flex flex-col gap-1.5">
-          {enabled.map((id, i) => (
-            <MenuItemRow
-              key={id}
-              label={config.labels?.[id] ?? NAV_LABELS[id]}
-              iconId={config.icons?.[id]}
-              isFirst={i === 0}
-              isLast={i === enabled.length - 1}
-              onRename={(label) => rename(id, label)}
-              onSetIcon={(icon) => setIcon(id, icon)}
-              onMoveUp={() => move(i, -1)}
-              onMoveDown={() => move(i, 1)}
-              onRemove={() => onChange({ ...config, items: enabled.filter((x) => x !== id) })}
+          <Field label="Brand name">
+            <input
+              type="text"
+              value={config.brand}
+              onChange={(e) => onChange({ ...config, brand: e.target.value })}
+              placeholder="Harbor"
+              className="h-12 rounded-lg border border-edge-soft bg-canvas/60 px-3.5 text-[15px] text-ink placeholder:text-ink-subtle transition-colors focus:border-accent/70 focus:bg-canvas/80 focus:outline-none"
             />
-          ))}
-          {enabled.length === 0 && (
-            <p className="px-1 text-[12px] text-ink-subtle">Add at least one item below.</p>
-          )}
-        </div>
-        {available.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 pt-2">
-            {available.map((id) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => onChange({ ...config, items: [...enabled, id] })}
-                className="flex h-10 items-center gap-1 rounded-md border border-edge-soft bg-canvas/40 px-3 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
-              >
-                <Plus size={12} strokeWidth={2.4} />
-                {NAV_LABELS[id]}
-              </button>
-            ))}
-          </div>
-        )}
-      </Field>
+          </Field>
+
+          <Field label="Menu items">
+            <div className="flex flex-col gap-1.5">
+              {enabled.map((id, i) => (
+                <MenuItemRow
+                  key={id}
+                  label={config.labels?.[id] ?? NAV_LABELS[id]}
+                  iconId={config.icons?.[id]}
+                  isFirst={i === 0}
+                  isLast={i === enabled.length - 1}
+                  onRename={(label) => rename(id, label)}
+                  onSetIcon={(icon) => setIcon(id, icon)}
+                  onMoveUp={() => move(i, -1)}
+                  onMoveDown={() => move(i, 1)}
+                  onRemove={() => onChange({ ...config, items: enabled.filter((x) => x !== id) })}
+                />
+              ))}
+              {enabled.length === 0 && (
+                <p className="px-1 text-[12px] text-ink-subtle">Add at least one item below.</p>
+              )}
+            </div>
+            {available.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {available.map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => onChange({ ...config, items: [...enabled, id] })}
+                    className="flex h-10 items-center gap-1 rounded-md border border-edge-soft bg-canvas/40 px-3 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                  >
+                    <Plus size={12} strokeWidth={2.4} />
+                    {NAV_LABELS[id]}
+                  </button>
+                ))}
+              </div>
+            )}
+          </Field>
         </>
       )}
 

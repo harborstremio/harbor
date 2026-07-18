@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchInstalledAddons, fetchManifestAt, filterEnabled } from "@/lib/addon-store";
-import {
-  torboxAddonFor,
-  userAddons,
-  withDebridKeys,
-  type Addon,
-} from "@/lib/addons";
+import { torboxAddonFor, userAddons, withDebridKeys, type Addon } from "@/lib/addons";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
 import type { useSettings } from "@/lib/settings";
 
@@ -31,7 +26,10 @@ async function resolveManifests(addons: Addon[]): Promise<Addon[]> {
   );
 }
 
-export function useAddons(authKey: string | null, settings: Settings): {
+export function useAddons(
+  authKey: string | null,
+  settings: Settings,
+): {
   addons: Addon[] | null;
   userHasStreamAddons: boolean;
 } {
@@ -79,8 +77,7 @@ export function useAddons(authKey: string | null, settings: Settings): {
       const list = withDebridKeys(merged, debridKeys);
       const existingTorboxIdx = list.findIndex(
         (a) =>
-          a.manifest.id === "app.torbox.stremio" ||
-          a.transportUrl?.includes("stremio.torbox.app"),
+          a.manifest.id === "app.torbox.stremio" || a.transportUrl?.includes("stremio.torbox.app"),
       );
       console.info(
         `[picker] authKey=${authKey ? "yes" : "no"} tbKey=${settings.tbKey ? `set(${settings.tbKey.slice(0, 8)}…)` : "EMPTY"} stremioAddons=${stremioAddons.length} installed=${installed.length} merged=${merged.length} userStreamCount=${userStreamCount} hasTorbox=${existingTorboxIdx >= 0} torboxAutoAddable=${!!torbox}`,

@@ -29,7 +29,9 @@ export function WelcomeStep() {
         </p>
       </div>
       <div className="grid grid-cols-3 gap-3 pt-2">
-        <Bullet title={t("Current")}>{t("Trending, in theaters, what's on every streamer.")}</Bullet>
+        <Bullet title={t("Current")}>
+          {t("Trending, in theaters, what's on every streamer.")}
+        </Bullet>
         <Bullet title={t("Yours")}>{t("Your Stremio library + addons sync in untouched.")}</Bullet>
         <Bullet title={t("Quiet")}>{t("No telemetry, no servers, no bundled keys.")}</Bullet>
       </div>

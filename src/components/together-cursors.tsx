@@ -62,7 +62,11 @@ export function TogetherCursors() {
   const lastSentRef = useRef(0);
   const lastMoveRef = useRef(0);
   const idleSentRef = useRef(false);
-  const lastPosRef = useRef<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
+  const lastPosRef = useRef<{ x: number; y: number; visible: boolean }>({
+    x: 0,
+    y: 0,
+    visible: false,
+  });
   const lastClientRef = useRef<{ cx: number; cy: number } | null>(null);
   const pathRef = useRef(topPath);
   pathRef.current = topPath;
@@ -95,7 +99,10 @@ export function TogetherCursors() {
     const onLeave = () => hideCursor();
 
     const onMouseOut = (e: MouseEvent) => {
-      if (e.relatedTarget == null && (e as MouseEvent & { toElement?: Element | null }).toElement == null) {
+      if (
+        e.relatedTarget == null &&
+        (e as MouseEvent & { toElement?: Element | null }).toElement == null
+      ) {
         hideCursor();
       }
     };
@@ -183,7 +190,9 @@ export function TogetherCursors() {
     <div className="pointer-events-none fixed inset-0 z-[150]">
       {visibleCursors.map((c) => {
         const peer = snapshot.participants.find((p) => p.id === c.from);
-        return <RemotePointer key={c.from} cursor={c} main={main} peerColor={peer?.color ?? null} />;
+        return (
+          <RemotePointer key={c.from} cursor={c} main={main} peerColor={peer?.color ?? null} />
+        );
       })}
     </div>
   );

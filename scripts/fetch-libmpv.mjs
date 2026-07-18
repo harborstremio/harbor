@@ -27,7 +27,9 @@ console.log(`[libmpv] fetching ${url}`);
 const res = await fetch(url, { redirect: "follow" });
 if (!res.ok) {
   console.error(`[libmpv] download failed (${res.status} ${res.statusText})`);
-  console.error("[libmpv] set HARBOR_LIBMPV_URL to a mirror, or drop libmpv-2.dll into src-tauri/libmpv/ by hand");
+  console.error(
+    "[libmpv] set HARBOR_LIBMPV_URL to a mirror, or drop libmpv-2.dll into src-tauri/libmpv/ by hand",
+  );
   process.exit(1);
 }
 const buf = Buffer.from(await res.arrayBuffer());

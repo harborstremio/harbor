@@ -17,7 +17,9 @@ export function useEpisodeEnrich({
   tvdbKey: string;
   omdbKey: string;
 }): Episode[] {
-  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(new Map());
+  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(
+    new Map(),
+  );
   const [omdbBySeason, setOmdbBySeason] = useState<Map<number, Map<number, number>>>(new Map());
   const [harborImdb, setHarborImdb] = useState<Map<string, number>>(new Map());
 

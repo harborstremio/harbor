@@ -30,9 +30,7 @@ export function AddonDescription({ text }: { text: string }) {
     <div className="max-w-2xl">
       <p
         ref={ref}
-        className={`text-[14px] leading-relaxed text-ink-muted ${
-          expanded ? "" : "line-clamp-3"
-        }`}
+        className={`text-[14px] leading-relaxed text-ink-muted ${expanded ? "" : "line-clamp-3"}`}
       >
         {text}
       </p>

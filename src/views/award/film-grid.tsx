@@ -37,16 +37,14 @@ export function FilmGrid({
   const canViewAll = !expanded && total > PREVIEW && films.length > 0;
   return (
     <section className="flex flex-col gap-7">
-      <Header
-        title={t("Winning films & shows")}
-        count={skeleton ? null : total}
-        tint={tint}
-      />
+      <Header title={t("Winning films & shows")} count={skeleton ? null : total} tint={tint} />
       <div className={GRID}>
         {skeleton
           ? Array.from({ length: PREVIEW }).map((_, i) => <PosterSkeleton key={i} />)
           : shown.map((m) => <PickCard key={m.id} meta={m} />)}
-        {expanded && loadingMore && Array.from({ length: 6 }).map((_, i) => <PosterSkeleton key={`m${i}`} />)}
+        {expanded &&
+          loadingMore &&
+          Array.from({ length: 6 }).map((_, i) => <PosterSkeleton key={`m${i}`} />)}
       </div>
 
       {canViewAll && (

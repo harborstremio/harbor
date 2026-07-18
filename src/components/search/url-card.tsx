@@ -25,7 +25,9 @@ export function UrlCard({ raw, onClose }: { raw: string; onClose: () => void }) 
         <Link2 size={22} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">Direct link</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+          Direct link
+        </span>
         <span className="truncate text-[15px] font-semibold text-ink">{title}</span>
         <span className="truncate text-[12.5px] text-ink-subtle">{url}</span>
       </div>

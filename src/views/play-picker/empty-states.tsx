@@ -82,8 +82,8 @@ export function FilteredOutState({
           Strict filters dropped everything
         </h2>
         <p className="max-w-lg text-[14px] leading-relaxed text-ink-muted">
-          Harbor blocks suspicious files and mismatched releases by default. For older shows
-          and unusual titles this is sometimes too tight.
+          Harbor blocks suspicious files and mismatched releases by default. For older shows and
+          unusual titles this is sometimes too tight.
         </p>
         {groups.length > 0 && (
           <ul className="flex flex-wrap justify-center gap-2 pt-1">

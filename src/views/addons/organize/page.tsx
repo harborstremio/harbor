@@ -177,7 +177,9 @@ export function OrganizeAddonsPage({
       setPhase({ kind: "ready" });
       setNotice({
         tone: "danger",
-        text: t("Something unexpected went wrong. Nothing may have been written. Retry to re-check."),
+        text: t(
+          "Something unexpected went wrong. Nothing may have been written. Retry to re-check.",
+        ),
         retry: true,
       });
     }
@@ -198,7 +200,9 @@ export function OrganizeAddonsPage({
     setBackupsOpen(false);
     setNotice({
       tone: "info",
-      text: t("Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save."),
+      text: t(
+        "Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save.",
+      ),
     });
   };
 
@@ -226,7 +230,9 @@ export function OrganizeAddonsPage({
               {t("Organize addons")}
             </h1>
             <p className="hidden truncate text-[13px] text-ink-muted sm:block">
-              {t("The order decides who answers first when you press Play. Drag, use the arrows, or jump anything straight to the top.")}
+              {t(
+                "The order decides who answers first when you press Play. Drag, use the arrows, or jump anything straight to the top.",
+              )}
             </p>
           </div>
           {showBackups && (
@@ -300,7 +306,9 @@ export function OrganizeAddonsPage({
           {phase.kind === "loadError" ? (
             <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-20 text-center">
               <p className="text-[15px] leading-relaxed text-ink-muted">
-                {t("Couldn't load your Stremio collection. Nothing can be reordered safely without it.")}
+                {t(
+                  "Couldn't load your Stremio collection. Nothing can be reordered safely without it.",
+                )}
               </p>
               <div className="flex items-center gap-3">
                 <button
@@ -377,7 +385,9 @@ export function OrganizeAddonsPage({
                     {workingDevice.length > 0 && (
                       <SectionCard
                         title={t("On this device only")}
-                        sub={t("These live in Harbor on this computer and never touch your account.")}
+                        sub={t(
+                          "These live in Harbor on this computer and never touch your account.",
+                        )}
                         count={workingDevice.length}
                       >
                         <OrganizeList
@@ -421,10 +431,22 @@ export function OrganizeAddonsPage({
                   </div>
                   <ul className="flex flex-col gap-2.5 text-[13px] leading-relaxed text-ink-muted">
                     <li>{t("Number 1 gets asked first for streams when you press Play.")}</li>
-                    <li>{t("The order also decides which addon's rows win on your Home screen.")}</li>
-                    <li>{t("Nothing changes until you press Save. Leaving this page discards edits.")}</li>
-                    <li>{t("The Backups button at the top keeps your last five orders. One click restores any of them.")}</li>
-                    <li>{t("Harbor double-checks with Stremio after saving, so a half-written order can't slip through.")}</li>
+                    <li>
+                      {t("The order also decides which addon's rows win on your Home screen.")}
+                    </li>
+                    <li>
+                      {t("Nothing changes until you press Save. Leaving this page discards edits.")}
+                    </li>
+                    <li>
+                      {t(
+                        "The Backups button at the top keeps your last five orders. One click restores any of them.",
+                      )}
+                    </li>
+                    <li>
+                      {t(
+                        "Harbor double-checks with Stremio after saving, so a half-written order can't slip through.",
+                      )}
+                    </li>
                   </ul>
                 </section>
               </div>

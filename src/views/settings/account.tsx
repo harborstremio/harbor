@@ -78,15 +78,13 @@ export function AccountStub() {
     <div className="flex flex-col gap-5">
       <Section
         title={t("Harbor identity")}
-        subtitle={t("How you appear in Watch Together, sessions, and chat. Sits on top of your Stremio account.")}
+        subtitle={t(
+          "How you appear in Watch Together, sessions, and chat. Sits on top of your Stremio account.",
+        )}
       >
         <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
           <div className="flex items-center gap-5">
-            <AvatarRing
-              src={effectiveAvatar}
-              size={88}
-              onClick={() => fileRef.current?.click()}
-            />
+            <AvatarRing src={effectiveAvatar} size={88} onClick={() => fileRef.current?.click()} />
             <input
               ref={fileRef}
               type="file"
@@ -136,7 +134,14 @@ export function AccountStub() {
                       ({user.fullname || user.email.split("@")[0]})
                     </span>
                   )}
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden className="text-ink-subtle">
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden
+                    className="text-ink-subtle"
+                  >
                     <path
                       d="M16.5 4.5l3 3-11 11H5.5v-3l11-11z"
                       stroke="currentColor"
@@ -153,7 +158,12 @@ export function AccountStub() {
                   className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    <path
+                      d="M12 5v14M5 12h14"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
                   </svg>
                   {t("Upload photo")}
                 </button>
@@ -181,7 +191,9 @@ export function AccountStub() {
 
       <Section
         title={t("Profiles")}
-        subtitle={t("Everyone who uses this Harbor gets their own watch history, avatar, color, and optional PIN. Switch anytime.")}
+        subtitle={t(
+          "Everyone who uses this Harbor gets their own watch history, avatar, color, and optional PIN. Switch anytime.",
+        )}
       >
         <div className="flex flex-col gap-5 rounded-2xl border border-edge-soft bg-canvas/40 p-5">
           <ProfilesStrip />
@@ -263,7 +275,9 @@ export function AccountStub() {
 
       <Section
         title={t("Synced addons")}
-        subtitle={t("Harbor pulls your addon collection from Stremio. Manage individual addons in Streaming sources.")}
+        subtitle={t(
+          "Harbor pulls your addon collection from Stremio. Manage individual addons in Streaming sources.",
+        )}
       >
         <SyncedAddonsCard />
       </Section>

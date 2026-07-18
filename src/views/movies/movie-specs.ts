@@ -58,9 +58,7 @@ export function rotateDaily<T extends { id: string; name: string }>(
   n: number,
   seen: ReturnType<typeof recentlyPlayed>,
 ): T[] {
-  const unseen = pool.filter(
-    (m) => !seen.ids.has(m.id) && !seen.titles.has(watchTitleKey(m.name)),
-  );
+  const unseen = pool.filter((m) => !seen.ids.has(m.id) && !seen.titles.has(watchTitleKey(m.name)));
   const base = unseen.length >= n ? unseen : pool;
   if (base.length === 0) return [];
   const day = Math.floor(Date.now() / 86_400_000);
@@ -87,11 +85,13 @@ export function movieSpecs(key: string, region: string): RowSpec[] {
       title: "In Theaters Now",
       fetcher: (p) => tmdbMovieRow(key, "now_playing", region, p),
     },
-    ...pickMoodSpecs(new Date()).map((m): RowSpec => ({
-      key: m.id,
-      title: m.title,
-      fetcher: (p) => tmdbDiscover(key, "movie", { ...m.params, page: String(p) }),
-    })),
+    ...pickMoodSpecs(new Date()).map(
+      (m): RowSpec => ({
+        key: m.id,
+        title: m.title,
+        fetcher: (p) => tmdbDiscover(key, "movie", { ...m.params, page: String(p) }),
+      }),
+    ),
     {
       key: "critics-acclaim",
       title: "Critics' Picks",

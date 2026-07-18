@@ -40,7 +40,9 @@ function normHex(raw: string): string | null {
   if (/^[0-9a-fA-F]{6}$/.test(v)) return `#${v.toLowerCase()}`;
   if (/^#[0-9a-fA-F]{6}$/.test(v)) return v.toLowerCase();
   const dec = parseColor(v);
-  return dec ? `#${[dec.r, dec.g, dec.b].map((n) => n.toString(16).padStart(2, "0")).join("")}` : null;
+  return dec
+    ? `#${[dec.r, dec.g, dec.b].map((n) => n.toString(16).padStart(2, "0")).join("")}`
+    : null;
 }
 
 function sectionsOf(text: string): Array<{ name: string; map: Record<string, string> }> {
@@ -62,7 +64,10 @@ function sectionsOf(text: string): Array<{ name: string; map: Record<string, str
   return out;
 }
 
-function pickAccent(map: Record<string, string>, exclude?: string): { accent: string; accentAlt?: string } {
+function pickAccent(
+  map: Record<string, string>,
+  exclude?: string,
+): { accent: string; accentAlt?: string } {
   const ex = exclude?.toLowerCase();
   const entries = Object.entries(map)
     .map(([k, v]) => ({ k, v, rgb: parseColor(v) }))
@@ -74,12 +79,18 @@ function pickAccent(map: Record<string, string>, exclude?: string): { accent: st
   return { accent: accent.v, accentAlt: alt?.v };
 }
 
-function bucketFor(schemeName: string, themeName: string, map: Record<string, string>): PaletteBucket | null {
+function bucketFor(
+  schemeName: string,
+  themeName: string,
+  map: Record<string, string>,
+): PaletteBucket | null {
   const present = (keys: string[]) => keys.map((k) => map[k]).filter(Boolean);
   const bgAll = present(BG_KEYS);
   if (bgAll.length === 0 || !map.text) return null;
 
-  const light = /latte|light|day|dawn/i.test(schemeName) || (parseColor(map.main ?? bgAll[0]) ? rgbIsLight(parseColor(map.main ?? bgAll[0])!) : false);
+  const light =
+    /latte|light|day|dawn/i.test(schemeName) ||
+    (parseColor(map.main ?? bgAll[0]) ? rgbIsLight(parseColor(map.main ?? bgAll[0])!) : false);
   const ranked = bgAll
     .map((h) => ({ h, rgb: parseColor(h)! }))
     .sort((a, b) => (light ? bLum(b.rgb) - bLum(a.rgb) : bLum(a.rgb) - bLum(b.rgb)));
@@ -87,7 +98,8 @@ function bucketFor(schemeName: string, themeName: string, map: Record<string, st
 
   const danger = map["notification-error"] ?? map.red ?? map.notification;
   const { accent, accentAlt } = pickAccent(map, danger);
-  const label = schemeName && schemeName.toLowerCase() !== "base" ? `${themeName} ${schemeName}` : themeName;
+  const label =
+    schemeName && schemeName.toLowerCase() !== "base" ? `${themeName} ${schemeName}` : themeName;
 
   return {
     name: label,

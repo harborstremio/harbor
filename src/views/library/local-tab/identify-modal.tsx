@@ -24,11 +24,7 @@ export type IdentifyResolution = {
   type: "movie" | "show";
 };
 
-async function searchTmdb(
-  key: string,
-  kind: "movie" | "tv",
-  query: string,
-): Promise<Candidate[]> {
+async function searchTmdb(key: string, kind: "movie" | "tv", query: string): Promise<Candidate[]> {
   const data = await get<{ results?: any[] }>(key, `search/${kind}`, {
     query,
     include_adult: "false",
@@ -156,7 +152,9 @@ export function IdentifyModal({
       <div className="flex w-full max-w-[560px] flex-col gap-5 rounded-[24px] border border-edge-soft bg-elevated/95 px-7 py-7 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-0.5">
-            <h2 className="text-[18px] font-medium tracking-tight text-ink">{t("What is this title?")}</h2>
+            <h2 className="text-[18px] font-medium tracking-tight text-ink">
+              {t("What is this title?")}
+            </h2>
             <p className="truncate text-[12px] text-ink-subtle" title={head.filename}>
               {target.length > 1
                 ? t("{n} episodes · {file}", { n: target.length, file: head.filename })
@@ -179,7 +177,9 @@ export function IdentifyModal({
               type="button"
               onClick={() => setKind(k)}
               className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-                kind === k ? "bg-ink text-canvas" : "bg-canvas/50 text-ink-muted ring-1 ring-edge-soft hover:text-ink"
+                kind === k
+                  ? "bg-ink text-canvas"
+                  : "bg-canvas/50 text-ink-muted ring-1 ring-edge-soft hover:text-ink"
               }`}
             >
               {k === "movie" ? t("Movie") : t("Series")}
@@ -206,7 +206,9 @@ export function IdentifyModal({
         ) : (
           <div className="flex max-h-[42vh] flex-col gap-1 overflow-y-auto">
             {results.length === 0 && !loading && query.trim() && (
-              <p className="px-1 py-6 text-center text-[13px] text-ink-muted">{t("No matches. Try a different search.")}</p>
+              <p className="px-1 py-6 text-center text-[13px] text-ink-muted">
+                {t("No matches. Try a different search.")}
+              </p>
             )}
             {results.map((c) => (
               <button
@@ -218,16 +220,31 @@ export function IdentifyModal({
               >
                 <div className="h-[72px] w-[48px] shrink-0 overflow-hidden rounded-lg bg-canvas ring-1 ring-edge-soft">
                   {c.poster ? (
-                    <img src={c.poster} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    <img
+                      src={c.poster}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   ) : null}
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <span className="flex items-center gap-2 text-[13.5px] font-semibold text-ink">
                     <span className="truncate">{c.title}</span>
-                    {c.year && <span className="shrink-0 text-[12px] font-normal text-ink-subtle">{c.year}</span>}
-                    {picking === c.tmdbId && <Loader2 size={13} className="shrink-0 animate-spin text-ink-subtle" />}
+                    {c.year && (
+                      <span className="shrink-0 text-[12px] font-normal text-ink-subtle">
+                        {c.year}
+                      </span>
+                    )}
+                    {picking === c.tmdbId && (
+                      <Loader2 size={13} className="shrink-0 animate-spin text-ink-subtle" />
+                    )}
                   </span>
-                  {c.overview && <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-muted">{c.overview}</span>}
+                  {c.overview && (
+                    <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-muted">
+                      {c.overview}
+                    </span>
+                  )}
                 </div>
               </button>
             ))}

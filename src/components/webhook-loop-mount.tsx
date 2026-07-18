@@ -65,7 +65,7 @@ export function WebhookLoopMount() {
           return null;
         }
       })();
-      const last = raw ? (JSON.parse(raw) as { at?: number }).at ?? 0 : 0;
+      const last = raw ? ((JSON.parse(raw) as { at?: number }).at ?? 0) : 0;
       if (Date.now() - last > TICK_INTERVAL_MS) void tick();
     };
     window.addEventListener("focus", onFocus);

@@ -97,7 +97,9 @@ function HistoryError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-start gap-2.5 px-3.5 py-4">
       <p className="text-[12px] leading-relaxed text-ink-subtle">
-        {t("Couldn't reach harbor.site to load earlier builds. Check your connection and try again.")}
+        {t(
+          "Couldn't reach harbor.site to load earlier builds. Check your connection and try again.",
+        )}
       </p>
       <div className="flex items-center gap-3">
         <button

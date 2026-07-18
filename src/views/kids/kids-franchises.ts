@@ -73,7 +73,10 @@ export const KIDS_FRANCHISES: Franchise[] = [
     key: "madagascar",
     name: "Madagascar",
     grad: "from-green-500 via-lime-500 to-amber-300",
-    source: { kind: "collection", queries: ["Madagascar Collection", "Penguins of Madagascar Collection"] },
+    source: {
+      kind: "collection",
+      queries: ["Madagascar Collection", "Penguins of Madagascar Collection"],
+    },
   },
   {
     key: "ice-age",
@@ -119,7 +122,11 @@ export const KIDS_FRANCHISES: Franchise[] = [
         { type: "movie", query: "Pokémon the Movie: White - Victini and Zekrom", year: 2011 },
         { type: "movie", query: "Pokémon the Movie: Kyurem vs. the Sword of Justice", year: 2012 },
         { type: "movie", query: "Pokémon the Movie: Genesect and the Legend Awakened", year: 2013 },
-        { type: "movie", query: "Pokémon the Movie: Diancie and the Cocoon of Destruction", year: 2014 },
+        {
+          type: "movie",
+          query: "Pokémon the Movie: Diancie and the Cocoon of Destruction",
+          year: 2014,
+        },
         { type: "movie", query: "Pokémon the Movie: Hoopa and the Clash of Ages", year: 2015 },
         { type: "movie", query: "Pokémon the Movie: I Choose You!", year: 2017 },
         { type: "movie", query: "Pokémon the Movie: The Power of Us", year: 2018 },
@@ -190,7 +197,9 @@ export function franchiseFetcher(key: string, f: Franchise): (page: number) => P
     const base = { sort_by: "popularity.desc", "vote_count.gte": "1", page: p, ...KEYWORD_KID };
     const [movies, tv] = await Promise.all([
       id
-        ? tmdbDiscover(key, "movie", { with_keywords: String(id), ...base }).catch(() => [] as Meta[])
+        ? tmdbDiscover(key, "movie", { with_keywords: String(id), ...base }).catch(
+            () => [] as Meta[],
+          )
         : Promise.resolve([] as Meta[]),
       id
         ? tmdbDiscover(key, "tv", { with_keywords: String(id), ...base }).catch(() => [] as Meta[])

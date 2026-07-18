@@ -60,9 +60,11 @@ export function AvatarDock({
         surface ? "pointer-events-none opacity-100" : "pointer-events-none opacity-0"
       }`}
     >
-      <div className={`flex flex-col gap-1.5 rounded-2xl border border-white/12 bg-black/35 px-2.5 py-2 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.65)] ${alignRight ? "items-end" : "items-start"}`}>
+      <div
+        className={`flex flex-col gap-1.5 rounded-2xl border border-white/12 bg-black/35 px-2.5 py-2 backdrop-blur-xl shadow-[0_18px_50px_-22px_rgba(0,0,0,0.65)] ${alignRight ? "items-end" : "items-start"}`}
+      >
         {participants.map((p) => {
-          const lastSeen = p.id === selfId ? now : presenceMap.get(p.id) ?? p.joinedAt;
+          const lastSeen = p.id === selfId ? now : (presenceMap.get(p.id) ?? p.joinedAt);
           const stale = now - lastSeen > ACTIVE_THRESHOLD_MS;
           const loc = participantLocations.get(p.id);
           const leftPlayer = p.id !== selfId && !!loc && loc.kind !== "player";
@@ -101,12 +103,12 @@ function Avatar({
   const t = useT();
   const { avatar: selfAvatar, color: selfColor } = useSelfIdentity();
   const initial = (participant.name?.[0] ?? "?").toUpperCase();
-  const avatarSrc = isSelf ? selfAvatar : participant.avatar ?? null;
+  const avatarSrc = isSelf ? selfAvatar : (participant.avatar ?? null);
   const [avatarFailed, setAvatarFailed] = useState(false);
   useEffect(() => setAvatarFailed(false), [avatarSrc]);
   const tint = isSelf
-    ? selfColor ?? nameColor(participant.name)
-    : participant.color ?? nameColor(participant.name);
+    ? (selfColor ?? nameColor(participant.name))
+    : (participant.color ?? nameColor(participant.name));
   const dim = isPauser || isStale || leftPlayer || !participant.ready;
   return (
     <div className="group/avatar pointer-events-auto flex items-center gap-2">

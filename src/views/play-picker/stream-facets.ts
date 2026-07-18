@@ -86,7 +86,9 @@ export function facetOptions(streams: ScoredStream[], dim: FacetDim): FacetOptio
     if (v == null) continue;
     counts.set(v, (counts.get(v) ?? 0) + 1);
   }
-  return dim.order.filter((k) => counts.has(k)).map((k) => ({ key: k, count: counts.get(k) as number }));
+  return dim.order
+    .filter((k) => counts.has(k))
+    .map((k) => ({ key: k, count: counts.get(k) as number }));
 }
 
 export function matchesFacets(s: ScoredStream, active: FacetState, except?: string): boolean {

@@ -15,5 +15,9 @@ function subscribe(l: () => void): () => void {
 }
 
 export function useSkipSegmentsView(): SkipSegment[] {
-  return useSyncExternalStore(subscribe, () => segments, () => segments);
+  return useSyncExternalStore(
+    subscribe,
+    () => segments,
+    () => segments,
+  );
 }

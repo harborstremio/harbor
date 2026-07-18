@@ -24,10 +24,7 @@
     "core:webview:allow-set-webview-zoom",
     {
       "identifier": "opener:allow-open-url",
-      "allow": [
-        { "url": "https://*" },
-        { "url": "http://*" }
-      ]
+      "allow": [{ "url": "https://*" }, { "url": "http://*" }]
     },
     {
       "identifier": "shell:allow-execute",
@@ -41,10 +38,7 @@
     },
     {
       "identifier": "http:default",
-      "allow": [
-        { "url": "https://*:*/**" },
-        { "url": "http://*:*/**" }
-      ]
+      "allow": [{ "url": "https://*:*/**" }, { "url": "http://*:*/**" }]
     },
     "dialog:default",
     "dialog:allow-open",

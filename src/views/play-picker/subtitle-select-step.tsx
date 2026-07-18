@@ -60,7 +60,12 @@ export function SubtitleSelectStep({
     if (r) {
       onStart({
         ...src,
-        subtitlePreselect: { off: false, url: r.url, lang: r.lang, title: r.title || languageName(r.lang) },
+        subtitlePreselect: {
+          off: false,
+          url: r.url,
+          lang: r.lang,
+          title: r.title || languageName(r.lang),
+        },
       });
       return;
     }
@@ -68,14 +73,23 @@ export function SubtitleSelectStep({
   };
 
   const visible =
-    activeLang === "all" ? results ?? [] : groups.find((g) => g.langKey === activeLang)?.items ?? [];
+    activeLang === "all"
+      ? (results ?? [])
+      : (groups.find((g) => g.langKey === activeLang)?.items ?? []);
   const context = episodeContext(src.episode, src.meta.name);
   const total = results?.length ?? 0;
 
   return (
-    <main data-tv-focus-scope className="absolute inset-0 z-50 flex flex-col overflow-hidden bg-canvas">
+    <main
+      data-tv-focus-scope
+      className="absolute inset-0 z-50 flex flex-col overflow-hidden bg-canvas"
+    >
       <BackdropLayer src={src.episode?.still || src.meta.background || src.meta.poster} />
-      <div aria-hidden data-tauri-drag-region={fs ? "false" : "true"} className="absolute inset-x-0 top-0 z-10 h-20" />
+      <div
+        aria-hidden
+        data-tauri-drag-region={fs ? "false" : "true"}
+        className="absolute inset-x-0 top-0 z-10 h-20"
+      />
 
       <div className="relative mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-6 px-10 pb-10 pt-24">
         <header className="flex items-start gap-4">
@@ -91,7 +105,9 @@ export function SubtitleSelectStep({
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex items-center gap-2.5">
               <Captions size={22} strokeWidth={2} className="shrink-0 text-accent" />
-              <h1 className="text-[26px] font-semibold tracking-tight text-ink">{t("Choose subtitles")}</h1>
+              <h1 className="text-[26px] font-semibold tracking-tight text-ink">
+                {t("Choose subtitles")}
+              </h1>
             </div>
             {context && <p className="truncate text-[14px] text-ink-muted">{context}</p>}
           </div>
@@ -130,11 +146,17 @@ export function SubtitleSelectStep({
 
               <section className="flex min-h-0 min-w-0 flex-1 flex-col">
                 <div className="min-h-0 flex-1 overflow-y-auto p-3">
-                  <OffRow selected={selected === "off"} onPick={() => setSelected("off")} label={t("No subtitles")} />
+                  <OffRow
+                    selected={selected === "off"}
+                    onPick={() => setSelected("off")}
+                    label={t("No subtitles")}
+                  />
 
                   {error && total === 0 && (
                     <p className="px-4 py-6 text-[14px] text-ink-muted">
-                      {t("Couldn't load subtitles. You can start anyway and add one later in the player.")}
+                      {t(
+                        "Couldn't load subtitles. You can start anyway and add one later in the player.",
+                      )}
                     </p>
                   )}
                   {!error && total === 0 && (
@@ -210,7 +232,9 @@ function SidebarItem({
     <button
       onClick={onClick}
       className={`flex min-h-[44px] items-center gap-2.5 rounded-xl px-3 text-start text-[13.5px] transition-colors ${
-        active ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+        active
+          ? "bg-elevated text-ink ring-1 ring-edge"
+          : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
       }`}
     >
       {icon}
@@ -221,7 +245,15 @@ function SidebarItem({
   );
 }
 
-function OffRow({ selected, onPick, label }: { selected: boolean; onPick: () => void; label: string }) {
+function OffRow({
+  selected,
+  onPick,
+  label,
+}: {
+  selected: boolean;
+  onPick: () => void;
+  label: string;
+}) {
   return (
     <button
       onClick={onPick}
@@ -310,12 +342,20 @@ function LoadingSkeleton() {
       <div className="flex flex-1">
         <div className="flex w-[190px] shrink-0 flex-col gap-1.5 border-e border-edge-soft bg-canvas/30 p-3">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-11 animate-pulse rounded-xl bg-elevated/60" style={{ opacity: 1 - i * 0.15 }} />
+            <div
+              key={i}
+              className="h-11 animate-pulse rounded-xl bg-elevated/60"
+              style={{ opacity: 1 - i * 0.15 }}
+            />
           ))}
         </div>
         <div className="flex flex-1 flex-col gap-2 p-3">
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-14 animate-pulse rounded-2xl bg-elevated/50" style={{ opacity: 1 - i * 0.12 }} />
+            <div
+              key={i}
+              className="h-14 animate-pulse rounded-2xl bg-elevated/50"
+              style={{ opacity: 1 - i * 0.12 }}
+            />
           ))}
         </div>
       </div>

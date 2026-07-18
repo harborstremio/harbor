@@ -87,7 +87,9 @@ export function AdReportModal({
           ) : (
             <>
               <p className="text-[12.5px] leading-relaxed text-ink-muted">
-                {t("Play to where the ad starts and add it, then play to the end and tap Now. You can also type the times. Add more than one if there are several.")}
+                {t(
+                  "Play to where the ad starts and add it, then play to the end and tap Now. You can also type the times. Add more than one if there are several.",
+                )}
               </p>
               {ranges.length > 0 && (
                 <div className="flex flex-col gap-2">

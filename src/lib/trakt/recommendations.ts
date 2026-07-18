@@ -1,8 +1,16 @@
 import { traktRequest } from "./client";
 import type { TraktItem } from "./types";
 
-type RawMovie = { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; trakt?: number } };
-type RawShow = { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; tvdb?: number; trakt?: number } };
+type RawMovie = {
+  title: string;
+  year: number | null;
+  ids: { imdb?: string; tmdb?: number; trakt?: number };
+};
+type RawShow = {
+  title: string;
+  year: number | null;
+  ids: { imdb?: string; tmdb?: number; tvdb?: number; trakt?: number };
+};
 
 export async function fetchMovieRecommendations(): Promise<TraktItem[]> {
   const rows = await traktRequest<RawMovie[]>(

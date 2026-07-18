@@ -30,16 +30,16 @@ export function getCachedEpisode(
 ): EpisodeDetail | null {
   const key = getCacheKey(seriesId, season, episode);
   const cached = episodeCache.get(key);
-  
+
   if (!cached) return null;
-  
+
   // Check if cache entry has expired
   const age = Date.now() - cached.timestamp;
   if (age > CACHE_DURATION_MS) {
     episodeCache.delete(key);
     return null;
   }
-  
+
   return cached.data;
 }
 
@@ -59,7 +59,7 @@ export function cacheEpisode(
     timestamp: Date.now(),
     seriesId,
   };
-  
+
   // Use LRU set to handle eviction automatically
   lruSet(episodeCache, key, entry, MAX_CACHE_SIZE);
 }

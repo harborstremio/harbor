@@ -17,7 +17,10 @@ type RawLite = {
 };
 
 const overviewCache = new Map<string, string>();
-export async function tmdbMetadataOverview(key: string, metaId: string): Promise<string | undefined> {
+export async function tmdbMetadataOverview(
+  key: string,
+  metaId: string,
+): Promise<string | undefined> {
   if (!key) return undefined;
   const m = metaId.match(/^tmdb:(movie|tv):(\d+)$/);
   if (!m) return undefined;

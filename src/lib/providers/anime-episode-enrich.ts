@@ -18,7 +18,10 @@ async function enrichFiller(episodes: KitsuEpisode[], kitsuId: number): Promise<
   }
 }
 
-async function enrichCinemetaThumbs(episodes: KitsuEpisode[], imdbId: string | null): Promise<void> {
+async function enrichCinemetaThumbs(
+  episodes: KitsuEpisode[],
+  imdbId: string | null,
+): Promise<void> {
   if (!imdbId || !imdbId.startsWith("tt")) return;
   if (episodes.every((ep) => ep.thumbnail)) return;
   const m = await fetchCinemetaMeta("series", imdbId).catch(() => null);
@@ -59,9 +62,7 @@ async function enrichTvdbThumbs(
   if (episodes.every((ep) => ep.thumbnail)) return;
   const tvdbId = await kitsuToTvdb(kitsuId).catch(() => null);
   if (!tvdbId) return;
-  const seasons = Array.from(
-    new Set(episodes.map((ep) => ep.imdbSeason ?? ep.seasonNumber ?? 1)),
-  );
+  const seasons = Array.from(new Set(episodes.map((ep) => ep.imdbSeason ?? ep.seasonNumber ?? 1)));
   const index = await fetchTvdbThumbs(settings.tvdbKey, tvdbId, seasons).catch(() => null);
   if (!index) return;
   for (const ep of episodes) {

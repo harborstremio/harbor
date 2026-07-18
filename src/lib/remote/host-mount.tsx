@@ -12,11 +12,7 @@ import {
   subscribeRemoteSession,
 } from "./session";
 import { installTextEntryListeners } from "./text-entry";
-import {
-  REMOTE_PROTO,
-  parseClientMessage,
-  type RemoteServerMessage,
-} from "./protocol";
+import { REMOTE_PROTO, parseClientMessage, type RemoteServerMessage } from "./protocol";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -120,13 +116,15 @@ export function RemoteHostMount() {
     unsubs.push(installTextEntryListeners());
 
     setRemoteCastDiscovering(true);
-    void discoverCastDevices().then((devices) => {
-      if (!cancelled) {
-        setRemoteCastDevices(devices);
-      }
-    }).finally(() => {
-      if (!cancelled) setRemoteCastDiscovering(false);
-    });
+    void discoverCastDevices()
+      .then((devices) => {
+        if (!cancelled) {
+          setRemoteCastDevices(devices);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setRemoteCastDiscovering(false);
+      });
 
     timerRef.current = window.setInterval(() => {
       pushSnapshot();

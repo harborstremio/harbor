@@ -23,10 +23,14 @@ export function DvrProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!IS_TAURI) return;
     let cancelled = false;
-    invoke<DvrSession[]>("dvr_list").then((list) => {
-      if (!cancelled) setSessions(list);
-    }).catch(() => {});
-    return () => { cancelled = true; };
+    invoke<DvrSession[]>("dvr_list")
+      .then((list) => {
+        if (!cancelled) setSessions(list);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -40,16 +44,24 @@ export function DvrProvider({ children }: { children: ReactNode }) {
         next[idx] = e.payload;
         return next;
       });
-    }).then((u) => unlisteners.push(u)).catch(() => {});
+    })
+      .then((u) => unlisteners.push(u))
+      .catch(() => {});
     listen<DvrSession>("dvr://done", (e) => {
       setSessions((prev) => prev.filter((s) => s.id !== e.payload.id));
       setTerminal((prev) => [...prev.filter((s) => s.id !== e.payload.id), e.payload]);
-    }).then((u) => unlisteners.push(u)).catch(() => {});
+    })
+      .then((u) => unlisteners.push(u))
+      .catch(() => {});
     listen<DvrSession>("dvr://error", (e) => {
       setSessions((prev) => prev.filter((s) => s.id !== e.payload.id));
       setTerminal((prev) => [...prev.filter((s) => s.id !== e.payload.id), e.payload]);
-    }).then((u) => unlisteners.push(u)).catch(() => {});
-    return () => { unlisteners.forEach((u) => u()); };
+    })
+      .then((u) => unlisteners.push(u))
+      .catch(() => {});
+    return () => {
+      unlisteners.forEach((u) => u());
+    };
   }, []);
 
   const start = useCallback(async (args: DvrStartArgs) => {

@@ -61,7 +61,13 @@ type FilterTab = "all" | "movies" | "shows" | StreamingService;
 
 const MAX_PAGES = 25;
 
-export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOpenGuide: () => void }) {
+export function EmptyState({
+  onClose,
+  onOpenGuide,
+}: {
+  onClose: () => void;
+  onOpenGuide: () => void;
+}) {
   const { recent, removeRecent, clearRecent, setQuery } = useSearch();
   const { setView, openMeta } = useView();
   const { hiddenTabs } = useParental();
@@ -118,8 +124,13 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
     if (!genreBrowse) return;
     if (loading) return;
     const cinemetaOnly = !settings.tmdbKey;
-    const needMovies = wantMovies && !movieDone && moviePage <= MAX_PAGES && (cinemetaOnly || typeof movieId === "number");
-    const needSeries = wantSeries && !tvDone && tvPage <= MAX_PAGES && (cinemetaOnly || typeof tvId === "number");
+    const needMovies =
+      wantMovies &&
+      !movieDone &&
+      moviePage <= MAX_PAGES &&
+      (cinemetaOnly || typeof movieId === "number");
+    const needSeries =
+      wantSeries && !tvDone && tvPage <= MAX_PAGES && (cinemetaOnly || typeof tvId === "number");
     if (!needMovies && !needSeries) return;
     setLoading(true);
     fetchRef.current?.abort();
@@ -220,10 +231,7 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
     return () => io.disconnect();
   }, [genreBrowse, items.length, loadMore, movieDone, tvDone, wantMovies, wantSeries]);
 
-  const exhausted =
-    items.length > 0 &&
-    (!wantMovies || movieDone) &&
-    (!wantSeries || tvDone);
+  const exhausted = items.length > 0 && (!wantMovies || movieDone) && (!wantSeries || tvDone);
 
   const visibleJumps = JUMP_TARGETS.filter((j) => !hiddenTabs[j.parentalKey]);
   const visibleGenres = Object.keys(MOVIE_GENRES).filter((name) => {
@@ -307,7 +315,11 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
           <p className="rounded-xl border border-dashed border-edge px-4 py-8 text-center text-[13px] text-ink-subtle">
             {t("No titles found for {genre}", { genre: genreBrowse })}
             {isServiceTab ? ` on ${SERVICES[filterTab as StreamingService].name}` : ""}.{" "}
-            {!settings.tmdbKey && isServiceTab && t("Service-specific browsing needs a TMDB key. Pick All / Movies / Shows to browse via Cinemeta.")}
+            {!settings.tmdbKey &&
+              isServiceTab &&
+              t(
+                "Service-specific browsing needs a TMDB key. Pick All / Movies / Shows to browse via Cinemeta.",
+              )}
           </p>
         ) : (
           <>
@@ -349,7 +361,9 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
         <section>
           <div className="mb-3 flex items-center justify-between gap-3">
             <h3 className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">
-              <span className="text-ink-muted"><Clock size={13} strokeWidth={2.2} /></span>
+              <span className="text-ink-muted">
+                <Clock size={13} strokeWidth={2.2} />
+              </span>
               {t("Recent searches")}
             </h3>
             <button
@@ -397,7 +411,9 @@ export function EmptyState({ onClose, onOpenGuide }: { onClose: () => void; onOp
               }}
               className="flex h-12 items-center gap-2.5 rounded-full border border-edge-soft bg-elevated/50 px-5 text-[14.5px] font-semibold text-ink transition-all hover:border-edge hover:bg-elevated active:scale-[0.97]"
             >
-              <span className="flex h-5 w-5 items-center justify-center text-ink-muted">{j.icon}</span>
+              <span className="flex h-5 w-5 items-center justify-center text-ink-muted">
+                {j.icon}
+              </span>
               {t(j.label)}
             </button>
           ))}
@@ -471,7 +487,9 @@ function FilterPill({
           ? "border-ink bg-ink text-canvas"
           : "border-edge-soft bg-elevated/40 text-ink-muted hover:border-edge hover:text-ink"
       }`}
-      style={active && accent ? { background: accent, borderColor: accent, color: "white" } : undefined}
+      style={
+        active && accent ? { background: accent, borderColor: accent, color: "white" } : undefined
+      }
     >
       {children}
     </button>

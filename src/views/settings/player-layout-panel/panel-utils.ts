@@ -1,8 +1,4 @@
-import type {
-  PlayerChromeConfig,
-  PlayerControlConfig,
-  PlayerSlot,
-} from "@/lib/player-chrome";
+import type { PlayerChromeConfig, PlayerControlConfig, PlayerSlot } from "@/lib/player-chrome";
 
 const SLOT_LIMITS: Record<PlayerSlot, number> = {
   "top-left": 3,

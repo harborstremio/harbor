@@ -11,7 +11,8 @@ export function useStreamPill(params: {
   inRoom: boolean;
   streamCheckOpen: boolean;
 }): "check" | "stalled" | "failed" | null {
-  const { srcUrl, snap, pipMode, showWaiting, isLocalSrc, slowLoad, inRoom, streamCheckOpen } = params;
+  const { srcUrl, snap, pipMode, showWaiting, isLocalSrc, slowLoad, inRoom, streamCheckOpen } =
+    params;
   const [pillSuppressed, setPillSuppressed] = useState(true);
   useEffect(() => {
     setPillSuppressed(true);

@@ -19,11 +19,7 @@ test("publishes mapped rows in order and yields between batches", async () => {
   });
 
   assert.deepEqual(result, [10, 20, 30, 40, 50]);
-  assert.deepEqual(published, [
-    [10, 20],
-    [30, 40],
-    [50],
-  ]);
+  assert.deepEqual(published, [[10, 20], [30, 40], [50]]);
   assert.deepEqual(events, ["publish:2/5", "yield", "publish:4/5", "yield", "publish:5/5"]);
 });
 

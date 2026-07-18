@@ -39,7 +39,9 @@ function normalize(t: Record<string, unknown>): StoreTheme {
 export function clientId(): string {
   let id = localStorage.getItem(CLIENT_KEY);
   if (!id) {
-    id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`).replace(/-/g, "").slice(0, 24);
+    id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`)
+      .replace(/-/g, "")
+      .slice(0, 24);
     localStorage.setItem(CLIENT_KEY, id);
   }
   return id;
@@ -159,7 +161,11 @@ export async function uploadTheme(
   return d;
 }
 
-export async function setVisibility(id: string, ownerToken: string, visibility: "public" | "unlisted"): Promise<void> {
+export async function setVisibility(
+  id: string,
+  ownerToken: string,
+  visibility: "public" | "unlisted",
+): Promise<void> {
   const r = await fetch(`${API}/themes/${id}/visibility`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${ownerToken}` },

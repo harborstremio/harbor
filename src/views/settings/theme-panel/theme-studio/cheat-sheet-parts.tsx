@@ -77,14 +77,20 @@ export function CopyName({ text }: { text: string }) {
       >
         <code
           className="col-start-1 row-start-1 font-mono text-[13.5px] font-semibold text-ink transition-[transform,opacity,color] duration-300 group-hover/cn:text-accent"
-          style={{ transform: copied ? "rotateX(90deg)" : "rotateX(0deg)", opacity: copied ? 0 : 1 }}
+          style={{
+            transform: copied ? "rotateX(90deg)" : "rotateX(0deg)",
+            opacity: copied ? 0 : 1,
+          }}
         >
           {text}
         </code>
         <span
           aria-hidden
           className="col-start-1 row-start-1 flex items-center gap-1 transition-[transform,opacity] duration-300"
-          style={{ transform: copied ? "rotateX(0deg)" : "rotateX(-90deg)", opacity: copied ? 1 : 0 }}
+          style={{
+            transform: copied ? "rotateX(0deg)" : "rotateX(-90deg)",
+            opacity: copied ? 1 : 0,
+          }}
         >
           <Check size={13} strokeWidth={2.6} className="text-accent" />
           <code className="font-mono text-[13px] font-semibold text-accent">Copied</code>
@@ -94,7 +100,15 @@ export function CopyName({ text }: { text: string }) {
   );
 }
 
-export function CodeBlock({ code, filename, compact }: { code: string; filename?: string; compact?: boolean }) {
+export function CodeBlock({
+  code,
+  filename,
+  compact,
+}: {
+  code: string;
+  filename?: string;
+  compact?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {
@@ -110,9 +124,13 @@ export function CodeBlock({ code, filename, compact }: { code: string; filename?
     void downloadText(name, code, [name.split(".").pop() ?? "txt"], "Harbor snippet");
   };
   return (
-    <div className={`overflow-hidden rounded-lg border border-edge-soft bg-elevated ${compact ? "mt-2.5" : ""}`}>
+    <div
+      className={`overflow-hidden rounded-lg border border-edge-soft bg-elevated ${compact ? "mt-2.5" : ""}`}
+    >
       <div className="flex items-center gap-2 border-b border-edge-soft/70 bg-canvas/40 px-3 py-1.5">
-        <span className="flex-1 truncate font-mono text-[12px] text-ink-subtle">{filename ?? "example"}</span>
+        <span className="flex-1 truncate font-mono text-[12px] text-ink-subtle">
+          {filename ?? "example"}
+        </span>
         {filename && (
           <button
             type="button"
@@ -132,7 +150,9 @@ export function CodeBlock({ code, filename, compact }: { code: string; filename?
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
-      <pre className="overflow-auto px-4 py-3 font-mono text-[13px] leading-relaxed text-ink-muted">{code}</pre>
+      <pre className="overflow-auto px-4 py-3 font-mono text-[13px] leading-relaxed text-ink-muted">
+        {code}
+      </pre>
     </div>
   );
 }

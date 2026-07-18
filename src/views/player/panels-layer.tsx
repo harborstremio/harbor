@@ -114,9 +114,7 @@ export function PanelsLayer({
       )}
 
       {showHeaderWarning && <HeaderWarning onPickAnother={onPickAnother} />}
-      {showNoAudioWarning && (
-        <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />
-      )}
+      {showNoAudioWarning && <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />}
     </>
   );
 }

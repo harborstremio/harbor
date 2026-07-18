@@ -27,7 +27,10 @@ export function sortGroups(groups: LocalGroup[], key: LocalSortKey, dir: SortDir
   const decorated = groups.map((g) => ({ g, ...groupSortEntry(g) }));
   decorated.sort((a, b) => {
     if (key === "title") {
-      return mul * (a.entry.title ?? "").localeCompare(b.entry.title ?? "", undefined, { sensitivity: "base" });
+      return (
+        mul *
+        (a.entry.title ?? "").localeCompare(b.entry.title ?? "", undefined, { sensitivity: "base" })
+      );
     }
     if (key === "runtime") {
       const ra = a.g.kind === "show" ? 0 : 1;
@@ -35,7 +38,13 @@ export function sortGroups(groups: LocalGroup[], key: LocalSortKey, dir: SortDir
       if (ra !== rb) return ra - rb;
     }
     const pick = (e: LocalEntry, added: number): number | null =>
-      key === "year" ? e.year ?? null : key === "rating" ? e.rating ?? null : key === "runtime" ? e.runtime ?? null : added;
+      key === "year"
+        ? (e.year ?? null)
+        : key === "rating"
+          ? (e.rating ?? null)
+          : key === "runtime"
+            ? (e.runtime ?? null)
+            : added;
     const av = pick(a.entry, a.added);
     const bv = pick(b.entry, b.added);
     if (av == null && bv == null) return 0;
@@ -105,7 +114,9 @@ export function SortMenu({
                   setOpen(false);
                 }}
                 className={`flex h-9 w-full items-center justify-between gap-3 rounded-lg px-3 text-start text-[13px] transition-colors ${
-                  sortKey === k ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+                  sortKey === k
+                    ? "bg-raised text-ink"
+                    : "text-ink-muted hover:bg-raised/60 hover:text-ink"
                 }`}
               >
                 <span>{label}</span>

@@ -25,7 +25,7 @@ export function buildAffinity(events: DiscoverEvent[], now = Date.now()): Affini
   const a = freshAffinity();
   for (const e of events) {
     if (!e.meta) continue;
-    const recency = Math.exp(-Math.LN2 * Math.max(0, now - e.ts) / HALF_LIFE_MS);
+    const recency = Math.exp((-Math.LN2 * Math.max(0, now - e.ts)) / HALF_LIFE_MS);
     const w = (KIND_WEIGHT[e.kind] ?? 1) * recency;
     if (w === 0) continue;
     for (const id of e.meta.cast) bumpNum(a.cast, id, w);
@@ -47,8 +47,8 @@ export function score(profile: ProfileSnapshot, affinity: Affinity): number {
   const creators = sumWeight(profile.creators, affinity.creators);
   const genres = avgWeight(profile.genres, affinity.genres);
   const keywords = avgWeight(profile.keywords, affinity.keywords);
-  const decade = profile.decade ? affinity.decades[profile.decade] ?? 0 : 0;
-  const lang = profile.language ? affinity.languages[profile.language] ?? 0 : 0;
+  const decade = profile.decade ? (affinity.decades[profile.decade] ?? 0) : 0;
+  const lang = profile.language ? (affinity.languages[profile.language] ?? 0) : 0;
   return (
     CATEGORY_WEIGHT.cast * cast +
     CATEGORY_WEIGHT.directors * directors +
@@ -64,9 +64,7 @@ export function topEntries<K extends string | number>(
   weights: Record<K, number>,
   n: number,
 ): Array<[K, number]> {
-  return (Object.entries(weights) as Array<[K, number]>)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, n);
+  return (Object.entries(weights) as Array<[K, number]>).sort((a, b) => b[1] - a[1]).slice(0, n);
 }
 
 export function affinityIsEmpty(a: Affinity): boolean {

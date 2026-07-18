@@ -30,7 +30,9 @@ export function ProfilesStrip() {
                 active ? openPicker({ kind: "edit", profileId: p.id }) : switchTo(p.id, locked)
               }
               aria-label={
-                active ? t("Edit {name}", { name: p.name }) : t("Switch to {name}", { name: p.name })
+                active
+                  ? t("Edit {name}", { name: p.name })
+                  : t("Switch to {name}", { name: p.name })
               }
               className="flex flex-col items-center gap-3.5 outline-none"
             >

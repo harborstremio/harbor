@@ -39,9 +39,7 @@ export function LanguageFilterPill({
   onToggle: () => void;
   isAnime: boolean;
 }) {
-  const display = isAnime
-    ? languages
-    : languages.filter((l) => normalizeLangCode(l) !== "ja");
+  const display = isAnime ? languages : languages.filter((l) => normalizeLangCode(l) !== "ja");
   const label = abbreviateLanguages(display);
   return (
     <button

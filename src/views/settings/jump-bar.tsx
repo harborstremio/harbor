@@ -31,7 +31,8 @@ export function SettingsJumpBar({
       if (title) next.push({ id: s.id, title });
     }
     setItems((prev) =>
-      prev.length === next.length && prev.every((p, i) => p.id === next[i].id && p.title === next[i].title)
+      prev.length === next.length &&
+      prev.every((p, i) => p.id === next[i].id && p.title === next[i].title)
         ? prev
         : next,
     );

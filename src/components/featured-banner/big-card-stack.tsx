@@ -46,7 +46,7 @@ export function BigCardStack({
     let cancelled = false;
     const indices = new Set<number>();
     for (let i = -2; i <= 2; i++) {
-      indices.add(((active + i) % items.length + items.length) % items.length);
+      indices.add((((active + i) % items.length) + items.length) % items.length);
     }
     const pending = items.filter((m, i) => indices.has(i) && !(m.id in logos));
     if (pending.length === 0) return;
@@ -218,7 +218,13 @@ export function BigCardStack({
             e.stopPropagation();
             onPrev();
           }}
-          style={{ position: "absolute", insetInlineStart: 12, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+          style={{
+            position: "absolute",
+            insetInlineStart: 12,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+          }}
           className="flex h-12 w-12 items-center justify-center rounded-full bg-canvas/65 text-ink opacity-0 backdrop-blur-md transition-all duration-200 hover:bg-canvas/85 hover:scale-105 group-hover:opacity-100"
         >
           <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
@@ -234,7 +240,13 @@ export function BigCardStack({
             e.stopPropagation();
             onNext();
           }}
-          style={{ position: "absolute", insetInlineEnd: 12, top: "50%", transform: "translateY(-50%)", zIndex: 10 }}
+          style={{
+            position: "absolute",
+            insetInlineEnd: 12,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+          }}
           className="flex h-12 w-12 items-center justify-center rounded-full bg-canvas/65 text-ink opacity-0 backdrop-blur-md transition-all duration-200 hover:bg-canvas/85 hover:scale-105 group-hover:opacity-100"
         >
           <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />
@@ -276,4 +288,3 @@ function TitlePlate({ title, logo }: { title: string; logo?: string }) {
     </div>
   );
 }
-

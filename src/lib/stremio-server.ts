@@ -23,7 +23,9 @@ export function remoteStreamServerStrict(): boolean {
   try {
     const raw = localStorage.getItem("harbor.settings");
     if (!raw) return false;
-    return (JSON.parse(raw) as { remoteStreamServerStrict?: boolean }).remoteStreamServerStrict === true;
+    return (
+      (JSON.parse(raw) as { remoteStreamServerStrict?: boolean }).remoteStreamServerStrict === true
+    );
   } catch {
     return false;
   }
@@ -106,7 +108,12 @@ export async function probeStremioServer(force = false, base?: string): Promise<
 }
 
 async function httpProbe(force: boolean, base: string): Promise<boolean> {
-  if (!force && probeCache && probeCache.base === base && Date.now() - probeCache.at < PROBE_TTL_MS) {
+  if (
+    !force &&
+    probeCache &&
+    probeCache.base === base &&
+    Date.now() - probeCache.at < PROBE_TTL_MS
+  ) {
     return probeCache.ok;
   }
   try {

@@ -14,7 +14,10 @@ import type { Addon } from "@/lib/addons";
 
 type Mode =
   | { kind: "install"; url: string }
-  | { kind: "manage"; existing: { id: string; name: string; logo?: string | null; transportUrl: string } };
+  | {
+      kind: "manage";
+      existing: { id: string; name: string; logo?: string | null; transportUrl: string };
+    };
 
 type ResolveMatch = {
   manifest: Addon["manifest"];
@@ -106,8 +109,15 @@ export function AddonInstallModal({
       return;
     }
     const stages: InstallStage[] = [
-      { label: resolved.matchKind === "fresh" ? t("Reading manifest") : t("Reading new manifest"), done: true },
-      { label: resolved.matchKind === "fresh" ? t("Saving to library") : t("Swapping configuration"), done: false },
+      {
+        label: resolved.matchKind === "fresh" ? t("Reading manifest") : t("Reading new manifest"),
+        done: true,
+      },
+      {
+        label:
+          resolved.matchKind === "fresh" ? t("Saving to library") : t("Swapping configuration"),
+        done: false,
+      },
       { label: t("Syncing to Stremio"), done: false },
     ];
     setInstallStage(stages);
@@ -281,12 +291,20 @@ function ManageStep1({
         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10.5px] font-bold text-canvas">
           1
         </span>
-        <p className="text-[13.5px] font-semibold text-ink">{t("Configure on the addon's setup page")}</p>
+        <p className="text-[13.5px] font-semibold text-ink">
+          {t("Configure on the addon's setup page")}
+        </p>
       </div>
       <p className="ps-7 text-[12.5px] leading-relaxed text-ink-muted">
         {isWeb()
-          ? t("Click below to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.", { name })
-          : t("Click below to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.", { name })}
+          ? t(
+              "Click below to open {name}'s setup page. Pick your options, then copy the install link it gives you and paste it below to update the addon.",
+              { name },
+            )
+          : t(
+              "Click below to open {name}'s setup page in Harbor's built-in browser. Pick your options. When you click Install on their page, Harbor catches the link automatically and updates the addon.",
+              { name },
+            )}
       </p>
       <button
         type="button"
@@ -297,7 +315,9 @@ function ManageStep1({
         {t("Open setup page")}
       </button>
       <p className="mt-1 ps-7 text-[11.5px] leading-relaxed text-ink-subtle">
-        {t("Heads-up: a few addons (like AIOStatus) don't pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their \"Import from URL\" field to restore your settings.")}
+        {t(
+          'Heads-up: a few addons (like AIOStatus) don\'t pre-fill from the URL. If the form loads blank, paste the existing manifest URL into their "Import from URL" field to restore your settings.',
+        )}
       </p>
     </div>
   );
@@ -327,7 +347,9 @@ function PasteRow({
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink text-[10.5px] font-bold text-canvas">
             {step}
           </span>
-          <p className="text-[13.5px] font-semibold text-ink">{t("Or paste the install link manually")}</p>
+          <p className="text-[13.5px] font-semibold text-ink">
+            {t("Or paste the install link manually")}
+          </p>
         </div>
       )}
       <div className={managing ? "ps-7" : ""}>
@@ -373,9 +395,7 @@ function ManifestPreview({
 }) {
   const t = useT();
   const types = manifest.types ?? [];
-  const resources = (manifest.resources ?? []).map((r) =>
-    typeof r === "string" ? r : r.name,
-  );
+  const resources = (manifest.resources ?? []).map((r) => (typeof r === "string" ? r : r.name));
   return (
     <div className="mt-5 flex flex-col gap-4 rounded-xl border border-edge bg-canvas/30 p-4 animate-in fade-in slide-in-from-bottom-1 duration-200">
       <div className="flex items-start gap-4">
@@ -409,7 +429,10 @@ function ManifestPreview({
       </div>
       {matchKind === "hostname-match" && replaceName && (
         <p className="rounded-lg bg-amber-300/[0.06] px-3 py-2 text-[12px] leading-relaxed text-amber-200 ring-1 ring-amber-300/20">
-          {t("Looks like a re-configure of {name}. We'll replace the existing entry so you don't end up with two copies.", { name: replaceName })}
+          {t(
+            "Looks like a re-configure of {name}. We'll replace the existing entry so you don't end up with two copies.",
+            { name: replaceName },
+          )}
         </p>
       )}
       {(types.length > 0 || resources.length > 0) && (

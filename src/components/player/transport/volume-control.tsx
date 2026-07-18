@@ -83,7 +83,11 @@ export function VolumeControl({
         className="flex h-12 w-12 items-center justify-center rounded-full text-white/90 transition-colors hover:bg-white/10 hover:text-white"
         aria-label={label}
       >
-        {muted ? <VolumeX size={24} strokeWidth={1.75} /> : <Volume2 size={24} strokeWidth={1.75} />}
+        {muted ? (
+          <VolumeX size={24} strokeWidth={1.75} />
+        ) : (
+          <Volume2 size={24} strokeWidth={1.75} />
+        )}
       </button>
     </Tooltip>
   );

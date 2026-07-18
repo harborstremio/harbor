@@ -26,7 +26,13 @@ function metaFor(category: string): { Icon: typeof Info; label: string } {
 const HOLD_MS = 10000;
 const HOVER_TAIL_MS = 2500;
 
-export function ContentAdvisoryToast({ categories, playKey }: { categories: Advisory[]; playKey: string }) {
+export function ContentAdvisoryToast({
+  categories,
+  playKey,
+}: {
+  categories: Advisory[];
+  playKey: string;
+}) {
   const t = useT();
   const rated = useMemo(
     () =>
@@ -85,7 +91,9 @@ export function ContentAdvisoryToast({ categories, playKey }: { categories: Advi
                     />
                   ))}
                 </span>
-                <span className={`w-[54px] text-[11px] font-semibold ${style.text}`}>{t(c.severity)}</span>
+                <span className={`w-[54px] text-[11px] font-semibold ${style.text}`}>
+                  {t(c.severity)}
+                </span>
               </span>
             </li>
           );

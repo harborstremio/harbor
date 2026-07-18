@@ -173,7 +173,11 @@ export async function removeStremioLibraryItem(authKey: string, id: string): Pro
 
 export const CLOUD_OK = /^(tt\d|kitsu:|mal:|anilist:|anidb:|tmdb:)/;
 
-export function cloudWriteId(metaId: string, resolved: string | null, verified: boolean): string | null {
+export function cloudWriteId(
+  metaId: string,
+  resolved: string | null,
+  verified: boolean,
+): string | null {
   if (metaId.startsWith("tt")) return metaId;
   if (verified && resolved && resolved.startsWith("tt")) return resolved;
   return CLOUD_OK.test(metaId) ? metaId : null;

@@ -14,8 +14,7 @@ const NOT_NATIVE_MSG =
 
 function ensureNative(): void {
   const hasTauri =
-    typeof window !== "undefined" &&
-    ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
+    typeof window !== "undefined" && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
   if (!hasTauri) {
     throw new Error(NOT_NATIVE_MSG);
   }

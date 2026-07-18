@@ -4,7 +4,12 @@ import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
 import { getEpisodeProgress } from "@/lib/episode-progress";
 import { simklWatchedForId, statusForId, type WatchlistStatus } from "@/lib/simkl/list-status";
-import { episodeFromVideoId, isAnimeCwItem, libraryMetaType, type LibraryItem } from "@/lib/stremio";
+import {
+  episodeFromVideoId,
+  isAnimeCwItem,
+  libraryMetaType,
+  type LibraryItem,
+} from "@/lib/stremio";
 import { isNextAired, resurfaceCandidates, type AnimeMode } from "@/lib/cw-resurface";
 
 const FINISHED_RATIO = 0.9;
@@ -133,10 +138,14 @@ export function useCwAdvance(
       const cur = currentEpisode(i);
       return (
         cur != null &&
-        watchedPredicate(i, cur, traktWatched, simklWatched, anilistWatched, simklStatus)(
-          cur.season,
-          cur.episode,
-        )
+        watchedPredicate(
+          i,
+          cur,
+          traktWatched,
+          simklWatched,
+          anilistWatched,
+          simklStatus,
+        )(cur.season, cur.episode)
       );
     });
     void (async () => {
@@ -200,9 +209,12 @@ export function useCwAdvance(
       const inCw = new Set(items.map((i) => i._id));
       const watchedFor = (item: LibraryItem, c: { season: number; episode: number }) =>
         watchedPredicate(item, c, traktWatched, simklWatched, anilistWatched, simklStatus);
-      const resurfaced = await resurfaceCandidates(lib, inCw, { tmdbKey, animeMode }, watchedFor).catch(
-        () => new Map<string, { season: number; episode: number }>(),
-      );
+      const resurfaced = await resurfaceCandidates(
+        lib,
+        inCw,
+        { tmdbKey, animeMode },
+        watchedFor,
+      ).catch(() => new Map<string, { season: number; episode: number }>());
       if (cancelled) return;
       const extraItems: LibraryItem[] = [];
       for (const [id, ep] of resurfaced) {
@@ -231,7 +243,19 @@ export function useCwAdvance(
     return () => {
       cancelled = true;
     };
-  }, [items, tmdbKey, enabled, library, animeMode, watchedVersion, traktWatched, simklWatched, anilistWatched, simklStatus, animeVersion]);
+  }, [
+    items,
+    tmdbKey,
+    enabled,
+    library,
+    animeMode,
+    watchedVersion,
+    traktWatched,
+    simklWatched,
+    anilistWatched,
+    simklStatus,
+    animeVersion,
+  ]);
 
   if (!enabled) return items;
   const base =

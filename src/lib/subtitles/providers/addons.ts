@@ -36,7 +36,12 @@ function extraSegment(q: SubSearchQuery): string {
   return parts.length > 0 ? `/${parts.join("&")}` : "";
 }
 
-async function callOne(addon: Addon, type: string, id: string, extra: string): Promise<RawAddonSub[]> {
+async function callOne(
+  addon: Addon,
+  type: string,
+  id: string,
+  extra: string,
+): Promise<RawAddonSub[]> {
   const base = transportBase(addon.transportUrl);
   const url = `${base}/subtitles/${type}/${id}${extra}.json`;
   dlog(`[addons] Fetching from ${addon.manifest.name}: ${url}`);
@@ -56,15 +61,12 @@ async function callOne(addon: Addon, type: string, id: string, extra: string): P
   }
 }
 
-export async function searchAddons(
-  addons: Addon[],
-  q: SubSearchQuery,
-): Promise<SubResult[]> {
+export async function searchAddons(addons: Addon[], q: SubSearchQuery): Promise<SubResult[]> {
   dlog(`[addons] searchAddons called with ${addons.length} addons`);
 
   const id = contentId(q);
   if (!id) {
-    dlog('[addons] No content ID, returning empty');
+    dlog("[addons] No content ID, returning empty");
     return [];
   }
 
@@ -80,10 +82,10 @@ export async function searchAddons(
   });
   dlog(`[addons] === Filtered subtitle addons: ${subAddons.length} of ${addons.length} ===`);
   if (subAddons.length > 0) {
-    dlog(`[addons] Accepting addons: ${subAddons.map(a => a.manifest.name).join(', ')}`);
+    dlog(`[addons] Accepting addons: ${subAddons.map((a) => a.manifest.name).join(", ")}`);
   }
   if (subAddons.length === 0) {
-    dlog('[addons] No subtitle addons accept this content');
+    dlog("[addons] No subtitle addons accept this content");
     return [];
   }
 
@@ -104,8 +106,8 @@ export async function searchAddons(
       if (!s.url) continue;
       // Include addon name and index to ensure unique IDs across different addons
       const uniqueId = s.id
-        ? `${addonName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${s.id}`
-        : `${addonName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${idx}`;
+        ? `${addonName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${s.id}`
+        : `${addonName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${idx}`;
       out.push({
         id: uniqueId,
         url: s.url,
@@ -120,4 +122,3 @@ export async function searchAddons(
   dlog(`[addons] Total addon results: ${out.length}`);
   return out;
 }
-

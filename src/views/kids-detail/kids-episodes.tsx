@@ -63,7 +63,10 @@ export function KidsEpisodes({
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
         {loading
           ? Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-video animate-pulse rounded-2xl bg-white/40 ring-2 ring-white/60" />
+              <div
+                key={i}
+                className="aspect-video animate-pulse rounded-2xl bg-white/40 ring-2 ring-white/60"
+              />
             ))
           : eps.map((ep) => <EpisodeCard key={ep.id} ep={ep} onPlay={() => play(ep)} t={t} />)}
       </div>
@@ -119,7 +122,11 @@ function SeasonPicker({
         className="flex h-12 min-w-[180px] items-center justify-center gap-2 rounded-2xl bg-[#1f8f88] px-6 text-[17px] font-extrabold text-white shadow-[0_8px_20px_-8px_rgba(20,90,90,0.6)]"
       >
         {t("Season {n}", { n: season })}
-        <ChevronDown size={20} strokeWidth={2.8} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={20}
+          strokeWidth={2.8}
+          className={`transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       <Step onClick={() => go(1)} disabled={idx >= seasons.length - 1}>
         <ChevronRight size={26} strokeWidth={2.6} className="dir-icon" />
@@ -188,7 +195,12 @@ function EpisodeCard({
     <button type="button" onClick={onPlay} className="group flex flex-col gap-2 text-start">
       <div className="relative aspect-video overflow-hidden rounded-2xl bg-surface shadow-[0_12px_28px_-14px_rgba(20,40,60,0.45)] ring-2 ring-white transition duration-300 group-hover:-translate-y-1 group-hover:shadow-[0_18px_36px_-14px_rgba(20,40,60,0.55)]">
         {still && (
-          <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={still}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         <span className="absolute start-2 top-2 rounded-full bg-black/75 px-2.5 py-1 text-[12px] font-extrabold text-white">
@@ -196,7 +208,12 @@ function EpisodeCard({
         </span>
         {rating && (
           <span className="pointer-events-none absolute bottom-1.5 end-1.5 grid h-9 w-9 place-items-center">
-            <img src="/kids/starbadge.svg" alt="" draggable={false} className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]" />
+            <img
+              src="/kids/starbadge.svg"
+              alt=""
+              draggable={false}
+              className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.3)]"
+            />
             <span className="relative translate-y-[1px] text-[9px] font-extrabold leading-none text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.6)]">
               {rating}
             </span>

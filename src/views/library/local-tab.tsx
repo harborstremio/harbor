@@ -22,7 +22,13 @@ import { ScanModeModal, type ScanMode } from "./local-tab/scan-mode-modal";
 import { IdentifyModal, type IdentifyResolution } from "./local-tab/identify-modal";
 import { type LocalCardProps } from "./local-tab/card-actions";
 import { OwnedCard } from "./local-tab/movie-card";
-import { BulkBar, SortMenu, sortGroups, type LocalSortKey, type SortDir } from "./local-tab/toolbar";
+import {
+  BulkBar,
+  SortMenu,
+  sortGroups,
+  type LocalSortKey,
+  type SortDir,
+} from "./local-tab/toolbar";
 import { buildNfoEntry, buildTmdbEntry, type ScannedFile } from "./local-tab/scan";
 
 type PendingScan = { folder: string; files: ScannedFile[]; nfoCount: number };
@@ -179,7 +185,11 @@ export function LocalTab() {
         const res = await exportSeries(key, eps, exportSizes);
         if (res.ok) {
           ok += 1;
-          if (res.localArt) updateLocalEntries(eps.map((e) => e.id), { localArt: res.localArt });
+          if (res.localArt)
+            updateLocalEntries(
+              eps.map((e) => e.id),
+              { localArt: res.localArt },
+            );
         } else {
           fail += 1;
           reason = reason ?? res.reason;
@@ -261,7 +271,9 @@ export function LocalTab() {
   const reviewGroups = useMemo(
     () =>
       groupLocal(items)
-        .filter((g) => (g.kind === "movie" ? g.entry.needsReview : g.episodes.some((e) => e.needsReview)))
+        .filter((g) =>
+          g.kind === "movie" ? g.entry.needsReview : g.episodes.some((e) => e.needsReview),
+        )
         .map((g) => (g.kind === "movie" ? [g.entry] : g.episodes)),
     [items],
   );
@@ -322,7 +334,11 @@ export function LocalTab() {
         onPick={onPickMode}
         onClose={() => setPending(null)}
       />
-      <IdentifyModal target={identify} onClose={() => setIdentify(null)} onResolved={onResolveIdentify} />
+      <IdentifyModal
+        target={identify}
+        onClose={() => setIdentify(null)}
+        onResolved={onResolveIdentify}
+      />
       {toast && (
         <div className="pointer-events-none fixed bottom-6 left-1/2 z-[130] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-[12.5px] font-semibold text-canvas shadow-[0_10px_30px_-8px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-2 duration-200">
           {toast}
@@ -426,8 +442,14 @@ export function LocalTab() {
       ) : null}
       <span className="text-[12px] text-ink-muted">
         {items.length === 1
-          ? t("{shown} of {total} file from your computer", { shown: visible.length, total: items.length })
-          : t("{shown} of {total} files from your computer", { shown: visible.length, total: items.length })}
+          ? t("{shown} of {total} file from your computer", {
+              shown: visible.length,
+              total: items.length,
+            })
+          : t("{shown} of {total} files from your computer", {
+              shown: visible.length,
+              total: items.length,
+            })}
       </span>
       {error && (
         <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">
@@ -476,7 +498,9 @@ function EmptyOwned({
       <div className="flex flex-col gap-1.5">
         <h2 className="text-[18px] font-semibold text-ink">{t("Add files from your computer")}</h2>
         <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.")}
+          {t(
+            "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.",
+          )}
         </p>
       </div>
       <button
@@ -485,7 +509,11 @@ function EmptyOwned({
         disabled={busy}
         className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-colors hover:bg-ink/90 disabled:cursor-wait disabled:opacity-60"
       >
-        {busy ? <Loader2 size={15} className="animate-spin" /> : <FolderPlus size={15} strokeWidth={2.2} />}
+        {busy ? (
+          <Loader2 size={15} className="animate-spin" />
+        ) : (
+          <FolderPlus size={15} strokeWidth={2.2} />
+        )}
         {busy ? scanLabel(progress, t) : t("Choose folder")}
       </button>
       {error && (

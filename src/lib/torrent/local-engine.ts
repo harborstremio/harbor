@@ -112,7 +112,11 @@ export async function torrentEngineRemove(infoHash: string, deleteFiles: boolean
 
 const pendingRemovals = new Map<string, number>();
 
-export function scheduleTorrentRemoval(infoHash: string, deleteFiles = false, delayMs = 1200): void {
+export function scheduleTorrentRemoval(
+  infoHash: string,
+  deleteFiles = false,
+  delayMs = 1200,
+): void {
   if (!isTauri) return;
   cancelTorrentRemoval(infoHash);
   const id = window.setTimeout(() => {
@@ -171,4 +175,3 @@ export async function torrentEngineSetOptions(
     console.warn("[engine] set options failed", e),
   );
 }
-

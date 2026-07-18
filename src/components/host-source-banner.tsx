@@ -38,8 +38,12 @@ export function HostSourceBanner({
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         {source.resolution && <Chip label={source.resolution} />}
-        {source.sizeBytes != null && source.sizeBytes > 0 && <Chip label={formatBytes(source.sizeBytes)} />}
-        {source.durationSec != null && source.durationSec > 0 && <Chip label={formatRuntime(source.durationSec)} />}
+        {source.sizeBytes != null && source.sizeBytes > 0 && (
+          <Chip label={formatBytes(source.sizeBytes)} />
+        )}
+        {source.durationSec != null && source.durationSec > 0 && (
+          <Chip label={formatRuntime(source.durationSec)} />
+        )}
       </div>
     </div>
   );

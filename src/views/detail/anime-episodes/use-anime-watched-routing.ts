@@ -22,7 +22,7 @@ export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[]) 
   };
 
   const manualMetaFor = (metaId: string): ManualWatchedMeta => {
-    const m = metaId === meta.id ? meta : byId.get(metaId) ?? meta;
+    const m = metaId === meta.id ? meta : (byId.get(metaId) ?? meta);
     return { type: "series", name: m.name, poster: m.poster, background: m.background };
   };
 

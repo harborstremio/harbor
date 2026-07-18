@@ -23,7 +23,8 @@ export function useLocalPoster(entry: LocalEntry) {
     const kind = entry.type === "show" ? "tv" : "movie";
     const metaId = `tmdb:${kind}:${entry.tmdbId}`;
     const langs = imageLangPriority();
-    const rankOf = (iso: string | null | undefined) => langs.indexOf(iso ? iso.toLowerCase() : null);
+    const rankOf = (iso: string | null | undefined) =>
+      langs.indexOf(iso ? iso.toLowerCase() : null);
     void fetchMovieAssets(settings.tmdbKey, metaId).then((assets) => {
       if (!alive) return;
       const best = (assets?.posters ?? [])

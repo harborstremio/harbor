@@ -99,7 +99,15 @@ export function applyRoomEvent(e: RoomEvent, sinks: RoomEventSinks): void {
   } else if (e.kind === "cursor") {
     setCursorMap((cur) => {
       const next = new Map(cur);
-      next.set(e.from, { from: e.from, name: e.name, x: e.x, y: e.y, visible: e.visible, path: e.path, updatedAt: Date.now() });
+      next.set(e.from, {
+        from: e.from,
+        name: e.name,
+        x: e.x,
+        y: e.y,
+        visible: e.visible,
+        path: e.path,
+        updatedAt: Date.now(),
+      });
       return next;
     });
     setPresenceMap((cur) => {

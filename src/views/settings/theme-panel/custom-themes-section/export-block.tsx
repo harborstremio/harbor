@@ -1,13 +1,7 @@
 import { Check, Copy, X } from "lucide-react";
 import { useState } from "react";
 
-export function ExportBlock({
-  text,
-  onClose,
-}: {
-  text: string;
-  onClose: () => void;
-}) {
+export function ExportBlock({ text, onClose }: { text: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     try {

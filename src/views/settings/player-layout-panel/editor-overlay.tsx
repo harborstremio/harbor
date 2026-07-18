@@ -168,26 +168,35 @@ export function EditorOverlay({
     [config.controls],
   );
 
-  const ctx = useMemo(
-    () => {
-      const opts = {
-        mid,
-        compact,
-        tight,
-        mode,
-        customIcons: config.customIcons,
-        controlVariants,
-        timeFormat: config.options.timeFormat,
-        volumeStyle: config.options.volumeStyle,
-        previewStates,
-      };
-      return theme === "stremio" ? buildStremioCtx(opts) : buildDefaultCtx(opts);
-    },
-    [theme, mid, compact, tight, mode, config.customIcons, controlVariants, config.options.timeFormat, config.options.volumeStyle, previewStates],
-  );
+  const ctx = useMemo(() => {
+    const opts = {
+      mid,
+      compact,
+      tight,
+      mode,
+      customIcons: config.customIcons,
+      controlVariants,
+      timeFormat: config.options.timeFormat,
+      volumeStyle: config.options.volumeStyle,
+      previewStates,
+    };
+    return theme === "stremio" ? buildStremioCtx(opts) : buildDefaultCtx(opts);
+  }, [
+    theme,
+    mid,
+    compact,
+    tight,
+    mode,
+    config.customIcons,
+    controlVariants,
+    config.options.timeFormat,
+    config.options.volumeStyle,
+    previewStates,
+  ]);
 
   const renderOne = (id: PlayerControlId) => {
-    if (theme === "stremio") return <RenderedStremioControl id={id} ctx={ctx as StremioRenderCtx} />;
+    if (theme === "stremio")
+      return <RenderedStremioControl id={id} ctx={ctx as StremioRenderCtx} />;
     return renderControl(id, ctx as ControlContext);
   };
 
@@ -263,7 +272,11 @@ export function EditorOverlay({
             title={isFs ? "Exit fullscreen" : "Enter fullscreen"}
             className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/8 text-white/85 transition-colors hover:bg-white/15 hover:text-white"
           >
-            {isFs ? <Minimize size={14} strokeWidth={2.4} /> : <Maximize size={14} strokeWidth={2.4} />}
+            {isFs ? (
+              <Minimize size={14} strokeWidth={2.4} />
+            ) : (
+              <Maximize size={14} strokeWidth={2.4} />
+            )}
           </button>
           <button
             type="button"
@@ -369,7 +382,9 @@ function HiddenTray({
   if (hidden.length === 0) return null;
   return (
     <div className="flex shrink-0 items-center gap-3 overflow-x-auto border-b border-white/8 px-8 py-2.5">
-      <span className="shrink-0 text-[10.5px] font-bold uppercase tracking-[0.24em] text-white/40">Hidden</span>
+      <span className="shrink-0 text-[10.5px] font-bold uppercase tracking-[0.24em] text-white/40">
+        Hidden
+      </span>
       <div className="flex items-center gap-1.5">
         {hidden.map((c) => (
           <button
@@ -394,13 +409,25 @@ function HiddenTray({
 function ModeSwitch({ mode, onChange }: { mode: PlayerMode; onChange: (m: PlayerMode) => void }) {
   return (
     <div className="flex h-11 items-center gap-0.5 rounded-full border border-white/10 bg-white/4 p-1">
-      <ModePill active={mode === "normal"} onClick={() => onChange("normal")} icon={<Film size={13} strokeWidth={2.4} />}>
+      <ModePill
+        active={mode === "normal"}
+        onClick={() => onChange("normal")}
+        icon={<Film size={13} strokeWidth={2.4} />}
+      >
         Normal
       </ModePill>
-      <ModePill active={mode === "live"} onClick={() => onChange("live")} icon={<Tv size={13} strokeWidth={2.4} />}>
+      <ModePill
+        active={mode === "live"}
+        onClick={() => onChange("live")}
+        icon={<Tv size={13} strokeWidth={2.4} />}
+      >
         Live TV
       </ModePill>
-      <ModePill active={mode === "together"} onClick={() => onChange("together")} icon={<Users size={13} strokeWidth={2.4} />}>
+      <ModePill
+        active={mode === "together"}
+        onClick={() => onChange("together")}
+        icon={<Users size={13} strokeWidth={2.4} />}
+      >
         Together
       </ModePill>
     </div>

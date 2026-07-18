@@ -31,7 +31,9 @@ export function CrunchyrollAwardsCorner({
   }
   const overflow = top.wins.length - lines.length;
 
-  const tooltip = wins.map((w) => `${awardSourceMeta(w.source).shortName} ${w.year} ${w.categoryName}`).join("\n");
+  const tooltip = wins
+    .map((w) => `${awardSourceMeta(w.source).shortName} ${w.year} ${w.categoryName}`)
+    .join("\n");
 
   return (
     <button
@@ -73,7 +75,9 @@ export function CrunchyrollAwardsCorner({
       </div>
       {otherGroups.length > 0 && (
         <div className="flex items-center gap-2 rounded-full bg-canvas/45 px-3 py-1.5 text-[11px] text-ink-subtle">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/45">{t("Also won")}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-ink/45">
+            {t("Also won")}
+          </span>
           {otherGroups.map((g) => {
             const meta = awardSourceMeta(g.source);
             return (

@@ -48,12 +48,7 @@ export function StremioRail() {
           className="flex h-[5.5rem] shrink-0 items-center justify-center text-white/90"
         >
           {customMark ? (
-            <img
-              src={customMark}
-              alt=""
-              draggable={false}
-              className="h-10 w-10 object-contain"
-            />
+            <img src={customMark} alt="" draggable={false} className="h-10 w-10 object-contain" />
           ) : (
             <HarborMark className="h-10 w-10" />
           )}
@@ -68,9 +63,7 @@ export function StremioRail() {
                 {...item}
                 gated={gated}
                 active={active}
-                onClick={() =>
-                  gated ? setPendingPin(item.view) : setView(item.view)
-                }
+                onClick={() => (gated ? setPendingPin(item.view) : setView(item.view))}
               />
             );
           })}
@@ -112,9 +105,7 @@ function RailAvatar() {
   const { activeProfile, openPicker } = useProfiles();
   const t = useT();
   const src = activeProfile?.avatar ?? settings.harborAvatar ?? user?.avatar ?? null;
-  const ring = activeProfile?.color
-    ? { boxShadow: `0 0 0 2px ${activeProfile.color}` }
-    : undefined;
+  const ring = activeProfile?.color ? { boxShadow: `0 0 0 2px ${activeProfile.color}` } : undefined;
   const label =
     activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
   return (
@@ -125,17 +116,9 @@ function RailAvatar() {
       title={label}
       className="group flex h-16 w-full flex-col items-center justify-center gap-1 rounded-xl text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white/85"
     >
-      <span
-        className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-elevated"
-        style={ring}
-      >
+      <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-elevated" style={ring}>
         {src ? (
-          <img
-            src={src}
-            alt=""
-            draggable={false}
-            className="h-full w-full object-cover"
-          />
+          <img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
         ) : (
           <CatAvatar className="h-full w-full" />
         )}
@@ -172,12 +155,12 @@ function RailTab({
       aria-label={gated ? t("chrome.lockedRequiresPin", { label: translated }) : translated}
       title={gated ? t("chrome.lockedShort", { label: translated }) : translated}
       className={`group flex h-[4.5rem] w-full flex-col items-center justify-center gap-1.5 rounded-xl transition-colors duration-150 ${
-        active
-          ? "text-accent"
-          : "text-white/35 hover:bg-white/[0.05] hover:text-white/85"
+        active ? "text-accent" : "text-white/35 hover:bg-white/[0.05] hover:text-white/85"
       }`}
     >
-      <span className={`relative flex h-7 w-7 items-center justify-center ${gated ? "opacity-70" : ""}`}>
+      <span
+        className={`relative flex h-7 w-7 items-center justify-center ${gated ? "opacity-70" : ""}`}
+      >
         {render(hovered)}
         {gated && (
           <span className="absolute -bottom-1 -end-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-canvas text-white/55 ring-1 ring-white/15">

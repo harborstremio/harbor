@@ -43,12 +43,10 @@ export function GuideChannelCell({
       style={{ width, height: ROW_HEIGHT_PX, flex: `0 0 ${width}px` }}
     >
       {current && <span className="pointer-events-none absolute inset-0 bg-accent/[0.08]" />}
-      {current && <span className="pointer-events-none absolute inset-y-0 start-0 w-[3px] bg-accent" />}
-      <HoverTooltip
-        label={displayName}
-        sublabel={channel.group}
-        className="flex min-w-0 flex-1"
-      >
+      {current && (
+        <span className="pointer-events-none absolute inset-y-0 start-0 w-[3px] bg-accent" />
+      )}
+      <HoverTooltip label={displayName} sublabel={channel.group} className="flex min-w-0 flex-1">
         <button
           onClick={() => onPlay(channel)}
           className="flex w-full min-w-0 items-center gap-2.5 py-2 text-start transition-opacity hover:opacity-85"

@@ -1,6 +1,11 @@
 import { Volume1, Volume2, VolumeX } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { NORMAL_FRACTION, VOL_MAX, boostColor, fractionFromValue } from "./transport/transport-utils";
+import {
+  NORMAL_FRACTION,
+  VOL_MAX,
+  boostColor,
+  fractionFromValue,
+} from "./transport/transport-utils";
 
 export type VolumeIndicatorState = {
   visible: boolean;
@@ -80,7 +85,10 @@ export function VolumeIndicator({
         <span className="relative h-2.5 overflow-hidden rounded-full bg-white/15 shadow-[inset_0_1px_3px_rgba(0,0,0,0.55)]">
           <span
             className="absolute inset-y-0 left-0 rounded-full transition-[width] duration-150 ease-out"
-            style={{ width: `${fillPct}%`, background: boosting ? color : "rgba(255,255,255,0.92)" }}
+            style={{
+              width: `${fillPct}%`,
+              background: boosting ? color : "rgba(255,255,255,0.92)",
+            }}
           />
           {allowBoost && (
             <span

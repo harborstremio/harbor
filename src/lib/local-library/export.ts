@@ -43,18 +43,27 @@ function ratingsBlock(detail: TmdbDetail): string[] {
 
 function artThumbs(art: ArtworkPaths, sizes: ExportSizes): string[] {
   const out: string[] = [];
-  if (art.poster) out.push(`  <thumb aspect="poster">${esc(artworkUrl(art.poster, sizes.poster))}</thumb>`);
+  if (art.poster)
+    out.push(`  <thumb aspect="poster">${esc(artworkUrl(art.poster, sizes.poster))}</thumb>`);
   if (art.backdrop) {
-    out.push("  <fanart>", `    <thumb>${esc(artworkUrl(art.backdrop, sizes.backdrop))}</thumb>`, "  </fanart>");
+    out.push(
+      "  <fanart>",
+      `    <thumb>${esc(artworkUrl(art.backdrop, sizes.backdrop))}</thumb>`,
+      "  </fanart>",
+    );
   }
-  if (art.logo) out.push(`  <thumb aspect="clearlogo">${esc(artworkUrl(art.logo, sizes.logo))}</thumb>`);
+  if (art.logo)
+    out.push(`  <thumb aspect="clearlogo">${esc(artworkUrl(art.logo, sizes.logo))}</thumb>`);
   return out;
 }
 
 function genreStudioCountry(detail: TmdbDetail): string[] {
   const out: string[] = [];
   for (const g of detail.genres) out.push(`  <genre>${esc(g)}</genre>`);
-  const studios = detail.kind === "tv" ? [...detail.networks, ...detail.productionCompanies] : detail.productionCompanies;
+  const studios =
+    detail.kind === "tv"
+      ? [...detail.networks, ...detail.productionCompanies]
+      : detail.productionCompanies;
   for (const s of studios) out.push(`  <studio>${esc(s)}</studio>`);
   for (const c of detail.productionCountries) out.push(`  <country>${esc(c)}</country>`);
   return out;
@@ -131,11 +140,17 @@ function buildTvShowNfo(detail: TmdbDetail, art: ArtworkPaths, sizes: ExportSize
     ...ratingsBlock(detail),
     `  <plot>${esc(detail.overview)}</plot>`,
     detail.tagline ? `  <tagline>${esc(detail.tagline)}</tagline>` : "",
-    art.poster ? `  <thumb aspect="poster">${esc(artworkUrl(art.poster, sizes.poster))}</thumb>` : "",
+    art.poster
+      ? `  <thumb aspect="poster">${esc(artworkUrl(art.poster, sizes.poster))}</thumb>`
+      : "",
     ...seasonThumbs,
     art.logo ? `  <thumb aspect="clearlogo">${esc(artworkUrl(art.logo, sizes.logo))}</thumb>` : "",
     ...(art.backdrop
-      ? ["  <fanart>", `    <thumb>${esc(artworkUrl(art.backdrop, sizes.backdrop))}</thumb>`, "  </fanart>"]
+      ? [
+          "  <fanart>",
+          `    <thumb>${esc(artworkUrl(art.backdrop, sizes.backdrop))}</thumb>`,
+          "  </fanart>",
+        ]
       : []),
     detail.imdbId ? `  <imdbid>${esc(detail.imdbId)}</imdbid>` : "",
     `  <tmdbid>${detail.id}</tmdbid>`,

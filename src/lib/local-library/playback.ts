@@ -6,7 +6,10 @@ import { openWatchLocalConfirm } from "@/lib/player/watch-local-confirm";
 
 export type LocalPlaybackMode = "ask" | "local" | "stream";
 
-function idsFromMeta(meta: Meta, extraImdb?: string | null): { tmdbId: number | null; imdbId: string | null } {
+function idsFromMeta(
+  meta: Meta,
+  extraImdb?: string | null,
+): { tmdbId: number | null; imdbId: string | null } {
   let tmdbId: number | null = null;
   let imdbId: string | null = extraImdb ?? null;
   const id = meta.id;

@@ -13,7 +13,17 @@ import { KidsSidebarDoodles } from "./kids-sidebar-doodles";
 import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 
-const PRIMARY_IDS = new Set(["home", "discover", "catalogs", "movies", "shows", "kids", "anime", "live", "vod"]);
+const PRIMARY_IDS = new Set([
+  "home",
+  "discover",
+  "catalogs",
+  "movies",
+  "shows",
+  "kids",
+  "anime",
+  "live",
+  "vod",
+]);
 
 export function Sidebar() {
   const { view, setView, chromeHidden } = useView();
@@ -79,7 +89,11 @@ export function Sidebar() {
                   alt="o"
                   draggable={false}
                   className="inline-block h-[0.92em] w-auto"
-                  style={{ transform: "translateY(0.08em)", marginLeft: "-5px", marginRight: "-5px" }}
+                  style={{
+                    transform: "translateY(0.08em)",
+                    marginLeft: "-5px",
+                    marginRight: "-5px",
+                  }}
                 />
                 r
               </span>
@@ -131,8 +145,12 @@ export function Sidebar() {
               </div>
               {!collapsed && (
                 <div className="hidden min-w-0 flex-1 lg:block">
-                  <div className="truncate text-[13.5px] font-medium text-ink-muted">{t("chrome.locked")}</div>
-                  <div className="truncate text-[12px] text-ink-subtle">{t("chrome.parentalOn")}</div>
+                  <div className="truncate text-[13.5px] font-medium text-ink-muted">
+                    {t("chrome.locked")}
+                  </div>
+                  <div className="truncate text-[12px] text-ink-subtle">
+                    {t("chrome.parentalOn")}
+                  </div>
                 </div>
               )}
             </div>
@@ -334,4 +352,3 @@ function NavItem({
     </button>
   );
 }
-

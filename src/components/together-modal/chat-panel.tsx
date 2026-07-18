@@ -41,12 +41,14 @@ export function ChatPanel({
         ref={chatRef}
         className="flex h-36 flex-col gap-1.5 overflow-y-auto rounded-lg border border-edge bg-canvas/60 p-2.5"
       >
-        {chat.length === 0 && <p className="m-auto text-[11.5px] text-ink-subtle">{t("Say hi.")}</p>}
+        {chat.length === 0 && (
+          <p className="m-auto text-[11.5px] text-ink-subtle">{t("Say hi.")}</p>
+        )}
         {chat.map((m, i) => {
           const self = m.from === clientId;
           const peer = participants.find((p) => p.id === m.from);
-          const avatarSrc = self ? selfAvatar : peer?.avatar ?? null;
-          const color = self ? selfColor : peer?.color ?? null;
+          const avatarSrc = self ? selfAvatar : (peer?.avatar ?? null);
+          const color = self ? selfColor : (peer?.color ?? null);
           return (
             <div key={`${m.at}-${i}`} className="flex items-start gap-2">
               <Avatar name={m.name} src={avatarSrc} color={color} size={18} />

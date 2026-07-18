@@ -49,14 +49,19 @@ export function GuideCard({ item, onPlay }: { item: NowItem; onPlay: (ch: IptvCh
         </div>
         {progress != null && (
           <div className="mt-1.5 h-[3px] w-full overflow-hidden rounded-full bg-canvas/55">
-            <div className="h-full rounded-full bg-danger" style={{ width: `${progress * 100}%` }} />
+            <div
+              className="h-full rounded-full bg-danger"
+              style={{ width: `${progress * 100}%` }}
+            />
           </div>
         )}
       </div>
       <div className="truncate text-[11.5px] text-ink-subtle">
         {next ? (
           <>
-            <span className="font-medium text-ink-muted">{t("Next {time}", { time: fmtClock(next.startMs) })} · </span>
+            <span className="font-medium text-ink-muted">
+              {t("Next {time}", { time: fmtClock(next.startMs) })} ·{" "}
+            </span>
             {next.title}
           </>
         ) : (

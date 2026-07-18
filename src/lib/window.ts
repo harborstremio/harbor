@@ -123,8 +123,6 @@ export function openInAppBrowser(url: string, title?: string) {
     return;
   }
   if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent("harbor:open-embed-viewport", { detail: { url, title } }),
-    );
+    window.dispatchEvent(new CustomEvent("harbor:open-embed-viewport", { detail: { url, title } }));
   }
 }

@@ -80,28 +80,20 @@ export function LetterboxdTab() {
         />
       )}
 
-      {status === "loading" && (
-        <p className="text-[13px] text-ink-muted">{tr("Loading…")}</p>
-      )}
+      {status === "loading" && <p className="text-[13px] text-ink-muted">{tr("Loading…")}</p>}
       {status === "error" && (
         <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">
           {tr("Couldn't reach Letterboxd. Try refreshing.")}
         </p>
       )}
       {status === "ready" && items.length === 0 && (
-        <p className="text-[13px] text-ink-muted">
-          {tr("Your Letterboxd watchlist is empty.")}
-        </p>
+        <p className="text-[13px] text-ink-muted">{tr("Your Letterboxd watchlist is empty.")}</p>
       )}
       {status === "ready" && visible.length === 0 && items.length > 0 && (
-        <p className="text-[13px] text-ink-muted">
-          {tr("No matches for these filters.")}
-        </p>
+        <p className="text-[13px] text-ink-muted">{tr("No matches for these filters.")}</p>
       )}
 
-      {visible.length > 0 && (
-        <GroupedGrid groups={sortedGroups(visible, settings.librarySort)} />
-      )}
+      {visible.length > 0 && <GroupedGrid groups={sortedGroups(visible, settings.librarySort)} />}
     </section>
   );
 }

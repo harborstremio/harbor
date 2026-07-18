@@ -4,18 +4,10 @@ import { BigButton } from "./big-button";
 import { DvrIcon } from "./dvr-icon";
 import { Tooltip } from "./tooltip";
 
-export function DvrButton({
-  channelName,
-  onClick,
-}: {
-  channelName: string;
-  onClick: () => void;
-}) {
+export function DvrButton({ channelName, onClick }: { channelName: string; onClick: () => void }) {
   const t = useT();
   const { sessions } = useDvr();
-  const active = sessions.find(
-    (s) => s.channelName === channelName && s.state === "recording",
-  );
+  const active = sessions.find((s) => s.channelName === channelName && s.state === "recording");
 
   if (!active) {
     return (
@@ -25,21 +17,27 @@ export function DvrButton({
     );
   }
 
-  const ratio = active.plannedDurationSec > 0
-    ? Math.min(1, active.elapsedSec / active.plannedDurationSec)
-    : 0;
+  const ratio =
+    active.plannedDurationSec > 0 ? Math.min(1, active.elapsedSec / active.plannedDurationSec) : 0;
   const pct = Math.round(ratio * 100);
   const remaining = Math.max(0, active.plannedDurationSec - active.elapsedSec);
   const remainingLabel =
-    remaining < 60 ? t("{s}s left", { s: Math.round(remaining) })
-    : remaining < 3600 ? t("{m}m left", { m: Math.round(remaining / 60) })
-    : t("{h}h {m}m left", {
-        h: Math.floor(remaining / 3600),
-        m: Math.round((remaining % 3600) / 60),
-      });
+    remaining < 60
+      ? t("{s}s left", { s: Math.round(remaining) })
+      : remaining < 3600
+        ? t("{m}m left", { m: Math.round(remaining / 60) })
+        : t("{h}h {m}m left", {
+            h: Math.floor(remaining / 3600),
+            m: Math.round((remaining % 3600) / 60),
+          });
 
   return (
-    <Tooltip label={t("Recording · {pct}% · {remaining} · click to manage", { pct, remaining: remainingLabel })}>
+    <Tooltip
+      label={t("Recording · {pct}% · {remaining} · click to manage", {
+        pct,
+        remaining: remainingLabel,
+      })}
+    >
       <button
         onClick={onClick}
         aria-label={t("Manage recording")}

@@ -21,7 +21,9 @@ export function CinemetaFallback({
       .sort((a, b) => (a.episode ?? 0) - (b.episode ?? 0));
   }, [videos, season]);
   if (eps.length === 0) {
-    return <p className="text-[14px] text-ink-subtle">{t("No episodes available for this season.")}</p>;
+    return (
+      <p className="text-[14px] text-ink-subtle">{t("No episodes available for this season.")}</p>
+    );
   }
   return (
     <div className="flex flex-col gap-1">

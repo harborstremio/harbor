@@ -25,16 +25,19 @@ export function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
   if (!text) return null;
 
   const responsive = boxH > 0 ? Math.max(0.3, Math.min(2.5, boxH / 1080)) : scale;
-  const baseFont = kid ? Math.max(54, clamp(settings.subFontSize, 16, 120)) : clamp(settings.subFontSize, 16, 120);
+  const baseFont = kid
+    ? Math.max(54, clamp(settings.subFontSize, 16, 120))
+    : clamp(settings.subFontSize, 16, 120);
   const fontSize = Math.round(baseFont * responsive);
   const marginY = clamp(settings.subMarginY, 0, 100);
   const fontColor = settings.subFontColor || "#FFFFFF";
   const align = settings.subAlignX || "center";
   const family = fontFamilyFor(settings.subFontFamily);
-  const style = kid ? "shadow" : settings.subStyle ?? "shadow";
+  const style = kid ? "shadow" : (settings.subStyle ?? "shadow");
   const lines = text.split("\n");
 
-  const justify = align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
+  const justify =
+    align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
 
   const baseTextStyle: React.CSSProperties = {
     color: fontColor,
@@ -48,7 +51,10 @@ export function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
   };
 
   if (style === "outline") {
-    const borderSize = Math.max(1, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive));
+    const borderSize = Math.max(
+      1,
+      Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive),
+    );
     const borderColor = settings.subBorderColor || "#000000";
     baseTextStyle.textShadow = buildOutline(borderColor, borderSize);
   } else if (style === "shadow") {

@@ -172,7 +172,9 @@ export function ChannelPicker({
               ) : (
                 <>
                   <Tv size={26} className="text-ink-subtle" />
-                  <p className="text-[13.5px]">No channels match. Try another group or paste a URL.</p>
+                  <p className="text-[13.5px]">
+                    No channels match. Try another group or paste a URL.
+                  </p>
                 </>
               )}
             </div>
@@ -284,7 +286,7 @@ function PlaylistDropdown({
   const activeLabel =
     value === ALL_PLAYLISTS
       ? "All playlists"
-      : sources.find((s) => s.id === value)?.name ?? "Playlist";
+      : (sources.find((s) => s.id === value)?.name ?? "Playlist");
 
   return (
     <div ref={wrapRef} className="relative">

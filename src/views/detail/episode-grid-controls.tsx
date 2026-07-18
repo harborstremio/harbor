@@ -67,7 +67,9 @@ function SortMenu({ sort, onSort }: { sort: Sort; onSort: (s: Sort) => void }) {
                 setOpen(false);
               }}
               className={`flex w-full items-center justify-between px-4 py-2.5 text-start text-[13px] transition-colors ${
-                sort === s ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+                sort === s
+                  ? "bg-ink/10 text-ink"
+                  : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
               }`}
             >
               {s === "newest" ? t("Newest") : t("Oldest")}

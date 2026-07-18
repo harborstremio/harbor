@@ -15,7 +15,8 @@ export function BirthdayLink({ birthday, age }: { birthday: string; age: number 
   }
   const m = date.getUTCMonth() + 1;
   const d = date.getUTCDate();
-  const handle = () => openInAppBrowser(`https://www.imdb.com/search/name/?birth_monthday=${m}-${d}`);
+  const handle = () =>
+    openInAppBrowser(`https://www.imdb.com/search/name/?birth_monthday=${m}-${d}`);
   return (
     <button
       onClick={handle}

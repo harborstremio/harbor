@@ -29,13 +29,7 @@ export const ANIME_GENRE_TO_JIKAN: Record<string, number> = {
   Psychological: 40,
 };
 
-export type PickSource =
-  | "sequel"
-  | "rec"
-  | "genre"
-  | "new"
-  | "airing"
-  | "top";
+export type PickSource = "sequel" | "rec" | "genre" | "new" | "airing" | "top";
 
 const SOURCE_BASE: Record<PickSource, number> = {
   sequel: 100,
@@ -158,12 +152,7 @@ function rotationNoise(franchiseKey: string, seed: number): number {
   return mulberry32(mixSeed(seed, hashStr(franchiseKey)))();
 }
 
-export function scorePick(
-  m: Meta,
-  source: PickSource,
-  recsIndex = 0,
-  recsLen = 0,
-): number {
+export function scorePick(m: Meta, source: PickSource, recsIndex = 0, recsLen = 0): number {
   let base = SOURCE_BASE[source];
   if (source === "rec" && recsLen > 0) base += Math.max(0, recsLen - recsIndex) * 0.5;
   if (source === "genre") {

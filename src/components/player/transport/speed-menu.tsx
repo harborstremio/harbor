@@ -1,6 +1,10 @@
 import { Clock, Gauge, Plus, Settings2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SLEEP_PRESETS, type SleepMode, type SleepTimerState } from "@/views/player/hooks/use-sleep-timer";
+import {
+  SLEEP_PRESETS,
+  type SleepMode,
+  type SleepTimerState,
+} from "@/views/player/hooks/use-sleep-timer";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { useMenuSide } from "../menu-side";
@@ -65,7 +69,8 @@ export function SpeedMenu({
   const sleepList = useMemo(() => {
     const minutes = new Map<number, boolean>();
     for (const p of SLEEP_PRESETS) {
-      if (p.mode.kind === "minutes" && CURATED_SLEEP_IDS.includes(p.id)) minutes.set(p.mode.total, false);
+      if (p.mode.kind === "minutes" && CURATED_SLEEP_IDS.includes(p.id))
+        minutes.set(p.mode.total, false);
     }
     for (const m of settings.customSleepMinutes) if (!minutes.has(m)) minutes.set(m, true);
     const minuteRows = [...minutes.entries()]
@@ -87,7 +92,8 @@ export function SpeedMenu({
   const accent = open || Math.abs(rate - 1) > 0.01 || sleepActive;
   const sleepLabel = (() => {
     if (!sleep || sleep.mode.kind === "off") return null;
-    if (sleep.mode.kind === "minutes" && sleep.remainingMs != null) return formatRemaining(sleep.remainingMs);
+    if (sleep.mode.kind === "minutes" && sleep.remainingMs != null)
+      return formatRemaining(sleep.remainingMs);
     if (sleep.mode.kind === "end_episode") return t("End ep");
     if (sleep.mode.kind === "end_next_episode") return t("+{n} ep", { n: sleep.mode.remaining });
     return null;
@@ -122,7 +128,9 @@ export function SpeedMenu({
           }}
           aria-label={t("Speed and sleep timer")}
           className={`flex h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 transition-[background-color,color] ${
-            accent ? "bg-white/22 text-white hover:bg-white/30" : "text-white/85 hover:bg-white/10 hover:text-white"
+            accent
+              ? "bg-white/22 text-white hover:bg-white/30"
+              : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
           <Gauge size={22} strokeWidth={1.9} />
@@ -163,7 +171,9 @@ export function SpeedMenu({
                   }}
                 />
               ))}
-              {editing && <AddPresetInput placeholder={t("e.g. 1.35")} suffix="×" onAdd={addSpeed} />}
+              {editing && (
+                <AddPresetInput placeholder={t("e.g. 1.35")} suffix="×" onAdd={addSpeed} />
+              )}
             </Section>
             {sleep && (
               <Section title={t("Sleep timer")} leftBorder>
@@ -184,7 +194,9 @@ export function SpeedMenu({
                       selected={isSel}
                       label={p.label}
                       hint={hint}
-                      onRemove={editing && p.custom && total != null ? () => removeSleep(total) : undefined}
+                      onRemove={
+                        editing && p.custom && total != null ? () => removeSleep(total) : undefined
+                      }
                       onClick={() => {
                         sleep.set(p.mode);
                         setOpen(false);
@@ -217,7 +229,9 @@ export function SpeedMenu({
             <button
               onClick={() => setEditing((e) => !e)}
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition-colors ${
-                editing ? "bg-canvas/55 text-ink" : "text-ink-subtle hover:bg-canvas/55 hover:text-ink"
+                editing
+                  ? "bg-canvas/55 text-ink"
+                  : "text-ink-subtle hover:bg-canvas/55 hover:text-ink"
               }`}
             >
               <Settings2 size={13} strokeWidth={2} />
@@ -267,12 +281,16 @@ function Row({
       <button
         onClick={onClick}
         className={`flex h-10 w-full items-center justify-between rounded-lg px-3 text-start text-[14px] transition-colors ${
-          selected ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
+          selected
+            ? "bg-elevated text-ink ring-1 ring-edge"
+            : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
         } ${onRemove ? "pe-10" : ""}`}
       >
         <span className={selected ? "font-medium" : ""}>{label}</span>
         {hint && !onRemove && (
-          <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">{hint}</span>
+          <span className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+            {hint}
+          </span>
         )}
       </button>
       {onRemove && (

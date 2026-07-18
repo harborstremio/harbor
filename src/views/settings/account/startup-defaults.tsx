@@ -20,7 +20,7 @@ export function StartupDefaults() {
   const interval = settings.profilePromptInterval ?? "launch";
   const defaultId = settings.defaultProfileId ?? "";
   const defaultName = defaultId
-    ? profiles.find((p) => p.id === defaultId)?.name ?? t("Ask each time")
+    ? (profiles.find((p) => p.id === defaultId)?.name ?? t("Ask each time"))
     : t("Ask each time");
   const intervalLabel = t(INTERVALS.find(([v]) => v === interval)?.[1] ?? "Every launch");
 
@@ -71,12 +71,16 @@ export function StartupDefaults() {
           {profiles.length > 1 && (
             <div className="flex flex-col gap-2">
               <span className="text-[12.5px] text-ink-muted">
-                {t("Skip Who's watching and always start as this profile. PIN-locked profiles can't be a default.")}
+                {t(
+                  "Skip Who's watching and always start as this profile. PIN-locked profiles can't be a default.",
+                )}
               </span>
               <div className="flex flex-wrap gap-2">
                 {[
                   { id: "", label: t("Ask each time") },
-                  ...profiles.filter((p) => !p.passwordHash).map((p) => ({ id: p.id, label: p.name })),
+                  ...profiles
+                    .filter((p) => !p.passwordHash)
+                    .map((p) => ({ id: p.id, label: p.name })),
                 ].map(({ id, label }) => {
                   const active = defaultId === id;
                   return (

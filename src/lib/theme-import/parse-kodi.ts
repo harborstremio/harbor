@@ -39,7 +39,9 @@ function flatList(map: Map<string, KodiColor>, names: string[], canvas: Rgb): st
     const lower = n.toLowerCase();
     for (const [k, v] of map) {
       if (k.toLowerCase() !== lower) continue;
-      out.push(v.alpha >= 0.999 ? toHex6(v.rgb) : toHex6(flattenAlpha({ ...v.rgb, a: v.alpha }, canvas)));
+      out.push(
+        v.alpha >= 0.999 ? toHex6(v.rgb) : toHex6(flattenAlpha({ ...v.rgb, a: v.alpha }, canvas)),
+      );
     }
   }
   return out;
@@ -55,7 +57,14 @@ export function parseKodi(text: string, themeName = "Kodi skin"): PaletteBucket 
   if (map.size === 0) return null;
 
   const canvasC =
-    pickName(map, ["background", "main_bg_100", "Background", "panel_color", "PageBackground", "black"]) ??
+    pickName(map, [
+      "background",
+      "main_bg_100",
+      "Background",
+      "panel_color",
+      "PageBackground",
+      "black",
+    ]) ??
     [...map.values()].filter((v) => v.alpha >= 0.999).sort((a, b) => lum(a.rgb) - lum(b.rgb))[0] ??
     [...map.values()][0];
   const canvas = canvasC.rgb;
@@ -94,13 +103,23 @@ export function parseKodi(text: string, themeName = "Kodi skin"): PaletteBucket 
   const ink = flatList(map, inkNames, canvas);
 
   const accentC =
-    pickName(map, ["button_focus", "Highlight", "selected", "mainblue", "focus", "highlight_color"]) ??
-    mostChromatic(map);
+    pickName(map, [
+      "button_focus",
+      "Highlight",
+      "selected",
+      "mainblue",
+      "focus",
+      "highlight_color",
+    ]) ?? mostChromatic(map);
   const accent = accentC ? toHex6(accentC.rgb) : "#3aa0c7";
 
   const dangerC = pickName(map, ["invalid", "red", "error", "notification_error"]);
 
-  const edge = firstFlat(map, ["border_alpha", "overlay_hard", "list_separator", "overlay_soft"], canvas);
+  const edge = firstFlat(
+    map,
+    ["border_alpha", "overlay_hard", "list_separator", "overlay_soft"],
+    canvas,
+  );
 
   const inkRgb = ink[0] ? parseColor(ink[0]) : null;
   const isLight = inkRgb ? lum(canvas) > lum({ r: inkRgb.r, g: inkRgb.g, b: inkRgb.b }) : undefined;

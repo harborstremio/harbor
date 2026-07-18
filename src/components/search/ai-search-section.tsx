@@ -51,7 +51,9 @@ export function AiSearchSection({
     <div className="mb-8">
       {status === "idle" && <AiSuggestButton query={query} provider={provider} onRun={run} />}
 
-      {status === "loading" && <AiThinking provider={provider} label={label} phrases={thinkingPhrases} />}
+      {status === "loading" && (
+        <AiThinking provider={provider} label={label} phrases={thinkingPhrases} />
+      )}
 
       {status === "error" && (
         <button

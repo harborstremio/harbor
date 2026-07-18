@@ -31,9 +31,7 @@ export function openInstallerViewport(url: string, title?: string, logo?: string
     return;
   }
   window.__harborInstallerOpen = true;
-  window.dispatchEvent(
-    new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }),
-  );
+  window.dispatchEvent(new CustomEvent<InstallerDetail>(EVENT, { detail: { url, title, logo } }));
 }
 
 export function InstallerViewportRoot() {

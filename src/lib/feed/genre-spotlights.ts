@@ -180,7 +180,12 @@ export const GENRE_SPOTLIGHTS: Record<string, Spotlight[]> = {
       relatedGenreIds: [18, 53, 36],
     },
     { name: "Oliver Stone", sub: "Vietnam & After", dept: "Directing", relatedGenreIds: [18, 36] },
-    { name: "Christopher Nolan", sub: "The Home Front", dept: "Directing", relatedGenreIds: [18, 36, 28] },
+    {
+      name: "Christopher Nolan",
+      sub: "The Home Front",
+      dept: "Directing",
+      relatedGenreIds: [18, 36, 28],
+    },
     { name: "Clint Eastwood", sub: "Both Flags", dept: "Directing", relatedGenreIds: [18, 36] },
     { name: "Sam Mendes", sub: "The Trenches", dept: "Directing", relatedGenreIds: [18, 36] },
     { name: "Mel Gibson", sub: "Frontline Valor", dept: "Directing", relatedGenreIds: [18, 36] },

@@ -21,7 +21,12 @@ export function AnilistRows() {
               title={
                 <span className="inline-flex items-center gap-2">
                   {label}
-                  <PinHomeButton id={`anilist:${rail.key}`} source="anilist" name={label} params={{ railKey: rail.key }} />
+                  <PinHomeButton
+                    id={`anilist:${rail.key}`}
+                    source="anilist"
+                    name={label}
+                    params={{ railKey: rail.key }}
+                  />
                 </span>
               }
               scrollKey={`anime:anilist:${rail.key}`}

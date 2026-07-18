@@ -143,13 +143,17 @@ function Banner({
           >
             {data.meta.name}
           </h1>
-          <p className="text-[14px] font-semibold uppercase tracking-[0.18em]" style={{ color: tint }}>
+          <p
+            className="text-[14px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: tint }}
+          >
             <span className="text-ink">{totalWins.toLocaleString()}</span> {t("recorded winners")} ·{" "}
             <span className="text-ink">{data.categories.length}</span>{" "}
             {data.categories.length === 1 ? t("category") : t("categories")}
             {yearSpan && (
               <>
-                {" "}· <span className="text-ink">{yearSpan}</span>
+                {" "}
+                · <span className="text-ink">{yearSpan}</span>
               </>
             )}
           </p>
@@ -208,7 +212,12 @@ function FilterBar({
           {t("All years")}
         </YearChip>
         {years.map((y) => (
-          <YearChip key={y} active={year === y} onClick={() => onYear(year === y ? null : y)} tint={tint}>
+          <YearChip
+            key={y}
+            active={year === y}
+            onClick={() => onYear(year === y ? null : y)}
+            tint={tint}
+          >
             {y}
           </YearChip>
         ))}

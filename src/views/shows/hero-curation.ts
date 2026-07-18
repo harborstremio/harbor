@@ -254,96 +254,135 @@ async function fetchPool(key: string): Promise<Meta[]> {
     () => safe(tmdbSeriesRow(key, "popular", 1)),
     () => safe(tmdbSeriesRow(key, "on_the_air", 1)),
     () => safe(tmdbSeriesRow(key, "top_rated", 1)),
-    () => safe(tmdbDiscover(key, "tv", {
-      "vote_average.gte": "8.6",
-      "vote_count.gte": "2000",
-      sort_by: "vote_average.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_genres: drama,
-      "vote_average.gte": "8.2",
-      "vote_count.gte": "1000",
-      "first_air_date.gte": "2018-01-01",
-      sort_by: "popularity.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_genres: comedy,
-      "vote_average.gte": "8.0",
-      "vote_count.gte": "700",
-      sort_by: "vote_average.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_genres: crime,
-      "vote_average.gte": "8.0",
-      "vote_count.gte": "600",
-      sort_by: "vote_count.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_genres: sciFi,
-      "vote_average.gte": "8.0",
-      "vote_count.gte": "600",
-      sort_by: "vote_count.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_genres: doc,
-      "vote_average.gte": "8.0",
-      "vote_count.gte": "150",
-      sort_by: "vote_average.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_type: "2",
-      "vote_average.gte": "7.8",
-      "vote_count.gte": "300",
-      sort_by: "vote_count.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      "first_air_date.gte": isoDaysAgo(90),
-      "vote_count.gte": "60",
-      "vote_average.gte": "7.4",
-      sort_by: "popularity.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_origin_country: "GB",
-      "vote_average.gte": "8.0",
-      "vote_count.gte": "300",
-      sort_by: "vote_average.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_origin_country: "KR",
-      "vote_average.gte": "7.8",
-      "vote_count.gte": "120",
-      sort_by: "popularity.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_networks: "49",
-      "vote_count.gte": "250",
-      sort_by: "vote_average.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      with_networks: "213",
-      "vote_average.gte": "7.8",
-      "vote_count.gte": "400",
-      sort_by: "vote_average.desc",
-      page: "1",
-    })),
-    () => safe(tmdbDiscover(key, "tv", {
-      "vote_average.gte": "7.8",
-      "vote_count.gte": "500",
-      "first_air_date.lte": "2010-12-31",
-      sort_by: "vote_count.desc",
-      page: "1",
-    })),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          "vote_average.gte": "8.6",
+          "vote_count.gte": "2000",
+          sort_by: "vote_average.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_genres: drama,
+          "vote_average.gte": "8.2",
+          "vote_count.gte": "1000",
+          "first_air_date.gte": "2018-01-01",
+          sort_by: "popularity.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_genres: comedy,
+          "vote_average.gte": "8.0",
+          "vote_count.gte": "700",
+          sort_by: "vote_average.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_genres: crime,
+          "vote_average.gte": "8.0",
+          "vote_count.gte": "600",
+          sort_by: "vote_count.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_genres: sciFi,
+          "vote_average.gte": "8.0",
+          "vote_count.gte": "600",
+          sort_by: "vote_count.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_genres: doc,
+          "vote_average.gte": "8.0",
+          "vote_count.gte": "150",
+          sort_by: "vote_average.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_type: "2",
+          "vote_average.gte": "7.8",
+          "vote_count.gte": "300",
+          sort_by: "vote_count.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          "first_air_date.gte": isoDaysAgo(90),
+          "vote_count.gte": "60",
+          "vote_average.gte": "7.4",
+          sort_by: "popularity.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_origin_country: "GB",
+          "vote_average.gte": "8.0",
+          "vote_count.gte": "300",
+          sort_by: "vote_average.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_origin_country: "KR",
+          "vote_average.gte": "7.8",
+          "vote_count.gte": "120",
+          sort_by: "popularity.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_networks: "49",
+          "vote_count.gte": "250",
+          sort_by: "vote_average.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          with_networks: "213",
+          "vote_average.gte": "7.8",
+          "vote_count.gte": "400",
+          sort_by: "vote_average.desc",
+          page: "1",
+        }),
+      ),
+    () =>
+      safe(
+        tmdbDiscover(key, "tv", {
+          "vote_average.gte": "7.8",
+          "vote_count.gte": "500",
+          "first_air_date.lte": "2010-12-31",
+          sort_by: "vote_count.desc",
+          page: "1",
+        }),
+      ),
   ];
 
   const sources: Meta[][] = [];

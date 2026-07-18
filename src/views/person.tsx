@@ -79,7 +79,10 @@ export function PersonView({ personId }: { personId: number }) {
     () => (person ? dedupe(person.cast).sort((a, b) => b.popularity - a.popularity) : []),
     [person],
   );
-  const sortedCrew = useMemo(() => (person ? person.crew.slice().sort((a, b) => b.popularity - a.popularity) : []), [person]);
+  const sortedCrew = useMemo(
+    () => (person ? person.crew.slice().sort((a, b) => b.popularity - a.popularity) : []),
+    [person],
+  );
 
   const knownFor = useMemo(() => {
     if (!person) return [];
@@ -115,14 +118,13 @@ export function PersonView({ personId }: { personId: number }) {
   const age = person?.birthday ? calcAge(person.birthday, person.deathday) : null;
 
   return (
-    <main
-      ref={scrollRef}
-      className="absolute inset-0 z-40 overflow-y-auto bg-canvas"
-    >
-
+    <main ref={scrollRef} className="absolute inset-0 z-40 overflow-y-auto bg-canvas">
       <div className="relative isolate">
         {backdrop && (
-          <div aria-hidden className="harbor-bleed-stremio pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70vh] overflow-hidden">
+          <div
+            aria-hidden
+            className="harbor-bleed-stremio pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70vh] overflow-hidden"
+          >
             <div
               className="absolute inset-0 scale-110"
               style={{
@@ -154,9 +156,13 @@ export function PersonView({ personId }: { personId: number }) {
               {personRank && (
                 <button
                   type="button"
-                  onClick={() => openTopRank((person?.knownForDepartment as TopRankDept) ?? "Acting")}
+                  onClick={() =>
+                    openTopRank((person?.knownForDepartment as TopRankDept) ?? "Acting")
+                  }
                   className="flex items-center gap-1 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-accent transition-all hover:scale-105 hover:border-accent/60 hover:bg-accent/20"
-                  title={t("Open Top 100 {dept}", { dept: t(person?.knownForDepartment ?? "Actors") })}
+                  title={t("Open Top 100 {dept}", {
+                    dept: t(person?.knownForDepartment ?? "Actors"),
+                  })}
                 >
                   {t("Top {n}", { n: personRank })}
                 </button>
@@ -167,10 +173,10 @@ export function PersonView({ personId }: { personId: number }) {
             </h1>
 
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-[14px] text-ink-muted">
-              {person?.birthday && (
-                <BirthdayLink birthday={person.birthday} age={age} />
+              {person?.birthday && <BirthdayLink birthday={person.birthday} age={age} />}
+              {person?.deathday && (
+                <span>{t("Died {date}", { date: fmtDate(person.deathday) })}</span>
               )}
-              {person?.deathday && <span>{t("Died {date}", { date: fmtDate(person.deathday) })}</span>}
               {person?.placeOfBirth && <PlaceLink place={person.placeOfBirth} />}
             </div>
 
@@ -200,8 +206,12 @@ export function PersonView({ personId }: { personId: number }) {
         {knownFor.length > 0 && (
           <FilmRow title={t("Known For")} credits={knownFor} showRole={false} />
         )}
-        {movies.length > 0 && <FilmRow title={t("Movies · {n}", { n: movies.length })} credits={movies} showRole />}
-        {shows.length > 0 && <FilmRow title={t("TV Shows · {n}", { n: shows.length })} credits={shows} showRole />}
+        {movies.length > 0 && (
+          <FilmRow title={t("Movies · {n}", { n: movies.length })} credits={movies} showRole />
+        )}
+        {shows.length > 0 && (
+          <FilmRow title={t("TV Shows · {n}", { n: shows.length })} credits={shows} showRole />
+        )}
         {directing.length > 0 && <FilmRow title={t("Directing")} credits={directing} showRole />}
         {writing.length > 0 && <FilmRow title={t("Writing")} credits={writing} showRole />}
         {producing.length > 0 && <FilmRow title={t("Producing")} credits={producing} showRole />}

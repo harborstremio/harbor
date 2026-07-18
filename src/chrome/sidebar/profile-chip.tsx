@@ -66,7 +66,10 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
         <ProfileAvatar profile={activeProfile} user={user} fallbackAvatar={harborAvatar} />
         <div className={`hidden min-w-0 flex-1 ${collapsed ? "" : "lg:block"}`}>
           <div className="truncate text-[14.5px] font-medium tracking-tight text-ink">
-            {activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback")}
+            {activeProfile?.name ??
+              user?.fullname ??
+              user?.email?.split("@")[0] ??
+              t("profile.fallback")}
           </div>
           <div className="truncate text-[12px] text-ink-subtle">
             <SubtitleText active={activeProfile} profiles={profiles} user={user} />
@@ -117,65 +120,65 @@ export function ProfileChip({ collapsed = false }: { collapsed?: boolean } = {})
             </div>
           )}
           {!kid && (
-          <div className="flex flex-col">
-            <button
-              onClick={() => {
-                openPicker({ kind: "list" });
-                setMenuOpen(false);
-              }}
-              className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-            >
-              <Users size={14} strokeWidth={2.2} />
-              {t("profile.whoWatching")}
-            </button>
-            {activeProfile && (
+            <div className="flex flex-col">
               <button
                 onClick={() => {
-                  openPicker({ kind: "edit", profileId: activeProfile.id });
+                  openPicker({ kind: "list" });
                   setMenuOpen(false);
                 }}
                 className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
               >
-                <Pencil size={14} strokeWidth={2.2} />
-                {t("profile.editThis")}
+                <Users size={14} strokeWidth={2.2} />
+                {t("profile.whoWatching")}
               </button>
-            )}
-            {activeProfile?.isPrimary && (
-              <button
-                onClick={() => {
-                  openPicker({ kind: "create" });
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <Plus size={14} strokeWidth={2.2} />
-                {t("profile.new")}
-              </button>
-            )}
-            {user ? (
-              <button
-                onClick={() => {
-                  signOut();
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <LogOut size={14} strokeWidth={2.2} />
-                {t("profile.signOut")}
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setAuthOpen(true);
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-              >
-                <LogIn size={14} strokeWidth={2.2} />
-                {t("profile.signIn")}
-              </button>
-            )}
-          </div>
+              {activeProfile && (
+                <button
+                  onClick={() => {
+                    openPicker({ kind: "edit", profileId: activeProfile.id });
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <Pencil size={14} strokeWidth={2.2} />
+                  {t("profile.editThis")}
+                </button>
+              )}
+              {activeProfile?.isPrimary && (
+                <button
+                  onClick={() => {
+                    openPicker({ kind: "create" });
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <Plus size={14} strokeWidth={2.2} />
+                  {t("profile.new")}
+                </button>
+              )}
+              {user ? (
+                <button
+                  onClick={() => {
+                    signOut();
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <LogOut size={14} strokeWidth={2.2} />
+                  {t("profile.signOut")}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setAuthOpen(true);
+                    setMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2.5 border-t border-edge-soft px-4 py-3 text-start text-[13.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+                >
+                  <LogIn size={14} strokeWidth={2.2} />
+                  {t("profile.signIn")}
+                </button>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -215,10 +218,7 @@ function ProfileAvatar({
   const src = profile?.avatar ?? fallbackAvatar ?? user?.avatar ?? null;
   const ringStyle = profile?.color ? { boxShadow: `0 0 0 2px ${profile.color}` } : undefined;
   return (
-    <div
-      className={`${dim} shrink-0 overflow-hidden rounded-full bg-elevated`}
-      style={ringStyle}
-    >
+    <div className={`${dim} shrink-0 overflow-hidden rounded-full bg-elevated`} style={ringStyle}>
       {src ? (
         <img src={src} alt="" className="h-full w-full object-cover" draggable={false} />
       ) : (

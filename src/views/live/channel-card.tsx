@@ -114,7 +114,9 @@ export function ChannelCard({
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-1 rounded-lg bg-canvas/40 text-ink-subtle">
               <Tv size={22} strokeWidth={1.7} />
-              <span className="text-[10.5px] font-medium uppercase tracking-[0.18em]">{t("Live")}</span>
+              <span className="text-[10.5px] font-medium uppercase tracking-[0.18em]">
+                {t("Live")}
+              </span>
             </div>
           )}
           <span className="absolute start-2.5 top-2.5 flex h-5 items-center gap-1 rounded-full bg-canvas/90 px-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-danger">
@@ -131,7 +133,10 @@ export function ChannelCard({
           {current ? (
             <>
               <div className="flex items-baseline gap-2">
-                <div dir="auto" className="min-w-0 flex-1 truncate text-[12.5px] leading-tight text-ink-muted">
+                <div
+                  dir="auto"
+                  className="min-w-0 flex-1 truncate text-[12.5px] leading-tight text-ink-muted"
+                >
                   {current.title}
                 </div>
                 {timeLeft && (
@@ -185,11 +190,7 @@ export function ChannelCard({
         >
           <Pin size={13} strokeWidth={2.2} className={isChannelPinned ? "fill-current" : ""} />
         </button>
-        <FavoriteButton
-          active={isFav}
-          onToggle={() => favorites.toggle(channel)}
-          size={14}
-        />
+        <FavoriteButton active={isFav} onToggle={() => favorites.toggle(channel)} size={14} />
       </div>
     </div>
   );

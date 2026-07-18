@@ -31,9 +31,9 @@ function num(v: number | string | undefined): number | undefined {
 }
 
 export async function fetchWatchedHistory(limit = 200): Promise<SimklHistoryItem[]> {
-  const data = await simklRequest<RawAllItems>(
-    "/sync/all-items/all/completed?extended=full",
-  ).catch(() => ({}) as RawAllItems);
+  const data = await simklRequest<RawAllItems>("/sync/all-items/all/completed?extended=full").catch(
+    () => ({}) as RawAllItems,
+  );
   const out: SimklHistoryItem[] = [];
   for (const e of data.movies ?? []) {
     const m = e.movie;

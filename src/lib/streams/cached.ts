@@ -1,4 +1,5 @@
-export const UNCACHED_MARKER_RX = /\b(?:rd|ad|pm|dl|tb|oc)\s*download\b|\buncached\b|[⬇⏳⌛⏬🔽📥☁]/i;
+export const UNCACHED_MARKER_RX =
+  /\b(?:rd|ad|pm|dl|tb|oc)\s*download\b|\buncached\b|[⬇⏳⌛⏬🔽📥☁]/i;
 export const CACHED_MARKER_RX = /[⚡✅]/u;
 
 export function hasUncachedMarker(s: {

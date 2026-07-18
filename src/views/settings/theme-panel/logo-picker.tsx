@@ -36,7 +36,12 @@ function LogoSlot({
         className={`flex ${square ? "h-16 w-16" : "h-16 w-28"} shrink-0 items-center justify-center overflow-hidden rounded-xl border border-edge-soft bg-elevated/30`}
       >
         {value ? (
-          <img src={value} alt="" draggable={false} className="max-h-full max-w-full object-contain p-1.5" />
+          <img
+            src={value}
+            alt=""
+            draggable={false}
+            className="max-h-full max-w-full object-contain p-1.5"
+          />
         ) : (
           <ImageDown size={20} strokeWidth={1.6} className="text-ink-subtle" />
         )}

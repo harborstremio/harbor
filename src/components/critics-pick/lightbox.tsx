@@ -51,7 +51,9 @@ export function Lightbox({
         className="absolute start-8 top-8 flex flex-col gap-1"
         onClick={(e) => e.stopPropagation()}
       >
-        <span className="font-display text-[18px] font-medium tracking-tight text-ink">{title}</span>
+        <span className="font-display text-[18px] font-medium tracking-tight text-ink">
+          {title}
+        </span>
         <span className="text-[12px] uppercase tracking-[0.18em] text-ink-subtle">
           {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
         </span>

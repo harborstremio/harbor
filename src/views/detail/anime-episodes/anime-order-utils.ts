@@ -16,7 +16,8 @@ export function buildAnimeOrder(
   for (const ep of episodes) {
     const abs = ep.absoluteNumber ?? ep.number;
     if (abs != null && !byAbs.has(abs)) byAbs.set(abs, ep);
-    if (ep.tvdbEpisodeId != null && !byTvdbId.has(ep.tvdbEpisodeId)) byTvdbId.set(ep.tvdbEpisodeId, ep);
+    if (ep.tvdbEpisodeId != null && !byTvdbId.has(ep.tvdbEpisodeId))
+      byTvdbId.set(ep.tvdbEpisodeId, ep);
     if (ep.imdbSeason == null || ep.imdbSeason < 1 || ep.imdbEpisode == null) continue;
     const key = `${ep.imdbSeason}:${ep.imdbEpisode}`;
     if (!byPair.has(key)) byPair.set(key, ep);
@@ -55,7 +56,14 @@ export function buildAnimeOrder(
     });
     const key = String(s.seasonNumber);
     const { from, to } = seasonDateRange(bucket);
-    items.push({ key, name: s.name, count: ordered.length, year: s.airDate?.slice(0, 4), from, to });
+    items.push({
+      key,
+      name: s.name,
+      count: ordered.length,
+      year: s.airDate?.slice(0, 4),
+      from,
+      to,
+    });
     subsetByKey.set(key, ordered);
   }
   if (items.length < 2) return null;

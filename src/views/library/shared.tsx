@@ -7,7 +7,16 @@ import { WatchlistCard } from "./watchlist-card";
 export { WatchlistCard } from "./watchlist-card";
 export { hydrateLibraryMeta, loadLocalIds } from "./hydrate-meta";
 
-export type Tab = "watchlist" | "history" | "local" | "lists" | "trakt" | "anilist" | "simkl" | "letterboxd" | "mal";
+export type Tab =
+  | "watchlist"
+  | "history"
+  | "local"
+  | "lists"
+  | "trakt"
+  | "anilist"
+  | "simkl"
+  | "letterboxd"
+  | "mal";
 
 export type TypeKey = "all" | "movie" | "series";
 
@@ -99,9 +108,7 @@ export function FilterPill({
       type="button"
       onClick={onClick}
       className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-        active
-          ? "bg-ink text-canvas"
-          : "text-ink-muted hover:bg-raised hover:text-ink"
+        active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
       }`}
     >
       {children}
@@ -109,7 +116,11 @@ export function FilterPill({
   );
 }
 
-export function applyFilter<T extends { meta: Meta }>(items: T[], type: TypeKey, query: string): T[] {
+export function applyFilter<T extends { meta: Meta }>(
+  items: T[],
+  type: TypeKey,
+  query: string,
+): T[] {
   const q = query.trim().toLowerCase();
   return items.filter((it) => {
     if (type !== "all" && it.meta.type !== type) return false;
@@ -228,7 +239,9 @@ export function GroupedGrid<
               <WatchlistCard
                 key={it.key}
                 meta={it.meta}
-                onRemove={onRemove && it.stremioId ? () => onRemove(it.stremioId as string) : undefined}
+                onRemove={
+                  onRemove && it.stremioId ? () => onRemove(it.stremioId as string) : undefined
+                }
               />
             ))}
           </Grid>
@@ -245,7 +258,9 @@ export function EmptyWatchlist({ connected }: { connected: boolean }) {
       <Bookmark size={28} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[16px] font-semibold text-ink">{t("Your watchlist is empty")}</h2>
       <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-        {t("Right-click any title in Harbor or hit \"Add to Watchlist\" on its detail page to save it here.")}
+        {t(
+          'Right-click any title in Harbor or hit "Add to Watchlist" on its detail page to save it here.',
+        )}
         {connected
           ? t(" Anything you save also syncs to your Trakt account.")
           : t(" Connect Trakt in Settings to sync this list across devices.")}

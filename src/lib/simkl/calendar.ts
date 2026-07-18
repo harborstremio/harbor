@@ -66,7 +66,9 @@ function mapCdnItem(item: SimklCdnItem, type: "tv" | "movie", isAnime: boolean):
   };
 }
 
-export async function fetchSimklCdnRolling(catalog: "tv" | "anime" | "movie"): Promise<CalendarItem[]> {
+export async function fetchSimklCdnRolling(
+  catalog: "tv" | "anime" | "movie",
+): Promise<CalendarItem[]> {
   const filename = catalog === "movie" ? "movie_release.json" : `${catalog}.json`;
   try {
     const res = await fetch(cdnUrl(filename), { headers: { "User-Agent": UA } });

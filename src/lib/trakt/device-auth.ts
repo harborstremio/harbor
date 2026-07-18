@@ -1,8 +1,4 @@
-import {
-  TRAKT_API_BASE,
-  TRAKT_CLIENT_ID,
-  TRAKT_DEVICE_TOKEN_PROXY,
-} from "./config";
+import { TRAKT_API_BASE, TRAKT_CLIENT_ID, TRAKT_DEVICE_TOKEN_PROXY } from "./config";
 import { setSession } from "./session";
 import type { DeviceCode, TraktSession, TraktUserMe } from "./types";
 

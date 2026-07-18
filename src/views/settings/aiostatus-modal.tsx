@@ -53,7 +53,9 @@ export function AioStatusModal({
               </span>
             )}
             <div className="flex min-w-0 flex-col">
-              <span className="truncate text-[14px] font-semibold text-ink">{snapshot.addonName}</span>
+              <span className="truncate text-[14px] font-semibold text-ink">
+                {snapshot.addonName}
+              </span>
               <span className="text-[11.5px] text-ink-subtle">{t("Service status")}</span>
             </div>
           </div>
@@ -103,7 +105,9 @@ function ServiceRow({ service }: { service: AioService }) {
         <span className="truncate text-[13.5px] font-medium text-ink">{service.name}</span>
         <span className="truncate text-[11.5px] text-ink-subtle">{service.rawLine}</span>
       </div>
-      <span className={`flex shrink-0 items-center gap-1.5 text-[11.5px] font-semibold ${pal.text}`}>
+      <span
+        className={`flex shrink-0 items-center gap-1.5 text-[11.5px] font-semibold ${pal.text}`}
+      >
         <span className={`h-1.5 w-1.5 rounded-full ${pal.dot}`} />
         {label}
         {service.quotaUsedPercent != null && (

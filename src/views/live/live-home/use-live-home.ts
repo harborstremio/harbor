@@ -58,15 +58,40 @@ const UNCATEGORIZED = "Uncategorized";
 const MIN_COUNTRY = 4;
 const MAX_RAILS = 120;
 const THEME_CAP = 60;
-const JUNK_RE = /\b(xxx|adult|adults|porn|ppv|vip|sex|hardcore|nsfw)\b|18\s*\+|\+\s*18|^[\s#*\-=._|~>]+$/i;
+const JUNK_RE =
+  /\b(xxx|adult|adults|porn|ppv|vip|sex|hardcore|nsfw)\b|18\s*\+|\+\s*18|^[\s#*\-=._|~>]+$/i;
 
 const THEMES: Array<{ key: string; title: string; re: RegExp }> = [
-  { key: "sports", title: "Sports", re: /\b(sports?|espn|bein|sky\s?sport|nfl|nba|mlb|nhl|ufc|wwe|boxing|football|soccer|dazn|fubo|golf|tennis|nascar|motogp|formula)\b/i },
-  { key: "news", title: "News", re: /\b(news|cnn|bbc|msnbc|cnbc|bloomberg|newsmax|gb\s?news|al\s?jazeera|sky\s?news|fox\s?news)\b/i },
-  { key: "movies", title: "Movies", re: /\b(movies?|cinema|film|films|hbo|cinemax|starz|showtime|tcm|mgm|paramount)\b/i },
-  { key: "kids", title: "Kids & Family", re: /\b(kids?|cartoon|disney|nick|nickelodeon|junior|baby|boomerang|cbeebies|pbs\s?kids)\b/i },
-  { key: "entertainment", title: "Entertainment", re: /\b(entertain\w*|comedy|drama|lifestyle|reality|bravo|tlc|usa\s?network|tnt|fx|amc)\b/i },
-  { key: "docs", title: "Documentary", re: /\b(document\w*|discovery|history|nat\s?geo|national\s?geographic|science|animal|smithsonian)\b/i },
+  {
+    key: "sports",
+    title: "Sports",
+    re: /\b(sports?|espn|bein|sky\s?sport|nfl|nba|mlb|nhl|ufc|wwe|boxing|football|soccer|dazn|fubo|golf|tennis|nascar|motogp|formula)\b/i,
+  },
+  {
+    key: "news",
+    title: "News",
+    re: /\b(news|cnn|bbc|msnbc|cnbc|bloomberg|newsmax|gb\s?news|al\s?jazeera|sky\s?news|fox\s?news)\b/i,
+  },
+  {
+    key: "movies",
+    title: "Movies",
+    re: /\b(movies?|cinema|film|films|hbo|cinemax|starz|showtime|tcm|mgm|paramount)\b/i,
+  },
+  {
+    key: "kids",
+    title: "Kids & Family",
+    re: /\b(kids?|cartoon|disney|nick|nickelodeon|junior|baby|boomerang|cbeebies|pbs\s?kids)\b/i,
+  },
+  {
+    key: "entertainment",
+    title: "Entertainment",
+    re: /\b(entertain\w*|comedy|drama|lifestyle|reality|bravo|tlc|usa\s?network|tnt|fx|amc)\b/i,
+  },
+  {
+    key: "docs",
+    title: "Documentary",
+    re: /\b(document\w*|discovery|history|nat\s?geo|national\s?geographic|science|animal|smithsonian)\b/i,
+  },
   { key: "music", title: "Music", re: /\b(music|mtv|vevo|vh1|kerrang|stingray|trace|hits)\b/i },
 ];
 
@@ -75,11 +100,31 @@ function isJunk(group: string): boolean {
 }
 
 function statToChannel(s: ChannelStat): IptvChannel {
-  return { id: s.id, tvgId: null, name: s.name, logo: s.logo, group: s.group, url: s.url, catchupSource: null, durationSec: null, attrs: {} };
+  return {
+    id: s.id,
+    tvgId: null,
+    name: s.name,
+    logo: s.logo,
+    group: s.group,
+    url: s.url,
+    catchupSource: null,
+    durationSec: null,
+    attrs: {},
+  };
 }
 
 function favToChannel(f: StoredFavorite): IptvChannel {
-  return { id: f.id, tvgId: f.tvgId, name: f.name, logo: f.logo, group: f.group, url: f.url, catchupSource: null, durationSec: null, attrs: {} };
+  return {
+    id: f.id,
+    tvgId: f.tvgId,
+    name: f.name,
+    logo: f.logo,
+    group: f.group,
+    url: f.url,
+    catchupSource: null,
+    durationSec: null,
+    attrs: {},
+  };
 }
 
 function railFor(g: string, channels: IptvChannel[], code?: string): ChannelRail {
@@ -140,7 +185,10 @@ export function useLiveHome(params: {
   }, [channels]);
 
   const tvgCounts = useMemo(() => computeTvgIdCounts(channels), [channels]);
-  const { channelsByCountry, countries } = useMemo(() => indexChannelsByCountry(channels), [channels]);
+  const { channelsByCountry, countries } = useMemo(
+    () => indexChannelsByCountry(channels),
+    [channels],
+  );
 
   const out = useMemo(() => {
     const { byId, byGroup, themeCh, topGroups } = index;
@@ -162,7 +210,8 @@ export function useLiveHome(params: {
       guide.push(it);
     };
     for (const ch of [...recentCh, ...favCh, ...topCh]) pushGuide(ch);
-    for (let i = 0; i < channels.length && i < 600 && guide.length < 16; i += 1) pushGuide(channels[i]);
+    for (let i = 0; i < channels.length && i < 600 && guide.length < 16; i += 1)
+      pushGuide(channels[i]);
 
     const tiles: IptvChannel[] = [];
     const tseen = new Set<string>();
@@ -172,7 +221,8 @@ export function useLiveHome(params: {
       tiles.push(ch);
     };
     for (const ch of [...favCh, ...topCh]) pushTile(ch);
-    for (let i = 0; i < channels.length && i < 400 && tiles.length < 18; i += 1) pushTile(channels[i]);
+    for (let i = 0; i < channels.length && i < 400 && tiles.length < 18; i += 1)
+      pushTile(channels[i]);
 
     const seen = new Set<string>();
     const pool: IptvChannel[] = [];
@@ -181,7 +231,8 @@ export function useLiveHome(params: {
       seen.add(ch.id);
       pool.push(ch);
     }
-    const score = (it: NowItem) => (it.current ? 4 : 0) + (it.current?.iconUrl ? 2 : 0) + (it.channel.logo ? 1 : 0);
+    const score = (it: NowItem) =>
+      (it.current ? 4 : 0) + (it.current?.iconUrl ? 2 : 0) + (it.channel.logo ? 1 : 0);
     const spotlight = pool
       .map((ch, i) => ({ it: item(ch), i }))
       .sort((a, b) => score(b.it) - score(a.it) || a.i - b.i)
@@ -191,8 +242,10 @@ export function useLiveHome(params: {
 
     const rails: ChannelRail[] = [];
     const used = new Set<string>();
-    if (recentCh.length) rails.push({ key: "recent", title: "Continue watching", group: null, channels: recentCh });
-    if (favCh.length) rails.push({ key: "fav", title: "Your favorites", group: null, channels: favCh });
+    if (recentCh.length)
+      rails.push({ key: "recent", title: "Continue watching", group: null, channels: recentCh });
+    if (favCh.length)
+      rails.push({ key: "fav", title: "Your favorites", group: null, channels: favCh });
     for (const g of prefs.pinned) {
       if (used.has(g) || !byGroup.has(g)) continue;
       rails.push(railFor(g, byGroup.get(g) ?? []));
@@ -225,7 +278,13 @@ export function useLiveHome(params: {
     } else {
       for (const t of THEMES) {
         const chs = themeCh[t.key];
-        if (chs.length >= 3) categoryRails.push({ key: `theme:${t.key}`, title: t.title, group: null, channels: chs.slice(0, 30) });
+        if (chs.length >= 3)
+          categoryRails.push({
+            key: `theme:${t.key}`,
+            title: t.title,
+            group: null,
+            channels: chs.slice(0, 30),
+          });
       }
       for (const g of topGroups) {
         if (categoryRails.length >= MAX_RAILS) break;
@@ -235,7 +294,19 @@ export function useLiveHome(params: {
     }
 
     return { spotlight, tiles, guide, rails, categoryRails };
-  }, [channels, epg, nowMs, sourceId, prefs, favorites.items, statsVersion, index, tvgCounts, channelsByCountry, countryPrefs.selected]);
+  }, [
+    channels,
+    epg,
+    nowMs,
+    sourceId,
+    prefs,
+    favorites.items,
+    statsVersion,
+    index,
+    tvgCounts,
+    channelsByCountry,
+    countryPrefs.selected,
+  ]);
 
   return { ...out, countries: countries.filter((c) => c.count >= MIN_COUNTRY) };
 }

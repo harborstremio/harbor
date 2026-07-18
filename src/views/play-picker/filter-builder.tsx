@@ -61,7 +61,9 @@ function MultiSection<T extends string>({
 }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{title}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+        {title}
+      </span>
       <div className="flex flex-wrap gap-1.5">
         {options.map((o) => (
           <MultiPill
@@ -193,7 +195,9 @@ export function FilterBuilder({
   const toggleMulti = <T extends string>(key: BadgeDimension, value: T) => {
     setDraft((d) => {
       const current = (d[key] as T[] | undefined) ?? [];
-      const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
       return { ...d, [key]: next };
     });
   };
@@ -233,7 +237,9 @@ export function FilterBuilder({
 
         <div className="flex flex-col gap-5 overflow-y-auto px-6 py-5">
           <div className="flex flex-col gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">Name</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+              Name
+            </span>
             <input
               value={draft.name}
               autoFocus

@@ -50,7 +50,9 @@ export function BackgroundPicker({
     try {
       const processed = await processBackgroundImage(file);
       if (!processed) {
-        flashError("Couldn't compress this image small enough. Try a different photo or crop it down.");
+        flashError(
+          "Couldn't compress this image small enough. Try a different photo or crop it down.",
+        );
         return;
       }
       justSetRef.current = true;
@@ -72,10 +74,7 @@ export function BackgroundPicker({
               style={{ backgroundImage: `url(${imageData})` }}
             />
             <div className="absolute inset-0" style={{ background: "black", opacity: 0.45 }} />
-            <div
-              className="absolute inset-0 bg-canvas"
-              style={{ opacity: dim }}
-            />
+            <div className="absolute inset-0 bg-canvas" style={{ opacity: dim }} />
           </>
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-ink-subtle">
@@ -87,8 +86,12 @@ export function BackgroundPicker({
           <p className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
             Live preview
           </p>
-          <p className="font-display text-[26px] font-medium tracking-tight text-ink">Tonight's picks</p>
-          <p className="text-[12px] text-ink-muted">Both serif and body text should stay legible at this dim.</p>
+          <p className="font-display text-[26px] font-medium tracking-tight text-ink">
+            Tonight's picks
+          </p>
+          <p className="text-[12px] text-ink-muted">
+            Both serif and body text should stay legible at this dim.
+          </p>
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
@@ -144,7 +147,8 @@ export function BackgroundPicker({
           className="w-full accent-[var(--color-accent)]"
         />
         <p className="text-[11.5px] leading-relaxed text-ink-subtle">
-          0% shows the raw image. 100% covers it with the theme color. 60-80% is the readable sweet spot.
+          0% shows the raw image. 100% covers it with the theme color. 60-80% is the readable sweet
+          spot.
         </p>
       </div>
     </div>

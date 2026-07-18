@@ -34,8 +34,7 @@ export function HeroAwardsCorner({
   const top = summary[0];
   if (!top || tier === "hidden") return null;
   const compact = tier === "compact";
-  const nominationsLabel = (n: number) =>
-    n === 1 ? t("nomination") : t("nominations");
+  const nominationsLabel = (n: number) => (n === 1 ? t("nomination") : t("nominations"));
   const lines: string[] = [];
   for (const item of summary) {
     if (item.wins > 0) {
@@ -119,7 +118,9 @@ export function HeroAwardsCorner({
       data-hero-awards
       onClick={(e) => {
         e.stopPropagation();
-        document.getElementById("awards-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        document
+          .getElementById("awards-section")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
       }}
       className={`group flex items-center gap-3 rounded-2xl px-3 py-2 text-end transition-all duration-200 hover:-translate-y-0.5 hover:bg-canvas/45 ${positionCls}`}
     >

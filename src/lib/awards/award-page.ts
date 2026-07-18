@@ -139,7 +139,8 @@ function buildSeeds(awardType: AwardType): {
       if (role === "film") {
         const k = norm(e.workTitle);
         const prev = filmByKey.get(k);
-        if (!prev || e.year > prev.year) filmByKey.set(k, { title: e.workTitle, year: e.year, kind });
+        if (!prev || e.year > prev.year)
+          filmByKey.set(k, { title: e.workTitle, year: e.year, kind });
       } else if (role === "actor" || role === "director" || role === "writer") {
         const names = e.recipients.flatMap(splitRecipients);
         for (const name of names) {
@@ -154,7 +155,13 @@ function buildSeeds(awardType: AwardType): {
               prev.work = e.workTitle;
             }
           } else {
-            map.set(k, { name, role: group.category.name, work: e.workTitle, year: e.year, wins: 1 });
+            map.set(k, {
+              name,
+              role: group.category.name,
+              work: e.workTitle,
+              year: e.year,
+              wins: 1,
+            });
           }
         }
       }
@@ -191,7 +198,8 @@ async function searchTitle(key: string, seed: FilmSeed): Promise<Meta | null> {
     include_adult: "false",
   });
   const wantTv = seed.kind === "series";
-  const yearOf = (r: RawResult) => Number((r.release_date ?? r.first_air_date ?? "").slice(0, 4)) || 0;
+  const yearOf = (r: RawResult) =>
+    Number((r.release_date ?? r.first_air_date ?? "").slice(0, 4)) || 0;
   const results = (data?.results ?? []).filter(
     (r) => (r.media_type === "movie" || r.media_type === "tv") && r.poster_path,
   );

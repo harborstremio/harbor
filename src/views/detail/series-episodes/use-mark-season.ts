@@ -42,9 +42,14 @@ export function useMarkSeason({
             : null);
       if (!showIds) return;
       if (watched) {
-        void markEpisodesWatched(showIds, active, enrichedEpisodes.map((e) => e.episodeNumber));
+        void markEpisodesWatched(
+          showIds,
+          active,
+          enrichedEpisodes.map((e) => e.episodeNumber),
+        );
       } else {
-        for (const e of enrichedEpisodes) void unmarkEpisodeWatched(showIds, active, e.episodeNumber);
+        for (const e of enrichedEpisodes)
+          void unmarkEpisodeWatched(showIds, active, e.episodeNumber);
       }
     },
     [meta, active, enrichedEpisodes, simklConnected],

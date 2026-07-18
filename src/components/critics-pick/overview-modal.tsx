@@ -94,7 +94,10 @@ export function OverviewModal({
         {review ? (
           <>
             <Quote size={22} className="shrink-0 text-accent" />
-            <div ref={contentRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pe-2">
+            <div
+              ref={contentRef}
+              className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pe-2"
+            >
               <p className="font-display text-[15px] leading-[1.65] text-ink/90 whitespace-pre-wrap">
                 <LinkedReview text={review.content} people={people} onPersonClick={onPersonClick} />
               </p>
@@ -150,7 +153,9 @@ export function OverviewModal({
             {tagline && (
               <>
                 <Quote size={22} className="shrink-0 text-accent" />
-                <p className="font-display text-[16px] italic leading-[1.55] text-ink/90">{tagline}</p>
+                <p className="font-display text-[16px] italic leading-[1.55] text-ink/90">
+                  {tagline}
+                </p>
               </>
             )}
             <p className="overflow-y-auto pe-2 text-[14px] leading-[1.65] text-ink-muted">

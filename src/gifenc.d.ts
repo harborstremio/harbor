@@ -5,7 +5,13 @@ declare module "gifenc" {
       index: Uint8Array,
       width: number,
       height: number,
-      opts?: { palette?: Palette; delay?: number; transparent?: boolean; repeat?: number; first?: boolean },
+      opts?: {
+        palette?: Palette;
+        delay?: number;
+        transparent?: boolean;
+        repeat?: number;
+        first?: boolean;
+      },
     ): void;
     finish(): void;
     bytes(): Uint8Array;

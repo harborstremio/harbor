@@ -1,4 +1,10 @@
-import { aniZipByAnidb, aniZipByAnilist, aniZipByImdb, aniZipByKitsu, aniZipByTmdbTv } from "@/lib/providers/anizip";
+import {
+  aniZipByAnidb,
+  aniZipByAnilist,
+  aniZipByImdb,
+  aniZipByKitsu,
+  aniZipByTmdbTv,
+} from "@/lib/providers/anizip";
 import { kitsuMainTvSeries } from "@/lib/providers/kitsu";
 
 const SIDE_ENTRY_TYPES = new Set(["ova", "ona", "special", "music"]);
@@ -240,7 +246,8 @@ export async function imdbToKitsu(imdbId: string): Promise<number | null> {
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }
-  if (typeof az?.mappings?.anidb_id === "number") return externalToKitsu("anidb", az.mappings.anidb_id);
+  if (typeof az?.mappings?.anidb_id === "number")
+    return externalToKitsu("anidb", az.mappings.anidb_id);
   const maps = await loadAnidbMaps();
   if (!imdbAnidbIndex) {
     const idx: Record<string, number> = {};
@@ -260,6 +267,7 @@ export async function tmdbTvToKitsu(tmdbId: number): Promise<number | null> {
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }
-  if (typeof az?.mappings?.anidb_id === "number") return externalToKitsu("anidb", az.mappings.anidb_id);
+  if (typeof az?.mappings?.anidb_id === "number")
+    return externalToKitsu("anidb", az.mappings.anidb_id);
   return null;
 }

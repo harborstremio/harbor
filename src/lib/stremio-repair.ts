@@ -8,7 +8,10 @@ const MAX_ITEMS = 150;
 const CONCURRENCY = 4;
 
 function norm(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
 }
 
 async function canonicalFor(

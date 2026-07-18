@@ -33,19 +33,13 @@ export function CategorySidebar({
     return groups.filter((g) => g.toLowerCase().includes(q));
   }, [groups, filter]);
   const showFavs = favoritesCount > 0 && !filter;
-  const all: string[] = [
-    ...(showFavs ? [FAVORITES_GROUP_KEY] : []),
-    "__ALL__",
-    ...visibleGroups,
-  ];
+  const all: string[] = [...(showFavs ? [FAVORITES_GROUP_KEY] : []), "__ALL__", ...visibleGroups];
   const activeKey = active ?? "__ALL__";
   const activeIdx = Math.max(0, all.indexOf(activeKey));
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const el = listRef.current?.querySelector<HTMLButtonElement>(
-      `[data-cat-idx="${activeIdx}"]`,
-    );
+    const el = listRef.current?.querySelector<HTMLButtonElement>(`[data-cat-idx="${activeIdx}"]`);
     el?.scrollIntoView({ block: "nearest" });
   }, [activeIdx]);
 
@@ -245,8 +239,12 @@ function CategoryItem({
           )}
         </span>
         <span className="flex flex-1 items-center gap-1.5 truncate text-[13px] font-medium">
-          {pinned && <Pin size={11} strokeWidth={2.4} className="shrink-0 fill-current text-accent" />}
-          <span dir="auto" className="truncate">{label}</span>
+          {pinned && (
+            <Pin size={11} strokeWidth={2.4} className="shrink-0 fill-current text-accent" />
+          )}
+          <span dir="auto" className="truncate">
+            {label}
+          </span>
         </span>
         <span
           className={`shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-semibold tabular-nums transition-opacity ${

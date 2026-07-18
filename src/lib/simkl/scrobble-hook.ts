@@ -47,7 +47,10 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
       const a = stopArgsRef.current;
       if (a.snap.durationSec < STUB_MAX_SEC) return;
       if (lastActionRef.current !== "start" && lastActionRef.current !== "pause") return;
-      const progress = Math.min(100, Math.max(0, (getPlaybackPosition() / a.snap.durationSec) * 100));
+      const progress = Math.min(
+        100,
+        Math.max(0, (getPlaybackPosition() / a.snap.durationSec) * 100),
+      );
       if (progress < SIMKL_WATCHED_RATIO * 100 && !pauseOnPauseRef.current) return;
       const action = progress >= SIMKL_WATCHED_RATIO * 100 ? "stop" : "pause";
       sendBeacon(a.metaId, a.episode, progress, action);

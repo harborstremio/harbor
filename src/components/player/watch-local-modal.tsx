@@ -70,7 +70,9 @@ export function WatchLocalModal() {
           onClick={() => closeWatchLocalConfirm()}
         />
         <div className="flex flex-col gap-1.5 text-center">
-          <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("This is in your local library")}</h2>
+          <h2 className="text-[19px] font-medium tracking-tight text-ink">
+            {t("This is in your local library")}
+          </h2>
           <p className="text-[13px] leading-relaxed text-ink-muted">
             {state.subtitle ? `${state.title} · ${state.subtitle}` : state.title}
           </p>

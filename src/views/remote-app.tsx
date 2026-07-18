@@ -14,14 +14,28 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { CastIcon } from "@/components/player/cast-icon";
 import { HarborLoader } from "@/components/harbor-loader";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import type { CastDeviceInfo } from "@/lib/cast";
 import { useKeyboardNavigation } from "@/lib/keyboard-navigation";
 import { useRemoteClient } from "@/lib/remote/use-remote-client";
-import type { RemoteCastDevice, RemoteNavKey, RemoteSnapshot, RemoteTextEntry } from "@/lib/remote/protocol";
+import type {
+  RemoteCastDevice,
+  RemoteNavKey,
+  RemoteSnapshot,
+  RemoteTextEntry,
+} from "@/lib/remote/protocol";
 
 function toCastDevice(d: RemoteCastDevice): CastDeviceInfo {
   return {
@@ -112,11 +126,7 @@ function SeekTen({
       size="lg"
     >
       <span className="relative flex h-9 w-9 items-center justify-center">
-        <RotateCcw
-          size={34}
-          strokeWidth={1.5}
-          className={forward ? "scale-x-[-1]" : undefined}
-        />
+        <RotateCcw size={34} strokeWidth={1.5} className={forward ? "scale-x-[-1]" : undefined} />
         <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold tracking-tight">
           10
         </span>
@@ -170,13 +180,7 @@ function TouchpadSurface({
     (dx: number, dy: number) => {
       if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
       const horizontal = Math.abs(dx) >= Math.abs(dy);
-      const key: RemoteNavKey = horizontal
-        ? dx > 0
-          ? "right"
-          : "left"
-        : dy > 0
-          ? "down"
-          : "up";
+      const key: RemoteNavKey = horizontal ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
       lastSwipeTimeRef.current = Date.now();
       onNav(key);
     },
@@ -349,7 +353,10 @@ function RendererSheet({
   if (!open) return null;
   const activeId = snapshot.target.kind === "cast" ? snapshot.target.deviceId : "local";
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-canvas/70 backdrop-blur-sm" data-remote-sheet>
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end bg-canvas/70 backdrop-blur-sm"
+      data-remote-sheet
+    >
       <div className="flex-1" role="presentation" onClick={onClose} />
       <div className="rounded-t-2xl border border-edge-soft bg-surface px-4 pb-8 pt-3 shadow-2xl">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-edge" />
@@ -362,7 +369,9 @@ function RendererSheet({
             className="rounded-lg border border-edge px-2.5 py-1.5 text-[12px] text-ink-muted hover:bg-elevated hover:text-ink disabled:cursor-default disabled:opacity-60"
           >
             <span className="inline-flex items-center gap-1.5">
-              {snapshot.castDiscovering && <Loader2 size={12} strokeWidth={2.2} className="animate-spin" />}
+              {snapshot.castDiscovering && (
+                <Loader2 size={12} strokeWidth={2.2} className="animate-spin" />
+              )}
               {snapshot.castDiscovering ? "Scanning..." : "Refresh"}
             </span>
           </button>
@@ -538,8 +547,7 @@ function RemoteBody({
     [onSubmitText],
   );
 
-  const showTextOverlay =
-    !textDismissed && (textEntryActive || typing) && !!heldTextEntry.current;
+  const showTextOverlay = !textDismissed && (textEntryActive || typing) && !!heldTextEntry.current;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-[clamp(0.75rem,2.2vh,1.25rem)] px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))]">
@@ -577,9 +585,7 @@ function RemoteBody({
               <Monitor size={15} strokeWidth={1.7} />
             )}
           </span>
-          <span className="truncate text-[15px] font-medium text-ink">
-            {snapshot.target.label}
-          </span>
+          <span className="truncate text-[15px] font-medium text-ink">{snapshot.target.label}</span>
           <ChevronDown size={16} strokeWidth={1.8} className="shrink-0 text-ink-muted" />
         </button>
 
@@ -588,11 +594,7 @@ function RemoteBody({
             <Search size={18} strokeWidth={1.7} />
           </CircleBtn>
         ) : (
-          <CircleBtn
-            label={snapshot.muted ? "Unmute" : "Mute"}
-            onClick={onMute}
-            size="sm"
-          >
+          <CircleBtn label={snapshot.muted ? "Unmute" : "Mute"} onClick={onMute} size="sm">
             {snapshot.muted || snapshot.volume === 0 ? (
               <VolumeX size={18} strokeWidth={1.7} />
             ) : (
@@ -601,7 +603,6 @@ function RemoteBody({
           </CircleBtn>
         )}
       </div>
-
 
       {/* One touchpad for both modes — poster is the surface while playing */}
       <TouchpadSurface
@@ -702,11 +703,7 @@ function RemoteBody({
           data-remote-transport
           className="grid w-full grid-cols-[1fr_auto_1fr] grid-rows-[4.75rem_4.75rem] place-items-center gap-4 pb-2"
         >
-          <CircleBtn
-            label="Back on display"
-            onClick={() => onNav("back")}
-            size="lg"
-          >
+          <CircleBtn label="Back on display" onClick={() => onNav("back")} size="lg">
             <ChevronLeft size={32} strokeWidth={1.7} />
           </CircleBtn>
 
@@ -843,7 +840,10 @@ export function RemoteApp() {
                 })
               }
               onVolumeStep={(delta) => {
-                const next = Math.max(0, Math.min(1, (snapshot.muted ? 0 : snapshot.volume) + delta));
+                const next = Math.max(
+                  0,
+                  Math.min(1, (snapshot.muted ? 0 : snapshot.volume) + delta),
+                );
                 sendCommand({ action: "setVolume", volume: next });
                 if (next > 0 && snapshot.muted) sendCommand({ action: "setMuted", muted: false });
               }}

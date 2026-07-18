@@ -36,4 +36,3 @@ export function sourceGroup(s: ScoredStream): SourceGroup | null {
       return null;
   }
 }
-

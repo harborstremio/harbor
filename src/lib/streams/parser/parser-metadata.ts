@@ -14,7 +14,11 @@ const EDITION_RX =
 const QUALITY_STOP_RX =
   /\.(?:480p|576p|720p|1080p|1440p|2160p|4k|uhd|hdr|hdr10|dv|dovi|bluray|bdrip|brrip|web[\.\-]?dl|webrip|hdrip|hdtv|remux|cam|ts|hdts|tc|scr|x264|x265|hevc|avc|h\.?264|h\.?265|av1|aac|ac3|ddp?|eac3|dts|truehd|atmos|flac|opus|10bit|8bit|repack|proper|extended|directors?|imax|hybrid|hdr10\+|repack\d?|multi|dual|dubbed|sub|subbed|complete|amzn|nf|hulu|max|atvp|dsnp)/i;
 
-export function parseEpisodeTitle(filename: string, season?: number, episode?: number): string | null {
+export function parseEpisodeTitle(
+  filename: string,
+  season?: number,
+  episode?: number,
+): string | null {
   if (season == null || episode == null) return null;
   const code = `S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`;
   const idx = filename.toUpperCase().indexOf(code);
@@ -22,7 +26,10 @@ export function parseEpisodeTitle(filename: string, season?: number, episode?: n
   let after = filename.slice(idx + code.length).replace(/^[\.\-_\s]+/, "");
   const stop = after.search(QUALITY_STOP_RX);
   if (stop > 0) after = after.slice(0, stop);
-  const cleaned = after.replace(/[\.\-_]+/g, " ").replace(/\s+/g, " ").trim();
+  const cleaned = after
+    .replace(/[\.\-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   if (cleaned.length < 2 || cleaned.length > 80) return null;
   if (/^(?:e\d+|episode|hdtv|webrip)$/i.test(cleaned)) return null;
   return cleaned;
@@ -103,7 +110,11 @@ export function parseAnimeHash(text: string): string | null {
   return m ? m[1].toUpperCase() : null;
 }
 
-export function computeScamScore(source: Source, resolution: Resolution, size: number | null): number {
+export function computeScamScore(
+  source: Source,
+  resolution: Resolution,
+  size: number | null,
+): number {
   let s = 0;
   if (resolution === "4K" && size != null && size < 5 * 1024 ** 3) s += 3;
   if (resolution === "1080p" && size != null && size < 700 * 1024 ** 2) s += 3;

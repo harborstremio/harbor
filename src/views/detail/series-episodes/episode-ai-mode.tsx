@@ -58,7 +58,13 @@ export function EpisodeAiMode({
     setFellBack(false);
     setRanQuery(q);
     try {
-      const refs = await aiFindEpisodes(settings.aiSearchKey, settings.aiSearchModel, meta.name, candidates, q);
+      const refs = await aiFindEpisodes(
+        settings.aiSearchKey,
+        settings.aiSearchModel,
+        meta.name,
+        candidates,
+        q,
+      );
       const found: Video[] = [];
       for (const r of refs) {
         const v = videos?.find((x) => x.season === r.season && x.episode === r.episode);

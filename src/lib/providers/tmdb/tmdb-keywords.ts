@@ -5,10 +5,7 @@ const KEYWORD_CACHE_MAX = 500;
 const keywordCache = new Map<string, number | null>();
 const keywordInflight = new Map<string, Promise<number | null>>();
 
-export async function tmdbKeywordIdByName(
-  key: string,
-  name: string,
-): Promise<number | null> {
+export async function tmdbKeywordIdByName(key: string, name: string): Promise<number | null> {
   if (!key || !name) return null;
   const k = name.trim().toLowerCase();
   if (keywordCache.has(k)) return keywordCache.get(k) ?? null;
@@ -29,10 +26,7 @@ export async function tmdbKeywordIdByName(
   return p;
 }
 
-export async function tmdbResolveKeywordIds(
-  key: string,
-  names: string[],
-): Promise<number[]> {
+export async function tmdbResolveKeywordIds(key: string, names: string[]): Promise<number[]> {
   const results = await Promise.all(names.map((n) => tmdbKeywordIdByName(key, n)));
   return results.filter((id): id is number => id != null);
 }

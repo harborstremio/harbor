@@ -93,7 +93,9 @@ function sep(): string {
 async function resolveDir(): Promise<string> {
   try {
     const raw = localStorage.getItem("harbor.settings");
-    const fromSettings = raw ? (JSON.parse(raw) as { downloadDir?: string }).downloadDir?.trim() : "";
+    const fromSettings = raw
+      ? (JSON.parse(raw) as { downloadDir?: string }).downloadDir?.trim()
+      : "";
     if (fromSettings) return fromSettings;
   } catch {
     /* fall through to system default */
@@ -190,21 +192,27 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
   speed.set(id, { bytes: 0, at: Date.now() });
   rebuild();
 
-  const handle = startDownload(id, url, path, (p) => {
-    const now = Date.now();
-    const s = speed.get(id);
-    let bps = 0;
-    if (s && now - s.at >= 500) {
-      bps = ((p.receivedBytes - s.bytes) / (now - s.at)) * 1000;
-      speed.set(id, { bytes: p.receivedBytes, at: now });
-    }
-    patch(id, {
-      receivedBytes: p.receivedBytes,
-      totalBytes: p.totalBytes,
-      ratio: p.ratio,
-      ...(bps > 0 ? { bytesPerSec: bps } : {}),
-    });
-  }, headers ?? undefined);
+  const handle = startDownload(
+    id,
+    url,
+    path,
+    (p) => {
+      const now = Date.now();
+      const s = speed.get(id);
+      let bps = 0;
+      if (s && now - s.at >= 500) {
+        bps = ((p.receivedBytes - s.bytes) / (now - s.at)) * 1000;
+        speed.set(id, { bytes: p.receivedBytes, at: now });
+      }
+      patch(id, {
+        receivedBytes: p.receivedBytes,
+        totalBytes: p.totalBytes,
+        ratio: p.ratio,
+        ...(bps > 0 ? { bytesPerSec: bps } : {}),
+      });
+    },
+    headers ?? undefined,
+  );
   handles.set(id, handle);
   handle.promise
     .then(() => patch(id, { status: "done", ratio: 1, bytesPerSec: 0 }))
@@ -213,7 +221,11 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
         patch(id, { status: "canceled", bytesPerSec: 0 });
         return;
       }
-      patch(id, { status: "error", error: e instanceof Error ? e.message : "Download failed", bytesPerSec: 0 });
+      patch(id, {
+        status: "error",
+        error: e instanceof Error ? e.message : "Download failed",
+        bytesPerSec: 0,
+      });
     })
     .finally(() => {
       handles.delete(id);
@@ -254,7 +266,11 @@ function subscribe(listener: () => void): () => void {
 }
 
 export function useDownloads(): DownloadItem[] {
-  return useSyncExternalStore(subscribe, () => snapshot, () => snapshot);
+  return useSyncExternalStore(
+    subscribe,
+    () => snapshot,
+    () => snapshot,
+  );
 }
 
 export function useActiveDownloadCount(): number {

@@ -50,8 +50,7 @@ export function SkipPill({
 
   const isOutroNext = mounted.kind === "outro" && hasNextEp && !!nextEp;
   const finalLeadSec = typeof leadSec === "number" && leadSec > 0 ? leadSec : 15;
-  const inCountdownWindow =
-    isOutroNext && remainingSec > 0 && remainingSec <= finalLeadSec;
+  const inCountdownWindow = isOutroNext && remainingSec > 0 && remainingSec <= finalLeadSec;
 
   if (isOutroNext && inCountdownWindow && nextEp) {
     return (
@@ -143,9 +142,7 @@ function UpNextCard({
   return (
     <div
       className={`pointer-events-none absolute end-7 z-30 transition-all duration-200 ease-out ${
-        visible
-          ? "bottom-44 opacity-100 translate-y-0"
-          : "bottom-40 opacity-0 translate-y-2"
+        visible ? "bottom-44 opacity-100 translate-y-0" : "bottom-40 opacity-0 translate-y-2"
       }`}
     >
       <div className="pointer-events-auto relative flex w-[360px] overflow-hidden rounded-2xl border border-white/15 bg-black/80 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.9)] backdrop-blur-md">
@@ -171,9 +168,7 @@ function UpNextCard({
               <div className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
                 {t("Up next in {s}s", { s: seconds })}
               </div>
-              <div className="mt-0.5 truncate text-[13.5px] font-semibold text-white">
-                {title}
-              </div>
+              <div className="mt-0.5 truncate text-[13.5px] font-semibold text-white">{title}</div>
               {title !== epLabel && (
                 <div className="truncate text-[11.5px] text-white/55">{epLabel}</div>
               )}

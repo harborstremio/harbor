@@ -52,10 +52,13 @@ type DiscoverTvRow = {
   original_language?: string;
 };
 
-function isAnimeRow(row: { genre_ids?: number[]; original_language?: string; origin_country?: string[] }): boolean {
+function isAnimeRow(row: {
+  genre_ids?: number[];
+  original_language?: string;
+  origin_country?: string[];
+}): boolean {
   const animation = (row.genre_ids ?? []).includes(ANIMATION_GENRE);
-  const japanese =
-    row.original_language === "ja" || (row.origin_country ?? []).includes("JP");
+  const japanese = row.original_language === "ja" || (row.origin_country ?? []).includes("JP");
   return animation && japanese;
 }
 
@@ -108,7 +111,11 @@ async function fetchDiscoverTv(
   }
 }
 
-async function fetchUpcomingMovies(apiKey: string, region: string, page: number): Promise<DiscoverMovieRow[]> {
+async function fetchUpcomingMovies(
+  apiKey: string,
+  region: string,
+  page: number,
+): Promise<DiscoverMovieRow[]> {
   const url = new URL(`${TMDB}/movie/upcoming`);
   url.searchParams.set("api_key", apiKey);
   if (region) url.searchParams.set("region", region);
@@ -138,11 +145,7 @@ export async function fetchCalendarRange(
     fetchDiscoverTv(apiKey, start, end, 1),
     fetchDiscoverTv(apiKey, start, end, 2),
   ]);
-  const movieP1 = [
-    ...m1,
-    ...m2,
-    ...mu1.filter((m) => inRange(m.release_date)),
-  ];
+  const movieP1 = [...m1, ...m2, ...mu1.filter((m) => inRange(m.release_date))];
   const movieP2: DiscoverMovieRow[] = [];
   const tvP1 = [...t1, ...t2];
   const tvP2: DiscoverTvRow[] = [];

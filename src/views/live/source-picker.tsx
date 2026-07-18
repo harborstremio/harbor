@@ -1,4 +1,16 @@
-import { ArrowUpToLine, Check, ChevronDown, ChevronUp, Copy, Download, MoreHorizontal, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import {
+  ArrowUpToLine,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Download,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { confirmDialog } from "@/lib/dialog";
@@ -73,7 +85,7 @@ export function SourcePicker({
     setActions(null);
   };
 
-  const editing = editingId ? sources.find((s) => s.id === editingId) ?? null : null;
+  const editing = editingId ? (sources.find((s) => s.id === editingId) ?? null) : null;
   const active = sources.find((s) => s.id === activeId);
   const ago = fetchedAt ? formatAgo(Date.now() - fetchedAt, t) : null;
 
@@ -133,9 +145,7 @@ export function SourcePicker({
                           onSelect(s.id);
                           close();
                         }}
-                        onToggleMenu={() =>
-                          setActions(isOpen ? null : { id: s.id, copied: false })
-                        }
+                        onToggleMenu={() => setActions(isOpen ? null : { id: s.id, copied: false })}
                         onCloseMenu={() => setActions(null)}
                         onEdit={() => {
                           setEditingId(s.id);
@@ -148,7 +158,9 @@ export function SourcePicker({
                           setActions(null);
                         }}
                         onDelete={async () => {
-                          if (await confirmDialog(t('Remove playlist "{name}"?', { name: s.name }))) {
+                          if (
+                            await confirmDialog(t('Remove playlist "{name}"?', { name: s.name }))
+                          ) {
                             onRemove(s.id);
                             setActions(null);
                           }
@@ -315,10 +327,7 @@ function SourceRow({
         </button>
       </div>
       {isMenuOpen && (
-        <PortalMenu
-          triggerRef={triggerRef}
-          onClose={onCloseMenu}
-        >
+        <PortalMenu triggerRef={triggerRef} onClose={onCloseMenu}>
           {onMoveTop && index > 0 && (
             <MenuItem icon={<ArrowUpToLine size={14} strokeWidth={1.9} />} onClick={onMoveTop}>
               {t("Move to top")}
@@ -328,7 +337,9 @@ function SourceRow({
             {t("Edit")}
           </MenuItem>
           <MenuItem
-            icon={copied ? <Check size={14} strokeWidth={2.2} /> : <Copy size={14} strokeWidth={1.9} />}
+            icon={
+              copied ? <Check size={14} strokeWidth={2.2} /> : <Copy size={14} strokeWidth={1.9} />
+            }
             onClick={onCopy}
             accent={copied}
           >
@@ -456,7 +467,10 @@ function MenuItem({
   );
 }
 
-function formatAgo(ms: number, t: (key: string, vars?: Record<string, string | number>) => string): string {
+function formatAgo(
+  ms: number,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
   const s = Math.floor(ms / 1000);
   if (s < 60) return t("just now");
   const m = Math.floor(s / 60);

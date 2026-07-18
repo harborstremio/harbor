@@ -1,6 +1,12 @@
 import type { ControlContext } from "@/components/player/transport/control-renderer";
 import type { StremioRenderCtx } from "@/components/player/transport/control-renderer-stremio";
-import type { ControlVariant, CustomIconMap, PlayerControlId, TimeFormat, VolumeStyle } from "@/lib/player-chrome";
+import type {
+  ControlVariant,
+  CustomIconMap,
+  PlayerControlId,
+  TimeFormat,
+  VolumeStyle,
+} from "@/lib/player-chrome";
 import { emptySnapshot, type PlayerCapabilities } from "@/lib/player/bridge";
 
 const NOOP = () => {};

@@ -37,10 +37,7 @@
       "name": "ayatana-ido",
       "buildsystem": "cmake-ninja",
       "cleanup": ["/include", "/lib/pkgconfig"],
-      "config-opts": [
-        "-DCMAKE_INSTALL_LIBDIR=lib",
-        "-DENABLE_INTROSPECTION=OFF"
-      ],
+      "config-opts": ["-DCMAKE_INSTALL_LIBDIR=lib", "-DENABLE_INTROSPECTION=OFF"],
       "sources": [
         {
           "type": "git",

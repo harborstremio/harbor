@@ -12,7 +12,15 @@ const SNAP_RATIO = 0.18;
 const FLICK_VELOCITY = 0.45;
 const SLIDE_GAP_PX = 22;
 
-export function HeroCarousel({ slides, full = false, fullQuality = false }: { slides: Slide[]; full?: boolean; fullQuality?: boolean }) {
+export function HeroCarousel({
+  slides,
+  full = false,
+  fullQuality = false,
+}: {
+  slides: Slide[];
+  full?: boolean;
+  fullQuality?: boolean;
+}) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -48,7 +56,9 @@ export function HeroCarousel({ slides, full = false, fullQuality = false }: { sl
 
   if (slides.length === 0) {
     return (
-      <div className={`animate-pulse border border-edge-soft bg-elevated/30 ${full ? "min-h-[clamp(560px,82vh,920px)] rounded-none" : "min-h-[560px] rounded-[28px]"}`} />
+      <div
+        className={`animate-pulse border border-edge-soft bg-elevated/30 ${full ? "min-h-[clamp(560px,82vh,920px)] rounded-none" : "min-h-[560px] rounded-[28px]"}`}
+      />
     );
   }
 
@@ -175,7 +185,9 @@ export function HeroCarousel({ slides, full = false, fullQuality = false }: { sl
                     fullQuality={fullQuality}
                   />
                 ) : (
-                  <div className={`w-full bg-elevated/30 ${full ? "h-[clamp(560px,82vh,920px)] rounded-none" : "h-[560px] rounded-[28px]"}`} />
+                  <div
+                    className={`w-full bg-elevated/30 ${full ? "h-[clamp(560px,82vh,920px)] rounded-none" : "h-[560px] rounded-[28px]"}`}
+                  />
                 )}
               </div>
             );
@@ -184,9 +196,7 @@ export function HeroCarousel({ slides, full = false, fullQuality = false }: { sl
       </div>
       {slides.length > 1 && (
         <div
-          className={`flex justify-center gap-2.5 ${
-            full ? "absolute bottom-4 inset-x-0" : "pt-1"
-          }`}
+          className={`flex justify-center gap-2.5 ${full ? "absolute bottom-4 inset-x-0" : "pt-1"}`}
         >
           {slides.map((_, i) => (
             <button

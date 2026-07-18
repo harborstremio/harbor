@@ -13,7 +13,8 @@ const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 export function ProfilePickerModal() {
-  const { profiles, pickerOpen, pickerView, setPickerView, selectProfile, closePicker } = useProfiles();
+  const { profiles, pickerOpen, pickerView, setPickerView, selectProfile, closePicker } =
+    useProfiles();
   const t = useT();
   const scrollRef = useRef<HTMLDivElement>(null);
   const scopeRef = useRef<HTMLDivElement>(null);
@@ -101,27 +102,37 @@ export function ProfilePickerModal() {
               onSelect={handleSelect}
             />
           )}
-          {pickerView.kind === "create" && <EditorView mode={{ kind: "create" }} onCancel={goList} onDone={goList} />}
-          {pickerView.kind === "edit" && (() => {
-            const target = profiles.find((p) => p.id === pickerView.profileId);
-            if (!target) {
-              return <NotFoundFallback onBack={goList} />;
-            }
-            return <EditorView mode={{ kind: "edit", profile: target }} onCancel={goList} onDone={goList} />;
-          })()}
-          {pickerView.kind === "unlock" && (() => {
-            const target = profiles.find((p) => p.id === pickerView.profileId);
-            if (!target || !target.passwordHash) {
-              return <NotFoundFallback onBack={goList} />;
-            }
-            return (
-              <PasswordPrompt
-                profile={target}
-                onSuccess={() => selectProfile(target.id, { unlocked: true })}
-                onCancel={goList}
-              />
-            );
-          })()}
+          {pickerView.kind === "create" && (
+            <EditorView mode={{ kind: "create" }} onCancel={goList} onDone={goList} />
+          )}
+          {pickerView.kind === "edit" &&
+            (() => {
+              const target = profiles.find((p) => p.id === pickerView.profileId);
+              if (!target) {
+                return <NotFoundFallback onBack={goList} />;
+              }
+              return (
+                <EditorView
+                  mode={{ kind: "edit", profile: target }}
+                  onCancel={goList}
+                  onDone={goList}
+                />
+              );
+            })()}
+          {pickerView.kind === "unlock" &&
+            (() => {
+              const target = profiles.find((p) => p.id === pickerView.profileId);
+              if (!target || !target.passwordHash) {
+                return <NotFoundFallback onBack={goList} />;
+              }
+              return (
+                <PasswordPrompt
+                  profile={target}
+                  onSuccess={() => selectProfile(target.id, { unlocked: true })}
+                  onCancel={goList}
+                />
+              );
+            })()}
         </div>
         {moreBelow && (
           <>
@@ -129,7 +140,10 @@ export function ProfilePickerModal() {
             <button
               type="button"
               onClick={() =>
-                scrollRef.current?.scrollBy({ top: scrollRef.current.clientHeight * 0.8, behavior: "smooth" })
+                scrollRef.current?.scrollBy({
+                  top: scrollRef.current.clientHeight * 0.8,
+                  behavior: "smooth",
+                })
               }
               aria-label={t("Scroll down")}
               className="absolute bottom-3 left-1/2 z-20 flex h-8 w-8 -translate-x-1/2 animate-bounce items-center justify-center rounded-full bg-canvas/80 text-ink-muted ring-1 ring-edge-soft backdrop-blur transition-colors hover:text-ink"
@@ -213,7 +227,10 @@ function ListView({
             style={
               selecting
                 ? undefined
-                : { animationDelay: `${140 + Math.min(profiles.length, 8) * 55}ms`, animationFillMode: "both" }
+                : {
+                    animationDelay: `${140 + Math.min(profiles.length, 8) * 55}ms`,
+                    animationFillMode: "both",
+                  }
             }
           >
             <AddProfileButton onClick={onCreate} />

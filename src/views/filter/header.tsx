@@ -90,7 +90,9 @@ function GenreSwitcher({
         </span>
         <span
           className={`flex h-10 w-10 items-center justify-center rounded-full border border-edge-soft text-ink-muted transition-[transform,background-color,color] ${
-            open ? "rotate-180 bg-elevated text-ink" : "group-hover:bg-elevated/70 group-hover:text-ink"
+            open
+              ? "rotate-180 bg-elevated text-ink"
+              : "group-hover:bg-elevated/70 group-hover:text-ink"
           }`}
         >
           <ChevronDown size={18} strokeWidth={2.2} />
@@ -149,10 +151,11 @@ function describe(
     return {
       kicker: t("Runtime"),
       title: t("Around {min} min", { min: f.value }),
-      subtitle: t(
-        "{media} between {lo}-{hi} minutes. Pick a length, not a wall of options.",
-        { media: mediaWord, lo: range.lo, hi: range.hi },
-      ),
+      subtitle: t("{media} between {lo}-{hi} minutes. Pick a length, not a wall of options.", {
+        media: mediaWord,
+        lo: range.lo,
+        hi: range.hi,
+      }),
       Icon: Clock,
     };
   }

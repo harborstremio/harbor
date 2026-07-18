@@ -6,7 +6,11 @@ const STYLE_ID = "harbor-custom-hover-css";
 
 export function CustomHoverCssMount() {
   const { settings } = useSettings();
-  const version = useSyncExternalStore(subscribeCustomHovers, customHoverVersion, customHoverVersion);
+  const version = useSyncExternalStore(
+    subscribeCustomHovers,
+    customHoverVersion,
+    customHoverVersion,
+  );
 
   useEffect(() => {
     const active =

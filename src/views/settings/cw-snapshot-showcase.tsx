@@ -10,7 +10,12 @@ export function CwSnapshotShowcase() {
     <div className="flex items-center gap-4 rounded-2xl border border-edge-soft bg-canvas/30 p-4">
       <div className="relative aspect-video w-44 shrink-0 overflow-hidden rounded-xl ring-1 ring-edge-soft/60">
         {still ? (
-          <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={still}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-elevated to-canvas" />
         )}
@@ -29,9 +34,13 @@ export function CwSnapshotShowcase() {
         </div>
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-[12.5px] font-semibold text-ink">{t("Picks up right where you left off")}</div>
+        <div className="text-[12.5px] font-semibold text-ink">
+          {t("Picks up right where you left off")}
+        </div>
         <p className="mt-1 text-[12px] leading-relaxed text-ink-muted">
-          {t("Back out mid-episode and the card keeps the exact frame you stopped on, with your progress, so it looks like a pause instead of a thumbnail.")}
+          {t(
+            "Back out mid-episode and the card keeps the exact frame you stopped on, with your progress, so it looks like a pause instead of a thumbnail.",
+          )}
         </p>
       </div>
     </div>

@@ -34,7 +34,10 @@ export function bitrateBudgetPenalty(
   return { signal: "bitrate-ok", delta: 0 };
 }
 
-export function expectedMinSizeBytes(resolution: string | undefined, runtimeMin: number): number | null {
+export function expectedMinSizeBytes(
+  resolution: string | undefined,
+  runtimeMin: number,
+): number | null {
   if (!resolution) return null;
   if (runtimeMin <= 0) return null;
   const mbPerMin: Record<string, number> = {

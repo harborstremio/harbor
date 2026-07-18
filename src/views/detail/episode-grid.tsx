@@ -48,7 +48,9 @@ export function EpisodeGrid({
 
   const change = (p: number) => {
     setPage(p);
-    requestAnimationFrame(() => wrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    requestAnimationFrame(() =>
+      wrapRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
   };
   const goToEpisode = (n: number) => {
     const idx = displayed.findIndex((e) => e.number === n);

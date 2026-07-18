@@ -3,13 +3,29 @@ import { useT } from "@/lib/i18n";
 
 export function getOptions(t: (k: string) => string) {
   const TIME_OPTIONS: Array<{ id: TimeFormat; label: string; sub: string }> = [
-    { id: "start-end", label: t("Elapsed and remaining"), sub: t("00:23 on the left, -1:12 on the right.") },
-    { id: "remaining", label: t("Remaining only"), sub: t("Single -1:12 label, both ends collapse.") },
-    { id: "elapsed-only", label: t("Elapsed only"), sub: t("Single 00:23 label, both ends collapse.") },
+    {
+      id: "start-end",
+      label: t("Elapsed and remaining"),
+      sub: t("00:23 on the left, -1:12 on the right."),
+    },
+    {
+      id: "remaining",
+      label: t("Remaining only"),
+      sub: t("Single -1:12 label, both ends collapse."),
+    },
+    {
+      id: "elapsed-only",
+      label: t("Elapsed only"),
+      sub: t("Single 00:23 label, both ends collapse."),
+    },
   ];
 
   const VOLUME_OPTIONS: Array<{ id: VolumeStyle; label: string; sub: string }> = [
-    { id: "slider", label: t("Slider"), sub: t("Hover the speaker to reveal a horizontal slider.") },
+    {
+      id: "slider",
+      label: t("Slider"),
+      sub: t("Hover the speaker to reveal a horizontal slider."),
+    },
     { id: "stepper", label: t("Stepper"), sub: t("Click to cycle 100 / 75 / 50 / 25 / 0.") },
     { id: "icon-only", label: t("Icon only"), sub: t("Click toggles mute. Wheel scrolls volume.") },
   ];

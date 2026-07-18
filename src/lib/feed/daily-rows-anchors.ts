@@ -54,13 +54,19 @@ export const ANCHORS: CatalogEntry[] = [
     "with_runtime.gte": "70",
     sort_by: "vote_average.desc",
   }),
-  anchor("hidden_gems_anchor", "Highly Rated, Quietly Loved", "High score, low fanfare", "discover", {
-    "vote_average.gte": "7.2",
-    "vote_count.gte": "300",
-    "vote_count.lte": "3500",
-    "with_runtime.gte": "70",
-    sort_by: "vote_average.desc",
-  }),
+  anchor(
+    "hidden_gems_anchor",
+    "Highly Rated, Quietly Loved",
+    "High score, low fanfare",
+    "discover",
+    {
+      "vote_average.gte": "7.2",
+      "vote_count.gte": "300",
+      "vote_count.lte": "3500",
+      "with_runtime.gte": "70",
+      sort_by: "vote_average.desc",
+    },
+  ),
   anchor("cult", "Cult Classics", "Beloved, slightly forgotten", "discover", {
     "primary_release_date.lte": "1999-12-31",
     "vote_average.gte": "7.4",

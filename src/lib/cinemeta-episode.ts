@@ -8,7 +8,7 @@ import type { EpisodeDetail } from "@/lib/providers/tmdb/tmdb-episode-types";
 
 /**
  * Extract episode details from Cinemeta series metadata
- * 
+ *
  * @param meta - Series metadata from Cinemeta
  * @param season - Season number
  * @param episode - Episode number
@@ -21,14 +21,12 @@ export async function cinemetaEpisodeDetail(
 ): Promise<Partial<EpisodeDetail> | null> {
   try {
     // Find the matching video/episode in the series metadata
-    const video = meta.videos?.find(
-      (v) => v.season === season && v.episode === episode
-    );
-    
+    const video = meta.videos?.find((v) => v.season === season && v.episode === episode);
+
     if (!video) {
       return null;
     }
-    
+
     // Extract available episode information
     // Cinemeta doesn't provide rich episode details like TMDB
     return {

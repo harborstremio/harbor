@@ -88,7 +88,12 @@ export function CatalogRows({
             onEndReached={row.hasMore ? () => onLoadMore(row.key) : undefined}
           >
             {row.metas.map((m) => (
-              <PickCard key={m.id} meta={m} flagRerun={flagRerunKeys?.includes(row.key)} kids={kids} />
+              <PickCard
+                key={m.id}
+                meta={m}
+                flagRerun={flagRerunKeys?.includes(row.key)}
+                kids={kids}
+              />
             ))}
           </Row>
         );

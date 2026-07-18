@@ -49,7 +49,9 @@ export function StreamingStep() {
       </div>
       {!tmdbReady && (
         <p className="text-[13px] text-ink-subtle">
-          {t("These rails activate once a TMDB key is set. You can come back to this anytime in Settings.")}
+          {t(
+            "These rails activate once a TMDB key is set. You can come back to this anytime in Settings.",
+          )}
         </p>
       )}
     </div>

@@ -42,7 +42,9 @@ function seedType(id: string): Meta["type"] {
 }
 
 async function streamingLane(key: string, settings: Settings): Promise<FeaturedItem[]> {
-  const enabled = (Object.keys(SERVICES) as StreamingService[]).filter((s) => settings.streaming[s]);
+  const enabled = (Object.keys(SERVICES) as StreamingService[]).filter(
+    (s) => settings.streaming[s],
+  );
   const region = settings.region || "US";
   const lists = await Promise.all(
     enabled.slice(0, 6).map(async (svc) => {
@@ -133,7 +135,11 @@ export async function fastLanes(key: string, region: string): Promise<FeaturedIt
   return tmdbTopLane(key, region).catch(() => [] as FeaturedItem[]);
 }
 
-export async function buildLanes(key: string, settings: Settings, seeds: Seed[]): Promise<FeaturedItem[]> {
+export async function buildLanes(
+  key: string,
+  settings: Settings,
+  seeds: Seed[],
+): Promise<FeaturedItem[]> {
   const region = settings.region || "US";
   const lanes = await Promise.all([
     streamingLane(key, settings).catch(() => [] as FeaturedItem[]),

@@ -1,4 +1,15 @@
-import { ArrowDown, ArrowUp, Check, Eye, EyeOff, ListOrdered, Pencil, Sparkles, X, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Check,
+  Eye,
+  EyeOff,
+  ListOrdered,
+  Pencil,
+  Sparkles,
+  X,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 
@@ -80,20 +91,49 @@ export function RowControls({
         )}
         {editing ? (
           <>
-            <KidCtrl icon={<Check size={22} strokeWidth={2.6} />} label={t("Save")} onClick={commit} primary />
-            <KidCtrl icon={<X size={22} strokeWidth={2.6} />} label={t("Cancel")} onClick={() => setEditing(false)} />
+            <KidCtrl
+              icon={<Check size={22} strokeWidth={2.6} />}
+              label={t("Save")}
+              onClick={commit}
+              primary
+            />
+            <KidCtrl
+              icon={<X size={22} strokeWidth={2.6} />}
+              label={t("Cancel")}
+              onClick={() => setEditing(false)}
+            />
           </>
         ) : (
           <>
-            <KidCtrl icon={<ArrowUp size={22} strokeWidth={2.6} />} label={t("Up")} onClick={onMoveUp} disabled={!canMoveUp} />
-            <KidCtrl icon={<ArrowDown size={22} strokeWidth={2.6} />} label={t("Down")} onClick={onMoveDown} disabled={!canMoveDown} />
             <KidCtrl
-              icon={hidden ? <EyeOff size={22} strokeWidth={2.6} /> : <Eye size={22} strokeWidth={2.6} />}
+              icon={<ArrowUp size={22} strokeWidth={2.6} />}
+              label={t("Up")}
+              onClick={onMoveUp}
+              disabled={!canMoveUp}
+            />
+            <KidCtrl
+              icon={<ArrowDown size={22} strokeWidth={2.6} />}
+              label={t("Down")}
+              onClick={onMoveDown}
+              disabled={!canMoveDown}
+            />
+            <KidCtrl
+              icon={
+                hidden ? (
+                  <EyeOff size={22} strokeWidth={2.6} />
+                ) : (
+                  <Eye size={22} strokeWidth={2.6} />
+                )
+              }
               label={hidden ? t("Show") : t("Hide")}
               onClick={onToggleHidden}
               active={hidden}
             />
-            <KidCtrl icon={<Pencil size={20} strokeWidth={2.6} />} label={t("Rename")} onClick={() => setEditing(true)} />
+            <KidCtrl
+              icon={<Pencil size={20} strokeWidth={2.6} />}
+              label={t("Rename")}
+              onClick={() => setEditing(true)}
+            />
           </>
         )}
       </div>
@@ -122,7 +162,9 @@ export function RowControls({
         onClick={onToggleHidden}
         title={hidden ? t("Show row") : t("Hide row")}
         className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
-          hidden ? "bg-danger/15 text-danger hover:bg-danger/25" : "text-ink-muted hover:bg-raised hover:text-ink"
+          hidden
+            ? "bg-danger/15 text-danger hover:bg-danger/25"
+            : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         {hidden ? <EyeOff size={14} strokeWidth={2.2} /> : <Eye size={14} strokeWidth={2.2} />}

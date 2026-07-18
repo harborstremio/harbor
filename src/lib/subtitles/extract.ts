@@ -22,7 +22,10 @@ export async function resolveReadableUrl(url: string): Promise<string | null> {
 }
 
 export function detectFormatFromUrl(url: string): "srt" | "vtt" {
-  const ext = url.split(/[?#]/)[0].match(/\.([a-z]{2,4})$/i)?.[1]?.toLowerCase();
+  const ext = url
+    .split(/[?#]/)[0]
+    .match(/\.([a-z]{2,4})$/i)?.[1]
+    ?.toLowerCase();
   return ext === "vtt" ? "vtt" : "srt";
 }
 
@@ -57,7 +60,8 @@ export async function getCuesAnySource(
     if (readable) {
       try {
         const cues = await fetchAndParse(readable);
-        if (cues.length > 0) return { ok: true, source: { cues, format: detectFormatFromUrl(rawUrl) } };
+        if (cues.length > 0)
+          return { ok: true, source: { cues, format: detectFormatFromUrl(rawUrl) } };
       } catch {
         /* fall through to embedded extraction */
       }

@@ -110,7 +110,10 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
         {source && playlist && playlist.channels.length === 0 && (
-          <EmptyMessage title="No channels" body="This playlist hasn't been loaded yet, or it has no channels." />
+          <EmptyMessage
+            title="No channels"
+            body="This playlist hasn't been loaded yet, or it has no channels."
+          />
         )}
         {source && playlist && playlist.channels.length > 0 && (
           <GuideView

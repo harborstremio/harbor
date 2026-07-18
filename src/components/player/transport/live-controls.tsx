@@ -36,7 +36,8 @@ export function GoToLive({
   if (!(durationSec > 0 && offset > LIVE_BEHIND_THRESHOLD_SEC)) return null;
   const minutesBehind = Math.floor(offset / 60);
   const secondsBehind = Math.floor(offset % 60);
-  const behindLabel = minutesBehind > 0 ? `${minutesBehind}m ${secondsBehind}s` : `${secondsBehind}s`;
+  const behindLabel =
+    minutesBehind > 0 ? `${minutesBehind}m ${secondsBehind}s` : `${secondsBehind}s`;
   return (
     <button
       onClick={() => onSeek(Math.max(0, durationSec - LIVE_EDGE_PAD_SEC))}
@@ -80,9 +81,8 @@ export function LiveSeekBar({
   const buffered = usePlaybackBufferedGated(active);
   const dur = durationSec;
 
-  const rawOffset = scrub != null
-    ? Math.max(0, dur - scrub)
-    : Math.max(0, dur - position - LIVE_NEAR_EDGE_PAD_SEC);
+  const rawOffset =
+    scrub != null ? Math.max(0, dur - scrub) : Math.max(0, dur - position - LIVE_NEAR_EDGE_PAD_SEC);
   const pct = Math.max(0, Math.min(1, 1 - rawOffset / LIVE_WINDOW_SEC)) * 100;
 
   const bufferOffset = Math.max(0, dur - (position + buffered) - LIVE_NEAR_EDGE_PAD_SEC);
@@ -110,9 +110,10 @@ export function LiveSeekBar({
     setScrub(null);
   };
 
-  const hoverPct = hover != null
-    ? Math.max(0, Math.min(1, 1 - Math.max(0, dur - hover) / LIVE_WINDOW_SEC)) * 100
-    : null;
+  const hoverPct =
+    hover != null
+      ? Math.max(0, Math.min(1, 1 - Math.max(0, dur - hover) / LIVE_WINDOW_SEC)) * 100
+      : null;
   const hoverLabel = hover != null ? formatRewindLabel(Math.max(0, dur - hover), t) : null;
 
   return (

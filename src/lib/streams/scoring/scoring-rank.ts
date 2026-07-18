@@ -8,14 +8,17 @@ export function rankAndPick(
   respectAddonOrder = false,
 ): RankedPicker {
   const isCached = (s: ScoredStream) =>
-    (s.url != null && !hasUncachedMarker(s)) || activeDebrids.some((slug) => s.cached[slug] === true);
+    (s.url != null && !hasUncachedMarker(s)) ||
+    activeDebrids.some((slug) => s.cached[slug] === true);
 
   const pri = (s: ScoredStream) => s.addonPriority ?? Number.MAX_SAFE_INTEGER;
   const ret = (s: ScoredStream) => s.addonReturnIdx ?? Number.MAX_SAFE_INTEGER;
   const all = scored
     .slice()
     .sort((a, b) =>
-      respectAddonOrder ? pri(a) - pri(b) || ret(a) - ret(b) || b.score - a.score : b.score - a.score,
+      respectAddonOrder
+        ? pri(a) - pri(b) || ret(a) - ret(b) || b.score - a.score
+        : b.score - a.score,
     );
   const cachedFirst = all.slice().sort((a, b) => {
     const ac = isCached(a) ? 1 : 0;

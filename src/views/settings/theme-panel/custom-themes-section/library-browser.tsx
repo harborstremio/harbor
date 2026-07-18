@@ -61,7 +61,10 @@ export function LibraryBrowser({
       role="dialog"
       aria-label="Theme library"
     >
-      <header data-tauri-drag-region className="flex shrink-0 items-center justify-between gap-4 border-b border-edge-soft bg-surface/40 px-10 py-5">
+      <header
+        data-tauri-drag-region
+        className="flex shrink-0 items-center justify-between gap-4 border-b border-edge-soft bg-surface/40 px-10 py-5"
+      >
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -72,7 +75,9 @@ export function LibraryBrowser({
             Back to settings
           </button>
           <div data-tauri-drag-region className="flex flex-col">
-            <h1 className="pointer-events-none text-[24px] font-semibold tracking-tight text-ink">Theme Library</h1>
+            <h1 className="pointer-events-none text-[24px] font-semibold tracking-tight text-ink">
+              Theme Library
+            </h1>
             <p className="pointer-events-none text-[13px] text-ink-subtle">
               {entries.length} themes. Click Apply on any card to use it.
             </p>
@@ -107,67 +112,73 @@ export function LibraryBrowser({
           {tab === "community" ? (
             <CommunityPane />
           ) : (
-          <>
-          {featured.length > 0 && (
-            <BrowserSection title="Featured" subtitle="Hand-picked reskins from the Harbor crew.">
-              <BrowserGrid
-                entries={featured}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
+            <>
+              {featured.length > 0 && (
+                <BrowserSection
+                  title="Featured"
+                  subtitle="Hand-picked reskins from the Harbor crew."
+                >
+                  <BrowserGrid
+                    entries={featured}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
 
-          {BETA_THEMES.length > 0 && (
-            <BrowserSection title="Beta" subtitle="Experimental 1:1 ports of other apps.">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <BetaThemesCard count={BETA_THEMES.length} onClick={() => setBetaOpen(true)} />
-              </div>
-            </BrowserSection>
-          )}
+              {BETA_THEMES.length > 0 && (
+                <BrowserSection title="Beta" subtitle="Experimental 1:1 ports of other apps.">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <BetaThemesCard count={BETA_THEMES.length} onClick={() => setBetaOpen(true)} />
+                  </div>
+                </BrowserSection>
+              )}
 
-          {builtIn.length > 0 && (
-            <BrowserSection title="Built-in" subtitle="Ships with Harbor. Always available.">
-              <BrowserGrid
-                entries={builtIn}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
+              {builtIn.length > 0 && (
+                <BrowserSection title="Built-in" subtitle="Ships with Harbor. Always available.">
+                  <BrowserGrid
+                    entries={builtIn}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
 
-          {templates.length > 0 && (
-            <BrowserSection title="Templates" subtitle="Starting points to remix and save your own.">
-              <BrowserGrid
-                entries={templates}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
+              {templates.length > 0 && (
+                <BrowserSection
+                  title="Templates"
+                  subtitle="Starting points to remix and save your own."
+                >
+                  <BrowserGrid
+                    entries={templates}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
 
-          {yours.length > 0 && (
-            <BrowserSection title="Your themes" subtitle="Themes you imported or built.">
-              <BrowserGrid
-                entries={yours}
-                activeId={activeId}
-                onActivate={onActivate}
-                onExport={onExport}
-                onDownload={onDownload}
-                onRemove={onRemove}
-              />
-            </BrowserSection>
-          )}
-          </>
+              {yours.length > 0 && (
+                <BrowserSection title="Your themes" subtitle="Themes you imported or built.">
+                  <BrowserGrid
+                    entries={yours}
+                    activeId={activeId}
+                    onActivate={onActivate}
+                    onExport={onExport}
+                    onDownload={onDownload}
+                    onRemove={onRemove}
+                  />
+                </BrowserSection>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -182,7 +193,15 @@ export function LibraryBrowser({
   );
 }
 
-function TabBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function TabBtn({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       type="button"
@@ -267,7 +286,8 @@ function BrowserCard({
   onRemove: () => void;
 }) {
   const hasImage = !!theme.previewImage;
-  const bg = theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
+  const bg =
+    theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
   const [busy, setBusy] = useState(false);
   const addImage = () => {
     const input = document.createElement("input");
@@ -322,7 +342,11 @@ function BrowserCard({
             disabled={busy}
             className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-canvas/45 text-[12px] font-semibold text-ink-muted opacity-0 backdrop-blur-[1px] transition-opacity hover:text-ink group-hover:opacity-100"
           >
-            {busy ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} strokeWidth={1.9} />}
+            {busy ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <ImagePlus size={18} strokeWidth={1.9} />
+            )}
             {busy ? "Adding" : "Add image"}
           </button>
         )}
@@ -331,7 +355,9 @@ function BrowserCard({
         <div className="flex min-w-0 flex-col gap-1">
           <span className="text-[16px] font-semibold tracking-tight text-ink">{theme.name}</span>
           {theme.blurb && (
-            <span className="line-clamp-2 text-[12.5px] leading-relaxed text-ink-muted">{theme.blurb}</span>
+            <span className="line-clamp-2 text-[12.5px] leading-relaxed text-ink-muted">
+              {theme.blurb}
+            </span>
           )}
         </div>
         <div className="flex items-center gap-1.5">

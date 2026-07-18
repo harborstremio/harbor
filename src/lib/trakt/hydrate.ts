@@ -43,16 +43,16 @@ async function hydrateOne(item: TraktItem, tmdbKey: string): Promise<Meta | null
   if (!skeleton) return null;
 
   if (tmdbKey && item.ids.tmdb) {
-    const enriched = await tmdbHydrate(tmdbKey, item.type, item.ids.tmdb).catch(
-      () => null,
-    );
+    const enriched = await tmdbHydrate(tmdbKey, item.type, item.ids.tmdb).catch(() => null);
     if (enriched && enriched.poster) {
       return { ...skeleton, ...enriched };
     }
   }
 
   if (item.ids.imdb) {
-    const full = await cinemetaMeta(narrowMediaType(skeleton.type), item.ids.imdb).catch(() => null);
+    const full = await cinemetaMeta(narrowMediaType(skeleton.type), item.ids.imdb).catch(
+      () => null,
+    );
     if (full && full.poster) return full;
   }
 
@@ -71,10 +71,7 @@ async function mapLimit<T, R>(
   return out;
 }
 
-export async function hydrateTraktItems(
-  items: TraktItem[],
-  tmdbKey: string,
-): Promise<Meta[]> {
+export async function hydrateTraktItems(items: TraktItem[], tmdbKey: string): Promise<Meta[]> {
   const results = await mapLimit(items, 20, (it) => hydrateOne(it, tmdbKey));
   return results.filter((m): m is Meta => m !== null && !!m.poster);
 }

@@ -57,21 +57,25 @@ export function ToolsLayer({
 }) {
   return (
     <>
-      {!pipMode && !drawMode && !showWaiting && pendingResumeSec == null && pendingSeekSec == null && (
-        <SkipPillContainer
-          skipSegments={skipSegments}
-          durationSec={durationSec}
-          hasNextEpisode={hasNextEpisode}
-          hasNextEpDisplay={hasNextEpDisplay}
-          nextEp={nextEp}
-          nextEpMask={nextEpMask}
-          visible={pillsVisible}
-          allowAutoSkip={allowAutoSkip}
-          onSkip={onSkip}
-          onNextEpisode={onNextEpisode}
-          onCancelAutoNext={onCancelAutoNext}
-        />
-      )}
+      {!pipMode &&
+        !drawMode &&
+        !showWaiting &&
+        pendingResumeSec == null &&
+        pendingSeekSec == null && (
+          <SkipPillContainer
+            skipSegments={skipSegments}
+            durationSec={durationSec}
+            hasNextEpisode={hasNextEpisode}
+            hasNextEpDisplay={hasNextEpDisplay}
+            nextEp={nextEp}
+            nextEpMask={nextEpMask}
+            visible={pillsVisible}
+            allowAutoSkip={allowAutoSkip}
+            onSkip={onSkip}
+            onNextEpisode={onNextEpisode}
+            onCancelAutoNext={onCancelAutoNext}
+          />
+        )}
 
       {!pipMode && !drawMode && (
         <QuickTools

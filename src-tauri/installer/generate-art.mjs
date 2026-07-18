@@ -19,7 +19,10 @@ function markSvg(fill) {
 }
 
 function wordmarkSvg(fill) {
-  return readFileSync(join(assets, "harbor-wordmark.svg"), "utf8").replace(/class="cls-1"/g, `fill="${fill}"`);
+  return readFileSync(join(assets, "harbor-wordmark.svg"), "utf8").replace(
+    /class="cls-1"/g,
+    `fill="${fill}"`,
+  );
 }
 
 function rasterByWidth(svg, width) {
@@ -70,7 +73,9 @@ async function finishBmp(composedPng, w, h, bg, bmpPath, previewPath) {
 }
 
 async function sidebar() {
-  const W = 164, H = 314, s = 2;
+  const W = 164,
+    H = 314,
+    s = 2;
   const base = rasterIntrinsic(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${W * s}" height="${H * s}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1f26"/><stop offset="0.55" stop-color="#15171c"/><stop offset="1" stop-color="#0d0f13"/></linearGradient></defs><rect width="${W * s}" height="${H * s}" fill="url(#g)"/></svg>`,
   );
@@ -87,19 +92,37 @@ async function sidebar() {
     ])
     .png()
     .toBuffer();
-  await finishBmp(composed, W, H, "#0d0f13", join(here, "sidebar.bmp"), join(here, "sidebar-preview.png"));
+  await finishBmp(
+    composed,
+    W,
+    H,
+    "#0d0f13",
+    join(here, "sidebar.bmp"),
+    join(here, "sidebar-preview.png"),
+  );
 }
 
 async function header() {
-  const W = 150, H = 57, s = 2;
-  const base = rasterIntrinsic(`<svg xmlns="http://www.w3.org/2000/svg" width="${W * s}" height="${H * s}"><rect width="${W * s}" height="${H * s}" fill="#ffffff"/></svg>`);
+  const W = 150,
+    H = 57,
+    s = 2;
+  const base = rasterIntrinsic(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${W * s}" height="${H * s}"><rect width="${W * s}" height="${H * s}" fill="#ffffff"/></svg>`,
+  );
   const mark = rasterByHeight(markSvg("#11141a"), 36 * s);
   const mm = await sharp(mark).metadata();
   const composed = await sharp(base)
     .composite([{ input: mark, left: 16 * s, top: Math.round((H * s - mm.height) / 2) }])
     .png()
     .toBuffer();
-  await finishBmp(composed, W, H, "#ffffff", join(here, "header.bmp"), join(here, "header-preview.png"));
+  await finishBmp(
+    composed,
+    W,
+    H,
+    "#ffffff",
+    join(here, "header.bmp"),
+    join(here, "header-preview.png"),
+  );
 }
 
 await sidebar();

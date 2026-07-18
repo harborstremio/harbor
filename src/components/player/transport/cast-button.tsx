@@ -16,11 +16,7 @@ export function CastButton({
     <BigButton
       onClick={onClick}
       ariaLabel={t("Cast")}
-      tooltip={
-        supported
-          ? t("Cast to a device")
-          : t("Casting comes with the mpv backend")
-      }
+      tooltip={supported ? t("Cast to a device") : t("Casting comes with the mpv backend")}
       disabled={!supported}
     >
       <Cast size={22} strokeWidth={1.9} />

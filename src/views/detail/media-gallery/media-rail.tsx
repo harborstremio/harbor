@@ -51,11 +51,21 @@ export function MediaRail({ children }: { children: React.ReactNode }) {
   );
 }
 
-function RailArrow({ side, visible, onClick }: { side: "start" | "end"; visible: boolean; onClick: () => void }) {
+function RailArrow({
+  side,
+  visible,
+  onClick,
+}: {
+  side: "start" | "end";
+  visible: boolean;
+  onClick: () => void;
+}) {
   const t = useT();
   const sideClass = side === "start" ? "start-0 justify-start" : "end-0 justify-end";
   return (
-    <div className={`pointer-events-none absolute inset-y-0 z-20 flex w-14 items-center ${sideClass}`}>
+    <div
+      className={`pointer-events-none absolute inset-y-0 z-20 flex w-14 items-center ${sideClass}`}
+    >
       <button
         type="button"
         onClick={onClick}

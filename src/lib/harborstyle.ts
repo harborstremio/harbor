@@ -77,16 +77,25 @@ function harborStyleToObject(
   if (manifest["chrome-position"]) chrome.position = manifest["chrome-position"];
   if (manifest["chrome-brand"]) chrome.brand = manifest["chrome-brand"];
   if (manifest["chrome-items"]) {
-    chrome.items = manifest["chrome-items"].split(",").map((s) => s.trim()).filter(Boolean);
+    chrome.items = manifest["chrome-items"]
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
   if (Object.keys(chrome).length) value.chrome = chrome;
 
   const nav: Record<string, unknown> = {};
   if (manifest["nav-order"]) {
-    nav.order = manifest["nav-order"].split(",").map((s) => s.trim()).filter(Boolean);
+    nav.order = manifest["nav-order"]
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
   if (manifest["nav-hidden"]) {
-    nav.hidden = manifest["nav-hidden"].split(",").map((s) => s.trim()).filter(Boolean);
+    nav.hidden = manifest["nav-hidden"]
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
   if (manifest["nav-renamed"]) {
     const renamed: Record<string, string> = {};
@@ -155,7 +164,8 @@ export function serializeHarborStyle(theme: ThemePreset | CustomTheme): string {
     if (nav.order.length) lines.push(`nav-order: ${nav.order.join(", ")}`);
     if (nav.hidden.length) lines.push(`nav-hidden: ${nav.hidden.join(", ")}`);
     const renamed = Object.entries(nav.renamed);
-    if (renamed.length) lines.push(`nav-renamed: ${renamed.map(([k, v]) => `${k}=${v}`).join(", ")}`);
+    if (renamed.length)
+      lines.push(`nav-renamed: ${renamed.map(([k, v]) => `${k}=${v}`).join(", ")}`);
   }
 
   lines.push("", "@tokens");

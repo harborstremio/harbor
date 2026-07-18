@@ -49,7 +49,10 @@ export function readLocalLibrary(): LocalEntry[] {
   return read();
 }
 
-export function localShowEpisodes(show: { imdbId?: string | null; title?: string | null }): LocalEntry[] {
+export function localShowEpisodes(show: {
+  imdbId?: string | null;
+  title?: string | null;
+}): LocalEntry[] {
   const wantImdb = show.imdbId ?? null;
   const wantTitle = (show.title ?? "").trim().toLowerCase();
   return read()
@@ -66,9 +69,7 @@ export function findLocalEpisode(
   season: number,
   episode: number,
 ): LocalEntry | null {
-  return (
-    localShowEpisodes(show).find((e) => e.season === season && e.episode === episode) ?? null
-  );
+  return localShowEpisodes(show).find((e) => e.season === season && e.episode === episode) ?? null;
 }
 
 export function addLocalEntries(entries: LocalEntry[]): void {
@@ -103,10 +104,7 @@ export function clearLocalLibrary(): void {
   write([]);
 }
 
-export function findLocalMovie(
-  tmdbId?: number | null,
-  imdbId?: string | null,
-): LocalEntry | null {
+export function findLocalMovie(tmdbId?: number | null, imdbId?: string | null): LocalEntry | null {
   return (
     read().find(
       (e) =>
@@ -149,7 +147,7 @@ export function findLocalSeriesEpisodes(
 
 export function localEntryToMeta(entry: LocalEntry): Meta | null {
   const kind = entry.type === "show" ? "tv" : "movie";
-  const id = entry.tmdbId != null ? `tmdb:${kind}:${entry.tmdbId}` : entry.imdbId ?? null;
+  const id = entry.tmdbId != null ? `tmdb:${kind}:${entry.tmdbId}` : (entry.imdbId ?? null);
   if (!id) return null;
   return {
     id,
@@ -215,7 +213,19 @@ export function useInLocalLibrary(
 }
 
 const VIDEO_EXTS = new Set([
-  "mkv", "mp4", "m4v", "mov", "avi", "wmv", "webm", "ts", "m2ts", "mpg", "mpeg", "flv", "ogv",
+  "mkv",
+  "mp4",
+  "m4v",
+  "mov",
+  "avi",
+  "wmv",
+  "webm",
+  "ts",
+  "m2ts",
+  "mpg",
+  "mpeg",
+  "flv",
+  "ogv",
 ]);
 
 export function isVideoFile(name: string): boolean {
@@ -224,11 +234,41 @@ export function isVideoFile(name: string): boolean {
 }
 
 const NOISE = [
-  "1080p", "720p", "2160p", "4k", "uhd", "hdr", "hdr10", "dv",
-  "bluray", "bdrip", "brrip", "webrip", "web-dl", "webdl", "hdtv", "dvdrip", "remux",
-  "x264", "x265", "h264", "h265", "hevc", "av1", "10bit",
-  "atmos", "ddp", "dts", "ac3", "aac",
-  "yify", "yts", "rarbg", "fgt", "evo", "psa",
+  "1080p",
+  "720p",
+  "2160p",
+  "4k",
+  "uhd",
+  "hdr",
+  "hdr10",
+  "dv",
+  "bluray",
+  "bdrip",
+  "brrip",
+  "webrip",
+  "web-dl",
+  "webdl",
+  "hdtv",
+  "dvdrip",
+  "remux",
+  "x264",
+  "x265",
+  "h264",
+  "h265",
+  "hevc",
+  "av1",
+  "10bit",
+  "atmos",
+  "ddp",
+  "dts",
+  "ac3",
+  "aac",
+  "yify",
+  "yts",
+  "rarbg",
+  "fgt",
+  "evo",
+  "psa",
 ];
 const NOISE_RX = new RegExp(`\\b(${NOISE.join("|")})\\b`, "gi");
 const TV_RX =

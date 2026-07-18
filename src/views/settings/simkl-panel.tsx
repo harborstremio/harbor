@@ -66,7 +66,9 @@ export function SimklPanel() {
               {t("Connect your Simkl account")}
             </h2>
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.")}
+              {t(
+                "Sync and track movies, shows, and anime across everything you use. Harbor marks what you finish as watched on Simkl and keeps your plan-to-watch list in step. Free at simkl.com.",
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -90,7 +92,9 @@ export function SimklPanel() {
         <>
           <Section
             title={t("Connected")}
-            subtitle={t("Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.")}
+            subtitle={t(
+              "Harbor will mark what you finish as watched on Simkl and sync your plan-to-watch list.",
+            )}
           >
             <div className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
               <div className="flex items-center gap-3">
@@ -107,8 +111,12 @@ export function SimklPanel() {
                   </span>
                 )}
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-[14px] font-medium text-ink">{username || t("Connected")}</span>
-                  <span className="text-[12px] text-ink-subtle">{t("Authorized on this device")}</span>
+                  <span className="text-[14px] font-medium text-ink">
+                    {username || t("Connected")}
+                  </span>
+                  <span className="text-[12px] text-ink-subtle">
+                    {t("Authorized on this device")}
+                  </span>
                 </div>
               </div>
               {username && (
@@ -139,7 +147,9 @@ export function SimklPanel() {
             )}
             <ToggleRow
               label={t("Show Simkl rails on Home")}
-              sub={t("Display your Watching, Plan to Watch, Up Next, and Trending rows on the home screen.")}
+              sub={t(
+                "Display your Watching, Plan to Watch, Up Next, and Trending rows on the home screen.",
+              )}
               value={settings.simklHomeRailsEnabled}
               onChange={(val) => update({ simklHomeRailsEnabled: val })}
             />
@@ -157,7 +167,9 @@ export function SimklPanel() {
             />
             <ToggleRow
               label={t("Scrobble to SIMKL")}
-              sub={t("Automatically track what you are playing and save watch progress in real-time.")}
+              sub={t(
+                "Automatically track what you are playing and save watch progress in real-time.",
+              )}
               value={settings.simklScrobbleEnabled}
               onChange={(val) => update({ simklScrobbleEnabled: val })}
             />
@@ -180,12 +192,22 @@ export function SimklPanel() {
               </p>
               <select
                 value={settings.simklAnimeTitleLanguage}
-                onChange={(e) => update({ simklAnimeTitleLanguage: e.target.value as "english" | "romaji" | "native" })}
+                onChange={(e) =>
+                  update({
+                    simklAnimeTitleLanguage: e.target.value as "english" | "romaji" | "native",
+                  })
+                }
                 className="h-11 w-full max-w-[340px] rounded-xl border border-edge-soft bg-canvas/40 px-3.5 text-[13.5px] text-ink outline-none transition-colors hover:border-edge focus:border-accent cursor-pointer"
               >
-                <option value="english" className="bg-elevated text-ink">{t("English")}</option>
-                <option value="romaji" className="bg-elevated text-ink">{t("Romaji")}</option>
-                <option value="native" className="bg-elevated text-ink">{t("Native/Japanese")}</option>
+                <option value="english" className="bg-elevated text-ink">
+                  {t("English")}
+                </option>
+                <option value="romaji" className="bg-elevated text-ink">
+                  {t("Romaji")}
+                </option>
+                <option value="native" className="bg-elevated text-ink">
+                  {t("Native/Japanese")}
+                </option>
               </select>
             </div>
             {!confirmDisconnect ? (

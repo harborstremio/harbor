@@ -49,11 +49,7 @@ export function SeekBarVisual({
     top: "50%",
     transform: "translateY(-50%)",
     backgroundColor: isRainbow || isImage ? undefined : accent,
-    backgroundImage: isRainbow
-      ? RAINBOW_BG
-      : isImage
-      ? `url(${settings.seekBarImage})`
-      : undefined,
+    backgroundImage: isRainbow ? RAINBOW_BG : isImage ? `url(${settings.seekBarImage})` : undefined,
     backgroundRepeat: isImage ? "repeat" : undefined,
     backgroundSize: isImage ? "auto 100%" : undefined,
   };

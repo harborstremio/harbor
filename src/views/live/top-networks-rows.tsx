@@ -2,11 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { ChevronLeft, ChevronRight, Tv } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { IptvChannel } from "@/lib/iptv/types";
-import {
-  type NetworkRow,
-  type ResolvedNetwork,
-  resolveNetworks,
-} from "@/lib/iptv/top-networks";
+import { type NetworkRow, type ResolvedNetwork, resolveNetworks } from "@/lib/iptv/top-networks";
 
 const MIN_CARD_WIDTH = 150;
 const GAP = 14;

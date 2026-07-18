@@ -65,7 +65,12 @@ export function SurpriseMe({ pool }: { pool: Meta[] }) {
 
 function SurpriseTile({ meta }: { meta: Meta }) {
   const { settings } = useSettings();
-  const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    meta.id,
+    meta.poster,
+    meta.type === "series" ? "series" : "movie",
+  );
   return (
     <img
       src={poster.src}

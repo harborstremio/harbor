@@ -96,7 +96,10 @@ export function SkipPillContainer({
       : null;
   useEffect(() => {
     if (!buttonKey || settings.skipButtonHideSec <= 0) return;
-    const id = window.setTimeout(() => setAutoHiddenKey(buttonKey), settings.skipButtonHideSec * 1000);
+    const id = window.setTimeout(
+      () => setAutoHiddenKey(buttonKey),
+      settings.skipButtonHideSec * 1000,
+    );
     return () => window.clearTimeout(id);
   }, [buttonKey, settings.skipButtonHideSec]);
   const skipHidden =

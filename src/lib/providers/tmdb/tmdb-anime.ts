@@ -34,7 +34,20 @@ type NormHit = {
 };
 
 const ANIMATION_GENRE = 16;
-const STOPWORDS = new Set(["the", "a", "an", "of", "to", "and", "no", "wa", "ga", "wo", "season", "part"]);
+const STOPWORDS = new Set([
+  "the",
+  "a",
+  "an",
+  "of",
+  "to",
+  "and",
+  "no",
+  "wa",
+  "ga",
+  "wo",
+  "season",
+  "part",
+]);
 
 function normTitle(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "");
@@ -78,7 +91,8 @@ function acceptHit(query: string, hit: NormHit, year: string | undefined, exact:
   const hTokens = new Set(sigTokens(hit.name));
   const missing = qTokens.filter((t) => !hTokens.has(t)).length;
   if (missing >= 1 && !yearMatch && !exactTitle) return false;
-  const overlap = exactTitle || hn.includes(qn) || qn.includes(hn) || qTokens.some((t) => hTokens.has(t));
+  const overlap =
+    exactTitle || hn.includes(qn) || qn.includes(hn) || qTokens.some((t) => hTokens.has(t));
   return overlap;
 }
 
@@ -143,11 +157,9 @@ export async function tmdbAnimeLogo(
   const match = await tmdbAnimeMatch(key, name, year, kind, opts);
   if (!match) return null;
   const { id, originalLang } = match;
-  const imgs = await get<{ logos?: any[]; backdrops?: any[] }>(
-    key,
-    `${kind}/${id}/images`,
-    { include_image_language: imageLangParam(originalLang) },
-  );
+  const imgs = await get<{ logos?: any[]; backdrops?: any[] }>(key, `${kind}/${id}/images`, {
+    include_image_language: imageLangParam(originalLang),
+  });
   const logo = pickLogo(imgs?.logos ?? [], originalLang);
   const backdropPath = (imgs?.backdrops ?? [])[0]?.file_path;
   return {

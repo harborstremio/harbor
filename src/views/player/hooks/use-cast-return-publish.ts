@@ -15,7 +15,8 @@ export function useCastReturnPublish(params: {
   guestPickRef: RefObject<boolean>;
   publishState: (state: PartialSyncState) => void;
 }) {
-  const { casting, inRoom, isHost, src, snapRef, hostSourceRef, guestPickRef, publishState } = params;
+  const { casting, inRoom, isHost, src, snapRef, hostSourceRef, guestPickRef, publishState } =
+    params;
   const wasCastingRef = useRef(false);
   useEffect(() => {
     if (wasCastingRef.current && !casting && inRoom && isHost) {
@@ -34,5 +35,14 @@ export function useCastReturnPublish(params: {
       });
     }
     wasCastingRef.current = casting;
-  }, [casting, inRoom, isHost, publishState, src.meta.id, src.meta.name, src.meta.poster, src.episode]);
+  }, [
+    casting,
+    inRoom,
+    isHost,
+    publishState,
+    src.meta.id,
+    src.meta.name,
+    src.meta.poster,
+    src.episode,
+  ]);
 }

@@ -29,7 +29,13 @@ type CinemetaMeta = {
   genres?: string[];
   trailerStreams?: Array<{ ytId?: string; title?: string }>;
   trailers?: Array<{ source?: string; type?: string }>;
-  videos?: Array<{ id?: string; season?: number; episode?: number; released?: string; title?: string }>;
+  videos?: Array<{
+    id?: string;
+    season?: number;
+    episode?: number;
+    released?: string;
+    title?: string;
+  }>;
 };
 
 function extractImdbId(id: string): string | null {
@@ -99,7 +105,12 @@ function toDetail(m: CinemetaMeta, kind: "movie" | "tv", related: Meta[]): TmdbD
     genres,
     originalLanguage: "",
     spokenLanguages: [],
-    productionCountries: m.country ? m.country.split(",").map((s) => s.trim()).filter(Boolean) : [],
+    productionCountries: m.country
+      ? m.country
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [],
     productionCompanies: [],
     networks: [],
     productionCompaniesRich: [],

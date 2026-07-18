@@ -122,7 +122,9 @@ export function CastMenu({
               </span>
               <span className="text-[11px] leading-snug text-ink-subtle">
                 {burnSubsOnTv
-                  ? t("Subtitles are baked into the picture so they always show. Re-encodes the video.")
+                  ? t(
+                      "Subtitles are baked into the picture so they always show. Re-encodes the video.",
+                    )
                   : t("Subtitles may not appear on the TV.")}
               </span>
             </span>
@@ -138,7 +140,9 @@ export function CastMenu({
       ) : devices.length === 0 ? (
         <div className="flex flex-col gap-2 px-1 py-3">
           <p className="text-[12.5px] text-ink-muted">
-            {t("No Chromecast, DLNA, or Roku devices found. Make sure your TV is on, woken up, and on the same Wi-Fi.")}
+            {t(
+              "No Chromecast, DLNA, or Roku devices found. Make sure your TV is on, woken up, and on the same Wi-Fi.",
+            )}
           </p>
           <button
             onClick={() => setScanCount((c) => c + 1)}
@@ -168,7 +172,7 @@ export function CastMenu({
                   )}
                 </span>
                 <span className="truncate text-[11px] text-ink-subtle">
-                  {d.kind === "dlna" ? d.model ?? t("DLNA TV") : d.model || `${d.host}:${d.port}`}
+                  {d.kind === "dlna" ? (d.model ?? t("DLNA TV")) : d.model || `${d.host}:${d.port}`}
                 </span>
               </div>
             </button>

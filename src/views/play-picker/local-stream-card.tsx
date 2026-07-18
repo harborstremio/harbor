@@ -18,7 +18,9 @@ export function LocalStreamCard({ entry, onPlay }: { entry: LocalEntry; onPlay: 
         <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
           {t("On your disk")}
           {ep && (
-            <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] tracking-normal">{ep}</span>
+            <span className="rounded-full bg-accent/15 px-1.5 py-0.5 text-[10px] tracking-normal">
+              {ep}
+            </span>
           )}
         </span>
         <span className="truncate text-[14.5px] font-semibold text-ink">{entry.filename}</span>

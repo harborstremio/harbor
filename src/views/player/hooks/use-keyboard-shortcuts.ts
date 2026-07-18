@@ -402,7 +402,41 @@ export function useKeyboardShortcuts(params: {
       window.removeEventListener("blur", onBlur);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [closePlayer, togglePip, drawMode, snap.muted, snap.volume, snap.rate, snap.durationSec, snap.subDelaySec, overrides, seekBackStepSec, seekForwardStepSec, seekTo, toggleSwitcher, toggleEpisodePanel, toggleGuide, toggleDvr, toggleSleep, onScreenshot, onGifRecord, onClipRecord, onToggleCrop, onPanscanUp, onPanscanDown, onPrevChannel, onToggleAnime4k, onAnime4kOn, onAnime4kOff, onFrameStep, onVolumeFeedback, settings.playerEscExitsFullscreen, settings.playerConfirmLeave, settings.playerVolumeSfx, update]);
+  }, [
+    closePlayer,
+    togglePip,
+    drawMode,
+    snap.muted,
+    snap.volume,
+    snap.rate,
+    snap.durationSec,
+    snap.subDelaySec,
+    overrides,
+    seekBackStepSec,
+    seekForwardStepSec,
+    seekTo,
+    toggleSwitcher,
+    toggleEpisodePanel,
+    toggleGuide,
+    toggleDvr,
+    toggleSleep,
+    onScreenshot,
+    onGifRecord,
+    onClipRecord,
+    onToggleCrop,
+    onPanscanUp,
+    onPanscanDown,
+    onPrevChannel,
+    onToggleAnime4k,
+    onAnime4kOn,
+    onAnime4kOff,
+    onFrameStep,
+    onVolumeFeedback,
+    settings.playerEscExitsFullscreen,
+    settings.playerConfirmLeave,
+    settings.playerVolumeSfx,
+    update,
+  ]);
 
   return { holdSpeedActive };
 }

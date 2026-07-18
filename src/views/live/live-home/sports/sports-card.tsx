@@ -19,10 +19,17 @@ function startLabel(
 
 import { SportsHoverPreview } from "./sports-hover-preview";
 
-export function SportsCard({ game, onSelect }: { game: SportsGame; onSelect: (g: SportsGame) => void }) {
+export function SportsCard({
+  game,
+  onSelect,
+}: {
+  game: SportsGame;
+  onSelect: (g: SportsGame) => void;
+}) {
   const finalGame = game.state === "post";
   const live = game.state === "in";
-  const hasScores = (game.home.score && game.home.score !== "0") || (game.away.score && game.away.score !== "0");
+  const hasScores =
+    (game.home.score && game.home.score !== "0") || (game.away.score && game.away.score !== "0");
   const showWinIndicator = finalGame && !hasScores && (game.home.winner || game.away.winner);
 
   return (
@@ -37,14 +44,34 @@ export function SportsCard({ game, onSelect }: { game: SportsGame; onSelect: (g:
             {game.league}
           </span>
         </div>
-        <SideRow side={game.away} active={live || finalGame} dim={finalGame && !game.away.winner} showWinner={showWinIndicator} />
-        <SideRow side={game.home} active={live || finalGame} dim={finalGame && !game.home.winner} showWinner={showWinIndicator} />
+        <SideRow
+          side={game.away}
+          active={live || finalGame}
+          dim={finalGame && !game.away.winner}
+          showWinner={showWinIndicator}
+        />
+        <SideRow
+          side={game.home}
+          active={live || finalGame}
+          dim={finalGame && !game.home.winner}
+          showWinner={showWinIndicator}
+        />
       </button>
     </SportsHoverPreview>
   );
 }
 
-function SideRow({ side, active, dim, showWinner }: { side: SportsSide; active: boolean; dim: boolean; showWinner?: boolean }) {
+function SideRow({
+  side,
+  active,
+  dim,
+  showWinner,
+}: {
+  side: SportsSide;
+  active: boolean;
+  dim: boolean;
+  showWinner?: boolean;
+}) {
   const t = useT();
   const [err, setErr] = useState(false);
   const hasScore = side.score && side.score !== "" && side.score !== "0";
@@ -64,7 +91,9 @@ function SideRow({ side, active, dim, showWinner }: { side: SportsSide; active: 
       ) : (
         <span className="h-5 w-5 shrink-0 rounded-full bg-canvas/60" />
       )}
-      <span className={`flex-1 truncate text-[13px] font-bold uppercase tracking-[0.02em] ${dim ? "text-ink-subtle" : "text-ink"}`}>
+      <span
+        className={`flex-1 truncate text-[13px] font-bold uppercase tracking-[0.02em] ${dim ? "text-ink-subtle" : "text-ink"}`}
+      >
         {side.abbr || side.name}
       </span>
       {showWinner && side.winner && !hasScore ? (
@@ -106,7 +135,7 @@ function Status({ game }: { game: SportsGame }) {
     );
   }
 
-  const label = game.startMs ? startLabel(game.startMs, locale, t) : (game.detail || t("Upcoming"));
+  const label = game.startMs ? startLabel(game.startMs, locale, t) : game.detail || t("Upcoming");
 
   return (
     <span className="flex h-[18px] items-center gap-1.5 rounded border border-edge-soft/60 px-1.5 text-[10.5px] font-semibold uppercase tracking-[0.06em] text-ink-subtle">

@@ -5,14 +5,26 @@ type RawListItem = {
   rank?: number;
   listed_at?: string;
   type: "movie" | "show";
-  movie?: { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; trakt?: number } };
-  show?: { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; tvdb?: number; trakt?: number } };
+  movie?: {
+    title: string;
+    year: number | null;
+    ids: { imdb?: string; tmdb?: number; trakt?: number };
+  };
+  show?: {
+    title: string;
+    year: number | null;
+    ids: { imdb?: string; tmdb?: number; tvdb?: number; trakt?: number };
+  };
 };
 
-export async function fetchTraktList(listId: string | number, page: number = 1, limit: number = 20): Promise<TraktItem[]> {
+export async function fetchTraktList(
+  listId: string | number,
+  page: number = 1,
+  limit: number = 20,
+): Promise<TraktItem[]> {
   const rows = await traktRequest<RawListItem[]>(
     `/lists/${listId}/items?page=${page}&limit=${limit}`,
-    { authed: false }
+    { authed: false },
   ).catch(() => []);
 
   const out: TraktItem[] = [];

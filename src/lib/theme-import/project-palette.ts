@@ -112,11 +112,7 @@ export function projectPalette(bucket: PaletteBucket): ProjectedTheme {
 
   const dangerParsed = bucket.danger ? parseColor(bucket.danger) : null;
   const dangerHex =
-    dangerParsed && isRedHue(dangerParsed)
-      ? toHex6(dangerParsed)
-      : light
-        ? "#dc2626"
-        : "#ef5a5a";
+    dangerParsed && isRedHue(dangerParsed) ? toHex6(dangerParsed) : light ? "#dc2626" : "#ef5a5a";
 
   const tokens: Record<string, string> = {
     "--color-canvas": toHex6(canvas),

@@ -44,7 +44,9 @@ export function EpisodeRow({
       <div className="flex gap-4 p-3">
         <div className="relative aspect-video h-[88px] shrink-0 overflow-hidden rounded-xl bg-canvas/60 ring-1 ring-edge-soft/60">
           {hasStill && !imgFailed && (
-            <div className={`h-full w-full overflow-hidden ${spoiler?.thumb ? SPOILER_THUMB_CLASS : ""}`}>
+            <div
+              className={`h-full w-full overflow-hidden ${spoiler?.thumb ? SPOILER_THUMB_CLASS : ""}`}
+            >
               <img
                 src={episode.still}
                 alt=""
@@ -75,7 +77,9 @@ export function EpisodeRow({
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
           <div className="flex items-start justify-between gap-2">
-            <p className={`line-clamp-2 text-[14.5px] font-semibold leading-snug text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
+            <p
+              className={`line-clamp-2 text-[14.5px] font-semibold leading-snug text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
+            >
               {episode.name ?? t("Episode {n}", { n: episode.episode })}
             </p>
             {isCurrent && (
@@ -89,7 +93,11 @@ export function EpisodeRow({
               onClick={onPlay}
               className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-accent px-4 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90"
             >
-              {isCurrent ? <RotateCcw size={15} strokeWidth={2.6} /> : <Play size={16} fill="currentColor" />}
+              {isCurrent ? (
+                <RotateCcw size={15} strokeWidth={2.6} />
+              ) : (
+                <Play size={16} fill="currentColor" />
+              )}
               {isCurrent ? t("Restart") : t("Play")}
             </button>
             <button
@@ -118,7 +126,9 @@ export function EpisodeRow({
             </div>
           )}
           {episode.overview ? (
-            <p className={`text-[13px] leading-relaxed text-ink-muted ${spoiler?.desc ? SPOILER_TEXT_CLASS : ""}`}>
+            <p
+              className={`text-[13px] leading-relaxed text-ink-muted ${spoiler?.desc ? SPOILER_TEXT_CLASS : ""}`}
+            >
               {episode.overview}
             </p>
           ) : (

@@ -52,7 +52,9 @@ export function createRealDebrid(apiKey: string): DebridStore {
   async function account(signal: AbortSignal): Promise<DebridResult<Account>> {
     const r = await get<RdUser>("/user", signal);
     if (!r.ok) return r;
-    const expiresAt = r.data.expiration ? Math.floor(new Date(r.data.expiration).getTime() / 1000) : undefined;
+    const expiresAt = r.data.expiration
+      ? Math.floor(new Date(r.data.expiration).getTime() / 1000)
+      : undefined;
     return {
       ok: true,
       data: {
@@ -72,7 +74,10 @@ export function createRealDebrid(apiKey: string): DebridStore {
     return { ok: true, data: {} };
   }
 
-  async function cacheCheck(hashes: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
+  async function cacheCheck(
+    hashes: string[],
+    signal: AbortSignal,
+  ): Promise<DebridResult<CacheMap>> {
     void hashes;
     void signal;
     void cacheCheckBatch;
@@ -88,7 +93,11 @@ export function createRealDebrid(apiKey: string): DebridStore {
     const hash = hashFromMagnet(magnet);
     const fullMagnet = magnetFromHash(magnet);
 
-    const add = await postForm<{ id: string }>("/torrents/addMagnet", { magnet: fullMagnet }, signal);
+    const add = await postForm<{ id: string }>(
+      "/torrents/addMagnet",
+      { magnet: fullMagnet },
+      signal,
+    );
     if (!add.ok) return add;
     const id = add.data.id;
 
@@ -97,7 +106,10 @@ export function createRealDebrid(apiKey: string): DebridStore {
     let effIdx = fileIdx;
     const ensureIdx = (files: RdFile[]): number | undefined => {
       if (effIdx == null && hint) {
-        const mi = matchEpisodeFileIndex(files.map((f) => f.path), hint);
+        const mi = matchEpisodeFileIndex(
+          files.map((f) => f.path),
+          hint,
+        );
         if (mi >= 0) effIdx = mi;
       }
       return effIdx;
@@ -121,7 +133,11 @@ export function createRealDebrid(apiKey: string): DebridStore {
           await delEmpty(`/torrents/delete/${id}`, signal);
           return { ok: false, code: "no-video-file", status: 0 };
         }
-        const sel = await postForm(`/torrents/selectFiles/${id}`, { files: fileIds.join(",") }, signal);
+        const sel = await postForm(
+          `/torrents/selectFiles/${id}`,
+          { files: fileIds.join(",") },
+          signal,
+        );
         if (!sel.ok) return sel;
         selected = true;
         await sleep(POLL_DELAY_MS, signal);
@@ -130,7 +146,12 @@ export function createRealDebrid(apiKey: string): DebridStore {
       if (status === "downloaded") break;
       if (status === "downloading" || status === "queued") {
         await delEmpty(`/torrents/delete/${id}`, signal);
-        return { ok: false, code: "not-cached", status: 0, raw: { hash, progress: info.data.progress } };
+        return {
+          ok: false,
+          code: "not-cached",
+          status: 0,
+          raw: { hash, progress: info.data.progress },
+        };
       }
       if (status === "error" || status === "virus" || status === "dead") {
         await delEmpty(`/torrents/delete/${id}`, signal);
@@ -207,7 +228,11 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   }
   if (res.status === 401 || res.status === 403) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     const errMsg = (body as RdErrorBody)?.error ?? "";
     const code = /subscription|premium/i.test(errMsg) ? "not-premium" : "unauthorized";
     return { ok: false, code, status: res.status, raw: body };
@@ -242,7 +267,11 @@ function pickRdFiles(files: RdFile[], fileIdx: number | undefined): number[] {
   return videos.map((f) => f.id);
 }
 
-function pickLinkIndex(files: RdFile[] | undefined, fileIdx: number | undefined, linkCount: number): number {
+function pickLinkIndex(
+  files: RdFile[] | undefined,
+  fileIdx: number | undefined,
+  linkCount: number,
+): number {
   if (!files || fileIdx == null) return 0;
   const selected = files.filter((f) => f.selected === 1);
   const target = files[fileIdx];

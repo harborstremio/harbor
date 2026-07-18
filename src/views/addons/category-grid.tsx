@@ -13,12 +13,48 @@ const CATEGORY_TILES: Array<{
   accent: string;
   icon: string;
 }> = [
-  { cat: "http+streams", title: "Streaming", blurb: "Where your video comes from", accent: "from-amber-500/40 to-orange-600/30", icon: streamsIcon },
-  { cat: "metadata", title: "Catalogs", blurb: "Posters, ratings, lists", accent: "from-blue-500/40 to-indigo-600/30", icon: catalogsIcon },
-  { cat: "subtitles", title: "Subtitles", blurb: "Captions in your language", accent: "from-violet-500/40 to-fuchsia-600/30", icon: subtitlesIcon },
-  { cat: "anime", title: "Anime", blurb: "Kitsu, MAL, season-aware", accent: "from-rose-500/40 to-pink-600/30", icon: animeIcon },
-  { cat: "torrents", title: "Torrents", blurb: "P2P sources, debrid-ready", accent: "from-emerald-500/40 to-teal-600/30", icon: sportsIcon },
-  { cat: "live+tv", title: "Live TV", blurb: "OTA channels + IPTV", accent: "from-cyan-500/40 to-sky-600/30", icon: livetvIcon },
+  {
+    cat: "http+streams",
+    title: "Streaming",
+    blurb: "Where your video comes from",
+    accent: "from-amber-500/40 to-orange-600/30",
+    icon: streamsIcon,
+  },
+  {
+    cat: "metadata",
+    title: "Catalogs",
+    blurb: "Posters, ratings, lists",
+    accent: "from-blue-500/40 to-indigo-600/30",
+    icon: catalogsIcon,
+  },
+  {
+    cat: "subtitles",
+    title: "Subtitles",
+    blurb: "Captions in your language",
+    accent: "from-violet-500/40 to-fuchsia-600/30",
+    icon: subtitlesIcon,
+  },
+  {
+    cat: "anime",
+    title: "Anime",
+    blurb: "Kitsu, MAL, season-aware",
+    accent: "from-rose-500/40 to-pink-600/30",
+    icon: animeIcon,
+  },
+  {
+    cat: "torrents",
+    title: "Torrents",
+    blurb: "P2P sources, debrid-ready",
+    accent: "from-emerald-500/40 to-teal-600/30",
+    icon: sportsIcon,
+  },
+  {
+    cat: "live+tv",
+    title: "Live TV",
+    blurb: "OTA channels + IPTV",
+    accent: "from-cyan-500/40 to-sky-600/30",
+    icon: livetvIcon,
+  },
 ];
 
 export function CategoryGrid({ onCategorySelect }: { onCategorySelect: (cat: string) => void }) {
@@ -27,7 +63,9 @@ export function CategoryGrid({ onCategorySelect }: { onCategorySelect: (cat: str
     <section>
       <header className="mb-5 flex items-end justify-between gap-4 border-b border-edge-soft/70 pb-3">
         <div>
-          <h3 className="font-display text-[26px] font-medium tracking-tight text-ink">{t("Browse by category")}</h3>
+          <h3 className="font-display text-[26px] font-medium tracking-tight text-ink">
+            {t("Browse by category")}
+          </h3>
           <p className="mt-1.5 text-[14px] leading-relaxed text-ink-muted">
             {t("Six places to start. Tap one and we'll filter the catalog for you.")}
           </p>

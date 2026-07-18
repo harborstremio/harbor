@@ -44,7 +44,12 @@ export function AvatarFan({
                 style={{ zIndex: i }}
               >
                 <span className="block h-full w-full overflow-hidden rounded-full ring-2 ring-canvas">
-                  <img src={avatarUrl(id)} alt="" draggable={false} className="h-full w-full object-cover" />
+                  <img
+                    src={avatarUrl(id)}
+                    alt=""
+                    draggable={false}
+                    className="h-full w-full object-cover"
+                  />
                 </span>
                 {last && (
                   <span className="absolute -bottom-1 -end-1.5 z-10 rounded-full bg-ink px-1.5 py-px text-[9.5px] font-bold leading-tight text-canvas ring-2 ring-canvas">

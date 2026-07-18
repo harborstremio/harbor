@@ -1,4 +1,13 @@
-import { AlertTriangle, Loader2, Plus, RefreshCw, Repeat2, Volume2, VolumeX, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Repeat2,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { SlotChannel } from "@/lib/multiview/store";
 import { MultiPlayer } from "./multi-player";

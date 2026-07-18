@@ -38,7 +38,8 @@ export function placePanel(
     const toLeft = rect.left - panelW - GUTTER_PX;
     if (toRight + panelW <= window.innerWidth - GUTTER_PX) left = toRight;
     else if (toLeft >= edgeInset) left = toLeft;
-    else left = Math.max(edgeInset, Math.min(cx - panelW / 2, window.innerWidth - panelW - edgeInset));
+    else
+      left = Math.max(edgeInset, Math.min(cx - panelW / 2, window.innerWidth - panelW - edgeInset));
     left = Math.round(left);
   } else {
     left = Math.round(

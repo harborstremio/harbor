@@ -4,7 +4,12 @@ import { FeedHero } from "@/components/feed-hero";
 import { Poster } from "@/components/poster";
 import { extendPool, getPool, type FeedItem } from "@/lib/feed";
 import { rankByAffinity } from "@/lib/feed/rank";
-import { blockQueueItem, filterQueuePool, shuffleQueuePool, snoozeQueueItem } from "@/lib/feed/skipped";
+import {
+  blockQueueItem,
+  filterQueuePool,
+  shuffleQueuePool,
+  snoozeQueueItem,
+} from "@/lib/feed/skipped";
 import { getDownvotedIds, getUpvotedIds } from "@/lib/feed/preferences";
 import { useSettings } from "@/lib/settings";
 import { useInWatchlist } from "@/lib/watchlist";
@@ -347,7 +352,9 @@ function QueueSkeleton({ loading, hasKey }: { loading: boolean; hasKey: boolean 
           {t("Add a TMDB key in Settings to unlock the full discovery feed.")}
         </p>
       ) : (
-        <p className="text-[15px] text-ink-muted">{t("No picks loaded. TMDB might be unreachable.")}</p>
+        <p className="text-[15px] text-ink-muted">
+          {t("No picks loaded. TMDB might be unreachable.")}
+        </p>
       )}
     </div>
   );

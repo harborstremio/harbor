@@ -62,7 +62,10 @@ export function AddonFilterSelect({
           <Layers size={17} className="text-ink-subtle" />
         )}
         <span className="max-w-[180px] truncate">{selected ? selected.name : t("All addons")}</span>
-        <ChevronDown size={15} className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={15}
+          className={`shrink-0 text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute start-0 top-[calc(100%+6px)] z-40 flex max-h-[380px] w-[280px] flex-col overflow-y-auto rounded-2xl border border-edge bg-canvas p-1.5 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">

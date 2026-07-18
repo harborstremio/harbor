@@ -27,7 +27,8 @@ export function RailSection({
   );
 }
 
-const RAIL = "flex gap-3 overflow-x-auto px-0.5 py-2 [scrollbar-width:none] [scroll-snap-type:x_proximity] [&::-webkit-scrollbar]:hidden";
+const RAIL =
+  "flex gap-3 overflow-x-auto px-0.5 py-2 [scrollbar-width:none] [scroll-snap-type:x_proximity] [&::-webkit-scrollbar]:hidden";
 
 function ScrollRail({ children }: { children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -121,7 +122,9 @@ function PersonCard({ person, onOpen }: { person: Person; onOpen?: (p: Person) =
           {person.name}
         </span>
         {person.role && (
-          <span className="line-clamp-1 text-[11.5px] leading-tight text-white/45">{person.role}</span>
+          <span className="line-clamp-1 text-[11.5px] leading-tight text-white/45">
+            {person.role}
+          </span>
         )}
       </div>
     </>
@@ -226,7 +229,10 @@ export function RailSkeleton({ portrait }: { portrait?: boolean }) {
   return (
     <div className={RAIL}>
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className={`shrink-0 ${portrait ? "w-[104px]" : "w-[116px]"} flex flex-col gap-2`}>
+        <div
+          key={i}
+          className={`shrink-0 ${portrait ? "w-[104px]" : "w-[116px]"} flex flex-col gap-2`}
+        >
           <div
             className={`w-full animate-pulse rounded-xl bg-white/[0.07] ${portrait ? "aspect-[3/4]" : "aspect-[2/3]"}`}
           />

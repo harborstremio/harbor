@@ -66,12 +66,18 @@ export function TraktTab() {
     [watchlistEntries, historyEntries],
   );
   const counts = useMemo(() => countByType(combined), [combined]);
-  const visibleW = useMemo(() => applyFilter(watchlistEntries, type, query), [watchlistEntries, type, query]);
-  const visibleH = useMemo(() => applyFilter(historyEntries, type, query), [historyEntries, type, query]);
+  const visibleW = useMemo(
+    () => applyFilter(watchlistEntries, type, query),
+    [watchlistEntries, type, query],
+  );
+  const visibleH = useMemo(
+    () => applyFilter(historyEntries, type, query),
+    [historyEntries, type, query],
+  );
 
   return (
     <section className="flex flex-col gap-10">
-      {(watchlistEntries.length + historyEntries.length) > 0 && (
+      {watchlistEntries.length + historyEntries.length > 0 && (
         <FilterBar
           type={type}
           setType={setType}
@@ -84,13 +90,17 @@ export function TraktTab() {
       <div className="flex flex-col gap-4">
         <div className="flex items-baseline gap-3">
           <h2 className="text-[18px] font-semibold text-ink">{tr("Trakt watchlist")}</h2>
-          <span className="text-[12px] text-ink-muted">{tr("{shown} of {total}", { shown: visibleW.length, total: watchlistEntries.length })}</span>
+          <span className="text-[12px] text-ink-muted">
+            {tr("{shown} of {total}", { shown: visibleW.length, total: watchlistEntries.length })}
+          </span>
         </div>
         {status === "loading" ? (
           <p className="text-[13px] text-ink-muted">{tr("Loading…")}</p>
         ) : visibleW.length === 0 ? (
           <p className="text-[13px] text-ink-muted">
-            {watchlistEntries.length === 0 ? tr("Nothing saved on Trakt yet.") : tr("No matches for these filters.")}
+            {watchlistEntries.length === 0
+              ? tr("Nothing saved on Trakt yet.")
+              : tr("No matches for these filters.")}
           </p>
         ) : (
           <GroupedGrid groups={sortedGroups(visibleW, settings.librarySort)} />
@@ -99,13 +109,17 @@ export function TraktTab() {
       <div className="flex flex-col gap-4">
         <div className="flex items-baseline gap-3">
           <h2 className="text-[18px] font-semibold text-ink">{tr("Trakt history")}</h2>
-          <span className="text-[12px] text-ink-muted">{tr("{shown} of {total}", { shown: visibleH.length, total: historyEntries.length })}</span>
+          <span className="text-[12px] text-ink-muted">
+            {tr("{shown} of {total}", { shown: visibleH.length, total: historyEntries.length })}
+          </span>
         </div>
         {status === "loading" ? (
           <p className="text-[13px] text-ink-muted">{tr("Loading…")}</p>
         ) : visibleH.length === 0 ? (
           <p className="text-[13px] text-ink-muted">
-            {historyEntries.length === 0 ? tr("No history yet.") : tr("No matches for these filters.")}
+            {historyEntries.length === 0
+              ? tr("No history yet.")
+              : tr("No matches for these filters.")}
           </p>
         ) : (
           <GroupedGrid groups={sortedGroups(visibleH, settings.librarySort)} />

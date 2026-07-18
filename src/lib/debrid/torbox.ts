@@ -73,10 +73,7 @@ export function createTorbox(apiKey: string): DebridStore {
     for (const h of batch) params.append("hash", h.toLowerCase());
     params.append("format", "object");
     params.append("list_files", "false");
-    const r = await get<TbEnvelope<unknown>>(
-      `/torrents/checkcached?${params.toString()}`,
-      signal,
-    );
+    const r = await get<TbEnvelope<unknown>>(`/torrents/checkcached?${params.toString()}`, signal);
     if (!r.ok) {
       dwarn("[torbox] cacheCheck batch failed", { code: r.code, status: r.status });
       return { ok: true, data: {} };
@@ -107,22 +104,21 @@ export function createTorbox(apiKey: string): DebridStore {
         if (h) tag(h);
       }
     }
-    dlog(
-      `[torbox] cacheCheck batch ${batch.length} → ${Object.keys(out).length} cached`,
-    );
+    dlog(`[torbox] cacheCheck batch ${batch.length} → ${Object.keys(out).length} cached`);
     return { ok: true, data: out };
   }
 
-  async function cacheCheck(hashes: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
+  async function cacheCheck(
+    hashes: string[],
+    signal: AbortSignal,
+  ): Promise<DebridResult<CacheMap>> {
     if (hashes.length === 0) return { ok: true, data: {} };
     const BATCH = 25;
     const batches: string[][] = [];
     for (let i = 0; i < hashes.length; i += BATCH) {
       batches.push(hashes.slice(i, i + BATCH));
     }
-    const results = await Promise.allSettled(
-      batches.map((b) => cacheCheckBatch(b, signal)),
-    );
+    const results = await Promise.allSettled(batches.map((b) => cacheCheckBatch(b, signal)));
     const merged: CacheMap = {};
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) {
@@ -156,7 +152,10 @@ export function createTorbox(apiKey: string): DebridStore {
     let info: TbTorrent | null = null;
     for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
       if (signal.aborted) return { ok: false, code: "aborted", status: 0 };
-      const r = await get<TbEnvelope<TbTorrent>>(`/torrents/mylist?id=${id}&bypass_cache=true`, signal);
+      const r = await get<TbEnvelope<TbTorrent>>(
+        `/torrents/mylist?id=${id}&bypass_cache=true`,
+        signal,
+      );
       if (!r.ok) return r;
       info = r.data.data ?? null;
       if (!info) {
@@ -171,7 +170,12 @@ export function createTorbox(apiKey: string): DebridStore {
     }
 
     if (!info || (!info.download_finished && !info.download_present)) {
-      return { ok: false, code: "still-downloading", status: 0, raw: { hash, progress: info?.progress } };
+      return {
+        ok: false,
+        code: "still-downloading",
+        status: 0,
+        raw: { hash, progress: info?.progress },
+      };
     }
 
     const file = pickTbFile(info.files ?? [], fileIdx, hint);
@@ -282,14 +286,21 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   }
 }
 
-function pickTbFile(files: TbFile[], fileIdx: number | undefined, hint?: EpisodeHint): TbFile | null {
+function pickTbFile(
+  files: TbFile[],
+  fileIdx: number | undefined,
+  hint?: EpisodeHint,
+): TbFile | null {
   if (files.length === 0) return null;
   if (fileIdx != null && files[fileIdx]) return files[fileIdx];
   const videos = files.filter((f) =>
     VIDEO_EXTS.some((ext) => (f.short_name ?? f.name ?? "").toLowerCase().endsWith(ext)),
   );
   const pool = videos.length > 0 ? videos : files;
-  const mi = matchEpisodeFileIndex(pool.map((f) => f.short_name ?? f.name ?? ""), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((f) => f.short_name ?? f.name ?? ""),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0] ?? null;
 }

@@ -3,10 +3,7 @@ import { Bookmark, Eye, ExternalLink, Heart, Loader2, Star, X } from "lucide-rea
 import type { Meta } from "@/lib/cinemeta";
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import { useLetterboxd } from "@/lib/stremboxd/provider";
-import {
-  fetchLetterboxdStreams,
-  type LetterboxdStreamInfo,
-} from "@/lib/stremboxd/client";
+import { fetchLetterboxdStreams, type LetterboxdStreamInfo } from "@/lib/stremboxd/client";
 import { letterboxdFilmUrl } from "@/lib/stremboxd/to-meta";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
@@ -45,7 +42,9 @@ function toggleSetParam(url: string, nextSet: boolean): string {
   }
 }
 
-function parseRateUrl(rateUrl: string): { userId: string; filmId: string; tok: string; imdb: string } | null {
+function parseRateUrl(
+  rateUrl: string,
+): { userId: string; filmId: string; tok: string; imdb: string } | null {
   try {
     const u = new URL(rateUrl);
     const parts = u.pathname.split("/").filter(Boolean);
@@ -62,7 +61,10 @@ function parseRateUrl(rateUrl: string): { userId: string; filmId: string; tok: s
   }
 }
 
-function buildRateSubmitUrl(parsed: { userId: string; filmId: string; tok: string; imdb: string }, rating: number | "remove"): string {
+function buildRateSubmitUrl(
+  parsed: { userId: string; filmId: string; tok: string; imdb: string },
+  rating: number | "remove",
+): string {
   const params = new URLSearchParams();
   if (parsed.imdb) params.set("imdb", parsed.imdb);
   params.set("tok", parsed.tok);
@@ -162,10 +164,7 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
     setInfo((prev) => (prev ? { ...prev, ...patch } : prev));
   };
 
-  const performToggle = async (
-    key: "watched" | "liked" | "inWatchlist",
-    url: string | null,
-  ) => {
+  const performToggle = async (key: "watched" | "liked" | "inWatchlist", url: string | null) => {
     if (!url || actionBusy) return;
     // Determine current state to compute the toggle target
     const current = info ? info[key] : false;
@@ -242,7 +241,9 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
                 {t("You ★ {rating}", { rating: yourRating.toFixed(1) })}
               </Badge>
             ) : (
-              <Badge tone="muted" icon={<Star size={13} />}>{t("Not rated")}</Badge>
+              <Badge tone="muted" icon={<Star size={13} />}>
+                {t("Not rated")}
+              </Badge>
             )}
           </div>
 
@@ -250,7 +251,11 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
           <div className="flex flex-wrap items-center gap-2">
             <ActionButton
               icon={<Star size={14} fill={yourRating != null ? "currentColor" : "none"} />}
-              label={yourRating != null ? t("★ {rating} — Change", { rating: yourRating.toFixed(1) }) : t("★ Rate")}
+              label={
+                yourRating != null
+                  ? t("★ {rating} — Change", { rating: yourRating.toFixed(1) })
+                  : t("★ Rate")
+              }
               tone={yourRating != null ? "rated" : "default"}
               busy={actionBusy === "rate"}
               onClick={() => {
@@ -287,7 +292,10 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
               <div className="flex items-center justify-between">
                 <span className="text-[13px] font-medium text-ink">{t("Rate this film")}</span>
                 <button
-                  onClick={() => { setShowRater(false); setPendingRating(yourRating); }}
+                  onClick={() => {
+                    setShowRater(false);
+                    setPendingRating(yourRating);
+                  }}
                   className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-canvas/40 hover:text-ink"
                   aria-label={t("Close")}
                 >
@@ -315,7 +323,7 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
                       onMouseMove={(e) => {
                         const rect = e.currentTarget.getBoundingClientRect();
                         const isRtl = document.documentElement.dir === "rtl";
-                        const isFirstHalf = isRtl 
+                        const isFirstHalf = isRtl
                           ? e.clientX - rect.left > rect.width / 2
                           : e.clientX - rect.left < rect.width / 2;
                         const next = isFirstHalf ? starIndex - 0.5 : starIndex;
@@ -351,7 +359,11 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-baseline gap-2">
                   <span className="text-[20px] font-bold text-amber-300 tabular-nums">
-                    {pendingRating != null ? pendingRating.toFixed(1) : yourRating != null ? yourRating.toFixed(1) : "—"}
+                    {pendingRating != null
+                      ? pendingRating.toFixed(1)
+                      : yourRating != null
+                        ? yourRating.toFixed(1)
+                        : "—"}
                   </span>
                   <span className="text-[12px] text-ink-subtle">{t("out of 5")}</span>
                 </div>
@@ -370,7 +382,11 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
                     disabled={!!actionBusy || pendingRating == null}
                     className="flex items-center gap-1.5 rounded-lg bg-amber-400/90 px-4 py-2 text-[12.5px] font-semibold text-canvas transition-all hover:bg-amber-400 active:scale-95 disabled:opacity-40"
                   >
-                    {actionBusy === "rate" ? <Loader2 size={13} className="animate-spin" /> : <Star size={13} fill="currentColor" />}
+                    {actionBusy === "rate" ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <Star size={13} fill="currentColor" />
+                    )}
                     {t("Submit")}
                   </button>
                 </div>
@@ -401,7 +417,9 @@ function Badge({
           ? "border-amber-400/30 bg-amber-400/10 text-amber-200"
           : "border-edge-soft bg-canvas/40 text-ink-muted";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium ${toneClass}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[12px] font-medium ${toneClass}`}
+    >
       {icon}
       {children}
     </span>

@@ -13,13 +13,7 @@ type Props = {
   onReset: () => void;
 };
 
-export function DownloadButton({
-  status,
-  onStart,
-  onCancel,
-  onReveal,
-  onReset,
-}: Props) {
+export function DownloadButton({ status, onStart, onCancel, onReveal, onReset }: Props) {
   const t = useT();
   useEffect(() => {
     if (status.kind !== "done") return;
@@ -55,8 +49,16 @@ export function DownloadButton({
           className="group relative flex h-12 w-12 items-center justify-center rounded-full text-white/85 transition-[background-color,color] hover:bg-white/10 hover:text-white"
         >
           <ProgressRing ratio={status.ratio} indeterminate={!status.totalBytes} />
-          <Download size={20} strokeWidth={1.9} className="relative transition-opacity group-hover:opacity-0" />
-          <X size={18} strokeWidth={2.4} className="absolute opacity-0 transition-opacity group-hover:opacity-100" />
+          <Download
+            size={20}
+            strokeWidth={1.9}
+            className="relative transition-opacity group-hover:opacity-0"
+          />
+          <X
+            size={18}
+            strokeWidth={2.4}
+            className="absolute opacity-0 transition-opacity group-hover:opacity-100"
+          />
         </button>
       </Tooltip>
     );
@@ -103,13 +105,7 @@ function Dot({ delay }: { delay: number }) {
   );
 }
 
-function ProgressRing({
-  ratio,
-  indeterminate,
-}: {
-  ratio: number;
-  indeterminate: boolean;
-}) {
+function ProgressRing({ ratio, indeterminate }: { ratio: number; indeterminate: boolean }) {
   const r = 20;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - Math.max(0, Math.min(1, ratio)));

@@ -25,7 +25,10 @@ export function isCurrentStream(
 
 const FLAG_EMOJI_RX = /[\u{1F1E6}-\u{1F1FF}]{2}/gu;
 function stripFlagEmoji(s: string): string {
-  return s.replace(FLAG_EMOJI_RX, "").replace(/\s{2,}/g, " ").trim();
+  return s
+    .replace(FLAG_EMOJI_RX, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 export function SwitcherRow({
@@ -52,7 +55,9 @@ export function SwitcherRow({
   const cornerBadges = streamBadges(stream);
   const langs = stream.audioLanguages ?? [];
   const link = resolveStreamLink(stream);
-  const filterReason = stream.reasons?.find((r) => r.signal.startsWith("filtered:"))?.signal.slice(9);
+  const filterReason = stream.reasons
+    ?.find((r) => r.signal.startsWith("filtered:"))
+    ?.signal.slice(9);
 
   return (
     <li className={divider ? "border-t border-edge-soft/60" : ""}>
@@ -101,9 +106,7 @@ export function SwitcherRow({
               {match === "same" ? t("Same file") : t("Close match")}
             </span>
           )}
-          {langs.length > 0 && !isCurrent && (
-            <FlagStack languages={langs} size="sm" max={3} />
-          )}
+          {langs.length > 0 && !isCurrent && <FlagStack languages={langs} size="sm" max={3} />}
           {cornerBadges.length > 0 && !isCurrent && (
             <span className="flex items-center gap-1">
               {cornerBadges.map((b) => (

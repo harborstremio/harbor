@@ -14,16 +14,19 @@ export function ActiveView({
   onReveal: () => void;
 }) {
   const t = useT();
-  const ratio = session.plannedDurationSec > 0
-    ? Math.min(1, session.elapsedSec / session.plannedDurationSec)
-    : 0;
+  const ratio =
+    session.plannedDurationSec > 0
+      ? Math.min(1, session.elapsedSec / session.plannedDurationSec)
+      : 0;
   const remaining = Math.max(0, session.plannedDurationSec - session.elapsedSec);
   const isDone = session.state === "done";
   return (
     <>
       <div className="flex flex-col gap-4 px-5 py-5">
         <div className="flex items-center gap-3 rounded-xl border border-edge-soft bg-canvas/55 px-4 py-3">
-          <span className={`h-2.5 w-2.5 rounded-full ${isDone ? "bg-emerald-400" : "bg-danger animate-pulse"}`} />
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${isDone ? "bg-emerald-400" : "bg-danger animate-pulse"}`}
+          />
           <div className="flex flex-1 flex-col">
             <span className="text-[10.5px] font-semibold uppercase tracking-[0.22em] text-ink-subtle">
               {isDone ? t("Recording finished") : t("Recording now")}

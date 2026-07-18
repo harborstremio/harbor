@@ -81,7 +81,9 @@ export function MyListsTab() {
                 setOverId(null);
               }}
               className={`cursor-grab rounded-2xl transition-all active:cursor-grabbing ${dragId === l.id ? "opacity-40" : ""} ${
-                overId === l.id && dragId !== l.id ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas" : ""
+                overId === l.id && dragId !== l.id
+                  ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas"
+                  : ""
               }`}
             >
               <ListCard list={l} onOpen={setSelectedListId} />
@@ -108,9 +110,13 @@ function EmptyLists({ onCreate }: { onCreate: () => void }) {
         <Layers size={24} strokeWidth={1.6} />
       </span>
       <div className="flex flex-col gap-1.5">
-        <h2 className="font-display text-[20px] font-medium text-ink">{t("Create your first list")}</h2>
+        <h2 className="font-display text-[20px] font-medium text-ink">
+          {t("Create your first list")}
+        </h2>
         <p className="max-w-sm text-[13px] leading-relaxed text-ink-muted">
-          {t("Group the movies and shows you love. Rewatch shelf, weekend picks, whatever keeps them close.")}
+          {t(
+            "Group the movies and shows you love. Rewatch shelf, weekend picks, whatever keeps them close.",
+          )}
         </p>
       </div>
       <button

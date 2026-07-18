@@ -3,7 +3,10 @@ import { useMemo } from "react";
 import { loadBackups, type AddonOrderBackup } from "@/lib/addons-store/reorder";
 import { useT } from "@/lib/i18n";
 
-function previewNames(names: string[], t: (key: string, vars?: Record<string, string | number>) => string): string {
+function previewNames(
+  names: string[],
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
   const first = names.slice(0, 3).join(", ");
   return names.length > 3 ? t("{names} +{n} more", { names: first, n: names.length - 3 }) : first;
 }
@@ -35,7 +38,9 @@ export function BackupsPanel({
   return (
     <div className="flex flex-col gap-4 p-5">
       <p className="text-[12.5px] leading-relaxed text-ink-muted">
-        {t("A safety copy of your addon order. One is saved automatically before Harbor writes any change, and you can save one yourself any time. The five most recent are kept.")}
+        {t(
+          "A safety copy of your addon order. One is saved automatically before Harbor writes any change, and you can save one yourself any time. The five most recent are kept.",
+        )}
       </p>
       <button
         onClick={onBackupNow}

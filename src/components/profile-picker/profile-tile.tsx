@@ -19,8 +19,7 @@ export function ProfileTile({
   const t = useT();
   const dim = size === "lg" ? "h-24 w-24" : size === "md" ? "h-16 w-16" : "h-12 w-12";
   const ring = size === "lg" ? "ring-[3px]" : "ring-2";
-  const fontName =
-    size === "lg" ? "text-[14px]" : size === "md" ? "text-[12.5px]" : "text-[11px]";
+  const fontName = size === "lg" ? "text-[14px]" : size === "md" ? "text-[12.5px]" : "text-[11px]";
 
   return (
     <div className="group flex flex-col items-center gap-2">

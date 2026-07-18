@@ -47,7 +47,13 @@ async function walkUp(startKitsu: number): Promise<number[]> {
     }
     if (ancestors.length === 0) break;
     ancestors.sort((a, b) =>
-      a.series !== b.series ? (a.series ? -1 : 1) : a.year !== b.year ? a.year - b.year : a.id - b.id,
+      a.series !== b.series
+        ? a.series
+          ? -1
+          : 1
+        : a.year !== b.year
+          ? a.year - b.year
+          : a.id - b.id,
     );
     current = ancestors[0].id;
     visited.add(current);

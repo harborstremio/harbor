@@ -161,7 +161,9 @@ export async function imdbapiDetails(
     if (match) targetId = match.id;
   }
 
-  const creditsResp = await fetchJson<{ credits: ImdbCreditsEntry[] }>(`${BASE}/${targetId}/credits`);
+  const creditsResp = await fetchJson<{ credits: ImdbCreditsEntry[] }>(
+    `${BASE}/${targetId}/credits`,
+  );
   const cast = creditsResp ? creditsToCast(creditsResp.credits) : [];
 
   let detail = title;

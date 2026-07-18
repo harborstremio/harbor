@@ -47,7 +47,14 @@ export function usePlayerCast(params: {
       getPosition: session.getCastPosition,
       isPlaying: session.isCastPlaying,
     }),
-    [session.castActiveRef, session.playCast, session.pauseCast, session.seekCast, session.getCastPosition, session.isCastPlaying],
+    [
+      session.castActiveRef,
+      session.playCast,
+      session.pauseCast,
+      session.seekCast,
+      session.getCastPosition,
+      session.isCastPlaying,
+    ],
   );
 
   return { ...session, ...pick, sync };

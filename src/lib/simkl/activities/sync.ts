@@ -121,7 +121,9 @@ function parseAndMergeEntry(cache: SimklCache, entry: RawEntry, type: "movie" | 
     watchedAt: entry.added_to_watchlist_at ?? existing?.watchedAt ?? null,
     watchedEpisodes: watchedEpisodes ?? existing?.watchedEpisodes,
     poster:
-      (entry.anime?.poster || entry.show?.poster || entry.movie?.poster) ?? existing?.poster ?? null,
+      (entry.anime?.poster || entry.show?.poster || entry.movie?.poster) ??
+      existing?.poster ??
+      null,
   };
 
   cache.items[simklIdStr] = item;

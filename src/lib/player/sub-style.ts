@@ -67,8 +67,6 @@ export async function applySubStyle(
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
   await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
+    props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
   );
 }

@@ -1,15 +1,15 @@
 {
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
+  "scripts": {
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0",
     "husky": "^9.1.7"
   },
-  "scripts": {
-    "prepare": "husky"
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }

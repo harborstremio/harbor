@@ -78,9 +78,9 @@ function ratingFrom(item: Record<string, unknown>, sources: string[]): number | 
   const rows = item.ratings;
   if (!Array.isArray(rows)) return null;
   for (const source of sources) {
-    const r = rows.find(
-      (x: { source?: string; value?: number | null }) => x?.source === source,
-    ) as { value?: number | null } | undefined;
+    const r = rows.find((x: { source?: string; value?: number | null }) => x?.source === source) as
+      | { value?: number | null }
+      | undefined;
     if (typeof r?.value === "number" && r.value > 0) return r.value;
   }
   return null;

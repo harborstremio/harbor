@@ -84,9 +84,7 @@ export function PersonHoverCard({
               {roleLabel(person.knownForDepartment)}
             </span>
           )}
-          {person && (
-            <span className="text-[12px] text-ink-subtle">{lifeLine(person)}</span>
-          )}
+          {person && <span className="text-[12px] text-ink-subtle">{lifeLine(person)}</span>}
         </div>
       </div>
 

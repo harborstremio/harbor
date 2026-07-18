@@ -58,7 +58,8 @@ export function PickerHeader({
       {episode ? (
         <>
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-            {meta.name} · Season {episode.imdbSeason ?? episode.season} · Episode {String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
+            {meta.name} · Season {episode.imdbSeason ?? episode.season} · Episode{" "}
+            {String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
           </p>
           <h1 className="font-display text-[64px] font-medium leading-[0.96] tracking-tight text-ink">
             {episode.name || `Episode ${episode.episode}`}

@@ -180,7 +180,9 @@ export function AnimeHero({
 
       <div className="relative z-10 flex flex-col gap-5 px-12 pb-12" data-saved={savedTick}>
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-[20px] font-medium tracking-tight text-ink">{t("Top Picks for You")}</h2>
+          <h2 className="text-[20px] font-medium tracking-tight text-ink">
+            {t("Top Picks for You")}
+          </h2>
           {slides.length > 1 && (
             <div className="flex gap-1.5">
               {slides.map((_, i) => (
@@ -252,7 +254,10 @@ export function AnimeHeroSkeleton() {
         <div className="h-5 w-44 animate-pulse rounded-full bg-elevated/45" />
         <div className="flex gap-4 overflow-hidden">
           {Array.from({ length: 7 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/35" />
+            <div
+              key={i}
+              className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/35"
+            />
           ))}
         </div>
       </div>
@@ -324,7 +329,14 @@ function CrunchyrollBadge({ name, year }: { name: string; year?: number }) {
         }`}
       >
         <div className="flex items-center gap-2">
-          <img src={src.iconSmall} alt="" width={14} height={14} className={tipIconCls} draggable={false} />
+          <img
+            src={src.iconSmall}
+            alt=""
+            width={14}
+            height={14}
+            className={tipIconCls}
+            draggable={false}
+          />
           <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
             {src.name}
           </span>
@@ -363,7 +375,11 @@ function HeroTags({ meta }: { meta: Meta }) {
     <div className="flex flex-wrap items-center gap-x-2 text-[13px] text-ink-muted">
       {parts.map((p, i) => (
         <span key={`${p}-${i}`} className="inline-flex items-center gap-2">
-          {i > 0 && <span aria-hidden className="text-ink-subtle">·</span>}
+          {i > 0 && (
+            <span aria-hidden className="text-ink-subtle">
+              ·
+            </span>
+          )}
           <span>{p}</span>
         </span>
       ))}

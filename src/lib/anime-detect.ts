@@ -66,9 +66,10 @@ export async function detectAnimeForCw(items: Array<{ _id: string; type: string 
     if (detected.has(id) || checked.has(id) || pending.has(id)) continue;
     pending.add(id);
     try {
-      const m = (await fetchMeta(it.type === "movie" ? "movie" : "series", id)) as
-        | { genres?: string[]; country?: string }
-        | null;
+      const m = (await fetchMeta(it.type === "movie" ? "movie" : "series", id)) as {
+        genres?: string[];
+        country?: string;
+      } | null;
       checked.add(id);
       let anime = !!m && isJapaneseAnime(m);
       if (!anime && (!m || hasAnimationGenre(m) || (m.genres ?? []).length === 0)) {

@@ -158,9 +158,24 @@ export function AwardView({ awardType }: { awardType: AwardType }) {
               scrollRoot={scrollRef}
               tint={tint}
             />
-            <PeopleRail title={t("Celebrated actors")} people={people.actors} loading={loadingPeople} tint={tint} />
-            <PeopleRail title={t("Acclaimed directors")} people={people.directors} loading={loadingPeople} tint={tint} />
-            <PeopleRail title={t("Honored writers")} people={people.writers} loading={loadingPeople} tint={tint} />
+            <PeopleRail
+              title={t("Celebrated actors")}
+              people={people.actors}
+              loading={loadingPeople}
+              tint={tint}
+            />
+            <PeopleRail
+              title={t("Acclaimed directors")}
+              people={people.directors}
+              loading={loadingPeople}
+              tint={tint}
+            />
+            <PeopleRail
+              title={t("Honored writers")}
+              people={people.writers}
+              loading={loadingPeople}
+              tint={tint}
+            />
             {isEmpty && (
               <p className="rounded-2xl border border-edge-soft bg-elevated/30 p-6 text-[14px] leading-relaxed text-ink-muted">
                 {t("No winners are catalogued for this award yet.")}

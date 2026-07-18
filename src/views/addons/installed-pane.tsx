@@ -35,9 +35,13 @@ export function InstalledPane({
   if (installed.length === 0) {
     return (
       <div className="rounded-2xl border border-edge-soft bg-elevated/30 p-12 text-center">
-        <h3 className="font-display text-[22px] font-medium text-ink">{t("No addons installed yet")}</h3>
+        <h3 className="font-display text-[22px] font-medium text-ink">
+          {t("No addons installed yet")}
+        </h3>
         <p className="mx-auto mt-2 max-w-md text-[13.5px] text-ink-muted">
-          {t("Head to Discover. Cinemeta and OpenSubtitles cover the basics; Torrentio + a debrid key cover almost everything else.")}
+          {t(
+            "Head to Discover. Cinemeta and OpenSubtitles cover the basics; Torrentio + a debrid key cover almost everything else.",
+          )}
         </p>
       </div>
     );
@@ -45,7 +49,9 @@ export function InstalledPane({
   if (filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-edge-soft bg-canvas/30 p-10 text-center">
-        <p className="font-display text-[16px] font-medium text-ink">{t("No installed addon matches that.")}</p>
+        <p className="font-display text-[16px] font-medium text-ink">
+          {t("No installed addon matches that.")}
+        </p>
         <p className="mt-1.5 text-[12.5px] text-ink-subtle">
           {t("Clear the search to see all {n} installed.", { n: installed.length })}
         </p>
@@ -160,7 +166,11 @@ function InstalledRow({
             onClick={handleToggle}
             role="switch"
             aria-checked={enabled}
-            aria-label={enabled ? t("Turn {name} off", { name: nameOf(r) }) : t("Turn {name} on", { name: nameOf(r) })}
+            aria-label={
+              enabled
+                ? t("Turn {name} off", { name: nameOf(r) })
+                : t("Turn {name} on", { name: nameOf(r) })
+            }
             className={`relative h-[22px] w-10 shrink-0 rounded-full outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 ${
               enabled ? "bg-accent" : "bg-edge/70 ring-1 ring-inset ring-edge-soft"
             }`}

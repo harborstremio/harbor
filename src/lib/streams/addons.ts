@@ -62,7 +62,9 @@ export async function fetchAddonStreams(
     }
   }
   if (skipped.length > 0) console.info(`[addons] skipped: ${skipped.join(", ")}`);
-  console.info(`[addons] querying ${namedTasks.length}: ${namedTasks.map((t) => t.name).join(", ")}`);
+  console.info(
+    `[addons] querying ${namedTasks.length}: ${namedTasks.map((t) => t.name).join(", ")}`,
+  );
 
   const accumulated: Stream[] = [];
   const wrapped = namedTasks.map(({ name, p }) =>
@@ -129,9 +131,7 @@ function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
     return streamResources.some((r) => {
       const typeOk = Array.isArray(r.types) && r.types.includes(type);
       const idOk =
-        !r.idPrefixes ||
-        r.idPrefixes.length === 0 ||
-        r.idPrefixes.some((p) => id.startsWith(p));
+        !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
       return typeOk && idOk;
     });
   }

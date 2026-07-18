@@ -14,7 +14,11 @@ function subscribe(cb: () => void) {
 }
 
 export function useOnline(): boolean {
-  return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true,
+  );
 }
 
 export function OfflineBanner() {

@@ -77,9 +77,7 @@ async function resolveAll(onProgress: () => void): Promise<void> {
         const exact = matches.find(
           (m) => stripAwardSequelNumber(stripFranchiseSuffix(m.name)).trim() === m.name.trim(),
         );
-        const earliest = [...matches].sort(
-          (a, b) => awardMetaYear(a) - awardMetaYear(b),
-        )[0];
+        const earliest = [...matches].sort((a, b) => awardMetaYear(a) - awardMetaYear(b))[0];
         cache[fk] = exact ?? earliest ?? null;
       } catch {
         cache[fk] = null;

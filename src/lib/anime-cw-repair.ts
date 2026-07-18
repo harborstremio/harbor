@@ -28,12 +28,15 @@ export async function healCorruptAnimeEntries(
   return removed;
 }
 
-export async function collectAnimeDiagnostics(authKey: string): Promise<{ text: string; count: number }> {
+export async function collectAnimeDiagnostics(
+  authKey: string,
+): Promise<{ text: string; count: number }> {
   const items = await library(authKey);
   const rows = items
     .filter((i) => {
       const watched = (i.state?.flaggedWatched ?? 0) > 0 || !!i.state?.video_id;
-      const rel = TT_ID.test(i._id) || ANIME_VID.test(i._id) || i.type === "series" || i.type === "anime";
+      const rel =
+        TT_ID.test(i._id) || ANIME_VID.test(i._id) || i.type === "series" || i.type === "anime";
       return watched && rel;
     })
     .map((i) => ({

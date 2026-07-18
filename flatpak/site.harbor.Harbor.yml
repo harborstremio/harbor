@@ -1,6 +1,6 @@
 app-id: site.harbor.Harbor
 runtime: org.gnome.Platform
-runtime-version: '49'
+runtime-version: "49"
 sdk: org.gnome.Sdk
 command: harbor
 
@@ -23,9 +23,9 @@ build-options:
   append-path: /usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node22/bin
   env:
     CARGO_HOME: /run/build/harbor/cargo
-    CARGO_NET_OFFLINE: 'true'
+    CARGO_NET_OFFLINE: "true"
     npm_config_cache: /run/build/harbor/npm-cache
-    CI: 'true'
+    CI: "true"
 
 modules:
   - shared-modules/libayatana-appindicator/libayatana-appindicator-gtk3.json

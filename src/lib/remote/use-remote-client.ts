@@ -56,10 +56,7 @@ export function useRemoteClient(initialHost?: string) {
     return true;
   }, []);
 
-  const sendCommand = useCallback(
-    (command: RemoteCommand) => send({ t: "cmd", command }),
-    [send],
-  );
+  const sendCommand = useCallback((command: RemoteCommand) => send({ t: "cmd", command }), [send]);
 
   const disconnect = useCallback(() => {
     manualClose.current = true;

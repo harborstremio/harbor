@@ -9,10 +9,7 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 // works) — proxying them through the VPS gets 403'd. EVERYTHING ELSE routes through the
 // VPS /api-proxy: it's required for addons that send no CORS header at all (OpenSubtitles)
 // and for the CORS-less debrid REST APIs, and it's fine for the rest (Cinemeta, Comet).
-const DIRECT_HOSTS = new Set([
-  "torrentio.strem.fun",
-  "stremio.torbox.app",
-]);
+const DIRECT_HOSTS = new Set(["torrentio.strem.fun", "stremio.torbox.app"]);
 
 const PROXY_HOSTS = new Set([
   "v3-cinemeta.strem.io",

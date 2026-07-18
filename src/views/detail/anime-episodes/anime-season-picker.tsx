@@ -15,7 +15,12 @@ export function AnimeSeasonPicker({
   onSelectEntry: (entryId: string) => void;
 }) {
   const t = useT();
-  const [menu, setMenu] = useState<{ right: number; top?: number; bottom?: number; maxH: number } | null>(null);
+  const [menu, setMenu] = useState<{
+    right: number;
+    top?: number;
+    bottom?: number;
+    maxH: number;
+  } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const open = menu != null;
@@ -80,7 +85,9 @@ export function AnimeSeasonPicker({
           isActive ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
         }`}
       >
-        <span className="mt-0.5 font-mono text-[11px] text-ink-subtle">{tags[i]?.short ?? `S${i + 1}`}</span>
+        <span className="mt-0.5 font-mono text-[11px] text-ink-subtle">
+          {tags[i]?.short ?? `S${i + 1}`}
+        </span>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="flex items-center gap-2 text-[13.5px] font-medium">
             <span className="truncate">{f.meta.name}</span>

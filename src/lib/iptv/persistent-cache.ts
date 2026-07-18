@@ -110,10 +110,12 @@ export async function writeIptvCache<T>(
     if (!db) return;
     await new Promise<void>((resolve) => {
       const transaction = db.transaction(STORE_NAME, "readwrite");
-      transaction.objectStore(STORE_NAME).put(
-        { ...entry, schemaVersion: SCHEMA_VERSION } satisfies StoredEntry<T>,
-        entryKey(kind, sourceId),
-      );
+      transaction
+        .objectStore(STORE_NAME)
+        .put(
+          { ...entry, schemaVersion: SCHEMA_VERSION } satisfies StoredEntry<T>,
+          entryKey(kind, sourceId),
+        );
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => resolve();
       transaction.onabort = () => resolve();

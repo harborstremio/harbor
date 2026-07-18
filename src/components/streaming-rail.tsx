@@ -18,13 +18,7 @@ export function StreamingRail({ services }: { services: StreamingService[] }) {
   );
 }
 
-function ServiceTile({
-  service,
-  onOpen,
-}: {
-  service: StreamingService;
-  onOpen: () => void;
-}) {
+function ServiceTile({ service, onOpen }: { service: StreamingService; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}

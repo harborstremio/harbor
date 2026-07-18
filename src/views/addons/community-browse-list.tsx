@@ -4,7 +4,12 @@ import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { CardArtBackdrop } from "@/components/card-art-backdrop";
 import { installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
 import { openInstallerViewport } from "@/components/installer-viewport";
-import { listAddons, risingEntryFor, useRising, type SAAddon } from "@/lib/providers/stremio-addons";
+import {
+  listAddons,
+  risingEntryFor,
+  useRising,
+  type SAAddon,
+} from "@/lib/providers/stremio-addons";
 import { useTopMovers } from "@/lib/providers/stremio-addons-velocity";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
@@ -30,8 +35,28 @@ export function CommunityBrowseList({
   onOpen: (manifestId: string) => void;
   onChange?: () => void;
 }) {
-  if (mode === "rising") return <RisingList category={category ?? null} search={search ?? null} allowAdult={!!allowAdult} installedIds={installedIds} onOpen={onOpen} onChange={onChange} />;
-  return <ApiSortedList mode={mode} category={category ?? null} search={search ?? null} allowAdult={!!allowAdult} installedIds={installedIds} onOpen={onOpen} onChange={onChange} />;
+  if (mode === "rising")
+    return (
+      <RisingList
+        category={category ?? null}
+        search={search ?? null}
+        allowAdult={!!allowAdult}
+        installedIds={installedIds}
+        onOpen={onOpen}
+        onChange={onChange}
+      />
+    );
+  return (
+    <ApiSortedList
+      mode={mode}
+      category={category ?? null}
+      search={search ?? null}
+      allowAdult={!!allowAdult}
+      installedIds={installedIds}
+      onOpen={onOpen}
+      onChange={onChange}
+    />
+  );
 }
 
 function ApiSortedList({
@@ -130,9 +155,7 @@ function ApiSortedList({
           />
         );
       })}
-      {items.length === 0 && loading && (
-        <SkeletonRows />
-      )}
+      {items.length === 0 && loading && <SkeletonRows />}
       <div ref={sentinelRef} className="h-px w-full" aria-hidden />
       {loading && items.length > 0 && (
         <div className="flex items-center justify-center py-4 text-ink-subtle">
@@ -217,7 +240,9 @@ function RisingList({
         </span>
         <p className="font-display text-[18px] font-medium text-ink">{t("No velocity data yet")}</p>
         <p className="mt-1.5 text-[12.5px] text-ink-muted">
-          {t("Trending tracks star growth across your Harbor visits. Open the addons page again tomorrow and the top risers will appear here.")}
+          {t(
+            "Trending tracks star growth across your Harbor visits. Open the addons page again tomorrow and the top risers will appear here.",
+          )}
         </p>
       </div>
     );
@@ -293,8 +318,9 @@ function CommunityRow({
   const install = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!m?.id || busy) return;
-    const hints = (m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } })
-      .behaviorHints;
+    const hints = (
+      m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } }
+    ).behaviorHints;
     if (hints?.configurable === true || hints?.configurationRequired === true) {
       openInstallerViewport(manifestToConfigureUrl(addon.manifestUrl), name, logo);
       return;
@@ -320,12 +346,7 @@ function CommunityRow({
       className="group relative flex cursor-pointer items-start gap-5 overflow-hidden rounded-2xl border border-edge-soft bg-elevated px-5 py-5 text-start transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-edge hover:shadow-[0_18px_36px_-22px_rgba(0,0,0,0.4)]"
     >
       <CardArtBackdrop logo={logo} background={m?.background} />
-      <AddonLogo
-        addonId={m?.id ?? addon.slug}
-        addonName={name}
-        manifestLogo={logo}
-        size="tile"
-      />
+      <AddonLogo addonId={m?.id ?? addon.slug} addonName={name} manifestLogo={logo} size="tile" />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-center gap-2">
           <span className="truncate text-[16px] font-semibold text-ink">{name}</span>

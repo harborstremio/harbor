@@ -31,11 +31,14 @@ function parseHits(md: string): WebHit[] {
   const seen = new Set<string>();
   const lines = md.split(/\r?\n/);
   const isHostname = (u: string) => {
-    try { return new URL(u).hostname; } catch { return ""; }
+    try {
+      return new URL(u).hostname;
+    } catch {
+      return "";
+    }
   };
 
-  const cleanText = (s: string) =>
-    s.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
+  const cleanText = (s: string) => s.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
 
   for (let i = 0; i < lines.length && hits.length < MAX_RESULTS; i++) {
     const line = lines[i];
@@ -64,7 +67,8 @@ function parseHits(md: string): WebHit[] {
     }
 
     const finalHost = isHostname(url);
-    if (!finalHost || /duckduckgo\.com|external-content\.duckduckgo\.com/i.test(finalHost)) continue;
+    if (!finalHost || /duckduckgo\.com|external-content\.duckduckgo\.com/i.test(finalHost))
+      continue;
     if (!/^https?:\/\//.test(url)) continue;
     if (seen.has(url)) continue;
 
@@ -127,13 +131,18 @@ export async function enrichWithContent(
   if (hits.length === 0) return { hits: [], context: "" };
 
   const priority = (u: string) =>
-    /wikipedia\.org|themoviedb\.org|rottentomatoes\.com|letterboxd\.com|metacritic\.com/i.test(u) ? 1 : 0;
+    /wikipedia\.org|themoviedb\.org|rottentomatoes\.com|letterboxd\.com|metacritic\.com/i.test(u)
+      ? 1
+      : 0;
 
   const promoted = [...hits].sort((a, b) => priority(b.url) - priority(a.url));
   const toFetch = promoted
     .slice(0, 3)
     .concat(
-      promoted.slice(3).filter((h) => priority(h.url) > 0).slice(0, 1),
+      promoted
+        .slice(3)
+        .filter((h) => priority(h.url) > 0)
+        .slice(0, 1),
     )
     .slice(0, 4);
 

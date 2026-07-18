@@ -3,11 +3,7 @@ import { library, type LibraryItem } from "./stremio";
 import { readLocalEntries } from "./watchlist";
 import { fetchWatchlist as fetchTraktWatchlist } from "./trakt/watchlist";
 import { tvmazeUpcoming } from "./providers/tvmaze";
-import {
-  tmdbFindByImdb,
-  tmdbMovieRelease,
-  tmdbTvUpcoming,
-} from "./providers/tmdb/tmdb-calendar";
+import { tmdbFindByImdb, tmdbMovieRelease, tmdbTvUpcoming } from "./providers/tmdb/tmdb-calendar";
 import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, pickEpisodeTitle } from "./providers/anizip";
 import type { CalendarItem } from "./calendar";
 
@@ -77,7 +73,11 @@ function isAnimationGenre(genres: string[] | undefined): boolean {
   });
 }
 
-async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+async function mapLimit<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
   const out: R[] = [];
   for (let i = 0; i < items.length; i += limit) {
     out.push(...(await Promise.all(items.slice(i, i + limit).map(fn))));
@@ -283,7 +283,11 @@ function gatherCandidates(
   for (const t of trakt) {
     const id =
       t.ids.imdb ??
-      (t.ids.tmdb ? (t.type === "movie" ? `tmdb:movie:${t.ids.tmdb}` : `tmdb:tv:${t.ids.tmdb}`) : null);
+      (t.ids.tmdb
+        ? t.type === "movie"
+          ? `tmdb:movie:${t.ids.tmdb}`
+          : `tmdb:tv:${t.ids.tmdb}`
+        : null);
     if (!id) continue;
     add({
       id,
@@ -325,7 +329,10 @@ export async function fetchLibraryCalendar(
   return resolveSavedCalendar(candidates, year, month, { tmdbKey: opts.tmdbKey });
 }
 
-async function resolveSeriesCached(c: SavedCandidate, tmdbKey: string): Promise<ResolvedSeries | null> {
+async function resolveSeriesCached(
+  c: SavedCandidate,
+  tmdbKey: string,
+): Promise<ResolvedSeries | null> {
   const hit = seriesCache.get(c.id);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.series;
   const series = await seriesUpcoming(c, wideWindow(), tmdbKey).catch(() => null);
@@ -333,7 +340,10 @@ async function resolveSeriesCached(c: SavedCandidate, tmdbKey: string): Promise<
   return series;
 }
 
-async function resolveMovieCached(c: SavedCandidate, tmdbKey: string): Promise<CalendarItem | null> {
+async function resolveMovieCached(
+  c: SavedCandidate,
+  tmdbKey: string,
+): Promise<CalendarItem | null> {
   const hit = movieCache.get(c.id);
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.movie;
   const movie = await movieRelease(c, wideWindow(), tmdbKey).catch(() => null);
@@ -348,8 +358,14 @@ export async function resolveSavedCalendar(
   opts: { tmdbKey: string },
 ): Promise<CalendarItem[]> {
   const inMonth = inMonthFactory(year, month);
-  const series = candidates.filter((c) => c.type === "series").sort(curatedFirst).slice(0, SERIES_LIMIT);
-  const movies = candidates.filter((c) => c.type === "movie").sort(curatedFirst).slice(0, MOVIE_LIMIT);
+  const series = candidates
+    .filter((c) => c.type === "series")
+    .sort(curatedFirst)
+    .slice(0, SERIES_LIMIT);
+  const movies = candidates
+    .filter((c) => c.type === "movie")
+    .sort(curatedFirst)
+    .slice(0, MOVIE_LIMIT);
 
   const out: CalendarItem[] = [];
 
@@ -380,7 +396,9 @@ export async function resolveSavedCalendar(
     }
   }
 
-  const movieResults = await mapLimit(movies, TMDB_CONCURRENCY, (c) => resolveMovieCached(c, opts.tmdbKey));
+  const movieResults = await mapLimit(movies, TMDB_CONCURRENCY, (c) =>
+    resolveMovieCached(c, opts.tmdbKey),
+  );
   for (const mi of movieResults) if (mi && inMonth(mi.releaseDate)) out.push(mi);
 
   const seen = new Set<string>();

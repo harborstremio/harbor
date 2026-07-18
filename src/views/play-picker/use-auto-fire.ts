@@ -34,10 +34,28 @@ export function useAutoFire(args: {
   onPlay: (s: ScoredStream, committed: boolean, skipP2pConfirm?: boolean, auto?: boolean) => void;
 }): void {
   const {
-    autoActive, rememberedHandledFirst, attempt, autoCandidates, resolving, autoAttemptIdx, autoSettleReady,
-    pipelineDone, firstResultAt, isCached, p2pAutoConsent, preferredLangs, hasStrongAddon, isTorrentioStream,
-    expectHostSource, hostSource, season, episode,
-    autoFiredRef, setAutoSettleReady, setAutoCancelled, onPlay,
+    autoActive,
+    rememberedHandledFirst,
+    attempt,
+    autoCandidates,
+    resolving,
+    autoAttemptIdx,
+    autoSettleReady,
+    pipelineDone,
+    firstResultAt,
+    isCached,
+    p2pAutoConsent,
+    preferredLangs,
+    hasStrongAddon,
+    isTorrentioStream,
+    expectHostSource,
+    hostSource,
+    season,
+    episode,
+    autoFiredRef,
+    setAutoSettleReady,
+    setAutoCancelled,
+    onPlay,
   } = args;
   const exactEpisode = (s: ScoredStream) =>
     episode == null ||
@@ -57,14 +75,36 @@ export function useAutoFire(args: {
     if (waitingForHostSource) return;
     if (!autoActive || autoFiredRef.current || pipelineDone || autoSettleReady) return;
     const top = autoCandidates[0];
-    const langOk = preferredLangs.length === 0 || (top != null && streamMatchesLangs(top, preferredLangs));
-    if (!top || !hasInstantMarker(top) || !isCached(top) || !langOk || !exactEpisode(top) || (hasStrongAddon && isTorrentioStream(top))) {
+    const langOk =
+      preferredLangs.length === 0 || (top != null && streamMatchesLangs(top, preferredLangs));
+    if (
+      !top ||
+      !hasInstantMarker(top) ||
+      !isCached(top) ||
+      !langOk ||
+      !exactEpisode(top) ||
+      (hasStrongAddon && isTorrentioStream(top))
+    ) {
       highConfidenceSinceRef.current = null;
       return;
     }
-    const t = window.setTimeout(() => setHighConfidenceTick((n) => n + 1), HIGH_CONFIDENCE_GRACE_MS + 20);
+    const t = window.setTimeout(
+      () => setHighConfidenceTick((n) => n + 1),
+      HIGH_CONFIDENCE_GRACE_MS + 20,
+    );
     return () => window.clearTimeout(t);
-  }, [autoActive, pipelineDone, autoSettleReady, autoCandidates, isCached, preferredLangs, hasStrongAddon, isTorrentioStream, autoFiredRef, waitingForHostSource]);
+  }, [
+    autoActive,
+    pipelineDone,
+    autoSettleReady,
+    autoCandidates,
+    isCached,
+    preferredLangs,
+    hasStrongAddon,
+    isTorrentioStream,
+    autoFiredRef,
+    waitingForHostSource,
+  ]);
 
   useEffect(() => {
     if (!autoActive || autoSettleReady || pipelineDone) return;
@@ -75,7 +115,16 @@ export function useAutoFire(args: {
     const remaining = Math.max(0, settleMs - elapsed);
     const t = window.setTimeout(() => setAutoSettleReady(true), remaining);
     return () => window.clearTimeout(t);
-  }, [autoActive, autoSettleReady, pipelineDone, firstResultAt, setAutoSettleReady, autoCandidates, isCached, episode]);
+  }, [
+    autoActive,
+    autoSettleReady,
+    pipelineDone,
+    firstResultAt,
+    setAutoSettleReady,
+    autoCandidates,
+    isCached,
+    episode,
+  ]);
 
   useEffect(() => {
     if (!autoActive || autoFiredRef.current) return;
@@ -83,9 +132,14 @@ export function useAutoFire(args: {
     if (waitingForHostSource) return;
     const top = autoCandidates[0];
     const isFirstAttempt = (attempt ?? 0) === 0 && autoAttemptIdx === 0;
-    const langOk = preferredLangs.length === 0 || (top != null && streamMatchesLangs(top, preferredLangs));
+    const langOk =
+      preferredLangs.length === 0 || (top != null && streamMatchesLangs(top, preferredLangs));
     const highConfidenceTop =
-      top != null && hasInstantMarker(top) && isCached(top) && langOk && exactEpisode(top) &&
+      top != null &&
+      hasInstantMarker(top) &&
+      isCached(top) &&
+      langOk &&
+      exactEpisode(top) &&
       (!hasStrongAddon || !isTorrentioStream(top));
     if (isFirstAttempt && !pipelineDone) {
       if (highConfidenceTop) {
@@ -108,7 +162,26 @@ export function useAutoFire(args: {
       return;
     }
     autoFiredRef.current = true;
-    const p2pConsentPick = !isCached(pick) && !pick.url && p2pAutoConsent && engineP2pEligible(pick);
+    const p2pConsentPick =
+      !isCached(pick) && !pick.url && p2pAutoConsent && engineP2pEligible(pick);
     onPlay(pick, p2pConsentPick, p2pConsentPick, true);
-  }, [autoActive, rememberedHandledFirst, attempt, autoCandidates, resolving, autoAttemptIdx, autoSettleReady, pipelineDone, isCached, preferredLangs, hasStrongAddon, isTorrentioStream, autoFiredRef, setAutoCancelled, onPlay, highConfidenceTick, waitingForHostSource]);
+  }, [
+    autoActive,
+    rememberedHandledFirst,
+    attempt,
+    autoCandidates,
+    resolving,
+    autoAttemptIdx,
+    autoSettleReady,
+    pipelineDone,
+    isCached,
+    preferredLangs,
+    hasStrongAddon,
+    isTorrentioStream,
+    autoFiredRef,
+    setAutoCancelled,
+    onPlay,
+    highConfidenceTick,
+    waitingForHostSource,
+  ]);
 }

@@ -8,7 +8,9 @@ export function looksLikeBase16(text: string, filename?: string): boolean {
     if (!/system\s*:\s*["']?base(16|24)/i.test(text)) return false;
   }
   if (/system\s*:\s*["']?base(16|24)/i.test(text)) return true;
-  return /(?:^|\n)\s*["']?base00["']?\s*:/i.test(text) && /(?:^|\n)\s*["']?base0d["']?\s*:/i.test(text);
+  return (
+    /(?:^|\n)\s*["']?base00["']?\s*:/i.test(text) && /(?:^|\n)\s*["']?base0d["']?\s*:/i.test(text)
+  );
 }
 
 export function parseBase16(text: string): PaletteBucket | null {
@@ -19,7 +21,9 @@ export function parseBase16(text: string): PaletteBucket | null {
   }
   if (!slots.base00 || !slots.base05) return null;
 
-  const nameMatch = text.match(/(?:^|\n)\s*(?:name|scheme)\s*:\s*["']?([^"'\n]+?)["']?\s*(?:\n|$)/i);
+  const nameMatch = text.match(
+    /(?:^|\n)\s*(?:name|scheme)\s*:\s*["']?([^"'\n]+?)["']?\s*(?:\n|$)/i,
+  );
   const authorMatch = text.match(/(?:^|\n)\s*author\s*:\s*["']?([^"'\n]+?)["']?\s*(?:\n|$)/i);
   const variantMatch = text.match(/(?:^|\n)\s*variant\s*:\s*["']?(light|dark)/i);
   const name = (nameMatch?.[1] ?? "Base16 theme").trim();

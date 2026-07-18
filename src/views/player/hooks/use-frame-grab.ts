@@ -60,9 +60,12 @@ export function useFrameGrab(params: {
     }
   }, [bridgeRef, src.meta.name, src.episode]);
 
-  useEffect(() => () => {
-    if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (dismissTimer.current) window.clearTimeout(dismissTimer.current);
+    },
+    [],
+  );
 
   return { toast, trigger };
 }

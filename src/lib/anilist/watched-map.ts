@@ -23,7 +23,7 @@ async function buildIndex(): Promise<Index> {
     for (const e of group.entries) {
       if (e.media.format === "MOVIE") continue;
       const total = e.media.episodes ?? undefined;
-      const raw = e.status === "COMPLETED" ? total ?? e.progress : e.progress;
+      const raw = e.status === "COMPLETED" ? (total ?? e.progress) : e.progress;
       const count = total != null ? Math.min(raw, total) : raw;
       if (count <= 0) continue;
       const entry: Entry = { count };
@@ -48,7 +48,9 @@ function keysFor(count: number): Set<string> {
   return set;
 }
 
-export async function loadAnilistWatchedMap(harborIds: string[]): Promise<Map<string, Set<string>>> {
+export async function loadAnilistWatchedMap(
+  harborIds: string[],
+): Promise<Map<string, Set<string>>> {
   const out = new Map<string, Set<string>>();
   if (harborIds.length === 0) return out;
   const { byAnilist, byMal } = await loadIndex();

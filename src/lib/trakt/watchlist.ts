@@ -5,8 +5,16 @@ type RawWatchlistRow = {
   rank?: number;
   listed_at: string;
   type: "movie" | "show";
-  movie?: { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; trakt?: number } };
-  show?: { title: string; year: number | null; ids: { imdb?: string; tmdb?: number; tvdb?: number; trakt?: number } };
+  movie?: {
+    title: string;
+    year: number | null;
+    ids: { imdb?: string; tmdb?: number; trakt?: number };
+  };
+  show?: {
+    title: string;
+    year: number | null;
+    ids: { imdb?: string; tmdb?: number; tvdb?: number; trakt?: number };
+  };
 };
 
 export async function fetchWatchlist(): Promise<TraktItem[]> {

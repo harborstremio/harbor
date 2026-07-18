@@ -46,7 +46,9 @@ export function AiSearchSection() {
   return (
     <Section
       title={t("AI search")}
-      subtitle={t("Type what you want in plain language and let a model find it. Bring your own API key.")}
+      subtitle={t(
+        "Type what you want in plain language and let a model find it. Bring your own API key.",
+      )}
     >
       <div className="flex flex-col gap-1.5">
         <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
@@ -79,9 +81,8 @@ export function AiSearchSection() {
               <>
                 Adds an "Ask AI" button to search, so you can type things like{" "}
                 <em>popular French TV shows last year</em>. Get a key at{" "}
-                <ExtLink href="https://openrouter.ai/keys">openrouter.ai/keys</ExtLink>. It
-                only runs when you tap that button, so it never costs anything unless you
-                ask.
+                <ExtLink href="https://openrouter.ai/keys">openrouter.ai/keys</ExtLink>. It only
+                runs when you tap that button, so it never costs anything unless you ask.
               </>
             }
           />
@@ -109,9 +110,9 @@ export function AiSearchSection() {
               <>
                 Adds an "Ask AI" button to search, so you can type things like{" "}
                 <em>popular French TV shows last year</em>. Get a key at{" "}
-                <ExtLink href="https://console.groq.com/keys">console.groq.com/keys</ExtLink>.
-                Groq runs open-source models on its LPU hardware with a generous free tier —
-                every model listed below runs on the free tier.
+                <ExtLink href="https://console.groq.com/keys">console.groq.com/keys</ExtLink>. Groq
+                runs open-source models on its LPU hardware with a generous free tier — every model
+                listed below runs on the free tier.
               </>
             }
           />

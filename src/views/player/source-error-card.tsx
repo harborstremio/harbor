@@ -20,19 +20,22 @@ function describe(status: number): { title: string; detail: string; offline: boo
   if (status === 0)
     return {
       title: "This source didn't respond",
-      detail: "The provider's server could not be reached. It may be offline, or you have no connection.",
+      detail:
+        "The provider's server could not be reached. It may be offline, or you have no connection.",
       offline: true,
     };
   if (status >= 500)
     return {
       title: "This source is down",
-      detail: "The provider's server returned an error. Nothing on Harbor's side can fix this. Pick another source.",
+      detail:
+        "The provider's server returned an error. Nothing on Harbor's side can fix this. Pick another source.",
       offline: false,
     };
   if (status >= 400)
     return {
       title: "This source rejected the stream",
-      detail: "The provider refused the request. The link is likely expired, region locked, or out of quota.",
+      detail:
+        "The provider refused the request. The link is likely expired, region locked, or out of quota.",
       offline: false,
     };
   return {
@@ -60,7 +63,11 @@ export function SourceErrorCard({
     <div className="animate-fade-in absolute inset-0 z-40 flex items-center justify-center bg-canvas/85 p-6 backdrop-blur-md">
       <div className="animate-modal-in flex w-[min(94vw,440px)] flex-col items-center gap-5 rounded-2xl border border-edge-soft bg-elevated/95 px-7 py-8 text-center shadow-[0_30px_90px_-25px_rgba(0,0,0,0.7)]">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/12 text-rose-300">
-          {info.offline ? <WifiOff size={26} strokeWidth={2} /> : <ServerCrash size={26} strokeWidth={2} />}
+          {info.offline ? (
+            <WifiOff size={26} strokeWidth={2} />
+          ) : (
+            <ServerCrash size={26} strokeWidth={2} />
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <h2 className="font-display text-[20px] font-medium text-ink">{t(info.title)}</h2>
@@ -77,7 +84,9 @@ export function SourceErrorCard({
             </span>
           </div>
           {error.host && (
-            <div className="truncate text-start font-mono text-[11.5px] text-ink-subtle">{error.host}</div>
+            <div className="truncate text-start font-mono text-[11.5px] text-ink-subtle">
+              {error.host}
+            </div>
           )}
         </div>
         <div className="flex w-full items-center gap-2.5">

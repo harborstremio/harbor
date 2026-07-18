@@ -20,7 +20,9 @@ export function P2pStatusChip({
   const t = useT();
   if (!visible || !stats || !settings.playerP2pChip) return null;
   const peers = stats.unchoked > 0 ? stats.unchoked : stats.peers;
-  const pct = stats.streamLen ? Math.min(100, Math.round((stats.downloaded / stats.streamLen) * 100)) : null;
+  const pct = stats.streamLen
+    ? Math.min(100, Math.round((stats.downloaded / stats.streamLen) * 100))
+    : null;
   const fullyDownloaded = pct === 100;
   const connecting = !fullyDownloaded && !stats.sawData && peers === 0 && stats.downloadSpeed === 0;
 
@@ -45,7 +47,9 @@ export function P2pStatusChip({
           <span>{stats.peerSearchRunning ? t("Finding peers") : t("Connecting")}</span>
         ) : (
           <>
-            <span>{peers} {peers === 1 ? t("peer") : t("peers")}</span>
+            <span>
+              {peers} {peers === 1 ? t("peer") : t("peers")}
+            </span>
             <span className="text-white/25">|</span>
             <span>{fmtSpeed(stats.downloadSpeed)}</span>
             {pct != null && (

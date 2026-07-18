@@ -26,13 +26,20 @@ export function useAutoNextEpisode(params: {
     if (startedNearEndRef.current) return;
     const pos = getPlaybackPosition();
     const naturalEnd = snap.status === "ended";
-    const errorAtEnd =
-      snap.errorCode != null && pos >= snap.durationSec - 2;
-    const reachedEnd =
-      snap.status !== "playing" && pos >= snap.durationSec - 1;
+    const errorAtEnd = snap.errorCode != null && pos >= snap.durationSec - 2;
+    const reachedEnd = snap.status !== "playing" && pos >= snap.durationSec - 1;
     if (!naturalEnd && !errorAtEnd && !reachedEnd) return;
     if (firedForRef.current === src.url) return;
     firedForRef.current = src.url;
     goToEpisode(nextEp);
-  }, [snap.status, snap.errorCode, snap.durationSec, src.url, nextEp, canChangeEpisode, cancelled, goToEpisode]);
+  }, [
+    snap.status,
+    snap.errorCode,
+    snap.durationSec,
+    src.url,
+    nextEp,
+    canChangeEpisode,
+    cancelled,
+    goToEpisode,
+  ]);
 }

@@ -100,7 +100,9 @@ export function TogetherInviteToast() {
           <span className="flex items-center gap-2 truncate text-[13.5px] font-semibold text-ink">
             <span className="max-w-[280px] truncate">{invite.mediaTitle}</span>
             {subtitle && (
-              <span className="font-mono text-[11px] tracking-[0.1em] text-ink-subtle">{subtitle}</span>
+              <span className="font-mono text-[11px] tracking-[0.1em] text-ink-subtle">
+                {subtitle}
+              </span>
             )}
           </span>
         </div>
@@ -109,7 +111,8 @@ export function TogetherInviteToast() {
           onClick={onJoin}
           className="inline-flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-transform hover:scale-[1.04]"
         >
-          {guestPick ? t("Choose") : t("Join")} <ArrowRight size={13} strokeWidth={2.4} className="dir-icon" />
+          {guestPick ? t("Choose") : t("Join")}{" "}
+          <ArrowRight size={13} strokeWidth={2.4} className="dir-icon" />
         </button>
 
         <button

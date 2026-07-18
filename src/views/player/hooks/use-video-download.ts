@@ -4,10 +4,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { randomUuid } from "@/lib/uuid";
-import {
-  buildDefaultFilename,
-  extensionFromUrl,
-} from "@/lib/download/filename";
+import { buildDefaultFilename, extensionFromUrl } from "@/lib/download/filename";
 import {
   startDownload,
   type DownloadHandle,
@@ -50,7 +47,9 @@ export function useVideoDownload({ url, meta, episode }: Args) {
     const sep = isWindowsDesktop() ? "\\" : "/";
     const settingsDir = settings.downloadDir.trim();
     const dir = settingsDir || (await downloadDir().catch(() => "")) || "";
-    const defaultPath = dir ? `${dir}${dir.endsWith(sep) ? "" : sep}${defaultFilename}` : defaultFilename;
+    const defaultPath = dir
+      ? `${dir}${dir.endsWith(sep) ? "" : sep}${defaultFilename}`
+      : defaultFilename;
     let path: string | null = null;
     try {
       path = await save({

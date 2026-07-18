@@ -99,12 +99,24 @@ function HdCompare({ src }: { src?: string }) {
         <Tile label={t("Lighter (w300)")} src={src} soft />
         <Tile label={t("Original")} src={src} accent />
       </div>
-      <Caption>{t("Loads full-resolution artwork instead of the lighter, softer version.")}</Caption>
+      <Caption>
+        {t("Loads full-resolution artwork instead of the lighter, softer version.")}
+      </Caption>
     </>
   );
 }
 
-function Tile({ label, src, soft, accent }: { label: string; src?: string; soft?: boolean; accent?: boolean }) {
+function Tile({
+  label,
+  src,
+  soft,
+  accent,
+}: {
+  label: string;
+  src?: string;
+  soft?: boolean;
+  accent?: boolean;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="overflow-hidden rounded-lg ring-1 ring-edge-soft/60">

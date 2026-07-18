@@ -49,7 +49,9 @@ export function useTitleDetail(meta: Meta, tmdbKey: string | null, active: boole
         cancelled = true;
       };
     }
-    const req: Promise<TmdbDetail | null> = tmdbKey ? tmdbDetails(tmdbKey, meta) : imdbapiDetails(meta.id);
+    const req: Promise<TmdbDetail | null> = tmdbKey
+      ? tmdbDetails(tmdbKey, meta)
+      : imdbapiDetails(meta.id);
     req
       .then((d) => {
         if (!cancelled) setDetail(d);

@@ -104,8 +104,7 @@ export function CustomThemesSection() {
     input.click();
   };
 
-  const activate = (id: string) =>
-    activateTheme(id, getThemeById(id)?.navCustomization);
+  const activate = (id: string) => activateTheme(id, getThemeById(id)?.navCustomization);
 
   const remove = (id: string) => {
     removeCustomTheme(id);
@@ -129,12 +128,7 @@ export function CustomThemesSection() {
   };
 
   if (studioOpen) {
-    return (
-      <ThemeStudio
-        seed={activeTheme ?? undefined}
-        onClose={() => setStudioOpen(false)}
-      />
-    );
+    return <ThemeStudio seed={activeTheme ?? undefined} onClose={() => setStudioOpen(false)} />;
   }
 
   if (libraryOpen) {
@@ -159,9 +153,7 @@ export function CustomThemesSection() {
       <ActiveBanner
         theme={activeTheme}
         onExport={() => activeTheme && showExport(activeTheme.id)}
-        onCustomize={() =>
-          window.dispatchEvent(new CustomEvent("harbor:open-theme-editor"))
-        }
+        onCustomize={() => window.dispatchEvent(new CustomEvent("harbor:open-theme-editor"))}
       />
 
       <HeroCards

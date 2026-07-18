@@ -127,7 +127,7 @@ export function CalendarView() {
   };
 
   const todayISO = todayLocalISO();
-  const dayModalItems = dayModal ? grouped.get(dayModal) ?? [] : [];
+  const dayModalItems = dayModal ? (grouped.get(dayModal) ?? []) : [];
 
   const showAllControls = source === "all";
   const showPremiereFilters = source === "simkl-anticipated";
@@ -227,9 +227,7 @@ export function CalendarView() {
                 {FILTERS.map((f) => {
                   const active = filter === f.id;
                   const count =
-                    f.id === "all"
-                      ? filtered.length
-                      : applyCalendarFilter(items, f.id).length;
+                    f.id === "all" ? filtered.length : applyCalendarFilter(items, f.id).length;
                   return (
                     <button
                       key={f.id}
@@ -306,7 +304,9 @@ export function CalendarView() {
         </nav>
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-12 py-8">{body}</div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-12 py-8">
+        {body}
+      </div>
 
       {dayModal && dayModalItems.length > 0 && (
         <DayModal

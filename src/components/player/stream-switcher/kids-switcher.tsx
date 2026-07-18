@@ -117,7 +117,9 @@ export function KidsStreamSwitcher({
                       {isCurrent ? t("Playing now") : t("Video {n}", { n: i + 1 })}
                     </span>
                     {quality && (
-                      <span className={`text-[14px] font-bold ${isCurrent ? "text-[#0c4a6e]/70" : "text-white/70"}`}>
+                      <span
+                        className={`text-[14px] font-bold ${isCurrent ? "text-[#0c4a6e]/70" : "text-white/70"}`}
+                      >
                         {quality}
                       </span>
                     )}

@@ -12,7 +12,10 @@ type Entry = { u: string | null; t: number };
 
 function load(): Record<string, Entry> {
   try {
-    const raw = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}") as { v?: number; map?: Record<string, Entry> };
+    const raw = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}") as {
+      v?: number;
+      map?: Record<string, Entry>;
+    };
     if (raw.v !== 2 || !raw.map) return {};
     const now = Date.now();
     const out: Record<string, Entry> = {};

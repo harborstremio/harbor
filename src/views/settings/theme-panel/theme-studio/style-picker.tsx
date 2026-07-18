@@ -54,7 +54,11 @@ export function StylePicker({
               </div>
               {active && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-canvas">
-                  {editable ? <Pencil size={11} strokeWidth={2.6} /> : <Check size={12} strokeWidth={3} />}
+                  {editable ? (
+                    <Pencil size={11} strokeWidth={2.6} />
+                  ) : (
+                    <Check size={12} strokeWidth={3} />
+                  )}
                 </span>
               )}
             </div>
@@ -65,7 +69,15 @@ export function StylePicker({
   );
 }
 
-function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: string; active: boolean }) {
+function Swatch({
+  kind,
+  variant,
+  active,
+}: {
+  kind: "card" | "button";
+  variant: string;
+  active: boolean;
+}) {
   if (variant === "custom") {
     return (
       <div
@@ -90,8 +102,7 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
         <div
           className="aspect-[5/3] w-full rounded-lg border"
           style={{
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04))",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04))",
             borderColor: "rgba(255,255,255,0.18)",
             backdropFilter: "blur(8px)",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2)",
@@ -103,11 +114,13 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
       return (
         <div
           className="aspect-[5/3] w-full rounded-lg ring-2"
-          style={{
-            background: "linear-gradient(135deg, #181434, #1f1b3f)",
-            borderColor: "rgba(255,255,255,0.12)",
-            "--tw-ring-color": active ? "var(--color-accent)" : "#7b5bf5",
-          } as React.CSSProperties}
+          style={
+            {
+              background: "linear-gradient(135deg, #181434, #1f1b3f)",
+              borderColor: "rgba(255,255,255,0.12)",
+              "--tw-ring-color": active ? "var(--color-accent)" : "#7b5bf5",
+            } as React.CSSProperties
+          }
         />
       );
     }
@@ -139,8 +152,7 @@ function Swatch({ kind, variant, active }: { kind: "card" | "button"; variant: s
             background:
               "linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0) 55%), var(--color-accent)",
             color: "#fff",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 18px -6px rgba(0,0,0,0.45)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 18px -6px rgba(0,0,0,0.45)",
           }}
         >
           Button

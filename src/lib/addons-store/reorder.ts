@@ -26,7 +26,10 @@ export function hostOf(url: string): string {
   }
 }
 
-function urlCountsMatch(a: Array<{ transportUrl: string }>, b: Array<{ transportUrl: string }>): boolean {
+function urlCountsMatch(
+  a: Array<{ transportUrl: string }>,
+  b: Array<{ transportUrl: string }>,
+): boolean {
   if (a.length !== b.length) return false;
   const counts = new Map<string, number>();
   for (const item of a) counts.set(item.transportUrl, (counts.get(item.transportUrl) ?? 0) + 1);
@@ -63,9 +66,15 @@ export function validateReorder(
   next: Addon[],
 ): { ok: true } | { ok: false; reason: ReorderInvalid } {
   if (!Array.isArray(original) || original.length === 0) return { ok: false, reason: "empty" };
-  if (!Array.isArray(next) || next.length !== original.length) return { ok: false, reason: "length" };
+  if (!Array.isArray(next) || next.length !== original.length)
+    return { ok: false, reason: "length" };
   for (const item of next) {
-    if (!item || typeof item !== "object" || typeof item.transportUrl !== "string" || !item.transportUrl) {
+    if (
+      !item ||
+      typeof item !== "object" ||
+      typeof item.transportUrl !== "string" ||
+      !item.transportUrl
+    ) {
       return { ok: false, reason: "null-item" };
     }
   }
@@ -82,7 +91,10 @@ export function sequencesEqual(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
-export function applyOrderToItems<T extends { transportUrl: string }>(items: T[], urls: string[]): T[] {
+export function applyOrderToItems<T extends { transportUrl: string }>(
+  items: T[],
+  urls: string[],
+): T[] {
   const used = new Array<boolean>(items.length).fill(false);
   const out: T[] = [];
   for (const url of urls) {
@@ -195,7 +207,12 @@ export async function saveCollectionOrder(
   onStep?.("verifying");
   const readBack = await getUserAddonsRaw(authKey);
   if (readBack == null) return { ok: false, stage: "verify", current: null };
-  if (!sequencesEqual(readBack.map((a) => a.transportUrl), next.map((a) => a.transportUrl))) {
+  if (
+    !sequencesEqual(
+      readBack.map((a) => a.transportUrl),
+      next.map((a) => a.transportUrl),
+    )
+  ) {
     return { ok: false, stage: "verify", current: readBack };
   }
   return { ok: true, items: readBack };

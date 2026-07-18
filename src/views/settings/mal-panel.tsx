@@ -90,7 +90,9 @@ export function MalPanel() {
         >
           <ToggleRow
             label={t("Sync watch progress")}
-            sub={t("Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.")}
+            sub={t(
+              "Finishing an anime episode updates your MyAnimeList progress. Forward only: it never lowers a count you already have.",
+            )}
             value={settings.malAutoSync}
             onChange={(v) => update({ malAutoSync: v })}
           />
@@ -181,7 +183,10 @@ export function MalPanel() {
   );
 }
 
-function sessionAge(t: (key: string, vars?: Record<string, string | number>) => string, createdAt?: number): string {
+function sessionAge(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  createdAt?: number,
+): string {
   if (!createdAt) return "";
   const days = Math.floor((Date.now() - createdAt) / 86400000);
   if (days < 1) return t("today");

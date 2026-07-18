@@ -53,10 +53,13 @@ export function PersonLink({
     return () => window.removeEventListener("scroll", onScroll, true);
   }, [anchor]);
 
-  useEffect(() => () => {
-    clearOpen();
-    clearClose();
-  }, []);
+  useEffect(
+    () => () => {
+      clearOpen();
+      clearClose();
+    },
+    [],
+  );
 
   return (
     <>

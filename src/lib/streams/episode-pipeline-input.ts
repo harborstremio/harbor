@@ -25,9 +25,9 @@ function embeddedStreams(meta: Meta, episode: PlayEpisode | undefined): Stream[]
       ? vids.find(
           (v) =>
             (v.season ?? null) === episode.season &&
-            ((v.episode ?? v.number) ?? null) === episode.episode,
+            (v.episode ?? v.number ?? null) === episode.episode,
         )
-      : vids.find((v) => v.id === meta.id) ?? (vids.length === 1 ? vids[0] : undefined);
+      : (vids.find((v) => v.id === meta.id) ?? (vids.length === 1 ? vids[0] : undefined));
   const raw = pick?.streams ?? [];
   return raw.map(
     (s) =>
@@ -51,7 +51,17 @@ export function buildEpisodePipelineInput(params: {
   strictMode: boolean;
   filterDisabled: boolean;
 }): PipelineInput {
-  const { meta, episode, imdbId, streamIds, addons, debrids, settings, strictMode, filterDisabled } = params;
+  const {
+    meta,
+    episode,
+    imdbId,
+    streamIds,
+    addons,
+    debrids,
+    settings,
+    strictMode,
+    filterDisabled,
+  } = params;
   const embedded = embeddedStreams(meta, episode);
   const addonNative = isAddonNativeMeta(meta);
   const requestType = addonNative
@@ -68,7 +78,7 @@ export function buildEpisodePipelineInput(params: {
   const effEpisode = imdbEpAligned ? (episode?.imdbEpisode ?? episode?.episode) : episode?.episode;
   const prevGroup =
     episode && typeof effSeason === "number" && typeof effEpisode === "number" && effEpisode > 1
-      ? readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined
+      ? (readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined)
       : undefined;
   return {
     request: {

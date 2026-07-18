@@ -10,7 +10,10 @@ function normName(name: string | undefined): string {
     .toLowerCase()
     .replace(/\[[^\]]*\]/g, "")
     .replace(/\|.*$/g, "")
-    .replace(/\b(rd|tb|ad|premiumize|debrid|elfhosted|community|official|free|paid|sponsored|by\s+\S+)\b/g, "")
+    .replace(
+      /\b(rd|tb|ad|premiumize|debrid|elfhosted|community|official|free|paid|sponsored|by\s+\S+)\b/g,
+      "",
+    )
     .replace(/[^a-z0-9]+/g, "")
     .trim();
 }
@@ -62,8 +65,7 @@ export function relatedAddons(
   const cat = categorizeAddon(target);
   const eligibleCandidates = all.filter(
     (r) =>
-      eligible(target, r, selfId) &&
-      (!targetNorm || normName(r.manifest?.name) !== targetNorm),
+      eligible(target, r, selfId) && (!targetNorm || normName(r.manifest?.name) !== targetNorm),
   );
   const sameCat = eligibleCandidates
     .filter((r) => categorizeAddon(r) === cat)

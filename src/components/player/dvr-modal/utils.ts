@@ -25,7 +25,10 @@ export function buildChoices(
       kind: "current",
       durationSec: sec,
       label: t("This show: {title}", { title: current.title }),
-      caption: t("Until {time} · {dur}", { time: formatClock(current.endMs), dur: formatMinutes(sec) }),
+      caption: t("Until {time} · {dur}", {
+        time: formatClock(current.endMs),
+        dur: formatMinutes(sec),
+      }),
       programTitle: current.title,
     });
   }
@@ -35,7 +38,10 @@ export function buildChoices(
       kind: "current-next",
       durationSec: sec,
       label: t("This and next: + {title}", { title: next.title }),
-      caption: t("Until {time} · {dur}", { time: formatClock(next.endMs), dur: formatMinutes(sec) }),
+      caption: t("Until {time} · {dur}", {
+        time: formatClock(next.endMs),
+        dur: formatMinutes(sec),
+      }),
       programTitle: `${current.title} + ${next.title}`,
     });
   }
@@ -47,7 +53,11 @@ export function buildChoices(
         kind: "next",
         durationSec: sec + Math.max(0, Math.round((next.startMs - now) / 1000)),
         label: t("Just the next show: {title}", { title: next.title }),
-        caption: t("{start} to {end} · {dur}", { start: formatClock(next.startMs), end: formatClock(next.endMs), dur: formatMinutes(sec) }),
+        caption: t("{start} to {end} · {dur}", {
+          start: formatClock(next.startMs),
+          end: formatClock(next.endMs),
+          dur: formatMinutes(sec),
+        }),
         programTitle: next.title,
       });
     }

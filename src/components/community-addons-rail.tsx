@@ -202,8 +202,9 @@ function CommunityCard({
     if (!m?.id || busy) return;
     setBusy(true);
     try {
-      let hints = (m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } })
-        .behaviorHints;
+      let hints = (
+        m as { behaviorHints?: { configurable?: boolean; configurationRequired?: boolean } }
+      ).behaviorHints;
       if (!hints) {
         const full = await fetchManifestAt(addon.manifestUrl).catch(() => null);
         hints = full?.behaviorHints;
@@ -238,7 +239,11 @@ function CommunityCard({
         className="relative h-24 w-full"
         style={
           background
-            ? { backgroundImage: `url(${background})`, backgroundSize: "cover", backgroundPosition: "center" }
+            ? {
+                backgroundImage: `url(${background})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
             : { background: "linear-gradient(135deg, var(--color-elevated), var(--color-raised))" }
         }
       >
@@ -338,7 +343,8 @@ function EmptyState() {
 function ErrorState({ message }: { message: string }) {
   return (
     <p className="rounded-xl border border-dashed border-edge bg-canvas/30 px-4 py-6 text-center text-[12.5px] text-ink-subtle">
-      {SITE_NAME} should be reachable in a moment. They're deploying right now. Refresh once their docs go live.
+      {SITE_NAME} should be reachable in a moment. They're deploying right now. Refresh once their
+      docs go live.
       <br />
       <span className="text-[10.5px] opacity-70">({message})</span>
     </p>

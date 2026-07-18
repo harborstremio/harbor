@@ -5,7 +5,9 @@ export function NoAudioWarning(props: { onUseMpv: () => void; onDismiss: () => v
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-32 z-30 mx-auto flex max-w-md flex-col items-center gap-3 rounded-2xl border border-white/15 bg-black/75 px-6 py-5 text-center text-white backdrop-blur-xl">
       <p className="text-[14px] leading-snug">
-        {t("No audio: this stream's audio format (likely Dolby or DTS) is not supported by the HTML5 engine.")}
+        {t(
+          "No audio: this stream's audio format (likely Dolby or DTS) is not supported by the HTML5 engine.",
+        )}
       </p>
       <div className="flex items-center gap-2">
         <button
@@ -30,7 +32,9 @@ export function HeaderWarning(props: { onPickAnother: () => void }) {
   return (
     <div className="pointer-events-auto absolute inset-x-0 bottom-32 z-30 mx-auto flex max-w-md flex-col items-center gap-3 rounded-2xl border border-white/15 bg-black/75 px-6 py-5 text-center text-white backdrop-blur-xl">
       <p className="text-[14px] leading-snug">
-        {t("This file is flagged as not web-playable. Try the mpv backend in Settings or pick another stream.")}
+        {t(
+          "This file is flagged as not web-playable. Try the mpv backend in Settings or pick another stream.",
+        )}
       </p>
       <button
         onClick={props.onPickAnother}

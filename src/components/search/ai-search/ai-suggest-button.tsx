@@ -27,7 +27,7 @@ export function AiSuggestButton({
           {t("AI search")}
         </span>
         <span className="truncate text-[15px] font-semibold text-ink">
-          {t("Ask AI to find titles for \"{query}\"", { query })}
+          {t('Ask AI to find titles for "{query}"', { query })}
         </span>
       </span>
       <span className="ms-auto flex shrink-0 items-center gap-1 text-accent/85">

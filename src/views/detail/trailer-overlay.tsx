@@ -79,7 +79,11 @@ export function TrailerOverlay({
       onClick={dismiss}
       className="fixed inset-0 z-[120] flex cursor-zoom-out items-center justify-center"
       style={{
-        backgroundColor: open ? (isMacDesktop() ? "rgba(0,0,0,1)" : "rgba(0,0,0,0.82)") : "rgba(0,0,0,0)",
+        backgroundColor: open
+          ? isMacDesktop()
+            ? "rgba(0,0,0,1)"
+            : "rgba(0,0,0,0.82)"
+          : "rgba(0,0,0,0)",
         backdropFilter: open ? "blur(32px) saturate(1.2)" : "blur(0px)",
         WebkitBackdropFilter: open ? "blur(32px) saturate(1.2)" : "blur(0px)",
         transition:
@@ -116,8 +120,7 @@ export function TrailerOverlay({
         style={{
           opacity: open ? 1 : 0,
           transform: open ? "scale(1)" : "scale(0.93)",
-          transition:
-            "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
+          transition: "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
         }}
       >
         {streamUrl ? (
@@ -184,7 +187,15 @@ function YouTubeEmbed({ id, title }: { id: string; title: string }) {
   );
 }
 
-function ExternalTrailerFallback({ id, title, logo }: { id: string; title: string; logo?: string }) {
+function ExternalTrailerFallback({
+  id,
+  title,
+  logo,
+}: {
+  id: string;
+  title: string;
+  logo?: string;
+}) {
   const t = useT();
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-8 text-center">

@@ -63,7 +63,9 @@ export function TraktPanel() {
               {t("Connect your Trakt account")}
             </h2>
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.")}
+              {t(
+                "Track everything you watch, see your watchlist, and get personalized recommendations on Harbor's home page. Free at trakt.tv.",
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -113,9 +115,7 @@ export function TraktPanel() {
             </div>
             {username && (
               <button
-                onClick={() =>
-                  openUrl(`https://trakt.tv/users/${encodeURIComponent(username)}`)
-                }
+                onClick={() => openUrl(`https://trakt.tv/users/${encodeURIComponent(username)}`)}
                 className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Open profile")}
@@ -182,7 +182,9 @@ export function TraktPanel() {
       {isConnected && (
         <Section
           title={t("Move your watchlist")}
-          subtitle={t("Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.")}
+          subtitle={t(
+            "Copy your Harbor watchlist over to Trakt, or pull your Trakt watchlist into Harbor. Safe to run again, Trakt skips anything it already has.",
+          )}
         >
           <WatchlistSync />
         </Section>
@@ -201,7 +203,9 @@ export function TraktPanel() {
         {settings.showTraktComments === true && (
           <ToggleRow
             label={t("Blur comments by default")}
-            sub={t("Comments are blurred until you reveal them, even if they are not tagged as spoilers.")}
+            sub={t(
+              "Comments are blurred until you reveal them, even if they are not tagged as spoilers.",
+            )}
             value={!!settings.blurComments}
             onChange={(on) => update({ blurComments: on })}
           />
@@ -213,7 +217,10 @@ export function TraktPanel() {
   );
 }
 
-function sessionAge(t: (key: string, vars?: Record<string, string | number>) => string, createdAt?: number): string {
+function sessionAge(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  createdAt?: number,
+): string {
   if (!createdAt) return "";
   const days = Math.floor((Date.now() / 1000 - createdAt) / 86400);
   if (days < 1) return t("today");

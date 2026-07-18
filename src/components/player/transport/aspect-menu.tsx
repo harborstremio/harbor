@@ -1,7 +1,12 @@
 import { RotateCcw, SlidersHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CROP_PRESETS } from "@/views/player/hooks/use-video-fill";
-import { PICTURE_KEYS, PICTURE_TEMPLATES, TweakSlider, useTweaks } from "@/views/settings/mpv-panel/dials";
+import {
+  PICTURE_KEYS,
+  PICTURE_TEMPLATES,
+  TweakSlider,
+  useTweaks,
+} from "@/views/settings/mpv-panel/dials";
 import { useT } from "@/lib/i18n";
 import { useMenuSide } from "../menu-side";
 import { Tooltip } from "./tooltip";
@@ -45,12 +50,16 @@ export function AspectMenu({
           }}
           aria-label={t("Picture")}
           className={`flex h-11 min-w-11 items-center justify-center gap-1 rounded-full px-2 transition-[background-color,color] ${
-            accent ? "bg-white/22 text-white hover:bg-white/30" : "text-white/85 hover:bg-white/10 hover:text-white"
+            accent
+              ? "bg-white/22 text-white hover:bg-white/30"
+              : "text-white/85 hover:bg-white/10 hover:text-white"
           }`}
         >
           <SlidersHorizontal size={21} strokeWidth={1.9} />
           {aspectActive && current ? (
-            <span className="text-[11px] font-bold tabular-nums tracking-wider">{current.label}</span>
+            <span className="text-[11px] font-bold tabular-nums tracking-wider">
+              {current.label}
+            </span>
           ) : null}
         </button>
       </Tooltip>
@@ -96,11 +105,62 @@ export function AspectMenu({
               ))}
             </div>
             <div className="mt-2 flex flex-col">
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="brightness" label={t("Brightness")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="contrast" label={t("Contrast")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="saturation" label={t("Saturation")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="gamma" label={t("Gamma")} min={-50} max={50} step={1} def={0} />
-              <TweakSlider compact tweaks={tweaks} setTweak={setTweak} mpvKey="sharpen" label={t("Sharpen")} min={0} max={2} step={0.05} def={0} fmt={(v) => v.toFixed(2)} />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="brightness"
+                label={t("Brightness")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="contrast"
+                label={t("Contrast")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="saturation"
+                label={t("Saturation")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="gamma"
+                label={t("Gamma")}
+                min={-50}
+                max={50}
+                step={1}
+                def={0}
+              />
+              <TweakSlider
+                compact
+                tweaks={tweaks}
+                setTweak={setTweak}
+                mpvKey="sharpen"
+                label={t("Sharpen")}
+                min={0}
+                max={2}
+                step={0.05}
+                def={0}
+                fmt={(v) => v.toFixed(2)}
+              />
             </div>
           </div>
           <div className="border-t border-edge-soft/60 p-2">
@@ -118,7 +178,9 @@ export function AspectMenu({
                       setOpen(false);
                     }}
                     className={`flex h-10 w-full items-center justify-between rounded-lg px-3 text-start text-[14px] transition-colors ${
-                      sel ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
+                      sel
+                        ? "bg-elevated text-ink ring-1 ring-edge"
+                        : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
                     }`}
                   >
                     <span className={sel ? "font-medium" : ""}>{t(m.label)}</span>

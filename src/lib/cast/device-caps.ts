@@ -210,7 +210,8 @@ export function getDeviceCaps(device: CastDeviceInfo): DeviceCaps {
   if (device.kind === "roku") return CAPS_ROKU_4K;
   if (device.kind === "airplay") {
     if (/apple\s*tv|appletv/.test(blob)) return CAPS_AIRPLAY_APPLE_TV;
-    if (/homepod/.test(blob)) return { ...CAPS_AIRPLAY_GENERIC, label: "HomePod", maxResolution: 1080 };
+    if (/homepod/.test(blob))
+      return { ...CAPS_AIRPLAY_GENERIC, label: "HomePod", maxResolution: 1080 };
     return CAPS_AIRPLAY_GENERIC;
   }
   if (device.kind === "dlna") {
@@ -271,30 +272,34 @@ function detectResolution(s: StreamLike): number {
 
 function noAudioPassthrough(caps: DeviceCaps): boolean {
   return (
-    !caps.passthroughAc3 &&
-    !caps.passthroughEac3 &&
-    !caps.passthroughDts &&
-    !caps.passthroughTruehd
+    !caps.passthroughAc3 && !caps.passthroughEac3 && !caps.passthroughDts && !caps.passthroughTruehd
   );
 }
 
 const NATIVE_AUDIO_RX = /\b(aac|mp3|opus|vorbis|flac)\b/;
 
 export function checkStreamCompat(stream: StreamLike, caps: DeviceCaps): CompatVerdict {
-  const hay = `${stream.parsedTitle ?? ""} ${stream.title ?? ""} ${stream.resolution ?? ""}`.toLowerCase();
+  const hay =
+    `${stream.parsedTitle ?? ""} ${stream.title ?? ""} ${stream.resolution ?? ""}`.toLowerCase();
   const reasons: string[] = [];
   const res = detectResolution(stream);
   if (res > caps.maxResolution) reasons.push(`${res}p above device max ${caps.maxResolution}p`);
-  if (/dolby\s*vision|\bdv\b|\bdvhdr\b/.test(hay) && !caps.dolbyVision) reasons.push("Dolby Vision unsupported");
+  if (/dolby\s*vision|\bdv\b|\bdvhdr\b/.test(hay) && !caps.dolbyVision)
+    reasons.push("Dolby Vision unsupported");
   if (/\bhdr10\+?\b|hdr10plus/.test(hay) && !caps.hdr10) reasons.push("HDR10 unsupported");
   if (/\bav1\b/.test(hay) && !caps.av1) reasons.push("AV1 unsupported");
   if (/\b(hevc|h\.?265|x265)\b/.test(hay) && !caps.hevc) reasons.push("HEVC unsupported");
   if (/\btruehd\b/.test(hay) && !caps.passthroughTruehd) reasons.push("TrueHD audio unsupported");
-  if (/\bdts(-?hd|-?ma)?\b/.test(hay) && !caps.passthroughDts) reasons.push("DTS audio unsupported");
-  if (/\beac3|e-?ac-?3|ddp\b/.test(hay) && !caps.passthroughEac3) reasons.push("E-AC-3 unsupported");
-  if (/\bac-?3|dd5|\bdolby\s*digital\b/.test(hay) && !caps.passthroughAc3) reasons.push("AC-3 audio unsupported");
-  if (/\b(mkv|matroska)\b/.test(hay) && !caps.containerMkv) reasons.push("MKV container unsupported");
-  if (noAudioPassthrough(caps) && !NATIVE_AUDIO_RX.test(hay)) reasons.push("audio must be re-encoded");
+  if (/\bdts(-?hd|-?ma)?\b/.test(hay) && !caps.passthroughDts)
+    reasons.push("DTS audio unsupported");
+  if (/\beac3|e-?ac-?3|ddp\b/.test(hay) && !caps.passthroughEac3)
+    reasons.push("E-AC-3 unsupported");
+  if (/\bac-?3|dd5|\bdolby\s*digital\b/.test(hay) && !caps.passthroughAc3)
+    reasons.push("AC-3 audio unsupported");
+  if (/\b(mkv|matroska)\b/.test(hay) && !caps.containerMkv)
+    reasons.push("MKV container unsupported");
+  if (noAudioPassthrough(caps) && !NATIVE_AUDIO_RX.test(hay))
+    reasons.push("audio must be re-encoded");
   return { ok: reasons.length === 0, reasons };
 }
 
@@ -311,11 +316,9 @@ export function pickBestCompatStream<T extends StreamLike>(
   });
 }
 
-export function pickTranscodeProfile(
-  stream: StreamLike,
-  caps: DeviceCaps,
-): TranscodeProfile {
-  const hay = `${stream.parsedTitle ?? ""} ${stream.title ?? ""} ${stream.resolution ?? ""}`.toLowerCase();
+export function pickTranscodeProfile(stream: StreamLike, caps: DeviceCaps): TranscodeProfile {
+  const hay =
+    `${stream.parsedTitle ?? ""} ${stream.title ?? ""} ${stream.resolution ?? ""}`.toLowerCase();
   const isHevc = /\b(hevc|h\.?265|x265)\b/.test(hay);
   const isAv1 = /\bav1\b/.test(hay);
   const isDv = /dolby\s*vision|\bdv\b|\bdvhdr\b/.test(hay);
@@ -346,8 +349,7 @@ export function pickTranscodeProfile(
 
   const force_stereo = force_aac && !caps.passthroughEac3 && !caps.passthroughAc3;
 
-  const max_video_kbps =
-    max_height >= 2160 ? 18000 : max_height >= 1080 ? 8000 : 3500;
+  const max_video_kbps = max_height >= 2160 ? 18000 : max_height >= 1080 ? 8000 : 3500;
 
   return { max_height, force_h264, force_aac, force_stereo, max_video_kbps };
 }

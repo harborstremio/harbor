@@ -44,12 +44,7 @@ export function ProfileBlock({ onOpenSettings }: { onOpenSettings: () => void })
           style={{ background: color }}
         >
           {avatar ? (
-            <img
-              src={avatar}
-              alt=""
-              className="h-full w-full object-cover"
-              draggable={false}
-            />
+            <img src={avatar} alt="" className="h-full w-full object-cover" draggable={false} />
           ) : (
             <CatAvatar className="h-full w-full" />
           )}

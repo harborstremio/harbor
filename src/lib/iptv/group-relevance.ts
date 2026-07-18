@@ -92,9 +92,11 @@ export function sortGroupsByRelevance(
   });
 }
 
-export function sortChannelsByGroupRelevance<
-  T extends { group: string | null },
->(channels: T[], region: string, preferredLanguages: string[]): T[] {
+export function sortChannelsByGroupRelevance<T extends { group: string | null }>(
+  channels: T[],
+  region: string,
+  preferredLanguages: string[],
+): T[] {
   const scoreCache = new Map<string, number>();
   const scoreOf = (group: string | null): number => {
     if (!group) return -1;

@@ -104,7 +104,8 @@ function cancelEverything(): void {
 }
 
 const setListening = createDismissListeners({
-  insidePanel: (target) => !!open && !!panelEl && target instanceof Node && panelEl.contains(target),
+  insidePanel: (target) =>
+    !!open && !!panelEl && target instanceof Node && panelEl.contains(target),
   cancel: cancelEverything,
   escape: () => {
     if (!open) return false;

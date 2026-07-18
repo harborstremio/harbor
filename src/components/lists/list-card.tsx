@@ -4,13 +4,7 @@ import { relativeTime } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
 import { Poster, posterPlate } from "@/components/poster";
 
-export function ListCard({
-  list,
-  onOpen,
-}: {
-  list: CustomList;
-  onOpen?: (id: string) => void;
-}) {
+export function ListCard({ list, onOpen }: { list: CustomList; onOpen?: (id: string) => void }) {
   const t = useT();
   const covers = list.items.slice(0, 3);
   const count = list.items.length;

@@ -113,7 +113,11 @@ type RankingsValue = {
   topList: (dept: string) => PersonEntry[];
 };
 
-const Ctx = createContext<RankingsValue>({ ready: false, rank: () => undefined, topList: () => [] });
+const Ctx = createContext<RankingsValue>({
+  ready: false,
+  rank: () => undefined,
+  topList: () => [],
+});
 
 export function RankingsProvider({ children }: { children: ReactNode }) {
   const { settings } = useSettings();

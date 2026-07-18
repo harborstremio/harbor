@@ -31,7 +31,10 @@ export function FontMenu({
   const menuRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
-  const items = [...BUILT_IN_FONTS, ...(fonts ?? []).map((f) => ({ id: `custom:${f.id}`, label: f.name }))];
+  const items = [
+    ...BUILT_IN_FONTS,
+    ...(fonts ?? []).map((f) => ({ id: `custom:${f.id}`, label: f.name })),
+  ];
   const current = items.find((i) => i.id === value) ?? items[0];
 
   useEffect(() => {
@@ -100,7 +103,9 @@ export function FontMenu({
                       setOpen(false);
                     }}
                     className={`flex w-full items-center justify-between gap-2 rounded-[9px] px-3 py-2.5 text-start text-[15px] transition-colors ${
-                      active ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+                      active
+                        ? "bg-raised text-ink"
+                        : "text-ink-muted hover:bg-raised/60 hover:text-ink"
                     }`}
                     style={{ fontFamily: previewFamily(it.id) }}
                   >
@@ -136,7 +141,11 @@ export function SizeStepper({ value, onChange }: { value: number; onChange: (n: 
   };
   return (
     <div className="flex h-11 shrink-0 items-stretch">
-      <button aria-label={t("Smaller")} onClick={() => onChange(value - 1)} className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink">
+      <button
+        aria-label={t("Smaller")}
+        onClick={() => onChange(value - 1)}
+        className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+      >
         <span className="text-[13px] font-bold">A</span>
       </button>
       <button
@@ -148,7 +157,11 @@ export function SizeStepper({ value, onChange }: { value: number; onChange: (n: 
       >
         {value}
       </button>
-      <button aria-label={t("Larger")} onClick={() => onChange(value + 1)} className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink">
+      <button
+        aria-label={t("Larger")}
+        onClick={() => onChange(value + 1)}
+        className="flex w-9 items-center justify-center text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+      >
         <span className="text-[17px] font-bold">A</span>
       </button>
     </div>

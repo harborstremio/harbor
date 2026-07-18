@@ -79,8 +79,8 @@ export function TmdbGuideModal({ open, onClose }: { open: boolean; onClose: () =
                     <Check size={15} strokeWidth={2.6} className="mt-0.5 shrink-0 text-accent" />
                     <p className="text-[12.5px] leading-relaxed text-ink">
                       For Application URL, type any address at all, like https://harbor.app or
-                      http://localhost. TMDB never visits it. The only thing you actually need is the
-                      API key.
+                      http://localhost. TMDB never visits it. The only thing you actually need is
+                      the API key.
                     </p>
                   </div>
                 )}

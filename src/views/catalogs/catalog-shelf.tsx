@@ -30,7 +30,10 @@ export function CatalogShelf({ catalog }: { catalog: BrowseCatalog }) {
     const load = () => {
       if (startedRef.current) return;
       startedRef.current = true;
-      void browseFetcher(catalog, null)(1)
+      void browseFetcher(
+        catalog,
+        null,
+      )(1)
         .then((list) => setItems(list))
         .catch(() => setItems([]));
     };
@@ -46,7 +49,10 @@ export function CatalogShelf({ catalog }: { catalog: BrowseCatalog }) {
 
   const loadMore = () => {
     const next = pageRef.current + 1;
-    void browseFetcher(catalog, null)(next)
+    void browseFetcher(
+      catalog,
+      null,
+    )(next)
       .then((list) => {
         if (list.length === 0) return;
         pageRef.current = next;

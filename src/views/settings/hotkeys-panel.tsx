@@ -51,7 +51,10 @@ export function HotkeysPanel() {
       if (isModifierOnly(e)) return;
       const binding = eventToBinding(e);
       const dupe = HOTKEYS.find(
-        (h) => h.id !== capturing && h.scope === HOTKEY_MAP[capturing].scope && effectiveBinding(h.id, overrides) === binding,
+        (h) =>
+          h.id !== capturing &&
+          h.scope === HOTKEY_MAP[capturing].scope &&
+          effectiveBinding(h.id, overrides) === binding,
       );
       setBinding(capturing, binding);
       setConflict(dupe ? dupe.id : null);
@@ -67,7 +70,9 @@ export function HotkeysPanel() {
     <>
       <div className="flex items-center justify-between">
         <p className="text-[13px] text-ink-subtle">
-          {t("Click any binding to rebind it. Press Esc while capturing to cancel. Letters ignore Shift (so K and Shift+K trigger the same action).")}
+          {t(
+            "Click any binding to rebind it. Press Esc while capturing to cancel. Letters ignore Shift (so K and Shift+K trigger the same action).",
+          )}
         </p>
         {overrideCount > 0 && (
           <button
@@ -83,25 +88,33 @@ export function HotkeysPanel() {
       <Section title={t("Behavior")} subtitle={t("How keys behave during playback.")}>
         <ToggleRow
           label={t("Esc exits fullscreen first")}
-          sub={t("When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.")}
+          sub={t(
+            "When in fullscreen, Esc leaves fullscreen instead of closing the player. Press Esc again to close. Turn off to make Esc always close.",
+          )}
           value={settings.playerEscExitsFullscreen}
           onChange={(v) => update({ playerEscExitsFullscreen: v })}
         />
         <ToggleRow
           label={t("Ask before leaving")}
-          sub={t("When Esc would close the player, show a quick confirm first. You can tick \"Don't ask me again\" in that prompt to always leave on Esc.")}
+          sub={t(
+            'When Esc would close the player, show a quick confirm first. You can tick "Don\'t ask me again" in that prompt to always leave on Esc.',
+          )}
           value={settings.playerConfirmLeave}
           onChange={(v) => update({ playerConfirmLeave: v })}
         />
         <ToggleRow
           label={t("TV navigation")}
-          sub={t("Use arrow keys and Select/Enter to move focus through Harbor. Turn this off to disable TV-style focus navigation everywhere.")}
+          sub={t(
+            "Use arrow keys and Select/Enter to move focus through Harbor. Turn this off to disable TV-style focus navigation everywhere.",
+          )}
           value={settings.tvNavigation}
           onChange={(v) => update({ tvNavigation: v })}
         />
         <ToggleRow
           label={t("TV navigation in player")}
-          sub={t("Use arrows and Select/Space to move focus between player controls. Turn this off to keep arrows for seeking and Space for play/pause.")}
+          sub={t(
+            "Use arrows and Select/Space to move focus between player controls. Turn this off to keep arrows for seeking and Space for play/pause.",
+          )}
           value={settings.playerTvNavigation}
           onChange={(v) => update({ playerTvNavigation: v })}
           lockReason={
@@ -129,7 +142,13 @@ export function HotkeysPanel() {
           subgroups.set(g, arr);
         }
         return (
-          <Section key={scope} title={t(scope)} subtitle={scope === "Player" ? t("Inside the playback view.") : t("Anywhere in Harbor.")}>
+          <Section
+            key={scope}
+            title={t(scope)}
+            subtitle={
+              scope === "Player" ? t("Inside the playback view.") : t("Anywhere in Harbor.")
+            }
+          >
             <div className="flex flex-col gap-6">
               {Array.from(subgroups.entries()).map(([groupName, items]) => (
                 <div key={groupName} className="flex flex-col gap-1.5">
@@ -160,7 +179,9 @@ export function HotkeysPanel() {
                   {scope === "Global" && groupName === "Interface" && (
                     <ReadOnlyHotkeyRow
                       label={t("Adjust interface scale with wheel")}
-                      description={t("Hold Ctrl or Cmd and scroll to resize Harbor's interface smoothly.")}
+                      description={t(
+                        "Hold Ctrl or Cmd and scroll to resize Harbor's interface smoothly.",
+                      )}
                       binding="Ctrl / ⌘ + Scroll"
                     />
                   )}
@@ -315,11 +336,7 @@ function HotkeyRow({
             <Keyboard size={12} strokeWidth={2.4} className="me-1.5 inline-block" />
             {t("Press a key…")}
           </span>
-          <button
-            onClick={onStartCapture}
-            className="hidden"
-            aria-hidden
-          />
+          <button onClick={onStartCapture} className="hidden" aria-hidden />
         </div>
       ) : (
         <div className="flex items-center gap-1.5">

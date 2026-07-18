@@ -40,7 +40,12 @@ export function parseStream(stream: Stream): ParsedStream {
   const audioLanguages = parseLanguages(text);
   const size = parseSize(text, stream.behaviorHints?.videoSize);
   const seeders = parseSeeders(text);
-  const cached = parseCacheFlags(text, stream.behaviorHints?.bingeGroup, stream.addonName, stream.url);
+  const cached = parseCacheFlags(
+    text,
+    stream.behaviorHints?.bingeGroup,
+    stream.addonName,
+    stream.url,
+  );
   const inLibrary: Partial<Record<DebridSlug, boolean>> = {};
   const container = parseContainer(stream.behaviorHints?.filename, filenameLine, text);
   const releaseGroup = ptt.group ?? null;

@@ -51,7 +51,12 @@ export function AnimeRow({ items, onClose }: { items: AnimeHit[]; onClose: () =>
 function AnimeRowItem({ hit, onOpen }: { hit: AnimeHit; onOpen: (hit: AnimeHit) => void }) {
   const t = useT();
   const { settings } = useSettings();
-  const poster = usePosterChain(settings.rpdbKey, animeHitMetaId(hit), hit.poster ?? undefined, "series");
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    animeHitMetaId(hit),
+    hit.poster ?? undefined,
+    "series",
+  );
   return (
     <button
       onClick={() => onOpen(hit)}

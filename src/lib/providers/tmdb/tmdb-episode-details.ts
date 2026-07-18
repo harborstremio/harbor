@@ -10,7 +10,7 @@ import { imageLangParam } from "./tmdb-image-lang";
 
 /**
  * Fetch comprehensive episode details from TMDB API
- * 
+ *
  * @param apiKey - TMDB API key
  * @param tvId - TMDB TV series ID
  * @param seasonNumber - Season number
@@ -40,7 +40,13 @@ export async function tmdbEpisodeDetail(
     // Merge regular cast + guest stars, dedup by id, sorted by order
     const seen = new Set<number>();
     const allCast: GuestStar[] = [];
-    const push = (item: { id: number; name: string; character: string; order: number; profile_path: string | null }) => {
+    const push = (item: {
+      id: number;
+      name: string;
+      character: string;
+      order: number;
+      profile_path: string | null;
+    }) => {
       if (seen.has(item.id)) return;
       seen.add(item.id);
       allCast.push({
@@ -65,15 +71,13 @@ export async function tmdbEpisodeDetail(
     }));
 
     // Transform stills (limit to 12 images)
-    const stills: StillImage[] = (data.images?.stills || [])
-      .slice(0, 12)
-      .map((still) => ({
-        aspectRatio: still.aspect_ratio,
-        filePath: still.file_path,
-        height: still.height,
-        width: still.width,
-        voteAverage: still.vote_average || 0,
-      }));
+    const stills: StillImage[] = (data.images?.stills || []).slice(0, 12).map((still) => ({
+      aspectRatio: still.aspect_ratio,
+      filePath: still.file_path,
+      height: still.height,
+      width: still.width,
+      voteAverage: still.vote_average || 0,
+    }));
 
     return {
       id: data.id,

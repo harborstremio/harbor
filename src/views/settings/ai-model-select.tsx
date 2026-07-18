@@ -42,7 +42,9 @@ export function AiModelSelect({
               <ProviderLogo provider={current.family ?? current.provider} />
               <span className="flex min-w-0 flex-1 items-baseline gap-2">
                 <span className="truncate text-[13px] font-medium text-ink">{current.label}</span>
-                <span className="shrink-0 text-[11px] text-ink-subtle">{PROVIDER_NAME[current.family ?? current.provider]}</span>
+                <span className="shrink-0 text-[11px] text-ink-subtle">
+                  {PROVIDER_NAME[current.family ?? current.provider]}
+                </span>
               </span>
             </>
           ) : (

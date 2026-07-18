@@ -24,7 +24,13 @@ function read(map: Map<string, Entry>, key: string): unknown {
   return e.value;
 }
 
-function write(map: Map<string, Entry>, key: string, value: unknown, ttl: number, max: number): void {
+function write(
+  map: Map<string, Entry>,
+  key: string,
+  value: unknown,
+  ttl: number,
+  max: number,
+): void {
   lruSet(map, key, { value, expiresAt: Date.now() + ttl }, max);
 }
 

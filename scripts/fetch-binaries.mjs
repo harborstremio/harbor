@@ -77,7 +77,8 @@ const YTDLP = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 const JVS = "https://johnvansickle.com/ffmpeg/releases";
 const EVERMEET = "https://evermeet.cx/ffmpeg/getrelease";
 const GYAN = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip";
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+const UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
 const SOURCES = {
   "yt-dlp": {
@@ -88,15 +89,31 @@ const SOURCES = {
     "x86_64-pc-windows-msvc": { kind: "raw", url: `${YTDLP}/yt-dlp.exe` },
   },
   ffmpeg: {
-    "x86_64-unknown-linux-gnu": { kind: "tar.xz", url: `${JVS}/ffmpeg-release-amd64-static.tar.xz`, member: "ffmpeg" },
-    "aarch64-unknown-linux-gnu": { kind: "tar.xz", url: `${JVS}/ffmpeg-release-arm64-static.tar.xz`, member: "ffmpeg" },
+    "x86_64-unknown-linux-gnu": {
+      kind: "tar.xz",
+      url: `${JVS}/ffmpeg-release-amd64-static.tar.xz`,
+      member: "ffmpeg",
+    },
+    "aarch64-unknown-linux-gnu": {
+      kind: "tar.xz",
+      url: `${JVS}/ffmpeg-release-arm64-static.tar.xz`,
+      member: "ffmpeg",
+    },
     "x86_64-apple-darwin": { kind: "zip", url: `${EVERMEET}/ffmpeg/zip`, member: "ffmpeg" },
     "aarch64-apple-darwin": { kind: "zip", url: `${EVERMEET}/ffmpeg/zip`, member: "ffmpeg" },
     "x86_64-pc-windows-msvc": { kind: "zip", url: GYAN, member: "ffmpeg.exe" },
   },
   ffprobe: {
-    "x86_64-unknown-linux-gnu": { kind: "tar.xz", url: `${JVS}/ffmpeg-release-amd64-static.tar.xz`, member: "ffprobe" },
-    "aarch64-unknown-linux-gnu": { kind: "tar.xz", url: `${JVS}/ffmpeg-release-arm64-static.tar.xz`, member: "ffprobe" },
+    "x86_64-unknown-linux-gnu": {
+      kind: "tar.xz",
+      url: `${JVS}/ffmpeg-release-amd64-static.tar.xz`,
+      member: "ffprobe",
+    },
+    "aarch64-unknown-linux-gnu": {
+      kind: "tar.xz",
+      url: `${JVS}/ffmpeg-release-arm64-static.tar.xz`,
+      member: "ffprobe",
+    },
     "x86_64-apple-darwin": { kind: "zip", url: `${EVERMEET}/ffprobe/zip`, member: "ffprobe" },
     "aarch64-apple-darwin": { kind: "zip", url: `${EVERMEET}/ffprobe/zip`, member: "ffprobe" },
     "x86_64-pc-windows-msvc": { kind: "zip", url: GYAN, member: "ffprobe.exe" },
@@ -119,7 +136,10 @@ const dlCache = new Map();
 async function download(url) {
   if (dlCache.has(url)) return dlCache.get(url);
   console.log(`[binaries] fetching ${url}`);
-  const res = await fetch(url, { redirect: "follow", headers: { "user-agent": UA, accept: "*/*" } });
+  const res = await fetch(url, {
+    redirect: "follow",
+    headers: { "user-agent": UA, accept: "*/*" },
+  });
   if (!res.ok) throw new Error(`download failed (${res.status} ${res.statusText})`);
   const buf = Buffer.from(await res.arrayBuffer());
   dlCache.set(url, buf);
@@ -161,7 +181,12 @@ function extractMember(buf, kind, member, dest) {
     } else if (process.platform === "win32") {
       execFileSync(
         "powershell",
-        ["-NoProfile", "-NonInteractive", "-Command", `Expand-Archive -LiteralPath "${archive}" -DestinationPath "${outDir}" -Force`],
+        [
+          "-NoProfile",
+          "-NonInteractive",
+          "-Command",
+          `Expand-Archive -LiteralPath "${archive}" -DestinationPath "${outDir}" -Force`,
+        ],
         { stdio: "inherit" },
       );
     } else {
@@ -180,8 +205,12 @@ function hint(name) {
     `[binaries] fix: set ${ENVVAR[name]} to a mirror URL, or drop a working`,
     `[binaries]      ${name}-${triple}${EXE} into src-tauri/binaries/ by hand.`,
   ];
-  if (name === "yt-dlp") lines.push("[binaries]      source: github.com/yt-dlp/yt-dlp/releases/latest");
-  else lines.push("[binaries]      static builds: johnvansickle.com (linux), evermeet.cx / osxexperts.net (macOS), gyan.dev or BtbN (windows)");
+  if (name === "yt-dlp")
+    lines.push("[binaries]      source: github.com/yt-dlp/yt-dlp/releases/latest");
+  else
+    lines.push(
+      "[binaries]      static builds: johnvansickle.com (linux), evermeet.cx / osxexperts.net (macOS), gyan.dev or BtbN (windows)",
+    );
   return lines.join("\n");
 }
 

@@ -95,7 +95,9 @@ export function AuthModal({ onClose }: { onClose: () => void }) {
           </span>
           <span className="flex flex-col">
             <span className="text-[13px] font-medium text-ink">{t("Remember me")}</span>
-            <span className="text-[11.5px] text-ink-subtle">{t("Stays signed in on this device only.")}</span>
+            <span className="text-[11.5px] text-ink-subtle">
+              {t("Stays signed in on this device only.")}
+            </span>
           </span>
         </button>
 

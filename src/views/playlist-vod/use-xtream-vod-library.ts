@@ -23,10 +23,7 @@ type Snapshot = {
   seriesTotal: number | null;
 };
 
-type PersistedSnapshot = Pick<
-  Snapshot,
-  "library" | "fetchedAt" | "movieTotal" | "seriesTotal"
->;
+type PersistedSnapshot = Pick<Snapshot, "library" | "fetchedAt" | "movieTotal" | "seriesTotal">;
 
 type SnapshotPatch = Partial<Omit<Snapshot, "library">> & {
   library?: Partial<VodLibrary>;
@@ -75,7 +72,11 @@ function makeLibrary(source: IptvPlaylistSource, channels: readonly IptvChannel[
   return buildVodLibrary([playlist], new Map([[source.id, source.name]]));
 }
 
-function appendUnique<T extends { id: string }>(target: T[], seen: Set<string>, items: readonly T[]) {
+function appendUnique<T extends { id: string }>(
+  target: T[],
+  seen: Set<string>,
+  items: readonly T[],
+) {
   for (const item of items) {
     if (seen.has(item.id)) continue;
     seen.add(item.id);
@@ -121,10 +122,7 @@ async function load(source: IptvPlaylistSource, force = false): Promise<void> {
     if (!force && !cache.has(source.id)) {
       const stored = await readIptvCache<PersistedSnapshot>("xtream-vod", source.id);
       if (!isCurrent()) return;
-      if (
-        stored?.sourceSignature === sourceSignature &&
-        isPersistedSnapshot(stored.value)
-      ) {
+      if (stored?.sourceSignature === sourceSignature && isPersistedSnapshot(stored.value)) {
         cache.set(source.id, {
           ...EMPTY,
           ...stored.value,

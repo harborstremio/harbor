@@ -24,7 +24,9 @@ export async function scaleToBlob(file: File, maxDim = 1920): Promise<Blob> {
     const ctx = canvas.getContext("2d");
     if (!ctx) return file;
     ctx.drawImage(img, 0, 0, w, h);
-    return await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b || file), "image/webp", 0.85));
+    return await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b || file), "image/webp", 0.85),
+    );
   } finally {
     URL.revokeObjectURL(url);
   }

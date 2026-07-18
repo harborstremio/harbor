@@ -1,4 +1,15 @@
-import { BookOpen, Check, Copy, Download, Loader2, Power, Radio, ShieldCheck, Wifi, X } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  Copy,
+  Download,
+  Loader2,
+  Power,
+  Radio,
+  ShieldCheck,
+  Wifi,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import cloudflareLogo from "@/assets/cloudflare.webp";
 import pubRelaySvg from "@/assets/pubrelay.svg";
@@ -14,7 +25,6 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 function isCloudflareRelay(url: string): boolean {
   return /workers\.dev|cloudflare/i.test(url);
 }
-
 
 export function TogetherRelayPanel({
   onOpenDocs,
@@ -41,7 +51,8 @@ export function TogetherRelayPanel({
     const v = draftUrl.trim();
     if (v) update({ togetherRelayUrl: v });
   };
-  const isManaged = settings.togetherCfDeployed && !!settings.togetherCfToken && !!settings.togetherCfAccountId;
+  const isManaged =
+    settings.togetherCfDeployed && !!settings.togetherCfToken && !!settings.togetherCfAccountId;
 
   const copy = async () => {
     if (!settings.togetherRelayUrl) return;
@@ -110,7 +121,12 @@ export function TogetherRelayPanel({
                 }`}
               >
                 {isCfRelay ? (
-                  <img src={cloudflareLogo} alt="Cloudflare" className="h-5 w-5 object-contain" draggable={false} />
+                  <img
+                    src={cloudflareLogo}
+                    alt="Cloudflare"
+                    className="h-5 w-5 object-contain"
+                    draggable={false}
+                  />
                 ) : (
                   <Radio size={18} strokeWidth={1.9} className="text-accent" />
                 )}
@@ -120,13 +136,19 @@ export function TogetherRelayPanel({
               <span className="text-[11px] uppercase tracking-wider text-ink-subtle">
                 {isManaged ? t("Your relay is live") : t("Connected to relay")}
               </span>
-              <span className="truncate font-mono text-[13px] text-ink">{settings.togetherRelayUrl}</span>
+              <span className="truncate font-mono text-[13px] text-ink">
+                {settings.togetherRelayUrl}
+              </span>
             </div>
             <button
               onClick={copy}
               className="flex h-10 items-center gap-1.5 rounded-lg border border-edge px-3 text-[13px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
             >
-              {copied ? <Check size={14} strokeWidth={2.2} /> : <Copy size={14} strokeWidth={1.8} />}
+              {copied ? (
+                <Check size={14} strokeWidth={2.2} />
+              ) : (
+                <Copy size={14} strokeWidth={1.8} />
+              )}
               {copied ? t("Copied") : t("Copy")}
             </button>
           </div>
@@ -156,7 +178,11 @@ export function TogetherRelayPanel({
                 disabled={testing}
                 className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-edge px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-60"
               >
-                {testing ? <Loader2 size={13} strokeWidth={1.9} className="animate-spin" /> : <Wifi size={13} strokeWidth={1.9} />}
+                {testing ? (
+                  <Loader2 size={13} strokeWidth={1.9} className="animate-spin" />
+                ) : (
+                  <Wifi size={13} strokeWidth={1.9} />
+                )}
                 {testing ? t("Testing…") : t("Run test")}
               </button>
             </div>
@@ -167,7 +193,9 @@ export function TogetherRelayPanel({
                   <div className="flex min-w-0 items-center gap-2.5">
                     <span
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                        passive.needsUpdate ? "bg-amber-400/15 text-amber-300" : "bg-accent/15 text-accent"
+                        passive.needsUpdate
+                          ? "bg-amber-400/15 text-amber-300"
+                          : "bg-accent/15 text-accent"
                       }`}
                     >
                       <ShieldCheck size={13} strokeWidth={2} />
@@ -175,14 +203,18 @@ export function TogetherRelayPanel({
                     <div className="flex min-w-0 flex-col">
                       <span className="text-[13px] font-medium text-ink">
                         {passive.needsUpdate
-                          ? t("Relay version {version}. Update available.", { version: passive.version ?? t("unknown") })
+                          ? t("Relay version {version}. Update available.", {
+                              version: passive.version ?? t("unknown"),
+                            })
                           : t("Relay is current (v{version}).", { version: passive.version ?? "" })}
                       </span>
                       <span className="text-[11.5px] text-ink-subtle">
                         {passive.needsUpdate
                           ? isPubRelay
                             ? t("Harbor's public relay updates automatically; nothing to do.")
-                            : t("Redeploy to pick up the latest Watch Together fixes. The in-app banner clears once the new version is live.")
+                            : t(
+                                "Redeploy to pick up the latest Watch Together fixes. The in-app banner clears once the new version is live.",
+                              )
                           : t("Running the latest Watch Together protocol.")}
                       </span>
                     </div>
@@ -192,7 +224,11 @@ export function TogetherRelayPanel({
                       onClick={() => (isManaged ? setShowDeploy(true) : setShowDocs(true))}
                       className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-edge px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
                     >
-                      {isManaged ? <Power size={13} strokeWidth={2} /> : <BookOpen size={13} strokeWidth={1.9} />}
+                      {isManaged ? (
+                        <Power size={13} strokeWidth={2} />
+                      ) : (
+                        <BookOpen size={13} strokeWidth={1.9} />
+                      )}
                       {isManaged ? t("Redeploy") : t("Redeploy instructions")}
                     </button>
                   )}
@@ -204,9 +240,13 @@ export function TogetherRelayPanel({
                 <div className="h-px bg-edge-soft/60" />
                 <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5">
                   <div className="flex min-w-0 flex-col">
-                    <span className="text-[13px] font-medium text-ink">{t("Backup credentials")}</span>
+                    <span className="text-[13px] font-medium text-ink">
+                      {t("Backup credentials")}
+                    </span>
                     <span className="text-[11.5px] text-ink-subtle">
-                      {t("Cloudflare shows API tokens only once. Save a copy now or you'll lose the ability to stop or redeploy this relay from Harbor.")}
+                      {t(
+                        "Cloudflare shows API tokens only once. Save a copy now or you'll lose the ability to stop or redeploy this relay from Harbor.",
+                      )}
                     </span>
                   </div>
                   <button
@@ -224,9 +264,7 @@ export function TogetherRelayPanel({
           {testResult && (
             <div
               className={`flex flex-col gap-2 rounded-xl border px-3.5 py-3 ${
-                testResult.ok
-                  ? "border-accent/40 bg-accent/10"
-                  : "border-danger/40 bg-danger/10"
+                testResult.ok ? "border-accent/40 bg-accent/10" : "border-danger/40 bg-danger/10"
               }`}
             >
               <div className="flex items-start gap-2.5">
@@ -235,10 +273,16 @@ export function TogetherRelayPanel({
                     testResult.ok ? "bg-accent/25 text-accent" : "bg-danger/25 text-danger"
                   }`}
                 >
-                  {testResult.ok ? <Check size={12} strokeWidth={2.4} /> : <X size={12} strokeWidth={2.4} />}
+                  {testResult.ok ? (
+                    <Check size={12} strokeWidth={2.4} />
+                  ) : (
+                    <X size={12} strokeWidth={2.4} />
+                  )}
                 </span>
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className={`text-[12.5px] font-medium ${testResult.ok ? "text-ink" : "text-danger"}`}>
+                  <span
+                    className={`text-[12.5px] font-medium ${testResult.ok ? "text-ink" : "text-danger"}`}
+                  >
                     {testResult.ok ? t("Relay verified end-to-end") : t("Relay test failed")}
                   </span>
                   <span className="text-[11.5px] text-ink-subtle">{testResult.message}</span>
@@ -263,7 +307,11 @@ export function TogetherRelayPanel({
                 disabled={stopping}
                 className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-danger/40 text-[13px] text-danger transition-colors hover:bg-danger/10 disabled:opacity-50 disabled:hover:bg-transparent"
               >
-                {stopping ? <Loader2 size={14} strokeWidth={1.9} className="animate-spin" /> : <Power size={14} strokeWidth={1.9} />}
+                {stopping ? (
+                  <Loader2 size={14} strokeWidth={1.9} className="animate-spin" />
+                ) : (
+                  <Power size={14} strokeWidth={1.9} />
+                )}
                 {stopping ? t("Stopping…") : t("Stop relay")}
               </button>
               <button
@@ -308,10 +356,14 @@ export function TogetherRelayPanel({
             <div className="flex flex-col gap-2 rounded-xl border border-edge-soft bg-canvas/40 p-4">
               <div className="flex items-center gap-2">
                 <Power size={14} strokeWidth={1.9} className="text-ink-subtle" />
-                <span className="text-[13px] font-medium text-ink">{t("Deploy a relay (desktop only)")}</span>
+                <span className="text-[13px] font-medium text-ink">
+                  {t("Deploy a relay (desktop only)")}
+                </span>
               </div>
               <p className="text-[12px] leading-snug text-ink-muted">
-                {t("Relay deployment requires the Cloudflare API, which is unavailable to browser clients. Use the desktop build to deploy a Worker, then enter the resulting URL below.")}
+                {t(
+                  "Relay deployment requires the Cloudflare API, which is unavailable to browser clients. Use the desktop build to deploy a Worker, then enter the resulting URL below.",
+                )}
               </p>
             </div>
           )}
@@ -339,7 +391,9 @@ export function TogetherRelayPanel({
             </button>
           </div>
           <p className="text-[11.5px] leading-relaxed text-ink-subtle">
-            {t("Only enter URLs for relays you operate or trust. A relay only carries Watch Together sync messages (play, pause, seek). Nothing else passes through it.")}
+            {t(
+              "Only enter URLs for relays you operate or trust. A relay only carries Watch Together sync messages (play, pause, seek). Nothing else passes through it.",
+            )}
           </p>
           <div className="flex flex-col gap-2 rounded-xl border border-edge-soft bg-canvas/40 px-3.5 py-3">
             <span className="text-[12px] text-ink-muted">
@@ -377,9 +431,6 @@ export function TogetherRelayPanel({
         </svg>
         {t("Documentation: run your own relay")}
       </button>
-
     </>
   );
 }
-
-

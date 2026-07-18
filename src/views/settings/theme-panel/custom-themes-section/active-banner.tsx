@@ -32,7 +32,8 @@ export function ActiveBanner({
       </div>
     );
   }
-  const bg = theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
+  const bg =
+    theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
   const canvasToken = theme.tokens?.["--color-canvas"] ?? theme.swatch[0];
   const isLight = colorLuminance(canvasToken) > 0.6;
   const fg = isLight ? "#0a0a0c" : "#ffffff";
@@ -58,7 +59,10 @@ export function ActiveBanner({
         aria-hidden
         style={{ background: scrim, zIndex: 1 }}
       />
-      <div className="relative flex flex-wrap items-center justify-between gap-4 px-5 py-5" style={{ zIndex: 2 }}>
+      <div
+        className="relative flex flex-wrap items-center justify-between gap-4 px-5 py-5"
+        style={{ zIndex: 2 }}
+      >
         <div className="flex min-w-0 flex-col gap-1">
           <div
             className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.28em]"
@@ -79,9 +83,17 @@ export function ActiveBanner({
             </p>
           )}
           <div className="mt-1.5 flex flex-wrap gap-1.5">
-            <Chip bg={chipBg} ring={chipRing} fg={fg}>{labelForLayout(theme.layout)}</Chip>
-            <Chip bg={chipBg} ring={chipRing} fg={fg}>{labelForCard(theme.cardStyle)}</Chip>
-            {theme.bokeh && <Chip bg={chipBg} ring={chipRing} fg={fg}>Bokeh</Chip>}
+            <Chip bg={chipBg} ring={chipRing} fg={fg}>
+              {labelForLayout(theme.layout)}
+            </Chip>
+            <Chip bg={chipBg} ring={chipRing} fg={fg}>
+              {labelForCard(theme.cardStyle)}
+            </Chip>
+            {theme.bokeh && (
+              <Chip bg={chipBg} ring={chipRing} fg={fg}>
+                Bokeh
+              </Chip>
+            )}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">

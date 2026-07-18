@@ -14,7 +14,15 @@ type Props = {
   onClick: () => void;
 };
 
-export const VodCard = memo(function VodCard({ kind, title, year, logo, seed, subtitle, onClick }: Props) {
+export const VodCard = memo(function VodCard({
+  kind,
+  title,
+  year,
+  logo,
+  seed,
+  subtitle,
+  onClick,
+}: Props) {
   const { settings } = useSettings();
   const [poster, setPoster] = useState<string | null>(logo);
   const ref = useRef<HTMLButtonElement>(null);
@@ -45,7 +53,11 @@ export const VodCard = memo(function VodCard({ kind, title, year, logo, seed, su
   }, [settings.tmdbKey, kind, title, year, logo]);
 
   return (
-    <button ref={ref} onClick={onClick} className="group flex w-full min-w-0 flex-col gap-2 text-start">
+    <button
+      ref={ref}
+      onClick={onClick}
+      className="group flex w-full min-w-0 flex-col gap-2 text-start"
+    >
       <Poster
         src={poster ?? undefined}
         seed={seed}

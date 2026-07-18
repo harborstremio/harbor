@@ -4,7 +4,13 @@ import { isWindowsDesktop } from "@/lib/platform";
 
 export type ViewMode = "home" | "grid" | "guide" | "multiview";
 
-export function ViewModeToggle({ mode, onChange }: { mode: ViewMode; onChange: (m: ViewMode) => void }) {
+export function ViewModeToggle({
+  mode,
+  onChange,
+}: {
+  mode: ViewMode;
+  onChange: (m: ViewMode) => void;
+}) {
   const t = useT();
   return (
     <div className="flex h-11 shrink-0 items-center gap-0.5 rounded-xl border border-edge-soft/55 bg-elevated p-1">

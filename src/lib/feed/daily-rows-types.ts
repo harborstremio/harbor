@@ -17,7 +17,15 @@ export type ExpandedRow = {
 
 export type CatalogEntry = {
   id: string;
-  dimension: "genre" | "decade" | "person" | "keyword" | "country" | "runtime" | "network" | "anchor";
+  dimension:
+    | "genre"
+    | "decade"
+    | "person"
+    | "keyword"
+    | "country"
+    | "runtime"
+    | "network"
+    | "anchor";
   eligible: (affinity: Affinity, settings: Settings) => boolean;
   expand: (affinity: Affinity, base: number, settings: Settings) => ExpandedRow[];
 };

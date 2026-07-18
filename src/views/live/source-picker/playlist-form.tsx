@@ -23,7 +23,12 @@ export const EMPTY_FORM: PlaylistFormValue = {
 };
 
 const KINDS: Array<{ id: PlaylistKind; label: string; icon: React.ReactNode; sub: string }> = [
-  { id: "m3u", label: "M3U URL", icon: <Tv size={14} strokeWidth={1.9} />, sub: "Direct .m3u link" },
+  {
+    id: "m3u",
+    label: "M3U URL",
+    icon: <Tv size={14} strokeWidth={1.9} />,
+    sub: "Direct .m3u link",
+  },
   {
     id: "xtream",
     label: "Xtream",

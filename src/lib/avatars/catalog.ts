@@ -1317,411 +1317,275 @@ export const AVATAR_CATALOG: AvatarGroup[] = [
   },
   {
     group: "A Clockwork Orange",
-    items: [
-      { id: "alex_delarge", name: "Alex DeLarge" },
-    ],
+    items: [{ id: "alex_delarge", name: "Alex DeLarge" }],
   },
   {
     group: "A Nightmare on Elm Street",
-    items: [
-      { id: "horror_freddy", name: "Freddy Krueger" },
-    ],
+    items: [{ id: "horror_freddy", name: "Freddy Krueger" }],
   },
   {
     group: "Alien",
-    items: [
-      { id: "alien_xenomorph", name: "Xenomorph" },
-    ],
+    items: [{ id: "alien_xenomorph", name: "Xenomorph" }],
   },
   {
     group: "American Psycho",
-    items: [
-      { id: "bateman", name: "Patrick Bateman" },
-    ],
+    items: [{ id: "bateman", name: "Patrick Bateman" }],
   },
   {
     group: "Anchorman",
-    items: [
-      { id: "ronburgundy", name: "Ron Burgundy" },
-    ],
+    items: [{ id: "ronburgundy", name: "Ron Burgundy" }],
   },
   {
     group: "Ancient Aliens",
-    items: [
-      { id: "internet_giorgio_tsoukalos_aliens", name: "Giorgio Tsoukalos" },
-    ],
+    items: [{ id: "internet_giorgio_tsoukalos_aliens", name: "Giorgio Tsoukalos" }],
   },
   {
     group: "Ben 10",
-    items: [
-      { id: "ben10", name: "Ben 10" },
-    ],
+    items: [{ id: "ben10", name: "Ben 10" }],
   },
   {
     group: "Big Hero 6",
-    items: [
-      { id: "baymax_v2", name: "Baymax" },
-    ],
+    items: [{ id: "baymax_v2", name: "Baymax" }],
   },
   {
     group: "Borat",
-    items: [
-      { id: "cult_borat_v3", name: "Borat" },
-    ],
+    items: [{ id: "cult_borat_v3", name: "Borat" }],
   },
   {
     group: "Captain Tsubasa",
-    items: [
-      { id: "global_tsubasa", name: "Tsubasa" },
-    ],
+    items: [{ id: "global_tsubasa", name: "Tsubasa" }],
   },
   {
     group: "CatDog",
-    items: [
-      { id: "anime_catdog", name: "CatDog" },
-    ],
+    items: [{ id: "anime_catdog", name: "CatDog" }],
   },
   {
     group: "Chappelle's Show",
-    items: [
-      { id: "tyrone_biggums", name: "Tyrone Biggums" },
-    ],
+    items: [{ id: "tyrone_biggums", name: "Tyrone Biggums" }],
   },
   {
     group: "Chappie",
-    items: [
-      { id: "cult_chappie", name: "Chappie" },
-    ],
+    items: [{ id: "cult_chappie", name: "Chappie" }],
   },
   {
     group: "Chhota Bheem",
-    items: [
-      { id: "global_chhota_bheem", name: "Chhota Bheem" },
-    ],
+    items: [{ id: "global_chhota_bheem", name: "Chhota Bheem" }],
   },
   {
     group: "Coraline",
-    items: [
-      { id: "coraline", name: "Coraline" },
-    ],
+    items: [{ id: "coraline", name: "Coraline" }],
   },
   {
     group: "Courage the Cowardly Dog",
-    items: [
-      { id: "courage", name: "Courage" },
-    ],
+    items: [{ id: "courage", name: "Courage" }],
   },
   {
     group: "Danny Phantom",
-    items: [
-      { id: "dannyphantom", name: "Danny Phantom" },
-    ],
+    items: [{ id: "dannyphantom", name: "Danny Phantom" }],
   },
   {
     group: "Dexter",
-    items: [
-      { id: "dexterkiller", name: "Dexter Morgan" },
-    ],
+    items: [{ id: "dexterkiller", name: "Dexter Morgan" }],
   },
   {
     group: "Dexter's Laboratory",
-    items: [
-      { id: "dexter_lab", name: "Dexter" },
-    ],
+    items: [{ id: "dexter_lab", name: "Dexter" }],
   },
   {
     group: "Don't Be a Menace",
-    items: [
-      { id: "locdog", name: "Loc Dog" },
-    ],
+    items: [{ id: "locdog", name: "Loc Dog" }],
   },
   {
     group: "Donnie Darko",
-    items: [
-      { id: "cult_frank_rabbit", name: "Frank" },
-    ],
+    items: [{ id: "cult_frank_rabbit", name: "Frank" }],
   },
   {
     group: "Eastbound & Down",
-    items: [
-      { id: "cult_kenny_powers", name: "Kenny Powers" },
-    ],
+    items: [{ id: "cult_kenny_powers", name: "Kenny Powers" }],
   },
   {
     group: "El Chapulin Colorado",
-    items: [
-      { id: "chapolin", name: "Chapulin" },
-    ],
+    items: [{ id: "chapolin", name: "Chapulin" }],
   },
   {
     group: "Fear and Loathing in Las Vegas",
-    items: [
-      { id: "cult_raoul_duke", name: "Raoul Duke" },
-    ],
+    items: [{ id: "cult_raoul_duke", name: "Raoul Duke" }],
   },
   {
     group: "Grendizer",
-    items: [
-      { id: "grendizer", name: "Grendizer" },
-    ],
+    items: [{ id: "grendizer", name: "Grendizer" }],
   },
   {
     group: "Hellboy",
-    items: [
-      { id: "hellboy", name: "Hellboy" },
-    ],
+    items: [{ id: "hellboy", name: "Hellboy" }],
   },
   {
     group: "Her",
-    items: [
-      { id: "theodore_v2", name: "Theodore" },
-    ],
+    items: [{ id: "theodore_v2", name: "Theodore" }],
   },
   {
     group: "Indiana Jones",
-    items: [
-      { id: "indiana_jones", name: "Indiana Jones" },
-    ],
+    items: [{ id: "indiana_jones", name: "Indiana Jones" }],
   },
   {
     group: "Inglourious Basterds",
-    items: [
-      { id: "aldoraine", name: "Aldo Raine" },
-    ],
+    items: [{ id: "aldoraine", name: "Aldo Raine" }],
   },
   {
     group: "John Wayne",
-    items: [
-      { id: "johnwayne", name: "John Wayne" },
-    ],
+    items: [{ id: "johnwayne", name: "John Wayne" }],
   },
   {
     group: "Johnny Bravo",
-    items: [
-      { id: "johnnybravo", name: "Johnny Bravo" },
-    ],
+    items: [{ id: "johnnybravo", name: "Johnny Bravo" }],
   },
   {
     group: "Johnny Test",
-    items: [
-      { id: "johnny_test", name: "Johnny Test" },
-    ],
+    items: [{ id: "johnny_test", name: "Johnny Test" }],
   },
   {
     group: "Judge Dredd",
-    items: [
-      { id: "judgedredd", name: "Judge Dredd" },
-    ],
+    items: [{ id: "judgedredd", name: "Judge Dredd" }],
   },
   {
     group: "Kimi ni Todoke",
-    items: [
-      { id: "sawako", name: "Sawako" },
-    ],
+    items: [{ id: "sawako", name: "Sawako" }],
   },
   {
     group: "Kung Fu Hustle",
-    items: [
-      { id: "kungfu_landlady", name: "The Landlady" },
-    ],
+    items: [{ id: "kungfu_landlady", name: "The Landlady" }],
   },
   {
     group: "Madoka Magica",
-    items: [
-      { id: "madoka", name: "Madoka" },
-    ],
+    items: [{ id: "madoka", name: "Madoka" }],
   },
   {
     group: "Magic Mike",
-    items: [
-      { id: "magicmike", name: "Magic Mike" },
-    ],
+    items: [{ id: "magicmike", name: "Magic Mike" }],
   },
   {
     group: "Mars Attacks!",
-    items: [
-      { id: "cult_mars_attacks", name: "Martian" },
-    ],
+    items: [{ id: "cult_mars_attacks", name: "Martian" }],
   },
   {
     group: "Maya the Bee",
-    items: [
-      { id: "global_maya_bee", name: "Maya" },
-    ],
+    items: [{ id: "global_maya_bee", name: "Maya" }],
   },
   {
     group: "Mazinger Z",
-    items: [
-      { id: "mazinger", name: "Mazinger" },
-    ],
+    items: [{ id: "mazinger", name: "Mazinger" }],
   },
   {
     group: "Moomin",
-    items: [
-      { id: "global_moomin", name: "Moomin" },
-    ],
+    items: [{ id: "global_moomin", name: "Moomin" }],
   },
   {
     group: "Mr. Bean",
-    items: [
-      { id: "mrbean", name: "Mr. Bean" },
-    ],
+    items: [{ id: "mrbean", name: "Mr. Bean" }],
   },
   {
     group: "My Life as a Teenage Robot",
-    items: [
-      { id: "anime_jenny_robot", name: "Jenny" },
-    ],
+    items: [{ id: "anime_jenny_robot", name: "Jenny" }],
   },
   {
     group: "My Neighbor Totoro",
-    items: [
-      { id: "totoro", name: "Totoro" },
-    ],
+    items: [{ id: "totoro", name: "Totoro" }],
   },
   {
     group: "Nana",
-    items: [
-      { id: "nana", name: "Nana Osaki" },
-    ],
+    items: [{ id: "nana", name: "Nana Osaki" }],
   },
   {
     group: "Napoleon Dynamite",
-    items: [
-      { id: "cult_napoleon_dynamite", name: "Napoleon Dynamite" },
-    ],
+    items: [{ id: "cult_napoleon_dynamite", name: "Napoleon Dynamite" }],
   },
   {
     group: "Narcos",
-    items: [
-      { id: "pabloescobar", name: "Pablo Escobar" },
-    ],
+    items: [{ id: "pabloescobar", name: "Pablo Escobar" }],
   },
   {
     group: "No Country for Old Men",
-    items: [
-      { id: "antonchigurh", name: "Anton Chigurh" },
-    ],
+    items: [{ id: "antonchigurh", name: "Anton Chigurh" }],
   },
   {
     group: "Obsession",
-    items: [
-      { id: "live_action_anna_barton_obsession", name: "Anna Barton" },
-    ],
+    items: [{ id: "live_action_anna_barton_obsession", name: "Anna Barton" }],
   },
   {
     group: "Ocean's Eleven",
-    items: [
-      { id: "dannyocean", name: "Danny Ocean" },
-    ],
+    items: [{ id: "dannyocean", name: "Danny Ocean" }],
   },
   {
     group: "Pan's Labyrinth",
-    items: [
-      { id: "pale_man", name: "Pale Man" },
-    ],
+    items: [{ id: "pale_man", name: "Pale Man" }],
   },
   {
     group: "Parks and Recreation",
-    items: [
-      { id: "cult_ron_swanson", name: "Ron Swanson" },
-    ],
+    items: [{ id: "cult_ron_swanson", name: "Ron Swanson" }],
   },
   {
     group: "Paul",
-    items: [
-      { id: "cult_paul_alien", name: "Paul" },
-    ],
+    items: [{ id: "cult_paul_alien", name: "Paul" }],
   },
   {
     group: "Peaky Blinders",
-    items: [
-      { id: "tommy_shelby", name: "Tommy Shelby" },
-    ],
+    items: [{ id: "tommy_shelby", name: "Tommy Shelby" }],
   },
   {
     group: "Pokemon",
-    items: [
-      { id: "ash_pikachu", name: "Ash & Pikachu" },
-    ],
+    items: [{ id: "ash_pikachu", name: "Ash & Pikachu" }],
   },
   {
     group: "Ponyo",
-    items: [
-      { id: "ponyo", name: "Ponyo" },
-    ],
+    items: [{ id: "ponyo", name: "Ponyo" }],
   },
   {
     group: "Pororo",
-    items: [
-      { id: "global_pororo", name: "Pororo" },
-    ],
+    items: [{ id: "global_pororo", name: "Pororo" }],
   },
   {
     group: "Predator",
-    items: [
-      { id: "predator", name: "Predator" },
-    ],
+    items: [{ id: "predator", name: "Predator" }],
   },
   {
     group: "Primal",
-    items: [
-      { id: "spear_primal", name: "Spear" },
-    ],
+    items: [{ id: "spear_primal", name: "Spear" }],
   },
   {
     group: "Princess Mononoke",
-    items: [
-      { id: "princess_mononoke_v2", name: "San" },
-    ],
+    items: [{ id: "princess_mononoke_v2", name: "San" }],
   },
   {
     group: "Rambo",
-    items: [
-      { id: "rambo", name: "Rambo" },
-    ],
+    items: [{ id: "rambo", name: "Rambo" }],
   },
   {
     group: "Romeo + Juliet",
-    items: [
-      { id: "romeo", name: "Romeo" },
-    ],
+    items: [{ id: "romeo", name: "Romeo" }],
   },
   {
     group: "Sailor Moon",
-    items: [
-      { id: "sailormoon", name: "Sailor Moon" },
-    ],
+    items: [{ id: "sailormoon", name: "Sailor Moon" }],
   },
   {
     group: "Scarface",
-    items: [
-      { id: "tonymontana_v2", name: "Tony Montana" },
-    ],
+    items: [{ id: "tonymontana_v2", name: "Tony Montana" }],
   },
   {
     group: "Scream",
-    items: [
-      { id: "ghostface_classic", name: "Ghostface" },
-    ],
+    items: [{ id: "ghostface_classic", name: "Ghostface" }],
   },
   {
     group: "Serial Experiments Lain",
-    items: [
-      { id: "anime_lain_iwakura_serial_experiments_lain", name: "Lain" },
-    ],
+    items: [{ id: "anime_lain_iwakura_serial_experiments_lain", name: "Lain" }],
   },
   {
     group: "Seth Rogen",
-    items: [
-      { id: "seth_rogen", name: "Seth Rogen" },
-    ],
+    items: [{ id: "seth_rogen", name: "Seth Rogen" }],
   },
   {
     group: "Snatch",
-    items: [
-      { id: "boris_the_blade", name: "Boris the Blade" },
-    ],
+    items: [{ id: "boris_the_blade", name: "Boris the Blade" }],
   },
   {
     group: "Spider-Verse",
@@ -1733,153 +1597,103 @@ export const AVATAR_CATALOG: AvatarGroup[] = [
   },
   {
     group: "Superbad",
-    items: [
-      { id: "mclovin", name: "McLovin" },
-    ],
+    items: [{ id: "mclovin", name: "McLovin" }],
   },
   {
     group: "Talladega Nights",
-    items: [
-      { id: "rickybobby", name: "Ricky Bobby" },
-    ],
+    items: [{ id: "rickybobby", name: "Ricky Bobby" }],
   },
   {
     group: "Ted",
-    items: [
-      { id: "cult_ted_bear", name: "Ted" },
-    ],
+    items: [{ id: "cult_ted_bear", name: "Ted" }],
   },
   {
     group: "The Dictator",
-    items: [
-      { id: "cult_aladeen", name: "Aladeen" },
-    ],
+    items: [{ id: "cult_aladeen", name: "Aladeen" }],
   },
   {
     group: "The Dollars Trilogy",
-    items: [
-      { id: "manwithnoname", name: "Man with No Name" },
-    ],
+    items: [{ id: "manwithnoname", name: "Man with No Name" }],
   },
   {
     group: "The Godfather",
-    items: [
-      { id: "don_corleone", name: "Don Corleone" },
-    ],
+    items: [{ id: "don_corleone", name: "Don Corleone" }],
   },
   {
     group: "The Goonies",
-    items: [
-      { id: "sloth_goonies", name: "Sloth" },
-    ],
+    items: [{ id: "sloth_goonies", name: "Sloth" }],
   },
   {
     group: "The Mask",
-    items: [
-      { id: "the_mask", name: "The Mask" },
-    ],
+    items: [{ id: "the_mask", name: "The Mask" }],
   },
   {
     group: "The Mummy",
-    items: [
-      { id: "ahmanet", name: "Ahmanet" },
-    ],
+    items: [{ id: "ahmanet", name: "Ahmanet" }],
   },
   {
     group: "The Munsters",
-    items: [
-      { id: "herman_munster", name: "Herman Munster" },
-    ],
+    items: [{ id: "herman_munster", name: "Herman Munster" }],
   },
   {
     group: "The Room",
-    items: [
-      { id: "wiseau_tommy", name: "Tommy Wiseau" },
-    ],
+    items: [{ id: "wiseau_tommy", name: "Tommy Wiseau" }],
   },
   {
     group: "The Terminator",
-    items: [
-      { id: "terminator", name: "Terminator" },
-    ],
+    items: [{ id: "terminator", name: "Terminator" }],
   },
   {
     group: "The Thing",
-    items: [
-      { id: "kurtrussell_thing", name: "MacReady" },
-    ],
+    items: [{ id: "kurtrussell_thing", name: "MacReady" }],
   },
   {
     group: "The Twilight Zone",
-    items: [
-      { id: "twilight_zone_gremlin", name: "Gremlin" },
-    ],
+    items: [{ id: "twilight_zone_gremlin", name: "Gremlin" }],
   },
   {
     group: "The Witcher",
-    items: [
-      { id: "geralt", name: "Geralt" },
-    ],
+    items: [{ id: "geralt", name: "Geralt" }],
   },
   {
     group: "Titanic",
-    items: [
-      { id: "jackdawson", name: "Jack Dawson" },
-    ],
+    items: [{ id: "jackdawson", name: "Jack Dawson" }],
   },
   {
     group: "Tokyo Ghoul",
-    items: [
-      { id: "kaneki", name: "Kaneki" },
-    ],
+    items: [{ id: "kaneki", name: "Kaneki" }],
   },
   {
     group: "Toradora",
-    items: [
-      { id: "taiga", name: "Taiga" },
-    ],
+    items: [{ id: "taiga", name: "Taiga" }],
   },
   {
     group: "Tropic Thunder",
-    items: [
-      { id: "kirklazarus_v2", name: "Kirk Lazarus" },
-    ],
+    items: [{ id: "kirklazarus_v2", name: "Kirk Lazarus" }],
   },
   {
     group: "Twin Peaks",
-    items: [
-      { id: "twin_peaks_man", name: "The Man from Another Place" },
-    ],
+    items: [{ id: "twin_peaks_man", name: "The Man from Another Place" }],
   },
   {
     group: "V for Vendetta",
-    items: [
-      { id: "v_for_vendetta", name: "V" },
-    ],
+    items: [{ id: "v_for_vendetta", name: "V" }],
   },
   {
     group: "Vicky the Viking",
-    items: [
-      { id: "global_vicky_viking", name: "Vicky" },
-    ],
+    items: [{ id: "global_vicky_viking", name: "Vicky" }],
   },
   {
     group: "Walker, Texas Ranger",
-    items: [
-      { id: "chucknorris_sheriff", name: "Cordell Walker" },
-    ],
+    items: [{ id: "chucknorris_sheriff", name: "Cordell Walker" }],
   },
   {
     group: "Wednesday",
-    items: [
-      { id: "wednesday", name: "Wednesday" },
-    ],
+    items: [{ id: "wednesday", name: "Wednesday" }],
   },
   {
     group: "You",
-    items: [
-      { id: "live_action_joe_goldberg_you", name: "Joe Goldberg" },
-    ],
+    items: [{ id: "live_action_joe_goldberg_you", name: "Joe Goldberg" }],
   },
 ];
 

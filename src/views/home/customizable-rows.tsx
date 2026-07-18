@@ -52,7 +52,10 @@ function RowTitle({ row }: { row: HomeRow }) {
   const menu = isLetterboxd ? (
     <LetterboxdRowMenu
       canMoveUp={lb.catalogOrder.indexOf(catalogId) > 0}
-      canMoveDown={lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 && lb.catalogOrder.indexOf(catalogId) !== -1}
+      canMoveDown={
+        lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 &&
+        lb.catalogOrder.indexOf(catalogId) !== -1
+      }
       hidden={lb.hiddenCatalogs.includes(catalogId)}
       onMoveUp={() => lb.moveCatalog(catalogId, -1)}
       onMoveDown={() => lb.moveCatalog(catalogId, 1)}
@@ -60,12 +63,17 @@ function RowTitle({ row }: { row: HomeRow }) {
     />
   ) : null;
 
-  if (!row.fetcher) return <>{t(row.name)}{badge}{menu}</>;
+  if (!row.fetcher)
+    return (
+      <>
+        {t(row.name)}
+        {badge}
+        {menu}
+      </>
+    );
   return (
     <button
-      onClick={() =>
-        openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
-      }
+      onClick={() => openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })}
       className="group/see inline-flex items-center gap-1.5 text-ink transition-colors hover:text-ink-muted"
     >
       {t(row.name)}
@@ -86,7 +94,10 @@ function RowTitleExtra({ row }: { row: HomeRow }) {
   return (
     <LetterboxdRowMenu
       canMoveUp={lb.catalogOrder.indexOf(catalogId) > 0}
-      canMoveDown={lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 && lb.catalogOrder.indexOf(catalogId) !== -1}
+      canMoveDown={
+        lb.catalogOrder.indexOf(catalogId) < lb.catalogOrder.length - 1 &&
+        lb.catalogOrder.indexOf(catalogId) !== -1
+      }
       hidden={lb.hiddenCatalogs.includes(catalogId)}
       onMoveUp={() => lb.moveCatalog(catalogId, -1)}
       onMoveDown={() => lb.moveCatalog(catalogId, 1)}
@@ -163,7 +174,9 @@ export function CustomizableRows({
         if (hidden && !editMode) return null;
         let metas = row.metas.filter((m) => typeof m.id === "string");
         if (homeLanguages && homeLanguages.length > 0) {
-          metas = metas.filter((m) => !m.originalLanguage || homeLanguages.includes(m.originalLanguage));
+          metas = metas.filter(
+            (m) => !m.originalLanguage || homeLanguages.includes(m.originalLanguage),
+          );
         }
         if (hideWatched) metas = metas.filter((m) => !isWatched(m));
         if (hideUnreleased) metas = metas.filter((m) => !isUnreleased(m));
@@ -179,11 +192,16 @@ export function CustomizableRows({
         const viewAll = row.fetcher
           ? () => openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
           : undefined;
-        const ranked =
-          (customization.numerals ?? []).includes(row.key) && metas.length >= 10;
+        const ranked = (customization.numerals ?? []).includes(row.key) && metas.length >= 10;
         let rowEl;
         if (row.sourceRow) {
-          rowEl = <CustomSourcesRow sourceRow={row.sourceRow} editMode={editMode} onEditFolderImages={onEditFolderImages} />;
+          rowEl = (
+            <CustomSourcesRow
+              sourceRow={row.sourceRow}
+              editMode={editMode}
+              onEditFolderImages={onEditFolderImages}
+            />
+          );
         } else if (ranked) {
           rowEl = (
             <Row
@@ -215,10 +233,7 @@ export function CustomizableRows({
           );
         }
         return (
-          <div
-            key={row.key}
-            data-scroll-anchor={`row:${row.key}`}
-          >
+          <div key={row.key} data-scroll-anchor={`row:${row.key}`}>
             {editMode && (
               <RowControls
                 name={row.name}

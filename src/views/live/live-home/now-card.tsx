@@ -93,7 +93,9 @@ export function NowCard({
                 style={{ width: `${progress * 100}%` }}
               />
             </div>
-            {left && <span className="shrink-0 text-[10.5px] font-medium text-ink-subtle">{left}</span>}
+            {left && (
+              <span className="shrink-0 text-[10.5px] font-medium text-ink-subtle">{left}</span>
+            )}
           </div>
         )}
       </div>

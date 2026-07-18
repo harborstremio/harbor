@@ -85,7 +85,9 @@ export function LetterboxdPanel() {
       setPassword("");
       setTotp("");
       setNeeds2fa(false);
-      update({ letterboxd: { ...lb, enabled: true, mode: "full", username: result.session.username } });
+      update({
+        letterboxd: { ...lb, enabled: true, mode: "full", username: result.session.username },
+      });
       invalidateLetterboxdCache();
     } else if (result.kind === "2fa") {
       setNeeds2fa(true);
@@ -112,7 +114,10 @@ export function LetterboxdPanel() {
       const catalogId = `letterboxd-list-${ref.id}`;
       const next = {
         ...lb,
-        listRefs: [...lb.listRefs.filter((r) => r.id !== ref.id), { id: ref.id, name: ref.name, owner: ref.owner, filmCount: ref.filmCount }],
+        listRefs: [
+          ...lb.listRefs.filter((r) => r.id !== ref.id),
+          { id: ref.id, name: ref.name, owner: ref.owner, filmCount: ref.filmCount },
+        ],
         selectedCatalogs: lb.selectedCatalogs.includes(catalogId)
           ? lb.selectedCatalogs
           : [...lb.selectedCatalogs, catalogId],
@@ -141,11 +146,15 @@ export function LetterboxdPanel() {
     <>
       <Section
         title={t("Letterboxd")}
-        subtitle={t("Bring your Letterboxd watchlist, diary, liked films and lists into Harbor via the Stremboxd bridge.")}
+        subtitle={t(
+          "Bring your Letterboxd watchlist, diary, liked films and lists into Harbor via the Stremboxd bridge.",
+        )}
       >
         <ToggleRow
           label={t("Enable Letterboxd integration")}
-          sub={t("Shows your Letterboxd catalogs on the home page and a Letterboxd panel on film pages.")}
+          sub={t(
+            "Shows your Letterboxd catalogs on the home page and a Letterboxd panel on film pages.",
+          )}
           value={lb.enabled}
           onChange={(on) => update({ letterboxd: { ...lb, enabled: on } })}
         />
@@ -166,8 +175,12 @@ export function LetterboxdPanel() {
               />
               <p className="text-[12.5px] leading-relaxed text-ink-subtle">
                 {lb.mode === "public"
-                  ? t("Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.")
-                  : t("Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.")}
+                  ? t(
+                      "Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.",
+                    )
+                  : t(
+                      "Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.",
+                    )}
               </p>
             </div>
 
@@ -215,9 +228,7 @@ export function LetterboxdPanel() {
                     className="h-12 rounded-xl border border-edge-soft bg-elevated px-4 text-[15px] text-ink placeholder:text-ink-subtle/55 outline-none focus:border-ink"
                   />
                 )}
-                {loginError && (
-                  <p className="text-[12.5px] text-red-300">{loginError}</p>
-                )}
+                {loginError && <p className="text-[12.5px] text-red-300">{loginError}</p>}
               </div>
             )}
 
@@ -228,7 +239,11 @@ export function LetterboxdPanel() {
                   disabled={busy || username.trim().length === 0}
                   className="flex h-11 items-center gap-2.5 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
                 >
-                  {busy ? <Loader2 size={15} className="animate-spin" /> : <Link2 size={15} strokeWidth={2.2} />}
+                  {busy ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <Link2 size={15} strokeWidth={2.2} />
+                  )}
                   {t("Connect / Verify")}
                 </button>
               ) : (
@@ -237,7 +252,11 @@ export function LetterboxdPanel() {
                   disabled={busy || username.trim().length === 0 || password.length === 0}
                   className="flex h-11 items-center gap-2.5 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
                 >
-                  {busy ? <Loader2 size={15} className="animate-spin" /> : <Link2 size={15} strokeWidth={2.2} />}
+                  {busy ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <Link2 size={15} strokeWidth={2.2} />
+                  )}
                   {needs2fa ? t("Verify & connect") : t("Connect")}
                 </button>
               )}
@@ -280,9 +299,13 @@ export function LetterboxdPanel() {
                   </span>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[14px] font-medium text-ink">
-                      {session.displayName ? `${session.displayName} (@${session.username})` : `@${session.username}`}
+                      {session.displayName
+                        ? `${session.displayName} (@${session.username})`
+                        : `@${session.username}`}
                     </span>
-                    <span className="text-[12px] text-ink-subtle">{t("Full mode — diary, friends & ratings enabled")}</span>
+                    <span className="text-[12px] text-ink-subtle">
+                      {t("Full mode — diary, friends & ratings enabled")}
+                    </span>
                   </div>
                 </div>
                 <button
@@ -325,7 +348,9 @@ export function LetterboxdPanel() {
                       </span>
                       {t(opt.label)}
                       {opt.fullOnly && (
-                        <span className="ms-auto text-[10px] uppercase tracking-wider text-ink-subtle">{t("Full")}</span>
+                        <span className="ms-auto text-[10px] uppercase tracking-wider text-ink-subtle">
+                          {t("Full")}
+                        </span>
                       )}
                     </button>
                   );
@@ -345,7 +370,9 @@ export function LetterboxdPanel() {
                       className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-2.5"
                     >
                       <div className="flex min-w-0 flex-col gap-0.5">
-                        <span className="truncate text-[13.5px] font-medium text-ink">{ref.name}</span>
+                        <span className="truncate text-[13.5px] font-medium text-ink">
+                          {ref.name}
+                        </span>
                         <span className="text-[11.5px] text-ink-subtle">
                           {ref.owner ? `${ref.owner} · ` : ""}
                           {ref.filmCount != null ? `${ref.filmCount} films` : ""}
@@ -411,11 +438,20 @@ export function LetterboxdPanel() {
                     return (
                       <button
                         key={id}
-                        onClick={() => update({ letterboxd: { ...lb, hiddenCatalogs: lb.hiddenCatalogs.filter((h) => h !== id) } })}
+                        onClick={() =>
+                          update({
+                            letterboxd: {
+                              ...lb,
+                              hiddenCatalogs: lb.hiddenCatalogs.filter((h) => h !== id),
+                            },
+                          })
+                        }
                         className="flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
                       >
                         {label}
-                        <span className="text-[10px] uppercase tracking-wider text-accent">{t("Show")}</span>
+                        <span className="text-[10px] uppercase tracking-wider text-accent">
+                          {t("Show")}
+                        </span>
                       </button>
                     );
                   })}

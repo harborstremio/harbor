@@ -30,9 +30,7 @@ export function AddToListMenu({
 
   const toggle = (listId: string, name: string) => {
     const nowIn = toggleInList(listId, item);
-    emitListToast(
-      nowIn ? t('Added to "{name}"', { name }) : t('Removed from "{name}"', { name }),
-    );
+    emitListToast(nowIn ? t('Added to "{name}"', { name }) : t('Removed from "{name}"', { name }));
   };
 
   return (

@@ -13,7 +13,8 @@ function legacyDiffers(blob: string, cur: Settings): boolean {
     const t = (p.theme ?? {}) as Partial<Settings["theme"]>;
     if ((t.preset ?? "") !== cur.theme.preset) return true;
     if ((t.fontPair ?? "") !== cur.theme.fontPair) return true;
-    if (JSON.stringify(t.customColors ?? null) !== JSON.stringify(cur.theme.customColors ?? null)) return true;
+    if (JSON.stringify(t.customColors ?? null) !== JSON.stringify(cur.theme.customColors ?? null))
+      return true;
     for (const k of KEY_FIELDS) {
       if (((p[k] as string) ?? "") !== ((cur[k] as string) ?? "")) return true;
     }
@@ -45,7 +46,9 @@ export function SettingsRecoverRow() {
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="text-[14px] font-medium text-ink">{t("Restore previous settings")}</span>
         <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Updating separated settings per profile, which may have reset your theme and keys. Harbor still has your old setup saved. Bring it back on this profile, then reload.")}
+          {t(
+            "Updating separated settings per profile, which may have reset your theme and keys. Harbor still has your old setup saved. Bring it back on this profile, then reload.",
+          )}
         </span>
       </div>
       <button

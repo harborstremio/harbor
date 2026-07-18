@@ -18,10 +18,7 @@ export function Lightbox({
   const [index, setIndex] = useState(startIndex);
   const total = images.length;
 
-  const prev = useCallback(
-    () => setIndex((i) => (i - 1 + total) % total),
-    [total],
-  );
+  const prev = useCallback(() => setIndex((i) => (i - 1 + total) % total), [total]);
   const next = useCallback(() => setIndex((i) => (i + 1) % total), [total]);
 
   useEffect(() => {

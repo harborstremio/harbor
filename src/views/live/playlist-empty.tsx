@@ -17,11 +17,7 @@ import {
   type PlaylistKind,
 } from "./source-picker/playlist-form";
 
-export function PlaylistEmpty({
-  onSave,
-}: {
-  onSave: (entry: PlaylistFormValue) => void;
-}) {
+export function PlaylistEmpty({ onSave }: { onSave: (entry: PlaylistFormValue) => void }) {
   const [stage, setStage] = useState<"intro" | "form">("intro");
   return stage === "intro" ? (
     <Intro onContinue={() => setStage("form")} />
@@ -92,15 +88,7 @@ function Intro({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-function Feature({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
+function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
   return (
     <div className="flex gap-4">
       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-muted">

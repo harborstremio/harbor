@@ -27,14 +27,16 @@ export function EditLayoutCard({
         <p className="text-[11.5px] text-ink-subtle">
           {activeProfileName ? (
             <>
-              {t("Profile")} <span className="text-ink-muted">{activeProfileName}</span> · {visibleCount} {t("visible")}
+              {t("Profile")} <span className="text-ink-muted">{activeProfileName}</span> ·{" "}
+              {visibleCount} {t("visible")}
             </>
           ) : (
             <>
               {visibleCount} {t("visible")}
             </>
           )}
-          {hiddenCount > 0 ? t(", {hiddenCount} hidden", { hiddenCount: String(hiddenCount) }) : ""} {t("on the {themeName} theme.", { themeName: themeName })}
+          {hiddenCount > 0 ? t(", {hiddenCount} hidden", { hiddenCount: String(hiddenCount) }) : ""}{" "}
+          {t("on the {themeName} theme.", { themeName: themeName })}
         </p>
       </div>
       <button
@@ -103,9 +105,7 @@ export function FooterBar({
         type="button"
         onClick={onResetAll}
         className={`flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12.5px] font-semibold transition-colors ${
-          confirmingReset
-            ? "bg-danger text-white"
-            : "text-ink-muted hover:bg-raised hover:text-ink"
+          confirmingReset ? "bg-danger text-white" : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         <RotateCcw size={12.5} strokeWidth={2.4} />

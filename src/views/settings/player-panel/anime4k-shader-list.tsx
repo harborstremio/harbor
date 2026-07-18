@@ -57,7 +57,10 @@ export function Anime4kShaderList() {
     update({ playerAnime4kTier: t, playerAnime4kShaders: anime4kChain(folder, mode, t) });
 
   return (
-    <div id="set-anime4k-presets" className="scroll-mt-28 flex flex-col gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-4 py-4">
+    <div
+      id="set-anime4k-presets"
+      className="scroll-mt-28 flex flex-col gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-4 py-4"
+    >
       <div className="flex flex-col gap-0.5">
         <span className="text-[14px] font-semibold text-ink">Anime4K presets</span>
         <span className="text-[12.5px] leading-snug text-ink-subtle">
@@ -69,7 +72,8 @@ export function Anime4kShaderList() {
       {!folder ? (
         <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/50 px-4 py-4">
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            One-time setup downloads the shader pack (about 1 MB) into Harbor. No files to hunt down.
+            One-time setup downloads the shader pack (about 1 MB) into Harbor. No files to hunt
+            down.
           </span>
           {error && (
             <span className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">
@@ -82,7 +86,11 @@ export function Anime4kShaderList() {
             disabled={busy}
             className="flex h-11 w-fit items-center gap-2 rounded-full bg-ink px-5 text-[14px] font-semibold text-canvas transition-colors hover:bg-ink/90 disabled:cursor-wait disabled:opacity-70"
           >
-            {busy ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} strokeWidth={2.2} />}
+            {busy ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Download size={16} strokeWidth={2.2} />
+            )}
             {busy ? "Downloading shaders…" : "Set up Anime4K"}
           </button>
         </div>
@@ -90,7 +98,11 @@ export function Anime4kShaderList() {
         <>
           <div className="flex items-center gap-1 self-start rounded-full bg-elevated/50 p-1 ring-1 ring-edge-soft/60">
             <TierBtn active={tier === "hq"} onClick={() => pickTier("hq")} label="Quality" />
-            <TierBtn active={tier === "fast"} onClick={() => pickTier("fast")} label="Performance" />
+            <TierBtn
+              active={tier === "fast"}
+              onClick={() => pickTier("fast")}
+              label="Performance"
+            />
           </div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {ANIME4K_MODES.map((m) => {
@@ -163,7 +175,15 @@ export function Anime4kShaderList() {
   );
 }
 
-function TierBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function TierBtn({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
   return (
     <button
       type="button"

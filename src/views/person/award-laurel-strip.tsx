@@ -156,7 +156,9 @@ function AwardChip({
             </span>
           )}
         </span>
-        <span className="text-[10.5px] uppercase tracking-[0.16em] text-ink-subtle">{labelFor(type)}</span>
+        <span className="text-[10.5px] uppercase tracking-[0.16em] text-ink-subtle">
+          {labelFor(type)}
+        </span>
       </div>
     </button>
   );

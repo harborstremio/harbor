@@ -40,7 +40,9 @@ export function SourceDiagnostic({
       >
         <span className="font-semibold text-ink-muted">{cachedTotal} cached</span>
         <span className="text-ink-subtle/40">·</span>
-        <span>{totalRaw} found across {counts.length} {sourceWord}</span>
+        <span>
+          {totalRaw} found across {counts.length} {sourceWord}
+        </span>
         <ChevronDown
           size={13}
           strokeWidth={2}

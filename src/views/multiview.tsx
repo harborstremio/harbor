@@ -54,7 +54,8 @@ export function MultiviewView({
   useEffect(() => {
     if (!active) return;
     const n = store.slots.filter(Boolean).length;
-    const label = n > 0 ? `Watching ${n} stream${n === 1 ? "" : "s"} at once` : "Setting up Multiview";
+    const label =
+      n > 0 ? `Watching ${n} stream${n === 1 ? "" : "s"} at once` : "Setting up Multiview";
     return pushActivityHint({ details: label, state: "Multiview" });
   }, [active, store.slots]);
 
@@ -133,9 +134,9 @@ export function MultiviewView({
         <div className="mx-6 mb-3 flex items-start gap-2.5 rounded-xl border border-edge-soft/60 bg-elevated/30 px-3.5 py-2.5">
           <Info size={13} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
           <p className="flex-1 text-[11.5px] leading-relaxed text-ink-muted">
-            Most IPTV providers cap simultaneous streams per account (commonly 1–2). If a tile
-            drops to "Stream offline" while others play, your provider may be throttling. Try
-            closing a stream and retrying.
+            Most IPTV providers cap simultaneous streams per account (commonly 1–2). If a tile drops
+            to "Stream offline" while others play, your provider may be throttling. Try closing a
+            stream and retrying.
           </p>
           <button
             type="button"

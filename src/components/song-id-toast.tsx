@@ -110,15 +110,7 @@ export function SongIdToast() {
   );
 }
 
-function Vinyl({
-  art,
-  size,
-  listening,
-}: {
-  art?: string;
-  size: string;
-  listening: boolean;
-}) {
+function Vinyl({ art, size, listening }: { art?: string; size: string; listening: boolean }) {
   return (
     <div className={`relative flex-none ${size}`}>
       <div className="absolute inset-0 flex animate-spin items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-neutral-700 via-neutral-900 to-black [animation-duration:6s]">
@@ -128,7 +120,11 @@ function Vinyl({
           <img src={art} alt="" className="h-2/3 w-2/3 rounded-full object-cover" />
         ) : (
           <div className="flex h-2/3 w-2/3 items-center justify-center rounded-full bg-white/10">
-            <Music size={28} strokeWidth={1.8} className={listening ? "animate-pulse" : undefined} />
+            <Music
+              size={28}
+              strokeWidth={1.8}
+              className={listening ? "animate-pulse" : undefined}
+            />
           </div>
         )}
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black ring-2 ring-white/40" />

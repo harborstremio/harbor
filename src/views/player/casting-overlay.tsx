@@ -41,9 +41,18 @@ export function CastingOverlay({
           {connecting && (
             <span className="absolute -bottom-5 left-1/2 -translate-x-1/2">
               <span className="flex gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0s infinite" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.18s infinite" }} />
-                <span className="h-1.5 w-1.5 rounded-full bg-accent" style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.36s infinite" }} />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0s infinite" }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.18s infinite" }}
+                />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                  style={{ animation: "harbor-cast-dot 1.2s ease-in-out 0.36s infinite" }}
+                />
               </span>
             </span>
           )}
@@ -52,7 +61,10 @@ export function CastingOverlay({
           <span className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink-subtle">
             {label}
           </span>
-          <span className="text-[28px] font-semibold leading-tight text-ink" style={{ fontFamily: "Fraunces, serif" }}>
+          <span
+            className="text-[28px] font-semibold leading-tight text-ink"
+            style={{ fontFamily: "Fraunces, serif" }}
+          >
             {device.name}
           </span>
           {title && !connecting && (

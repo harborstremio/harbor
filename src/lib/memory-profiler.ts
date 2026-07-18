@@ -137,7 +137,9 @@ function buildDumpText(): string {
   lines.push(`  baseline heap: ${baselineHeapMB.toFixed(1)} MB`);
   lines.push(`  current heap:  ${currentHeap.toFixed(1)} MB`);
   lines.push(`  peak heap:     ${peakHeapMB.toFixed(1)} MB`);
-  lines.push(`  delta:         ${(currentHeap - baselineHeapMB >= 0 ? "+" : "")}${(currentHeap - baselineHeapMB).toFixed(1)} MB`);
+  lines.push(
+    `  delta:         ${currentHeap - baselineHeapMB >= 0 ? "+" : ""}${(currentHeap - baselineHeapMB).toFixed(1)} MB`,
+  );
   lines.push(`  dom nodes:     ${dom.nodes}`);
   lines.push(`  images:        ${dom.imgs}`);
   lines.push(`  videos:        ${dom.vids}`);
@@ -198,7 +200,9 @@ function buildDumpText(): string {
     const end = history[history.length - 1];
     const max = Math.max(...history);
     const arrow = end > start ? "▲" : end < start ? "▼" : "─";
-    lines.push(`  ${arrow} ${name.padEnd(30)} start=${start} end=${end} max=${max} samples=${history.length}`);
+    lines.push(
+      `  ${arrow} ${name.padEnd(30)} start=${start} end=${end} max=${max} samples=${history.length}`,
+    );
   }
   lines.push("");
 
@@ -230,7 +234,9 @@ function buildDumpText(): string {
   lines.push("  time         duration  label");
   const longTasks = eventsSinceReset.filter((s) => s.kind === "longtask");
   for (const t of longTasks) {
-    lines.push(`  ${formatTime(t.ts)}  ${String((t.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${t.label}`);
+    lines.push(
+      `  ${formatTime(t.ts)}  ${String((t.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${t.label}`,
+    );
   }
   if (longTasks.length === 0) lines.push("  (none — main thread stayed responsive)");
   lines.push("");
@@ -239,7 +245,9 @@ function buildDumpText(): string {
   lines.push("  time         duration  component");
   const slowRenders = eventsSinceReset.filter((s) => s.kind === "render");
   for (const r of slowRenders) {
-    lines.push(`  ${formatTime(r.ts)}  ${String((r.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${r.detail?.componentId ?? r.label}`);
+    lines.push(
+      `  ${formatTime(r.ts)}  ${String((r.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${r.detail?.componentId ?? r.label}`,
+    );
   }
   if (slowRenders.length === 0) lines.push("  (none — every tracked render under 16ms)");
   lines.push("");
@@ -315,14 +323,18 @@ function periodicReport() {
   if (heapJumps.length > 0) {
     console.warn("Heap jumps (>5MB) in last window:");
     for (const { s, jump } of heapJumps) {
-      console.warn(`  +${jump.toFixed(1)}MB @ ${new Date(s.ts).toLocaleTimeString()} after ${s.kind}: ${s.label}`);
+      console.warn(
+        `  +${jump.toFixed(1)}MB @ ${new Date(s.ts).toLocaleTimeString()} after ${s.kind}: ${s.label}`,
+      );
     }
   }
   if (navStack.length > 0) {
     const lastNav = navStack[navStack.length - 1];
     const since = (Date.now() - lastNav.at) / 1000;
     const heapDeltaSinceNav = heap - lastNav.heap;
-    console.info(`Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`);
+    console.info(
+      `Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`,
+    );
   }
   console.groupEnd();
 }
@@ -374,7 +386,8 @@ function instrumentClicks() {
     (e) => {
       const target = e.target as HTMLElement | null;
       if (!target) return;
-      const label = target.getAttribute("aria-label") ||
+      const label =
+        target.getAttribute("aria-label") ||
         target.textContent?.trim().slice(0, 40) ||
         target.tagName.toLowerCase();
       pushSample("click", label);
@@ -399,7 +412,10 @@ function instrumentLongTasks() {
   } catch {}
 }
 
-const renderTimings = new Map<string, { count: number; totalMs: number; maxMs: number; lastMs: number }>();
+const renderTimings = new Map<
+  string,
+  { count: number; totalMs: number; maxMs: number; lastMs: number }
+>();
 
 export function recordRender(componentId: string, actualDurationMs: number): void {
   const entry = renderTimings.get(componentId) ?? { count: 0, totalMs: 0, maxMs: 0, lastMs: 0 };
@@ -416,8 +432,22 @@ export function recordRender(componentId: string, actualDurationMs: number): voi
   }
 }
 
-export function getRenderReport(): Array<{ id: string; count: number; totalMs: number; maxMs: number; avgMs: number; lastMs: number }> {
-  const out: Array<{ id: string; count: number; totalMs: number; maxMs: number; avgMs: number; lastMs: number }> = [];
+export function getRenderReport(): Array<{
+  id: string;
+  count: number;
+  totalMs: number;
+  maxMs: number;
+  avgMs: number;
+  lastMs: number;
+}> {
+  const out: Array<{
+    id: string;
+    count: number;
+    totalMs: number;
+    maxMs: number;
+    avgMs: number;
+    lastMs: number;
+  }> = [];
   for (const [id, t] of renderTimings) {
     out.push({
       id,

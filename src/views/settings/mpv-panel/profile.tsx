@@ -50,7 +50,9 @@ export function QualityProfile() {
             </span>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="text-[15px] font-semibold text-ink">{t(p.label)}</span>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-accent/90">{t(p.who)}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-accent/90">
+                {t(p.who)}
+              </span>
               <span className="text-[12.5px] leading-snug text-ink-muted">{t(p.sub)}</span>
             </div>
           </button>

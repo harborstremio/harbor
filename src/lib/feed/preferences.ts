@@ -31,7 +31,13 @@ function migrate(raw: string): Stored {
     } else if (v && typeof v === "object" && "vote" in v) {
       const e = v as VoteEntry;
       if (e.vote === "up" || e.vote === "down") {
-        votes[id] = { vote: e.vote, ts: e.ts ?? updatedAt, name: e.name, type: e.type, altId: e.altId };
+        votes[id] = {
+          vote: e.vote,
+          ts: e.ts ?? updatedAt,
+          name: e.name,
+          type: e.type,
+          altId: e.altId,
+        };
       }
     }
   }

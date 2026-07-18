@@ -35,7 +35,9 @@ export function StreamFiltersPanel() {
   return (
     <Section
       title={t("Saved stream filters")}
-      subtitle={t("Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.")}
+      subtitle={t(
+        "Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.",
+      )}
     >
       <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-5">
         <div className="flex items-center justify-between gap-3">

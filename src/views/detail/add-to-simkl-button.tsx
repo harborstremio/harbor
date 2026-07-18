@@ -151,7 +151,11 @@ export function AddToSimklButton({
             onClick={() => setMenuOpen((v) => !v)}
             className="flex h-12 items-center gap-2.5 rounded-full border border-ink bg-ink/10 px-6 text-[15px] font-medium text-ink transition-[transform,background-color,border-color] duration-200 hover:bg-ink/20 active:scale-[0.98] disabled:opacity-60"
           >
-            <img src={simklLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
+            <img
+              src={simklLogo}
+              alt=""
+              className="h-[18px] w-[18px] rounded-[4px] object-contain"
+            />
             {t(SIMKL_STATUS_LABELS[status])}
             <ChevronDown
               size={16}
@@ -185,7 +189,11 @@ export function AddToSimklButton({
                     <div className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
                       {t("Your rating")}
                     </div>
-                    <SimklRatingPicker harborId={harborId} type={type} simklConnected={isConnected} />
+                    <SimklRatingPicker
+                      harborId={harborId}
+                      type={type}
+                      simklConnected={isConnected}
+                    />
                   </div>
                 </>
               )}

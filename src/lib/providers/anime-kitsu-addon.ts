@@ -54,7 +54,12 @@ type AddonMetaResponse = {
 };
 
 export async function animeKitsuMeta(metaId: string): Promise<AnimeKitsuMeta | null> {
-  if (!metaId.startsWith("kitsu:") && !metaId.startsWith("mal:") && !metaId.startsWith("anilist:") && !metaId.startsWith("anidb:")) {
+  if (
+    !metaId.startsWith("kitsu:") &&
+    !metaId.startsWith("mal:") &&
+    !metaId.startsWith("anilist:") &&
+    !metaId.startsWith("anidb:")
+  ) {
     return null;
   }
   const key = metaId;

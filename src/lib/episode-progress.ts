@@ -62,8 +62,7 @@ export function getEpisodeProgress(
   traktSeason?: number,
   traktEpisode?: number,
 ): EpisodeProgress {
-  const resumeIds =
-    traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
+  const resumeIds = traktImdbId && traktImdbId !== resumeId ? [resumeId, traktImdbId] : [resumeId];
   let entry: { ms: number; t: number } | null = null;
   for (const id of resumeIds) {
     const e = readResumeEntry(id, season, episode);
@@ -83,7 +82,9 @@ export function getEpisodeProgress(
   const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60 * 1000 : 0;
   const ratio = durationMs > 0 && ms > 0 ? Math.min(1, ms / durationMs) : 0;
 
-  const traktKey = traktImdbId ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}` : null;
+  const traktKey = traktImdbId
+    ? `imdb:${traktImdbId}:${traktSeason ?? season}:${traktEpisode ?? episode}`
+    : null;
   const traktDone = traktKey ? traktWatched.has(traktKey) : false;
   const stremioDone = stremioWatched ? stremioWatched.has(`${season}:${episode}`) : false;
   const anilistDone = anilistWatched ? anilistWatched.has(`${season}:${episode}`) : false;

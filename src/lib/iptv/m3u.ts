@@ -155,7 +155,10 @@ function captureVlcOpt(rest: string, attrs: Record<string, string>): void {
   const eq = rest.indexOf("=");
   if (eq < 0) return;
   const key = rest.slice(0, eq).trim().toLowerCase();
-  const val = rest.slice(eq + 1).trim().replace(/^"|"$/g, "");
+  const val = rest
+    .slice(eq + 1)
+    .trim()
+    .replace(/^"|"$/g, "");
   if (!val) return;
   if (key === "http-user-agent") attrs["vlcopt-user-agent"] = val;
   else if (key === "http-referrer") attrs["vlcopt-referrer"] = val;
@@ -177,7 +180,8 @@ function capturePipeOpts(rest: string, attrs: Record<string, string>): void {
     const val = safeDecode(pair.slice(eq + 1).trim());
     if (!val) continue;
     if (key === "user-agent" && !attrs["vlcopt-user-agent"]) attrs["vlcopt-user-agent"] = val;
-    else if ((key === "referer" || key === "referrer") && !attrs["vlcopt-referrer"]) attrs["vlcopt-referrer"] = val;
+    else if ((key === "referer" || key === "referrer") && !attrs["vlcopt-referrer"])
+      attrs["vlcopt-referrer"] = val;
     else if (key === "cookie" && !attrs["vlcopt-cookie"]) attrs["vlcopt-cookie"] = val;
   }
 }
@@ -211,8 +215,7 @@ export function deriveEpgFromGetPhp(playlistUrl: string): string | null {
 export function deriveEpgUrls(playlistUrl: string): string[] {
   try {
     const u = new URL(playlistUrl);
-    const isXtream =
-      u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
+    const isXtream = u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
     if (!isXtream) return [];
     const username = u.searchParams.get("username");
     const password = u.searchParams.get("password");

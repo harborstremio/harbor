@@ -129,7 +129,12 @@ export function AddToAnilistButton({ harborId, title }: { harborId: string; titl
           className={`text-ink-muted transition-transform ${menuOpen ? "rotate-180" : ""}`}
         />
       </button>
-      <AnchoredMenu anchorRef={btnRef} open={menuOpen} onClose={() => setMenuOpen(false)} width={224}>
+      <AnchoredMenu
+        anchorRef={btnRef}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        width={224}
+      >
         <div className="overflow-hidden rounded-2xl border border-edge bg-raised py-1.5 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.7)]">
           {STATUS_ORDER.map((s) => (
             <button

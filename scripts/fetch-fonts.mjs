@@ -35,7 +35,9 @@ for (const f of FONTS) {
   const res = await fetch(f.url, { redirect: "follow" });
   if (!res.ok) {
     console.error(`[fonts] download failed (${res.status} ${res.statusText}) for ${f.file}`);
-    console.error("[fonts] set HARBOR_FONTS_BASE to a mirror, or drop the .otf into src-tauri/fonts/ by hand");
+    console.error(
+      "[fonts] set HARBOR_FONTS_BASE to a mirror, or drop the .otf into src-tauri/fonts/ by hand",
+    );
     process.exit(1);
   }
   const buf = Buffer.from(await res.arrayBuffer());

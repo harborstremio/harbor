@@ -53,7 +53,9 @@ export function TweakSlider({
   const active = raw != null && raw !== "" && parseFloat(raw) !== def;
   return (
     <div className={`flex items-center px-1 py-1.5 ${compact ? "gap-2.5" : "gap-4"}`}>
-      <span className={`shrink-0 font-medium text-ink ${compact ? "w-[76px] text-[12.5px]" : "w-36 text-[13.5px]"}`}>
+      <span
+        className={`shrink-0 font-medium text-ink ${compact ? "w-[76px] text-[12.5px]" : "w-36 text-[13.5px]"}`}
+      >
         {label}
       </span>
       <input
@@ -87,7 +89,11 @@ export function TweakSlider({
   );
 }
 
-export const PICTURE_TEMPLATES: Array<{ label: string; sub: string; patch: Record<string, string | null> }> = [
+export const PICTURE_TEMPLATES: Array<{
+  label: string;
+  sub: string;
+  patch: Record<string, string | null>;
+}> = [
   {
     label: "Brighten dark movies",
     sub: "Lifts shadows so the pitch-black scenes are actually watchable.",
@@ -119,7 +125,9 @@ export function PictureDialsSection() {
   return (
     <Section
       title={t("Picture adjustments")}
-      subtitle={t("Nudge the image to taste. Start with a one-tap look below, then fine-tune with the dials. Everything resets cleanly, so you can't break anything.")}
+      subtitle={t(
+        "Nudge the image to taste. Start with a one-tap look below, then fine-tune with the dials. Everything resets cleanly, so you can't break anything.",
+      )}
     >
       <div className="flex flex-wrap gap-2">
         {PICTURE_TEMPLATES.map((tpl) => (
@@ -146,11 +154,57 @@ export function PictureDialsSection() {
       </div>
 
       <div className="mt-1 flex flex-col">
-        <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="brightness" label={t("Brightness")} min={-50} max={50} step={1} def={0} />
-        <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="contrast" label={t("Contrast")} min={-50} max={50} step={1} def={0} />
-        <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="saturation" label={t("Saturation")} min={-50} max={50} step={1} def={0} />
-        <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="gamma" label={t("Gamma (midtones)")} min={-50} max={50} step={1} def={0} />
-        <TweakSlider tweaks={tweaks} setTweak={setTweak} mpvKey="sharpen" label={t("Sharpen")} min={0} max={2} step={0.05} def={0} fmt={(v) => v.toFixed(2)} />
+        <TweakSlider
+          tweaks={tweaks}
+          setTweak={setTweak}
+          mpvKey="brightness"
+          label={t("Brightness")}
+          min={-50}
+          max={50}
+          step={1}
+          def={0}
+        />
+        <TweakSlider
+          tweaks={tweaks}
+          setTweak={setTweak}
+          mpvKey="contrast"
+          label={t("Contrast")}
+          min={-50}
+          max={50}
+          step={1}
+          def={0}
+        />
+        <TweakSlider
+          tweaks={tweaks}
+          setTweak={setTweak}
+          mpvKey="saturation"
+          label={t("Saturation")}
+          min={-50}
+          max={50}
+          step={1}
+          def={0}
+        />
+        <TweakSlider
+          tweaks={tweaks}
+          setTweak={setTweak}
+          mpvKey="gamma"
+          label={t("Gamma (midtones)")}
+          min={-50}
+          max={50}
+          step={1}
+          def={0}
+        />
+        <TweakSlider
+          tweaks={tweaks}
+          setTweak={setTweak}
+          mpvKey="sharpen"
+          label={t("Sharpen")}
+          min={0}
+          max={2}
+          step={0.05}
+          def={0}
+          fmt={(v) => v.toFixed(2)}
+        />
       </div>
     </Section>
   );
@@ -171,7 +225,9 @@ export function ColorHdrSection() {
   return (
     <Section
       title={t("Color & HDR")}
-      subtitle={t("How Harbor squeezes HDR movies onto a normal screen. Auto is right for almost everyone; the curves below just change the look (punchy vs soft). Only matters on HDR sources.")}
+      subtitle={t(
+        "How Harbor squeezes HDR movies onto a normal screen. Auto is right for almost everyone; the curves below just change the look (punchy vs soft). Only matters on HDR sources.",
+      )}
     >
       <div className="flex flex-col gap-1.5">
         <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
@@ -186,7 +242,9 @@ export function ColorHdrSection() {
       </div>
       <ToggleRow
         label={t("Boost SDR video toward HDR")}
-        sub={t("On an HDR display, stretches normal (non-HDR) movies to use the extra brightness range. Leave off on a regular screen; it can look washed out.")}
+        sub={t(
+          "On an HDR display, stretches normal (non-HDR) movies to use the extra brightness range. Leave off on a regular screen; it can look washed out.",
+        )}
         value={tweaks["inverse-tone-mapping"] === "yes"}
         onChange={(on) => setTweak("inverse-tone-mapping", on ? "yes" : null)}
       />

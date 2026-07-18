@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { addToWatchlist as traktAdd, removeFromWatchlist as traktRemove } from "@/lib/trakt/watchlist";
+import {
+  addToWatchlist as traktAdd,
+  removeFromWatchlist as traktRemove,
+} from "@/lib/trakt/watchlist";
 import { stremioIdToTraktTarget } from "@/lib/trakt/ids";
-import { addToWatchlist as simklAdd, removeFromWatchlist as simklRemove } from "@/lib/simkl/watchlist";
+import {
+  addToWatchlist as simklAdd,
+  removeFromWatchlist as simklRemove,
+} from "@/lib/simkl/watchlist";
 import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
 import { isAuthenticated as simklConnected } from "@/lib/simkl/session";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
@@ -20,7 +26,13 @@ export type LocalEntry = {
   addedAt: number;
 };
 
-export type WatchlistInput = { id: string; type?: string; name?: string; poster?: string; imdbId?: string | null };
+export type WatchlistInput = {
+  id: string;
+  type?: string;
+  name?: string;
+  poster?: string;
+  imdbId?: string | null;
+};
 
 let memoryFallback: Map<string, LocalEntry> | null = null;
 
@@ -59,7 +71,13 @@ function read(): Map<string, LocalEntry> {
       if (typeof el === "string") {
         map.set(el, { id: el, type: inferType(el), name: "", addedAt: 0 });
       } else if (el && typeof el === "object" && typeof (el as { id?: unknown }).id === "string") {
-        const e = el as { id: string; type?: string; name?: string; poster?: string; addedAt?: number };
+        const e = el as {
+          id: string;
+          type?: string;
+          name?: string;
+          poster?: string;
+          addedAt?: number;
+        };
         map.set(e.id, {
           id: e.id,
           type: e.type === "series" ? "series" : "movie",
@@ -111,7 +129,9 @@ function readAggregateCache(): Set<string> {
     const raw = localStorage.getItem(AGG_KEY);
     if (!raw) return new Set();
     const arr = JSON.parse(raw) as unknown;
-    return new Set(Array.isArray(arr) ? (arr as string[]).filter((v) => typeof v === "string") : []);
+    return new Set(
+      Array.isArray(arr) ? (arr as string[]).filter((v) => typeof v === "string") : [],
+    );
   } catch {
     return new Set();
   }
@@ -157,7 +177,7 @@ export function removeFromWatchlist(id: string): void {
 export function toggleWatchlist(input: string | WatchlistInput): boolean {
   const map = read();
   const id = typeof input === "string" ? input : input.id;
-  const imdb = typeof input === "string" ? null : input.imdbId ?? null;
+  const imdb = typeof input === "string" ? null : (input.imdbId ?? null);
   const has = map.has(id) || aggregateIds.has(id) || (!!imdb && aggregateIds.has(imdb));
   if (has) {
     map.delete(id);
@@ -201,13 +221,15 @@ async function syncWithStremio(input: string | WatchlistInput, added: boolean): 
   const authKey = readActiveStremioAuthKey();
   if (!authKey) return;
   const id = typeof input === "string" ? input : input.id;
-  const imdb = typeof input === "string" ? null : input.imdbId ?? null;
+  const imdb = typeof input === "string" ? null : (input.imdbId ?? null);
   const writeId = cloudWriteId(id, imdb, !!imdb);
   if (!writeId) return;
   try {
     if (added) {
       const meta =
-        typeof input === "string" ? {} : { type: input.type, name: input.name, poster: input.poster };
+        typeof input === "string"
+          ? {}
+          : { type: input.type, name: input.name, poster: input.poster };
       await saveStremioBookmark(authKey, writeId, meta);
     } else {
       await removeStremioBookmark(authKey, writeId);

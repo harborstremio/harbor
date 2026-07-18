@@ -32,11 +32,15 @@ export function CustomHoverOverlay({
 }) {
   const t = useT();
   const btn = preview ? "pointer-events-none" : "pointer-events-auto";
-  const vis = preview ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100";
+  const vis = preview
+    ? "opacity-100"
+    : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100";
 
   const info = (config.showTitle || config.showMeta) && (
     <div className="flex min-w-0 flex-col gap-1">
-      {config.showTitle && <span className="line-clamp-1 text-[13px] font-semibold text-white">{meta.name}</span>}
+      {config.showTitle && (
+        <span className="line-clamp-1 text-[13px] font-semibold text-white">{meta.name}</span>
+      )}
       {config.showMeta && (
         <span className="flex items-center gap-2 text-[11px] text-white/85">
           {meta.imdbRating && (
@@ -86,11 +90,15 @@ export function CustomHoverOverlay({
   return (
     <div
       className={`pointer-events-none absolute inset-0 z-20 flex flex-col justify-end rounded-[var(--poster-radius,12px)] p-3 transition-opacity duration-300 ${
-        config.overlay === "gradient" ? "bg-gradient-to-t from-black/85 via-black/20 to-transparent pt-9" : ""
+        config.overlay === "gradient"
+          ? "bg-gradient-to-t from-black/85 via-black/20 to-transparent pt-9"
+          : ""
       } ${vis}`}
     >
       {info}
-      {playDisc && <div className="absolute inset-0 flex items-center justify-center">{playDisc}</div>}
+      {playDisc && (
+        <div className="absolute inset-0 flex items-center justify-center">{playDisc}</div>
+      )}
     </div>
   );
 }

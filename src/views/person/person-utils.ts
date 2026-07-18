@@ -25,7 +25,12 @@ export function isCameoOrGuest(c: PersonCredit): boolean {
     ch.startsWith("himself -") ||
     ch.startsWith("herself ") ||
     ch.startsWith("herself -");
-  if (ch.includes("(uncredited)") || ch.includes("archive footage") || ch.includes("archival footage")) return true;
+  if (
+    ch.includes("(uncredited)") ||
+    ch.includes("archive footage") ||
+    ch.includes("archival footage")
+  )
+    return true;
   if (!isSelf) return false;
   if (c.mediaType === "tv" && (c.episodeCount ?? 0) >= 8) return false;
   return true;

@@ -20,10 +20,30 @@ export const US_NETWORK_ROWS: NetworkRow[] = [
     id: "us-broadcast",
     title: "Broadcast networks",
     networks: [
-      { id: "abc", displayName: "ABC", match: new RegExp(word("abc"), "i"), exclude: /family|news\s|abcn\b|spark/i },
-      { id: "cbs", displayName: "CBS", match: new RegExp(word("cbs"), "i"), exclude: /sports|news\s|cbsn\b|justice/i },
-      { id: "nbc", displayName: "NBC", match: new RegExp(word("nbc"), "i"), exclude: /msnbc|cnbc|sports|news\s/i },
-      { id: "fox", displayName: "FOX", match: new RegExp(word("fox"), "i"), exclude: /fox\s+news|fox\s+sports|fox\s+business|news\s/i },
+      {
+        id: "abc",
+        displayName: "ABC",
+        match: new RegExp(word("abc"), "i"),
+        exclude: /family|news\s|abcn\b|spark/i,
+      },
+      {
+        id: "cbs",
+        displayName: "CBS",
+        match: new RegExp(word("cbs"), "i"),
+        exclude: /sports|news\s|cbsn\b|justice/i,
+      },
+      {
+        id: "nbc",
+        displayName: "NBC",
+        match: new RegExp(word("nbc"), "i"),
+        exclude: /msnbc|cnbc|sports|news\s/i,
+      },
+      {
+        id: "fox",
+        displayName: "FOX",
+        match: new RegExp(word("fox"), "i"),
+        exclude: /fox\s+news|fox\s+sports|fox\s+business|news\s/i,
+      },
       { id: "cw", displayName: "The CW", match: /\bcw\b/i, exclude: /cwseed|news\s/i },
       { id: "pbs", displayName: "PBS", match: /\bpbs\b/i, exclude: /kids|news\s/i },
       { id: "my-network", displayName: "MyNetwork", match: /mynetwork/i },
@@ -55,7 +75,12 @@ export const US_NETWORK_ROWS: NetworkRow[] = [
     id: "us-sports",
     title: "Sports",
     networks: [
-      { id: "espn", displayName: "ESPN", match: /\bespn\b/i, exclude: /espn2|espnu|espn\s+news|espn\s+deportes|espn\+|espn\s+plus/i },
+      {
+        id: "espn",
+        displayName: "ESPN",
+        match: /\bespn\b/i,
+        exclude: /espn2|espnu|espn\s+news|espn\s+deportes|espn\+|espn\s+plus/i,
+      },
       { id: "espn2", displayName: "ESPN2", match: /\bespn2\b/i },
       { id: "espn-u", displayName: "ESPNU", match: /\bespnu\b/i },
       { id: "espn-news", displayName: "ESPN News", match: /espn\s+news/i },
@@ -92,7 +117,12 @@ export const US_NETWORK_ROWS: NetworkRow[] = [
       { id: "paramount-plus", displayName: "Paramount+", match: /paramount\+|paramount\s+plus/i },
       { id: "peacock", displayName: "Peacock", match: /peacock/i },
       { id: "apple-tv-plus", displayName: "Apple TV+", match: /apple\s+tv\+|apple\s+tv\s+plus/i },
-      { id: "disney-plus", displayName: "Disney+", match: /disney\+|disney\s+plus/i, exclude: /channel|jr|xd/i },
+      {
+        id: "disney-plus",
+        displayName: "Disney+",
+        match: /disney\+|disney\s+plus/i,
+        exclude: /channel|jr|xd/i,
+      },
       { id: "netflix", displayName: "Netflix", match: /netflix/i },
       { id: "tcm", displayName: "Turner Classic Movies", match: /turner\s+classic|\btcm\b/i },
     ],
@@ -132,7 +162,11 @@ export const US_NETWORK_ROWS: NetworkRow[] = [
       { id: "lifetime-movies", displayName: "Lifetime Movies", match: /lifetime\s+movies/i },
       { id: "own", displayName: "OWN", match: /\bown\b/i },
       { id: "ae", displayName: "A&E", match: /\ba[\s&]+e\b|a\s*&\s*e/i },
-      { id: "investigation", displayName: "Investigation Discovery", match: /investigation\s+discovery|\bid\b\s+channel/i },
+      {
+        id: "investigation",
+        displayName: "Investigation Discovery",
+        match: /investigation\s+discovery|\bid\b\s+channel/i,
+      },
       { id: "hallmark", displayName: "Hallmark", match: /hallmark/i, exclude: /movies|drama/i },
       { id: "hallmark-movies", displayName: "Hallmark Movies", match: /hallmark\s+movies/i },
       { id: "diy", displayName: "DIY", match: /\bdiy\b/i },
@@ -144,10 +178,20 @@ export const US_NETWORK_ROWS: NetworkRow[] = [
     id: "us-documentary",
     title: "Documentary & Discovery",
     networks: [
-      { id: "discovery", displayName: "Discovery", match: /discovery/i, exclude: /science|family|investigation|history/i },
+      {
+        id: "discovery",
+        displayName: "Discovery",
+        match: /discovery/i,
+        exclude: /science|family|investigation|history/i,
+      },
       { id: "history", displayName: "History", match: /\bhistory\b/i, exclude: /military|vault/i },
       { id: "history2", displayName: "History 2", match: /history\s+2|h2\b/i },
-      { id: "natgeo", displayName: "Nat Geo", match: /nat\s*geo|national\s+geographic/i, exclude: /wild|mundo/i },
+      {
+        id: "natgeo",
+        displayName: "Nat Geo",
+        match: /nat\s*geo|national\s+geographic/i,
+        exclude: /wild|mundo/i,
+      },
       { id: "natgeo-wild", displayName: "Nat Geo Wild", match: /nat\s*geo\s+wild/i },
       { id: "smithsonian", displayName: "Smithsonian", match: /smithsonian/i },
       { id: "science", displayName: "Science Channel", match: /science\s+channel/i },
@@ -164,7 +208,12 @@ export const US_NETWORK_ROWS: NetworkRow[] = [
       { id: "disney", displayName: "Disney Channel", match: /disney\s+channel/i },
       { id: "disney-jr", displayName: "Disney Jr", match: /disney\s+jr/i },
       { id: "disney-xd", displayName: "Disney XD", match: /disney\s+xd/i },
-      { id: "nickelodeon", displayName: "Nickelodeon", match: /nickelodeon/i, exclude: /jr|nicktoons/i },
+      {
+        id: "nickelodeon",
+        displayName: "Nickelodeon",
+        match: /nickelodeon/i,
+        exclude: /jr|nicktoons/i,
+      },
       { id: "nick-jr", displayName: "Nick Jr", match: /nick\s+jr/i },
       { id: "nicktoons", displayName: "Nicktoons", match: /nicktoons/i },
       { id: "cartoon-network", displayName: "Cartoon Network", match: /cartoon\s+network/i },
@@ -216,7 +265,11 @@ export const BR_NETWORK_ROWS: NetworkRow[] = [
       { id: "espn-br", displayName: "ESPN Brasil", match: /espn\s+brasil/i },
       { id: "premiere", displayName: "Premiere", match: /premiere/i },
       { id: "combate", displayName: "Combate", match: /combate/i },
-      { id: "esporte-interativo", displayName: "Esporte Interativo", match: /esporte\s+interativo/i },
+      {
+        id: "esporte-interativo",
+        displayName: "Esporte Interativo",
+        match: /esporte\s+interativo/i,
+      },
     ],
   },
 ];
@@ -265,10 +318,7 @@ const REGION_GROUP_TOKENS: Record<string, string[]> = {
   UK: ["UK", "GB", "BRITAIN", "BRITISH", "ENGLAND"],
 };
 
-export function filterChannelsByRegion(
-  channels: IptvChannel[],
-  region: string,
-): IptvChannel[] {
+export function filterChannelsByRegion(channels: IptvChannel[], region: string): IptvChannel[] {
   const tokens = REGION_GROUP_TOKENS[region.toUpperCase()];
   if (!tokens) return channels;
   const tokenRes = tokens.map((t) => new RegExp(`\\b${t}\\b`));
@@ -285,10 +335,7 @@ export type ResolvedNetwork = {
   logoUrl: string | null;
 };
 
-export function resolveNetworks(
-  channels: IptvChannel[],
-  defs: NetworkDef[],
-): ResolvedNetwork[] {
+export function resolveNetworks(channels: IptvChannel[], defs: NetworkDef[]): ResolvedNetwork[] {
   const out: ResolvedNetwork[] = [];
   const claimed = new Set<string>();
   for (const def of defs) {

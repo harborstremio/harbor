@@ -65,7 +65,12 @@ export function KidsSetupPanel({
                       on ? "ring-4 ring-white" : "ring-2 ring-white/40"
                     }`}
                   >
-                    <img src={src} alt="" draggable={false} className="h-full w-full object-cover" />
+                    <img
+                      src={src}
+                      alt=""
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                    />
                   </span>
                   {on && (
                     <span className="absolute -bottom-0.5 -end-0.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#0c4a6e] shadow-md">

@@ -25,7 +25,13 @@ export function AddonHits({ hits, onClose }: { hits: AddonHit[]; onClose: () => 
           >
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-elevated ring-1 ring-edge-soft">
               {a.logo ? (
-                <img src={a.logo} alt="" loading="lazy" draggable={false} className="h-8 w-8 object-contain" />
+                <img
+                  src={a.logo}
+                  alt=""
+                  loading="lazy"
+                  draggable={false}
+                  className="h-8 w-8 object-contain"
+                />
               ) : (
                 <Blocks size={20} className="text-ink-subtle" strokeWidth={1.9} />
               )}
@@ -41,10 +47,15 @@ export function AddonHits({ hits, onClose }: { hits: AddonHit[]; onClose: () => 
                 )}
               </div>
               {a.blurb && (
-                <span className="line-clamp-1 text-[12.5px] leading-snug text-ink-subtle">{a.blurb}</span>
+                <span className="line-clamp-1 text-[12.5px] leading-snug text-ink-subtle">
+                  {a.blurb}
+                </span>
               )}
             </div>
-            <ChevronRight size={18} className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
+            <ChevronRight
+              size={18}
+              className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+            />
           </button>
         ))}
       </div>

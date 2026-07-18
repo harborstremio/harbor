@@ -35,7 +35,13 @@ export function ChannelGrid({
   const tvgIdCounts = useMemo(() => computeTvgIdCounts(channels), [channels]);
   const nowMinute = Math.floor(nowMs / 60_000);
   const nowByChannel = useMemo(() => {
-    const m = new Map<string, { current: ReturnType<typeof findCurrent>["current"]; next: ReturnType<typeof findCurrent>["next"] }>();
+    const m = new Map<
+      string,
+      {
+        current: ReturnType<typeof findCurrent>["current"];
+        next: ReturnType<typeof findCurrent>["next"];
+      }
+    >();
     for (const ch of visible) {
       const programs = epgProgramsForChannel(ch, epg, tvgIdCounts);
       m.set(ch.id, findCurrent(programs, nowMs));
@@ -75,10 +81,13 @@ export function ChannelGrid({
         </div>
       ) : channels.length > visible.length ? (
         <div className="mx-auto max-w-[460px] rounded-xl border border-edge-soft/55 bg-elevated/60 px-4 py-2.5 text-center text-[12px] text-ink-subtle">
-          {t("Showing first {shown} of {total} channels. Use search or a category to narrow down.", {
-            shown: visible.length.toLocaleString(),
-            total: channels.length.toLocaleString(),
-          })}
+          {t(
+            "Showing first {shown} of {total} channels. Use search or a category to narrow down.",
+            {
+              shown: visible.length.toLocaleString(),
+              total: channels.length.toLocaleString(),
+            },
+          )}
         </div>
       ) : (
         channels.length > 60 && (
@@ -112,7 +121,9 @@ export function ErrorBlock({ message, onRetry }: { message: string; onRetry: () 
           <AlertTriangle size={20} strokeWidth={1.9} />
         </div>
         <div className="flex min-w-0 flex-col gap-1.5">
-          <h2 className="text-[17px] font-semibold leading-tight text-ink">{t(classified.title)}</h2>
+          <h2 className="text-[17px] font-semibold leading-tight text-ink">
+            {t(classified.title)}
+          </h2>
           <p className="text-[13.5px] leading-snug text-ink-muted">{t(classified.hint)}</p>
         </div>
       </div>
@@ -136,7 +147,11 @@ export function ErrorBlock({ message, onRetry }: { message: string; onRetry: () 
           onClick={() => setExpanded((v) => !v)}
           className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle transition-colors hover:text-ink-muted"
         >
-          {expanded ? <ChevronUp size={12} strokeWidth={2.2} /> : <ChevronDown size={12} strokeWidth={2.2} />}
+          {expanded ? (
+            <ChevronUp size={12} strokeWidth={2.2} />
+          ) : (
+            <ChevronDown size={12} strokeWidth={2.2} />
+          )}
           {t("Technical details")}
         </button>
         {expanded && (
@@ -163,7 +178,12 @@ function classifyError(raw: string): { title: string; hint: string; raw: string 
       raw,
     };
   }
-  if (lower.includes("inactive") || lower.includes("expired") || lower.includes("banned") || lower.includes("disabled")) {
+  if (
+    lower.includes("inactive") ||
+    lower.includes("expired") ||
+    lower.includes("banned") ||
+    lower.includes("disabled")
+  ) {
     return {
       title: "Account is not active",
       hint: "This Xtream account is expired, banned, or disabled on the provider side. Renew or confirm with your provider.",
@@ -212,14 +232,23 @@ function classifyError(raw: string): { title: string; hint: string; raw: string 
       raw,
     };
   }
-  if (lower.includes("503") || lower.includes("max-connections") || lower.includes("max connections")) {
+  if (
+    lower.includes("503") ||
+    lower.includes("max-connections") ||
+    lower.includes("max connections")
+  ) {
     return {
       title: "Provider refused service",
       hint: "Most common cause: this account is at its max simultaneous connections. Close other devices and players using these credentials.",
       raw,
     };
   }
-  if (lower.includes("did not respond") || lower.includes("gave up after") || lower.includes("timeout") || lower.includes("timed out")) {
+  if (
+    lower.includes("did not respond") ||
+    lower.includes("gave up after") ||
+    lower.includes("timeout") ||
+    lower.includes("timed out")
+  ) {
     return {
       title: "Server did not respond",
       hint: "The playlist server is down or your network is blocking it. Try again in a few minutes.",
@@ -247,7 +276,11 @@ function classifyError(raw: string): { title: string; hint: string; raw: string 
       raw,
     };
   }
-  if (lower.includes("error sending request") || lower.includes("tcp connect") || lower.includes("unreachable")) {
+  if (
+    lower.includes("error sending request") ||
+    lower.includes("tcp connect") ||
+    lower.includes("unreachable")
+  ) {
     return {
       title: "Could not reach playlist server",
       hint: "The host did not respond. The URL may have expired (many providers rotate domains), the server is down, or your network is blocking it. Contact your provider for an updated URL.",
@@ -288,7 +321,9 @@ export function EmptyResult({ onClear }: { onClear: () => void }) {
     <div className="mx-auto flex max-w-[440px] flex-col items-center gap-3 py-16 text-center">
       <Tv size={26} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[16.5px] font-semibold text-ink">{t("No channels match")}</h2>
-      <p className="text-[13.5px] text-ink-muted">{t("Try a different category or clear your filters.")}</p>
+      <p className="text-[13.5px] text-ink-muted">
+        {t("Try a different category or clear your filters.")}
+      </p>
       <button
         onClick={onClear}
         className="mt-1 flex h-10 items-center rounded-xl border border-edge-soft bg-elevated px-3.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink"

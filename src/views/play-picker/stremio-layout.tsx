@@ -65,14 +65,22 @@ export function StremioLayout({
     [streams, filter],
   );
   const customFiltered = useMemo(
-    () => (activeFilter ? addonFiltered.filter((s) => matchesCustomFilter(s, activeFilter)) : addonFiltered),
+    () =>
+      activeFilter
+        ? addonFiltered.filter((s) => matchesCustomFilter(s, activeFilter))
+        : addonFiltered,
     [addonFiltered, activeFilter],
   );
   const facetData = useMemo(
     () =>
       FACET_DIMS.map((dim) => {
         const base = customFiltered.filter((s) => matchesFacets(s, facet, dim.key));
-        return { dim, options: facetOptions(base, dim), total: base.length, value: facet[dim.key] ?? "all" };
+        return {
+          dim,
+          options: facetOptions(base, dim),
+          total: base.length,
+          value: facet[dim.key] ?? "all",
+        };
       }),
     [customFiltered, facet],
   );
@@ -84,7 +92,8 @@ export function StremioLayout({
     }
   }, [facetData]);
   useEffect(() => {
-    if (activeFilterId && !customFilters.some((f) => f.id === activeFilterId)) setActiveFilterId(null);
+    if (activeFilterId && !customFilters.some((f) => f.id === activeFilterId))
+      setActiveFilterId(null);
   }, [customFilters, activeFilterId]);
   const visibleStreams = useMemo(() => {
     const filtered = customFiltered.filter((s) => matchesFacets(s, facet));
@@ -111,10 +120,9 @@ export function StremioLayout({
       return 0;
     });
   }, [customFiltered, facet, filter, addonRank, preserveOrder]);
-  const filterLabel = filter === "all"
-    ? "All"
-    : addonOptions.find((o) => o.id === filter)?.name ?? "All";
-  const filterLogo = filter === "all" ? null : addonLogoMap.get(filter) ?? null;
+  const filterLabel =
+    filter === "all" ? "All" : (addonOptions.find((o) => o.id === filter)?.name ?? "All");
+  const filterLogo = filter === "all" ? null : (addonLogoMap.get(filter) ?? null);
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
@@ -206,11 +214,7 @@ export function StremioLayout({
         ))}
       </div>
       {!pipelineDone && (
-        <PendingAddonsPill
-          addons={addons}
-          streams={streams}
-          fallbackCount={loadingAddonCount}
-        />
+        <PendingAddonsPill addons={addons} streams={streams} fallbackCount={loadingAddonCount} />
       )}
       <FilterBuilder
         open={builderOpen}
@@ -338,10 +342,46 @@ function CircleLogo({
     return (
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-elevated ring-1 ring-edge-soft">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
+          <rect
+            x="3"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="3"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
         </svg>
       </div>
     );

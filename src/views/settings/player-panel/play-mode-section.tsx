@@ -26,12 +26,16 @@ export function PlayModePanel() {
     {
       id: "manual",
       label: t("Manual picker"),
-      sub: t("Hitting Play opens the source list so you can choose quality, debrid, and audio yourself."),
+      sub: t(
+        "Hitting Play opens the source list so you can choose quality, debrid, and audio yourself.",
+      ),
     },
     {
       id: "season",
       label: t("Lock to season server"),
-      sub: t("Pick a source once and Harbor keeps playing the rest of that season from the same release, no re-picking. Works best with a debrid season pack. Skipped for anime."),
+      sub: t(
+        "Pick a source once and Harbor keeps playing the rest of that season from the same release, no re-picking. Works best with a debrid season pack. Skipped for anime.",
+      ),
     },
   ];
 
@@ -87,7 +91,9 @@ export function PlayModePanel() {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[15px] font-semibold text-ink">{t("Remember last stream")}</span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you resume something you were watching, replay the exact stream you last used (same addon and source) instead of opening the picker again. Turn off to always choose fresh.")}
+            {t(
+              "When you resume something you were watching, replay the exact stream you last used (same addon and source) instead of opening the picker again. Turn off to always choose fresh.",
+            )}
           </span>
         </div>
       </button>
@@ -104,9 +110,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Ask to resume or start over")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Ask to resume or start over")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers items synced from Stremio or Trakt.")}
+            {t(
+              "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers items synced from Stremio or Trakt.",
+            )}
           </span>
         </div>
       </button>
@@ -123,9 +133,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Resume where you left off")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Resume where you left off")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("Pick up partly-watched episodes and movies at your saved spot. Anything watched past 80% always restarts. Turn this off to always start from the beginning, handy if you rewatch shows.")}
+            {t(
+              "Pick up partly-watched episodes and movies at your saved spot. Anything watched past 80% always restarts. Turn this off to always start from the beginning, handy if you rewatch shows.",
+            )}
           </span>
         </div>
       </button>
@@ -142,9 +156,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Keep same source on next episode")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Keep same source on next episode")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When auto-playing the next episode, keep the same release/source you were just watching instead of Harbor's top-ranked stream. Falls back to the best stream if that source isn't available.")}
+            {t(
+              "When auto-playing the next episode, keep the same release/source you were just watching instead of Harbor's top-ranked stream. Falls back to the best stream if that source isn't available.",
+            )}
           </span>
         </div>
       </button>
@@ -161,9 +179,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Stay in fullscreen after closing the player")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Stay in fullscreen after closing the player")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you exit playback, keep the window fullscreen instead of dropping back to a window. Turn off to leave fullscreen automatically whenever the player closes.")}
+            {t(
+              "When you exit playback, keep the window fullscreen instead of dropping back to a window. Turn off to leave fullscreen automatically whenever the player closes.",
+            )}
           </span>
         </div>
       </button>
@@ -180,9 +202,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Restore window position after fullscreen")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Restore window position after fullscreen")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you exit fullscreen, return the window to exactly where it was. Turn off to center it on screen instead.")}
+            {t(
+              "When you exit fullscreen, return the window to exactly where it was. Turn off to center it on screen instead.",
+            )}
           </span>
         </div>
       </button>
@@ -199,9 +225,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Volume pop-up while watching")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Volume pop-up while watching")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("Show a quick volume overlay when you change volume with the player controls hidden, so keyboard and scroll wheel changes are always visible.")}
+            {t(
+              "Show a quick volume overlay when you change volume with the player controls hidden, so keyboard and scroll wheel changes are always visible.",
+            )}
           </span>
         </div>
       </button>

@@ -11,7 +11,11 @@ type StoredPlaylist = Settings["iptvPlaylists"][number];
 
 export function materializePlaylistEntry(id: string, entry: PlaylistFormValue): StoredPlaylist {
   if (entry.kind === "xtream") {
-    const { m3u, epg } = buildXtreamUrls(entry.xtream.server, entry.xtream.username, entry.xtream.password);
+    const { m3u, epg } = buildXtreamUrls(
+      entry.xtream.server,
+      entry.xtream.username,
+      entry.xtream.password,
+    );
     return {
       id,
       name: entry.name,

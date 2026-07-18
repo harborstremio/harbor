@@ -51,7 +51,11 @@ export function AnchoredMenu({
   return createPortal(
     <>
       <div className="fixed inset-0 z-[300]" onMouseDown={onClose} />
-      <div ref={menuRef} className="fixed z-[310]" style={{ top: pos.top, left: pos.left, width: pos.width }}>
+      <div
+        ref={menuRef}
+        className="fixed z-[310]"
+        style={{ top: pos.top, left: pos.left, width: pos.width }}
+      >
         {children}
       </div>
     </>,

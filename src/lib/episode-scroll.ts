@@ -12,7 +12,11 @@ export function scrollToDataEp(
       return;
     }
     if (opts.center) {
-      target.scrollIntoView({ behavior: opts.behavior ?? "auto", block: "center", inline: "center" });
+      target.scrollIntoView({
+        behavior: opts.behavior ?? "auto",
+        block: "center",
+        inline: "center",
+      });
       return;
     }
     const rootRect = root.getBoundingClientRect();

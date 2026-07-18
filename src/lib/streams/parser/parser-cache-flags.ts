@@ -21,11 +21,14 @@ const AIOSTREAMS_GDRIVE_CACHED_RX = /🎫/u;
 const AIOSTREAMS_GDRIVE_UNCACHED_RX = /🎟️?/u;
 const AIOSTREAMS_GENERIC_CACHED_RX = /[🚀🌩📫]|\bcached\b/iu;
 const AIOSTREAMS_GENERIC_UNCACHED_RX = /☁️?|\bUNCACHED\b/iu;
-const MEDIAFUSION_SERVICE = "RD|TB|TRB|AD|PM|DL|OC|ED|ST|DBD|DB|PKP|PP|SDR|SAB|NZB|DAV|EN|NNTP|QB-WD|Putio|Offcloud|EasyDebrid";
+const MEDIAFUSION_SERVICE =
+  "RD|TB|TRB|AD|PM|DL|OC|ED|ST|DBD|DB|PKP|PP|SDR|SAB|NZB|DAV|EN|NNTP|QB-WD|Putio|Offcloud|EasyDebrid";
 const MEDIAFUSION_CACHED_RX = new RegExp(`\\b(?:${MEDIAFUSION_SERVICE})\\s*[+⚡✅]`, "iu");
 const MEDIAFUSION_UNCACHED_RX = new RegExp(`\\b(?:${MEDIAFUSION_SERVICE})\\s*[⏳⬇🔻❌]`, "iu");
-const SERVICE_CACHED_RX = /(?:⚡️?|✅)\s*(?:cached(?:\s+on)?|instant(?:\s+on)?|ready(?:\s+on)?)?\s*(real[\s\-_]?debrid|realdebrid|rd|torbox|tb|all[\s\-_]?debrid|alldebrid|ad|premiumize|pm|debrid[\s\-_]?link|debridlink|dl)/i;
-const SERVICE_UNCACHED_RX = /(?:⏳|⬇️?|🔻|❌)\s*(?:need[\s_-]?cache|need[\s_-]?to[\s_-]?cache|download(?:\s+via)?|not\s+ready|uncached(?:\s+on)?)?\s*(real[\s\-_]?debrid|realdebrid|rd|torbox|tb|all[\s\-_]?debrid|alldebrid|ad|premiumize|pm|debrid[\s\-_]?link|debridlink|dl)/i;
+const SERVICE_CACHED_RX =
+  /(?:⚡️?|✅)\s*(?:cached(?:\s+on)?|instant(?:\s+on)?|ready(?:\s+on)?)?\s*(real[\s\-_]?debrid|realdebrid|rd|torbox|tb|all[\s\-_]?debrid|alldebrid|ad|premiumize|pm|debrid[\s\-_]?link|debridlink|dl)/i;
+const SERVICE_UNCACHED_RX =
+  /(?:⏳|⬇️?|🔻|❌)\s*(?:need[\s_-]?cache|need[\s_-]?to[\s_-]?cache|download(?:\s+via)?|not\s+ready|uncached(?:\s+on)?)?\s*(real[\s\-_]?debrid|realdebrid|rd|torbox|tb|all[\s\-_]?debrid|alldebrid|ad|premiumize|pm|debrid[\s\-_]?link|debridlink|dl)/i;
 
 const COMET_BINGE_RX = /^comet\|([a-z\-]+)\|/i;
 const ELFHOSTED_CACHE_RX = /\belf[\s\-_]?cache\b|cached\s+on\s+elfhosted/i;
@@ -133,7 +136,10 @@ export function parseCacheFlags(
     const slug = addonNameSlug(addonName);
     if (slug && !denied[slug] && !out[slug]) {
       const isHttp = /^https?:\/\//i.test(url);
-      const looksDebrid = /(?:realdebrid|real-debrid|torbox|alldebrid|premiumize|debridlink|debrid-link|elfhosted)/i.test(url);
+      const looksDebrid =
+        /(?:realdebrid|real-debrid|torbox|alldebrid|premiumize|debridlink|debrid-link|elfhosted)/i.test(
+          url,
+        );
       if (isHttp && (looksDebrid || isDebridAwareAddon(addonName))) {
         out[slug] = true;
       }
@@ -179,7 +185,9 @@ function addonNameSlug(name: string | undefined): DebridSlug | null {
 }
 
 function isDebridAwareAddon(name: string): boolean {
-  return /(?:mediafusion|comet|torrentio|aiostreams|knightcrawler|jackettio|streamfusion|easynews)/i.test(name);
+  return /(?:mediafusion|comet|torrentio|aiostreams|knightcrawler|jackettio|streamfusion|easynews)/i.test(
+    name,
+  );
 }
 
 function cometServiceFrom(bingeGroup: string): DebridSlug | null {

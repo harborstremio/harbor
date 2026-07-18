@@ -52,9 +52,7 @@ export function TraktDeviceModal({ onClose }: { onClose: () => void }) {
               {t("Connect Trakt")}
             </span>
             <h2 className="text-[20px] font-medium tracking-tight text-ink">
-              {connectState.kind === "success"
-                ? t("Connected")
-                : t("Authorize Harbor on Trakt")}
+              {connectState.kind === "success" ? t("Connected") : t("Authorize Harbor on Trakt")}
             </h2>
           </div>
           <button
@@ -141,7 +139,9 @@ export function TraktDeviceModal({ onClose }: { onClose: () => void }) {
         {connectState.kind === "denied" && (
           <ErrorBox
             title={t("Access denied")}
-            message={t("Trakt reported that authorization was denied. Try again if this was unintentional.")}
+            message={t(
+              "Trakt reported that authorization was denied. Try again if this was unintentional.",
+            )}
             onRetry={beginConnect}
           />
         )}

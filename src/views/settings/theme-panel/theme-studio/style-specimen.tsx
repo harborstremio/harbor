@@ -19,9 +19,7 @@ export function StyleSpecimen({ colors }: { colors: CustomColors }) {
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <div className="rounded-xl bg-surface p-3">
               <p className="text-[11.5px] font-semibold text-ink">Panel surface</p>
-              <p className="text-[10.5px] leading-snug text-ink-muted">
-                Secondary copy sits here.
-              </p>
+              <p className="text-[10.5px] leading-snug text-ink-muted">Secondary copy sits here.</p>
             </div>
             <div className="flex gap-2">
               <button className="flex h-10 flex-1 items-center justify-center rounded-lg bg-accent text-[12px] font-semibold text-white">

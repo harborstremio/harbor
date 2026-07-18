@@ -19,9 +19,7 @@ export function ServiceLogo({
       </span>
     );
   }
-  const finalHeight = meta.logoHeight
-    ? Math.round(height * (meta.logoHeight / 32))
-    : height;
+  const finalHeight = meta.logoHeight ? Math.round(height * (meta.logoHeight / 32)) : height;
   return (
     <img
       src={meta.logo}

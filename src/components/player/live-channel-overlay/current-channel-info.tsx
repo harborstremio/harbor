@@ -25,7 +25,7 @@ export function CurrentChannelInfo({
     return [channel.name];
   }, [channel]);
   const hydrations = useChannelHydration(hydrationNames);
-  const hydrated = channel ? hydrations.get(channel.name) ?? null : null;
+  const hydrated = channel ? (hydrations.get(channel.name) ?? null) : null;
   if (!channel) return null;
   return (
     <div className="flex h-[140px] w-full overflow-hidden rounded-2xl border border-edge-soft/60 bg-canvas/85 backdrop-blur">
@@ -38,13 +38,7 @@ export function CurrentChannelInfo({
   );
 }
 
-function Backdrop({
-  hydrated,
-  logo,
-}: {
-  hydrated: Meta | null;
-  logo: string | null;
-}) {
+function Backdrop({ hydrated, logo }: { hydrated: Meta | null; logo: string | null }) {
   const [errored, setErrored] = useState(false);
   const url = hydrated?.background || hydrated?.poster || logo;
   if (!url || errored) {
@@ -66,13 +60,7 @@ function Backdrop({
   );
 }
 
-function ChannelLogo({
-  channel,
-  hydrated,
-}: {
-  channel: IptvChannel;
-  hydrated: Meta | null;
-}) {
+function ChannelLogo({ channel, hydrated }: { channel: IptvChannel; hydrated: Meta | null }) {
   const [errored, setErrored] = useState(false);
   const url = hydrated?.poster || channel.logo;
   if (!url || errored) {
@@ -161,9 +149,7 @@ function Body({
               </>
             )}
           </div>
-          {description && (
-            <p className="truncate text-[12.5px] text-ink-muted/85">{description}</p>
-          )}
+          {description && <p className="truncate text-[12.5px] text-ink-muted/85">{description}</p>}
           {progress != null && (
             <div className="mt-1 h-[3px] w-full max-w-[280px] overflow-hidden rounded-full bg-canvas/55">
               <div

@@ -37,7 +37,11 @@ export function DiscoveryQueueCta({ items }: { items: FeedItem[] }) {
               style={{ opacity: 0.45 + i * 0.06 }}
             >
               <Poster
-                src={rpdbPoster(settings.rpdbKey, item.meta.id, item.meta.background ?? item.meta.poster)}
+                src={rpdbPoster(
+                  settings.rpdbKey,
+                  item.meta.id,
+                  item.meta.background ?? item.meta.poster,
+                )}
                 seed={item.meta.id}
                 ratio="landscape"
                 className="absolute inset-0 rounded-none"

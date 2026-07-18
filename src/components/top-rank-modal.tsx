@@ -66,7 +66,10 @@ export function TopRankModal() {
     return pushActivityHint({ details: `Browsing ${meta.title}`, state: meta.subtitle });
   }, [openDept]);
 
-  const list = useMemo<PersonEntry[]>(() => (openDept ? topList(openDept) : []), [openDept, topList]);
+  const list = useMemo<PersonEntry[]>(
+    () => (openDept ? topList(openDept) : []),
+    [openDept, topList],
+  );
   const filtered = useMemo(() => {
     if (!query.trim()) return list;
     const q = query.trim().toLowerCase();
@@ -180,7 +183,9 @@ function PersonRow({
   onOpenMedia: (m: Meta) => void;
 }) {
   const t = useT();
-  const photo = person.profilePath ? `https://image.tmdb.org/t/p/w185${person.profilePath}` : undefined;
+  const photo = person.profilePath
+    ? `https://image.tmdb.org/t/p/w185${person.profilePath}`
+    : undefined;
   const bestKnown = person.knownFor.slice(0, 3);
   const handleImdb = useImdbOpener(person.id, tmdbKey);
 
@@ -192,9 +197,19 @@ function PersonRow({
         aria-label={t("Open {name}", { name: person.name })}
       >
         {photo ? (
-          <img src={photo} alt={person.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={photo}
+            alt={person.name}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         ) : (
-          <Poster src={undefined} seed={String(person.id)} ratio="portrait" className="absolute inset-0" />
+          <Poster
+            src={undefined}
+            seed={String(person.id)}
+            ratio="portrait"
+            className="absolute inset-0"
+          />
         )}
         <span className="absolute start-1.5 top-1.5 flex items-center gap-0.5 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[10px] font-bold">
           <span className="text-[8.5px] uppercase tracking-[0.18em] text-ink-subtle">#</span>
@@ -209,12 +224,20 @@ function PersonRow({
         >
           {person.name}
         </button>
-        <p className="text-[10.5px] uppercase tracking-[0.18em] text-ink-subtle">{t("Best known for")}</p>
+        <p className="text-[10.5px] uppercase tracking-[0.18em] text-ink-subtle">
+          {t("Best known for")}
+        </p>
         <div className="flex max-h-[68px] flex-wrap gap-1.5 overflow-hidden">
           {bestKnown.map((k) => (
-            <KnownChip key={`${k.mediaType}:${k.id}`} entry={k} onClick={() => onOpenMedia(toMeta(k))} />
+            <KnownChip
+              key={`${k.mediaType}:${k.id}`}
+              entry={k}
+              onClick={() => onOpenMedia(toMeta(k))}
+            />
           ))}
-          {bestKnown.length === 0 && <span className="text-[12px] text-ink-subtle">{t("No credits available")}</span>}
+          {bestKnown.length === 0 && (
+            <span className="text-[12px] text-ink-subtle">{t("No credits available")}</span>
+          )}
         </div>
         <div className="mt-auto flex items-center gap-2 pt-1">
           <button
@@ -241,7 +264,9 @@ function PersonRow({
 
 function KnownChip({ entry, onClick }: { entry: KnownForEntry; onClick: () => void }) {
   const { settings } = useSettings();
-  const rawPoster = entry.posterPath ? `https://image.tmdb.org/t/p/w92${entry.posterPath}` : undefined;
+  const rawPoster = entry.posterPath
+    ? `https://image.tmdb.org/t/p/w92${entry.posterPath}`
+    : undefined;
   const poster = usePosterChain(
     settings.rpdbKey,
     `tmdb:${entry.mediaType}:${entry.id}`,
@@ -256,7 +281,13 @@ function KnownChip({ entry, onClick }: { entry: KnownForEntry; onClick: () => vo
     >
       <span className="h-7 w-5 shrink-0 overflow-hidden rounded-full bg-canvas">
         {poster.src ? (
-          <img src={poster.src} alt="" loading="lazy" onError={poster.onError} className="h-full w-full object-cover" />
+          <img
+            src={poster.src}
+            alt=""
+            loading="lazy"
+            onError={poster.onError}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span className="block h-full w-full bg-gradient-to-br from-canvas to-elevated" />
         )}
@@ -298,7 +329,8 @@ function useImdbOpener(personId: number, tmdbKey: string) {
       );
       if (r.ok) {
         const data = await r.json();
-        const id = typeof data?.imdb_id === "string" && data.imdb_id.startsWith("nm") ? data.imdb_id : null;
+        const id =
+          typeof data?.imdb_id === "string" && data.imdb_id.startsWith("nm") ? data.imdb_id : null;
         cache.current = id;
         if (id) openUrl(`https://www.imdb.com/name/${id}`);
         else fallback();

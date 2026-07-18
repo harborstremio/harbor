@@ -35,8 +35,8 @@ export function Signature() {
           </p>
           <p>A special thank you to the team at Stremio-Addons. Please consider supporting them.</p>
           <p>
-            This little footnote area we intend to keep unprofessional as opposed to the rest
-            of this project. We hope you enjoy!
+            This little footnote area we intend to keep unprofessional as opposed to the rest of
+            this project. We hope you enjoy!
           </p>
         </div>
       )}

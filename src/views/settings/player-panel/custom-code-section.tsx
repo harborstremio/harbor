@@ -17,16 +17,14 @@ const FIELDS: Array<{
   {
     id: "customCss",
     label: "Custom CSS",
-    placeholder:
-      "/* override anything */\n.harbor-seek-fill { box-shadow: 0 0 12px #ffca3a; }",
+    placeholder: "/* override anything */\n.harbor-seek-fill { box-shadow: 0 0 12px #ffca3a; }",
     hint: "Live-injected into the document. Use it to retheme buttons, change spacing, recolor anything.",
     rows: 7,
   },
   {
     id: "customJs",
     label: "Custom JS",
-    placeholder:
-      "// runs once whenever this field changes\nconsole.log('hello from your script');",
+    placeholder: "// runs once whenever this field changes\nconsole.log('hello from your script');",
     hint: "Runs in the app's WebView. You're modding your own client. No sandbox, no safety net. Errors land in the console.",
     rows: 7,
   },
@@ -56,7 +54,9 @@ export function CustomCodeCard() {
         <div className="flex flex-col gap-1">
           <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Custom code")}</h2>
           <span className="text-[13.5px] leading-relaxed text-ink-muted">
-            {t("Power-user knob. Inject your own CSS, JS, and HTML into Harbor. Lives in your local settings; nothing leaves your machine.")}
+            {t(
+              "Power-user knob. Inject your own CSS, JS, and HTML into Harbor. Lives in your local settings; nothing leaves your machine.",
+            )}
           </span>
         </div>
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-edge text-ink-muted transition-colors hover:bg-elevated hover:text-ink">
@@ -81,7 +81,9 @@ export function CustomCodePanel() {
       <div className="flex items-start gap-2.5 rounded-xl border border-danger/40 bg-danger/10 px-3.5 py-3 text-[12px] leading-snug text-ink">
         <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-danger" />
         <span>
-          {t("You're modding your own client. Custom JS has full access to your Harbor session. Only paste code you wrote or fully trust.")}
+          {t(
+            "You're modding your own client. Custom JS has full access to your Harbor session. Only paste code you wrote or fully trust.",
+          )}
         </span>
       </div>
 

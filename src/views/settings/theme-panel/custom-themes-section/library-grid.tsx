@@ -134,7 +134,8 @@ function ImportTile({ onUpload }: { onUpload: (file: File) => void }) {
           className="flex h-12 w-12 items-center justify-center rounded-2xl border border-edge-soft bg-surface text-ink-muted transition-all duration-300 group-hover:border-edge group-hover:text-ink"
           style={{
             transform: dragOver ? "scale(1.08)" : "scale(1)",
-            transition: "transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color 200ms, color 200ms",
+            transition:
+              "transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1), border-color 200ms, color 200ms",
           }}
         >
           <FilePlus2 size={20} strokeWidth={2} />
@@ -162,7 +163,8 @@ function LibraryCard({
 }) {
   const { theme, category, removable } = entry;
   const hasImage = !!theme.previewImage;
-  const bg = theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
+  const bg =
+    theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
   return (
     <div
       className={`group relative flex flex-col overflow-hidden rounded-2xl border bg-surface transition-all ${

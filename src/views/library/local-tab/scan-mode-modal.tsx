@@ -39,7 +39,9 @@ export function ScanModeModal({
       <div className="flex w-full max-w-[460px] flex-col gap-6 rounded-[24px] border border-edge-soft bg-elevated/95 px-8 py-8 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
-            <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("How should we import this folder?")}</h2>
+            <h2 className="text-[19px] font-medium tracking-tight text-ink">
+              {t("How should we import this folder?")}
+            </h2>
             <p className="text-[12.5px] leading-relaxed text-ink-muted">
               {nfoCount > 0
                 ? t("Found {n} .nfo file in this folder.", { n: nfoCount })
@@ -65,7 +67,9 @@ export function ScanModeModal({
           <ModeButton
             icon={<FileText size={18} strokeWidth={2} />}
             title={t("Import from .nfo files")}
-            sub={t("Read titles, ids, and any poster/logo/backdrop already saved next to your files. Missing images are filled from TMDB.")}
+            sub={t(
+              "Read titles, ids, and any poster/logo/backdrop already saved next to your files. Missing images are filled from TMDB.",
+            )}
             disabled={nfoCount === 0}
             disabledHint={t("No .nfo files here")}
             onClick={() => onPick("nfo")}

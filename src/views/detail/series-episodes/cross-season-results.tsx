@@ -63,7 +63,11 @@ export function CrossSeasonResults({
   return (
     <div className="flex flex-col gap-1.5">
       {results.map((v) => (
-        <EpisodeResultRow key={v.id ?? `${v.season}-${v.episode}`} video={v} onPlay={() => play(v)} />
+        <EpisodeResultRow
+          key={v.id ?? `${v.season}-${v.episode}`}
+          video={v}
+          onPlay={() => play(v)}
+        />
       ))}
     </div>
   );

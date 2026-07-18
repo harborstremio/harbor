@@ -9,10 +9,7 @@ export async function hashProfilePassword(password: string): Promise<string> {
   return out;
 }
 
-export async function verifyProfilePassword(
-  password: string,
-  hash: string,
-): Promise<boolean> {
+export async function verifyProfilePassword(password: string, hash: string): Promise<boolean> {
   if (!hash) return false;
   const candidate = await hashProfilePassword(password);
   return candidate === hash;

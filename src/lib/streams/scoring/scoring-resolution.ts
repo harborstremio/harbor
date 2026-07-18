@@ -9,7 +9,13 @@ export function resolutionPoints(s: ParsedStream): ScoreReason {
 }
 
 export function tierOf(s: ParsedStream): Tier {
-  if (s.source === "CAM" || s.source === "TS" || s.source === "HDTS" || s.source === "TC" || s.source === "SCR") {
+  if (
+    s.source === "CAM" ||
+    s.source === "TS" ||
+    s.source === "HDTS" ||
+    s.source === "TC" ||
+    s.source === "SCR"
+  ) {
     return "ROUGH";
   }
   if (s.resolution === "4K") {

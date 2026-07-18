@@ -46,10 +46,7 @@ export function GuideSkeleton() {
                 {t("Channel")}
               </span>
             </div>
-            <div
-              className="flex border-b border-edge-soft/60"
-              style={{ height: RULER_HEIGHT_PX }}
-            >
+            <div className="flex border-b border-edge-soft/60" style={{ height: RULER_HEIGHT_PX }}>
               {Array.from({ length: slots }).map((_, i) => (
                 <div
                   key={i}

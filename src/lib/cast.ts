@@ -149,7 +149,5 @@ function mimeFromExt(s: string): string | undefined {
 }
 
 export function guessContentType(url: string, fallbackName?: string): string {
-  return (
-    mimeFromExt(url) ?? (fallbackName ? mimeFromExt(fallbackName) : undefined) ?? "video/mp4"
-  );
+  return mimeFromExt(url) ?? (fallbackName ? mimeFromExt(fallbackName) : undefined) ?? "video/mp4";
 }

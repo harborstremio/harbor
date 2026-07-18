@@ -32,7 +32,15 @@ function TileButton({
   );
 }
 
-export function VideoTile({ v, onPlay, onDownload }: { v: GalleryVideo; onPlay: () => void; onDownload: () => void }) {
+export function VideoTile({
+  v,
+  onPlay,
+  onDownload,
+}: {
+  v: GalleryVideo;
+  onPlay: () => void;
+  onDownload: () => void;
+}) {
   return (
     <div className="group flex w-[300px] shrink-0 flex-col gap-2.5">
       <div className="relative">
@@ -54,7 +62,11 @@ export function VideoTile({ v, onPlay, onDownload }: { v: GalleryVideo; onPlay: 
           </span>
         </button>
         <span className="absolute end-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
-          <TileButton icon={<Download size={15} strokeWidth={2.2} />} label={t("Download")} onClick={onDownload} />
+          <TileButton
+            icon={<Download size={15} strokeWidth={2.2} />}
+            label={t("Download")}
+            onClick={onDownload}
+          />
         </span>
       </div>
       <div className="flex flex-col gap-0.5 px-0.5">
@@ -83,7 +95,10 @@ export function ImageTile({
   const w = ratio === "landscape" ? "w-[300px]" : "w-[160px]";
   const aspect = ratio === "landscape" ? "aspect-video" : "aspect-[2/3]";
   return (
-    <div className={`group relative ${w} shrink-0`} data-title-backdrop={pinnable ? src : undefined}>
+    <div
+      className={`group relative ${w} shrink-0`}
+      data-title-backdrop={pinnable ? src : undefined}
+    >
       <button
         type="button"
         onClick={onOpen}
@@ -104,7 +119,11 @@ export function ImageTile({
             onClick={onSetBackdrop}
           />
         )}
-        <TileButton icon={<Download size={15} strokeWidth={2.2} />} label={t("Download")} onClick={onDownload} />
+        <TileButton
+          icon={<Download size={15} strokeWidth={2.2} />}
+          label={t("Download")}
+          onClick={onDownload}
+        />
       </span>
     </div>
   );
@@ -143,7 +162,11 @@ export function LogoTile({
             onClick={onSetLogo}
           />
         )}
-        <TileButton icon={<Download size={15} strokeWidth={2.2} />} label={t("Download")} onClick={onDownload} />
+        <TileButton
+          icon={<Download size={15} strokeWidth={2.2} />}
+          label={t("Download")}
+          onClick={onDownload}
+        />
       </span>
     </div>
   );

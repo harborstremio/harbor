@@ -3,8 +3,16 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 
 const OPTIONS = [
-  ["shared", "Share settings with all profiles", "One set of preferences everyone on this Harbor uses."],
-  ["independent", "Use independent settings for this profile", "This profile keeps its own preferences, separate from everyone else."],
+  [
+    "shared",
+    "Share settings with all profiles",
+    "One set of preferences everyone on this Harbor uses.",
+  ],
+  [
+    "independent",
+    "Use independent settings for this profile",
+    "This profile keeps its own preferences, separate from everyone else.",
+  ],
 ] as const;
 
 export function SettingsScopeCard() {

@@ -4,8 +4,16 @@ export type Anime4kTier = "hq" | "fast";
 export const ANIME4K_MODES: Array<{ id: Anime4kMode; label: string; sub: string }> = [
   { id: "A", label: "Mode A", sub: "Restore + upscale. The best all-rounder for most anime." },
   { id: "B", label: "Mode B", sub: "Softer restore. Kinder to compressed or noisy sources." },
-  { id: "C", label: "Mode C", sub: "Denoise + upscale. Lightest, cleanest on already-sharp video." },
-  { id: "AA", label: "Mode A+A", sub: "Double restore. Sharpest detail, for high-quality sources." },
+  {
+    id: "C",
+    label: "Mode C",
+    sub: "Denoise + upscale. Lightest, cleanest on already-sharp video.",
+  },
+  {
+    id: "AA",
+    label: "Mode A+A",
+    sub: "Double restore. Sharpest detail, for high-quality sources.",
+  },
   { id: "BB", label: "Mode B+B", sub: "Double soft restore. For heavy compression artifacts." },
   { id: "CA", label: "Mode C+A", sub: "Denoise then restore. Balanced cleanup and detail." },
 ];

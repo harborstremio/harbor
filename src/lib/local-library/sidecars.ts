@@ -99,13 +99,25 @@ export async function findLocalArt(videoPath: string): Promise<LocalArt> {
   const index = await dirIndex(dir);
   const [poster, backdrop, logo] = await Promise.all([
     resolveIn(dir, index, [
-      `${stem}-poster.jpg`, `${stem}-poster.png`, "poster.jpg", "poster.png", "folder.jpg", "cover.jpg",
+      `${stem}-poster.jpg`,
+      `${stem}-poster.png`,
+      "poster.jpg",
+      "poster.png",
+      "folder.jpg",
+      "cover.jpg",
     ]),
     resolveIn(dir, index, [
-      `${stem}-fanart.jpg`, `${stem}-fanart.png`, "fanart.jpg", "fanart.png", "backdrop.jpg",
+      `${stem}-fanart.jpg`,
+      `${stem}-fanart.png`,
+      "fanart.jpg",
+      "fanart.png",
+      "backdrop.jpg",
     ]),
     resolveIn(dir, index, [
-      `${stem}-clearlogo.png`, `${stem}-logo.png`, "clearlogo.png", "logo.png",
+      `${stem}-clearlogo.png`,
+      `${stem}-logo.png`,
+      "clearlogo.png",
+      "logo.png",
     ]),
   ]);
   const art: LocalArt = {};
@@ -121,17 +133,16 @@ export async function findShowNfo(videoPath: string): Promise<string | null> {
   return resolveInDirs(await dirAndParent(dir), ["tvshow.nfo"]);
 }
 
-export async function findShowArt(
-  videoPath: string,
-  season: number | null,
-): Promise<LocalArt> {
+export async function findShowArt(videoPath: string, season: number | null): Promise<LocalArt> {
   if (!isTauri) return {};
   const { dir } = await splitVideoPath(videoPath);
   const dirs = await dirAndParent(dir);
-  const seasonTag =
-    season != null ? `season${String(season).padStart(2, "0")}-poster` : null;
+  const seasonTag = season != null ? `season${String(season).padStart(2, "0")}-poster` : null;
   const posterNames = [
-    "poster.jpg", "poster.png", "folder.jpg", "cover.jpg",
+    "poster.jpg",
+    "poster.png",
+    "folder.jpg",
+    "cover.jpg",
     ...(seasonTag ? [`${seasonTag}.jpg`, `${seasonTag}.png`] : []),
   ];
   const [poster, backdrop, logo] = await Promise.all([
@@ -174,8 +185,7 @@ export function parseNfo(xml: string): ParsedNfo {
   out.showTitle = text("showtitle");
 
   const yearRaw =
-    text("year") ??
-    (text("premiered") || text("aired") || text("releasedate"))?.slice(0, 4);
+    text("year") ?? (text("premiered") || text("aired") || text("releasedate"))?.slice(0, 4);
   const yearNum = yearRaw ? parseInt(yearRaw, 10) : NaN;
   out.year = Number.isFinite(yearNum) ? yearNum : null;
 
@@ -217,8 +227,7 @@ export function parseNfo(xml: string): ParsedNfo {
 function parseNfoArt(doc: Document): LocalArt | undefined {
   const thumbs = Array.from(doc.querySelectorAll("thumb"));
   const val = (el: Element | undefined) => el?.textContent?.trim() || undefined;
-  const byAspect = (aspect: string) =>
-    thumbs.filter((el) => el.getAttribute("aspect") === aspect);
+  const byAspect = (aspect: string) => thumbs.filter((el) => el.getAttribute("aspect") === aspect);
 
   const poster = val(byAspect("poster").find((el) => !el.getAttribute("season")));
 

@@ -44,7 +44,7 @@ export function tmdbImdbCached(metaId?: string): string | null | undefined {
   if (metaId.startsWith("tt")) return metaId;
   if (!metaId.startsWith("tmdb:")) return undefined;
   loadImdbCache();
-  return imdbCache.has(metaId) ? imdbCache.get(metaId) ?? null : undefined;
+  return imdbCache.has(metaId) ? (imdbCache.get(metaId) ?? null) : undefined;
 }
 
 export function subscribeTmdbImdb(metaId: string, fn: () => void): () => void {
@@ -133,7 +133,7 @@ function notifyTmdb(imdbId: string) {
 export function tmdbFromImdbCached(imdbId?: string): string | null | undefined {
   if (!imdbId || !imdbId.startsWith("tt")) return undefined;
   loadTmdbCache();
-  return tmdbCache.has(imdbId) ? tmdbCache.get(imdbId) ?? null : undefined;
+  return tmdbCache.has(imdbId) ? (tmdbCache.get(imdbId) ?? null) : undefined;
 }
 
 export function subscribeImdbTmdb(imdbId: string, fn: () => void): () => void {

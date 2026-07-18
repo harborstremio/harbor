@@ -13,7 +13,9 @@ export function AdvancedMpvSection() {
   return (
     <Section
       title={t("Advanced (mpv.conf)")}
-      subtitle={t("The escape hatch for power users. One mpv option per line as key=value, exactly like mpv.conf. These apply last, so they override every dial above. Anything Harbor can't read is skipped, so a typo won't break playback. Restart playback to apply.")}
+      subtitle={t(
+        "The escape hatch for power users. One mpv option per line as key=value, exactly like mpv.conf. These apply last, so they override every dial above. Anything Harbor can't read is skipped, so a typo won't break playback. Restart playback to apply.",
+      )}
     >
       <textarea
         value={value}
@@ -31,20 +33,27 @@ export function AdvancedMpvSection() {
         )}
         {check.skipped > 0 && (
           <span className="text-ink-subtle">
-            {check.skipped === 1 ? t("1 line skipped (not valid)") : t("{n} lines skipped (not valid)", { n: check.skipped })}
+            {check.skipped === 1
+              ? t("1 line skipped (not valid)")
+              : t("{n} lines skipped (not valid)", { n: check.skipped })}
           </span>
         )}
         {check.valid === 0 && check.skipped === 0 && (
-          <span className="text-ink-subtle">{t("Empty. The dials above cover what most people ever need.")}</span>
+          <span className="text-ink-subtle">
+            {t("Empty. The dials above cover what most people ever need.")}
+          </span>
         )}
       </div>
       {check.risky.length > 0 && (
         <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/40 bg-amber-400/10 px-3.5 py-3 text-[12px] leading-snug text-ink">
           <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-amber-300" />
           <span>
-            {t("Heads up: {keys} can load outside scripts or open your player to the network. Only keep these if you know exactly what they do.", {
-              keys: check.risky.join(", "),
-            })}
+            {t(
+              "Heads up: {keys} can load outside scripts or open your player to the network. Only keep these if you know exactly what they do.",
+              {
+                keys: check.risky.join(", "),
+              },
+            )}
           </span>
         </div>
       )}

@@ -7,7 +7,9 @@ export function WatchOn({ providers }: { providers: WatchProvider[] }) {
   if (providers.length === 0) return null;
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">{t("Watch on")}</p>
+      <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
+        {t("Watch on")}
+      </p>
       <div className="flex flex-wrap gap-2.5">
         {providers.map((p) => (
           <button

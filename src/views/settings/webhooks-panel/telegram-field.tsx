@@ -91,7 +91,9 @@ export function TelegramComposedField({
         disabled={!ready || status.state === "busy"}
         className="flex h-10 items-center justify-center gap-1.5 self-start rounded-lg bg-ink px-5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {status.state === "busy" && <Loader2 size={12} strokeWidth={2.4} className="animate-spin" />}
+        {status.state === "busy" && (
+          <Loader2 size={12} strokeWidth={2.4} className="animate-spin" />
+        )}
         {t("Send test")}
       </button>
       <div className="rounded-lg bg-canvas/60 p-3 text-[12px] leading-relaxed text-ink-muted">

@@ -57,9 +57,7 @@ export function SyncedAddonsCard() {
               {count === 1 ? t("addon synced") : t("addons synced")}
             </span>
           </div>
-          {addons && addons.length > 0 && (
-            <AddonStackPeek addons={addons} max={MAX_VISIBLE} />
-          )}
+          {addons && addons.length > 0 && <AddonStackPeek addons={addons} max={MAX_VISIBLE} />}
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -158,7 +156,12 @@ function AddonListTooltip({ addons, onClose }: { addons: Addon[]; onClose: () =>
           className="flex h-6 w-6 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path
+              d="M6 6l12 12M18 6L6 18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
       </div>

@@ -59,7 +59,11 @@ export function useGifRecorder(params: { src: PlayerSrc }): {
         path: result.path,
       });
     } catch (e) {
-      setToast({ id: Date.now(), kind: "error", text: typeof e === "string" ? e : "GIF export failed" });
+      setToast({
+        id: Date.now(),
+        kind: "error",
+        text: typeof e === "string" ? e : "GIF export failed",
+      });
     } finally {
       setPhase("idle");
       setElapsedSec(0);

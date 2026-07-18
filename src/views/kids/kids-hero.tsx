@@ -56,15 +56,7 @@ export function KidsHero({ featured }: { featured: Meta[] }) {
   );
 }
 
-function KidsHeroCard({
-  meta,
-  index,
-  onOpen,
-}: {
-  meta: Meta;
-  index: number;
-  onOpen: () => void;
-}) {
+function KidsHeroCard({ meta, index, onOpen }: { meta: Meta; index: number; onOpen: () => void }) {
   const { settings } = useSettings();
   const art = upsizeCard(meta.background) || meta.poster;
   const [logo, setLogo] = useState<string | undefined>(meta.logo);

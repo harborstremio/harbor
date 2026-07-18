@@ -12,8 +12,25 @@ import { WelcomeStep } from "@/components/onboarding/welcome-step";
 import { useT } from "@/lib/i18n";
 import { useOnboarding } from "@/lib/onboarding";
 
-type StepId = "splash" | "welcome" | "layout" | "tmdb" | "stremio" | "streaming" | "subtitles" | "done";
-const STEPS: StepId[] = ["splash", "welcome", "layout", "tmdb", "stremio", "streaming", "subtitles", "done"];
+type StepId =
+  | "splash"
+  | "welcome"
+  | "layout"
+  | "tmdb"
+  | "stremio"
+  | "streaming"
+  | "subtitles"
+  | "done";
+const STEPS: StepId[] = [
+  "splash",
+  "welcome",
+  "layout",
+  "tmdb",
+  "stremio",
+  "streaming",
+  "subtitles",
+  "done",
+];
 
 export function OnboardingModal() {
   const { onboarded, finishOnboarding } = useOnboarding();
@@ -83,7 +100,10 @@ export function OnboardingModal() {
                 onJump={(i) => setStepIdx(i + 1)}
               />
               <div className="flex items-center gap-2.5">
-                {(step === "tmdb" || step === "stremio" || step === "streaming" || step === "subtitles") && (
+                {(step === "tmdb" ||
+                  step === "stremio" ||
+                  step === "streaming" ||
+                  step === "subtitles") && (
                   <button
                     key={`skip-${step}`}
                     onClick={next}

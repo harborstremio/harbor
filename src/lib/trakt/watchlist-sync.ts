@@ -63,7 +63,10 @@ export async function runExport(plan: ExportPlan): Promise<ExportResult> {
   let firstErr: unknown = null;
   const post = async (body: { movies?: SyncEntry[]; shows?: SyncEntry[] }) => {
     try {
-      const res = await traktRequest<WatchlistPostResponse>("/sync/watchlist", { method: "POST", body });
+      const res = await traktRequest<WatchlistPostResponse>("/sync/watchlist", {
+        method: "POST",
+        body,
+      });
       synced +=
         (res.added?.movies ?? 0) +
         (res.added?.shows ?? 0) +
@@ -74,10 +77,17 @@ export async function runExport(plan: ExportPlan): Promise<ExportResult> {
       if (firstErr == null) firstErr = e;
     }
   };
-  for (let i = 0; i < plan.movies.length; i += CHUNK) await post({ movies: plan.movies.slice(i, i + CHUNK) });
-  for (let i = 0; i < plan.shows.length; i += CHUNK) await post({ shows: plan.shows.slice(i, i + CHUNK) });
+  for (let i = 0; i < plan.movies.length; i += CHUNK)
+    await post({ movies: plan.movies.slice(i, i + CHUNK) });
+  for (let i = 0; i < plan.shows.length; i += CHUNK)
+    await post({ shows: plan.shows.slice(i, i + CHUNK) });
   if (synced === 0 && firstErr != null) throw firstErr;
-  return { exportable, synced, skippedAnime: plan.skippedAnime, unmatched: Math.max(0, exportable - synced) };
+  return {
+    exportable,
+    synced,
+    skippedAnime: plan.skippedAnime,
+    unmatched: Math.max(0, exportable - synced),
+  };
 }
 
 function traktItemToStremioId(it: TraktItem): string | null {

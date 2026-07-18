@@ -26,7 +26,12 @@ export function EpisodeResultRow({
       }`}
     >
       <div className="relative w-40 shrink-0 overflow-hidden rounded-lg">
-        <Poster src={video.thumbnail || undefined} seed={String(video.id ?? video.episode)} ratio="landscape" lazy />
+        <Poster
+          src={video.thumbnail || undefined}
+          seed={String(video.id ?? video.episode)}
+          ratio="landscape"
+          lazy
+        />
         <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 transition-opacity group-hover:opacity-100">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink/90 text-canvas backdrop-blur-md">
             <Play size={14} fill="currentColor" />
@@ -38,7 +43,8 @@ export function EpisodeResultRow({
           {video.name || t("Episode {n}", { n: video.episode ?? 0 })}
         </span>
         <span className="text-[12.5px] font-medium text-accent">
-          {t("Season {s}", { s: video.season ?? 0 })} · {t("Episode {n}", { n: video.episode ?? 0 })}
+          {t("Season {s}", { s: video.season ?? 0 })} ·{" "}
+          {t("Episode {n}", { n: video.episode ?? 0 })}
         </span>
       </div>
     </button>

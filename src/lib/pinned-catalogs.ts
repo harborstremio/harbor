@@ -26,12 +26,19 @@ function load(): PinnedCatalog[] {
       if (!el || typeof el !== "object") continue;
       const e = el as Partial<PinnedCatalog>;
       if (typeof e.id !== "string" || typeof e.name !== "string") continue;
-      if (e.source !== "catalog" && e.source !== "anilist" && e.source !== "simkl" && e.source !== "mal") continue;
+      if (
+        e.source !== "catalog" &&
+        e.source !== "anilist" &&
+        e.source !== "simkl" &&
+        e.source !== "mal"
+      )
+        continue;
       out.push({
         id: e.id,
         source: e.source,
         name: e.name,
-        params: e.params && typeof e.params === "object" ? (e.params as Record<string, string>) : {},
+        params:
+          e.params && typeof e.params === "object" ? (e.params as Record<string, string>) : {},
       });
     }
     return out.slice(0, CAP);

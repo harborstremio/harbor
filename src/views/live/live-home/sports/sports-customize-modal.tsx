@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { X, Check, Settings2 } from "lucide-react";
 import { useT, useUiLanguage } from "@/lib/i18n";
-import { LEAGUES, LEAGUE_GROUPS, getLeagueLabel, getGroupLabel, type LeagueDef } from "@/lib/sports/espn";
+import {
+  LEAGUES,
+  LEAGUE_GROUPS,
+  getLeagueLabel,
+  getGroupLabel,
+  type LeagueDef,
+} from "@/lib/sports/espn";
 
 interface SportsCustomizeModalProps {
   selected: string[];
@@ -38,20 +44,24 @@ export function SportsCustomizeModal({ selected, onSave, onClose }: SportsCustom
   const selectAll = () => setDraft(new Set(LEAGUES.map((l) => l.key)));
   const clearAll = () => setDraft(new Set());
 
-  const filteredLeagues = activeGroup === "all"
-    ? LEAGUES
-    : LEAGUES.filter((l) => l.group === activeGroup);
+  const filteredLeagues =
+    activeGroup === "all" ? LEAGUES : LEAGUES.filter((l) => l.group === activeGroup);
 
   const groupLeaguesMap = new Map<string, LeagueDef[]>();
   for (const g of LEAGUE_GROUPS) {
-    groupLeaguesMap.set(g.key, LEAGUES.filter((l) => l.group === g.key));
+    groupLeaguesMap.set(
+      g.key,
+      LEAGUES.filter((l) => l.group === g.key),
+    );
   }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backdropFilter: "blur(12px)", backgroundColor: "rgba(0,0,0,0.65)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div className="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-edge-soft/40 bg-canvas shadow-2xl">
         <div className="flex items-center justify-between border-b border-edge-soft/30 px-6 py-4">
@@ -61,7 +71,9 @@ export function SportsCustomizeModal({ selected, onSave, onClose }: SportsCustom
             </div>
             <div>
               <h2 className="text-[15px] font-semibold text-ink">{t("sports.customize.title")}</h2>
-              <p className="text-[12px] text-ink-subtle">{t("sports.customize.selected", { n: draft.size })}</p>
+              <p className="text-[12px] text-ink-subtle">
+                {t("sports.customize.selected", { n: draft.size })}
+              </p>
             </div>
           </div>
           <button
@@ -124,7 +136,9 @@ export function SportsCustomizeModal({ selected, onSave, onClose }: SportsCustom
                         onClick={() => toggleGroup(g.key)}
                         className={`text-[11px] font-medium transition-colors ${allSel ? "text-danger hover:text-danger/80" : someSel ? "text-amber-400 hover:text-amber-300" : "text-ink-subtle hover:text-ink"}`}
                       >
-                        {allSel ? t("sports.customize.deselectGroupAll") : t("sports.customize.selectGroupAll")}
+                        {allSel
+                          ? t("sports.customize.deselectGroupAll")
+                          : t("sports.customize.selectGroupAll")}
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -167,7 +181,10 @@ export function SportsCustomizeModal({ selected, onSave, onClose }: SportsCustom
               {t("sports.customize.cancel")}
             </button>
             <button
-              onClick={() => { onSave([...draft]); onClose(); }}
+              onClick={() => {
+                onSave([...draft]);
+                onClose();
+              }}
               className="rounded-xl bg-ink px-5 py-2 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-80"
             >
               {t("sports.customize.save")}
@@ -180,7 +197,11 @@ export function SportsCustomizeModal({ selected, onSave, onClose }: SportsCustom
 }
 
 function GroupTab({
-  active, label, icon, badge, onClick,
+  active,
+  label,
+  icon,
+  badge,
+  onClick,
 }: {
   active: boolean;
   label: string;
@@ -200,9 +221,11 @@ function GroupTab({
       <span>{icon}</span>
       <span>{label}</span>
       {badge !== undefined && (
-        <span className={`flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
-          active ? "bg-white/20 text-white" : "bg-ink/15 text-ink"
-        }`}>
+        <span
+          className={`flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${
+            active ? "bg-white/20 text-white" : "bg-ink/15 text-ink"
+          }`}
+        >
           {badge}
         </span>
       )}
@@ -211,7 +234,9 @@ function GroupTab({
 }
 
 function LeagueCard({
-  league, selected, onToggle,
+  league,
+  selected,
+  onToggle,
 }: {
   league: LeagueDef;
   selected: boolean;

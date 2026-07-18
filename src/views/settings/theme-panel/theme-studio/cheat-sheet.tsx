@@ -17,7 +17,12 @@ import {
 import { RECIPES } from "./cheat-sheet-recipes";
 import { SUITE_CHROME } from "./suite-theme";
 
-const RECIPE_EXT: Record<string, string> = { css: "css", js: "js", harborstyle: "harborstyle", html: "html" };
+const RECIPE_EXT: Record<string, string> = {
+  css: "css",
+  js: "js",
+  harborstyle: "harborstyle",
+  html: "html",
+};
 
 function slug(s: string): string {
   return (
@@ -139,22 +144,41 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto">
           <div className="mx-auto flex max-w-[960px] flex-col gap-12 px-6 py-9 lg:px-10">
-            <Section id="tokens-color" title="Color tokens" sub="Every surface in Harbor maps to one of these 12 variables.">
+            <Section
+              id="tokens-color"
+              title="Color tokens"
+              sub="Every surface in Harbor maps to one of these 12 variables."
+            >
               <TokenTable rows={COLOR_TOKENS} swatch />
             </Section>
 
-            <Section id="tokens-font" title="Font tokens" sub="Set on the root. Override any to swap typography.">
+            <Section
+              id="tokens-font"
+              title="Font tokens"
+              sub="Set on the root. Override any to swap typography."
+            >
               <TokenTable rows={FONT_TOKENS} />
             </Section>
 
-            <Section id="tokens-easing" title="Easing tokens" sub="Shared transition curves. Use anywhere you transition.">
+            <Section
+              id="tokens-easing"
+              title="Easing tokens"
+              sub="Shared transition curves. Use anywhere you transition."
+            >
               <TokenTable rows={EASING_TOKENS} />
             </Section>
 
-            <Section id="data-attrs" title="Root data attributes" sub="Set on <html>. Use them to scope styles to a specific layout/card/button choice.">
+            <Section
+              id="data-attrs"
+              title="Root data attributes"
+              sub="Set on <html>. Use them to scope styles to a specific layout/card/button choice."
+            >
               <div className="flex flex-col gap-2.5">
                 {ROOT_DATA_ATTRS.map((d) => (
-                  <div key={d.attr} className="rounded-lg border border-edge-soft bg-elevated/15 p-4">
+                  <div
+                    key={d.attr}
+                    className="rounded-lg border border-edge-soft bg-elevated/15 p-4"
+                  >
                     <div className="flex flex-wrap items-baseline gap-2">
                       <CopyName text={d.attr} />
                       <span className="text-[11px] text-ink-subtle">·</span>
@@ -176,21 +200,33 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="utilities" title="Tailwind utility shortcuts" sub="The Tailwind classes that already exist on every component. Override one of these in CSS and you change everywhere it's used.">
+            <Section
+              id="utilities"
+              title="Tailwind utility shortcuts"
+              sub="The Tailwind classes that already exist on every component. Override one of these in CSS and you change everywhere it's used."
+            >
               <div className="grid gap-1.5 sm:grid-cols-2">
                 {TAILWIND_UTILITIES.map((u) => (
                   <div
                     key={u.class}
                     className="flex items-center justify-between gap-3 rounded-lg border border-edge-soft bg-elevated/15 px-3 py-1.5"
                   >
-                    <code className="font-mono text-[11.5px] font-semibold text-ink">.{u.class}</code>
-                    <code className="truncate text-end font-mono text-[11px] text-ink-subtle">{u.mapsTo}</code>
+                    <code className="font-mono text-[11.5px] font-semibold text-ink">
+                      .{u.class}
+                    </code>
+                    <code className="truncate text-end font-mono text-[11px] text-ink-subtle">
+                      {u.mapsTo}
+                    </code>
                   </div>
                 ))}
               </div>
             </Section>
 
-            <Section id="selectors" title="Stable selectors" sub="Class names and data attributes that won't change between releases. Safe to target from your CSS.">
+            <Section
+              id="selectors"
+              title="Stable selectors"
+              sub="Class names and data attributes that won't change between releases. Safe to target from your CSS."
+            >
               <div className="flex flex-col gap-1.5">
                 {STABLE_SELECTORS.map((s) => (
                   <div
@@ -201,15 +237,17 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
                       <CopyName text={s.selector} />
                       <span className="text-[11.5px] text-ink-muted">{s.where}</span>
                     </div>
-                    {s.tip && (
-                      <p className="mt-1 text-[11px] italic text-ink-subtle">{s.tip}</p>
-                    )}
+                    {s.tip && <p className="mt-1 text-[11px] italic text-ink-subtle">{s.tip}</p>}
                   </div>
                 ))}
               </div>
             </Section>
 
-            <Section id="z-index" title="Z-index map" sub="Pick a z-index for your overlays that sits where you want it.">
+            <Section
+              id="z-index"
+              title="Z-index map"
+              sub="Pick a z-index for your overlays that sits where you want it."
+            >
               <div className="flex flex-col gap-1">
                 {Z_INDEX_MAP.map((l) => (
                   <div
@@ -228,7 +266,11 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="events" title="Window events" sub="Dispatched on window. Listen from your theme JS to react to Harbor's lifecycle.">
+            <Section
+              id="events"
+              title="Window events"
+              sub="Dispatched on window. Listen from your theme JS to react to Harbor's lifecycle."
+            >
               <div className="flex flex-col gap-1.5">
                 {WINDOW_EVENTS.map((e) => (
                   <div
@@ -249,7 +291,11 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="views" title="View identifiers" sub="Use these strings if you wire a custom navbar that needs to navigate.">
+            <Section
+              id="views"
+              title="View identifiers"
+              sub="Use these strings if you wire a custom navbar that needs to navigate."
+            >
               <div className="flex flex-wrap gap-1.5">
                 {VIEW_NAMES.map((v) => (
                   <span
@@ -265,10 +311,17 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
               </div>
             </Section>
 
-            <Section id="recipes" title="Recipes" sub="Copy-paste starters for common customizations.">
+            <Section
+              id="recipes"
+              title="Recipes"
+              sub="Copy-paste starters for common customizations."
+            >
               <div className="flex flex-col gap-3">
                 {RECIPES.map((r) => (
-                  <div key={r.title} className="rounded-lg border border-edge-soft bg-elevated/15 p-4">
+                  <div
+                    key={r.title}
+                    className="rounded-lg border border-edge-soft bg-elevated/15 p-4"
+                  >
                     <div className="mb-1 flex items-center gap-2">
                       <span className="rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-accent">
                         {r.lang}
@@ -313,7 +366,17 @@ export function CheatSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-function Section({ id, title, sub, children }: { id: string; title: string; sub?: string; children: ReactNode }) {
+function Section({
+  id,
+  title,
+  sub,
+  children,
+}: {
+  id: string;
+  title: string;
+  sub?: string;
+  children: ReactNode;
+}) {
   return (
     <section id={`cs-${id}`} className="flex flex-col gap-4 scroll-mt-4">
       <div className="flex flex-col gap-0.5">
@@ -351,4 +414,3 @@ function TokenTable({ rows, swatch }: { rows: TokenRow[]; swatch?: boolean }) {
     </div>
   );
 }
-

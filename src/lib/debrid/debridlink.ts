@@ -54,9 +54,10 @@ export function createDebridLink(apiKey: string): DebridStore {
     const r = await get<DlEnvelope<DlUser>>("/account/infos", signal);
     if (!r.ok) return r;
     const u = r.data.value;
-    const expiresAt = typeof u?.premiumLeft === "number"
-      ? Math.floor(Date.now() / 1000) + u.premiumLeft
-      : undefined;
+    const expiresAt =
+      typeof u?.premiumLeft === "number"
+        ? Math.floor(Date.now() / 1000) + u.premiumLeft
+        : undefined;
     return {
       ok: true,
       data: {
@@ -91,7 +92,10 @@ export function createDebridLink(apiKey: string): DebridStore {
     return { ok: true, data: out };
   }
 
-  async function cacheCheck(hashes: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
+  async function cacheCheck(
+    hashes: string[],
+    signal: AbortSignal,
+  ): Promise<DebridResult<CacheMap>> {
     if (hashes.length === 0) return { ok: true, data: {} };
     const lower = hashes.map((h) => h.toLowerCase());
     const BATCH = 20;
@@ -104,9 +108,7 @@ export function createDebridLink(apiKey: string): DebridStore {
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) Object.assign(merged, r.value.data);
     }
-    dlog(
-      `[dl] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`,
-    );
+    dlog(`[dl] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`);
     return { ok: true, data: merged };
   }
 
@@ -135,10 +137,13 @@ export function createDebridLink(apiKey: string): DebridStore {
         await delEmpty(`/seedbox/${id}/remove`, signal);
         return { ok: false, code: "aborted", status: 0 };
       }
-      const r = await get<DlEnvelope<DlSeedbox>>(`/seedbox/list?ids=${encodeURIComponent(id)}`, signal);
+      const r = await get<DlEnvelope<DlSeedbox>>(
+        `/seedbox/list?ids=${encodeURIComponent(id)}`,
+        signal,
+      );
       if (!r.ok) return r;
       const arr = (r.data.value as unknown as DlSeedbox[]) ?? [];
-      info = Array.isArray(arr) ? arr[0] ?? null : (r.data.value as DlSeedbox);
+      info = Array.isArray(arr) ? (arr[0] ?? null) : (r.data.value as DlSeedbox);
       if (!info) {
         await sleep(POLL_DELAY_MS, signal);
         continue;
@@ -153,7 +158,12 @@ export function createDebridLink(apiKey: string): DebridStore {
 
     if (!info || (info.status !== 6 && info.downloadPercent !== 100)) {
       await delEmpty(`/seedbox/${id}/remove`, signal);
-      return { ok: false, code: "not-cached", status: 0, raw: { hash, progress: info?.downloadPercent } };
+      return {
+        ok: false,
+        code: "not-cached",
+        status: 0,
+        raw: { hash, progress: info?.downloadPercent },
+      };
     }
 
     const file = pickDlFile(info.files ?? [], fileIdx, hint);
@@ -223,7 +233,11 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   }
   if (res.status === 401 || res.status === 403) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     const errMsg = (body as DlError)?.error ?? (body as DlError)?.message ?? "";
     const code = /subscription|premium/i.test(errMsg) ? "not-premium" : "unauthorized";
     return { ok: false, code, status: res.status, raw: body };
@@ -255,14 +269,21 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   }
 }
 
-function pickDlFile(files: DlFile[], fileIdx: number | undefined, hint?: EpisodeHint): DlFile | null {
+function pickDlFile(
+  files: DlFile[],
+  fileIdx: number | undefined,
+  hint?: EpisodeHint,
+): DlFile | null {
   if (files.length === 0) return null;
   if (fileIdx != null && files[fileIdx]) return files[fileIdx];
   const videos = files.filter((f) =>
     VIDEO_EXTS.some((ext) => (f.name ?? "").toLowerCase().endsWith(ext)),
   );
   const pool = videos.length > 0 ? videos : files;
-  const mi = matchEpisodeFileIndex(pool.map((f) => f.name ?? ""), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((f) => f.name ?? ""),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0] ?? null;
 }

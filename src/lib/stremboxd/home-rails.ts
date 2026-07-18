@@ -1,4 +1,9 @@
-import { fetchFullModeCatalog, fetchFullModeManifest, fetchStremboxdCatalog, fetchStremboxdManifest } from "./client";
+import {
+  fetchFullModeCatalog,
+  fetchFullModeManifest,
+  fetchStremboxdCatalog,
+  fetchStremboxdManifest,
+} from "./client";
 import { stremboxdMetaToMeta } from "./to-meta";
 import type { LetterboxdListRef, LetterboxdSession } from "./types";
 import type { Meta } from "@/lib/cinemeta";

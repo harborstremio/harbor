@@ -123,7 +123,9 @@ export function ToggleRow({
       >
         <span
           className={`absolute top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
-            on ? "translate-x-[22px] rtl:-translate-x-[22px]" : "translate-x-0.5 rtl:-translate-x-0.5"
+            on
+              ? "translate-x-[22px] rtl:-translate-x-[22px]"
+              : "translate-x-0.5 rtl:-translate-x-0.5"
           }`}
         />
       </span>

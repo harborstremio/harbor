@@ -58,7 +58,8 @@ export function createPremiumize(apiKey: string): DebridStore {
       data: {
         slug: "pm",
         username: r.data.customer_id ? String(r.data.customer_id) : undefined,
-        premium: typeof r.data.premium_until === "number" && r.data.premium_until * 1000 > Date.now(),
+        premium:
+          typeof r.data.premium_until === "number" && r.data.premium_until * 1000 > Date.now(),
         premiumUntil: r.data.premium_until,
       },
     };
@@ -83,7 +84,10 @@ export function createPremiumize(apiKey: string): DebridStore {
     return { ok: true, data: out };
   }
 
-  async function cacheCheck(hashes: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
+  async function cacheCheck(
+    hashes: string[],
+    signal: AbortSignal,
+  ): Promise<DebridResult<CacheMap>> {
     if (hashes.length === 0) return { ok: true, data: {} };
     const lower = hashes.map((h) => h.toLowerCase());
     const BATCH = 100;
@@ -96,9 +100,7 @@ export function createPremiumize(apiKey: string): DebridStore {
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) Object.assign(merged, r.value.data);
     }
-    dlog(
-      `[pm] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`,
-    );
+    dlog(`[pm] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`);
     return { ok: true, data: merged };
   }
 
@@ -171,7 +173,11 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
   if (!res.ok) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     return { ok: false, code: `http-${res.status}`, status: res.status, raw: body };
   }
   let body: PmEnvelope & T;
@@ -191,18 +197,23 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   return { ok: true, data: body as T };
 }
 
-function pickPmFile(content: PmFile[], fileIdx: number | undefined, hint?: EpisodeHint): PmFile | null {
+function pickPmFile(
+  content: PmFile[],
+  fileIdx: number | undefined,
+  hint?: EpisodeHint,
+): PmFile | null {
   if (content.length === 0) return null;
   if (fileIdx != null && content[fileIdx]) return content[fileIdx];
   const videos = content.filter((f) =>
     VIDEO_EXTS.some((ext) => (f.path ?? "").toLowerCase().endsWith(ext)),
   );
   const pool = videos.length > 0 ? videos : content;
-  const mi = matchEpisodeFileIndex(pool.map((f) => f.path ?? ""), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((f) => f.path ?? ""),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
-  return pool
-    .slice()
-    .sort((a, b) => Number(b.size ?? 0) - Number(a.size ?? 0))[0];
+  return pool.slice().sort((a, b) => Number(b.size ?? 0) - Number(a.size ?? 0))[0];
 }
 
 type PmEnvelope = {

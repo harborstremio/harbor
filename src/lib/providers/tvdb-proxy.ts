@@ -40,7 +40,8 @@ export async function fetchTvdbProxyImages(opts: {
   type?: string;
 }): Promise<TvdbImageMap> {
   let series: number | null = opts.series ?? null;
-  if (series == null && opts.kitsuId != null) series = await kitsuToTvdb(opts.kitsuId).catch(() => null);
+  if (series == null && opts.kitsuId != null)
+    series = await kitsuToTvdb(opts.kitsuId).catch(() => null);
   const q = new URLSearchParams();
   if (series) q.set("series", String(series));
   else if (opts.imdb && opts.imdb.startsWith("tt")) q.set("imdb", opts.imdb);

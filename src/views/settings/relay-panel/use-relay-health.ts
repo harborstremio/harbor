@@ -25,7 +25,9 @@ function httpBaseOf(url: string): string {
     .replace(/\/+$/, "");
 }
 
-async function fetchRelayVersion(url: string): Promise<{ healthMs: number; version: number | null }> {
+async function fetchRelayVersion(
+  url: string,
+): Promise<{ healthMs: number; version: number | null }> {
   const t0 = performance.now();
   const r = await safeFetch(`${httpBaseOf(url)}/health`, { method: "GET" });
   const healthMs = Math.round(performance.now() - t0);

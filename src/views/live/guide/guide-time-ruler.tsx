@@ -26,11 +26,7 @@ export function GuideTimeRuler({
       style={{ height: RULER_HEIGHT_PX }}
     >
       {slots.map((slot) => (
-        <div
-          key={slot.ms}
-          className="relative shrink-0"
-          style={{ width: slotMin * PX_PER_MIN }}
-        >
+        <div key={slot.ms} className="relative shrink-0" style={{ width: slotMin * PX_PER_MIN }}>
           <div className="flex h-full flex-col items-start justify-center gap-0.5 ps-2.5">
             <span
               className={`text-[12px] tabular-nums leading-none ${
@@ -45,9 +41,7 @@ export function GuideTimeRuler({
               </span>
             )}
           </div>
-          {slot.major && (
-            <div className="absolute bottom-0 start-0 h-2 w-px bg-edge-soft" />
-          )}
+          {slot.major && <div className="absolute bottom-0 start-0 h-2 w-px bg-edge-soft" />}
         </div>
       ))}
     </div>

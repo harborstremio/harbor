@@ -35,7 +35,7 @@ export async function anilistRequest<T>(
   accessToken?: string,
   skipAuth = false,
 ): Promise<T> {
-  const token = skipAuth ? null : accessToken ?? getSession()?.accessToken ?? null;
+  const token = skipAuth ? null : (accessToken ?? getSession()?.accessToken ?? null);
   let res = await doFetch(query, variables, token);
 
   if (res.status === 429) {

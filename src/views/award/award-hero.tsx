@@ -42,23 +42,39 @@ export function AwardHero({ type, tint, films }: { type: AwardType; tint: string
         >
           {tiles.map((src, i) => (
             <div key={i} className="overflow-hidden rounded-xl ring-1 ring-inset ring-white/[0.06]">
-              <img src={src} alt="" draggable={false} className="h-full w-full object-cover opacity-[0.82]" />
+              <img
+                src={src}
+                alt=""
+                draggable={false}
+                className="h-full w-full object-cover opacity-[0.82]"
+              />
             </div>
           ))}
         </div>
       )}
 
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-r from-canvas via-canvas/75 to-canvas/15" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas via-canvas/10 to-transparent" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-canvas via-canvas/75 to-canvas/15"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-canvas via-canvas/10 to-transparent"
+      />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: `radial-gradient(ellipse at 14% 34%, ${tint}1f 0%, transparent 52%)` }}
+        style={{
+          backgroundImage: `radial-gradient(ellipse at 14% 34%, ${tint}1f 0%, transparent 52%)`,
+        }}
       />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 hidden lg:block"
-        style={{ backgroundImage: "radial-gradient(38% 64% at 87% 64%, rgba(0,0,0,0.42) 0%, transparent 72%)" }}
+        style={{
+          backgroundImage:
+            "radial-gradient(38% 64% at 87% 64%, rgba(0,0,0,0.42) 0%, transparent 72%)",
+        }}
       />
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1180px] items-end justify-between gap-12 px-12">

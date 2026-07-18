@@ -85,7 +85,11 @@ export function AnilistEntryCard({
         </span>
       </button>
 
-      <button type="button" onClick={open} className="truncate text-start text-[13px] font-medium text-ink">
+      <button
+        type="button"
+        onClick={open}
+        className="truncate text-start text-[13px] font-medium text-ink"
+      >
         {name}
       </button>
 
@@ -157,7 +161,9 @@ function StatusDropdown({
                 setOpen(false);
               }}
               className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-start text-[12.5px] transition-colors ${
-                s === value ? "bg-elevated/60 text-ink" : "text-ink-muted hover:bg-elevated/40 hover:text-ink"
+                s === value
+                  ? "bg-elevated/60 text-ink"
+                  : "text-ink-muted hover:bg-elevated/40 hover:text-ink"
               }`}
             >
               {t(STATUS_LABELS[s])}

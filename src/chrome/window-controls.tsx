@@ -17,18 +17,39 @@ export function WindowControls() {
       <Ctl label={t("chrome.minimize")} onClick={minimize}>
         <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
       </Ctl>
-      <Ctl label={fullscreen ? t("chrome.restore") : t("chrome.maximize")} onClick={() => void toggleWindowFullscreen()}>
+      <Ctl
+        label={fullscreen ? t("chrome.restore") : t("chrome.maximize")}
+        onClick={() => void toggleWindowFullscreen()}
+      >
         {fullscreen ? (
           <>
-            <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
-            <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" strokeWidth="1.4" fill="none" />
+            <rect
+              x="2.5"
+              y="4.5"
+              width="6"
+              height="6"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              rx="1"
+            />
+            <path
+              d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              fill="none"
+            />
           </>
         ) : (
           <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
         )}
       </Ctl>
       <Ctl label={t("common.close")} onClick={close} danger windowClose>
-        <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        <path
+          d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+        />
       </Ctl>
     </div>
   );

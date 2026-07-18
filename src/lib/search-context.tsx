@@ -1,7 +1,22 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
 import { useParental } from "@/lib/parental";
-import { searchAll, searchAnime, searchCinemeta, searchLiveTvChannels, type SearchResults } from "@/lib/search";
+import {
+  searchAll,
+  searchAnime,
+  searchCinemeta,
+  searchLiveTvChannels,
+  type SearchResults,
+} from "@/lib/search";
 import { searchAddonCatalogs, searchAddonGroups, mergeMetas } from "@/lib/search-addons";
 import { searchAddonIndex } from "@/lib/search-addon-index";
 import { gatherCatalogAddons, type Addon } from "@/lib/addons";
@@ -102,9 +117,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       const addonPromise = addonsP
         .then((a) => searchAddonCatalogs(a, trimmed))
         .catch(() => ({ movies: [], series: [] }));
-      const addonGroupsPromise = addonsP
-        .then((a) => searchAddonGroups(a, trimmed))
-        .catch(() => []);
+      const addonGroupsPromise = addonsP.then((a) => searchAddonGroups(a, trimmed)).catch(() => []);
       const cinemetaPromise = searchCinemeta(trimmed).catch(() => ({ movies: [], series: [] }));
       let tmdbResult: Awaited<typeof tmdbPromise> | null = null;
       const acc = {
@@ -115,8 +128,14 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       };
       const publish = () => {
         if (id !== reqIdRef.current || !tmdbResult) return;
-        const mergedMovies = mergeMetas(mergeMetas(tmdbResult.movies, acc.addon.movies), acc.cine.movies);
-        const mergedSeries = mergeMetas(mergeMetas(tmdbResult.series, acc.addon.series), acc.cine.series);
+        const mergedMovies = mergeMetas(
+          mergeMetas(tmdbResult.movies, acc.addon.movies),
+          acc.cine.movies,
+        );
+        const mergedSeries = mergeMetas(
+          mergeMetas(tmdbResult.series, acc.addon.series),
+          acc.cine.series,
+        );
         const shown = new Set<string>([...mergedMovies, ...mergedSeries].map((m) => m.id));
         const dedupedGroups = acc.groups
           .map((g) => ({ ...g, metas: g.metas.filter((m) => !shown.has(m.id)) }))
@@ -157,7 +176,15 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         publish();
       });
     }, 180);
-  }, [query, settings.tmdbKey, settings.iptvPlaylists, excludeGenres, hiddenTabs.anime, hiddenTabs.liveTv, authKey]);
+  }, [
+    query,
+    settings.tmdbKey,
+    settings.iptvPlaylists,
+    excludeGenres,
+    hiddenTabs.anime,
+    hiddenTabs.liveTv,
+    authKey,
+  ]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -188,7 +215,10 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const trimmed = q.trim();
     if (!trimmed) return;
     setRecent((prev) => {
-      const next = [trimmed, ...prev.filter((p) => p.toLowerCase() !== trimmed.toLowerCase())].slice(0, MAX_RECENT);
+      const next = [
+        trimmed,
+        ...prev.filter((p) => p.toLowerCase() !== trimmed.toLowerCase()),
+      ].slice(0, MAX_RECENT);
       saveRecent(next);
       return next;
     });
@@ -208,8 +238,31 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ open, setOpen, query, setQuery, results, status, recent, clear, recordRecent, removeRecent, clearRecent }),
-    [open, query, results, status, recent, setQuery, clear, recordRecent, removeRecent, clearRecent],
+    () => ({
+      open,
+      setOpen,
+      query,
+      setQuery,
+      results,
+      status,
+      recent,
+      clear,
+      recordRecent,
+      removeRecent,
+      clearRecent,
+    }),
+    [
+      open,
+      query,
+      results,
+      status,
+      recent,
+      setQuery,
+      clear,
+      recordRecent,
+      removeRecent,
+      clearRecent,
+    ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

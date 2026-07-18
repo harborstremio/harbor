@@ -145,7 +145,9 @@ export class StremboxdClient {
     const key = `${this.configSegment}:${imdbId}`;
     const cached = getCachedMeta<StremboxdMeta>(key);
     if (cached !== undefined) return cached;
-    const { meta } = await asJson<StremboxdMetaResponse>(await fetch(metaUrl(this.configSegment, imdbId)));
+    const { meta } = await asJson<StremboxdMetaResponse>(
+      await fetch(metaUrl(this.configSegment, imdbId)),
+    );
     if (meta) setCachedMeta(key, meta);
     return meta ?? null;
   }
@@ -178,7 +180,9 @@ export async function fetchFullModeCatalog(
   const key = `full:${userId}:${catalogId}:${skip}`;
   const cached = getCachedCatalog<CatalogPage>(key);
   if (cached) return cached;
-  const { metas } = await asJson<StremboxdCatalogResponse>(await fetch(fullCatalogUrl(userId, catalogId, skip)));
+  const { metas } = await asJson<StremboxdCatalogResponse>(
+    await fetch(fullCatalogUrl(userId, catalogId, skip)),
+  );
   const page: CatalogPage = { metas, hasMore: metas.length >= PAGE_SIZE };
   setCachedCatalog(key, page);
   return page;
@@ -227,7 +231,7 @@ export type LetterboxdReview = {
 // Accept-Language and a Referer hint to improve pass-through.
 async function fetchWithCloudflareBypass(url: string): Promise<Response> {
   const headers: Record<string, string> = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
   };
   try {
@@ -407,12 +411,16 @@ export async function fetchLetterboxdFriendsReviews(
     const authorLink = art.querySelector("a.avatar") as HTMLAnchorElement | null;
     const authorPath = authorLink?.getAttribute("href") ?? "";
     const authorUrl = authorPath
-      ? authorPath.startsWith("http") ? authorPath : `https://letterboxd.com${authorPath}`
+      ? authorPath.startsWith("http")
+        ? authorPath
+        : `https://letterboxd.com${authorPath}`
       : "";
     const avatarImg = art.querySelector("a.avatar img") as HTMLImageElement | null;
     const avatarSrc = avatarImg?.getAttribute("src") ?? "";
     const avatar = avatarSrc
-      ? avatarSrc.startsWith("http") ? avatarSrc : `https://letterboxd.com${avatarSrc}`
+      ? avatarSrc.startsWith("http")
+        ? avatarSrc
+        : `https://letterboxd.com${avatarSrc}`
       : null;
     const ratingSvg = art.querySelector(".inline-rating svg") as SVGSVGElement | null;
     const rating = ratingSvg?.getAttribute("aria-label") ?? null;
@@ -474,26 +482,41 @@ export async function validateStremboxdConfig(
       return { ok: false, reason: "invalid", message: "Unexpected manifest from Stremboxd." };
     }
     if (!Array.isArray(manifest.catalogs) || manifest.catalogs.length === 0) {
-      return { ok: false, reason: "no-catalogs", message: "No catalogs returned for this configuration." };
+      return {
+        ok: false,
+        reason: "no-catalogs",
+        message: "No catalogs returned for this configuration.",
+      };
     }
     const hasWatchlist = manifest.catalogs.some((c) => c.id === "letterboxd-watchlist");
     if (expectWatchlist && !hasWatchlist) {
       return {
         ok: false,
         reason: "invalid",
-        message: "Letterboxd did not return a watchlist for this username. Check the username is correct and public.",
+        message:
+          "Letterboxd did not return a watchlist for this username. Check the username is correct and public.",
       };
     }
     return { ok: true, catalogs: manifest.catalogs.length, hasWatchlist };
   } catch (e) {
     if (e instanceof StremboxdApiError) {
-      return { ok: false, reason: "invalid", message: e.status === 400 ? "Invalid configuration." : `Stremboxd error (${e.status}).` };
+      return {
+        ok: false,
+        reason: "invalid",
+        message: e.status === 400 ? "Invalid configuration." : `Stremboxd error (${e.status}).`,
+      };
     }
-    return { ok: false, reason: "network", message: "Could not reach Stremboxd. Check your connection." };
+    return {
+      ok: false,
+      reason: "network",
+      message: "Could not reach Stremboxd. Check your connection.",
+    };
   }
 }
 
-export async function validateLetterboxdUsername(username: string): Promise<LetterboxdUsernameValidation> {
+export async function validateLetterboxdUsername(
+  username: string,
+): Promise<LetterboxdUsernameValidation> {
   return postJson<LetterboxdUsernameValidation>("/auth/validate-username", { username });
 }
 
@@ -520,7 +543,11 @@ export async function loginLetterboxd(
       const { fetch: tauriFetch } = await import("@tauri-apps/plugin-http");
       res = await tauriFetch(url, { method: "POST", headers, body });
     } catch {
-      throw new StremboxdLoginError(0, "Could not reach Stremboxd. Check your connection.", undefined);
+      throw new StremboxdLoginError(
+        0,
+        "Could not reach Stremboxd. Check your connection.",
+        undefined,
+      );
     }
   }
 
@@ -554,17 +581,29 @@ export class StremboxdLoginError extends Error {
   }
 }
 
-export async function resolveLetterboxdFilm(imdbId: string, userToken: string): Promise<LetterboxdFilm | null> {
+export async function resolveLetterboxdFilm(
+  imdbId: string,
+  userToken: string,
+): Promise<LetterboxdFilm | null> {
   try {
-    return await getJson<LetterboxdFilm>(`/v1/resolve-film?imdbId=${encodeURIComponent(imdbId)}`, userToken);
+    return await getJson<LetterboxdFilm>(
+      `/v1/resolve-film?imdbId=${encodeURIComponent(imdbId)}`,
+      userToken,
+    );
   } catch (e) {
     if (e instanceof StremboxdApiError && e.status === 404) return null;
     throw e;
   }
 }
 
-export async function fetchLetterboxdFilmRating(filmId: string, userToken: string): Promise<LetterboxdFilmRating> {
-  return getJson<LetterboxdFilmRating>(`/v1/film-rating?filmId=${encodeURIComponent(filmId)}`, userToken);
+export async function fetchLetterboxdFilmRating(
+  filmId: string,
+  userToken: string,
+): Promise<LetterboxdFilmRating> {
+  return getJson<LetterboxdFilmRating>(
+    `/v1/film-rating?filmId=${encodeURIComponent(filmId)}`,
+    userToken,
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -600,8 +639,13 @@ export type LetterboxdStreamInfo = {
   watchlistUrl: string | null;
 };
 
-export async function fetchLetterboxdStreams(userId: string, imdbId: string): Promise<LetterboxdStreamInfo | null> {
-  const res = await fetch(`${STREMBOXD_BASE}/stremio/${userId}/stream/movie/${encodeURIComponent(imdbId)}.json`);
+export async function fetchLetterboxdStreams(
+  userId: string,
+  imdbId: string,
+): Promise<LetterboxdStreamInfo | null> {
+  const res = await fetch(
+    `${STREMBOXD_BASE}/stremio/${userId}/stream/movie/${encodeURIComponent(imdbId)}.json`,
+  );
   if (!res.ok) return null;
   const body = await res.json().catch(() => null);
   if (!body) return null;

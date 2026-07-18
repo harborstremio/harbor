@@ -40,7 +40,8 @@ export function TimeStart({
   if (stremio) {
     const fmt: TimeFormat = timeFormat ?? "start-end";
     const positionText = fmtTime(positionSec);
-    const cls = "pointer-events-auto ms-2 shrink-0 font-medium tabular-nums text-[14px] text-white/90";
+    const cls =
+      "pointer-events-auto ms-2 shrink-0 font-medium tabular-nums text-[14px] text-white/90";
     const inner =
       fmt === "elapsed-only" ? (
         <>

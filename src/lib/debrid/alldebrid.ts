@@ -94,7 +94,10 @@ export function createAllDebrid(apiKey: string): DebridStore {
     return { ok: true, data: out };
   }
 
-  async function cacheCheck(hashes: string[], signal: AbortSignal): Promise<DebridResult<CacheMap>> {
+  async function cacheCheck(
+    hashes: string[],
+    signal: AbortSignal,
+  ): Promise<DebridResult<CacheMap>> {
     if (hashes.length === 0) return { ok: true, data: {} };
     const lower = hashes.map((h) => h.toLowerCase());
     const BATCH = 100;
@@ -107,9 +110,7 @@ export function createAllDebrid(apiKey: string): DebridStore {
     for (const r of results) {
       if (r.status === "fulfilled" && r.value.ok) Object.assign(merged, r.value.data);
     }
-    dlog(
-      `[ad] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`,
-    );
+    dlog(`[ad] cacheCheck total ${hashes.length} hashes → ${Object.keys(merged).length} cached`);
     return { ok: true, data: merged };
   }
 
@@ -135,9 +136,7 @@ export function createAllDebrid(apiKey: string): DebridStore {
     }
     const id = first.id;
 
-    let entry: AdMagnetStatus | null = first.ready
-      ? null
-      : null;
+    let entry: AdMagnetStatus | null = first.ready ? null : null;
     let chosenLink: AdMagnetLink | null = null;
 
     for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
@@ -157,21 +156,33 @@ export function createAllDebrid(apiKey: string): DebridStore {
         return { ok: false, code: `status-${entry.statusCode}`, status: 0, raw: { hash } };
       }
       if (attempt >= 3) {
-        return { ok: false, code: "not-cached", status: 0, raw: { hash, statusCode: entry.statusCode } };
+        return {
+          ok: false,
+          code: "not-cached",
+          status: 0,
+          raw: { hash, statusCode: entry.statusCode },
+        };
       }
       await sleep(POLL_DELAY_MS, signal);
     }
 
     if (!chosenLink) return { ok: false, code: "no-link", status: 0 };
 
-    const u = await get<AdUnlock>(`/link/unlock?link=${encodeURIComponent(chosenLink.link)}`, signal);
+    const u = await get<AdUnlock>(
+      `/link/unlock?link=${encodeURIComponent(chosenLink.link)}`,
+      signal,
+    );
     if (!u.ok) return u;
     if (u.data.delayed && u.data.delayed > 0) {
       const settled = await pollDelayed(u.data.delayed, signal);
       if (!settled.ok) return settled;
       return {
         ok: true,
-        data: { url: settled.data.link, filename: settled.data.filename, filesize: settled.data.filesize },
+        data: {
+          url: settled.data.link,
+          filename: settled.data.filename,
+          filesize: settled.data.filesize,
+        },
       };
     }
     return {
@@ -180,7 +191,10 @@ export function createAllDebrid(apiKey: string): DebridStore {
     };
   }
 
-  async function pollDelayed(delayedId: number, signal: AbortSignal): Promise<DebridResult<AdUnlock>> {
+  async function pollDelayed(
+    delayedId: number,
+    signal: AbortSignal,
+  ): Promise<DebridResult<AdUnlock>> {
     for (let attempt = 0; attempt < 18; attempt++) {
       if (signal.aborted) return { ok: false, code: "aborted", status: 0 };
       await sleep(2500, signal);
@@ -239,7 +253,11 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   if (res.status === 429) return { ok: false, code: "rate-limited", status: 429 };
   if (!res.ok && res.status !== 200) {
     let body: unknown;
-    try { body = await res.json(); } catch { body = await res.text().catch(() => null); }
+    try {
+      body = await res.json();
+    } catch {
+      body = await res.text().catch(() => null);
+    }
     return { ok: false, code: `http-${res.status}`, status: res.status, raw: body };
   }
   let body: AdEnvelope<T>;
@@ -259,14 +277,21 @@ async function wrap<T>(call: () => Promise<Response>): Promise<DebridResult<T>> 
   return { ok: true, data: body.data as T };
 }
 
-function pickAdLink(links: AdMagnetLink[], fileIdx: number | undefined, hint?: EpisodeHint): AdMagnetLink | null {
+function pickAdLink(
+  links: AdMagnetLink[],
+  fileIdx: number | undefined,
+  hint?: EpisodeHint,
+): AdMagnetLink | null {
   if (links.length === 0) return null;
   if (fileIdx != null && links[fileIdx]) return links[fileIdx];
   const videos = links.filter((l) =>
     VIDEO_EXTS.some((ext) => l.filename.toLowerCase().endsWith(ext)),
   );
   const pool = videos.length > 0 ? videos : links;
-  const mi = matchEpisodeFileIndex(pool.map((l) => l.filename), hint);
+  const mi = matchEpisodeFileIndex(
+    pool.map((l) => l.filename),
+    hint,
+  );
   if (mi >= 0) return pool[mi];
   return pool.slice().sort((a, b) => (b.size ?? 0) - (a.size ?? 0))[0];
 }

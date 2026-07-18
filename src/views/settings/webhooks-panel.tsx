@@ -60,7 +60,8 @@ const SOURCES: SourceMeta[] = [
   {
     id: "custom",
     label: "Custom calendar",
-    description: "Anything matching your Custom calendar: tracked people, genres, providers, countries.",
+    description:
+      "Anything matching your Custom calendar: tracked people, genres, providers, countries.",
     icon: () => <Star size={14} strokeWidth={2} />,
     prereq: (s) => (s.tmdbKey ? null : "Add a TMDB key in Library settings."),
   },
@@ -73,7 +74,10 @@ export function WebhooksPanel() {
   const { isConnected: traktConnected } = useTrakt();
   const [discordStatus, setDiscordStatus] = useState<FieldStatus>(idleStatus);
   const [telegramStatus, setTelegramStatus] = useState<FieldStatus>(idleStatus);
-  const inFlightRef = useRef<{ discord: boolean; telegram: boolean }>({ discord: false, telegram: false });
+  const inFlightRef = useRef<{ discord: boolean; telegram: boolean }>({
+    discord: false,
+    telegram: false,
+  });
 
   const setUrl = (which: "discordUrl" | "telegramUrl", v: string) =>
     update({ webhooks: { ...settings.webhooks, [which]: v.trim() } });
@@ -104,7 +108,7 @@ export function WebhooksPanel() {
       const res = await fireWebhook(kind, url, testPayload);
       setStatus({
         state: res.ok ? "ok" : "error",
-        message: res.ok ? "Sent. Check your channel." : res.error ?? "Failed",
+        message: res.ok ? "Sent. Check your channel." : (res.error ?? "Failed"),
       });
     } finally {
       inFlightRef.current[kind] = false;
@@ -116,7 +120,9 @@ export function WebhooksPanel() {
     <>
       <Section
         title={t("Where alerts go")}
-        subtitle={t("Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.")}
+        subtitle={t(
+          "Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.",
+        )}
       >
         <div className="flex flex-col gap-5">
           <WebhookField
@@ -140,7 +146,9 @@ export function WebhooksPanel() {
 
       <Section
         title={t("What to send")}
-        subtitle={t("Pick which calendars feed your alerts. Items are deduped across sources before sending.")}
+        subtitle={t(
+          "Pick which calendars feed your alerts. Items are deduped across sources before sending.",
+        )}
       >
         <div className="flex flex-col gap-2">
           {SOURCES.map((s) => {
@@ -161,12 +169,26 @@ export function WebhooksPanel() {
 
       <Section
         title={t("Media types")}
-        subtitle={t("Filter by type after the sources merge. Leave them all on to send everything.")}
+        subtitle={t(
+          "Filter by type after the sources merge. Leave them all on to send everything.",
+        )}
       >
         <div className="flex flex-wrap gap-2">
-          <ChipToggle label={t("Movies")} on={settings.webhooks.notifyMovies} onToggle={(v) => setNotify("notifyMovies", v)} />
-          <ChipToggle label={t("TV")} on={settings.webhooks.notifyTv} onToggle={(v) => setNotify("notifyTv", v)} />
-          <ChipToggle label={t("Anime")} on={settings.webhooks.notifyAnime} onToggle={(v) => setNotify("notifyAnime", v)} />
+          <ChipToggle
+            label={t("Movies")}
+            on={settings.webhooks.notifyMovies}
+            onToggle={(v) => setNotify("notifyMovies", v)}
+          />
+          <ChipToggle
+            label={t("TV")}
+            on={settings.webhooks.notifyTv}
+            onToggle={(v) => setNotify("notifyTv", v)}
+          />
+          <ChipToggle
+            label={t("Anime")}
+            on={settings.webhooks.notifyAnime}
+            onToggle={(v) => setNotify("notifyAnime", v)}
+          />
         </div>
       </Section>
 
@@ -231,7 +253,9 @@ function SourceToggle({
       >
         <span
           className={`absolute start-0 top-0.5 h-4 w-4 rounded-full bg-canvas transition-transform ${
-            effective ? "translate-x-[18px] rtl:-translate-x-[18px]" : "translate-x-0.5 rtl:-translate-x-0.5"
+            effective
+              ? "translate-x-[18px] rtl:-translate-x-[18px]"
+              : "translate-x-0.5 rtl:-translate-x-0.5"
           }`}
         />
       </span>
@@ -253,7 +277,9 @@ function ChipToggle({
     <button
       onClick={() => onToggle(!on)}
       className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
-        on ? "bg-ink text-canvas" : "border border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
+        on
+          ? "bg-ink text-canvas"
+          : "border border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
       }`}
     >
       {t(label)}

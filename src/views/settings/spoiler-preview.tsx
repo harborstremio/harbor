@@ -81,7 +81,12 @@ function PreviewCard({
     <div className="group min-w-0 flex-1 cursor-default select-none">
       <div className="relative aspect-video overflow-hidden rounded-xl">
         <div className={`absolute inset-0 ${mask.thumb ? SPOILER_THUMB_CLASS : ""}`}>
-          <img src={img} alt="" draggable={false} className={`h-full w-full object-cover ${imgPos}`} />
+          <img
+            src={img}
+            alt=""
+            draggable={false}
+            className={`h-full w-full object-cover ${imgPos}`}
+          />
         </div>
         <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
           {n}
@@ -94,7 +99,9 @@ function PreviewCard({
         </span>
       </div>
       <div className="mt-2.5 flex flex-col gap-0.5 px-0.5">
-        <span className={`text-[13.5px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>
+        <span
+          className={`text-[13.5px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}
+        >
           {title}
         </span>
         <span className="text-[11.5px] text-ink-subtle">

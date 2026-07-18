@@ -52,7 +52,9 @@ export function FacetMenuRow({
           }}
         />
       ))}
-      {(visible.length > 0 || filters.length > 0) && <span className="mx-1 h-4 w-px shrink-0 bg-edge-soft" />}
+      {(visible.length > 0 || filters.length > 0) && (
+        <span className="mx-1 h-4 w-px shrink-0 bg-edge-soft" />
+      )}
       {filters.map((f) => (
         <SavedChip
           key={f.id}
@@ -185,11 +187,7 @@ function MenuItem({
       )}
       <span className="flex-1 truncate">{label}</span>
       <span className="text-[11.5px] text-ink-subtle">{count}</span>
-      <Check
-        size={13}
-        strokeWidth={2.6}
-        className={selected ? "text-ink" : "invisible"}
-      />
+      <Check size={13} strokeWidth={2.6} className={selected ? "text-ink" : "invisible"} />
     </button>
   );
 }

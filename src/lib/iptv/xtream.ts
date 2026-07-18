@@ -27,13 +27,21 @@ export function parseXtreamUrl(url: string): XtreamCreds | null {
   }
 }
 
-export function credsFromServer(server: string, username: string, password: string): XtreamCreds | null {
+export function credsFromServer(
+  server: string,
+  username: string,
+  password: string,
+): XtreamCreds | null {
   const trimmed = server.trim().replace(/\/+$/, "");
   if (!/^https?:\/\//i.test(trimmed)) return null;
   if (!username.trim() || !password.trim()) return null;
   try {
     const u = new URL(trimmed);
-    return { base: `${u.protocol}//${u.host}`, username: username.trim(), password: password.trim() };
+    return {
+      base: `${u.protocol}//${u.host}`,
+      username: username.trim(),
+      password: password.trim(),
+    };
   } catch {
     return null;
   }
@@ -52,7 +60,12 @@ type LiveStreamRow = {
 };
 
 type UserInfo = {
-  user_info?: { auth?: number; status?: string; message?: string; allowed_output_formats?: string[] };
+  user_info?: {
+    auth?: number;
+    status?: string;
+    message?: string;
+    allowed_output_formats?: string[];
+  };
   server_info?: { server_protocol?: string; https_port?: string | number; port?: string | number };
 };
 
@@ -118,7 +131,11 @@ function parseJsonStrict(text: string): unknown {
   }
 }
 
-export function apiUrl(creds: XtreamCreds, action: string, extra: Record<string, string> = {}): string {
+export function apiUrl(
+  creds: XtreamCreds,
+  action: string,
+  extra: Record<string, string> = {},
+): string {
   const params = new URLSearchParams({
     username: creds.username,
     password: creds.password,
@@ -146,8 +163,10 @@ export async function fetchXtreamUserInfo(creds: XtreamCreds): Promise<XtreamSer
   }
   const status = (info.status ?? "").toString().toLowerCase();
   if (status === "expired") throw new XtreamAuthError("This Xtream account is expired.");
-  if (status === "banned") throw new XtreamAuthError("This Xtream account is banned by the provider.");
-  if (status === "disabled") throw new XtreamAuthError("This Xtream account is disabled by the provider.");
+  if (status === "banned")
+    throw new XtreamAuthError("This Xtream account is banned by the provider.");
+  if (status === "disabled")
+    throw new XtreamAuthError("This Xtream account is disabled by the provider.");
   const allowedFormats = Array.isArray(info.allowed_output_formats)
     ? info.allowed_output_formats.map((f) => String(f).toLowerCase())
     : [];
@@ -199,7 +218,7 @@ export async function fetchXtreamLiveChannels(
     const s = streams[i];
     if (!s || s.stream_id == null) continue;
     const tvgId = s.epg_channel_id?.trim() || null;
-    const group = s.category_id ? categoryName.get(String(s.category_id)) ?? null : null;
+    const group = s.category_id ? (categoryName.get(String(s.category_id)) ?? null) : null;
     const url = buildLiveStreamUrl(creds, s.stream_id, resolvedContainer, streamBase);
     const attrs: Record<string, string> = {};
     if (Number(s.tv_archive) > 0) {
@@ -244,7 +263,8 @@ export async function fetchXtreamShortEpg(
   }
   const listings = (raw as { epg_listings?: ShortEpgRow[] })?.epg_listings;
   if (!Array.isArray(listings)) return [];
-  const out: Array<{ title: string; description: string | null; startMs: number; endMs: number }> = [];
+  const out: Array<{ title: string; description: string | null; startMs: number; endMs: number }> =
+    [];
   for (const row of listings) {
     const startMs = Number(row.start_timestamp) * 1000;
     const endMs = Number(row.stop_timestamp) * 1000;

@@ -78,7 +78,9 @@ function Chip({
       )}
       <span className="max-w-[150px] truncate">{label}</span>
       {count != null && (
-        <span className={`text-[11.5px] tabular-nums ${active ? "text-canvas/65" : "text-ink-subtle"}`}>
+        <span
+          className={`text-[11.5px] tabular-nums ${active ? "text-canvas/65" : "text-ink-subtle"}`}
+        >
           {count.toLocaleString()}
         </span>
       )}

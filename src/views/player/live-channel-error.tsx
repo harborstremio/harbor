@@ -25,7 +25,9 @@ export function LiveChannelError({
           </h2>
           <p className="text-[13.5px] leading-relaxed text-white/70">{channelName}</p>
           <p className="mx-auto max-w-md text-[13px] leading-relaxed text-white/55">
-            {t("It looks offline right now. Free playlists often include channels that have gone dark, so another one is usually a click away.")}
+            {t(
+              "It looks offline right now. Free playlists often include channels that have gone dark, so another one is usually a click away.",
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2.5 pt-2">

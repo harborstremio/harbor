@@ -65,7 +65,8 @@ async function build(
 ): Promise<TvdbOrder | null> {
   const joinedClean = seasonType === "absolute";
   const rawAbsolute = seasonType === "tvdbabsolute";
-  const slug = seasonType === "aired" || joinedClean ? "default" : rawAbsolute ? "absolute" : seasonType;
+  const slug =
+    seasonType === "aired" || joinedClean ? "default" : rawAbsolute ? "absolute" : seasonType;
   const nameTypeSlug =
     seasonType === "aired" || joinedClean || rawAbsolute ? "official" : seasonType;
   const [defaultEps, names] = await Promise.all([
@@ -109,7 +110,9 @@ async function build(
   }
   if (bySeason.size === 0) return null;
   if (joinedClean) {
-    bySeason.get(1)?.sort((x, y) => x.seasonNumber - y.seasonNumber || x.episodeNumber - y.episodeNumber);
+    bySeason
+      .get(1)
+      ?.sort((x, y) => x.seasonNumber - y.seasonNumber || x.episodeNumber - y.episodeNumber);
   }
 
   const absByEpId = new Map<number, number>();

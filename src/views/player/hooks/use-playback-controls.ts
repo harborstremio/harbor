@@ -35,7 +35,8 @@ export function usePlaybackControls(params: {
 
   const rememberSubChoice = useCallback(
     (t: { lang?: string } | null | undefined) => {
-      if (t) writePlayerPrefs(metaId, t.lang ? { subLang: t.lang, subsOff: false } : { subsOff: false });
+      if (t)
+        writePlayerPrefs(metaId, t.lang ? { subLang: t.lang, subsOff: false } : { subsOff: false });
       else writePlayerPrefs(metaId, { subsOff: true });
     },
     [metaId],
@@ -79,8 +80,6 @@ export function usePlaybackControls(params: {
     if (!b) return;
     if (snapRef.current.status === "playing") b.pause();
     else b.play().catch(() => {});
-
-
   };
 
   const seekStep = (delta: number) => {

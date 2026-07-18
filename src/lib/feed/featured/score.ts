@@ -42,7 +42,12 @@ export function passesFloor(m: Meta, source: string): boolean {
   return m.tmdbScore == null || m.tmdbScore >= QUAL_FLOOR;
 }
 
-export function scoreFeatured(item: FeaturedItem, affinity: Affinity, now: number, dayIndex: number): number {
+export function scoreFeatured(
+  item: FeaturedItem,
+  affinity: Affinity,
+  now: number,
+  dayIndex: number,
+): number {
   const m = item.meta;
   const AFF = Math.min(1, affinityScore(profileFromMeta(m), affinity) / AFF_CAP);
   const R = (m.tmdbScore ?? 0) / 10;
@@ -50,9 +55,18 @@ export function scoreFeatured(item: FeaturedItem, affinity: Affinity, now: numbe
   const QUAL = R > 0 ? (R * n + 0.62 * 8) / (n + 8) : 0.5;
   const PROM = SOURCE_BASE[item.source] / (1 + item.sourceRank);
   const SIM =
-    item.source === "similar" && item.seedTs != null ? decay(now - item.seedTs, HALF_LIFE_TASTE_MS) : 0;
+    item.source === "similar" && item.seedTs != null
+      ? decay(now - item.seedTs, HALF_LIFE_TASTE_MS)
+      : 0;
   const vote = getVoteWithTs(m.id);
   const SUPP = vote?.vote === "up" ? SUPPRESS_MAX * decay(now - vote.ts, HALF_LIFE_SUPP_MS) : 0;
   const jitter = mulberry32(mixSeed(hashId(m.id), dayIndex))() * 0.2;
-  return WEIGHTS.AFF * AFF + WEIGHTS.QUAL * QUAL + WEIGHTS.PROM * PROM + WEIGHTS.SIM * SIM - SUPP + jitter;
+  return (
+    WEIGHTS.AFF * AFF +
+    WEIGHTS.QUAL * QUAL +
+    WEIGHTS.PROM * PROM +
+    WEIGHTS.SIM * SIM -
+    SUPP +
+    jitter
+  );
 }

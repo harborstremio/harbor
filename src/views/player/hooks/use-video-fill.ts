@@ -36,7 +36,11 @@ const modeIndex = (id: string) => {
   return i < 0 ? 0 : i;
 };
 
-export function useVideoFill(bridgeRef: RefObject<PlayerBridge | null>, srcKey: string, loaded: boolean) {
+export function useVideoFill(
+  bridgeRef: RefObject<PlayerBridge | null>,
+  srcKey: string,
+  loaded: boolean,
+) {
   const { settings, update } = useSettings();
   const [pill, setPill] = useState<string | null>(null);
   const index = useRef(modeIndex(settings.cropMode));
@@ -103,7 +107,10 @@ export function useVideoFill(bridgeRef: RefObject<PlayerBridge | null>, srcKey: 
       index.current = zoomIdx;
       update({ cropMode: "zoom" });
     }
-    zoom.current = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round((zoom.current + delta) * 100) / 100));
+    zoom.current = Math.max(
+      ZOOM_MIN,
+      Math.min(ZOOM_MAX, Math.round((zoom.current + delta) * 100) / 100),
+    );
     apply(zoomIdx, zoom.current, true);
   };
 

@@ -20,7 +20,12 @@ import { LiveHero } from "./live-home/live-hero";
 import { MoreOnNow } from "./live-home/more-on-now";
 import { NowCard } from "./live-home/now-card";
 import { fmtClock } from "./live-home/now-format";
-import { buildNowItem, hydrationKey, useLiveHome, type ChannelRail } from "./live-home/use-live-home";
+import {
+  buildNowItem,
+  hydrationKey,
+  useLiveHome,
+  type ChannelRail,
+} from "./live-home/use-live-home";
 
 export function LiveHome({
   channels,
@@ -98,7 +103,9 @@ export function LiveHome({
           <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">
             {t("Your TV")}
           </h1>
-          <span className="text-[16px] text-ink-subtle">{t("at {time}", { time: fmtClock(nowMs) })}</span>
+          <span className="text-[16px] text-ink-subtle">
+            {t("at {time}", { time: fmtClock(nowMs) })}
+          </span>
         </div>
         {spotlight.length > 0 && (
           <div className="flex gap-5">
@@ -119,7 +126,12 @@ export function LiveHome({
         />
       )}
       {guide.length > 0 && (
-        <Row title={t("On now")} shape="landscape" min={300} scrollKey={`live-home:${sourceId}:guide`}>
+        <Row
+          title={t("On now")}
+          shape="landscape"
+          min={300}
+          scrollKey={`live-home:${sourceId}:guide`}
+        >
           {guide.map((it) => (
             <GuideCard key={it.channel.id} item={it} onPlay={onPlay} />
           ))}
@@ -190,7 +202,8 @@ function RailRow({
   const hydrations = useChannelHydration(
     useMemo(() => {
       const set = new Set<string>();
-      for (const it of items.slice(0, 14)) if (isHydratableChannel(it.channel)) set.add(hydrationKey(it));
+      for (const it of items.slice(0, 14))
+        if (isHydratableChannel(it.channel)) set.add(hydrationKey(it));
       return [...set];
     }, [items]),
   );

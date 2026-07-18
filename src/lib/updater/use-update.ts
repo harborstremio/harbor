@@ -101,12 +101,18 @@ function betaChannel(): boolean {
 
 export async function checkForUpdate(manual = false): Promise<void> {
   if (!IS_TAURI) return;
-  if (state.status === "checking" || state.status === "downloading" || state.status === "installing") {
+  if (
+    state.status === "checking" ||
+    state.status === "downloading" ||
+    state.status === "installing"
+  ) {
     return;
   }
   set({ status: "checking", manualCheck: manual, error: null });
   try {
-    const update = await check(betaChannel() ? { headers: { "x-harbor-channel": "beta" } } : undefined);
+    const update = await check(
+      betaChannel() ? { headers: { "x-harbor-channel": "beta" } } : undefined,
+    );
     if (!update) {
       set({ status: "uptodate", version: null, notes: null });
       return;

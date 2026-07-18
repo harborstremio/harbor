@@ -9,19 +9,24 @@ import { ToggleRow } from "../shared";
 import { SeekImageUpload, openSeekImageDialog } from "./seek-image-upload";
 import { useT } from "@/lib/i18n";
 
-const STYLES: Array<{ id: "flat" | "glass" | "pinstripe" | "rainbow"; label: string; sub: string }> = [
+const STYLES: Array<{
+  id: "flat" | "glass" | "pinstripe" | "rainbow";
+  label: string;
+  sub: string;
+}> = [
   { id: "flat", label: "Flat_Style", sub: "Solid fill, no texture. Cleanest baseline." },
   { id: "glass", label: "Glass", sub: "Subtle Apple-like sheen on the filled portion." },
   { id: "pinstripe", label: "Pinstripe", sub: "Diagonal stripes across the fill, retro vibe." },
   { id: "rainbow", label: "Rainbow", sub: "Six horizontal stripes. Pairs with nyan cat dot." },
 ];
 
-const SHAPES: Array<{ id: "circle" | "square" | "image" | "hidden"; label: string; sub: string }> = [
-  { id: "circle", label: "Circle", sub: "The default round dot." },
-  { id: "square", label: "Square", sub: "Rounded square in the same color." },
-  { id: "image", label: "Custom image", sub: "PNG, GIF, WebP, or SVG. Animated GIFs play." },
-  { id: "hidden", label: "Hidden", sub: "No dot, just the bar." },
-];
+const SHAPES: Array<{ id: "circle" | "square" | "image" | "hidden"; label: string; sub: string }> =
+  [
+    { id: "circle", label: "Circle", sub: "The default round dot." },
+    { id: "square", label: "Square", sub: "Rounded square in the same color." },
+    { id: "image", label: "Custom image", sub: "PNG, GIF, WebP, or SVG. Animated GIFs play." },
+    { id: "hidden", label: "Hidden", sub: "No dot, just the bar." },
+  ];
 
 const PRESET_COLORS = [
   "",
@@ -50,7 +55,9 @@ export function SeekBarPanel() {
     <div className="flex flex-col gap-7">
       <ToggleRow
         label={t("Show thumbnail preview on hover")}
-        sub={t("Generates a frame on the fly as you scrub the seek bar. Works on debrid streams and local files.")}
+        sub={t(
+          "Generates a frame on the fly as you scrub the seek bar. Works on debrid streams and local files.",
+        )}
         value={settings.seekPreviewEnabled}
         onChange={(v) => update({ seekPreviewEnabled: v })}
       />
@@ -140,7 +147,9 @@ export function SeekBarPanel() {
             })
           }
           emptyTitle={t("Upload a pattern to tile across the bar")}
-          hint={t("Tiles horizontally; the bar's height crops it vertically. Animated GIFs up to 2 MB play.")}
+          hint={t(
+            "Tiles horizontally; the bar's height crops it vertically. Animated GIFs up to 2 MB play.",
+          )}
           targetDim={256}
           targetQuality={0.88}
         />
@@ -148,7 +157,9 @@ export function SeekBarPanel() {
 
       <ToggleRow
         label={t("Buffer fill")}
-        sub={t("The lighter fill showing how much is buffered or downloaded ahead. It hides automatically once a stream is fully cached (green dot).")}
+        sub={t(
+          "The lighter fill showing how much is buffered or downloaded ahead. It hides automatically once a stream is fully cached (green dot).",
+        )}
         value={settings.seekBarFill !== false}
         onChange={(v) => update({ seekBarFill: v })}
       />
@@ -190,7 +201,10 @@ export function SeekBarPanel() {
         </div>
       </SubField>
 
-      <SubField label={currentShape === "image" ? t("Image size") : t("Dot size")} value={`${dotVal}px`}>
+      <SubField
+        label={currentShape === "image" ? t("Image size") : t("Dot size")}
+        value={`${dotVal}px`}
+      >
         <input
           type="range"
           min={8}
@@ -214,7 +228,9 @@ export function SeekBarPanel() {
             })
           }
           emptyTitle={t("Upload nyan cat, a sticker, anything")}
-          hint={t("PNG, JPEG, WebP, or SVG (auto-shrunk if huge). Animated GIFs up to 2 MB play live.")}
+          hint={t(
+            "PNG, JPEG, WebP, or SVG (auto-shrunk if huge). Animated GIFs up to 2 MB play live.",
+          )}
         />
       </SubField>
     </div>
@@ -244,7 +260,9 @@ function PickTile({
       }`}
     >
       <span className={`text-[12.5px] font-semibold ${selected ? "text-ink" : ""}`}>{label}</span>
-      <span className={`text-[10.5px] leading-snug ${selected ? "text-ink-muted" : "text-ink-subtle"}`}>
+      <span
+        className={`text-[10.5px] leading-snug ${selected ? "text-ink-muted" : "text-ink-subtle"}`}
+      >
         {sub}
       </span>
     </button>
@@ -265,7 +283,12 @@ function Preview({ settings }: { settings: Settings }) {
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-edge shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-      <img src={seekPreviewBg} alt="" className="block h-auto w-full select-none" draggable={false} />
+      <img
+        src={seekPreviewBg}
+        alt=""
+        className="block h-auto w-full select-none"
+        draggable={false}
+      />
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent px-7 pb-3 pt-6">
         <div
           ref={trackRef}

@@ -14,7 +14,11 @@ export function verifyAddonSamples(): { passed: number; failed: Failure[] } {
   let passed = 0;
 
   for (const sample of ADDON_SAMPLES) {
-    const parsed = parseStream({ ...sample.raw, addonId: sample.addonId, addonName: sample.addonName });
+    const parsed = parseStream({
+      ...sample.raw,
+      addonId: sample.addonId,
+      addonName: sample.addonName,
+    });
     const errors = compareExpected(parsed, sample.expected, sample);
     if (errors.length === 0) passed++;
     else failed.push(...errors);
@@ -35,7 +39,8 @@ function compareExpected(
     for (const [slug, want] of Object.entries(expected.cached)) {
       if (!want) continue;
       const got = parsed.cached[slug as keyof typeof parsed.cached];
-      if (!got) out.push({ addon: where, field: `cached.${slug}`, expected: true, actual: got ?? false });
+      if (!got)
+        out.push({ addon: where, field: `cached.${slug}`, expected: true, actual: got ?? false });
     }
   }
   if (expected.uncached) {
@@ -43,24 +48,49 @@ function compareExpected(
       if (!want) continue;
       const isUncached = parsed.cached[slug as keyof typeof parsed.cached] === false;
       if (!isUncached) {
-        out.push({ addon: where, field: `uncached.${slug}`, expected: true, actual: parsed.cached[slug as keyof typeof parsed.cached] });
+        out.push({
+          addon: where,
+          field: `uncached.${slug}`,
+          expected: true,
+          actual: parsed.cached[slug as keyof typeof parsed.cached],
+        });
       }
     }
   }
   if (expected.seeders !== undefined && parsed.seeders !== expected.seeders) {
-    out.push({ addon: where, field: "seeders", expected: expected.seeders, actual: parsed.seeders });
+    out.push({
+      addon: where,
+      field: "seeders",
+      expected: expected.seeders,
+      actual: parsed.seeders,
+    });
   }
   if (expected.source && parsed.source !== expected.source) {
     out.push({ addon: where, field: "source", expected: expected.source, actual: parsed.source });
   }
   if (expected.resolution && parsed.resolution !== expected.resolution) {
-    out.push({ addon: where, field: "resolution", expected: expected.resolution, actual: parsed.resolution });
+    out.push({
+      addon: where,
+      field: "resolution",
+      expected: expected.resolution,
+      actual: parsed.resolution,
+    });
   }
   if (expected.hdrFormat !== undefined && parsed.hdrFormat !== expected.hdrFormat) {
-    out.push({ addon: where, field: "hdrFormat", expected: expected.hdrFormat, actual: parsed.hdrFormat });
+    out.push({
+      addon: where,
+      field: "hdrFormat",
+      expected: expected.hdrFormat,
+      actual: parsed.hdrFormat,
+    });
   }
   if (expected.releaseGroup !== undefined && parsed.releaseGroup !== expected.releaseGroup) {
-    out.push({ addon: where, field: "releaseGroup", expected: expected.releaseGroup, actual: parsed.releaseGroup });
+    out.push({
+      addon: where,
+      field: "releaseGroup",
+      expected: expected.releaseGroup,
+      actual: parsed.releaseGroup,
+    });
   }
   if (expected.size !== undefined && parsed.size !== expected.size) {
     out.push({ addon: where, field: "size", expected: expected.size, actual: parsed.size });
@@ -78,6 +108,8 @@ export function logVerificationReport(): void {
   }
   console.warn(`[parser-verify] ${passed}/${total} samples passed, ${failed.length} mismatches:`);
   for (const f of failed) {
-    console.warn(`  ${f.addon} :: ${f.field} — expected ${JSON.stringify(f.expected)}, got ${JSON.stringify(f.actual)}`);
+    console.warn(
+      `  ${f.addon} :: ${f.field} — expected ${JSON.stringify(f.expected)}, got ${JSON.stringify(f.actual)}`,
+    );
   }
 }

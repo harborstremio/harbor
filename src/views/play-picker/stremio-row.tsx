@@ -53,7 +53,9 @@ export function StremioRow({
           {headline}
         </p>
         {description && (
-          <p className={`whitespace-pre-line text-[14.5px] leading-snug text-ink-muted${full ? "" : " line-clamp-3"}`}>
+          <p
+            className={`whitespace-pre-line text-[14.5px] leading-snug text-ink-muted${full ? "" : " line-clamp-3"}`}
+          >
             {description}
           </p>
         )}
@@ -67,9 +69,7 @@ export function StremioRow({
             <EditionChip stream={stream} />
           </div>
         )}
-        {failed && (
-          <p className="text-[13px] font-medium text-danger">Unavailable, try another.</p>
-        )}
+        {failed && <p className="text-[13px] font-medium text-danger">Unavailable, try another.</p>}
       </div>
       <div className="flex shrink-0 items-center gap-2 self-center">
         {link && <CopyLinkButton url={link} size={16} className="h-9 w-9" />}

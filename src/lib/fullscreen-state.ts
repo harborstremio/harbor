@@ -30,7 +30,9 @@ export function consumeMarathonReenter(): boolean {
 }
 
 function isTauri(): boolean {
-  return typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
+  return (
+    typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window)
+  );
 }
 
 function emit(): void {
@@ -102,7 +104,9 @@ async function osWindowFullscreen(): Promise<boolean> {
   if (!isTauri()) return false;
   try {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
-    return await getCurrentWindow().isFullscreen().catch(() => false);
+    return await getCurrentWindow()
+      .isFullscreen()
+      .catch(() => false);
   } catch {
     return false;
   }

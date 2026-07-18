@@ -114,7 +114,8 @@ export function fetchAniSkipSegments(
       const end = r.interval?.endTime;
       const t = r.skipType ?? "";
       if (typeof start !== "number" || typeof end !== "number" || end <= start) continue;
-      const kind: SkipSegment["kind"] = t === "ed" || t === "mixed-ed" ? "outro" : t === "recap" ? "recap" : "intro";
+      const kind: SkipSegment["kind"] =
+        t === "ed" || t === "mixed-ed" ? "outro" : t === "recap" ? "recap" : "intro";
       segments.push({ kind, startSec: start, endSec: end, source: "aniskip" });
     }
     segments.sort((a, b) => a.startSec - b.startSec);

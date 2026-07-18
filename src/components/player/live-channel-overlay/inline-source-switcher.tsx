@@ -65,7 +65,9 @@ export function InlineSourceSwitcher({
                     setOpen(false);
                   }}
                   className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-start text-[13.5px] transition-colors ${
-                    isActive ? "bg-raised text-ink" : "text-ink-muted hover:bg-raised hover:text-ink"
+                    isActive
+                      ? "bg-raised text-ink"
+                      : "text-ink-muted hover:bg-raised hover:text-ink"
                   }`}
                 >
                   <span

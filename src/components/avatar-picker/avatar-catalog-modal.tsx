@@ -158,7 +158,9 @@ export function AvatarCatalogModal({
                     </span>
                     <span
                       className={`w-full truncate text-center text-[11px] leading-tight transition-colors ${
-                        selected ? "font-semibold text-ink" : "text-ink-subtle group-hover:text-ink-muted"
+                        selected
+                          ? "font-semibold text-ink"
+                          : "text-ink-subtle group-hover:text-ink-muted"
                       }`}
                     >
                       {it.name}
@@ -203,7 +205,9 @@ function Disclaimer() {
         onBlur={() => setHover(false)}
         aria-label={t("Rights and usage")}
         className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors ${
-          show ? "bg-elevated text-ink-muted" : "text-ink-subtle hover:bg-elevated hover:text-ink-muted"
+          show
+            ? "bg-elevated text-ink-muted"
+            : "text-ink-subtle hover:bg-elevated hover:text-ink-muted"
         }`}
       >
         <Info size={13} strokeWidth={2.2} />
@@ -226,7 +230,9 @@ function ScrollEdge({ side, onClick }: { side: "start" | "end"; onClick: () => v
   return (
     <div
       className={`pointer-events-none absolute inset-y-0 z-10 flex items-center from-surface via-surface to-transparent ${
-        side === "start" ? "start-0 bg-gradient-to-r ps-3 pe-10" : "end-0 bg-gradient-to-l pe-3 ps-10"
+        side === "start"
+          ? "start-0 bg-gradient-to-r ps-3 pe-10"
+          : "end-0 bg-gradient-to-l pe-3 ps-10"
       }`}
     >
       <button
@@ -259,9 +265,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={`shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12.5px] font-medium transition-colors ${
-        active
-          ? "bg-ink text-canvas"
-          : "bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
+        active ? "bg-ink text-canvas" : "bg-elevated text-ink-muted hover:bg-raised hover:text-ink"
       }`}
     >
       {children}

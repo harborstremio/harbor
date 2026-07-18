@@ -32,9 +32,10 @@ export function RecordingPill() {
 
   const showRecording = active.length > 0;
   const primary = active[0];
-  const ratio = primary && primary.plannedDurationSec > 0
-    ? Math.min(1, primary.elapsedSec / primary.plannedDurationSec)
-    : 0;
+  const ratio =
+    primary && primary.plannedDurationSec > 0
+      ? Math.min(1, primary.elapsedSec / primary.plannedDurationSec)
+      : 0;
 
   return (
     <div ref={wrapRef} className="relative">
@@ -83,7 +84,12 @@ export function RecordingPill() {
           </div>
           <div className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto px-3 py-3">
             {active.map((s) => (
-              <SessionRow key={s.id} session={s} onStop={() => stop(s.id)} onReveal={() => reveal(s.outputPath)} />
+              <SessionRow
+                key={s.id}
+                session={s}
+                onStop={() => stop(s.id)}
+                onReveal={() => reveal(s.outputPath)}
+              />
             ))}
             {recent.map((s) => (
               <SessionRow
@@ -114,9 +120,10 @@ function SessionRow({
   const t = useT();
   const isActive = session.state === "recording";
   const isError = session.state === "error";
-  const ratio = session.plannedDurationSec > 0
-    ? Math.min(1, session.elapsedSec / session.plannedDurationSec)
-    : 0;
+  const ratio =
+    session.plannedDurationSec > 0
+      ? Math.min(1, session.elapsedSec / session.plannedDurationSec)
+      : 0;
   const remaining = Math.max(0, session.plannedDurationSec - session.elapsedSec);
   const title = session.programTitle ?? session.channelName;
   return (
@@ -143,9 +150,7 @@ function SessionRow({
           />
         </div>
       )}
-      {session.error && (
-        <p className="text-[11.5px] text-amber-300">{session.error}</p>
-      )}
+      {session.error && <p className="text-[11.5px] text-amber-300">{session.error}</p>}
       <div className="flex items-center gap-2">
         <button
           onClick={onReveal}

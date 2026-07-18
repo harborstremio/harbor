@@ -19,9 +19,7 @@ export async function requestPin(): Promise<SimklPin> {
   };
 }
 
-export type PollResult =
-  | { kind: "authorized"; session: SimklSession }
-  | { kind: "expired" };
+export type PollResult = { kind: "authorized"; session: SimklSession } | { kind: "expired" };
 
 export type PollHandle = { cancel: () => void };
 

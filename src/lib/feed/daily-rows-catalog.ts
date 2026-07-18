@@ -2,11 +2,26 @@ import type { Affinity } from "@/lib/discover/types";
 import { providerIdsFor, SERVICES } from "@/lib/providers/streaming";
 import type { StreamingService } from "@/lib/settings";
 import { genreToTmdbId } from "./sections";
-import { DECADES, GENRE_MOVIE_TO_TV, LANG_TO_COUNTRY, LANGUAGES, MOVIE_GENRES, TV_GENRES, mixSeed } from "./tags";
+import {
+  DECADES,
+  GENRE_MOVIE_TO_TV,
+  LANG_TO_COUNTRY,
+  LANGUAGES,
+  MOVIE_GENRES,
+  TV_GENRES,
+  mixSeed,
+} from "./tags";
 import { normalizedAffinity, weightedPickWithoutReplacement } from "./daily-rows-select";
 import { ANCHORS } from "./daily-rows-anchors";
 import { PEOPLE_TEMPLATES } from "./daily-rows-people";
-import { LAMBDA, movieGenre, relax, rng, type CatalogEntry, type ExpandedRow } from "./daily-rows-types";
+import {
+  LAMBDA,
+  movieGenre,
+  relax,
+  rng,
+  type CatalogEntry,
+  type ExpandedRow,
+} from "./daily-rows-types";
 
 export type { CatalogEntry, ExpandedRow } from "./daily-rows-types";
 export { setPersonLabels } from "./daily-rows-people";

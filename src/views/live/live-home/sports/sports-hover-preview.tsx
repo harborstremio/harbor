@@ -49,7 +49,14 @@ export function SportsHoverPreview({
       onClick={onSelect}
     >
       {children}
-      {hovered && <PreviewPortal container={containerRef.current} game={game} detail={detail} loading={loading} />}
+      {hovered && (
+        <PreviewPortal
+          container={containerRef.current}
+          game={game}
+          detail={detail}
+          loading={loading}
+        />
+      )}
     </div>
   );
 }
@@ -94,20 +101,30 @@ function PreviewPortal({
       style={{ top: pos.top, left: pos.left, transformOrigin: "bottom" }}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-ink-subtle">{game.league}</span>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-ink-subtle">
+          {game.league}
+        </span>
         <span className="text-[11px] font-bold text-ink-muted">{game.detail || t("Upcoming")}</span>
       </div>
 
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-center gap-2">
-          {game.home.logo ? <img src={game.home.logo} className="h-10 w-10 object-contain" alt="" /> : <div className="h-10 w-10 rounded-full bg-canvas/50" />}
+          {game.home.logo ? (
+            <img src={game.home.logo} className="h-10 w-10 object-contain" alt="" />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-canvas/50" />
+          )}
           <span className="text-[12px] font-bold">{game.home.abbr || game.home.name}</span>
         </div>
         <div className="text-[22px] font-black tracking-tight">
           {game.home.score || "0"} - {game.away.score || "0"}
         </div>
         <div className="flex flex-col items-center gap-2">
-          {game.away.logo ? <img src={game.away.logo} className="h-10 w-10 object-contain" alt="" /> : <div className="h-10 w-10 rounded-full bg-canvas/50" />}
+          {game.away.logo ? (
+            <img src={game.away.logo} className="h-10 w-10 object-contain" alt="" />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-canvas/50" />
+          )}
           <span className="text-[12px] font-bold">{game.away.abbr || game.away.name}</span>
         </div>
       </div>
@@ -134,6 +151,6 @@ function PreviewPortal({
         </div>
       )}
     </div>,
-    document.body
+    document.body,
   );
 }

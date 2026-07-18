@@ -64,24 +64,26 @@ export function useBridgeLoad(params: {
     const isAutoRetry = (src.attempt ?? 0) > 0;
     const isLive =
       !!src.meta.id?.startsWith("iptv:") ||
-      (!!src.meta.type && !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+      (!!src.meta.type &&
+        !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
     let cancelled = false;
     (async () => {
       const openingVid = videoIdFor(
         src,
         cloudWriteId(src.meta.id, src.imdbId ?? null, src.imdbIdVerified === true),
       );
-      const resolved = isLive || src.startFromZero
-        ? { ms: 0, fromRemote: false, finished: false }
-        : await resolveStartMs(
-            src.meta.id,
-            season,
-            episode,
-            authKey,
-            src.imdbId ?? null,
-            src.imdbIdVerified === true,
-            openingVid,
-          );
+      const resolved =
+        isLive || src.startFromZero
+          ? { ms: 0, fromRemote: false, finished: false }
+          : await resolveStartMs(
+              src.meta.id,
+              season,
+              episode,
+              authKey,
+              src.imdbId ?? null,
+              src.imdbIdVerified === true,
+              openingVid,
+            );
       const startMs = resolved.ms;
       const runtimeMin = src.episode?.runtime ?? null;
       const durationMs = runtimeMin && runtimeMin > 0 ? runtimeMin * 60_000 : 0;
@@ -159,7 +161,18 @@ export function useBridgeLoad(params: {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bridgeReady, bridgeKey, src.url, src.notWebReady, src.meta.id, src.subtitles, season, episode, transcodedUrl, authKey]);
+  }, [
+    bridgeReady,
+    bridgeKey,
+    src.url,
+    src.notWebReady,
+    src.meta.id,
+    src.subtitles,
+    season,
+    episode,
+    transcodedUrl,
+    authKey,
+  ]);
 
   useEffect(() => {
     lastLoadedUrlRef.current = null;

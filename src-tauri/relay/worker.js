@@ -12,11 +12,16 @@ function sanitizeSource(v) {
   if (!v || typeof v !== "object" || Array.isArray(v)) return undefined;
   const out = {};
   if (typeof v.title === "string" && v.title.length > 0) out.title = v.title.slice(0, 200);
-  if (typeof v.resolution === "string" && v.resolution.length > 0) out.resolution = v.resolution.slice(0, 16);
-  if (typeof v.infoHash === "string" && /^[0-9a-fA-F]{16,64}$/.test(v.infoHash)) out.infoHash = v.infoHash.toLowerCase();
-  if (typeof v.sizeBytes === "number" && isFinite(v.sizeBytes) && v.sizeBytes >= 0) out.sizeBytes = v.sizeBytes;
-  if (typeof v.durationSec === "number" && isFinite(v.durationSec) && v.durationSec >= 0) out.durationSec = v.durationSec;
-  if (typeof v.fileIdx === "number" && isFinite(v.fileIdx) && v.fileIdx >= 0) out.fileIdx = v.fileIdx;
+  if (typeof v.resolution === "string" && v.resolution.length > 0)
+    out.resolution = v.resolution.slice(0, 16);
+  if (typeof v.infoHash === "string" && /^[0-9a-fA-F]{16,64}$/.test(v.infoHash))
+    out.infoHash = v.infoHash.toLowerCase();
+  if (typeof v.sizeBytes === "number" && isFinite(v.sizeBytes) && v.sizeBytes >= 0)
+    out.sizeBytes = v.sizeBytes;
+  if (typeof v.durationSec === "number" && isFinite(v.durationSec) && v.durationSec >= 0)
+    out.durationSec = v.durationSec;
+  if (typeof v.fileIdx === "number" && isFinite(v.fileIdx) && v.fileIdx >= 0)
+    out.fileIdx = v.fileIdx;
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
@@ -50,9 +55,12 @@ export default {
   async fetch(req, env) {
     const url = new URL(req.url);
     if (url.pathname === "/" || url.pathname === "/health") {
-      return new Response(JSON.stringify({ ok: true, version: WORKER_VERSION, hosts: [...PROXY_HOSTS] }), {
-        headers: { "content-type": "application/json", "access-control-allow-origin": "*" },
-      });
+      return new Response(
+        JSON.stringify({ ok: true, version: WORKER_VERSION, hosts: [...PROXY_HOSTS] }),
+        {
+          headers: { "content-type": "application/json", "access-control-allow-origin": "*" },
+        },
+      );
     }
     if (url.pathname === "/proxy") return handleProxy(req, url);
     const m = url.pathname.match(ALLOWED_PATH);
@@ -140,7 +148,13 @@ async function handleProxy(req, url) {
 const ROOM_IDLE_MS = 1000 * 60 * 60 * 6;
 
 function peerAttachment(p) {
-  return { clientId: p.clientId, name: p.name, joinedAt: p.joinedAt, ready: p.ready, color: p.color };
+  return {
+    clientId: p.clientId,
+    name: p.name,
+    joinedAt: p.joinedAt,
+    ready: p.ready,
+    color: p.color,
+  };
 }
 
 export class Room {
@@ -386,16 +400,28 @@ export class Room {
   handleHello(socket, msg) {
     if (!msg.clientId) {
       this.send(socket, { t: "error", code: "missing_client_id", message: "clientId required" });
-      try { socket.close(1008, "missing_client_id"); } catch {}
+      try {
+        socket.close(1008, "missing_client_id");
+      } catch {}
       return;
     }
     const name = (msg.name || "Guest").toString().slice(0, 32);
     const avatar = sanitizeAvatar(msg.avatar);
     const color = sanitizeColor(msg.color);
-    const peer = { clientId: msg.clientId, name, joinedAt: Date.now(), ready: false, avatar, color, lastStateAt: 0 };
+    const peer = {
+      clientId: msg.clientId,
+      name,
+      joinedAt: Date.now(),
+      ready: false,
+      avatar,
+      color,
+      lastStateAt: 0,
+    };
     for (const [s, p] of this.peers) {
       if (p.clientId === msg.clientId && s !== socket) {
-        try { s.close(1000, "replaced"); } catch {}
+        try {
+          s.close(1000, "replaced");
+        } catch {}
         this.peers.delete(s);
       }
     }
@@ -465,20 +491,35 @@ export class Room {
     this.peers.delete(socket);
     this.broadcast({ t: "participant-left", clientId: peer.clientId, name: peer.name });
     if (this.hostClientId === peer.clientId) this.reassignHost();
-    try { socket.close(1000, "left"); } catch {}
+    try {
+      socket.close(1000, "left");
+    } catch {}
   }
 
   handleState(socket, msg) {
     const peer = this.peers.get(socket);
     if (!peer || !msg.state) return;
     const s = msg.state;
-    if (typeof s.positionSeconds !== "number" || !isFinite(s.positionSeconds) || s.positionSeconds < 0) return;
+    if (
+      typeof s.positionSeconds !== "number" ||
+      !isFinite(s.positionSeconds) ||
+      s.positionSeconds < 0
+    )
+      return;
     if (typeof s.updatedAt !== "number" || !isFinite(s.updatedAt)) return;
     if (typeof s.playing !== "boolean") return;
     if (s.mediaId != null && typeof s.mediaId !== "string") return;
     if (s.mediaTitle != null && typeof s.mediaTitle !== "string") return;
     if (s.posterUrl != null && typeof s.posterUrl !== "string") return;
-    if (s.episode != null && !(typeof s.episode === "object" && typeof s.episode.season === "number" && typeof s.episode.episode === "number")) return;
+    if (
+      s.episode != null &&
+      !(
+        typeof s.episode === "object" &&
+        typeof s.episode.season === "number" &&
+        typeof s.episode.episode === "number"
+      )
+    )
+      return;
     if (typeof s.updatedBy !== "string" || s.updatedBy !== peer.clientId) return;
     const cleanSource = sanitizeSource(s.source);
     if (cleanSource) s.source = cleanSource;
@@ -503,7 +544,13 @@ export class Room {
     if (!peer || !msg.command || typeof msg.command.action !== "string") return;
     const c = msg.command;
     if (c.action !== "play" && c.action !== "pause" && c.action !== "seek") return;
-    if (c.action === "seek" && (typeof c.positionSeconds !== "number" || !isFinite(c.positionSeconds) || c.positionSeconds < 0)) return;
+    if (
+      c.action === "seek" &&
+      (typeof c.positionSeconds !== "number" ||
+        !isFinite(c.positionSeconds) ||
+        c.positionSeconds < 0)
+    )
+      return;
     if (c.seq != null && (typeof c.seq !== "number" || !isFinite(c.seq))) delete c.seq;
     if (c.at != null && (typeof c.at !== "number" || !isFinite(c.at))) delete c.at;
     if (!this.hostClientId || peer.clientId === this.hostClientId) return;
@@ -558,14 +605,20 @@ export class Room {
   }
 
   send(socket, msg) {
-    try { socket.send(JSON.stringify(msg)); } catch {}
+    try {
+      socket.send(JSON.stringify(msg));
+    } catch {}
   }
 
   broadcast(msg, except) {
     const payload = JSON.stringify(msg);
     for (const [s] of this.peers) {
       if (s === except) continue;
-      try { s.send(payload); } catch (e) { console.error("[relay] broadcast send failed", e); }
+      try {
+        s.send(payload);
+      } catch (e) {
+        console.error("[relay] broadcast send failed", e);
+      }
     }
   }
 }

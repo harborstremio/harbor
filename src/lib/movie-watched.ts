@@ -8,7 +8,9 @@ function load(): Set<string> {
   if (cache) return cache;
   try {
     const arr = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    cache = new Set(Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : []);
+    cache = new Set(
+      Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [],
+    );
   } catch {
     cache = new Set();
   }

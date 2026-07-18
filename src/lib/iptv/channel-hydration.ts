@@ -53,7 +53,10 @@ function persist() {
   } catch {}
 }
 
-function queryForChannel(channelName: string): { query: string | null; preferType: "movie" | "series" | null } {
+function queryForChannel(channelName: string): {
+  query: string | null;
+  preferType: "movie" | "series" | null;
+} {
   const memoed = channelToQuery.get(channelName);
   if (memoed !== undefined) {
     return { query: memoed, preferType: null };
@@ -117,10 +120,7 @@ async function doHydrate(
   return null;
 }
 
-async function fetchFullMeta(
-  type: "movie" | "series",
-  id: string,
-): Promise<Meta | null> {
+async function fetchFullMeta(type: "movie" | "series", id: string): Promise<Meta | null> {
   try {
     const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
     if (!res.ok) return null;

@@ -165,11 +165,7 @@ export function CinemaHero({
             return (
               <div key={m.id} className="relative h-full w-full shrink-0">
                 {shouldMount ? (
-                  <CinemaSlide
-                    meta={m}
-                    active={i === active && !dragging}
-                    eyebrow={eyebrow}
-                  />
+                  <CinemaSlide meta={m} active={i === active && !dragging} eyebrow={eyebrow} />
                 ) : null}
               </div>
             );
@@ -194,15 +190,7 @@ export function CinemaHero({
   );
 }
 
-function CinemaSlide({
-  meta,
-  active,
-  eyebrow,
-}: {
-  meta: Meta;
-  active: boolean;
-  eyebrow: string;
-}) {
+function CinemaSlide({ meta, active, eyebrow }: { meta: Meta; active: boolean; eyebrow: string }) {
   const t = useT();
   const { settings } = useSettings();
   const { openMeta, openPicker } = useView();
@@ -310,10 +298,7 @@ function CinemaSlide({
   }, [trailerInfo]);
 
   return (
-    <div
-      aria-hidden={!active}
-      className="relative h-full w-full"
-    >
+    <div aria-hidden={!active} className="relative h-full w-full">
       {bg && (
         <img
           src={bg}
@@ -384,7 +369,9 @@ function CinemaSlide({
           )}
           <div className="mt-2 flex items-center gap-3">
             <button
-              onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
+              onClick={() =>
+                openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })
+              }
               className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.5)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               <Play size={17} fill="currentColor" />

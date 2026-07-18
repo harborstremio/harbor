@@ -11,13 +11,7 @@ function fmtBytes(n: number): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export function FileDrop({
-  files,
-  onChange,
-}: {
-  files: File[];
-  onChange: (next: File[]) => void;
-}) {
+export function FileDrop({ files, onChange }: { files: File[]; onChange: (next: File[]) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [reject, setReject] = useState<string | null>(null);
@@ -86,9 +80,7 @@ export function FileDrop({
           e.target.value = "";
         }}
       />
-      {reject && (
-        <p className="text-[11.5px] text-danger">{reject}</p>
-      )}
+      {reject && <p className="text-[11.5px] text-danger">{reject}</p>}
       {files.length > 0 && (
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {files.map((f, i) => (
@@ -98,7 +90,9 @@ export function FileDrop({
             >
               <FilePreview file={f} />
               <div className="flex items-center gap-2 px-2.5 py-2 text-[11px] text-ink-muted">
-                <span className="truncate" title={f.name}>{f.name}</span>
+                <span className="truncate" title={f.name}>
+                  {f.name}
+                </span>
                 <span className="ms-auto shrink-0 text-ink-subtle">{fmtBytes(f.size)}</span>
               </div>
               <button

@@ -25,7 +25,10 @@ function rank(pool: FeaturedItem[], now: number, di: number): FeaturedItem[] {
   const sets = buildExclusionSets();
   const { affinity } = getStore();
   return pool
-    .filter((it) => it.meta.background && passesFloor(it.meta, it.source) && !isExcluded(it.meta, sets, now))
+    .filter(
+      (it) =>
+        it.meta.background && passesFloor(it.meta, it.source) && !isExcluded(it.meta, sets, now),
+    )
     .map((it) => ({ it, s: scoreFeatured(it, affinity, now, di) }))
     .sort((a, b) => b.s - a.s)
     .map((x) => x.it);

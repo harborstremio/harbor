@@ -5,7 +5,15 @@ import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { ResultPoster } from "../result-poster";
 
-function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: () => void; index: number }) {
+function AiResultRow({
+  result,
+  onClose,
+  index,
+}: {
+  result: AiResult;
+  onClose: () => void;
+  index: number;
+}) {
   const { openMeta } = useView();
   const t = useT();
   const { meta, season, episode, episodeTitle } = result;
@@ -34,7 +42,9 @@ function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: ()
         </span>
         <div className="flex items-center gap-2 text-[12.5px] text-ink-muted">
           {isEpisode && <span className="truncate">{meta.name}</span>}
-          {isEpisode && meta.releaseInfo && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />}
+          {isEpisode && meta.releaseInfo && (
+            <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />
+          )}
           {meta.releaseInfo && <span>{meta.releaseInfo}</span>}
           {meta.imdbRating && (
             <>
@@ -47,7 +57,9 @@ function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: ()
           )}
         </div>
         {!isEpisode && description && (
-          <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">{description}</span>
+          <span className="line-clamp-2 text-[12.5px] leading-snug text-ink-subtle">
+            {description}
+          </span>
         )}
       </div>
     </button>

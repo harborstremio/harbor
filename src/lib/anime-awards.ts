@@ -124,7 +124,7 @@ export type AnimeAwardCategory = {
 };
 
 export function readAnimeAwardSource(source: AwardSourceId): {
-  meta: typeof SOURCE_META[AwardSourceId];
+  meta: (typeof SOURCE_META)[AwardSourceId];
   categories: AnimeAwardCategory[];
   years: number[];
 } {
@@ -262,7 +262,10 @@ export function findTopAward(animeName: string, releaseYear?: number): AwardWin 
   return wins[0] ?? null;
 }
 
-export function groupWinsBySource(animeName: string, releaseYear?: number): Array<{
+export function groupWinsBySource(
+  animeName: string,
+  releaseYear?: number,
+): Array<{
   source: AwardSourceId;
   wins: AwardWin[];
 }> {
@@ -283,10 +286,7 @@ export function groupWinsBySource(animeName: string, releaseYear?: number): Arra
   }
   return Array.from(map.entries())
     .map(([source, w]) => ({ source, wins: w }))
-    .sort(
-      (a, b) =>
-        SOURCE_META[b.source].prestige - SOURCE_META[a.source].prestige,
-    );
+    .sort((a, b) => SOURCE_META[b.source].prestige - SOURCE_META[a.source].prestige);
 }
 
 export function uniqueWinnerFranchisesAcrossSources(): Map<string, AwardWin> {

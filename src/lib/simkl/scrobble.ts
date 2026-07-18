@@ -4,7 +4,11 @@ export type ScrobbleAction = "start" | "pause" | "stop";
 
 export type EpisodeRef = { season?: number; episode?: number } | undefined;
 
-export function buildBody(metaId: string, episode: EpisodeRef, progress: number): Record<string, unknown> | null {
+export function buildBody(
+  metaId: string,
+  episode: EpisodeRef,
+  progress: number,
+): Record<string, unknown> | null {
   const p = Math.min(100, Math.max(0, progress));
 
   if (metaId.startsWith("tt")) {
@@ -36,7 +40,9 @@ export function buildBody(metaId: string, episode: EpisodeRef, progress: number)
     };
   }
 
-  const animePrefix = ["kitsu:", "mal:", "anilist:", "anidb:"].find((pre) => metaId.startsWith(pre));
+  const animePrefix = ["kitsu:", "mal:", "anilist:", "anidb:"].find((pre) =>
+    metaId.startsWith(pre),
+  );
   if (animePrefix && episode?.episode != null) {
     const num = Number(metaId.split(":")[1]);
     if (!Number.isFinite(num)) return null;

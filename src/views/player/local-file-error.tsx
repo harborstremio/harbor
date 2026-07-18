@@ -22,14 +22,16 @@ export function LocalFileError({
           <FileX size={26} strokeWidth={1.8} />
         </span>
         <div className="flex flex-col gap-2">
-          <h2 className="font-display text-[24px] font-semibold text-white">{t("Couldn't open this file")}</h2>
-          <p className="text-[13.5px] leading-relaxed text-white/70">
-            {filename}
-          </p>
+          <h2 className="font-display text-[24px] font-semibold text-white">
+            {t("Couldn't open this file")}
+          </h2>
+          <p className="text-[13.5px] leading-relaxed text-white/70">{filename}</p>
         </div>
         {looksLikeOneDrive && (
           <p className="rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-[12.5px] leading-relaxed text-amber-100/85">
-            {t("This file is in OneDrive. If \"Files On-Demand\" is on, the file is a cloud placeholder until it's downloaded. Right-click it in Explorer and pick")}{" "}
+            {t(
+              'This file is in OneDrive. If "Files On-Demand" is on, the file is a cloud placeholder until it\'s downloaded. Right-click it in Explorer and pick',
+            )}{" "}
             <span className="font-semibold">{t("Always keep on this device")}</span>
             {t(", then try again.")}
           </p>

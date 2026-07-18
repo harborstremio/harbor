@@ -36,11 +36,7 @@ export function FavoriteButton({
             }`
       }
     >
-      <Star
-        size={size}
-        strokeWidth={active ? 0 : 1.9}
-        fill={active ? "currentColor" : "none"}
-      />
+      <Star size={size} strokeWidth={active ? 0 : 1.9} fill={active ? "currentColor" : "none"} />
     </button>
   );
 }

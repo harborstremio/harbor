@@ -37,7 +37,8 @@ export async function buildTmdbEntry(
   tmdbKey: string | null,
 ): Promise<LocalEntry> {
   let tmdb: TmdbLookup = {};
-  if (tmdbKey) tmdb = await tmdbLookup(tmdbKey, parsed.title, parsed.year, parsed.type).catch(() => ({}));
+  if (tmdbKey)
+    tmdb = await tmdbLookup(tmdbKey, parsed.title, parsed.year, parsed.type).catch(() => ({}));
   const needsReview = tmdbKey ? lowConfidence(parsed, tmdb) : false;
   const identified = tmdb.tmdbId != null && !needsReview;
   return {
@@ -96,7 +97,9 @@ export async function buildNfoEntry(
   let runtime = meta?.runtime ?? null;
 
   if (tmdbKey && !tmdbId) {
-    const look = await tmdbLookup(tmdbKey, title, year, parsed.type).catch(() => ({} as TmdbLookup));
+    const look = await tmdbLookup(tmdbKey, title, year, parsed.type).catch(
+      () => ({}) as TmdbLookup,
+    );
     if (look.tmdbId) tmdbId = look.tmdbId;
     if (!imdbId && look.imdbId) imdbId = look.imdbId;
     if (!art.poster && look.poster) poster = look.poster;
@@ -185,7 +188,8 @@ async function tmdbLookup(
       const imdb = dj.imdb_id ?? dj.external_ids?.imdb_id;
       if (typeof imdb === "string" && imdb.startsWith("tt")) imdbId = imdb;
       if (typeof dj.vote_average === "number" && dj.vote_average > 0) rating = dj.vote_average;
-      if (type === "movie" && typeof dj.runtime === "number" && dj.runtime > 0) runtime = dj.runtime;
+      if (type === "movie" && typeof dj.runtime === "number" && dj.runtime > 0)
+        runtime = dj.runtime;
       if (type === "show" && Array.isArray(dj.episode_run_time) && dj.episode_run_time[0] > 0) {
         runtime = dj.episode_run_time[0];
       }

@@ -6,7 +6,8 @@ const WARN_BYTES = Math.floor(MAX_BYTES * 0.8);
 const MIN_DIM = 16;
 const MAX_DIM = 512;
 
-const SVG_STRIP = /<script[\s\S]*?<\/script>|\son\w+="[^"]*"|\son\w+='[^']*'|\s(?:xlink:href|href)="(?:javascript:|data:text\/html)[^"]*"/gi;
+const SVG_STRIP =
+  /<script[\s\S]*?<\/script>|\son\w+="[^"]*"|\son\w+='[^']*'|\s(?:xlink:href|href)="(?:javascript:|data:text\/html)[^"]*"/gi;
 
 export function IconUpload({
   currentUrl,
@@ -66,7 +67,9 @@ function SingleUpload({
       return;
     }
     if (file.size > MAX_BYTES) {
-      window.alert(`Icon must be under ${Math.round(MAX_BYTES / 1024)} KB. Yours is ${Math.round(file.size / 1024)} KB.`);
+      window.alert(
+        `Icon must be under ${Math.round(MAX_BYTES / 1024)} KB. Yours is ${Math.round(file.size / 1024)} KB.`,
+      );
       return;
     }
     setBusy(true);
@@ -76,8 +79,10 @@ function SingleUpload({
       const dims = await probeImage(sanitized);
       const messages: string[] = [];
       if (file.size > WARN_BYTES) messages.push(`large file (${Math.round(file.size / 1024)} KB)`);
-      if (dims && (dims.w < MIN_DIM || dims.h < MIN_DIM)) messages.push(`tiny (${dims.w}×${dims.h}px)`);
-      if (dims && (dims.w > MAX_DIM || dims.h > MAX_DIM)) messages.push(`huge (${dims.w}×${dims.h}px)`);
+      if (dims && (dims.w < MIN_DIM || dims.h < MIN_DIM))
+        messages.push(`tiny (${dims.w}×${dims.h}px)`);
+      if (dims && (dims.w > MAX_DIM || dims.h > MAX_DIM))
+        messages.push(`huge (${dims.w}×${dims.h}px)`);
       if (messages.length > 0) setWarning(messages.join(" · "));
       onUpload(sanitized);
     } catch (err) {
@@ -182,7 +187,11 @@ function Thumb({
     <div
       title={warning ?? (label ? `${label} icon` : undefined)}
       className={`relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-white/8 transition-colors ${
-        dragOver ? "border-accent ring-2 ring-accent/40" : warning ? "border-amber-300/40" : "border-white/12"
+        dragOver
+          ? "border-accent ring-2 ring-accent/40"
+          : warning
+            ? "border-amber-300/40"
+            : "border-white/12"
       }`}
     >
       {busy ? (

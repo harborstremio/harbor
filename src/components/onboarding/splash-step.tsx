@@ -18,9 +18,7 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
       .then(([m, s]) => {
         if (cancelled) return;
         const all: Meta[] = [...m, ...s];
-        const urls = all
-          .map((x) => x.poster)
-          .filter((p): p is string => !!p);
+        const urls = all.map((x) => x.poster).filter((p): p is string => !!p);
         for (let i = urls.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [urls[i], urls[j]] = [urls[j], urls[i]];
@@ -44,7 +42,9 @@ export function SplashStep({ onAdvance }: { onAdvance: () => void }) {
   }, [onAdvance]);
 
   return (
-    <div className={`relative h-[528px] w-full overflow-hidden bg-canvas ${out ? "animate-splash-out" : ""}`}>
+    <div
+      className={`relative h-[528px] w-full overflow-hidden bg-canvas ${out ? "animate-splash-out" : ""}`}
+    >
       <div className="absolute inset-0 flex gap-2 px-2">
         {[0, 1, 2, 3, 4].map((col) => (
           <PosterColumn key={col} idx={col} posters={posters} />

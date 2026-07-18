@@ -127,8 +127,8 @@ function EmbedViewport({
               {title} blocks embedding from outside its site.
             </p>
             <p className="max-w-[44ch] text-[12.5px] text-ink-muted">
-              That&apos;s a normal security setting. Use the button below to open it in your
-              browser instead.
+              That&apos;s a normal security setting. Use the button below to open it in your browser
+              instead.
             </p>
             <button
               type="button"

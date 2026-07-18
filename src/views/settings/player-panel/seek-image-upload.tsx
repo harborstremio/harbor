@@ -72,7 +72,9 @@ export function SeekImageUpload({
           />
           <img
             key={value || "empty"}
-            src={value || "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="}
+            src={
+              value || "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+            }
             alt=""
             className={`h-12 w-12 object-contain transition-all duration-300 ease-out ${
               value ? "translate-y-0 scale-100 opacity-100" : "translate-y-2 scale-75 opacity-0"
@@ -192,7 +194,8 @@ async function processSeekImage(file: File, maxDim: number, quality: number): Pr
     const tighter = await downsizeRaster(sourceUrl, Math.round(maxDim / 2), 0.82);
     if (tighter && tighter.length <= MAX_STORED_BYTES) return { url: tighter };
     return {
-      error: "Even after auto-shrinking this image is still too big to store. Try one with a tighter crop.",
+      error:
+        "Even after auto-shrinking this image is still too big to store. Try one with a tighter crop.",
     };
   }
   return { url: downsized };
@@ -210,7 +213,11 @@ function readAsDataUrl(file: File): Promise<string> {
   });
 }
 
-async function downsizeRaster(dataUrl: string, maxDim: number, quality: number): Promise<string | null> {
+async function downsizeRaster(
+  dataUrl: string,
+  maxDim: number,
+  quality: number,
+): Promise<string | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {

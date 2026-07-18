@@ -25,7 +25,12 @@ export function PasswordPrompt({
           style={{ boxShadow: `0 0 0 3px ${profile.color}` }}
         >
           {profile.avatar ? (
-            <img src={profile.avatar} alt="" className="h-full w-full object-cover" draggable={false} />
+            <img
+              src={profile.avatar}
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           ) : (
             <CatAvatar className="h-full w-full" />
           )}

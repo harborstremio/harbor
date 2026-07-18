@@ -33,7 +33,8 @@ export function DiagnosticsCard({ diag }: { diag: Diagnostics | null }) {
       {open && (
         <div className="border-t border-edge-soft/55 px-4 py-3">
           <p className="mb-2 text-[11.5px] leading-relaxed text-ink-muted">
-            Auto-included. No keys, no library, no URLs. Just structural flags so reproductions go faster.
+            Auto-included. No keys, no library, no URLs. Just structural flags so reproductions go
+            faster.
           </p>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11.5px] font-mono text-ink-muted">
             <Pair k="App" v={diag.appVersion} />

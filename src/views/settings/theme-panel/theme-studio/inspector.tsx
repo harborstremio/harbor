@@ -65,76 +65,86 @@ export function Inspector({
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div key={tab} className="animate-[studioTabIn_220ms_ease-out]">
-        {tab === "look" && (
-          <div className="flex flex-col">
-            <Group title="Identity" sub="What this theme is called.">
-              <IdentityRow
-                name={draft.name}
-                blurb={draft.blurb}
-                onChange={(p) => onPatch(p)}
-                onSeed={onSeed}
-              />
-            </Group>
-            <Group title="Colors" sub="Every surface in Harbor maps to one of these.">
-              <ColorsGrid colors={draft.colors} onChange={(colors) => onPatch({ colors })} />
-              <StyleSpecimen colors={draft.colors} />
-            </Group>
-            <Group title="Cards" sub="How thumbnails and panels render." defaultOpen={false}>
-              <StylePicker
-                kind="card"
-                value={draft.cardStyle}
-                onChange={(v) => onPatch({ cardStyle: v as ThemeCardStyle })}
-                onEditCustom={() => setCardCssOpen(true)}
-              />
-            </Group>
-            <Group title="Buttons" sub="Surface treatment for action buttons." defaultOpen={false}>
-              <StylePicker
-                kind="button"
-                value={draft.buttonStyle}
-                onChange={(v) => onPatch({ buttonStyle: v as ThemeButtonStyle })}
-              />
-            </Group>
-            <Group title="Typography" sub="Display + body type pairing, or upload your own font.">
-              <FontPicker
-                pairValue={draft.fontPair}
-                customValue={draft.customFontId}
-                onPickPair={(fontPair) => onPatch({ fontPair, customFontId: null })}
-                onPickCustom={(id) => onPatch({ customFontId: id })}
-              />
-            </Group>
-            <Group title="Ambience" defaultOpen={false}>
-              <BokehToggle value={draft.bokeh} onChange={(bokeh) => onPatch({ bokeh })} />
-            </Group>
-          </div>
-        )}
-
-        {tab === "layout" && (
-          <div className="flex flex-col">
-            <Group title="Layout" sub="Where the navigation lives. Pick one to see it live.">
-              <LayoutPicker value={draft.layout} onChange={(layout) => onPatch({ layout })} />
-            </Group>
-            {draft.layout === "custom" && (
-              <CustomChromeBuilder
-                config={draft.chrome}
-                dirty={draft.chromeDirty}
-                onChange={onChromeChange}
-                onRegenerate={onRegenerateChrome}
-                onOpenCode={() => onExpand("html")}
-              />
-            )}
-            {draft.layout !== "custom" && (
-              <Group title="Navigation items" sub="Reorder, rename, or hide what appears in your nav.">
-                <NavEditor layout={draft.layout} />
+          {tab === "look" && (
+            <div className="flex flex-col">
+              <Group title="Identity" sub="What this theme is called.">
+                <IdentityRow
+                  name={draft.name}
+                  blurb={draft.blurb}
+                  onChange={(p) => onPatch(p)}
+                  onSeed={onSeed}
+                />
               </Group>
-            )}
-          </div>
-        )}
+              <Group title="Colors" sub="Every surface in Harbor maps to one of these.">
+                <ColorsGrid colors={draft.colors} onChange={(colors) => onPatch({ colors })} />
+                <StyleSpecimen colors={draft.colors} />
+              </Group>
+              <Group title="Cards" sub="How thumbnails and panels render." defaultOpen={false}>
+                <StylePicker
+                  kind="card"
+                  value={draft.cardStyle}
+                  onChange={(v) => onPatch({ cardStyle: v as ThemeCardStyle })}
+                  onEditCustom={() => setCardCssOpen(true)}
+                />
+              </Group>
+              <Group
+                title="Buttons"
+                sub="Surface treatment for action buttons."
+                defaultOpen={false}
+              >
+                <StylePicker
+                  kind="button"
+                  value={draft.buttonStyle}
+                  onChange={(v) => onPatch({ buttonStyle: v as ThemeButtonStyle })}
+                />
+              </Group>
+              <Group title="Typography" sub="Display + body type pairing, or upload your own font.">
+                <FontPicker
+                  pairValue={draft.fontPair}
+                  customValue={draft.customFontId}
+                  onPickPair={(fontPair) => onPatch({ fontPair, customFontId: null })}
+                  onPickCustom={(id) => onPatch({ customFontId: id })}
+                />
+              </Group>
+              <Group title="Ambience" defaultOpen={false}>
+                <BokehToggle value={draft.bokeh} onChange={(bokeh) => onPatch({ bokeh })} />
+              </Group>
+            </div>
+          )}
 
-        {tab === "code" && (
-          <Group title="Code" sub="CSS, HTML and JS layered over the whole app. Optional for built-in layouts, required for custom chrome.">
-            <CodeSection css={draft.css} js={draft.js} html={draft.html} onExpand={onExpand} />
-          </Group>
-        )}
+          {tab === "layout" && (
+            <div className="flex flex-col">
+              <Group title="Layout" sub="Where the navigation lives. Pick one to see it live.">
+                <LayoutPicker value={draft.layout} onChange={(layout) => onPatch({ layout })} />
+              </Group>
+              {draft.layout === "custom" && (
+                <CustomChromeBuilder
+                  config={draft.chrome}
+                  dirty={draft.chromeDirty}
+                  onChange={onChromeChange}
+                  onRegenerate={onRegenerateChrome}
+                  onOpenCode={() => onExpand("html")}
+                />
+              )}
+              {draft.layout !== "custom" && (
+                <Group
+                  title="Navigation items"
+                  sub="Reorder, rename, or hide what appears in your nav."
+                >
+                  <NavEditor layout={draft.layout} />
+                </Group>
+              )}
+            </div>
+          )}
+
+          {tab === "code" && (
+            <Group
+              title="Code"
+              sub="CSS, HTML and JS layered over the whole app. Optional for built-in layouts, required for custom chrome."
+            >
+              <CodeSection css={draft.css} js={draft.js} html={draft.html} onExpand={onExpand} />
+            </Group>
+          )}
         </div>
       </div>
 

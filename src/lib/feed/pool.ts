@@ -46,19 +46,29 @@ export async function extendPool(tmdbKey: string, page: number): Promise<FeedIte
   const genres = pickRandom(Object.keys(MOVIE_GENRES), 3, seed);
   const decades = pickRandom(DECADES, 2, seed + 1);
   const queries: Array<Promise<FeedItem[]>> = [
-    tmdbTrending(tmdbKey, "movie", "week", page).then((m) => label(m, TAG_TRENDING, "trending_movies")),
-    tmdbTrending(tmdbKey, "tv", "week", page).then((m) => label(m, TAG_TRENDING, "trending_series")),
-    tmdbMovieRow(tmdbKey, "popular", "US", page).then((m) => label(m, TAG_TRENDING, "popular_movies")),
-    tmdbMovieRow(tmdbKey, "top_rated", "US", page + 2).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
-    tmdbSeriesRow(tmdbKey, "top_rated", page + 2).then((m) => label(m, TAG_SERIES, "top_rated_series")),
+    tmdbTrending(tmdbKey, "movie", "week", page).then((m) =>
+      label(m, TAG_TRENDING, "trending_movies"),
+    ),
+    tmdbTrending(tmdbKey, "tv", "week", page).then((m) =>
+      label(m, TAG_TRENDING, "trending_series"),
+    ),
+    tmdbMovieRow(tmdbKey, "popular", "US", page).then((m) =>
+      label(m, TAG_TRENDING, "popular_movies"),
+    ),
+    tmdbMovieRow(tmdbKey, "top_rated", "US", page + 2).then((m) =>
+      label(m, TAG_TOP_RATED, "top_rated_movies"),
+    ),
+    tmdbSeriesRow(tmdbKey, "top_rated", page + 2).then((m) =>
+      label(m, TAG_SERIES, "top_rated_series"),
+    ),
     ...genres.map((g) =>
       tmdbDiscover(tmdbKey, "movie", { ...genreParams(g), page: String(page) }).then((m) =>
         label(m, g, `genre_${g}`),
       ),
     ),
     ...decades.map((d) =>
-      tmdbDiscover(tmdbKey, "movie", { ...decadeParams(d.from, d.to), page: String(page) }).then((m) =>
-        label(m, `From the ${d.label}`, `decade_${d.label}`),
+      tmdbDiscover(tmdbKey, "movie", { ...decadeParams(d.from, d.to), page: String(page) }).then(
+        (m) => label(m, `From the ${d.label}`, `decade_${d.label}`),
       ),
     ),
   ];
@@ -79,14 +89,24 @@ async function buildTmdbPool(key: string): Promise<FeedItem[]> {
     tmdbTrending(key, "movie", "week", 1).then((m) => label(m, TAG_TRENDING, "trending_movies")),
     tmdbTrending(key, "movie", "week", 2).then((m) => label(m, TAG_TRENDING, "trending_movies")),
     tmdbTrending(key, "tv", "week", 1).then((m) => label(m, TAG_TRENDING, "trending_series")),
-    tmdbMovieRow(key, "top_rated", "US", 1).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
-    tmdbMovieRow(key, "top_rated", "US", 2).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
-    tmdbMovieRow(key, "top_rated", "US", 3).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
+    tmdbMovieRow(key, "top_rated", "US", 1).then((m) =>
+      label(m, TAG_TOP_RATED, "top_rated_movies"),
+    ),
+    tmdbMovieRow(key, "top_rated", "US", 2).then((m) =>
+      label(m, TAG_TOP_RATED, "top_rated_movies"),
+    ),
+    tmdbMovieRow(key, "top_rated", "US", 3).then((m) =>
+      label(m, TAG_TOP_RATED, "top_rated_movies"),
+    ),
     tmdbMovieRow(key, "popular", "US", 1).then((m) => label(m, TAG_TRENDING, "popular_movies")),
     tmdbSeriesRow(key, "top_rated", 1).then((m) => label(m, TAG_SERIES, "top_rated_series")),
     tmdbSeriesRow(key, "top_rated", 2).then((m) => label(m, TAG_SERIES, "top_rated_series")),
-    tmdbDiscover(key, "movie", hiddenGemParams("1")).then((m) => label(m, TAG_HIDDEN_GEM, "hidden_gems")),
-    tmdbDiscover(key, "movie", hiddenGemParams("2")).then((m) => label(m, TAG_HIDDEN_GEM, "hidden_gems")),
+    tmdbDiscover(key, "movie", hiddenGemParams("1")).then((m) =>
+      label(m, TAG_HIDDEN_GEM, "hidden_gems"),
+    ),
+    tmdbDiscover(key, "movie", hiddenGemParams("2")).then((m) =>
+      label(m, TAG_HIDDEN_GEM, "hidden_gems"),
+    ),
     tmdbDiscover(key, "movie", acclaimedParams()).then((m) => label(m, TAG_ACCLAIMED, "acclaimed")),
     tmdbDiscover(key, "movie", cultParams()).then((m) => label(m, TAG_CULT, "cult_classics")),
     ...genres.map((g) =>

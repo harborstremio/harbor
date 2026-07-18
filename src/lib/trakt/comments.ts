@@ -95,9 +95,9 @@ export async function fetchComments(
 }
 
 export async function fetchReplies(commentId: number): Promise<TraktComment[]> {
-  const raw = await traktRequest<RawComment[]>(`/comments/${commentId}/replies?extended=images`).catch(
-    () => [] as RawComment[],
-  );
+  const raw = await traktRequest<RawComment[]>(
+    `/comments/${commentId}/replies?extended=images`,
+  ).catch(() => [] as RawComment[]);
   return raw.map(mapComment);
 }
 
@@ -113,12 +113,13 @@ export async function deleteComment(id: number): Promise<void> {
   await traktRequest(`/comments/${id}`, { method: "DELETE", authed: true });
 }
 
-
 function subjectBody(target: TraktTarget) {
   const ids: Record<string, string | number> = {};
-  const src = target.kind === "episode"
-    ? (target as { ids?: { tmdb?: number; imdb?: string } }).ids ?? (target as { show: { ids: { tmdb?: number; imdb?: string } } }).show.ids
-    : target.ids;
+  const src =
+    target.kind === "episode"
+      ? ((target as { ids?: { tmdb?: number; imdb?: string } }).ids ??
+        (target as { show: { ids: { tmdb?: number; imdb?: string } } }).show.ids)
+      : target.ids;
   if (src.tmdb) ids.tmdb = src.tmdb;
   if (src.imdb) ids.imdb = src.imdb;
   const key = target.kind === "episode" ? "episode" : target.kind;
@@ -185,11 +186,15 @@ export async function getUserRating(target: TraktTarget): Promise<number | null>
   if (!session?.accessToken) return null;
 
   const epIds = (target as { ids?: TraktIds }).ids;
-  const itemId = target.kind === "episode" ? (epIds?.tmdb ?? epIds?.imdb) : (target.ids?.tmdb ?? target.ids?.imdb);
+  const itemId =
+    target.kind === "episode"
+      ? (epIds?.tmdb ?? epIds?.imdb)
+      : (target.ids?.tmdb ?? target.ids?.imdb);
   if (!itemId) return null;
 
   const param = typeof itemId === "number" ? `tmdb=${itemId}` : `imdb=${itemId}`;
-  const type = target.kind === "movie" ? "movies" : target.kind === "episode" ? "episodes" : "shows";
+  const type =
+    target.kind === "movie" ? "movies" : target.kind === "episode" ? "episodes" : "shows";
 
   try {
     const res = await fetch(`${TRAKT_API_BASE}/sync/ratings/${type}?${param}`, {

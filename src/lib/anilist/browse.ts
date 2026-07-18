@@ -162,7 +162,10 @@ export async function anilistArtById(id: number): Promise<{ banner?: string; cov
   if (cached) return cached;
   try {
     const data = await anilistRequest<{
-      Media: { bannerImage: string | null; coverImage: { extraLarge: string | null } | null } | null;
+      Media: {
+        bannerImage: string | null;
+        coverImage: { extraLarge: string | null } | null;
+      } | null;
     }>(ART_BY_ID_QUERY, { id }, undefined, true);
     const art = {
       banner: data?.Media?.bannerImage ?? undefined,
@@ -244,7 +247,9 @@ export async function anilistRecommendations(anilistId: number): Promise<Meta[]>
   if (cached) return cached;
   try {
     const data = await anilistRequest<{
-      Media: { recommendations: { nodes: Array<{ mediaRecommendation: AnilistMedia | null }> } | null } | null;
+      Media: {
+        recommendations: { nodes: Array<{ mediaRecommendation: AnilistMedia | null }> } | null;
+      } | null;
     }>(RECS_QUERY, { id: anilistId }, undefined, true);
     const out: Meta[] = [];
     const seen = new Set<string>();

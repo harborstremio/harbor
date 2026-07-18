@@ -27,7 +27,10 @@ function DecisionLine({ data }: { data: PreviewData }) {
   if (data.genre) parts.push(<span key="genre">{data.genre}</span>);
   if (parts.length === 0) return null;
   return (
-    <div data-stagger="1" className="truncate text-[12.5px] font-medium tabular-nums text-ink-muted">
+    <div
+      data-stagger="1"
+      className="truncate text-[12.5px] font-medium tabular-nums text-ink-muted"
+    >
       {parts.flatMap((p, i) =>
         i === 0
           ? [p]
@@ -56,7 +59,13 @@ function WatchlistToggle({ data }: { data: PreviewData }) {
       onPointerDown={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.stopPropagation();
-        toggleWatchlist({ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster, imdbId: alt ?? undefined });
+        toggleWatchlist({
+          id: meta.id,
+          type: meta.type,
+          name: meta.name,
+          poster: meta.poster,
+          imdbId: alt ?? undefined,
+        });
       }}
       className="flex h-7 w-7 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 hover:bg-raised hover:text-ink"
     >

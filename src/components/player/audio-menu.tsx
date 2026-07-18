@@ -269,11 +269,11 @@ function DelayRow({
       }`}
     >
       <div className="flex items-center justify-between">
-        <span className="text-[12px] font-semibold text-ink">
-          {tr("Sync Offset")}
-        </span>
+        <span className="text-[12px] font-semibold text-ink">{tr("Sync Offset")}</span>
         <div className="flex items-center gap-2">
-          <span className={`font-mono text-[13px] font-bold tabular-nums ${delay !== 0 ? "text-accent" : "text-ink-muted"}`}>
+          <span
+            className={`font-mono text-[13px] font-bold tabular-nums ${delay !== 0 ? "text-accent" : "text-ink-muted"}`}
+          >
             {delay > 0 ? "+" : ""}
             {delay.toFixed(2)}s
           </span>
@@ -288,7 +288,7 @@ function DelayRow({
           )}
         </div>
       </div>
-      
+
       <div className="flex items-stretch overflow-hidden rounded-lg bg-raised">
         <button
           disabled={disabled}
@@ -309,4 +309,3 @@ function DelayRow({
     </div>
   );
 }
-

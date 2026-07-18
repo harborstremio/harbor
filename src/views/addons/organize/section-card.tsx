@@ -136,7 +136,12 @@ function OrganizeRow({
       >
         <GripVertical size={18} strokeWidth={2.2} />
       </span>
-      <AddonLogo addonId={entry.addonId} addonName={entry.name} manifestLogo={entry.logo} size="lg" />
+      <AddonLogo
+        addonId={entry.addonId}
+        addonName={entry.name}
+        manifestLogo={entry.logo}
+        size="lg"
+      />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="truncate text-[15px] font-medium text-ink">{entry.name}</span>
         <span className="truncate text-[12px] text-ink-subtle">{entry.host}</span>

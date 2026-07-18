@@ -148,7 +148,10 @@ export function directStreamAvailable(stream: { infoHash?: string | null }): boo
 
 const P2P_MIN_SEEDERS = 2;
 
-export function engineP2pEligible(stream: { infoHash?: string | null; seeders?: number | null }): boolean {
+export function engineP2pEligible(stream: {
+  infoHash?: string | null;
+  seeders?: number | null;
+}): boolean {
   if (torrentsDisabled()) return false;
   if (!directStreamAvailable(stream)) return false;
   if (stream.seeders != null && stream.seeders < P2P_MIN_SEEDERS) return false;

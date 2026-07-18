@@ -244,8 +244,7 @@ export function GuideView({
                   {programs.map((p) => {
                     const clip = clampDuration(p.startMs, p.endMs, windowStart, windowEnd);
                     if (!clip) return null;
-                    const replayable =
-                      p.endMs <= nowMs && !!onPlayCatchup && channelHasCatchup(ch);
+                    const replayable = p.endMs <= nowMs && !!onPlayCatchup && channelHasCatchup(ch);
                     return (
                       <GuideProgramBlock
                         key={`${p.startMs}-${p.endMs}-${p.title}`}
@@ -255,9 +254,7 @@ export function GuideView({
                         rowHeight={ROW_HEIGHT_PX}
                         nowMs={nowMs}
                         replayable={replayable}
-                        onClick={() =>
-                          replayable ? onPlayCatchup!(ch, p) : onPlay(ch)
-                        }
+                        onClick={() => (replayable ? onPlayCatchup!(ch, p) : onPlay(ch))}
                       />
                     );
                   })}
@@ -302,10 +299,13 @@ export function GuideView({
         </div>
       ) : allChannels.length > channels.length ? (
         <div className="mx-6 mt-3 mb-2 rounded-xl border border-edge-soft/55 bg-elevated/60 px-4 py-2.5 text-center text-[12px] text-ink-subtle">
-          {t("Showing first {shown} of {total} channels. Use search or a category to narrow down.", {
-            shown: channels.length.toLocaleString(),
-            total: allChannels.length.toLocaleString(),
-          })}
+          {t(
+            "Showing first {shown} of {total} channels. Use search or a category to narrow down.",
+            {
+              shown: channels.length.toLocaleString(),
+              total: allChannels.length.toLocaleString(),
+            },
+          )}
         </div>
       ) : null}
       {matchTarget && epg && (

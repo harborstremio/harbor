@@ -41,7 +41,9 @@ export function useDrawMode(params: {
     }
   };
   const onDrawPoint = (id: string, x: number, y: number) => {
-    setStrokes((prev) => prev.map((s) => (s.id === id ? { ...s, points: [...s.points, { x, y }] } : s)));
+    setStrokes((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, points: [...s.points, { x, y }] } : s)),
+    );
     if (inRoom) sendDraw(id, "point", topPath, x, y);
   };
   const onDrawEnd = (id: string) => {
@@ -63,7 +65,8 @@ export function useDrawMode(params: {
         return;
       }
       if (e.x == null || e.y == null) {
-        if (e.phase === "end") setStrokes((prev) => prev.filter((s) => Date.now() - s.bornAt < STROKE_GC_MS));
+        if (e.phase === "end")
+          setStrokes((prev) => prev.filter((s) => Date.now() - s.bornAt < STROKE_GC_MS));
         return;
       }
       const point = { x: e.x, y: e.y };

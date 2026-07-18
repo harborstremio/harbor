@@ -15,11 +15,7 @@ name = "rust_cast"
 version = "0.20.0"
 authors = ["Aleh Zasypkin <aleh.zasypkin@gmail.com>"]
 build = "build.rs"
-exclude = [
-    ".github/*",
-    "examples/*",
-    "protobuf/*",
-]
+exclude = [".github/*", "examples/*", "protobuf/*"]
 autolib = false
 autobins = false
 autoexamples = false
@@ -29,16 +25,8 @@ description = "Library that allows you to communicate with Google Cast enabled d
 homepage = "https://github.com/azasypkin/rust-cast"
 documentation = "https://docs.rs/crate/rust_cast/"
 readme = "README.md"
-keywords = [
-    "cast",
-    "chromecast",
-    "google",
-]
-categories = [
-    "api-bindings",
-    "hardware-support",
-    "multimedia",
-]
+keywords = ["cast", "chromecast", "google"]
+categories = ["api-bindings", "hardware-support", "multimedia"]
 license = "MIT"
 repository = "https://github.com/azasypkin/rust-cast"
 

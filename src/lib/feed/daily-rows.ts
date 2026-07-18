@@ -3,7 +3,12 @@ import type { Affinity } from "@/lib/discover/types";
 import type { Settings, StreamingService } from "@/lib/settings";
 import type { ShelfMeta } from "@/components/feed-shelf";
 import { CATALOG, type ExpandedRow } from "./daily-rows-catalog";
-import { ANCHOR_AWARDS, ANCHOR_TOP_RATED, ANCHOR_TRENDING, ROTATING_ANCHORS } from "./daily-rows-anchors";
+import {
+  ANCHOR_AWARDS,
+  ANCHOR_TOP_RATED,
+  ANCHOR_TRENDING,
+  ROTATING_ANCHORS,
+} from "./daily-rows-anchors";
 import { fetchRowWithFallback } from "./daily-rows-select";
 import { dayIndex, mixSeed, mulberry32 } from "./tags";
 import { fallbackShelves } from "./themes";
@@ -66,7 +71,9 @@ function expandCandidates(affinity: Affinity, base: number, settings: Settings):
       if (seen.has(row.key)) continue;
       seen.add(row.key);
       const standard = STANDARD_ANCHORS.has(row.key.split(":")[0]);
-      const pageBase = standard ? 1 : 1 + Math.floor(mulberry32(mixSeed(base, hashStr(row.key)))() * 3);
+      const pageBase = standard
+        ? 1
+        : 1 + Math.floor(mulberry32(mixSeed(base, hashStr(row.key)))() * 3);
       out.push({ ...row, pageBase });
     }
   }
@@ -93,7 +100,10 @@ function orderRows(rows: ExpandedRow[], base: number, count: number): ExpandedRo
   const trending = rows.find((r) => r.key.startsWith(`${ANCHOR_TRENDING}:`));
   const topRated = rows.find((r) => r.key.startsWith(`${ANCHOR_TOP_RATED}:`));
   const award = rows.find((r) => r.key.startsWith(`${ANCHOR_AWARDS}:`));
-  const rotatingId = ROTATING_ANCHORS[Math.floor(mulberry32(mixSeed(base, ANCHOR_SALT))() * ROTATING_ANCHORS.length)];
+  const rotatingId =
+    ROTATING_ANCHORS[
+      Math.floor(mulberry32(mixSeed(base, ANCHOR_SALT))() * ROTATING_ANCHORS.length)
+    ];
   const closing = rows.find((r) => r.key.startsWith(`${rotatingId}:`));
   const pinnedKeys = new Set<string>();
   if (trending) pinnedKeys.add(trending.key);

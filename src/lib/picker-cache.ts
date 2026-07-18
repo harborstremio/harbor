@@ -48,14 +48,19 @@ export function setPickerCache(
 ): void {
   if (result.picker.all.length === 0) return;
   const stripped: StoredResult = { picker: result.picker, rejected: result.rejected.slice(0, 60) };
-  lruSet(cache, entryKey(meta, episode), {
-    meta,
-    episode,
-    result: stripped,
-    fetchedAt: Date.now(),
-    configHash,
-    complete,
-  }, MAX_ENTRIES);
+  lruSet(
+    cache,
+    entryKey(meta, episode),
+    {
+      meta,
+      episode,
+      result: stripped,
+      fetchedAt: Date.now(),
+      configHash,
+      complete,
+    },
+    MAX_ENTRIES,
+  );
   notify();
 }
 

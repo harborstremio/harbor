@@ -199,7 +199,12 @@ export function QualityFilterMenu({
   setQualityFilter: (q: QualityKey) => void;
   open: boolean;
   setOpen: (fn: (v: boolean) => boolean) => void;
-  qualityOptions: Array<{ id: Exclude<QualityKey, "all">; name: string; count: number; badge: BadgeKind }>;
+  qualityOptions: Array<{
+    id: Exclude<QualityKey, "all">;
+    name: string;
+    count: number;
+    badge: BadgeKind;
+  }>;
   totalCount: number;
 }) {
   const t = useT();
@@ -218,7 +223,10 @@ export function QualityFilterMenu({
         {qualityFilter === "all" ? (
           <Gauge size={13} strokeWidth={2.2} />
         ) : (
-          <FormatBadge kind={QUALITY_BADGE[qualityFilter as Exclude<QualityKey, "all">]} size="sm" />
+          <FormatBadge
+            kind={QUALITY_BADGE[qualityFilter as Exclude<QualityKey, "all">]}
+            size="sm"
+          />
         )}
         <span className="max-w-[120px] truncate">
           {qualityFilter === "all"

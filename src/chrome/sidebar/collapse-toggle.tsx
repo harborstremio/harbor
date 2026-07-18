@@ -22,7 +22,9 @@ export function CollapseToggle({ collapsed }: { collapsed: boolean }) {
       ) : (
         <PanelLeftClose size={17} strokeWidth={1.8} className="dir-icon" />
       )}
-      {!collapsed && <span className="hidden text-[13px] font-medium lg:inline">{t("Collapse")}</span>}
+      {!collapsed && (
+        <span className="hidden text-[13px] font-medium lg:inline">{t("Collapse")}</span>
+      )}
     </button>
   );
 }

@@ -153,7 +153,9 @@ export function AnilistTab() {
       <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-8 py-16 text-center">
         <h2 className="text-[16px] font-semibold text-ink">{t("Your AniList is empty")}</h2>
         <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Add anime to your AniList and they show up here, grouped by status and ready to edit.")}
+          {t(
+            "Add anime to your AniList and they show up here, grouped by status and ready to edit.",
+          )}
         </p>
       </div>
     );

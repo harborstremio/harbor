@@ -80,7 +80,9 @@ export function usePickHandler({
 }) {
   const [queuedHash, setQueuedHash] = useState<string | null>(null);
   const [debridDown, setDebridDown] = useState(false);
-  const [p2pConfirm, setP2pConfirm] = useState<{ stream: ScoredStream; forceP2p?: boolean } | null>(null);
+  const [p2pConfirm, setP2pConfirm] = useState<{ stream: ScoredStream; forceP2p?: boolean } | null>(
+    null,
+  );
   const debridFailStreakRef = useRef(0);
   const resolveAcRef = useRef<AbortController | null>(null);
   const autoPickRef = useRef(false);
@@ -121,7 +123,9 @@ export function usePickHandler({
     resolveAcRef.current = ac;
     let opened = false;
     try {
-      const hint = episode ? { season: episode.season ?? null, episode: episode.episode ?? null } : undefined;
+      const hint = episode
+        ? { season: episode.season ?? null, episode: episode.episode ?? null }
+        : undefined;
       const r = await resolveStream(stream, debrids, ac.signal, userCommitted, forceP2p, hint);
       if (ac.signal.aborted) return;
       if (!r.ok) {
@@ -158,7 +162,8 @@ export function usePickHandler({
         } catch (e) {
           setFailedStreams((prev) => new Set(prev).add(stream));
           const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
-          if (!willRetry) setResolveError("Could not start the local stream proxy. Pick another stream.");
+          if (!willRetry)
+            setResolveError("Could not start the local stream proxy. Pick another stream.");
           advanceAuto();
           return;
         }
@@ -185,7 +190,9 @@ export function usePickHandler({
         const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
         advanceAuto();
         if (!willRetry && !autoActive) {
-          setResolveError("This source isn't ready on your debrid yet. Try it again in a moment or pick another.");
+          setResolveError(
+            "This source isn't ready on your debrid yet. Try it again in a moment or pick another.",
+          );
         }
         return;
       }
@@ -197,7 +204,13 @@ export function usePickHandler({
           stream.name ||
           stream.addonName ||
           null;
-        void enqueueDownload({ meta, episode, streamLabel: label, url: r.data.url, headers: r.data.headers });
+        void enqueueDownload({
+          meta,
+          episode,
+          streamLabel: label,
+          url: r.data.url,
+          headers: r.data.headers,
+        });
         opened = true;
         setResolving(null);
         onDownloadStarted?.(label);
@@ -363,5 +376,15 @@ export function usePickHandler({
     sameSourceRetryRef.current = 0;
   };
 
-  return { onPlay, onCache, queuedHash, debridDown, resetDebridDown, abortResolve, p2pConfirm, confirmP2p, cancelP2p };
+  return {
+    onPlay,
+    onCache,
+    queuedHash,
+    debridDown,
+    resetDebridDown,
+    abortResolve,
+    p2pConfirm,
+    confirmP2p,
+    cancelP2p,
+  };
 }

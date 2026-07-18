@@ -84,7 +84,17 @@ function toLibraryItem(raw: RawSession): LibraryItem | null {
   if (!raw.show && !raw.episode && raw.anime) {
     const movieId = movieMetaId(raw.anime.ids);
     if (movieId) {
-      return buildItem(movieId, "movie", raw.anime, pct, DURATION_MS.movie, when, undefined, undefined, true);
+      return buildItem(
+        movieId,
+        "movie",
+        raw.anime,
+        pct,
+        DURATION_MS.movie,
+        when,
+        undefined,
+        undefined,
+        true,
+      );
     }
   }
 

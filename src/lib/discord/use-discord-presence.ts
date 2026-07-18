@@ -8,7 +8,12 @@ import { awardTypeLabel } from "@/lib/providers/wikidata";
 import { awardSourceMeta } from "@/lib/anime-awards";
 import { tmdbPerson, tmdbPersonCached } from "@/lib/providers/tmdb/tmdb-people";
 import type { Meta } from "@/lib/cinemeta";
-import { configureDiscord, setBrowsePresence, setPartyPresence, type BrowsePresence } from "./presence";
+import {
+  configureDiscord,
+  setBrowsePresence,
+  setPartyPresence,
+  type BrowsePresence,
+} from "./presence";
 import { useActivityHint } from "./activity-hint";
 
 const JOIN_BASE = "https://app.harbor.site";
@@ -65,7 +70,8 @@ function filterBrowse(f: MetaFilter): BrowsePresence {
   const media = f.mediaType === "movie" ? "movies" : "shows";
   if (f.kind === "year") return { details: `Browsing ${f.value} ${media}` };
   if (f.kind === "runtime") return { details: `Browsing ${media} around ${f.value} min` };
-  if (f.kind === "country") return { details: `Browsing ${media} from ${f.name}`, largeText: f.name };
+  if (f.kind === "country")
+    return { details: `Browsing ${media} from ${f.name}`, largeText: f.name };
   return { details: `Browsing ${f.name} ${media}`, largeText: f.name };
 }
 

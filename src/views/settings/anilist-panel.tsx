@@ -23,7 +23,9 @@ export function AnilistPanel() {
               {t("Connect your AniList account")}
             </h2>
             <p className="text-[13.5px] leading-relaxed text-ink-muted">
-              {t("Show your AniList lists as rails on the Anime page, keep your watch progress in sync as you finish episodes, and use your AniList avatar as your Harbor photo. Free at anilist.co.")}
+              {t(
+                "Show your AniList lists as rails on the Anime page, keep your watch progress in sync as you finish episodes, and use your AniList avatar as your Harbor photo. Free at anilist.co.",
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -46,7 +48,9 @@ export function AnilistPanel() {
       ) : (
         <Section
           title={t("Connected")}
-          subtitle={t("Harbor shows your AniList lists on the Anime page and keeps your progress in sync.")}
+          subtitle={t(
+            "Harbor shows your AniList lists on the Anime page and keeps your progress in sync.",
+          )}
         >
           <div className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
             <div className="flex items-center gap-3">
@@ -72,9 +76,7 @@ export function AnilistPanel() {
             </div>
             {userName && (
               <button
-                onClick={() =>
-                  openUrl(`https://anilist.co/user/${encodeURIComponent(userName)}`)
-                }
+                onClick={() => openUrl(`https://anilist.co/user/${encodeURIComponent(userName)}`)}
                 className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Open profile")}
@@ -84,7 +86,9 @@ export function AnilistPanel() {
           </div>
           <ToggleRow
             label={t("Sync watch progress")}
-            sub={t("Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.")}
+            sub={t(
+              "Finishing an anime episode updates your AniList progress. Forward only: it never lowers a count you already have.",
+            )}
             value={settings.anilistAutoSync}
             onChange={(v) => update({ anilistAutoSync: v })}
           />
@@ -102,7 +106,9 @@ export function AnilistPanel() {
           />
           <ToggleRow
             label={t("Blur comments by default")}
-            sub={t("Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.")}
+            sub={t(
+              "Comments on anime pages are blurred until you reveal them, even if they are not tagged as spoilers.",
+            )}
             value={!!settings.anilistBlurComments}
             onChange={(on) => update({ anilistBlurComments: on })}
           />
@@ -117,7 +123,9 @@ export function AnilistPanel() {
           ) : (
             <div className="flex items-center justify-between gap-3 rounded-lg border border-red-400/30 bg-red-400/5 p-3">
               <span className="text-[12.5px] text-red-200">
-                {t("Disconnect AniList? Your lists will stop showing on the Anime page until you reconnect.")}
+                {t(
+                  "Disconnect AniList? Your lists will stop showing on the Anime page until you reconnect.",
+                )}
               </span>
               <div className="flex items-center gap-2">
                 <button
@@ -147,7 +155,10 @@ export function AnilistPanel() {
   );
 }
 
-function sessionAge(t: (key: string, vars?: Record<string, string | number>) => string, createdAt?: number): string {
+function sessionAge(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  createdAt?: number,
+): string {
   if (!createdAt) return "";
   const days = Math.floor((Date.now() - createdAt) / 86400000);
   if (days < 1) return t("today");

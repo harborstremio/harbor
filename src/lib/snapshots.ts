@@ -248,7 +248,11 @@ export async function captureMpvFrame(fullQuality = false): Promise<string | nul
   }
 }
 
-async function downscaleDataUrl(dataUrl: string, targetW: number, quality: number): Promise<string | null> {
+async function downscaleDataUrl(
+  dataUrl: string,
+  targetW: number,
+  quality: number,
+): Promise<string | null> {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {

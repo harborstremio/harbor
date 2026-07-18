@@ -46,7 +46,10 @@ export function KidsDetailView({
   const backdrop = detail?.backdrop || base?.background || meta.background || meta.poster;
   const logo = detail?.logo || base?.logo || meta.logo;
   const overview =
-    detail?.overview || base?.description || (meta.id.startsWith("tmdb:") ? "" : meta.description) || "";
+    detail?.overview ||
+    base?.description ||
+    (meta.id.startsWith("tmdb:") ? "" : meta.description) ||
+    "";
   const genres = (detail?.genres?.length ? detail.genres : base?.genres) ?? [];
   const runtime = detail?.runtime;
   const year = meta.releaseInfo || base?.releaseInfo;
@@ -106,7 +109,9 @@ export function KidsDetailView({
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/25 transition-transform duration-200 group-hover:rotate-6">
               <Play size={26} strokeWidth={0} fill="currentColor" className="ms-0.5" />
             </span>
-            <span className="font-display text-[22px] font-extrabold tracking-tight">{t("Play")}</span>
+            <span className="font-display text-[22px] font-extrabold tracking-tight">
+              {t("Play")}
+            </span>
           </button>
         </div>
       </section>
@@ -118,14 +123,10 @@ export function KidsDetailView({
         {meta.type === "series" && detail && detail.seasons.length > 0 && (
           <KidsEpisodes meta={meta} tvId={detail.id} seasons={detail.seasons} />
         )}
-        {detail?.collection && (
-          <CollectionRow collection={detail.collection} currentId={meta.id} />
-        )}
+        {detail?.collection && <CollectionRow collection={detail.collection} currentId={meta.id} />}
         {recs.length > 0 && (
           <Row
-            title={
-              <span className="font-display text-[#0e3a43]">{t("More to explore")}</span>
-            }
+            title={<span className="font-display text-[#0e3a43]">{t("More to explore")}</span>}
             titleClassName="text-[#0e3a43]"
             titleScale={1.28}
             min={148}

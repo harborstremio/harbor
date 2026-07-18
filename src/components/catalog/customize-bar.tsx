@@ -13,8 +13,9 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
   const t = useT();
   return (
     <>
-      {editMode && hasChanges && (
-        kids ? (
+      {editMode &&
+        hasChanges &&
+        (kids ? (
           <button
             onClick={onReset}
             className="flex h-12 items-center gap-2 rounded-full bg-amber-400 px-5 text-[15px] font-extrabold text-[#0e3a43] shadow-[0_8px_20px_-8px_rgba(180,120,0,0.5)] transition-transform hover:scale-105 active:scale-95"
@@ -30,8 +31,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
             <RotateCcw size={12} strokeWidth={2.2} />
             {t("Reset")}
           </button>
-        )
-      )}
+        ))}
       {kids ? (
         editMode ? (
           <button

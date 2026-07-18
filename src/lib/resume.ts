@@ -26,12 +26,7 @@ function writeAll(all: Record<string, Entry>): void {
   }
 }
 
-export function saveResumeMs(
-  id: string,
-  ms: number,
-  season?: number,
-  episode?: number,
-): void {
+export function saveResumeMs(id: string, ms: number, season?: number, episode?: number): void {
   if (!Number.isFinite(ms) || ms < 0) return;
   if (typeof season === "number" && typeof episode === "number") {
     if (season < 0 || episode < 1) return;
@@ -57,11 +52,7 @@ export function saveResumeBatch(
   writeAll(all);
 }
 
-export function readResumeMs(
-  id: string,
-  season?: number,
-  episode?: number,
-): number {
+export function readResumeMs(id: string, season?: number, episode?: number): number {
   const all = readAll();
   return all[entryKey(id, season, episode)]?.ms ?? 0;
 }

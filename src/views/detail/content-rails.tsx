@@ -75,7 +75,9 @@ function RailControls({
   const t = useT();
   return (
     <div className="flex items-center gap-2 rounded-xl border border-edge-soft bg-elevated/40 px-3 py-2">
-      <span className={`flex-1 truncate text-[13px] font-semibold ${hidden ? "text-ink-subtle" : "text-ink"}`}>
+      <span
+        className={`flex-1 truncate text-[13px] font-semibold ${hidden ? "text-ink-subtle" : "text-ink"}`}
+      >
         {label}
       </span>
       <button

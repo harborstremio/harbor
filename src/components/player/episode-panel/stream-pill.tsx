@@ -13,7 +13,8 @@ export function StreamPill({
 }) {
   const t = useT();
   void cached;
-  const headline = stream.name?.trim() || stream.parsedTitle || stream.title || stream.addonName || t("Source");
+  const headline =
+    stream.name?.trim() || stream.parsedTitle || stream.title || stream.addonName || t("Source");
   const description = stream.title?.trim() || stream.description?.trim() || "";
   const badges = streamBadges(stream);
   return (

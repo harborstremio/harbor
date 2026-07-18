@@ -185,7 +185,13 @@ export function FloatingInspector({
 
         <Group label={control.hidden ? "Hidden" : "Visible"}>
           <IconBtn
-            icon={control.hidden ? <EyeOff size={14} strokeWidth={2.3} /> : <Eye size={14} strokeWidth={2.3} />}
+            icon={
+              control.hidden ? (
+                <EyeOff size={14} strokeWidth={2.3} />
+              ) : (
+                <Eye size={14} strokeWidth={2.3} />
+              )
+            }
             onClick={onToggleHidden}
             variant={control.hidden ? "active" : "default"}
             title={control.hidden ? "Show this control" : "Hide this control"}
@@ -367,7 +373,13 @@ function PanelInspector({
 
         <Group label={cfg.hidden ? "Hidden" : "Visible"}>
           <IconBtn
-            icon={cfg.hidden ? <EyeOff size={14} strokeWidth={2.3} /> : <Eye size={14} strokeWidth={2.3} />}
+            icon={
+              cfg.hidden ? (
+                <EyeOff size={14} strokeWidth={2.3} />
+              ) : (
+                <Eye size={14} strokeWidth={2.3} />
+              )
+            }
             onClick={() => onToggleHidden(panelId)}
             variant={cfg.hidden ? "active" : "default"}
             title={cfg.hidden ? "Show this panel" : "Hide this panel"}

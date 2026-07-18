@@ -143,7 +143,14 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
   }, []);
 
   const reset = useCallback(() => {
-    setState((prev) => ({ ...prev, points: [], nudge: 0, segments: [], rangeStart: null, rangeEnd: null }));
+    setState((prev) => ({
+      ...prev,
+      points: [],
+      nudge: 0,
+      segments: [],
+      rangeStart: null,
+      rangeEnd: null,
+    }));
   }, []);
 
   const seekTo = useCallback((cueIndex: number) => {
@@ -174,12 +181,22 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
       const path = await writeTemp(text, cur.sourceFormat, `synced-${Date.now()}`);
       let applied = false;
       if (path) {
-        const ok = await b?.addSubtitle(path, undefined, `Synced (${cur.sourceFormat.toUpperCase()})`, true);
+        const ok = await b?.addSubtitle(
+          path,
+          undefined,
+          `Synced (${cur.sourceFormat.toUpperCase()})`,
+          true,
+        );
         applied = ok === true;
       }
       if (!applied) {
         const { downloadText } = await import("@/lib/download-text");
-        const saved = await downloadText(`subtitle.synced.${cur.sourceFormat}`, text, [cur.sourceFormat], "Subtitle");
+        const saved = await downloadText(
+          `subtitle.synced.${cur.sourceFormat}`,
+          text,
+          [cur.sourceFormat],
+          "Subtitle",
+        );
         if (!saved) return { ok: false, reason: "save-cancelled" };
       }
       b?.setSubDelay(0);
@@ -191,7 +208,8 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
     }
   }, [exit]);
 
-  const dirty = state.points.length > 0 || state.nudge !== state.baseOffset || state.segments.length > 0;
+  const dirty =
+    state.points.length > 0 || state.nudge !== state.baseOffset || state.segments.length > 0;
 
   return {
     ...state,

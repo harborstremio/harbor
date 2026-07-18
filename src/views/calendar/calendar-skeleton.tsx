@@ -3,12 +3,8 @@ import { useSettings } from "@/lib/settings";
 import { orderedWeekdayNames } from "./utils";
 
 const CHIPS_PER_CELL = [
-  2, 0, 1, 3, 0, 1, 0,
-  2, 1, 0, 0, 2, 1, 3,
-  0, 1, 0, 2, 0, 1, 2,
-  0, 1, 0, 3, 1, 0, 2,
-  0, 1, 0, 2, 1, 0, 1,
-  0, 2, 0, 1, 3, 0, 1,
+  2, 0, 1, 3, 0, 1, 0, 2, 1, 0, 0, 2, 1, 3, 0, 1, 0, 2, 0, 1, 2, 0, 1, 0, 3, 1, 0, 2, 0, 1, 0, 2, 1,
+  0, 1, 0, 2, 0, 1, 3, 0, 1,
 ];
 
 export function CalendarSkeleton() {

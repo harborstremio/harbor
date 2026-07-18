@@ -73,34 +73,51 @@ export function PickerEmptyLadder({
           action={{ label: "Open Library settings", onClick: onOpenLibrarySettings }}
         />
       )}
-      {addonsSettled && streamIds && streamIds.length > 0 && debridCount === 0 && allCount === 0 && (
-        <EmptyState
-          message="No playable streams turned up, and no debrid is configured. Real-Debrid, TorBox, AllDebrid, Premiumize, or Debrid-Link will unlock raw torrent results. Some addons bake debrid in (Sootio, Comet/ElfHosted, MediaFusion/ElfHosted) and play without your own keys."
-          action={{ label: "Set up a debrid", onClick: onOpenStreamingSettings }}
-        />
-      )}
-      {addonsSettled && streamIds && streamIds.length > 0 && allCount === 0 && debridCount > 0 && rawCount === 0 && (
-        <NoSourcesState
-          addonCount={addonCount}
-          streamIds={streamIds}
-          isAnime={meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:")}
-        />
-      )}
-      {addonsSettled && streamIds && streamIds.length > 0 && allCount === 0 && debridCount > 0 && rawCount > 0 && isStillInTheatres && (
-        <TheatresEmptyState
-          meta={meta}
-          onShowAll={onShowAll}
-          showingAll={forceShowAll}
-        />
-      )}
-      {addonsSettled && streamIds && streamIds.length > 0 && allCount === 0 && debridCount > 0 && rawCount > 0 && !isStillInTheatres && (
-        <FilteredOutState
-          rawCount={rawCount}
-          rejected={result?.rejected ?? []}
-          strictMode={strictMode || !forceShowAll}
-          onSearchWider={onSearchWider}
-        />
-      )}
+      {addonsSettled &&
+        streamIds &&
+        streamIds.length > 0 &&
+        debridCount === 0 &&
+        allCount === 0 && (
+          <EmptyState
+            message="No playable streams turned up, and no debrid is configured. Real-Debrid, TorBox, AllDebrid, Premiumize, or Debrid-Link will unlock raw torrent results. Some addons bake debrid in (Sootio, Comet/ElfHosted, MediaFusion/ElfHosted) and play without your own keys."
+            action={{ label: "Set up a debrid", onClick: onOpenStreamingSettings }}
+          />
+        )}
+      {addonsSettled &&
+        streamIds &&
+        streamIds.length > 0 &&
+        allCount === 0 &&
+        debridCount > 0 &&
+        rawCount === 0 && (
+          <NoSourcesState
+            addonCount={addonCount}
+            streamIds={streamIds}
+            isAnime={meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:")}
+          />
+        )}
+      {addonsSettled &&
+        streamIds &&
+        streamIds.length > 0 &&
+        allCount === 0 &&
+        debridCount > 0 &&
+        rawCount > 0 &&
+        isStillInTheatres && (
+          <TheatresEmptyState meta={meta} onShowAll={onShowAll} showingAll={forceShowAll} />
+        )}
+      {addonsSettled &&
+        streamIds &&
+        streamIds.length > 0 &&
+        allCount === 0 &&
+        debridCount > 0 &&
+        rawCount > 0 &&
+        !isStillInTheatres && (
+          <FilteredOutState
+            rawCount={rawCount}
+            rejected={result?.rejected ?? []}
+            strictMode={strictMode || !forceShowAll}
+            onSearchWider={onSearchWider}
+          />
+        )}
 
       {pipelineDone && allCount > 0 && allCount <= 2 && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] px-5 py-3.5 text-[13px] text-ink">

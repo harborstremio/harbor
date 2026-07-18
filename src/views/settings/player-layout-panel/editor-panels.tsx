@@ -58,11 +58,7 @@ function PanelMount({
 }) {
   const style = id === "episodes" ? episodeTabStyle(corner) : cornerStyle(corner);
   const radius =
-    id === "episodes"
-      ? isLeftCorner(corner)
-        ? "rounded-r-2xl"
-        : "rounded-l-2xl"
-      : "rounded-2xl";
+    id === "episodes" ? (isLeftCorner(corner) ? "rounded-r-2xl" : "rounded-l-2xl") : "rounded-2xl";
   return (
     <div
       data-panel-id={id}

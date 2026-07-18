@@ -71,7 +71,7 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
         if (localized) return localized;
       }
     }
-    const full = await fetchCinemeta(narrowMediaType(m.type),m.id);
+    const full = await fetchCinemeta(narrowMediaType(m.type), m.id);
     return full?.logo;
   }
   if (m.id.startsWith("tmdb:")) {
@@ -80,7 +80,7 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
       if (fromTmdb) return fromTmdb;
       const tt = await tmdbImdbId(tmdbKey, m.id);
       if (tt) {
-        const full = await fetchCinemeta(narrowMediaType(m.type),tt);
+        const full = await fetchCinemeta(narrowMediaType(m.type), tt);
         if (full?.logo) return full.logo;
       }
     }
@@ -106,7 +106,8 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
     let kitsuId = parseKitsuId(m.id);
     if (kitsuId == null && m.id.startsWith("mal:")) {
       const malId = Number(m.id.slice(4));
-      if (Number.isFinite(malId)) kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
+      if (Number.isFinite(malId))
+        kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
     }
     if (kitsuId != null) {
       const art = await fetchTvdbArtwork({ kitsuId }).catch(() => null);

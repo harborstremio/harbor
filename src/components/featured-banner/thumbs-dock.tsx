@@ -83,7 +83,9 @@ function ThumbsHint({ onDismiss }: { onDismiss: () => void }) {
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <p className="text-[13px] font-semibold text-ink">{t("Tune your recommendations")}</p>
           <p className="text-[12px] leading-snug text-ink-subtle">
-            {t("Thumbs down hides this title from Featured. Thumbs up helps surface similar picks.")}
+            {t(
+              "Thumbs down hides this title from Featured. Thumbs up helps surface similar picks.",
+            )}
           </p>
         </div>
         <button

@@ -60,7 +60,10 @@ type StickyMedia = {
   canToggleSubtitles: boolean;
 };
 
-function subtitleFlags(b: RemotePlaybackBinding): { subtitlesOn: boolean; canToggleSubtitles: boolean } {
+function subtitleFlags(b: RemotePlaybackBinding): {
+  subtitlesOn: boolean;
+  canToggleSubtitles: boolean;
+} {
   const casting = !!b.castDevice;
   const tracks = b.snap.subtitleTracks ?? [];
   return {
@@ -279,9 +282,7 @@ export function buildRemoteSnapshot(positionSec?: number): RemoteSnapshot {
   const playing = casting
     ? b.castPlaying
     : status === "playing" || status === "loading" || status === "ready";
-  const pos = casting
-    ? b.castPositionSec || positionSec || 0
-    : (positionSec ?? b.snap.positionSec);
+  const pos = casting ? b.castPositionSec || positionSec || 0 : (positionSec ?? b.snap.positionSec);
   const target: RemoteTarget = casting
     ? {
         kind: "cast",

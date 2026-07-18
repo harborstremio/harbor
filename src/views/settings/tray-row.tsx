@@ -56,7 +56,9 @@ export function TrayRow() {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[14px] font-medium text-ink">{t("Close to the system tray")}</span>
           <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Closing the window tucks Harbor into the tray instead of quitting, so it reopens instantly. Right-click the tray icon for quick controls, or pick Quit to exit fully.")}
+            {t(
+              "Closing the window tucks Harbor into the tray instead of quitting, so it reopens instantly. Right-click the tray icon for quick controls, or pick Quit to exit fully.",
+            )}
           </p>
         </div>
         <button

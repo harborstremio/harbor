@@ -61,10 +61,14 @@ export function useEpisodeNavigation(params: {
         setAdjacent({
           prev:
             r.prev ??
-            (localPrev ? { season: localPrev.season as number, episode: localPrev.episode as number } : null),
+            (localPrev
+              ? { season: localPrev.season as number, episode: localPrev.episode as number }
+              : null),
           next:
             r.next ??
-            (localNext ? { season: localNext.season as number, episode: localNext.episode as number } : null),
+            (localNext
+              ? { season: localNext.season as number, episode: localNext.episode as number }
+              : null),
         });
         return;
       }

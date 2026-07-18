@@ -176,7 +176,11 @@ export function CodePopout({
                 className="flex h-9 items-center gap-1.5 rounded-lg px-3 text-[13.5px] font-medium transition-colors hover:bg-white/10"
                 style={{ color: copied ? "#98c379" : IDE.textDim }}
               >
-                {copied ? <Check size={15} strokeWidth={2.6} /> : <Copy size={15} strokeWidth={2.2} />}
+                {copied ? (
+                  <Check size={15} strokeWidth={2.6} />
+                ) : (
+                  <Copy size={15} strokeWidth={2.2} />
+                )}
                 {copied ? "Copied" : "Copy"}
               </button>
               <button

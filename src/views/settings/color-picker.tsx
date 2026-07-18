@@ -37,7 +37,9 @@ export function ColorPicker({
               onClick={() => onChange(hex)}
               aria-label={hex}
               className={`relative h-7 w-7 rounded-full transition-transform ${
-                selected ? "scale-110 ring-2 ring-ink ring-offset-2 ring-offset-canvas" : "hover:scale-105"
+                selected
+                  ? "scale-110 ring-2 ring-ink ring-offset-2 ring-offset-canvas"
+                  : "hover:scale-105"
               }`}
               style={{ background: hex }}
             />
@@ -193,13 +195,7 @@ export function ColorPopoverTrigger({
   );
 }
 
-function CustomColorPanel({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (hex: string) => void;
-}) {
+function CustomColorPanel({ value, onChange }: { value: string; onChange: (hex: string) => void }) {
   const [hsv, setHsv] = useState(() => {
     const { r, g, b } = hexToRgb(value);
     return rgbToHsv(r, g, b);
@@ -211,7 +207,9 @@ function CustomColorPanel({
     const { r, g, b } = hexToRgb(value);
     const next = rgbToHsv(r, g, b);
     setHsv((prev) =>
-      Math.abs(prev.h - next.h) < 0.5 && Math.abs(prev.s - next.s) < 0.005 && Math.abs(prev.v - next.v) < 0.005
+      Math.abs(prev.h - next.h) < 0.5 &&
+      Math.abs(prev.s - next.s) < 0.005 &&
+      Math.abs(prev.v - next.v) < 0.005
         ? prev
         : next,
     );
@@ -327,7 +325,10 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
-  const c = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+  const c = (n: number) =>
+    Math.max(0, Math.min(255, Math.round(n)))
+      .toString(16)
+      .padStart(2, "0");
   return `#${c(r)}${c(g)}${c(b)}`;
 }
 

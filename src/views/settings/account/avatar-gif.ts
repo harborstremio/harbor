@@ -48,7 +48,10 @@ async function encodeGif(file: File, maxDim: number, maxFrames: number): Promise
     const { data: rgba } = ctx.getImageData(0, 0, w, h);
     const palette = quantize(rgba, 256);
     const index = applyPalette(rgba, palette);
-    enc.writeFrame(index, w, h, { palette, delay: Math.max(20, Math.round((durUs / 1000) * step)) });
+    enc.writeFrame(index, w, h, {
+      palette,
+      delay: Math.max(20, Math.round((durUs / 1000) * step)),
+    });
   }
   enc.finish();
   dec.close?.();

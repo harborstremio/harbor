@@ -37,7 +37,10 @@ export function isMobileDevice(): boolean {
   const ua = navigator.userAgent || "";
   if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini|iPad/i.test(ua)) return true;
   if (/Macintosh/i.test(ua) && (navigator.maxTouchPoints ?? 0) > 1) return true;
-  if ((navigator.maxTouchPoints ?? 0) > 0 && Math.min(window.innerWidth, window.innerHeight) < 640) {
+  if (
+    (navigator.maxTouchPoints ?? 0) > 0 &&
+    Math.min(window.innerWidth, window.innerHeight) < 640
+  ) {
     return true;
   }
   return false;

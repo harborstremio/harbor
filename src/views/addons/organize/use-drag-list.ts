@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type HTMLAttributes, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type HTMLAttributes,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 
 type ActiveDrag = { from: number; pointerId: number; y: number };
 

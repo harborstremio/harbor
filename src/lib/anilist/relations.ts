@@ -62,7 +62,12 @@ async function fetchEdges(anilistId: number): Promise<RawEdge[]> {
   const cached = edgeCache.get(anilistId);
   if (cached) return cached;
   try {
-    const data = await anilistRequest<RelationsResponse>(RELATIONS_QUERY, { id: anilistId }, undefined, true);
+    const data = await anilistRequest<RelationsResponse>(
+      RELATIONS_QUERY,
+      { id: anilistId },
+      undefined,
+      true,
+    );
     const edges = data?.Media?.relations?.edges ?? [];
     edgeCache.set(anilistId, edges);
     return edges;

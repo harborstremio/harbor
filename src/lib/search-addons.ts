@@ -41,7 +41,11 @@ export async function searchAddonCatalogs(
       const res = await safeFetch(url, { headers: { Accept: "application/json" } });
       if (!res.ok) return { type, metas: [] as Meta[], origin: addonOrigin(addon) };
       const json = (await res.json()) as { metas?: Meta[] };
-      return { type, metas: (json.metas ?? []).slice(0, CAP_PER_CATALOG), origin: addonOrigin(addon) };
+      return {
+        type,
+        metas: (json.metas ?? []).slice(0, CAP_PER_CATALOG),
+        origin: addonOrigin(addon),
+      };
     }),
   );
 
@@ -82,7 +86,10 @@ export type AddonResultGroup = {
 const MAX_GROUPS = 8;
 const CAP_PER_GROUP = 14;
 
-export async function searchAddonGroups(addons: Addon[], query: string): Promise<AddonResultGroup[]> {
+export async function searchAddonGroups(
+  addons: Addon[],
+  query: string,
+): Promise<AddonResultGroup[]> {
   const q = query.trim();
   if (!q) return [];
 

@@ -30,11 +30,11 @@ export function useFranchiseEpisodes(
       return;
     }
     let cancelled = false;
-    void Promise.all(otherIds.map((id) => fetchEntryEpisodes(id).catch(() => [] as KitsuEpisode[]))).then(
-      (lists) => {
-        if (!cancelled) setExtra(lists.flat());
-      },
-    );
+    void Promise.all(
+      otherIds.map((id) => fetchEntryEpisodes(id).catch(() => [] as KitsuEpisode[])),
+    ).then((lists) => {
+      if (!cancelled) setExtra(lists.flat());
+    });
     return () => {
       cancelled = true;
     };

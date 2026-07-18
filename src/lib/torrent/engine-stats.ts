@@ -12,10 +12,7 @@ export type EngineStats = {
   sawData: boolean;
 };
 
-export type StatsFetch =
-  | { kind: "ok"; stats: EngineStats }
-  | { kind: "empty" }
-  | { kind: "down" };
+export type StatsFetch = { kind: "ok"; stats: EngineStats } | { kind: "empty" } | { kind: "down" };
 
 const GENUINE_FAILURE_WINDOW_MS = 22_000;
 const COLD_CONNECT_DEADLINE_MS = 45_000;
@@ -114,7 +111,10 @@ export function readinessScore(s: EngineStats | null, isInfoHash: boolean): numb
   if (!s) return 0;
   const peers = s.unchoked > 0 ? s.unchoked : s.peers;
   const peerScore = Math.min(1, peers / 8) * 20;
-  const minDownload = Math.min(8 * 1024 * 1024, Math.max(2 * 1024 * 1024, (s.streamLen ?? 0) * 0.008));
+  const minDownload = Math.min(
+    8 * 1024 * 1024,
+    Math.max(2 * 1024 * 1024, (s.streamLen ?? 0) * 0.008),
+  );
   const downloadedScore = Math.min(1, s.downloaded / minDownload) * 70;
   const speedScore = Math.min(1, s.downloadSpeed / (1024 * 1024)) * 10;
   return Math.min(99, peerScore + downloadedScore + speedScore);

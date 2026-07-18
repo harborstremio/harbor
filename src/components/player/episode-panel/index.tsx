@@ -105,7 +105,14 @@ export function EpisodePanel({
     setResolvingFor(ep);
     try {
       const hint = { season: ep.season ?? null, episode: ep.episode ?? null };
-      const r = await resolveStream(stream, debrids, new AbortController().signal, true, false, hint);
+      const r = await resolveStream(
+        stream,
+        debrids,
+        new AbortController().signal,
+        true,
+        false,
+        hint,
+      );
       if (!r.ok) {
         setResolvingFor(null);
         return;
@@ -123,7 +130,7 @@ export function EpisodePanel({
       const skipPreflight = r.via === "p2p" || r.via === "direct";
       const preflight = skipPreflight
         ? ({ ok: true } as const)
-        : await preflightCheck(playUrl).catch(() => ({ ok: true } as const));
+        : await preflightCheck(playUrl).catch(() => ({ ok: true }) as const);
       if (!preflight.ok && preflight.reason === "stub") {
         setResolvingFor(null);
         return;
@@ -183,7 +190,9 @@ export function EpisodePanel({
         role="dialog"
         aria-label={t("Up next")}
         className={`absolute top-0 flex h-full w-full max-w-[440px] flex-col overflow-hidden bg-surface shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] transition-transform duration-300 ease-out ${
-          corner === "top-left" || corner === "bottom-left" ? "left-0 border-r border-edge-soft" : "right-0 border-l border-edge-soft"
+          corner === "top-left" || corner === "bottom-left"
+            ? "left-0 border-r border-edge-soft"
+            : "right-0 border-l border-edge-soft"
         } ${
           open
             ? "translate-x-0"

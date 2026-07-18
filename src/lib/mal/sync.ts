@@ -111,7 +111,9 @@ export async function syncMalProgress(
     const malId = await resolveMalMediaId(harborId);
     if (malId == null) return;
 
-    const cur = await malRequest<EntryResponse>(`/anime/${malId}?fields=num_episodes,my_list_status`);
+    const cur = await malRequest<EntryResponse>(
+      `/anime/${malId}?fields=num_episodes,my_list_status`,
+    );
 
     const current = cur?.my_list_status?.num_episodes_watched ?? 0;
     if (ep <= current) {

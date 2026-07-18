@@ -117,7 +117,12 @@ function MoreMenu({ entries, buttonClassName }: { entries: NavEntry[]; buttonCla
 
   return (
     <div ref={ref} className="relative shrink-0">
-      <MoreButton className={buttonClassName} open={open} active={anyActive} onClick={() => setOpen((o) => !o)} />
+      <MoreButton
+        className={buttonClassName}
+        open={open}
+        active={anyActive}
+        onClick={() => setOpen((o) => !o)}
+      />
       {open && (
         <div
           data-tv-focus-scope
@@ -166,7 +171,11 @@ function MoreButton({
       className={`${className} ${active || open ? "text-ink" : ""}`}
     >
       {t("common.more")}
-      <ChevronDown size={14} strokeWidth={2.2} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      <ChevronDown
+        size={14}
+        strokeWidth={2.2}
+        className={`transition-transform ${open ? "rotate-180" : ""}`}
+      />
     </button>
   );
 }

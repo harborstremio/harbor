@@ -66,10 +66,14 @@ function writeCache(groups: MalListGroup[]): void {
 
 export async function fetchMalList(): Promise<MalListGroup[]> {
   const all: MalListEntry[] = [];
-  let cursor: string | null = `/users/@me/animelist?fields=my_list_status,num_episodes,mean,main_picture,alternative_titles,media_type&nsfw=true&limit=1000`;
+  let cursor: string | null =
+    `/users/@me/animelist?fields=my_list_status,num_episodes,mean,main_picture,alternative_titles,media_type&nsfw=true&limit=1000`;
   while (cursor) {
     const data: ListResponse = await malRequest(cursor);
-    for (const entry of data.data) { const parsed = parseNode(entry.node); if (parsed) all.push(parsed); }
+    for (const entry of data.data) {
+      const parsed = parseNode(entry.node);
+      if (parsed) all.push(parsed);
+    }
     cursor = data.paging?.next ?? null;
   }
 

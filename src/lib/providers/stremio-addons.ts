@@ -91,7 +91,10 @@ function buildQuery(params: ListParams): string {
 }
 
 function slugifyId(id: string): string {
-  return id.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return id
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function addonToSA(a: Addon): SAAddon {
@@ -144,8 +147,7 @@ function applyListParams(all: SAAddon[], params: ListParams): ListResult {
   }
   if (params.nsfw === "exclude") {
     filtered = filtered.filter((a) => {
-      const bh = (a.manifest as { behaviorHints?: { adult?: boolean } } | undefined)
-        ?.behaviorHints;
+      const bh = (a.manifest as { behaviorHints?: { adult?: boolean } } | undefined)?.behaviorHints;
       return !bh?.adult;
     });
   }
@@ -214,7 +216,9 @@ export async function listAddons(params: ListParams = {}): Promise<ListResult> {
     const json = (await res.json()) as ListResult;
     const community = await loadFallbackAddons();
     const seen = new Set(
-      json.addons.map((a) => (a.manifest as { id?: string } | undefined)?.id).filter(Boolean) as string[],
+      json.addons
+        .map((a) => (a.manifest as { id?: string } | undefined)?.id)
+        .filter(Boolean) as string[],
     );
     const extras = community.filter((a) => {
       const id = (a.manifest as { id?: string } | undefined)?.id;

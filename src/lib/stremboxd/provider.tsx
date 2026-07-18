@@ -16,14 +16,13 @@ import {
 } from "./client";
 import { buildStremboxdConfig } from "./settings-helper";
 import { invalidateLetterboxdCache } from "./cache";
-import {
-  getLetterboxdSession,
-  setLetterboxdSession,
-  subscribeLetterboxdSession,
-} from "./session";
+import { getLetterboxdSession, setLetterboxdSession, subscribeLetterboxdSession } from "./session";
 import type { LetterboxdSession } from "./types";
 
-type LoginResult = { kind: "success"; session: LetterboxdSession } | { kind: "2fa" } | { kind: "error"; message: string };
+type LoginResult =
+  | { kind: "success"; session: LetterboxdSession }
+  | { kind: "2fa" }
+  | { kind: "error"; message: string };
 
 type Value = {
   enabled: boolean;
@@ -72,7 +71,9 @@ function buildServerPreferences(
 export function LetterboxdProvider({ children }: { children: ReactNode }) {
   const { settings, update } = useSettings();
   const lb = settings.letterboxd;
-  const [session, setLocalSession] = useState<LetterboxdSession | null>(() => getLetterboxdSession());
+  const [session, setLocalSession] = useState<LetterboxdSession | null>(() =>
+    getLetterboxdSession(),
+  );
 
   useEffect(
     () =>
@@ -95,7 +96,12 @@ export function LetterboxdProvider({ children }: { children: ReactNode }) {
           lists: res.lists,
         };
         setLetterboxdSession(next);
-        const updatedSettings = { ...lb, enabled: true, mode: "full" as const, username: res.user.username };
+        const updatedSettings = {
+          ...lb,
+          enabled: true,
+          mode: "full" as const,
+          username: res.user.username,
+        };
         update({
           letterboxd: { ...updatedSettings, encodedConfig: buildStremboxdConfig(updatedSettings) },
         });
@@ -117,7 +123,10 @@ export function LetterboxdProvider({ children }: { children: ReactNode }) {
           if (e.status === 0) return { kind: "error", message: e.message };
           return { kind: "error", message: e.message };
         }
-        return { kind: "error", message: e instanceof Error ? e.message : "Could not reach Stremboxd." };
+        return {
+          kind: "error",
+          message: e instanceof Error ? e.message : "Could not reach Stremboxd.",
+        };
       }
     },
     [lb, update],

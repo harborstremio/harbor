@@ -50,7 +50,11 @@ export function ChatOverlay({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.key ?? "").toLowerCase() === "t" && !composing && document.activeElement?.tagName !== "INPUT") {
+      if (
+        (e.key ?? "").toLowerCase() === "t" &&
+        !composing &&
+        document.activeElement?.tagName !== "INPUT"
+      ) {
         e.preventDefault();
         setComposing(true);
         setTimeout(() => inputRef.current?.focus(), 30);
@@ -86,8 +90,7 @@ export function ChatOverlay({
     () =>
       recent.map((m, i) => {
         const prev = recent[i - 1];
-        const isContinuation =
-          !!prev && prev.from === m.from && m.at - prev.at < GROUP_GAP_MS;
+        const isContinuation = !!prev && prev.from === m.from && m.at - prev.at < GROUP_GAP_MS;
         return { message: m, isContinuation };
       }),
     [recent],

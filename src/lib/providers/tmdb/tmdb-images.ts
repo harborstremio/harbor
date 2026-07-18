@@ -54,7 +54,10 @@ export const pickLogo = (logos: LogoEntry[], originalLang?: string | null): stri
   return best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
 };
 
-export async function tmdbLocalizedPoster(key: string, metaId: string): Promise<string | undefined> {
+export async function tmdbLocalizedPoster(
+  key: string,
+  metaId: string,
+): Promise<string | undefined> {
   const picks = pickedImageLangs();
   if (!picks.length) return undefined;
   const assets = await fetchMovieAssets(key, metaId);
@@ -67,7 +70,8 @@ export async function tmdbLocalizedPoster(key: string, metaId: string): Promise<
     return i === -1 ? -1 : picks.length - i;
   };
   const best = [...posters].sort(
-    (a, b) => rank(b.iso_639_1) - rank(a.iso_639_1) || (b.vote_average ?? 0) - (a.vote_average ?? 0),
+    (a, b) =>
+      rank(b.iso_639_1) - rank(a.iso_639_1) || (b.vote_average ?? 0) - (a.vote_average ?? 0),
   )[0];
   return best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
 }

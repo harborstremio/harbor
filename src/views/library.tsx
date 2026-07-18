@@ -93,14 +93,14 @@ export function LibraryView({ active }: { active: boolean }) {
           : tab === "lists"
             ? "Browsing their lists"
             : tab === "trakt"
-            ? "Browsing their Trakt library"
-            : tab === "simkl"
-              ? "Browsing their Simkl library"
-              : tab === "letterboxd"
-                ? "Browsing their Letterboxd library"
-              : tab === "mal"
-                ? "Browsing their MyAnimeList library"
-                : "Browsing their Stremio library";
+              ? "Browsing their Trakt library"
+              : tab === "simkl"
+                ? "Browsing their Simkl library"
+                : tab === "letterboxd"
+                  ? "Browsing their Letterboxd library"
+                  : tab === "mal"
+                    ? "Browsing their MyAnimeList library"
+                    : "Browsing their Stremio library";
     return pushActivityHint({ details: label, state: "Library" });
   }, [active, tab]);
 
@@ -164,7 +164,9 @@ function Header({
             {t("Your collection.")}
           </h1>
           <p className="text-[14px] leading-snug text-ink-muted">
-            {t("Watchlist is what you've saved for later. History is everything you've watched. Local is files on your computer.")}
+            {t(
+              "Watchlist is what you've saved for later. History is everything you've watched. Local is files on your computer.",
+            )}
           </p>
         </div>
         {settings.wrappedButton && (

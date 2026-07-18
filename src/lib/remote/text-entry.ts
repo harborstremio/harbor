@@ -83,9 +83,7 @@ function resolveTextEntryEl(): HTMLInputElement | HTMLTextAreaElement | null {
 
 function setNativeValue(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
   const proto =
-    el instanceof HTMLTextAreaElement
-      ? HTMLTextAreaElement.prototype
-      : HTMLInputElement.prototype;
+    el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
   const desc = Object.getOwnPropertyDescriptor(proto, "value");
   desc?.set?.call(el, value);
   el.dispatchEvent(new Event("input", { bubbles: true }));

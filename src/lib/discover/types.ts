@@ -1,4 +1,11 @@
-export type EventKind = "open" | "dwell" | "play" | "watchlist" | "watched" | "vote_up" | "vote_down";
+export type EventKind =
+  | "open"
+  | "dwell"
+  | "play"
+  | "watchlist"
+  | "watched"
+  | "vote_up"
+  | "vote_down";
 
 export type ProfileSnapshot = {
   cast: number[];

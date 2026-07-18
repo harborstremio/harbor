@@ -24,13 +24,48 @@ import ytsLogo from "@/assets/addon-logos/yts.png";
 
 const BUNDLED: Array<{ match: (id: string, name: string) => boolean; src: string }> = [
   { match: (id, n) => id.includes("torrentio") || /torrentio/i.test(n), src: torrentioLogo },
-  { match: (id, n) => id === "tb-library" || id.startsWith("tb-") || /torbox/i.test(id) || /\btorbox\b/i.test(n), src: torboxLogo },
-  { match: (id, n) => id === "rd-library" || id.startsWith("rd-") || /real.?debrid/i.test(id) || /real.?debrid/i.test(n), src: realDebridLogo },
-  { match: (id, n) => id === "ad-library" || id.startsWith("ad-") || /alldebrid/i.test(id) || /all.?debrid/i.test(n), src: allDebridLogo },
-  { match: (id, n) => id === "pm-library" || id.startsWith("pm-") || /premiumize/i.test(id) || /premiumize/i.test(n), src: premiumizeLogo },
-  { match: (id, n) => id === "dl-library" || id.startsWith("dl-") || /debrid.?link/i.test(id) || /debrid.?link/i.test(n), src: debridLinkLogo },
+  {
+    match: (id, n) =>
+      id === "tb-library" || id.startsWith("tb-") || /torbox/i.test(id) || /\btorbox\b/i.test(n),
+    src: torboxLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "rd-library" ||
+      id.startsWith("rd-") ||
+      /real.?debrid/i.test(id) ||
+      /real.?debrid/i.test(n),
+    src: realDebridLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "ad-library" ||
+      id.startsWith("ad-") ||
+      /alldebrid/i.test(id) ||
+      /all.?debrid/i.test(n),
+    src: allDebridLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "pm-library" ||
+      id.startsWith("pm-") ||
+      /premiumize/i.test(id) ||
+      /premiumize/i.test(n),
+    src: premiumizeLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "dl-library" ||
+      id.startsWith("dl-") ||
+      /debrid.?link/i.test(id) ||
+      /debrid.?link/i.test(n),
+    src: debridLinkLogo,
+  },
   { match: (id, n) => id === "knaben" || /knaben/i.test(n), src: knabenLogo },
-  { match: (id, n) => id === "tpb" || id.includes("piratebay") || /pirate.?bay/i.test(n), src: thepiratebayLogo },
+  {
+    match: (id, n) => id === "tpb" || id.includes("piratebay") || /pirate.?bay/i.test(n),
+    src: thepiratebayLogo,
+  },
   { match: (id, n) => id === "x1337" || /1337/.test(id) || /1337x/i.test(n), src: x1337Logo },
   { match: (id, n) => id === "yts" || /^yts/i.test(n), src: ytsLogo },
   { match: (id, n) => id === "eztv" || /^eztv/i.test(n), src: eztvLogo },
@@ -40,11 +75,21 @@ const BUNDLED: Array<{ match: (id: string, name: string) => boolean; src: string
   { match: (id, n) => id.includes("comet") || /^comet\b/i.test(n), src: cometLogo },
   { match: (id, n) => id.includes("mediafusion") || /mediafusion/i.test(n), src: mediafusionLogo },
   { match: (id, n) => id.includes("aiostreams") || /aio.?streams/i.test(n), src: aioStreamsLogo },
-  { match: (id, n) => id.includes("opensubtitles") || /opensubtitles/i.test(n), src: opensubtitlesLogo },
+  {
+    match: (id, n) => id.includes("opensubtitles") || /opensubtitles/i.test(n),
+    src: opensubtitlesLogo,
+  },
   { match: (id, n) => id.includes("anime-kitsu") || /anime.?kitsu/i.test(n), src: animeKitsuLogo },
-  { match: (id, n) => id.includes("streaming-catalogs") || /streaming.catalog/i.test(n), src: streamingCatalogsLogo },
+  {
+    match: (id, n) => id.includes("streaming-catalogs") || /streaming.catalog/i.test(n),
+    src: streamingCatalogsLogo,
+  },
   { match: (id, n) => id.includes("easynews") || /easy.?news/i.test(n), src: easynewsLogo },
-  { match: (id, n) => id === "org.stremio.local" || /^local files\b/i.test(n) || /local.?files/i.test(id), src: localFilesLogo },
+  {
+    match: (id, n) =>
+      id === "org.stremio.local" || /^local files\b/i.test(n) || /local.?files/i.test(id),
+    src: localFilesLogo,
+  },
 ];
 
 export const BOAT_ADDON_LOGOS: string[] = [
@@ -109,7 +154,10 @@ export function addonLogoSrc(addonId: string, addonName: string): string | null 
   return null;
 }
 
-export function resolveAddonLogo(logo: string | null | undefined, transportUrl: string | null | undefined): string | null {
+export function resolveAddonLogo(
+  logo: string | null | undefined,
+  transportUrl: string | null | undefined,
+): string | null {
   if (!logo) return null;
   const trimmed = logo.trim();
   if (!trimmed) return null;

@@ -161,7 +161,9 @@ export function AnimeGenrePicker({
             >
               <span
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                  hideWatched ? "border-accent bg-accent text-canvas" : "border-edge text-transparent"
+                  hideWatched
+                    ? "border-accent bg-accent text-canvas"
+                    : "border-edge text-transparent"
                 }`}
               >
                 <Check size={13} strokeWidth={3} />
@@ -178,7 +180,9 @@ export function AnimeGenrePicker({
             type="button"
             onClick={() => setSelected(new Set())}
             className={`text-[12.5px] font-medium transition-colors ${
-              selected.size > 0 ? "text-ink-subtle hover:text-ink" : "pointer-events-none text-transparent"
+              selected.size > 0
+                ? "text-ink-subtle hover:text-ink"
+                : "pointer-events-none text-transparent"
             }`}
           >
             {t("Clear all")}

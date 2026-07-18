@@ -33,7 +33,7 @@ export function LiveHero({
 
   const activeIdx = Math.min(idx, items.length - 1);
   const active = items[activeIdx];
-  const hydrated = active ? hydrations.get(hydrationKey(active)) ?? null : null;
+  const hydrated = active ? (hydrations.get(hydrationKey(active)) ?? null) : null;
   const heroArt = active
     ? hydrated?.background || active.current?.iconUrl || active.channel.logo || null
     : null;
@@ -174,7 +174,10 @@ function HeroBackdrop({
   const art = backdrop && !artErr ? backdrop : null;
   const logo = item.channel.logo && !logoErr ? item.channel.logo : null;
   return (
-    <div className="absolute inset-0 transition-opacity duration-700" style={{ opacity: visible ? 1 : 0 }}>
+    <div
+      className="absolute inset-0 transition-opacity duration-700"
+      style={{ opacity: visible ? 1 : 0 }}
+    >
       {art ? (
         <img
           src={art}

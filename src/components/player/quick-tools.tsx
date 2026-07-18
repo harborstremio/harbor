@@ -28,9 +28,7 @@ export function QuickTools({
 }) {
   return (
     <>
-      {(ab.a != null || ab.b != null) && (
-        <AbLoopChip ab={ab} visible={visible} />
-      )}
+      {(ab.a != null || ab.b != null) && <AbLoopChip ab={ab} visible={visible} />}
       {toast && <FrameToast toast={toast} />}
       {gifToast && <FrameToast toast={gifToast} />}
       {clipToast && <FrameToast toast={clipToast} />}

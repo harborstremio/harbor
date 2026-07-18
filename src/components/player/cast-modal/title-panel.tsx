@@ -210,7 +210,11 @@ export function TitlePanel({
                   : "bg-white/[0.12] text-white ring-white/15 hover:bg-white/20"
               }`}
             >
-              {queued ? <Check size={17} strokeWidth={2.6} /> : <Plus size={17} strokeWidth={2.4} />}
+              {queued ? (
+                <Check size={17} strokeWidth={2.6} />
+              ) : (
+                <Plus size={17} strokeWidth={2.4} />
+              )}
               {queued ? t("Queued") : t("Queue")}
             </button>
           </div>
@@ -277,7 +281,9 @@ export function TitlePanel({
         </RailSection>
       ) : needsKey ? (
         <p className="px-1 text-[13.5px] leading-relaxed text-white/55">
-          {t("Add a TMDB key in Settings to see the cast, crew and recommendations for every title.")}
+          {t(
+            "Add a TMDB key in Settings to see the cast, crew and recommendations for every title.",
+          )}
         </p>
       ) : null}
 

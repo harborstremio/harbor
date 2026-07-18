@@ -19,7 +19,17 @@ export function useHostSource(params: {
   guestPickRef: RefObject<boolean>;
   publishState: (state: PartialSyncState) => void;
 }): { hostSourceRef: RefObject<SourceDescriptor | null> } {
-  const { inRoom, isHost, hasStarted, src, liveUrl, liveStreamRef, snap, guestPickRef, publishState } = params;
+  const {
+    inRoom,
+    isHost,
+    hasStarted,
+    src,
+    liveUrl,
+    liveStreamRef,
+    snap,
+    guestPickRef,
+    publishState,
+  } = params;
 
   const [validDurationSec, setValidDurationSec] = useState(0);
   const urlChangedAtRef = useRef(0);
@@ -72,7 +82,17 @@ export function useHostSource(params: {
       source: descriptor,
       guestPick: guestPickRef.current || undefined,
     });
-  }, [inRoom, isHost, hasStarted, descriptor, publishState, src.meta.id, src.meta.name, src.meta.poster, src.episode]);
+  }, [
+    inRoom,
+    isHost,
+    hasStarted,
+    descriptor,
+    publishState,
+    src.meta.id,
+    src.meta.name,
+    src.meta.poster,
+    src.episode,
+  ]);
 
   return { hostSourceRef };
 }

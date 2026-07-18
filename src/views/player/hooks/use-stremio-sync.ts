@@ -27,7 +27,15 @@ export function useStremioSync(params: {
   resolutionSettled: boolean;
   castActiveRef?: { current: boolean };
 }) {
-  const { src, snap, authKey, resolvedImdbId, resolvedImdbVerified, resolutionSettled, castActiveRef } = params;
+  const {
+    src,
+    snap,
+    authKey,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    resolutionSettled,
+    castActiveRef,
+  } = params;
   const canonicalId = cloudWriteId(src.meta.id, resolvedImdbId, resolvedImdbVerified);
   const watcherProfileId = useProfiles().activeProfile?.id ?? null;
   useEffect(() => {
@@ -130,7 +138,13 @@ export function useStremioSync(params: {
   }, [authKey, canonicalId]);
 
   const writeWithFreshBase = async (isTerminal: boolean, withGet: boolean) => {
-    const { src: s, snap: sn, authKey: ak, canonicalId: liveCid, resolutionSettled: settled } = latestRef.current;
+    const {
+      src: s,
+      snap: sn,
+      authKey: ak,
+      canonicalId: liveCid,
+      resolutionSettled: settled,
+    } = latestRef.current;
     if (!ak || !settled || !loadResetSeenRef.current) return;
     const cid = sessionCidRef.current ?? liveCid;
     if (!cid) return;
@@ -166,7 +180,13 @@ export function useStremioSync(params: {
   };
 
   const writeFlushFast = (): Promise<void> => {
-    const { src: s, snap: sn, authKey: ak, canonicalId: liveCid, resolutionSettled: settled } = latestRef.current;
+    const {
+      src: s,
+      snap: sn,
+      authKey: ak,
+      canonicalId: liveCid,
+      resolutionSettled: settled,
+    } = latestRef.current;
     if (!ak || !settled || !loadResetSeenRef.current) return Promise.resolve();
     const cid = sessionCidRef.current ?? liveCid;
     if (!cid) return Promise.resolve();
@@ -196,7 +216,11 @@ export function useStremioSync(params: {
       if (!active || !loadResetSeenRef.current) return;
       const pos = getPlaybackPosition();
       if (pos < MIN_POSITION_SEC || sn.durationSec <= 0) return;
-      if (import.meta.env.DEV && Date.now() - sessionStartRef.current > 30000 && !wroteOnceRef.current) {
+      if (
+        import.meta.env.DEV &&
+        Date.now() - sessionStartRef.current > 30000 &&
+        !wroteOnceRef.current
+      ) {
         console.warn("[stremio-sync] playing >30s with zero successful cloud writes");
       }
       const ms = pos * 1000;
@@ -314,9 +338,12 @@ async function writeLibraryItem(
   const videoChanged = prevVideoId !== null && prevVideoId !== videoId;
   const prevTimesWatched = typeof baseState.timesWatched === "number" ? baseState.timesWatched : 0;
   const prevTimeWatched = typeof baseState.timeWatched === "number" ? baseState.timeWatched : 0;
-  const prevOverall = typeof baseState.overallTimeWatched === "number" ? baseState.overallTimeWatched : 0;
+  const prevOverall =
+    typeof baseState.overallTimeWatched === "number" ? baseState.overallTimeWatched : 0;
   const prevWatched =
-    typeof baseState.watched === "string" && baseState.watched.length > 0 ? baseState.watched : null;
+    typeof baseState.watched === "string" && baseState.watched.length > 0
+      ? baseState.watched
+      : null;
   const prevLastVidReleased =
     typeof baseState.lastVidReleased === "string" ? baseState.lastVidReleased : null;
   const prevFlagged = typeof baseState.flaggedWatched === "number" ? baseState.flaggedWatched : 0;
@@ -355,7 +382,8 @@ async function writeLibraryItem(
 
   const metaPoster =
     typeof src.meta.poster === "string" && src.meta.poster.length > 0 ? src.meta.poster : null;
-  const basePoster = typeof base?.poster === "string" && base.poster.length > 0 ? base.poster : null;
+  const basePoster =
+    typeof base?.poster === "string" && base.poster.length > 0 ? base.poster : null;
   const baseType = base?.type === "series" || base?.type === "movie" ? base.type : null;
   let removed = base ? base.removed === true : true;
   let temp = base ? base.temp === true : true;
@@ -364,7 +392,7 @@ async function writeLibraryItem(
   const item: StremioLibraryItem = {
     _id: canonicalId,
     name,
-    type: src.episode ? "series" : baseType ?? (isSeries ? "series" : "movie"),
+    type: src.episode ? "series" : (baseType ?? (isSeries ? "series" : "movie")),
     poster: metaPoster ?? basePoster,
     posterShape: pickPosterShape(baseRecord?.posterShape),
     removed,

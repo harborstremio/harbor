@@ -176,8 +176,7 @@ function SpeedTestButtonInner() {
             samples.push({ t, bytes: value.length });
             if (t - startedAt >= SPEEDTEST_WARMUP_MS) total += value.length;
           }
-        } catch {
-        }
+        } catch {}
       }
     };
 

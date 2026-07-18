@@ -114,7 +114,8 @@ export function railsForFilter(f: MetaFilter): AnyRail[] {
         params: {
           "with_runtime.gte": String(r.lo),
           "with_runtime.lte": String(r.hi),
-          [f.mediaType === "movie" ? "primary_release_date.gte" : "first_air_date.gte"]: "2020-01-01",
+          [f.mediaType === "movie" ? "primary_release_date.gte" : "first_air_date.gte"]:
+            "2020-01-01",
           sort_by: "popularity.desc",
           "vote_count.gte": "200",
         },
@@ -145,7 +146,8 @@ export function railsForFilter(f: MetaFilter): AnyRail[] {
         kicker: "Fresh from the studio",
         params: {
           with_companies: id,
-          [f.mediaType === "movie" ? "primary_release_date.gte" : "first_air_date.gte"]: "2020-01-01",
+          [f.mediaType === "movie" ? "primary_release_date.gte" : "first_air_date.gte"]:
+            "2020-01-01",
           sort_by: "popularity.desc",
           "vote_count.gte": "30",
         },
@@ -289,8 +291,7 @@ export function railsForFilter(f: MetaFilter): AnyRail[] {
     },
   });
 
-  const companionId =
-    f.mediaType === "movie" ? GENRE_MOVIE_TO_TV[f.id] : GENRE_TV_TO_MOVIE[f.id];
+  const companionId = f.mediaType === "movie" ? GENRE_MOVIE_TO_TV[f.id] : GENRE_TV_TO_MOVIE[f.id];
   if (companionId) {
     const companionType: "movie" | "tv" = f.mediaType === "movie" ? "tv" : "movie";
     const word = companionType === "tv" ? "Series" : "Movies";

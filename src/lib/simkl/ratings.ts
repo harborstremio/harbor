@@ -46,9 +46,10 @@ async function resolveScoreByImdb(imdbId: string): Promise<number | null> {
   return detail.ratings?.simkl?.rating ?? null;
 }
 
-export function useSimklCommunityRating(
-  imdbId: string | null,
-): { rating: number | null; loading: boolean } {
+export function useSimklCommunityRating(imdbId: string | null): {
+  rating: number | null;
+  loading: boolean;
+} {
   const [rating, setRating] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 

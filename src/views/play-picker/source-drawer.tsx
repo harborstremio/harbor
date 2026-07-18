@@ -53,11 +53,13 @@ export function SourceDrawer({
   const [addonFilter, setAddonFilter] = useState("all");
   const addonOptions = useMemo(() => buildAddonOptions(streams), [streams]);
   const shown = useMemo(
-    () => (addonFilter === "all" ? streams : streams.filter((s) => addonInstanceKey(s) === addonFilter)),
+    () =>
+      addonFilter === "all" ? streams : streams.filter((s) => addonInstanceKey(s) === addonFilter),
     [streams, addonFilter],
   );
   useEffect(() => {
-    if (addonFilter !== "all" && !addonOptions.some((o) => o.id === addonFilter)) setAddonFilter("all");
+    if (addonFilter !== "all" && !addonOptions.some((o) => o.id === addonFilter))
+      setAddonFilter("all");
   }, [addonOptions, addonFilter]);
   return (
     <div className="flex flex-col gap-4">
@@ -82,7 +84,12 @@ export function SourceDrawer({
       </button>
       {open && addonOptions.length > 1 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <AddonPill active={addonFilter === "all"} onClick={() => setAddonFilter("all")} label="All" count={streams.length} />
+          <AddonPill
+            active={addonFilter === "all"}
+            onClick={() => setAddonFilter("all")}
+            label="All"
+            count={streams.length}
+          />
           {addonOptions.map((o) => (
             <AddonPill
               key={o.id}
@@ -203,7 +210,9 @@ function SourceRow({
             />
             <span className="truncate">
               {contributorLabel(stream)}
-              {summary.length > 0 && <span className="text-ink-subtle/60"> · {summary.join(" · ")}</span>}
+              {summary.length > 0 && (
+                <span className="text-ink-subtle/60"> · {summary.join(" · ")}</span>
+              )}
             </span>
           </p>
         </div>

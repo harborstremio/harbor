@@ -7,7 +7,11 @@ import {
   type CardHoverStyle,
 } from "@/components/pick-card/card-hover";
 import { CustomHoverOverlay, customHoverPosterProps } from "@/components/pick-card/custom-hover";
-import { listCustomHovers, subscribeCustomHovers, type CustomHoverConfig } from "@/lib/custom-hover";
+import {
+  listCustomHovers,
+  subscribeCustomHovers,
+  type CustomHoverConfig,
+} from "@/lib/custom-hover";
 import { useT } from "@/lib/i18n";
 import { CustomHoverEditor } from "./custom-hover-editor";
 
@@ -83,7 +87,8 @@ export function HoverStyleGallery({
           onClose={() => setEditing(null)}
           onSaved={(id) => onChange("custom", id)}
           onDeleted={() => {
-            if (value === "custom" && editing !== "new" && customHoverId === editing.id) onChange("default");
+            if (value === "custom" && editing !== "new" && customHoverId === editing.id)
+              onChange("default");
           }}
         />
       )}
@@ -106,7 +111,8 @@ function Tile({
   meta: Meta | null;
   style: CardHoverStyle;
 }) {
-  const inCard = style === "elegant" || style === "frosted" || style === "cinema" || style === "spotlight";
+  const inCard =
+    style === "elegant" || style === "frosted" || style === "cinema" || style === "spotlight";
   return (
     <button
       type="button"
@@ -136,7 +142,9 @@ function Tile({
         {meta && inCard && <CardHoverOverlay meta={meta} style={style} onPlay={() => {}} preview />}
       </div>
       <div className="flex items-center justify-between px-0.5">
-        <span className={`text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>{label}</span>
+        <span className={`text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>
+          {label}
+        </span>
         <span className="hidden text-[10px] text-ink-subtle sm:inline">{sub}</span>
       </div>
     </button>
@@ -169,9 +177,17 @@ function CustomTile({
         selected ? "border-accent bg-accent/10" : "border-edge-soft bg-canvas/50 hover:border-edge"
       }`}
     >
-      <div className={`relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft/60 ${props.className}`} style={props.style}>
+      <div
+        className={`relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft/60 ${props.className}`}
+        style={props.style}
+      >
         {meta?.poster && (
-          <img src={meta.poster} alt="" draggable={false} className="absolute inset-0 h-full w-full rounded-lg object-cover" />
+          <img
+            src={meta.poster}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full rounded-lg object-cover"
+          />
         )}
         {meta && <CustomHoverOverlay config={config} meta={meta} onPlay={() => {}} preview />}
         <button
@@ -187,7 +203,11 @@ function CustomTile({
         </button>
       </div>
       <div className="flex items-center justify-between px-0.5">
-        <span className={`line-clamp-1 text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}>{config.name}</span>
+        <span
+          className={`line-clamp-1 text-[12px] font-semibold ${selected ? "text-accent" : "text-ink"}`}
+        >
+          {config.name}
+        </span>
       </div>
     </div>
   );
@@ -213,7 +233,9 @@ function DefaultModalPreview({ meta }: { meta: Meta }) {
           {meta.releaseInfo && <span>· {meta.releaseInfo}</span>}
         </span>
         {meta.description && (
-          <span className="line-clamp-2 text-[8px] leading-tight text-ink-subtle">{meta.description}</span>
+          <span className="line-clamp-2 text-[8px] leading-tight text-ink-subtle">
+            {meta.description}
+          </span>
         )}
         <div className="mt-0.5 flex items-center gap-2 text-[8px] font-bold uppercase tracking-wide text-ink-muted">
           <span className="flex items-center gap-0.5 text-ink">

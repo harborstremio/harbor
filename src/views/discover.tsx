@@ -12,7 +12,12 @@ import { Row, ScrollRootContext } from "@/components/row";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
 import { fetchCriticsPickList, getPool, selectDailyRows, type FeedItem } from "@/lib/feed";
-import { buildFeatured, buildFeaturedFast, rescoreFeatured, type FeaturedResult } from "@/lib/feed/featured";
+import {
+  buildFeatured,
+  buildFeaturedFast,
+  rescoreFeatured,
+  type FeaturedResult,
+} from "@/lib/feed/featured";
 import type { FeaturedItem } from "@/lib/feed/featured/types";
 import { prewarmExternalWatched, subscribeExternalWatched } from "@/lib/feed/external-watched";
 import { getStore, subscribe as subscribeTaste } from "@/lib/discover/store";
@@ -377,7 +382,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Featured & Recommended")}
                   hidden={hiddenFeatured}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-featured"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-featured"))
+                  }
                 />
               )}
               <div className={hiddenFeatured ? "pointer-events-none opacity-40" : ""}>
@@ -395,7 +402,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Browse your catalogs")}
                   hidden={hiddenCatalog}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-catalog"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-catalog"))
+                  }
                 />
                 <div className={hiddenCatalog ? "pointer-events-none opacity-40" : ""}>
                   <CatalogBrowser />
@@ -405,7 +414,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Can't decide?")}
                   hidden={hiddenSurprise}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-surprise"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-surprise"))
+                  }
                 />
                 <div className={hiddenSurprise ? "pointer-events-none opacity-40" : ""}>
                   <SurpriseMe pool={surprisePool} />
@@ -426,34 +437,34 @@ export function Discover({ active = true }: { active?: boolean }) {
           {letterboxdRows.map((row, i) => {
             const catalogId = row.key.replace("letterboxd-", "");
             return (
-            <Row
-              key={row.key}
-              title={
-                <>
-                  {row.name}
-                  <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
-                    Letterboxd
-                  </span>
-                </>
-              }
-              titleExtra={
-                <LetterboxdRowMenu
-                  canMoveUp={i > 0}
-                  canMoveDown={i < letterboxdRows.length - 1}
-                  hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
-                  onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
-                  onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
-                  onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
-                />
-              }
-              min={148}
-              shape="portrait"
-              scrollKey={`discover:${row.key}`}
-            >
-              {row.metas.map((m) => (
-                <PickCard key={m.id} meta={m} />
-              ))}
-            </Row>
+              <Row
+                key={row.key}
+                title={
+                  <>
+                    {row.name}
+                    <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
+                      Letterboxd
+                    </span>
+                  </>
+                }
+                titleExtra={
+                  <LetterboxdRowMenu
+                    canMoveUp={i > 0}
+                    canMoveDown={i < letterboxdRows.length - 1}
+                    hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
+                    onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
+                    onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
+                    onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
+                  />
+                }
+                min={148}
+                shape="portrait"
+                scrollKey={`discover:${row.key}`}
+              >
+                {row.metas.map((m) => (
+                  <PickCard key={m.id} meta={m} />
+                ))}
+              </Row>
             );
           })}
 
@@ -468,11 +479,21 @@ export function Discover({ active = true }: { active?: boolean }) {
                       hidden={hidden}
                       canMoveUp={idx > 0}
                       canMoveDown={idx >= 0 && idx < orderKeys.length - 1}
-                      onMoveUp={() => pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, -1))}
-                      onMoveDown={() => pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, 1))}
-                      onToggleHidden={() => pageRows.persist(togglePageRowHidden(pageRows.custom, item.key))}
-                      onRename={(label) => pageRows.persist(renamePageRow(pageRows.custom, item.key, label))}
-                      onResetName={() => pageRows.persist(renamePageRow(pageRows.custom, item.key, ""))}
+                      onMoveUp={() =>
+                        pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, -1))
+                      }
+                      onMoveDown={() =>
+                        pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, 1))
+                      }
+                      onToggleHidden={() =>
+                        pageRows.persist(togglePageRowHidden(pageRows.custom, item.key))
+                      }
+                      onRename={(label) =>
+                        pageRows.persist(renamePageRow(pageRows.custom, item.key, label))
+                      }
+                      onResetName={() =>
+                        pageRows.persist(renamePageRow(pageRows.custom, item.key, ""))
+                      }
                       isRenamed={item.key in pageRows.custom.renamed}
                     />
                     {!hidden && (

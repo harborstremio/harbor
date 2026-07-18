@@ -26,8 +26,7 @@ export function useAnilistWatched(harborId: string, episodes: KitsuEpisode[]): A
         (a, b) => (a.seasonNumber || 1) - (b.seasonNumber || 1) || a.number - b.number,
       );
       const total = sorted.length;
-      const watchedCount =
-        status === "COMPLETED" ? total : Math.max(0, Math.min(progress, total));
+      const watchedCount = status === "COMPLETED" ? total : Math.max(0, Math.min(progress, total));
       const watchedKeys = new Set<string>();
       for (let i = 0; i < watchedCount; i++) {
         const ep = sorted[i];

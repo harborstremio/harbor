@@ -21,7 +21,9 @@ export function stremboxdMetaToMeta(m: StremboxdMeta): Meta {
 }
 
 export function letterboxdFilmUrl(meta: Meta): string | null {
-  const link = meta.links?.find((l) => l.category === "Letterboxd" || /letterboxd\.com\/film\//.test(l.url));
+  const link = meta.links?.find(
+    (l) => l.category === "Letterboxd" || /letterboxd\.com\/film\//.test(l.url),
+  );
   if (link) return link.url;
   if (/^tt\d+$/.test(meta.id)) return `https://letterboxd.com/imdb/${meta.id}/`;
   return null;

@@ -13,8 +13,22 @@ import { createPortal } from "react-dom";
 import type { LayoutProfile } from "@/lib/player-chrome-profiles";
 
 type Dialog =
-  | { kind: "input"; title: string; placeholder: string; initial: string; confirmLabel: string; onConfirm: (value: string) => void }
-  | { kind: "confirm"; title: string; message: string; confirmLabel: string; danger?: boolean; onConfirm: () => void };
+  | {
+      kind: "input";
+      title: string;
+      placeholder: string;
+      initial: string;
+      confirmLabel: string;
+      onConfirm: (value: string) => void;
+    }
+  | {
+      kind: "confirm";
+      title: string;
+      message: string;
+      confirmLabel: string;
+      danger?: boolean;
+      onConfirm: () => void;
+    };
 
 type Props = {
   profiles: LayoutProfile[];
@@ -141,7 +155,11 @@ export function ProfilePicker({
         className="flex h-11 max-w-[200px] items-center gap-2 rounded-full border border-white/15 bg-white/8 ps-4 pe-3 text-[13px] font-medium text-white/90 transition-colors hover:bg-white/15 hover:text-white"
       >
         <span className="truncate">{label}</span>
-        <ChevronDown size={14} strokeWidth={2.3} className={open ? "rotate-180 transition-transform" : "transition-transform"} />
+        <ChevronDown
+          size={14}
+          strokeWidth={2.3}
+          className={open ? "rotate-180 transition-transform" : "transition-transform"}
+        />
       </button>
 
       {open && (
@@ -164,7 +182,9 @@ export function ProfilePicker({
                         setOpen(false);
                       }}
                       className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-start text-[13px] transition-colors ${
-                        isActive ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/8 hover:text-white"
+                        isActive
+                          ? "bg-white/10 text-white"
+                          : "text-white/80 hover:bg-white/8 hover:text-white"
                       }`}
                     >
                       <span className="flex h-4 w-4 shrink-0 items-center justify-center">
@@ -181,7 +201,11 @@ export function ProfilePicker({
           <div className="my-1 h-px bg-white/8" />
 
           <div className="px-1.5 py-1">
-            <MenuItem icon={<Plus size={14} strokeWidth={2.3} />} label="Save as new profile..." onClick={askSaveAsNew} />
+            <MenuItem
+              icon={<Plus size={14} strokeWidth={2.3} />}
+              label="Save as new profile..."
+              onClick={askSaveAsNew}
+            />
             <MenuItem
               icon={<Pencil size={13} strokeWidth={2.3} />}
               label="Rename current"
@@ -303,7 +327,9 @@ function LayoutDialog({ dialog, onClose }: { dialog: Dialog; onClose: () => void
             onClick={confirm}
             disabled={!canConfirm}
             className={`h-10 rounded-full px-5 text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${
-              dialog.kind === "confirm" && dialog.danger ? "bg-red-500 text-white" : "bg-white text-black"
+              dialog.kind === "confirm" && dialog.danger
+                ? "bg-red-500 text-white"
+                : "bg-white text-black"
             }`}
           >
             {dialog.confirmLabel}

@@ -2,15 +2,28 @@ import { Check, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { type Settings } from "@/lib/settings";
-import { loadSubPresets, saveSubPresets, snapshotSub, type SubPreset } from "@/lib/player/sub-presets";
+import {
+  loadSubPresets,
+  saveSubPresets,
+  snapshotSub,
+  type SubPreset,
+} from "@/lib/player/sub-presets";
 import { useT } from "@/lib/i18n";
 
 function styleMatches(s: Settings, p: SubPreset): boolean {
   const v = snapshotSub(s);
-  return (Object.keys(p.values) as Array<keyof SubPreset["values"]>).every((k) => v[k] === p.values[k]);
+  return (Object.keys(p.values) as Array<keyof SubPreset["values"]>).every(
+    (k) => v[k] === p.values[k],
+  );
 }
 
-export function LooksCluster({ settings, update }: { settings: Settings; update: (p: Partial<Settings>) => void }) {
+export function LooksCluster({
+  settings,
+  update,
+}: {
+  settings: Settings;
+  update: (p: Partial<Settings>) => void;
+}) {
   const t = useT();
   const [list, setList] = useState<SubPreset[]>(() => loadSubPresets());
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -75,7 +88,9 @@ export function LooksCluster({ settings, update }: { settings: Settings; update:
           onClick={createNamed}
           disabled={!draft.trim()}
           className={`ms-0.5 flex h-8 items-center gap-1 rounded-[8px] px-2.5 text-[13px] font-semibold transition-colors ${
-            draft.trim() ? "bg-accent text-canvas hover:brightness-110" : "cursor-default text-ink-subtle/50"
+            draft.trim()
+              ? "bg-accent text-canvas hover:brightness-110"
+              : "cursor-default text-ink-subtle/50"
           }`}
         >
           <Check size={13} strokeWidth={2.6} />
@@ -118,7 +133,12 @@ export function LooksCluster({ settings, update }: { settings: Settings; update:
               }`}
             >
               {p.name}
-              {isSel && dirty && <span aria-label={t("unsaved changes")} className="h-1.5 w-1.5 rounded-full bg-amber-400" />}
+              {isSel && dirty && (
+                <span
+                  aria-label={t("unsaved changes")}
+                  className="h-1.5 w-1.5 rounded-full bg-amber-400"
+                />
+              )}
             </button>
           </PresetTip>
         );
@@ -137,11 +157,21 @@ export function LooksCluster({ settings, update }: { settings: Settings; update:
             : t("Save this look")
         }
         className={`flex h-8 items-center gap-1.5 rounded-[8px] px-3 text-[13px] font-semibold transition-all ${
-          isSaved ? "cursor-default text-ink-subtle/55" : "bg-accent text-canvas hover:brightness-110"
+          isSaved
+            ? "cursor-default text-ink-subtle/55"
+            : "bg-accent text-canvas hover:brightness-110"
         }`}
       >
-        {isSaved || selected ? <Check size={13} strokeWidth={2.6} /> : <Plus size={14} strokeWidth={2.6} />}
-        {isSaved ? t("Saved") : selected ? t("Override {name}", { name: selected.name }) : t("Save look")}
+        {isSaved || selected ? (
+          <Check size={13} strokeWidth={2.6} />
+        ) : (
+          <Plus size={14} strokeWidth={2.6} />
+        )}
+        {isSaved
+          ? t("Saved")
+          : selected
+            ? t("Override {name}", { name: selected.name })
+            : t("Save look")}
       </button>
 
       {selected && (

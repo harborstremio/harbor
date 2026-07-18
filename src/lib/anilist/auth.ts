@@ -59,7 +59,8 @@ async function exchangeCode(code: string): Promise<string> {
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ code }),
   });
-  if (!res.ok) throw new Error("AniList rejected that code. Authorize again and paste the newest one.");
+  if (!res.ok)
+    throw new Error("AniList rejected that code. Authorize again and paste the newest one.");
   const json = (await res.json()) as { access_token?: string };
   if (!json.access_token) throw new Error("AniList did not return a token. Try authorizing again.");
   return json.access_token;

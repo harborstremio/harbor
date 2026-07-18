@@ -106,7 +106,9 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
           {loading && hits.length === 0 ? (
             <p className="px-4 py-4 text-[13px] text-ink-muted">{t("Searching...")}</p>
           ) : hits.length === 0 ? (
-            <p className="px-4 py-4 text-[13px] text-ink-muted">{t("No matches. Try another title.")}</p>
+            <p className="px-4 py-4 text-[13px] text-ink-muted">
+              {t("No matches. Try another title.")}
+            </p>
           ) : (
             <div className="max-h-[360px] overflow-y-auto py-1.5">
               {hits.map((m) => {
@@ -133,7 +135,11 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
                         inList ? "text-accent" : "border border-edge text-ink-muted"
                       }`}
                     >
-                      {inList ? <Check size={16} strokeWidth={2.6} /> : <Plus size={16} strokeWidth={2.2} />}
+                      {inList ? (
+                        <Check size={16} strokeWidth={2.6} />
+                      ) : (
+                        <Plus size={16} strokeWidth={2.2} />
+                      )}
                     </span>
                   </button>
                 );

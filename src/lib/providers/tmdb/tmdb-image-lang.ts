@@ -38,7 +38,10 @@ export function imageLangParam(originalLang?: string | null): string {
     .join(",");
 }
 
-export function imageLangRank(iso: string | null | undefined, originalLang?: string | null): number {
+export function imageLangRank(
+  iso: string | null | undefined,
+  originalLang?: string | null,
+): number {
   const order = effectiveOrder(originalLang);
   const idx = order.indexOf(iso ?? null);
   return idx === -1 ? -1 : order.length - idx;

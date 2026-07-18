@@ -145,9 +145,7 @@ type CommentsResponse = {
   Page: { threadComments: RawThreadComment[] | null };
 };
 
-export async function fetchThreadComments(
-  threadId: number,
-): Promise<AnilistThreadComment[]> {
+export async function fetchThreadComments(threadId: number): Promise<AnilistThreadComment[]> {
   const data = await anilistRequest<CommentsResponse>(COMMENTS_QUERY, { threadId });
   const raw = data?.Page?.threadComments ?? [];
   return raw.map(mapComment);
@@ -223,10 +221,9 @@ const DELETE_COMMENT_MUTATION = `mutation ($id: Int) {
 }`;
 
 export async function deleteThreadComment(commentId: number): Promise<void> {
-  await anilistRequest<{ DeleteThreadComment: { deleted: boolean } }>(
-    DELETE_COMMENT_MUTATION,
-    { id: commentId },
-  );
+  await anilistRequest<{ DeleteThreadComment: { deleted: boolean } }>(DELETE_COMMENT_MUTATION, {
+    id: commentId,
+  });
 }
 
 export function isAnilistConnected(): boolean {

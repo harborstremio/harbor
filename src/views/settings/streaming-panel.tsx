@@ -14,9 +14,9 @@ import {
 import { openUrl } from "@/lib/window";
 import { useSettings, type StreamingService } from "@/lib/settings";
 
-export function pickDebridForAddon(s: ReturnType<typeof useSettings>["settings"]):
-  | { service: string; key: string; label: string }
-  | null {
+export function pickDebridForAddon(
+  s: ReturnType<typeof useSettings>["settings"],
+): { service: string; key: string; label: string } | null {
   if (s.tbKey) return { service: "torbox", key: s.tbKey, label: "TorBox" };
   if (s.rdKey) return { service: "realdebrid", key: s.rdKey, label: "Real-Debrid" };
   if (s.adKey) return { service: "alldebrid", key: s.adKey, label: "AllDebrid" };
@@ -49,10 +49,20 @@ export function RecommendedAddonCard({
     const url = transportUrlFor(id);
     if (!url) return;
     const current = cometKeyFromUrl(url);
-    const stale = !current || current.service !== debrid.service || current.apiKey !== debrid.key.trim();
+    const stale =
+      !current || current.service !== debrid.service || current.apiKey !== debrid.key.trim();
     if (!stale) return;
     installAddon(id, urlBuilder(debrid.service, debrid.key)).catch(() => {});
-  }, [id, debrid, urlBuilder, settings.tbKey, settings.rdKey, settings.adKey, settings.pmKey, settings.dlKey]);
+  }, [
+    id,
+    debrid,
+    urlBuilder,
+    settings.tbKey,
+    settings.rdKey,
+    settings.adKey,
+    settings.pmKey,
+    settings.dlKey,
+  ]);
 
   const onInstall = async () => {
     if (!debrid) return;
@@ -90,7 +100,8 @@ export function RecommendedAddonCard({
         {error && <span className="text-[12px] text-danger">{error}</span>}
         {!debrid && !installed && (
           <span className="text-[12px] text-ink-subtle">
-            Save a debrid key above (TorBox, Real-Debrid, AllDebrid, Premiumize, or Debrid-Link) to enable this.
+            Save a debrid key above (TorBox, Real-Debrid, AllDebrid, Premiumize, or Debrid-Link) to
+            enable this.
           </span>
         )}
       </div>
@@ -108,7 +119,11 @@ export function RecommendedAddonCard({
           disabled={!debrid || busy}
           className="flex h-10 items-center gap-1.5 rounded-lg bg-ink px-4 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {busy ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} strokeWidth={2.2} />}
+          {busy ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Download size={13} strokeWidth={2.2} />
+          )}
           Install
         </button>
       )}
@@ -227,7 +242,11 @@ export function ManualAddonCard({
             disabled={!draft.trim() || busy}
             className="flex h-11 items-center gap-1.5 rounded-lg bg-ink px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} strokeWidth={2.2} />}
+            {busy ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <Download size={13} strokeWidth={2.2} />
+            )}
             Install
           </button>
         </div>
@@ -321,7 +340,6 @@ export function LanguagesPicker({
     </div>
   );
 }
-
 
 export function ServiceCard({
   service,

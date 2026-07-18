@@ -40,7 +40,9 @@ export function FeatureCard({
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="truncate text-[16.5px] font-semibold text-ink">{nameOf(resolved)}</span>
+            <span className="truncate text-[16.5px] font-semibold text-ink">
+              {nameOf(resolved)}
+            </span>
             <AddonStarBadge manifestId={resolved.manifest?.id} size="sm" />
           </div>
           <InstallPill

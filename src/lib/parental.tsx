@@ -7,12 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import {
-  anyTabLocked,
-  DEFAULT_HIDDEN,
-  type HiddenTabs,
-  type LockableTab,
-} from "./lockable-tabs";
+import { anyTabLocked, DEFAULT_HIDDEN, type HiddenTabs, type LockableTab } from "./lockable-tabs";
 import { hashProfilePassword, verifyProfilePassword } from "./profile-password";
 import { useProfiles } from "./profiles";
 

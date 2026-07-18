@@ -63,7 +63,8 @@ export function useMiddleClickScroll() {
       marker = document.createElement("div");
       marker.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:9999px;border:2px solid rgba(255,255,255,0.55);background:rgba(0,0,0,0.4);box-shadow:0 2px 12px rgba(0,0,0,0.5);z-index:2147483647;pointer-events:none;display:flex;align-items:center;justify-content:center;`;
       const dot = document.createElement("span");
-      dot.style.cssText = "width:5px;height:5px;border-radius:9999px;background:rgba(255,255,255,0.85);";
+      dot.style.cssText =
+        "width:5px;height:5px;border-radius:9999px;background:rgba(255,255,255,0.85);";
       marker.appendChild(dot);
       document.body.appendChild(marker);
       document.body.style.cursor = "ns-resize";

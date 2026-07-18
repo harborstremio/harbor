@@ -5,7 +5,13 @@ import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 
-export function AddonResults({ groups, onClose }: { groups: AddonResultGroup[]; onClose: () => void }) {
+export function AddonResults({
+  groups,
+  onClose,
+}: {
+  groups: AddonResultGroup[];
+  onClose: () => void;
+}) {
   if (groups.length === 0) return null;
   return (
     <section className="flex flex-col gap-6">

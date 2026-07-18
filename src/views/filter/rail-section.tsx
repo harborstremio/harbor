@@ -121,7 +121,10 @@ export function RailSection({ filter, rail }: { filter: MetaFilter; rail: Standa
             </div>
           ))
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40" />
+            <div
+              key={i}
+              className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40"
+            />
           ))}
     </Row>
   );

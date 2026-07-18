@@ -34,10 +34,26 @@ export function usePinnedRows(): HomeRow[] {
   const extraMap = useMemo(() => {
     const m = new Map<string, HomeRow>();
     if (trendingMetas.length > 0) {
-      m.set("trending", { key: "", type: "series", name: "", metas: trendingMetas, page: 1, hasMore: false, noDedup: true });
+      m.set("trending", {
+        key: "",
+        type: "series",
+        name: "",
+        metas: trendingMetas,
+        page: 1,
+        hasMore: false,
+        noDedup: true,
+      });
     }
     if (topMetas.length > 0) {
-      m.set("top100", { key: "", type: "series", name: "", metas: topMetas, page: 1, hasMore: false, noDedup: true });
+      m.set("top100", {
+        key: "",
+        type: "series",
+        name: "",
+        metas: topMetas,
+        page: 1,
+        hasMore: false,
+        noDedup: true,
+      });
     }
     return m;
   }, [trendingMetas, topMetas]);
@@ -59,12 +75,28 @@ export function usePinnedRows(): HomeRow[] {
         }
         const rail = anilistRails.find((r) => r.key === desc.params.railKey);
         if (rail && rail.metas.length > 0) {
-          out.push({ key, type: "series", name: desc.name, metas: rail.metas, page: 1, hasMore: false, noDedup: true });
+          out.push({
+            key,
+            type: "series",
+            name: desc.name,
+            metas: rail.metas,
+            page: 1,
+            hasMore: false,
+            noDedup: true,
+          });
         }
       } else if (desc.source === "mal") {
         const rail = malRails.find((r) => r.key === desc.params.railKey);
         if (rail && rail.metas.length > 0) {
-          out.push({ key, type: "series", name: desc.name, metas: rail.metas, page: 1, hasMore: false, noDedup: true });
+          out.push({
+            key,
+            type: "series",
+            name: desc.name,
+            metas: rail.metas,
+            page: 1,
+            hasMore: false,
+            noDedup: true,
+          });
         }
       }
     }

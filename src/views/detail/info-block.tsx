@@ -31,7 +31,9 @@ export function InfoBlock({ detail, isAnime = false }: { detail: TmdbDetail; isA
   const mediaType: "movie" | "tv" = detail.kind === "tv" ? "tv" : "movie";
 
   const fmtMoney = (n?: number) =>
-    n && n > 0 ? `$${(n / 1_000_000).toFixed(n >= 1_000_000_000 ? 2 : 0)}${n >= 1_000_000_000 ? "B" : "M"}` : null;
+    n && n > 0
+      ? `$${(n / 1_000_000).toFixed(n >= 1_000_000_000 ? 2 : 0)}${n >= 1_000_000_000 ? "B" : "M"}`
+      : null;
 
   const networkChips = detail.networksRich.slice(0, 4).map((n) => ({
     label: n.name,

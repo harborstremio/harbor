@@ -1,7 +1,9 @@
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { t } from "@/lib/i18n";
 
-export function resourceLabels(rs: NonNullable<ResolvedAddon["manifest"]>["resources"] | undefined): string[] {
+export function resourceLabels(
+  rs: NonNullable<ResolvedAddon["manifest"]>["resources"] | undefined,
+): string[] {
   if (!rs) return [];
   return rs.map((r) => (typeof r === "string" ? r : r.name));
 }

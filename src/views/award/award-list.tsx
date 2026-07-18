@@ -133,9 +133,20 @@ function FilterBar({
         )}
       </div>
       <div className="flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <DecadePill active={decade === null} label={t("All years")} onClick={() => onDecade(null)} tint={tint} />
+        <DecadePill
+          active={decade === null}
+          label={t("All years")}
+          onClick={() => onDecade(null)}
+          tint={tint}
+        />
         {decades.map((d) => (
-          <DecadePill key={d} active={decade === d} label={`${d}s`} onClick={() => onDecade(d)} tint={tint} />
+          <DecadePill
+            key={d}
+            active={decade === d}
+            label={`${d}s`}
+            onClick={() => onDecade(d)}
+            tint={tint}
+          />
         ))}
       </div>
     </section>
@@ -184,7 +195,12 @@ function CategorySection({ group, tint }: { group: CategoryHistory; tint: string
       </div>
       <ol className="flex flex-col">
         {group.entries.map((e, i) => (
-          <WinnerRow key={`${e.year}-${e.workTitle}-${i}`} entry={e} tint={tint} preferTv={preferTv} />
+          <WinnerRow
+            key={`${e.year}-${e.workTitle}-${i}`}
+            entry={e}
+            tint={tint}
+            preferTv={preferTv}
+          />
         ))}
       </ol>
     </section>
@@ -283,7 +299,10 @@ const TV_CATEGORY_RX =
 type AwardHit = { id: number; type: "movie" | "tv" };
 
 function normTitle(s: string): string {
-  return s.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "");
+  return s
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 function tmdbYear(date?: string): number | null {
@@ -307,7 +326,9 @@ async function searchType(
       .map((r) => ({
         id: Number(r.id),
         title: String(
-          type === "movie" ? r.title ?? r.original_title ?? "" : r.name ?? r.original_name ?? "",
+          type === "movie"
+            ? (r.title ?? r.original_title ?? "")
+            : (r.name ?? r.original_name ?? ""),
         ),
         year: tmdbYear(
           ((type === "movie" ? r.release_date : r.first_air_date) as string) || undefined,

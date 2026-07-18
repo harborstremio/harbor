@@ -220,7 +220,8 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
       }
       if ((e.metaKey || e.ctrlKey) && (e.key === "z" || e.key === "Z")) {
         const el = e.target as HTMLElement | null;
-        if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+        if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable))
+          return;
         e.preventDefault();
         if (e.shiftKey) redo();
         else undo();
@@ -413,7 +414,8 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
                 Leave without saving?
               </h2>
               <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-muted">
-                Your changes to this theme aren&apos;t saved yet. They&apos;ll be lost if you leave now.
+                Your changes to this theme aren&apos;t saved yet. They&apos;ll be lost if you leave
+                now.
               </p>
               <div className="mt-5 flex items-center justify-end gap-2.5">
                 <button

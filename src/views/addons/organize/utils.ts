@@ -62,7 +62,9 @@ export function noticeFor(result: Exclude<SaveResult, { ok: true }>): Notice {
     case "write":
       return {
         tone: "danger",
-        text: t("Stremio didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again."),
+        text: t(
+          "Stremio didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.",
+        ),
         retry: true,
       };
     case "verify":

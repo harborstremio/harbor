@@ -133,7 +133,10 @@ export function StreamsView({
               <span>
                 {totalStreams === 1
                   ? t("{n} source across {count} addons", { n: totalStreams, count: groups.length })
-                  : t("{n} sources across {count} addons", { n: totalStreams, count: groups.length })}
+                  : t("{n} sources across {count} addons", {
+                      n: totalStreams,
+                      count: groups.length,
+                    })}
               </span>
               {!pipelineDone && (
                 <span className="flex items-center gap-1.5">

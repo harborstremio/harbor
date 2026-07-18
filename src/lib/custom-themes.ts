@@ -1,4 +1,13 @@
-import { FONT_PAIRS, type ChromeConfig, type ChromeNavId, type FontPairId, type ThemePreset, type ThemeButtonStyle, type ThemeCardStyle, type ThemeLayout } from "./theme";
+import {
+  FONT_PAIRS,
+  type ChromeConfig,
+  type ChromeNavId,
+  type FontPairId,
+  type ThemePreset,
+  type ThemeButtonStyle,
+  type ThemeCardStyle,
+  type ThemeLayout,
+} from "./theme";
 
 const STORAGE_KEY = "harbor.custom-themes.v1";
 const PREFIX = "user:";
@@ -65,8 +74,27 @@ function isCustomTheme(t: unknown): t is CustomTheme {
   return true;
 }
 
-const LAYOUTS = new Set<ThemeLayout>(["sidebar", "topdock", "rail", "stremio", "minui", "dracula", "nord", "forest", "royal", "custom"]);
-const CARDS = new Set<ThemeCardStyle>(["flat", "glass", "stremio", "minui", "crunch", "noir", "custom"]);
+const LAYOUTS = new Set<ThemeLayout>([
+  "sidebar",
+  "topdock",
+  "rail",
+  "stremio",
+  "minui",
+  "dracula",
+  "nord",
+  "forest",
+  "royal",
+  "custom",
+]);
+const CARDS = new Set<ThemeCardStyle>([
+  "flat",
+  "glass",
+  "stremio",
+  "minui",
+  "crunch",
+  "noir",
+  "custom",
+]);
 const BUTTONS = new Set<ThemeButtonStyle>(["flat", "glossy", "minui", "crunch", "noir", "custom"]);
 const asLayout = (v: unknown): ThemeLayout | undefined =>
   typeof v === "string" && (LAYOUTS as Set<string>).has(v) ? (v as ThemeLayout) : undefined;
@@ -99,7 +127,9 @@ function parseNavMap(raw: unknown): Partial<Record<ChromeNavId, string>> | undef
 
 function parseNavIdList(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((x): x is string => typeof x === "string" && !!x && x.length <= 64).slice(0, 64);
+  return raw
+    .filter((x): x is string => typeof x === "string" && !!x && x.length <= 64)
+    .slice(0, 64);
 }
 
 function parseNavCustomization(
@@ -121,11 +151,19 @@ function parseNavCustomization(
 
 function parseChrome(raw: unknown): ChromeConfig | undefined {
   if (!raw || typeof raw !== "object") return undefined;
-  const o = raw as { position?: unknown; brand?: unknown; items?: unknown; labels?: unknown; icons?: unknown };
+  const o = raw as {
+    position?: unknown;
+    brand?: unknown;
+    items?: unknown;
+    labels?: unknown;
+    icons?: unknown;
+  };
   const position = o.position === "topbar" ? "topbar" : "sidebar";
   const brand = typeof o.brand === "string" ? o.brand.slice(0, 40) : "";
   const items = Array.isArray(o.items)
-    ? o.items.filter((x): x is ChromeNavId => typeof x === "string" && (CHROME_NAV as Set<string>).has(x))
+    ? o.items.filter(
+        (x): x is ChromeNavId => typeof x === "string" && (CHROME_NAV as Set<string>).has(x),
+      )
     : [];
   const labels = parseNavMap(o.labels);
   const icons = parseNavMap(o.icons);
@@ -151,7 +189,9 @@ function emit(): void {
   for (const fn of subscribers) fn();
 }
 
-export function parseThemeJson(text: string): { ok: true; theme: CustomTheme } | { ok: false; error: string } {
+export function parseThemeJson(
+  text: string,
+): { ok: true; theme: CustomTheme } | { ok: false; error: string } {
   let raw: unknown;
   try {
     raw = JSON.parse(text);
@@ -190,7 +230,9 @@ export function parseThemeJson(text: string): { ok: true; theme: CustomTheme } |
   const fontPair = asFontPair(co.fontPair);
   const bokeh = typeof co.bokeh === "boolean" ? co.bokeh : undefined;
   const chrome = parseChrome((co as { chrome?: unknown }).chrome);
-  const navCustomization = parseNavCustomization((co as { navCustomization?: unknown }).navCustomization);
+  const navCustomization = parseNavCustomization(
+    (co as { navCustomization?: unknown }).navCustomization,
+  );
   const css = typeof co.css === "string" ? co.css : undefined;
   const js = typeof co.js === "string" ? co.js : undefined;
   const html = typeof co.html === "string" ? co.html : undefined;
@@ -318,7 +360,8 @@ export function getStarterTemplate(): string {
         dim: 0,
       },
       logo: {
-        wordmark: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMjQiPjx0ZXh0IHg9IjAiIHk9IjE4IiBmb250LWZhbWlseT0iJ0ZyYXVuY2VzJyxzZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iI2U4ZWJmMiI+TXkgVGhlbWU8L3RleHQ+PC9zdmc+",
+        wordmark:
+          "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMjQiPjx0ZXh0IHg9IjAiIHk9IjE4IiBmb250LWZhbWlseT0iJ0ZyYXVuY2VzJyxzZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iI2U4ZWJmMiI+TXkgVGhlbWU8L3RleHQ+PC9zdmc+",
         mark: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiIGZpbGw9IiM3YjVjZmYiLz48L3N2Zz4=",
       },
       css: "/* Optional: extra CSS layered on top. Targets work like a regular stylesheet. */\n.harbor-cinema-badge { color: #7b5cff; border-color: rgba(123,92,255,0.35); }",

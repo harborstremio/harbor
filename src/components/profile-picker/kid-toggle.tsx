@@ -50,11 +50,17 @@ export function KidToggle({
       })}
       <div className="relative flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className={`font-display text-[16px] font-semibold ${on ? "text-white" : "text-ink"}`}>
+          <span
+            className={`font-display text-[16px] font-semibold ${on ? "text-white" : "text-ink"}`}
+          >
             {t("Kids profile")}
           </span>
-          <span className={`max-w-[320px] text-[12px] leading-snug ${on ? "text-white/85" : "text-ink-subtle"}`}>
-            {t("A safe, simple space: kid-friendly titles, big art, one-tap play, and a watch-time limit.")}
+          <span
+            className={`max-w-[320px] text-[12px] leading-snug ${on ? "text-white/85" : "text-ink-subtle"}`}
+          >
+            {t(
+              "A safe, simple space: kid-friendly titles, big art, one-tap play, and a watch-time limit.",
+            )}
           </span>
         </div>
         <Switch on={on} onClick={() => onChange(on ? null : DEFAULT_KID)} />

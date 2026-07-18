@@ -16,7 +16,8 @@ export function useDraftHistory(initial: () => Draft) {
 
   const setDraft = useCallback((updater: Updater) => {
     setState((s) => {
-      const next = typeof updater === "function" ? (updater as (p: Draft) => Draft)(s.draft) : updater;
+      const next =
+        typeof updater === "function" ? (updater as (p: Draft) => Draft)(s.draft) : updater;
       if (next === s.draft) return s;
       const now = Date.now();
       const coalesce = s.past.length > 0 && now - lastPushAt.current < COALESCE_MS;

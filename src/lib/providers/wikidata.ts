@@ -184,7 +184,15 @@ function parseRows(data: any, result: "won" | "nominated"): AwardEntry[] {
     let bucket = map.get(key);
     if (!bucket) {
       bucket = {
-        entry: { type: classify(awardName), awardName, category, year, result, workTitle, workImdb },
+        entry: {
+          type: classify(awardName),
+          awardName,
+          category,
+          year,
+          result,
+          workTitle,
+          workImdb,
+        },
         recipients: new Set<string>(),
       };
       map.set(key, bucket);

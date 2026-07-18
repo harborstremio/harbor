@@ -66,10 +66,14 @@ export function NewRecordingView({
   useEffect(() => {
     if (dir) return;
     let cancelled = false;
-    getDefaultDir().then((d) => {
-      if (!cancelled && d) setDir(d);
-    }).catch(() => {});
-    return () => { cancelled = true; };
+    getDefaultDir()
+      .then((d) => {
+        if (!cancelled && d) setDir(d);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, [getDefaultDir, dir]);
 
   const chosen = choices.find((c) => c.kind === selectedKind) ?? choices[choices.length - 1];
@@ -116,15 +120,13 @@ export function NewRecordingView({
                 selected={selectedKind === c.kind}
                 onSelect={() => setSelectedKind(c.kind)}
                 renderTrailing={
-                  c.kind === "custom"
-                    ? (
-                        <CustomMinutes
-                          value={customMinutes}
-                          onChange={setCustomMinutes}
-                          active={selectedKind === "custom"}
-                        />
-                      )
-                    : null
+                  c.kind === "custom" ? (
+                    <CustomMinutes
+                      value={customMinutes}
+                      onChange={setCustomMinutes}
+                      active={selectedKind === "custom"}
+                    />
+                  ) : null
                 }
               />
             ))}
@@ -155,7 +157,9 @@ export function NewRecordingView({
       <Footer>
         <div className="flex min-w-0 flex-1 flex-col text-[12px]">
           {error ? (
-            <span className="truncate text-amber-300" title={error}>{error}</span>
+            <span className="truncate text-amber-300" title={error}>
+              {error}
+            </span>
           ) : (
             <span className="text-ink-subtle">{t("Saved as .ts (works in mpv, VLC, ffmpeg)")}</span>
           )}
@@ -188,9 +192,7 @@ function ChoiceRow({
     <button
       onClick={onSelect}
       className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-start transition-colors ${
-        selected
-          ? "border-ink bg-canvas/70"
-          : "border-edge-soft bg-canvas/40 hover:bg-canvas/60"
+        selected ? "border-ink bg-canvas/70" : "border-edge-soft bg-canvas/40 hover:bg-canvas/60"
       }`}
     >
       <span
@@ -220,7 +222,9 @@ function CustomMinutes({
 }) {
   const t = useT();
   return (
-    <div className={`flex items-center gap-2 transition-opacity ${active ? "opacity-100" : "opacity-55"}`}>
+    <div
+      className={`flex items-center gap-2 transition-opacity ${active ? "opacity-100" : "opacity-55"}`}
+    >
       <input
         type="number"
         min={5}

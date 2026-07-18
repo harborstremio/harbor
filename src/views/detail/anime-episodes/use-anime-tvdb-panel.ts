@@ -11,7 +11,11 @@ import {
   type TvdbSeasonTypeOption,
 } from "@/lib/providers/tvdb";
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
-import { fetchTvdbOrderBySeriesId, seasonDateRange, type TvdbOrder } from "@/lib/providers/tvdb-order";
+import {
+  fetchTvdbOrderBySeriesId,
+  seasonDateRange,
+  type TvdbOrder,
+} from "@/lib/providers/tvdb-order";
 import type { PickerItem } from "../series-episodes/season-arc-picker";
 
 export type AnimeTvdbPanel = {
@@ -107,7 +111,12 @@ export function useAnimeTvdbPanel(
       const effective = values.has(norm) ? norm : values.has("aired") ? "aired" : nonEmpty[0].value;
       setOrderTypes(nonEmpty);
       setActiveType(effective);
-      const o = await fetchTvdbOrderBySeriesId(tvdbKey, seriesId, effective, tvdbLangFromIso1(tmdbLanguageIso()));
+      const o = await fetchTvdbOrderBySeriesId(
+        tvdbKey,
+        seriesId,
+        effective,
+        tvdbLangFromIso1(tmdbLanguageIso()),
+      );
       if (cancelled) return;
       setOrdering(o);
       if (!o) setResolved("none");
@@ -125,9 +134,10 @@ export function useAnimeTvdbPanel(
     const byAbs = new Map<number, KitsuEpisode>();
     const byTvdbId = new Map<number, KitsuEpisode>();
     for (const ep of pool) {
-      const abs = franchiseWide ? ep.absoluteNumber : ep.absoluteNumber ?? ep.number;
+      const abs = franchiseWide ? ep.absoluteNumber : (ep.absoluteNumber ?? ep.number);
       if (abs != null && !byAbs.has(abs)) byAbs.set(abs, ep);
-      if (ep.tvdbEpisodeId != null && !byTvdbId.has(ep.tvdbEpisodeId)) byTvdbId.set(ep.tvdbEpisodeId, ep);
+      if (ep.tvdbEpisodeId != null && !byTvdbId.has(ep.tvdbEpisodeId))
+        byTvdbId.set(ep.tvdbEpisodeId, ep);
       if (ep.imdbSeason != null && ep.imdbSeason >= 1 && ep.imdbEpisode != null) {
         const k = `${ep.imdbSeason}:${ep.imdbEpisode}`;
         if (!byPair.has(k)) byPair.set(k, ep);
@@ -174,7 +184,9 @@ export function useAnimeTvdbPanel(
     }
     const matchedIds = new Set<number>();
     for (const eps of subset.values()) for (const e of eps) matchedIds.add(e.id);
-    const leftovers = pool.filter((e) => e.id > 0 && e.sourceMetaId == null && !matchedIds.has(e.id));
+    const leftovers = pool.filter(
+      (e) => e.id > 0 && e.sourceMetaId == null && !matchedIds.has(e.id),
+    );
     if (leftovers.length > 0) {
       items.push({ key: "specials", name: t("Specials"), count: leftovers.length, extra: true });
       subset.set("specials", leftovers);

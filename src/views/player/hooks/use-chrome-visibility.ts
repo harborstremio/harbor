@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { getSeekHovering, subscribeSeekHovering } from "@/lib/player/playback-clock";
-import { CHROME_HIDE_MS_PAUSED, CHROME_HIDE_MS_PLAYING, CHROME_HIDE_MS_RESUME } from "../player-utils";
+import {
+  CHROME_HIDE_MS_PAUSED,
+  CHROME_HIDE_MS_PLAYING,
+  CHROME_HIDE_MS_RESUME,
+} from "../player-utils";
 import { getFocusable, isVisible } from "@/lib/keyboard-navigation";
 
 const UI_SCALE_ACTIVITY_EVENT = "harbor:ui-scale-activity";

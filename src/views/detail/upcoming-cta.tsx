@@ -9,7 +9,9 @@ export function UpcomingCta({ detail, onTry }: { detail: TmdbDetail | null; onTr
   const date = detail?.kind === "movie" ? detail?.releaseDate : detail?.firstAirDate;
   const friendly = upcomingDateLabel(t, date);
   return (
-    <Tooltip label={t("Not officially released yet. Click to search anyway in case of an early release.")}>
+    <Tooltip
+      label={t("Not officially released yet. Click to search anyway in case of an early release.")}
+    >
       <button
         onClick={onTry}
         className="group flex h-12 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-full border border-edge bg-elevated/40 px-7 text-[15px] font-semibold text-ink-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[transform,background-color,border-color,color] duration-200 hover:border-ink-subtle hover:bg-elevated/70 hover:text-ink active:scale-[0.98]"
