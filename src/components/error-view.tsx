@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import snip404 from "@/assets/snip404.svg";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { submitErrorReport } from "@/lib/bug-report";
+import { loadStartupCrashReport, startupCrashToHarborError } from "@/lib/startup-crash";
+import { isStaleTauriListenerError } from "@/lib/tauri-unlisten";
 
 export type HarborError = {
   code: string;
@@ -20,6 +22,7 @@ const APP_VERSION = __APP_VERSION__;
 function isNoisyError(reason: unknown, message?: string): boolean {
   const r = reason as { name?: string; message?: string } | undefined;
   const m = ((message || r?.message) ?? "").toLowerCase();
+  if (isStaleTauriListenerError(reason ?? message)) return true;
   if (m.includes("resizeobserver loop")) return true;
   if (m.includes("non-error promise rejection")) return true;
   if (m.includes("the resource id") && m.includes("is invalid")) return true;
@@ -44,6 +47,7 @@ export function ErrorView() {
   const [report, setReport] = useState<ReportState>({ kind: "idle" });
 
   useEffect(() => {
+    let cancelled = false;
     const onError = (e: Event) => {
       const ce = e as CustomEvent<HarborError>;
       setError(ce.detail);
@@ -63,12 +67,13 @@ export function ErrorView() {
       });
     };
     const onUnhandledRejection = (e: PromiseRejectionEvent) => {
-      const reason = e.reason as { name?: string; message?: string; stack?: string } | string | undefined;
+      const reason = e.reason as
+        | { name?: string; message?: string; stack?: string }
+        | string
+        | undefined;
       const message =
-        typeof reason === "string"
-          ? reason
-          : reason?.message ?? "Unhandled promise rejection.";
-      const name = typeof reason === "object" ? reason?.name ?? "Rejection" : "Rejection";
+        typeof reason === "string" ? reason : (reason?.message ?? "Unhandled promise rejection.");
+      const name = typeof reason === "object" ? (reason?.name ?? "Rejection") : "Rejection";
       if (isNoisyError(reason, message)) return;
       showHarborError({
         code: name,
@@ -83,7 +88,11 @@ export function ErrorView() {
     window.addEventListener("harbor:error", onError);
     window.addEventListener("error", onWindowError);
     window.addEventListener("unhandledrejection", onUnhandledRejection);
+    void loadStartupCrashReport().then((startupReport) => {
+      if (!cancelled && startupReport) setError(startupCrashToHarborError(startupReport));
+    });
     return () => {
+      cancelled = true;
       window.removeEventListener("harbor:error", onError);
       window.removeEventListener("error", onWindowError);
       window.removeEventListener("unhandledrejection", onUnhandledRejection);
@@ -227,8 +236,7 @@ export function ErrorView() {
         <p className="text-[11.5px] text-ink-subtle">
           {report.kind === "sent" ? (
             <>
-              Thanks. Tracked as{" "}
-              <span className="font-mono text-ink-muted">{report.id}</span>.
+              Thanks. Tracked as <span className="font-mono text-ink-muted">{report.id}</span>.
             </>
           ) : report.kind === "error" ? (
             <span className="text-danger/80">Could not send: {report.message}</span>
@@ -285,7 +293,9 @@ function TechnicalDetail({ content }: { content: string }) {
         onClick={() => setOpen((v) => !v)}
         className="inline-flex w-fit items-center gap-2 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
       >
-        <ChevronIcon className={`h-[10px] w-[10px] transition-transform duration-200 ${open ? "rotate-90" : ""}`} />
+        <ChevronIcon
+          className={`h-[10px] w-[10px] transition-transform duration-200 ${open ? "rotate-90" : ""}`}
+        />
         Technical detail
       </button>
 

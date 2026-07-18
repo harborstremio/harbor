@@ -1,4 +1,5 @@
 import { useEffect, useRef, type RefObject } from "react";
+import { shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { SFX } from "@/lib/sfx";
 import { isModalOverlayOpen, modalOverlayClose } from "@/lib/modal-overlay";
 
@@ -910,6 +911,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
 
+      if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (isLocallyManaged(target)) return;
       if (activeIsSearch && isEditingSearch) return;
       if (isEditable(target) && !isSearchLikeField(target)) return;

@@ -15,7 +15,7 @@ import {
   effectiveBinding,
   eventToBinding,
   formatBindingForDisplay,
-  isTypingTarget,
+  shouldHandleGlobalKeyboardEvent,
 } from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
@@ -238,7 +238,7 @@ function SearchPill({ onOpen }: { onOpen: () => void }) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (isTypingTarget(e)) return;
+      if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (eventToBinding(e) !== binding) return;
       e.preventDefault();
       onOpen();

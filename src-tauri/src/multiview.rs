@@ -2,16 +2,74 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
-use tauri::{AppHandle, State};
 #[cfg(windows)]
 use tauri::Manager;
+use tauri::{AppHandle, State};
 use tokio::process::{Child, Command};
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Semaphore};
 
 #[cfg(windows)]
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 pub const MAX_SLOTS: u32 = 4;
+#[cfg(any(windows, test))]
+const IPC_QUEUE_CAPACITY: usize = 64;
+#[cfg(any(windows, test))]
+const MAX_IPC_BUFFER_BYTES: usize = 1_048_576;
+
+#[cfg(any(windows, test))]
+#[derive(Debug, PartialEq)]
+enum MultiviewIpcEvent {
+    Error(String),
+    Playing,
+}
+
+#[cfg(any(windows, test))]
+fn classify_ipc_event(text: &str) -> Option<MultiviewIpcEvent> {
+    let value = serde_json::from_str::<serde_json::Value>(text).ok()?;
+    match value.get("event").and_then(|event| event.as_str())? {
+        "end-file" => {
+            let reason = value.get("reason").and_then(|reason| reason.as_str())?;
+            matches!(reason, "error" | "eof" | "network" | "unknown")
+                .then(|| MultiviewIpcEvent::Error(reason.to_string()))
+        }
+        "file-loaded" | "playback-restart" => Some(MultiviewIpcEvent::Playing),
+        _ => None,
+    }
+}
+
+#[cfg(any(windows, test))]
+fn consume_ipc_lines<F>(pending: &mut Vec<u8>, chunk: &[u8], mut consume: F) -> bool
+where
+    F: FnMut(&str),
+{
+    pending.extend_from_slice(chunk);
+    let mut consumed = 0;
+    let mut oversized = false;
+    while let Some(offset) = pending[consumed..].iter().position(|&byte| byte == b'\n') {
+        let start = consumed;
+        let end = start + offset;
+        consumed = end + 1;
+        if end - start > MAX_IPC_BUFFER_BYTES {
+            oversized = true;
+            continue;
+        }
+        if let Ok(text) = std::str::from_utf8(&pending[start..end]) {
+            let text = text.trim();
+            if !text.is_empty() {
+                consume(text);
+            }
+        }
+    }
+    if consumed > 0 {
+        pending.drain(..consumed);
+    }
+    if pending.len() > MAX_IPC_BUFFER_BYTES {
+        pending.clear();
+        oversized = true;
+    }
+    oversized
+}
 
 struct Slot {
     child: Option<Child>,
@@ -23,14 +81,14 @@ struct Slot {
 
 pub struct MultiviewState {
     slots: Arc<Mutex<HashMap<u32, Slot>>>,
-    spawn_lock: Arc<Mutex<()>>,
+    spawn_lock: Arc<Semaphore>,
 }
 
 impl MultiviewState {
     pub fn new() -> Self {
         Self {
             slots: Arc::new(Mutex::new(HashMap::new())),
-            spawn_lock: Arc::new(Mutex::new(())),
+            spawn_lock: Arc::new(Semaphore::new(1)),
         }
     }
 }
@@ -143,10 +201,7 @@ fn css_to_physical(
     (x, y, w.max(1), h.max(1))
 }
 
-async fn on_main<R: Send + 'static>(
-    app: &AppHandle,
-    f: impl FnOnce() -> R + Send + 'static,
-) -> R {
+async fn on_main<R: Send + 'static>(app: &AppHandle, f: impl FnOnce() -> R + Send + 'static) -> R {
     let (tx, rx) = tokio::sync::oneshot::channel();
     let _ = app.run_on_main_thread(move || {
         let _ = tx.send(f());
@@ -322,6 +377,38 @@ fn kill_orphan_mpv_for_slot(parent: isize, slot: u32, keep_pid: Option<u32>) {
 #[cfg(not(windows))]
 fn kill_orphan_mpv_for_slot(_parent: isize, _slot: u32, _keep_pid: Option<u32>) {}
 
+#[cfg(any(windows, test))]
+async fn write_ipc_messages<W>(
+    mut writer: W,
+    mut messages: tokio::sync::mpsc::Receiver<String>,
+    mut shutdown: tokio::sync::watch::Receiver<bool>,
+) where
+    W: tokio::io::AsyncWrite + Unpin,
+{
+    use tokio::io::AsyncWriteExt;
+
+    loop {
+        tokio::select! {
+            biased;
+            changed = shutdown.changed() => {
+                if changed.is_err() || *shutdown.borrow() {
+                    break;
+                }
+            }
+            message = messages.recv() => {
+                let Some(message) = message else {
+                    break;
+                };
+                if writer.write_all(message.as_bytes()).await.is_err()
+                    || writer.write_all(b"\n").await.is_err()
+                {
+                    break;
+                }
+            }
+        }
+    }
+}
+
 #[cfg(windows)]
 async fn connect_ipc(
     app: &AppHandle,
@@ -329,7 +416,7 @@ async fn connect_ipc(
     pipe: &str,
 ) -> Option<tokio::sync::mpsc::Sender<String>> {
     use tauri::Emitter;
-    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+    use tokio::io::AsyncReadExt;
     use tokio::net::windows::named_pipe::ClientOptions;
     let stream = {
         let mut retries = 20;
@@ -344,77 +431,68 @@ async fn connect_ipc(
             }
         }
     }?;
-    let (mut reader, mut writer) = tokio::io::split(stream);
-    let (tx, mut rx) = tokio::sync::mpsc::channel::<String>(16);
-    let (event_tx, mut event_rx) = tokio::sync::mpsc::unbounded_channel::<Vec<u8>>();
+    let (mut reader, writer) = tokio::io::split(stream);
+    let (tx, rx) = tokio::sync::mpsc::channel::<String>(16);
+    let (event_tx, mut event_rx) =
+        tokio::sync::mpsc::channel::<MultiviewIpcEvent>(IPC_QUEUE_CAPACITY);
+    let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
     let app_for_events = app.clone();
 
     tauri::async_runtime::spawn(async move {
         let mut buf = [0u8; 8192];
-        loop {
+        let mut pending = Vec::with_capacity(16_384);
+        let mut last_oversized_log = None;
+        'read: loop {
             match reader.read(&mut buf).await {
                 Ok(0) | Err(_) => break,
                 Ok(n) => {
-                    let _ = event_tx.send(buf[..n].to_vec());
-                }
-            }
-        }
-    });
-
-    tauri::async_runtime::spawn(async move {
-        let mut pending: Vec<u8> = Vec::with_capacity(16_384);
-        while let Some(chunk) = event_rx.recv().await {
-            pending.extend_from_slice(&chunk);
-            while let Some(nl) = pending.iter().position(|&b| b == b'\n') {
-                let line: Vec<u8> = pending.drain(..=nl).collect();
-                let text = match std::str::from_utf8(&line[..line.len().saturating_sub(1)]) {
-                    Ok(s) => s.trim(),
-                    Err(_) => continue,
-                };
-                if text.is_empty() {
-                    continue;
-                }
-                let Ok(v) = serde_json::from_str::<serde_json::Value>(text) else {
-                    continue;
-                };
-                let Some(event) = v.get("event").and_then(|x| x.as_str()) else {
-                    continue;
-                };
-                match event {
-                    "end-file" => {
-                        let reason = v.get("reason").and_then(|x| x.as_str()).unwrap_or("");
-                        if matches!(reason, "error" | "eof" | "network" | "unknown") {
-                            let _ = app_for_events.emit(
-                                "multiview-slot-error",
-                                serde_json::json!({ "slot": slot, "reason": reason }),
-                            );
+                    let mut events = Vec::new();
+                    let oversized = consume_ipc_lines(&mut pending, &buf[..n], |line| {
+                        if let Some(event) = classify_ipc_event(line) {
+                            events.push(event);
+                        }
+                    });
+                    if oversized
+                        && last_oversized_log
+                            .map(|last: std::time::Instant| {
+                                last.elapsed() >= Duration::from_secs(5)
+                            })
+                            .unwrap_or(true)
+                    {
+                        eprintln!("[harbor::multiview] discarding oversized IPC message");
+                        last_oversized_log = Some(std::time::Instant::now());
+                    }
+                    for event in events {
+                        if event_tx.send(event).await.is_err() {
+                            break 'read;
                         }
                     }
-                    "file-loaded" | "playback-restart" => {
-                        let _ = app_for_events.emit(
-                            "multiview-slot-playing",
-                            serde_json::json!({ "slot": slot }),
-                        );
-                    }
-                    _ => {}
                 }
             }
-            if pending.len() > 1_048_576 {
-                pending.clear();
+        }
+        let _ = shutdown_tx.send(true);
+    });
+
+    tauri::async_runtime::spawn(async move {
+        while let Some(event) = event_rx.recv().await {
+            match event {
+                MultiviewIpcEvent::Error(reason) => {
+                    let _ = app_for_events.emit(
+                        "multiview-slot-error",
+                        serde_json::json!({ "slot": slot, "reason": reason }),
+                    );
+                }
+                MultiviewIpcEvent::Playing => {
+                    let _ = app_for_events.emit(
+                        "multiview-slot-playing",
+                        serde_json::json!({ "slot": slot }),
+                    );
+                }
             }
         }
     });
 
-    tauri::async_runtime::spawn(async move {
-        while let Some(msg) = rx.recv().await {
-            if writer.write_all(msg.as_bytes()).await.is_err() {
-                break;
-            }
-            if writer.write_all(b"\n").await.is_err() {
-                break;
-            }
-        }
-    });
+    tauri::async_runtime::spawn(write_ipc_messages(writer, rx, shutdown_rx));
     Some(tx)
 }
 
@@ -616,7 +694,11 @@ async fn ensure_slot(
     slot: u32,
     user_agent: Option<&str>,
 ) -> Result<Option<tokio::sync::mpsc::Sender<String>>, String> {
-    let _guard = state.spawn_lock.lock().await;
+    let _permit = state
+        .spawn_lock
+        .acquire()
+        .await
+        .map_err(|_| "multiview spawn lock closed".to_string())?;
     let mh = main_hwnd(app)?;
     {
         let slots = state.slots.lock().await;
@@ -726,13 +808,17 @@ pub async fn multiview_audio_focus(
     state: State<'_, MultiviewState>,
     focus: i64,
 ) -> Result<(), String> {
-    let slots = state.slots.lock().await;
-    for (slot, s) in slots.iter() {
-        let muted = !(focus >= 0 && *slot as i64 == focus);
-        let msg = format!("{{\"command\":[\"set_property\",\"mute\",{muted}]}}");
-        if let Some(tx) = s.writer.as_ref() {
-            let _ = tx.send(msg).await;
-        }
+    let writers: Vec<(u32, tokio::sync::mpsc::Sender<String>)> = {
+        let slots = state.slots.lock().await;
+        slots
+            .iter()
+            .filter_map(|(slot, state)| state.writer.clone().map(|writer| (*slot, writer)))
+            .collect()
+    };
+    for (slot, writer) in writers {
+        let muted = !(focus >= 0 && slot as i64 == focus);
+        let message = format!("{{\"command\":[\"set_property\",\"mute\",{muted}]}}");
+        let _ = writer.send(message).await;
     }
     Ok(())
 }
@@ -814,4 +900,108 @@ pub async fn multiview_stop_all(
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        classify_ipc_event, consume_ipc_lines, MultiviewIpcEvent, IPC_QUEUE_CAPACITY,
+        MAX_IPC_BUFFER_BYTES,
+    };
+    use std::time::Duration;
+
+    #[test]
+    fn ipc_parser_handles_split_lines_and_keeps_partial_tail() {
+        let mut pending = Vec::new();
+        let mut lines = Vec::new();
+
+        assert!(!consume_ipc_lines(
+            &mut pending,
+            b"{\"event\":\"file-",
+            |line| { lines.push(line.to_string()) }
+        ));
+        assert!(!consume_ipc_lines(
+            &mut pending,
+            b"loaded\"}\n{\"event\":\"end-file\"}\npartial",
+            |line| lines.push(line.to_string()),
+        ));
+
+        assert_eq!(
+            lines,
+            ["{\"event\":\"file-loaded\"}", "{\"event\":\"end-file\"}"]
+        );
+        assert_eq!(pending, b"partial");
+    }
+
+    #[test]
+    fn ipc_parser_discards_oversized_unterminated_message() {
+        let mut pending = Vec::new();
+        let oversized = vec![b'x'; MAX_IPC_BUFFER_BYTES + 1];
+
+        assert!(consume_ipc_lines(&mut pending, &oversized, |_| {
+            panic!("oversized message must not be delivered")
+        }));
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn ipc_classifier_ignores_malformed_and_replaceable_events() {
+        assert_eq!(classify_ipc_event("not-json"), None);
+        assert_eq!(
+            classify_ipc_event(r#"{"event":"property-change","name":"time-pos"}"#),
+            None
+        );
+        assert_eq!(
+            classify_ipc_event(r#"{"event":"end-file","reason":"error"}"#),
+            Some(MultiviewIpcEvent::Error("error".to_string()))
+        );
+    }
+
+    #[tokio::test]
+    async fn saturated_ipc_queue_preserves_critical_events() {
+        let (sender, mut receiver) = tokio::sync::mpsc::channel(IPC_QUEUE_CAPACITY);
+        for _ in 0..IPC_QUEUE_CAPACITY {
+            sender.send(MultiviewIpcEvent::Playing).await.unwrap();
+        }
+        let blocked_sender = sender.clone();
+        let send = tokio::spawn(async move {
+            blocked_sender
+                .send(MultiviewIpcEvent::Error("error".to_string()))
+                .await
+        });
+        tokio::task::yield_now().await;
+        assert!(!send.is_finished());
+
+        assert_eq!(receiver.recv().await, Some(MultiviewIpcEvent::Playing));
+        assert!(send.await.unwrap().is_ok());
+        for _ in 1..IPC_QUEUE_CAPACITY {
+            assert_eq!(receiver.recv().await, Some(MultiviewIpcEvent::Playing));
+        }
+        assert_eq!(
+            receiver.recv().await,
+            Some(MultiviewIpcEvent::Error("error".to_string()))
+        );
+    }
+
+    #[tokio::test]
+    async fn ipc_writer_stops_when_reader_signals_shutdown() {
+        let (client, mut server) = tokio::io::duplex(64);
+        let (_reader, writer) = tokio::io::split(client);
+        let (tx, rx) = tokio::sync::mpsc::channel(1);
+        let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
+        let task = tokio::spawn(super::write_ipc_messages(writer, rx, shutdown_rx));
+
+        tx.send("before-shutdown".to_string()).await.unwrap();
+        let mut bytes = vec![0; 16];
+        tokio::io::AsyncReadExt::read_exact(&mut server, &mut bytes)
+            .await
+            .unwrap();
+        assert_eq!(&bytes, b"before-shutdown\n");
+
+        shutdown_tx.send(true).unwrap();
+        tokio::time::timeout(Duration::from_millis(100), task)
+            .await
+            .expect("writer task should stop")
+            .unwrap();
+    }
 }

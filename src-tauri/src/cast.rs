@@ -51,6 +51,14 @@ fn needs_auto_remux(kind: &str, url: &str) -> bool {
     true
 }
 
+fn required_control_url(kind: &str, control_url: Option<String>) -> Result<Option<String>, String> {
+    match (kind, control_url) {
+        ("dlna", None) => Err("DLNA device missing control_url".to_string()),
+        ("roku", None) => Err("Roku device missing ecp_base".to_string()),
+        (_, control_url) => Ok(control_url),
+    }
+}
+
 fn detect_audio_only(name: &str, model: &Option<String>, kind: &str) -> bool {
     let n = name.to_lowercase();
     let m = model.as_deref().unwrap_or("").to_lowercase();
@@ -60,16 +68,34 @@ fn detect_audio_only(name: &str, model: &Option<String>, kind: &str) -> bool {
         return false;
     }
     let speaker_hints = [
-        "sonos", "echo dot", "echo studio", "homepod", "home pod",
-        "google home mini", "google nest mini", "nest audio",
-        "speaker", "soundbar", "playbar", "play:1", "play:3", "play:5",
-        "era 100", "era 300", "five ",
+        "sonos",
+        "echo dot",
+        "echo studio",
+        "homepod",
+        "home pod",
+        "google home mini",
+        "google nest mini",
+        "nest audio",
+        "speaker",
+        "soundbar",
+        "playbar",
+        "play:1",
+        "play:3",
+        "play:5",
+        "era 100",
+        "era 300",
+        "five ",
     ];
     if speaker_hints.iter().any(|h| blob.contains(h)) {
         return true;
     }
     if kind == "chromecast" {
-        let audio_models = ["chromecast audio", "nest audio", "google home mini", "nest mini"];
+        let audio_models = [
+            "chromecast audio",
+            "nest audio",
+            "google home mini",
+            "nest mini",
+        ];
         return audio_models.iter().any(|h| m.contains(h));
     }
     false
@@ -83,23 +109,61 @@ enum ActiveSession {
         session_id: String,
         media_session_id: Option<i32>,
         seek_start_sec: f64,
+        hls_session_id: Option<String>,
     },
     Dlna {
         control_url: String,
+        hls_session_id: Option<String>,
     },
     Roku {
         ecp_base: String,
+        hls_session_id: Option<String>,
     },
     AirPlay {
         host: String,
         port: u16,
+        hls_session_id: Option<String>,
     },
 }
 
 static ACTIVE: Mutex<Option<ActiveSession>> = Mutex::new(None);
 
+impl ActiveSession {
+    fn hls_session_id(&self) -> Option<String> {
+        match self {
+            Self::Chromecast { hls_session_id, .. }
+            | Self::Dlna { hls_session_id, .. }
+            | Self::Roku { hls_session_id, .. }
+            | Self::AirPlay { hls_session_id, .. } => hls_session_id.clone(),
+        }
+    }
+}
+
+async fn replace_active_session<Stop, StopFuture>(
+    next: ActiveSession,
+    stop_hls: Stop,
+) -> Result<(), String>
+where
+    Stop: FnOnce(String) -> StopFuture,
+    StopFuture: std::future::Future<Output = ()>,
+{
+    let previous_hls = {
+        let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
+        active
+            .replace(next)
+            .and_then(|session| session.hls_session_id())
+    };
+    if let Some(id) = previous_hls {
+        stop_hls(id).await;
+    }
+    Ok(())
+}
+
 fn parse_friendly_name(properties: &HashMap<String, String>) -> Option<String> {
-    properties.get("fn").or_else(|| properties.get("n")).map(|s| s.to_string())
+    properties
+        .get("fn")
+        .or_else(|| properties.get("n"))
+        .map(|s| s.to_string())
 }
 
 fn parse_model(properties: &HashMap<String, String>) -> Option<String> {
@@ -120,7 +184,9 @@ fn pick_address(addrs: &std::collections::HashSet<IpAddr>) -> Option<IpAddr> {
 
 async fn discover_chromecasts() -> Vec<CastDeviceInfo> {
     tokio::task::spawn_blocking(|| -> Vec<CastDeviceInfo> {
-        let Ok(daemon) = ServiceDaemon::new() else { return Vec::new() };
+        let Ok(daemon) = ServiceDaemon::new() else {
+            return Vec::new();
+        };
         let Ok(receiver) = daemon.browse(CAST_SERVICE_TYPE) else {
             return Vec::new();
         };
@@ -130,7 +196,9 @@ async fn discover_chromecasts() -> Vec<CastDeviceInfo> {
             match receiver.recv_timeout(Duration::from_millis(120)) {
                 Ok(ServiceEvent::ServiceResolved(info)) => {
                     let addrs = info.get_addresses();
-                    let Some(addr) = pick_address(addrs) else { continue };
+                    let Some(addr) = pick_address(addrs) else {
+                        continue;
+                    };
                     let port = info.get_port();
                     let host = addr.to_string();
                     let props_map: HashMap<String, String> = info
@@ -265,8 +333,8 @@ fn dedupe_by_host(devices: Vec<CastDeviceInfo>) -> Vec<CastDeviceInfo> {
                 let pair = (existing.kind.as_str(), d.kind.as_str());
                 let apple = looks_like_apple(&d.name, &d.model)
                     || looks_like_apple(&existing.name, &existing.model);
-                let dlna_wins_airplay = matches!(pair, ("airplay", "dlna") | ("dlna", "airplay"))
-                    && !apple;
+                let dlna_wins_airplay =
+                    matches!(pair, ("airplay", "dlna") | ("dlna", "airplay")) && !apple;
                 if dlna_wins_airplay {
                     if d.kind == "dlna" {
                         slot.insert(d);
@@ -288,8 +356,7 @@ pub async fn cast_discover() -> Result<Vec<CastDeviceInfo>, String> {
         discover_roku(),
         discover_airplay(),
     );
-    let merged: Vec<CastDeviceInfo> =
-        cc.into_iter().chain(dl).chain(rk).chain(ap).collect();
+    let merged: Vec<CastDeviceInfo> = cc.into_iter().chain(dl).chain(rk).chain(ap).collect();
     let mut out = dedupe_by_host(merged);
     out.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
     Ok(out)
@@ -298,8 +365,14 @@ pub async fn cast_discover() -> Result<Vec<CastDeviceInfo>, String> {
 fn connect_device_once<'a>(host: &str, port: u16) -> Result<CastDevice<'a>, String> {
     let device = CastDevice::connect_without_host_verification(host.to_string(), port)
         .map_err(|e| format!("connect: {e}"))?;
-    device.connection.connect("receiver-0".to_string()).map_err(|e| format!("connect ns: {e}"))?;
-    device.heartbeat.ping().map_err(|e| format!("heartbeat: {e}"))?;
+    device
+        .connection
+        .connect("receiver-0".to_string())
+        .map_err(|e| format!("connect ns: {e}"))?;
+    device
+        .heartbeat
+        .ping()
+        .map_err(|e| format!("heartbeat: {e}"))?;
     Ok(device)
 }
 
@@ -309,7 +382,8 @@ fn humanize_cast_error(err: &str) -> String {
         return "Device dropped the connection. It may be busy with another app, asleep, or another phone is already casting to it. Wake the screen, stop other casts, and try again.".to_string();
     }
     if lower.contains("timed out") || lower.contains("os error 10060") {
-        return "Couldn't reach the device. Check it's on the same Wi-Fi as your computer.".to_string();
+        return "Couldn't reach the device. Check it's on the same Wi-Fi as your computer."
+            .to_string();
     }
     if lower.contains("connection refused") {
         return "Device refused the connection. Try restarting it.".to_string();
@@ -324,7 +398,10 @@ fn connect_device<'a>(host: &str, port: u16) -> Result<CastDevice<'a>, String> {
     match connect_device_once(host, port) {
         Ok(d) => Ok(d),
         Err(e1) => {
-            eprintln!("[harbor::cast] connect attempt 1 failed: {} (retrying once)", e1);
+            eprintln!(
+                "[harbor::cast] connect attempt 1 failed: {} (retrying once)",
+                e1
+            );
             std::thread::sleep(Duration::from_millis(500));
             match connect_device_once(host, port) {
                 Ok(d) => Ok(d),
@@ -338,10 +415,15 @@ fn launch_harbor_receiver<'a>(device: &CastDevice<'a>) -> Result<(String, String
     launch_receiver_app(device, HARBOR_RECEIVER_APP_ID)
 }
 
-fn launch_receiver_app<'a>(device: &CastDevice<'a>, app_id: &str) -> Result<(String, String), String> {
-    let app = CastDeviceApp::from_str(app_id)
-        .map_err(|_| "invalid receiver app id".to_string())?;
-    let session = device.receiver.launch_app(&app).map_err(|e| format!("launch: {e}"))?;
+fn launch_receiver_app<'a>(
+    device: &CastDevice<'a>,
+    app_id: &str,
+) -> Result<(String, String), String> {
+    let app = CastDeviceApp::from_str(app_id).map_err(|_| "invalid receiver app id".to_string())?;
+    let session = device
+        .receiver
+        .launch_app(&app)
+        .map_err(|e| format!("launch: {e}"))?;
     let transport_id = session.transport_id.clone();
     let session_id = session.session_id.clone();
     if transport_id.is_empty() || session_id.is_empty() {
@@ -373,6 +455,7 @@ pub async fn cast_load(
     sub_style: Option<CastSubStyle>,
 ) -> Result<(), String> {
     let kind_str = kind.unwrap_or_else(|| "chromecast".into());
+    let control_url = required_control_url(&kind_str, control_url)?;
     let req_headers = headers.unwrap_or_default();
     let burn_sub = match subtitle {
         Some(ref s) if !s.off => {
@@ -407,8 +490,13 @@ pub async fn cast_load(
     let auto_remux = (url_needs_remux && ffmpeg_available) || roku_force_transcode;
     let do_transcode = transcode.unwrap_or(false) || auto_remux || burn_sub.is_some();
     eprintln!(
-        "[harbor::cast] load kind={} host={} port={} transcode={} (auto_remux={} burn_sub={}) src={}",
-        kind_str, host, port, do_transcode, auto_remux, burn_sub.is_some(), url,
+        "[harbor::cast] load kind={} host={} port={} transcode={} (auto_remux={} burn_sub={})",
+        kind_str,
+        host,
+        port,
+        do_transcode,
+        auto_remux,
+        burn_sub.is_some(),
     );
     // When auto_remux fires (and the frontend didn't pass a re-encode profile),
     // use copy mode so we just remux to MPEGTS at line rate — no CPU cost.
@@ -423,7 +511,9 @@ pub async fn cast_load(
     } else {
         None
     });
-    let burn_sub_path = burn_sub.as_ref().map(|p| p.path.to_string_lossy().to_string());
+    let burn_sub_path = burn_sub
+        .as_ref()
+        .map(|p| p.path.to_string_lossy().to_string());
     let burn_sub_style = burn_sub.as_ref().map(|p| p.force_style.clone());
     let proxied = proxy_state
         .register_cast(RegisterArgs {
@@ -437,7 +527,11 @@ pub async fn cast_load(
             burn_sub_style,
         })
         .await;
-    eprintln!("[harbor::cast] proxied URL for device: {}", proxied.url);
+    eprintln!("[harbor::cast] proxied stream ready");
+    let hls_session_id = proxied
+        .url
+        .contains("/cast/hls/")
+        .then(|| proxied.session_id.clone());
     let cast_url = proxied.url;
     if kind_str == "dlna" {
         let cu = control_url.ok_or_else(|| "DLNA device missing control_url".to_string())?;
@@ -446,9 +540,31 @@ pub async fn cast_load(
         } else {
             content_type.clone()
         };
-        dlna::load(cu.clone(), cast_url, title, start_time_sec, ct, do_transcode).await?;
-        let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
-        *active = Some(ActiveSession::Dlna { control_url: cu });
+        if let Err(error) = dlna::load(
+            cu.clone(),
+            cast_url,
+            title,
+            start_time_sec,
+            ct,
+            do_transcode,
+        )
+        .await
+        {
+            if let Some(id) = hls_session_id.as_deref() {
+                proxy_state.stop_hls_session(id).await;
+            }
+            return Err(error);
+        }
+        replace_active_session(
+            ActiveSession::Dlna {
+                control_url: cu,
+                hls_session_id,
+            },
+            |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            },
+        )
+        .await?;
         return Ok(());
     }
     if kind_str == "roku" {
@@ -458,26 +574,68 @@ pub async fn cast_load(
         } else {
             content_type.clone()
         };
-        roku::load(ecp.clone(), cast_url, title, ct, start_time_sec).await?;
-        let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
-        *active = Some(ActiveSession::Roku { ecp_base: ecp });
+        if let Err(error) = roku::load(ecp.clone(), cast_url, title, ct, start_time_sec).await {
+            if let Some(id) = hls_session_id.as_deref() {
+                proxy_state.stop_hls_session(id).await;
+            }
+            return Err(error);
+        }
+        replace_active_session(
+            ActiveSession::Roku {
+                ecp_base: ecp,
+                hls_session_id,
+            },
+            |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            },
+        )
+        .await?;
         return Ok(());
     }
     if kind_str == "airplay" {
-        airplay::load(host.clone(), port, cast_url, start_time_sec).await?;
-        let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
-        *active = Some(ActiveSession::AirPlay { host, port });
+        if let Err(error) = airplay::load(host.clone(), port, cast_url, start_time_sec).await {
+            if let Some(id) = hls_session_id.as_deref() {
+                proxy_state.stop_hls_session(id).await;
+            }
+            return Err(error);
+        }
+        replace_active_session(
+            ActiveSession::AirPlay {
+                host,
+                port,
+                hls_session_id,
+            },
+            |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            },
+        )
+        .await?;
         return Ok(());
     }
-    cast_load_chromecast(
+    let result = cast_load_chromecast(
         host,
         port,
         cast_url,
         title,
         poster,
         start_time_sec,
+        hls_session_id.clone(),
     )
-    .await
+    .await;
+    match result {
+        Ok(session) => {
+            replace_active_session(session, |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            })
+            .await
+        }
+        Err(error) => {
+            if let Some(id) = hls_session_id.as_deref() {
+                proxy_state.stop_hls_session(id).await;
+            }
+            Err(error)
+        }
+    }
 }
 
 async fn cast_load_chromecast(
@@ -487,15 +645,19 @@ async fn cast_load_chromecast(
     title: Option<String>,
     poster: Option<String>,
     start_time_sec: Option<f64>,
-) -> Result<(), String> {
+    hls_session_id: Option<String>,
+) -> Result<ActiveSession, String> {
     // Tear down any prior session's receiver app before starting a new one.
     {
         let prior = {
             let active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
             match active.as_ref() {
-                Some(ActiveSession::Chromecast { host, port, session_id, .. }) => {
-                    Some((host.clone(), *port, session_id.clone()))
-                }
+                Some(ActiveSession::Chromecast {
+                    host,
+                    port,
+                    session_id,
+                    ..
+                }) => Some((host.clone(), *port, session_id.clone())),
                 _ => None,
             }
         };
@@ -556,8 +718,8 @@ async fn cast_load_chromecast(
             "video/mp4"
         };
         eprintln!(
-            "[harbor::cast] sending LOAD: url={} ct={} time={:.1}",
-            stream_url_clone, content_type, start,
+            "[harbor::cast] sending LOAD: ct={} time={:.1}",
+            content_type, start,
         );
         let media = Media {
             content_id: stream_url_clone.clone(),
@@ -578,27 +740,38 @@ async fn cast_load_chromecast(
             },
             autoplay: true,
         };
-        let status = match device
-            .media
-            .load_with_opts(&transport_id, &session_id, &media, load_opts)
-        {
-            Ok(s) => s,
-            Err(e) => {
-                eprintln!("[harbor::cast] LOAD failed: {}", e);
-                let _ = result_tx.send(Err(format!("load: {e}")));
-                return;
-            }
-        };
+        let status =
+            match device
+                .media
+                .load_with_opts(&transport_id, &session_id, &media, load_opts)
+            {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("[harbor::cast] LOAD failed: {}", e);
+                    let _ = result_tx.send(Err(format!("load: {e}")));
+                    return;
+                }
+            };
         let media_session_id = status.entries.first().map(|e| e.media_session_id);
         eprintln!("[harbor::cast] LOAD ok msid={:?}", media_session_id);
-        let _ = result_tx.send(Ok((transport_id.clone(), session_id.clone(), media_session_id)));
+        let _ = result_tx.send(Ok((
+            transport_id.clone(),
+            session_id.clone(),
+            media_session_id,
+        )));
 
-        eprintln!("[harbor::cast] receive loop entering for {}:{}", host_clone, port);
+        eprintln!(
+            "[harbor::cast] receive loop entering for {}:{}",
+            host_clone, port
+        );
         loop {
             match device.receive() {
                 Ok(rust_cast::ChannelMessage::Heartbeat(_)) => {
                     if let Err(e) = device.heartbeat.pong() {
-                        eprintln!("[harbor::cast] pong failed for {}:{}: {e}", host_clone, port);
+                        eprintln!(
+                            "[harbor::cast] pong failed for {}:{}: {e}",
+                            host_clone, port
+                        );
                         return;
                     }
                 }
@@ -607,7 +780,10 @@ async fn cast_load_chromecast(
                 }
                 Ok(_) => {}
                 Err(e) => {
-                    eprintln!("[harbor::cast] receive loop ended for {}:{}: {e}", host_clone, port);
+                    eprintln!(
+                        "[harbor::cast] receive loop ended for {}:{}: {e}",
+                        host_clone, port
+                    );
                     return;
                 }
             }
@@ -618,16 +794,15 @@ async fn cast_load_chromecast(
         .await
         .map_err(|e| format!("cast result channel: {e}"))??;
 
-    let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
-    *active = Some(ActiveSession::Chromecast {
+    Ok(ActiveSession::Chromecast {
         host,
         port,
         transport_id,
         session_id,
         media_session_id: msid,
         seek_start_sec: start,
-    });
-    Ok(())
+        hls_session_id,
+    })
 }
 
 fn snapshot_chromecast() -> Result<(String, u16, String, Option<i32>, f64), String> {
@@ -653,7 +828,7 @@ fn snapshot_chromecast() -> Result<(String, u16, String, Option<i32>, f64), Stri
 
 fn snapshot_dlna() -> Option<String> {
     let active = ACTIVE.lock().ok()?;
-    if let Some(ActiveSession::Dlna { control_url }) = active.as_ref() {
+    if let Some(ActiveSession::Dlna { control_url, .. }) = active.as_ref() {
         Some(control_url.clone())
     } else {
         None
@@ -662,7 +837,7 @@ fn snapshot_dlna() -> Option<String> {
 
 fn snapshot_roku() -> Option<String> {
     let active = ACTIVE.lock().ok()?;
-    if let Some(ActiveSession::Roku { ecp_base }) = active.as_ref() {
+    if let Some(ActiveSession::Roku { ecp_base, .. }) = active.as_ref() {
         Some(ecp_base.clone())
     } else {
         None
@@ -671,7 +846,7 @@ fn snapshot_roku() -> Option<String> {
 
 fn snapshot_airplay() -> Option<(String, u16)> {
     let active = ACTIVE.lock().ok()?;
-    if let Some(ActiveSession::AirPlay { host, port }) = active.as_ref() {
+    if let Some(ActiveSession::AirPlay { host, port, .. }) = active.as_ref() {
         Some((host.clone(), *port))
     } else {
         None
@@ -692,9 +867,15 @@ pub async fn cast_play() -> Result<(), String> {
     let (host, port, transport_id, msid, _seek_start) = snapshot_chromecast()?;
     tokio::task::spawn_blocking(move || -> Result<(), String> {
         let device = connect_device(&host, port)?;
-        device.connection.connect(transport_id.clone()).map_err(|e| format!("{e}"))?;
+        device
+            .connection
+            .connect(transport_id.clone())
+            .map_err(|e| format!("{e}"))?;
         let msid = msid.ok_or("no media session")?;
-        device.media.play(&transport_id, msid).map_err(|e| format!("play: {e}"))?;
+        device
+            .media
+            .play(&transport_id, msid)
+            .map_err(|e| format!("play: {e}"))?;
         Ok(())
     })
     .await
@@ -715,9 +896,15 @@ pub async fn cast_pause() -> Result<(), String> {
     let (host, port, transport_id, msid, _seek_start) = snapshot_chromecast()?;
     tokio::task::spawn_blocking(move || -> Result<(), String> {
         let device = connect_device(&host, port)?;
-        device.connection.connect(transport_id.clone()).map_err(|e| format!("{e}"))?;
+        device
+            .connection
+            .connect(transport_id.clone())
+            .map_err(|e| format!("{e}"))?;
         let msid = msid.ok_or("no media session")?;
-        device.media.pause(&transport_id, msid).map_err(|e| format!("pause: {e}"))?;
+        device
+            .media
+            .pause(&transport_id, msid)
+            .map_err(|e| format!("pause: {e}"))?;
         Ok(())
     })
     .await
@@ -739,7 +926,10 @@ pub async fn cast_seek(sec: f64) -> Result<(), String> {
     let cast_relative = (sec - seek_start).max(0.0);
     tokio::task::spawn_blocking(move || -> Result<(), String> {
         let device = connect_device(&host, port)?;
-        device.connection.connect(transport_id.clone()).map_err(|e| format!("{e}"))?;
+        device
+            .connection
+            .connect(transport_id.clone())
+            .map_err(|e| format!("{e}"))?;
         let msid = msid.ok_or("no media session")?;
         device
             .media
@@ -752,28 +942,42 @@ pub async fn cast_seek(sec: f64) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn cast_stop() -> Result<(), String> {
+pub async fn cast_stop(proxy_state: tauri::State<'_, ProxyState>) -> Result<(), String> {
     let session = {
         let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
         active.take()
     };
     cast_subs::cleanup();
-    match session {
-        Some(ActiveSession::Dlna { control_url }) => dlna::stop(control_url).await,
-        Some(ActiveSession::Roku { ecp_base }) => roku::stop(ecp_base).await,
-        Some(ActiveSession::AirPlay { host, port }) => airplay::stop(host, port).await,
-        Some(ActiveSession::Chromecast { host, port, session_id, .. }) => {
-            tokio::task::spawn_blocking(move || -> Result<(), String> {
-                if let Ok(device) = connect_device(&host, port) {
-                    let _ = device.receiver.stop_app(&session_id);
-                }
-                Ok(())
-            })
-            .await
-            .map_err(|e| format!("join: {e}"))?
-        }
+    let hls_session_id = match session.as_ref() {
+        Some(ActiveSession::Chromecast { hls_session_id, .. })
+        | Some(ActiveSession::Dlna { hls_session_id, .. })
+        | Some(ActiveSession::Roku { hls_session_id, .. })
+        | Some(ActiveSession::AirPlay { hls_session_id, .. }) => hls_session_id.clone(),
+        None => None,
+    };
+    let result = match session {
+        Some(ActiveSession::Dlna { control_url, .. }) => dlna::stop(control_url).await,
+        Some(ActiveSession::Roku { ecp_base, .. }) => roku::stop(ecp_base).await,
+        Some(ActiveSession::AirPlay { host, port, .. }) => airplay::stop(host, port).await,
+        Some(ActiveSession::Chromecast {
+            host,
+            port,
+            session_id,
+            ..
+        }) => tokio::task::spawn_blocking(move || -> Result<(), String> {
+            if let Ok(device) = connect_device(&host, port) {
+                let _ = device.receiver.stop_app(&session_id);
+            }
+            Ok(())
+        })
+        .await
+        .map_err(|e| format!("join: {e}"))?,
         None => Ok(()),
+    };
+    if let Some(id) = hls_session_id {
+        proxy_state.stop_hls_session(&id).await;
     }
+    result
 }
 
 #[tauri::command]
@@ -808,7 +1012,10 @@ pub async fn cast_status() -> Result<Option<CastStatus>, String> {
     let (host, port, transport_id, msid, seek_start) = snap;
     tokio::task::spawn_blocking(move || -> Result<Option<CastStatus>, String> {
         let device = connect_device(&host, port)?;
-        device.connection.connect(transport_id.clone()).map_err(|e| format!("{e}"))?;
+        device
+            .connection
+            .connect(transport_id.clone())
+            .map_err(|e| format!("{e}"))?;
         if let Some(msid) = msid {
             if let Ok(status) = device.media.get_status(&transport_id, Some(msid)) {
                 if let Some(entry) = status.entries.first() {
@@ -863,5 +1070,63 @@ fn drain_briefly(device: &CastDevice<'_>, ms: u64) {
             Ok(_) => {}
             Err(_) => break,
         }
+    }
+}
+
+#[cfg(test)]
+mod cast_validation_tests {
+    use super::{replace_active_session, required_control_url, ActiveSession, ACTIVE};
+    use std::sync::{Arc, Mutex};
+
+    #[test]
+    fn control_url_is_required_before_starting_dlna_or_roku() {
+        assert_eq!(
+            required_control_url("dlna", None),
+            Err("DLNA device missing control_url".to_string())
+        );
+        assert_eq!(
+            required_control_url("roku", None),
+            Err("Roku device missing ecp_base".to_string())
+        );
+        assert_eq!(required_control_url("chromecast", None), Ok(None));
+    }
+
+    #[tokio::test]
+    async fn replacing_an_active_cast_stops_its_hls_session() {
+        ACTIVE.lock().expect("lock active session").take();
+        let stopped = Arc::new(Mutex::new(Vec::new()));
+
+        replace_active_session(
+            ActiveSession::Dlna {
+                control_url: "first".to_string(),
+                hls_session_id: Some("first-hls".to_string()),
+            },
+            |_| async {},
+        )
+        .await
+        .expect("activate first cast");
+
+        let recorded = stopped.clone();
+        replace_active_session(
+            ActiveSession::Dlna {
+                control_url: "second".to_string(),
+                hls_session_id: Some("second-hls".to_string()),
+            },
+            move |id| async move {
+                assert!(
+                    ACTIVE.try_lock().is_ok(),
+                    "ACTIVE must be unlocked before HLS cleanup"
+                );
+                recorded.lock().expect("lock stopped sessions").push(id);
+            },
+        )
+        .await
+        .expect("activate second cast");
+
+        assert_eq!(
+            stopped.lock().expect("lock stopped sessions").as_slice(),
+            ["first-hls"]
+        );
+        ACTIVE.lock().expect("lock active session").take();
     }
 }

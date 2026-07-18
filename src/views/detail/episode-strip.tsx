@@ -61,7 +61,7 @@ export function EpisodeStrip({
           rating: ep.imdbRating ?? ep.voteAverage ?? undefined,
           ratingIsImdb: ep.imdbRating != null,
           upcoming: isUpcomingDate(ep.airDate),
-          play: () =>
+          play: (opts) =>
             playLocalAware({
               meta,
               episode: {
@@ -72,13 +72,27 @@ export function EpisodeStrip({
                 still: stills[0],
                 overview: ep.overview || undefined,
               },
-              opts: { autoPlay: settings.instantPlay || settings.seasonSourceLock },
+              opts: {
+                autoPlay: settings.instantPlay || settings.seasonSourceLock,
+                resume: opts?.resume,
+              },
               imdbId: seriesImdbId,
               videos: cinemetaVideos,
             }),
         };
       }),
-    [episodes, thumbnailFor, meta, playLocalAware, settings.instantPlay, settings.seasonSourceLock, settings.hdEpisodeImages, t, seriesImdbId, cinemetaVideos],
+    [
+      episodes,
+      thumbnailFor,
+      meta,
+      playLocalAware,
+      settings.instantPlay,
+      settings.seasonSourceLock,
+      settings.hdEpisodeImages,
+      t,
+      seriesImdbId,
+      cinemetaVideos,
+    ],
   );
   const epByNumber = useMemo(() => {
     const m = new Map<number, Episode>();
@@ -150,7 +164,8 @@ function EpisodeStripCard({
 
   const still = useMemo(() => {
     const tmdbSize = settings.hdEpisodeImages ? "original" : "w300";
-    if (imgIdx === 0 && ep.stillPath) return `https://image.tmdb.org/t/p/${tmdbSize}${ep.stillPath}`;
+    if (imgIdx === 0 && ep.stillPath)
+      return `https://image.tmdb.org/t/p/${tmdbSize}${ep.stillPath}`;
     if (imgIdx === 0 && !ep.stillPath && ep.stillUrl) return ep.stillUrl;
     if (imgIdx <= 1 && thumbnail) return thumbnail;
     return undefined;
@@ -167,7 +182,10 @@ function EpisodeStripCard({
         still,
         overview: ep.overview || undefined,
       },
-      opts: { autoPlay: settings.instantPlay || settings.seasonSourceLock },
+      opts: {
+        autoPlay: settings.instantPlay || settings.seasonSourceLock,
+        resume: !progress.watched && progress.ratio > 0.01,
+      },
       imdbId: seriesImdbId,
       videos: cinemetaVideos,
     });
@@ -194,7 +212,7 @@ function EpisodeStripCard({
             onError={() => setImgIdx((i) => i + 1)}
           />
         </div>
-        
+
         {settings.showEpisodeRating && ratingValue != null && ratingValue > 0 && (
           <div className="pointer-events-none absolute start-2 top-2 z-[6] flex items-center gap-1.5 rounded-md bg-black/55 px-1.5 py-0.5 opacity-0 drop-shadow-md backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
             <EpisodeRatingBadge value={ratingValue} isImdb={ratingIsImdb} />
@@ -218,7 +236,10 @@ function EpisodeStripCard({
         )}
         {progress.ratio > 0.01 && (
           <div className="absolute inset-x-0 bottom-0 z-10 h-[3px] bg-black/55 transition-opacity group-hover:opacity-0">
-            <div className="h-full bg-accent" style={{ width: `${Math.max(2, progress.ratio * 100)}%` }} />
+            <div
+              className="h-full bg-accent"
+              style={{ width: `${Math.max(2, progress.ratio * 100)}%` }}
+            />
           </div>
         )}
       </button>
@@ -228,7 +249,9 @@ function EpisodeStripCard({
           onClick={handlePlayClick}
           className="flex min-w-0 flex-1 flex-col gap-0.5 text-start focus-visible:outline-none"
         >
-          <span className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}>
+          <span
+            className={`truncate text-[13.5px] font-semibold text-ink ${spoiler?.title ? SPOILER_TEXT_CLASS : ""}`}
+          >
             {ep.name || t("Episode {n}", { n: ep.episodeNumber })}
           </span>
           <span className="text-[11.5px] text-ink-subtle">

@@ -13,6 +13,7 @@ import { topSeries, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { publishResumeStates } from "@/lib/hover-preview/store";
 import { listPager } from "@/lib/list-pager";
+import { CATALOG_REQUEST_TIMEOUT_MS, upsertOrdered, withTimeout } from "@/lib/progressive-rows";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useSettings } from "@/lib/settings";
 import { cwSortKey, isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
@@ -71,34 +72,42 @@ export function Shows({ active = true }: { active?: boolean }) {
       setItems([]);
       return;
     }
-    library(authKey).then(setItems).catch(() => {});
+    library(authKey)
+      .then(setItems)
+      .catch(() => {});
   }, [authKey]);
 
   useEffect(() => {
     let cancelled = false;
+    setHero([]);
+    setRows([]);
     (async () => {
       if (settings.tmdbKey) {
-        const heroPool = await buildShowHero(settings.tmdbKey).catch(() => [] as Meta[]);
         const specs = showSpecs(settings.tmdbKey);
-        const firstPages = await Promise.all(
-          specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
+        const order = specs.map((spec) => spec.key);
+        void withTimeout(buildShowHero(settings.tmdbKey), CATALOG_REQUEST_TIMEOUT_MS)
+          .then((heroPool) => {
+            if (!cancelled) setHero(heroPool);
+          })
+          .catch(() => {});
+        const results = await Promise.allSettled(
+          specs.map(async (spec) => {
+            const metas = await withTimeout(spec.fetcher(1), CATALOG_REQUEST_TIMEOUT_MS);
+            if (cancelled || metas.length === 0) return false;
+            const row: ShowRow = {
+              key: spec.key,
+              title: spec.title,
+              metas,
+              page: 1,
+              hasMore: !spec.noPaginate && metas.length >= 14,
+              fetcher: spec.noPaginate ? undefined : spec.fetcher,
+            };
+            setRows((current) => upsertOrdered(current, row, order));
+            return true;
+          }),
         );
         if (cancelled) return;
-        const built: ShowRow[] = specs
-          .map((spec, i) => ({
-            key: spec.key,
-            title: spec.title,
-            metas: firstPages[i],
-            page: 1,
-            hasMore: !spec.noPaginate && firstPages[i].length >= 14,
-            fetcher: spec.noPaginate ? undefined : spec.fetcher,
-          }))
-          .filter((r) => r.metas.length > 0);
-        if (built.length > 0) {
-          setHero(heroPool);
-          setRows(built);
-          return;
-        }
+        if (results.some((result) => result.status === "fulfilled" && result.value)) return;
       }
       {
         const genreList = [
@@ -117,8 +126,10 @@ export function Shows({ active = true }: { active?: boolean }) {
           "Horror",
         ];
         const [top, ...byGenre] = await Promise.all([
-          topSeries().catch(() => [] as Meta[]),
-          ...genreList.map((g) => topSeries(g).catch(() => [] as Meta[])),
+          withTimeout(topSeries(), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+          ...genreList.map((g) =>
+            withTimeout(topSeries(g), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+          ),
         ]);
         if (cancelled) return;
         setHero(top.filter((m) => m.background).slice(0, HERO_POOL_TARGET));
@@ -253,7 +264,12 @@ export function Shows({ active = true }: { active?: boolean }) {
           </div>
           {!settings.tmdbKey && <TmdbNudge />}
           {cwItems.length > 0 && (
-            <Row title={t("Pick up where you left off")} min={260} shape="landscape" scrollKey="shows:cw">
+            <Row
+              title={t("Pick up where you left off")}
+              min={260}
+              shape="landscape"
+              scrollKey="shows:cw"
+            >
               {cwItems.map((it) => (
                 <ContinueCard
                   key={it._id}
@@ -318,9 +334,7 @@ function PageMast() {
       <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
         {t(copy.title)}
       </h1>
-      <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">
-        {t(copy.subtitle)}
-      </p>
+      <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">{t(copy.subtitle)}</p>
     </header>
   );
 }

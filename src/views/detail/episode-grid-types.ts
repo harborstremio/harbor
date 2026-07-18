@@ -18,5 +18,5 @@ export type GridEpisode = {
   upcoming?: boolean;
   meta?: Meta;
   sourceMetaId?: string;
-  play: () => void;
+  play: (opts?: { resume?: boolean }) => void;
 };

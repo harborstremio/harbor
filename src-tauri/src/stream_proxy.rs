@@ -92,7 +92,10 @@ impl ProxyState {
         };
         let proxy_routes = Router::new()
             .route("/s/{id}", get(handle_stream).head(handle_stream))
-            .route("/p/{id}/{*path}", get(handle_playlist).head(handle_playlist))
+            .route(
+                "/p/{id}/{*path}",
+                get(handle_playlist).head(handle_playlist),
+            )
             .route("/health", get(handle_health))
             .with_state(state.clone());
         let app = proxy_routes.merge(crate::cast_hls::router(hls));
@@ -120,7 +123,10 @@ impl ProxyState {
                 self.sessions.write().await.insert(id.clone(), session);
                 let qs = query.map(|q| format!("?{}", q)).unwrap_or_default();
                 let url = format!("http://127.0.0.1:{}/p/{}/{}{}", self.port, id, last_seg, qs);
-                return RegisterResult { session_id: id, url };
+                return RegisterResult {
+                    session_id: id,
+                    url,
+                };
             }
         }
         let session = Session {
@@ -135,7 +141,10 @@ impl ProxyState {
         self.sessions.write().await.insert(id.clone(), session);
         let suffix = if args.transcode { ".ts" } else { "" };
         let url = format!("http://127.0.0.1:{}/s/{}{}", self.port, id, suffix);
-        RegisterResult { session_id: id, url }
+        RegisterResult {
+            session_id: id,
+            url,
+        }
     }
 
     pub async fn register_cast(&self, args: RegisterArgs) -> RegisterResult {
@@ -154,13 +163,24 @@ impl ProxyState {
             let seek = args.start_time_sec.unwrap_or(0.0).max(0.0);
             match self
                 .hls
-                .register_with_seek(args.url.clone(), args.headers.clone(), seek, burn_sub.clone())
+                .register_with_seek(
+                    args.url.clone(),
+                    args.headers.clone(),
+                    seek,
+                    burn_sub.clone(),
+                )
                 .await
             {
                 Ok(hid) => {
                     let url = format!("http://{}:{}/cast/hls/{}/master.m3u8", host, self.port, hid);
-                    eprintln!("[harbor::proxy] cast HLS session: {} (seek={:.1}s)", url, seek);
-                    return RegisterResult { session_id: hid, url };
+                    eprintln!(
+                        "[harbor::proxy] cast HLS session: {} (seek={:.1}s)",
+                        url, seek
+                    );
+                    return RegisterResult {
+                        session_id: hid,
+                        url,
+                    };
                 }
                 Err(e) => {
                     eprintln!("[harbor::proxy] HLS register failed ({}); falling back to direct transcode", e);
@@ -185,7 +205,10 @@ impl ProxyState {
             self.sessions.write().await.insert(id.clone(), session);
             let qs = query.map(|q| format!("?{}", q)).unwrap_or_default();
             let url = format!("http://{}:{}/p/{}/{}{}", host, self.port, id, last_seg, qs);
-            return RegisterResult { session_id: id, url };
+            return RegisterResult {
+                session_id: id,
+                url,
+            };
         }
         let session = Session {
             url: args.url.clone(),
@@ -199,11 +222,22 @@ impl ProxyState {
         self.sessions.write().await.insert(id.clone(), session);
         let suffix = if args.transcode { ".ts" } else { "" };
         let url = format!("http://{}:{}/s/{}{}", host, self.port, id, suffix);
-        RegisterResult { session_id: id, url }
+        RegisterResult {
+            session_id: id,
+            url,
+        }
     }
 
     pub async fn unregister(&self, session_id: &str) {
         self.sessions.write().await.remove(session_id);
+    }
+
+    pub async fn stop_hls_session(&self, session_id: &str) -> bool {
+        self.hls.stop_session(session_id).await
+    }
+
+    pub async fn stop_all_hls(&self) -> usize {
+        self.hls.stop_all().await
     }
 
     pub async fn gc_idle(&self) -> usize {
@@ -225,6 +259,15 @@ impl ProxyState {
         removed += self.hls.evict_idle(HLS_IDLE).await;
         removed
     }
+}
+
+pub(crate) fn shutdown(app: &tauri::AppHandle) {
+    use tauri::Manager;
+
+    let state = app.state::<ProxyState>().inner().clone();
+    tauri::async_runtime::block_on(async move {
+        state.stop_all_hls().await;
+    });
 }
 
 pub(crate) fn lan_ip() -> Option<String> {
@@ -301,8 +344,14 @@ async fn handle_stream(
     headers: HeaderMap,
 ) -> Response {
     let id = id_with_ext.trim_end_matches(".ts").to_string();
-    let ua = headers.get("user-agent").and_then(|v| v.to_str().ok()).unwrap_or("(no-ua)");
-    let range = headers.get("range").and_then(|v| v.to_str().ok()).unwrap_or("(no-range)");
+    let ua = headers
+        .get("user-agent")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("(no-ua)");
+    let range = headers
+        .get("range")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("(no-range)");
     eprintln!("[harbor::proxy] req id={id} ua={ua} range={range}");
     let session = {
         let map = state.sessions.read().await;
@@ -315,7 +364,13 @@ async fn handle_stream(
     };
 
     if session.transcode {
-        return handle_transcode(&session.url, &session.headers, &session.profile, session.burn_sub.as_ref()).await;
+        return handle_transcode(
+            &session.url,
+            &session.headers,
+            &session.profile,
+            session.burn_sub.as_ref(),
+        )
+        .await;
     }
 
     forward_upstream(&state, &session, &session.url, &headers).await
@@ -327,8 +382,14 @@ async fn handle_playlist(
     headers: HeaderMap,
     uri: axum::http::Uri,
 ) -> Response {
-    let ua = headers.get("user-agent").and_then(|v| v.to_str().ok()).unwrap_or("(no-ua)");
-    let range = headers.get("range").and_then(|v| v.to_str().ok()).unwrap_or("(no-range)");
+    let ua = headers
+        .get("user-agent")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("(no-ua)");
+    let range = headers
+        .get("range")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("(no-range)");
     eprintln!("[harbor::proxy] playlist req id={id} path={rest} ua={ua} range={range}");
     let session = {
         let map = state.sessions.read().await;
@@ -353,11 +414,8 @@ async fn forward_upstream(
     headers: &HeaderMap,
 ) -> Response {
     let mut req = state.client.get(upstream_url);
-    let session_keys: std::collections::HashSet<String> = session
-        .headers
-        .keys()
-        .map(|k| k.to_lowercase())
-        .collect();
+    let session_keys: std::collections::HashSet<String> =
+        session.headers.keys().map(|k| k.to_lowercase()).collect();
     // NOTE: do NOT forward `accept-encoding` — reqwest manages compression
     // itself and rejects manual setting of this header (the noisy warning we
     // were seeing). The client gets the upstream encoding handled.
@@ -388,16 +446,12 @@ async fn forward_upstream(
     let upstream = match req.send().await {
         Ok(r) => r,
         Err(e) => {
-            return (
-                StatusCode::BAD_GATEWAY,
-                format!("upstream error: {}", e),
-            )
-                .into_response();
+            return (StatusCode::BAD_GATEWAY, format!("upstream error: {}", e)).into_response();
         }
     };
 
-    let status = StatusCode::from_u16(upstream.status().as_u16())
-        .unwrap_or(StatusCode::BAD_GATEWAY);
+    let status =
+        StatusCode::from_u16(upstream.status().as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
     let upstream_ct = upstream
         .headers()
         .get("content-type")
@@ -450,10 +504,7 @@ async fn forward_upstream(
     if needs_ct_override {
         let ct = guess_ct_from_url(upstream_url);
         if let Ok(value) = HeaderValue::from_str(ct) {
-            response_headers.insert(
-                HeaderName::from_static("content-type"),
-                value,
-            );
+            response_headers.insert(HeaderName::from_static("content-type"), value);
             eprintln!("[harbor::proxy] forced content-type={ct} (upstream was {upstream_ct})");
         }
     }
@@ -481,7 +532,13 @@ async fn forward_upstream(
         .and_then(|v| v.to_str().ok())
         .unwrap_or("")
         .to_lowercase();
-    let is_m3u8 = body_ct.contains("mpegurl") || upstream_url.split('?').next().unwrap_or("").to_lowercase().ends_with(".m3u8");
+    let is_m3u8 = body_ct.contains("mpegurl")
+        || upstream_url
+            .split('?')
+            .next()
+            .unwrap_or("")
+            .to_lowercase()
+            .ends_with(".m3u8");
 
     if is_m3u8 {
         response_headers.insert(

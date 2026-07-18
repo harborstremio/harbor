@@ -1,3 +1,5 @@
+import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
+
 const EVENT = "harbor:deeplink-install";
 const OPEN_EVENT = "harbor:deeplink-open";
 
@@ -95,8 +97,7 @@ function shouldForward(url: string): boolean {
 
 export async function startDeepLinkBridge(): Promise<() => void> {
   const isTauri =
-    typeof window !== "undefined" &&
-    ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
+    typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
   if (!isTauri) return () => {};
   try {
     const mod = await import("@tauri-apps/plugin-deep-link");
@@ -111,18 +112,20 @@ export async function startDeepLinkBridge(): Promise<() => void> {
         if (shouldForward(u)) emitDeepLinkInstall(u);
       }
     };
-    const unlisten = await mod.onOpenUrl(handle);
+    const unlisten = makeSafeTauriUnlisten(await mod.onOpenUrl(handle));
     const { listen } = await import("@tauri-apps/api/event");
-    const unlistenNative = await listen<string>("harbor:stremio-deeplink", (e) => {
-      const u = e.payload;
-      if (typeof u !== "string" || !u) return;
-      const open = parseStremioOpen(u);
-      if (open) {
-        emitDeepLinkOpen(open);
-        return;
-      }
-      if (shouldForward(u)) emitDeepLinkInstall(u);
-    });
+    const unlistenNative = makeSafeTauriUnlisten(
+      await listen<string>("harbor:stremio-deeplink", (e) => {
+        const u = e.payload;
+        if (typeof u !== "string" || !u) return;
+        const open = parseStremioOpen(u);
+        if (open) {
+          emitDeepLinkOpen(open);
+          return;
+        }
+        if (shouldForward(u)) emitDeepLinkInstall(u);
+      }),
+    );
     let lastCap = "";
     let lastCapAt = 0;
     const forwardLinuxBrowserInstall = async (e: { payload: string }) => {
@@ -141,13 +144,14 @@ export async function startDeepLinkBridge(): Promise<() => void> {
       const { invoke } = await import("@tauri-apps/api/core");
       invoke("browser_close").catch(() => {});
     };
-    const unlistenBrowserCap = await listen<string>(
-      "harbor://browser-stremio-capture",
-      forwardLinuxBrowserInstall,
+    const unlistenBrowserCap = makeSafeTauriUnlisten(
+      await listen<string>("harbor://browser-stremio-capture", forwardLinuxBrowserInstall),
     );
-    const unlistenOpenFile = await listen<string>("harbor:open-file", (e) => {
-      if (typeof e.payload === "string" && e.payload) emitOpenLocalFile(e.payload);
-    });
+    const unlistenOpenFile = makeSafeTauriUnlisten(
+      await listen<string>("harbor:open-file", (e) => {
+        if (typeof e.payload === "string" && e.payload) emitOpenLocalFile(e.payload);
+      }),
+    );
     try {
       const { invoke } = await import("@tauri-apps/api/core");
       const pending = await invoke<string | null>("harbor_take_pending_file");

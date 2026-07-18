@@ -20,7 +20,7 @@ import { useCustomLists } from "@/lib/custom-lists";
 import { StreamingRail } from "@/components/streaming-rail";
 import { TopRankCard } from "@/components/top-rank-card";
 import { hasTmdbProviderAddon, loadAddonRows, userAddons, type AddonRow } from "@/lib/addons";
-import { isAnimeRow } from "@/views/anime";
+import { isAnimeRow } from "@/lib/is-anime-row";
 import { buildArabicHomeRows } from "@/lib/arabic/home-rows";
 import { useAuth } from "@/lib/auth";
 import { type Meta } from "@/lib/cinemeta";

@@ -109,7 +109,10 @@ export function usePlayerBridge(params: {
         extraOptions: mergeMpvOptions(settings, svpOn),
         getEmbedRect,
       });
-      if (cancelled) return;
+      if (cancelled) {
+        choose.destroy();
+        return;
+      }
       bridge = choose;
       bridge.attach(host);
       bridgeRef.current = bridge;

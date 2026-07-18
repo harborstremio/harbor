@@ -5,6 +5,7 @@ mod cast;
 mod cast_hls;
 mod cast_server;
 mod cast_subs;
+mod crash_report;
 mod cf_relay;
 mod discord_rp;
 mod dlna;
@@ -46,9 +47,12 @@ mod web_server;
 mod webview_helpers;
 
 pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
+    thumbs::shutdown(app);
+    stream_proxy::shutdown(app);
     cast_server::stop();
     torrent_engine::stop();
     discord_rp::shutdown(app);
+    crash_report::mark_clean_exit();
 }
 
 pub static CLOSE_FLUSH_DONE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
@@ -500,6 +504,9 @@ pub fn run() {
             }
         })
         .setup(move |app| {
+            if let Err(error) = crash_report::initialize(app.handle()) {
+                eprintln!("[harbor::crash-report] initialization failed: {error}");
+            }
             #[cfg(windows)]
             {
                 use tauri_plugin_deep_link::DeepLinkExt;
@@ -598,6 +605,7 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            crash_report::take_startup_crash_report,
             harbor_flush_done,
             harbor_startup_ready,
             close_aux_windows,

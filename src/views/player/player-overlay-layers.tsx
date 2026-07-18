@@ -9,6 +9,7 @@ import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import type { PlayerSrc, PlayEpisode } from "@/lib/view";
 import { CastLayer } from "./cast-layer";
+import { BufferingIndicator } from "./buffering-indicator";
 import { DragClickStage } from "./drag-click-stage";
 import { LiveLayer } from "./live-layer";
 import { LoaderLayer } from "./loader-layer";
@@ -197,9 +198,17 @@ export function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
         videoFillPill={p.videoFillPill}
         subDropToast={p.subDropToast}
         contentAdvisory={p.contentAdvisory}
-        onSubDelay={(s) => { p.bridgeRef.current?.setSubDelay(s); }}
+        onSubDelay={(s) => {
+          p.bridgeRef.current?.setSubDelay(s);
+        }}
         onEnterSync={p.onEnterSync}
         chromeVisible={p.showChrome}
+      />
+      <BufferingIndicator
+        key={p.src.url}
+        buffering={p.snap.buffering}
+        status={p.snap.status}
+        suppressed={p.loaderActive || p.pipMode || p.cast.castDevice != null}
       />
       <CastLayer
         cast={p.cast}
@@ -398,7 +407,9 @@ export function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
           visible
           compact={p.mpvEmbedWindowsActive}
           live={p.liveOverlay.isLive}
-          onLooksGood={p.streamPillVariant === "check" ? () => p.setStreamCheckOpen(false) : undefined}
+          onLooksGood={
+            p.streamPillVariant === "check" ? () => p.setStreamCheckOpen(false) : undefined
+          }
           onPickAnother={p.pickAnotherOrGuide}
         />
       )}

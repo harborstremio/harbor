@@ -16,6 +16,8 @@ import { effectiveTmdbLanguage, setTmdbLanguage } from "@/lib/providers/tmdb/tmd
 import { setPosterBaseUrl } from "@/lib/providers/rpdb";
 import { setMdblistBatchKey } from "@/lib/providers/mdblist-batch";
 import { setUiLanguage } from "@/lib/i18n";
+import { setSnapshotRetentionDays } from "@/lib/snapshots";
+import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { STORAGE_KEY } from "./settings/defaults";
 import { readSettingsFile, writeSettingsFile } from "./settings/file-store";
 import { loadFontData, saveFontData } from "./font-storage";
@@ -267,9 +269,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, [settings.blockTrackers]);
 
   useEffect(() => {
-    void import("@/lib/snapshots").then(({ setSnapshotRetentionDays }) => {
-      setSnapshotRetentionDays(settings.cwSnapshotRetentionDays);
-    });
+    setSnapshotRetentionDays(settings.cwSnapshotRetentionDays);
   }, [settings.cwSnapshotRetentionDays]);
 
   useEffect(() => {
@@ -318,7 +318,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (!("__TAURI_INTERNALS__" in window)) return;
     let cancelled = false;
     const unlisteners: Array<() => void> = [];
-    const track = (u: () => void) => {
+    const track = (rawUnlisten: () => void) => {
+      const u = makeSafeTauriUnlisten(rawUnlisten);
       if (cancelled) u();
       else unlisteners.push(u);
     };

@@ -6,7 +6,8 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tokio::sync::RwLock;
+use tokio::process::Child;
+use tokio::sync::{Mutex, RwLock};
 use uuid::Uuid;
 
 const PROBE_TIMEOUT: Duration = Duration::from_secs(15);
@@ -28,7 +29,7 @@ struct HlsSession {
     probe: Probe,
     temp_dir: PathBuf,
     last_access: std::sync::Mutex<Instant>,
-    _ffmpeg_kill: Arc<KillHandle>,
+    process: Mutex<Option<Child>>,
 }
 
 fn touch(session: &HlsSession) {
@@ -37,37 +38,20 @@ fn touch(session: &HlsSession) {
     }
 }
 
-struct KillHandle {
-    pid: std::sync::Mutex<Option<u32>>,
-    temp_dir: PathBuf,
-}
-
-impl Drop for KillHandle {
-    fn drop(&mut self) {
-        if let Ok(mut guard) = self.pid.lock() {
-            if let Some(pid) = guard.take() {
-                #[cfg(windows)]
-                {
-                    use std::os::windows::process::CommandExt;
-                    let _ = std::process::Command::new("taskkill")
-                        .arg("/F")
-                        .arg("/T")
-                        .arg("/PID")
-                        .arg(pid.to_string())
-                        .stdout(std::process::Stdio::null())
-                        .stderr(std::process::Stdio::null())
-                        .creation_flags(0x0800_0000)
-                        .status();
-                }
-                #[cfg(not(windows))]
-                {
-                    use std::process::Command;
-                    let _ = Command::new("kill").arg("-9").arg(pid.to_string()).status();
-                }
-                eprintln!("[cast-hls] killed ffmpeg pid={}", pid);
-            }
+async fn stop_session_resources(session: Arc<HlsSession>) {
+    let child = { session.process.lock().await.take() };
+    if let Some(mut child) = child {
+        if let Err(error) = child.start_kill() {
+            eprintln!("[cast-hls] ffmpeg termination request failed: {error}");
         }
-        let _ = std::fs::remove_dir_all(&self.temp_dir);
+        if let Err(error) = child.wait().await {
+            eprintln!("[cast-hls] ffmpeg reap failed: {error}");
+        }
+    }
+    if let Err(error) = tokio::fs::remove_dir_all(&session.temp_dir).await {
+        if error.kind() != std::io::ErrorKind::NotFound {
+            eprintln!("[cast-hls] temporary session cleanup failed: {error}");
+        }
     }
 }
 
@@ -94,47 +78,77 @@ impl HlsState {
         let id = Uuid::new_v4().to_string();
         let temp_dir = std::env::temp_dir().join(format!("harbor-hls-{}", id));
         std::fs::create_dir_all(&temp_dir).map_err(|e| format!("mkdir: {}", e))?;
-        let kill_handle = Arc::new(KillHandle {
-            pid: std::sync::Mutex::new(None),
-            temp_dir: temp_dir.clone(),
-        });
-        spawn_continuous_ffmpeg(
+        let child = match spawn_continuous_ffmpeg(
             &media_url,
             &headers,
             seek_start_sec,
             probe.duration_sec,
             &temp_dir,
-            kill_handle.clone(),
             burn_sub,
         )
-        .await?;
+        .await
+        {
+            Ok(child) => child,
+            Err(error) => {
+                let _ = tokio::fs::remove_dir_all(&temp_dir).await;
+                return Err(error);
+            }
+        };
         let session = Arc::new(HlsSession {
             probe,
             temp_dir,
             last_access: std::sync::Mutex::new(Instant::now()),
-            _ffmpeg_kill: kill_handle,
+            process: Mutex::new(Some(child)),
         });
         self.sessions.write().await.insert(id.clone(), session);
-        eprintln!("[cast-hls] session {} registered, seek={:.1}s", id, seek_start_sec);
+        eprintln!(
+            "[cast-hls] session {} registered, seek={:.1}s",
+            id, seek_start_sec
+        );
         Ok(id)
+    }
+
+    pub async fn stop_session(&self, id: &str) -> bool {
+        let session = { self.sessions.write().await.remove(id) };
+        let Some(session) = session else {
+            return false;
+        };
+        stop_session_resources(session).await;
+        true
+    }
+
+    pub async fn stop_all(&self) -> usize {
+        let sessions: Vec<Arc<HlsSession>> = {
+            let mut map = self.sessions.write().await;
+            map.drain().map(|(_, session)| session).collect()
+        };
+        for session in &sessions {
+            stop_session_resources(session.clone()).await;
+        }
+        sessions.len()
     }
 
     pub async fn evict_idle(&self, idle: Duration) -> usize {
         let now = Instant::now();
-        let mut map = self.sessions.write().await;
-        let stale: Vec<String> = map
-            .iter()
-            .filter(|(_, s)| {
-                s.last_access
-                    .lock()
-                    .map(|t| now.duration_since(*t) > idle)
-                    .unwrap_or(false)
-            })
-            .map(|(k, _)| k.clone())
-            .collect();
-        for k in &stale {
-            map.remove(k);
-            eprintln!("[cast-hls] evicted idle session {}", k);
+        let stale: Vec<Arc<HlsSession>> = {
+            let mut map = self.sessions.write().await;
+            let stale_ids: Vec<String> = map
+                .iter()
+                .filter(|(_, s)| {
+                    s.last_access
+                        .lock()
+                        .map(|t| now.duration_since(*t) > idle)
+                        .unwrap_or(false)
+                })
+                .map(|(k, _)| k.clone())
+                .collect();
+            stale_ids
+                .into_iter()
+                .filter_map(|id| map.remove(&id))
+                .collect()
+        };
+        for session in &stale {
+            stop_session_resources(session.clone()).await;
         }
         stale.len()
     }
@@ -161,12 +175,25 @@ pub fn router(state: HlsState) -> axum::Router {
 async fn handle_preflight() -> Response {
     let mut resp = Response::builder().status(StatusCode::NO_CONTENT);
     if let Some(h) = resp.headers_mut() {
-        h.insert(HeaderName::from_static("access-control-allow-origin"), HeaderValue::from_static("*"));
-        h.insert(HeaderName::from_static("access-control-allow-methods"), HeaderValue::from_static("GET, HEAD, OPTIONS"));
-        h.insert(HeaderName::from_static("access-control-allow-headers"), HeaderValue::from_static("Content-Type, Accept-Encoding, Range, Origin"));
-        h.insert(HeaderName::from_static("access-control-max-age"), HeaderValue::from_static("86400"));
+        h.insert(
+            HeaderName::from_static("access-control-allow-origin"),
+            HeaderValue::from_static("*"),
+        );
+        h.insert(
+            HeaderName::from_static("access-control-allow-methods"),
+            HeaderValue::from_static("GET, HEAD, OPTIONS"),
+        );
+        h.insert(
+            HeaderName::from_static("access-control-allow-headers"),
+            HeaderValue::from_static("Content-Type, Accept-Encoding, Range, Origin"),
+        );
+        h.insert(
+            HeaderName::from_static("access-control-max-age"),
+            HeaderValue::from_static("86400"),
+        );
     }
-    resp.body(Body::empty()).unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "preflight").into_response())
+    resp.body(Body::empty())
+        .unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "preflight").into_response())
 }
 
 async fn handle_master(
@@ -174,7 +201,10 @@ async fn handle_master(
     Path(id): Path<String>,
     headers: axum::http::HeaderMap,
 ) -> Response {
-    let origin = headers.get("origin").and_then(|v| v.to_str().ok()).unwrap_or("(no-origin)");
+    let origin = headers
+        .get("origin")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("(no-origin)");
     eprintln!("[cast-hls] MASTER hit id={} origin={}", id, origin);
     let session = match state.sessions.read().await.get(&id).cloned() {
         Some(s) => s,
@@ -182,7 +212,11 @@ async fn handle_master(
     };
     touch(&session);
     let codecs = "avc1.640029,mp4a.40.2";
-    let bandwidth = session.probe.video_bitrate.saturating_add(192_000).max(2_500_000);
+    let bandwidth = session
+        .probe
+        .video_bitrate
+        .saturating_add(192_000)
+        .max(2_500_000);
     let (w, h) = clamp_resolution(session.probe.width, session.probe.height);
     let body = format!(
         "#EXTM3U\n\
@@ -195,10 +229,7 @@ async fn handle_master(
     playlist_response(body)
 }
 
-async fn handle_variant(
-    State(state): State<HlsState>,
-    Path(id): Path<String>,
-) -> Response {
+async fn handle_variant(State(state): State<HlsState>, Path(id): Path<String>) -> Response {
     eprintln!("[cast-hls] VARIANT hit id={}", id);
     let session = match state.sessions.read().await.get(&id).cloned() {
         Some(s) => s,
@@ -242,7 +273,12 @@ async fn handle_segment(
             tokio::time::sleep(Duration::from_millis(80)).await;
             if let Ok(bytes) = tokio::fs::read(&path).await {
                 if !bytes.is_empty() && bytes[0] == 0x47 {
-                    eprintln!("[cast-hls] SEGMENT hit id={} filename={} bytes={}", id, filename, bytes.len());
+                    eprintln!(
+                        "[cast-hls] SEGMENT hit id={} filename={} bytes={}",
+                        id,
+                        filename,
+                        bytes.len()
+                    );
                     return binary_response(bytes, "video/mp2t");
                 }
             }
@@ -259,25 +295,57 @@ fn playlist_response(body: String) -> Response {
     let bytes = body.into_bytes();
     let mut resp = Response::builder().status(StatusCode::OK);
     if let Some(h) = resp.headers_mut() {
-        h.insert(HeaderName::from_static("content-type"), HeaderValue::from_static("application/vnd.apple.mpegurl"));
-        h.insert(HeaderName::from_static("cache-control"), HeaderValue::from_static("no-cache"));
-        h.insert(HeaderName::from_static("access-control-allow-origin"), HeaderValue::from_static("*"));
-        h.insert(HeaderName::from_static("access-control-expose-headers"), HeaderValue::from_static("Content-Length, Content-Range"));
-        h.insert(HeaderName::from_static("content-length"), HeaderValue::from_str(&bytes.len().to_string()).unwrap());
+        h.insert(
+            HeaderName::from_static("content-type"),
+            HeaderValue::from_static("application/vnd.apple.mpegurl"),
+        );
+        h.insert(
+            HeaderName::from_static("cache-control"),
+            HeaderValue::from_static("no-cache"),
+        );
+        h.insert(
+            HeaderName::from_static("access-control-allow-origin"),
+            HeaderValue::from_static("*"),
+        );
+        h.insert(
+            HeaderName::from_static("access-control-expose-headers"),
+            HeaderValue::from_static("Content-Length, Content-Range"),
+        );
+        h.insert(
+            HeaderName::from_static("content-length"),
+            HeaderValue::from_str(&bytes.len().to_string()).unwrap(),
+        );
     }
-    resp.body(Body::from(bytes)).unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "build").into_response())
+    resp.body(Body::from(bytes))
+        .unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "build").into_response())
 }
 
 fn binary_response(bytes: Vec<u8>, content_type: &'static str) -> Response {
     let mut resp = Response::builder().status(StatusCode::OK);
     if let Some(h) = resp.headers_mut() {
-        h.insert(HeaderName::from_static("content-type"), HeaderValue::from_static(content_type));
-        h.insert(HeaderName::from_static("access-control-allow-origin"), HeaderValue::from_static("*"));
-        h.insert(HeaderName::from_static("access-control-expose-headers"), HeaderValue::from_static("Content-Length, Content-Range"));
-        h.insert(HeaderName::from_static("accept-ranges"), HeaderValue::from_static("bytes"));
-        h.insert(HeaderName::from_static("content-length"), HeaderValue::from_str(&bytes.len().to_string()).unwrap());
+        h.insert(
+            HeaderName::from_static("content-type"),
+            HeaderValue::from_static(content_type),
+        );
+        h.insert(
+            HeaderName::from_static("access-control-allow-origin"),
+            HeaderValue::from_static("*"),
+        );
+        h.insert(
+            HeaderName::from_static("access-control-expose-headers"),
+            HeaderValue::from_static("Content-Length, Content-Range"),
+        );
+        h.insert(
+            HeaderName::from_static("accept-ranges"),
+            HeaderValue::from_static("bytes"),
+        );
+        h.insert(
+            HeaderName::from_static("content-length"),
+            HeaderValue::from_str(&bytes.len().to_string()).unwrap(),
+        );
     }
-    resp.body(Body::from(bytes)).unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "build").into_response())
+    resp.body(Body::from(bytes))
+        .unwrap_or_else(|_| (StatusCode::INTERNAL_SERVER_ERROR, "build").into_response())
 }
 
 fn clamp_resolution(w: u32, h: u32) -> (u32, u32) {
@@ -290,7 +358,8 @@ fn clamp_resolution(w: u32, h: u32) -> (u32, u32) {
 }
 
 async fn probe_source(url: &str, headers: &HashMap<String, String>) -> Result<Probe, String> {
-    let ffprobe = crate::transcode::locate_ffprobe().ok_or_else(|| "ffprobe not found".to_string())?;
+    let ffprobe =
+        crate::transcode::locate_ffprobe().ok_or_else(|| "ffprobe not found".to_string())?;
     let mut cmd = tokio::process::Command::new(&ffprobe);
     cmd.arg("-v").arg("error");
     for (k, v) in headers {
@@ -310,12 +379,16 @@ async fn probe_source(url: &str, headers: &HashMap<String, String>) -> Result<Pr
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
+    cmd.kill_on_drop(true);
     let output = match tokio::time::timeout(PROBE_TIMEOUT, cmd.output()).await {
         Ok(Ok(o)) => o,
         Ok(Err(e)) => return Err(format!("ffprobe spawn: {}", e)),
         Err(_) => return Err("ffprobe timed out".to_string()),
     };
-    let stdout = String::from_utf8_lossy(&output.stdout);
+    parse_probe_output(&String::from_utf8_lossy(&output.stdout))
+}
+
+fn parse_probe_output(stdout: &str) -> Result<Probe, String> {
     let mut probe = Probe {
         duration_sec: 0.0,
         video_codec: String::new(),
@@ -326,40 +399,58 @@ async fn probe_source(url: &str, headers: &HashMap<String, String>) -> Result<Pr
         video_bitrate: 4_000_000,
     };
     let mut current_type: Option<String> = None;
+    let mut pending_codec_name: Option<String> = None;
     for line in stdout.lines() {
         if let Some(v) = line.strip_prefix("codec_type=") {
             current_type = Some(v.trim().to_string());
+            if let Some(name) = pending_codec_name.take() {
+                match current_type.as_deref() {
+                    Some("video") if probe.video_codec.is_empty() => probe.video_codec = name,
+                    Some("audio") if probe.audio_codec.is_empty() => probe.audio_codec = name,
+                    _ => {}
+                }
+            }
         } else if let Some(v) = line.strip_prefix("codec_name=") {
             let name = v.trim().to_lowercase();
             match current_type.as_deref() {
                 Some("video") if probe.video_codec.is_empty() => probe.video_codec = name,
                 Some("audio") if probe.audio_codec.is_empty() => probe.audio_codec = name,
-                _ => {}
+                _ => pending_codec_name = Some(name),
             }
         } else if let Some(v) = line.strip_prefix("width=") {
             if current_type.as_deref() == Some("video") {
-                if let Ok(n) = v.trim().parse::<u32>() { probe.width = n; }
+                if let Ok(n) = v.trim().parse::<u32>() {
+                    probe.width = n;
+                }
             }
         } else if let Some(v) = line.strip_prefix("height=") {
             if current_type.as_deref() == Some("video") {
-                if let Ok(n) = v.trim().parse::<u32>() { probe.height = n; }
+                if let Ok(n) = v.trim().parse::<u32>() {
+                    probe.height = n;
+                }
             }
         } else if let Some(v) = line.strip_prefix("r_frame_rate=") {
             if current_type.as_deref() == Some("video") {
                 if let Some((num, den)) = v.trim().split_once('/') {
                     if let (Ok(n), Ok(d)) = (num.parse::<f64>(), den.parse::<f64>()) {
-                        if d > 0.0 { probe.fps = n / d; }
+                        if d > 0.0 {
+                            probe.fps = n / d;
+                        }
                     }
                 }
             }
         } else if let Some(v) = line.strip_prefix("bit_rate=") {
             if current_type.as_deref() == Some("video") {
                 if let Ok(n) = v.trim().parse::<u64>() {
-                    if n > 0 { probe.video_bitrate = n; }
+                    if n > 0 {
+                        probe.video_bitrate = n;
+                    }
                 }
             }
         } else if let Some(v) = line.strip_prefix("duration=") {
-            if let Ok(n) = v.trim().parse::<f64>() { probe.duration_sec = n; }
+            if let Ok(n) = v.trim().parse::<f64>() {
+                probe.duration_sec = n;
+            }
         }
     }
     if probe.video_codec.is_empty() {
@@ -377,9 +468,8 @@ async fn spawn_continuous_ffmpeg(
     seek_start: f64,
     _total_duration: f64,
     temp_dir: &std::path::Path,
-    kill: Arc<KillHandle>,
     burn_sub: Option<(String, String)>,
-) -> Result<(), String> {
+) -> Result<Child, String> {
     let ffmpeg = crate::transcode::locate_ffmpeg().ok_or_else(|| "ffmpeg not found".to_string())?;
     let segment_pattern = temp_dir.join("seg%05d.ts");
     let playlist_path = temp_dir.join("playlist.m3u8");
@@ -444,12 +534,14 @@ async fn spawn_continuous_ffmpeg(
         .arg("6")
         .arg("-hls_segment_type")
         .arg("mpegts")
-        .arg("-hls_playlist_type")
-        .arg("event")
         .arg("-hls_list_size")
-        .arg("0")
+        .arg("8")
+        .arg("-hls_delete_threshold")
+        .arg("2")
         .arg("-hls_flags")
-        .arg("independent_segments+temp_file")
+        // A sliding playlist prevents long casts from retaining every segment.
+        // Receivers may occasionally request a segment that has just expired.
+        .arg("delete_segments+independent_segments+temp_file")
         .arg("-hls_segment_filename")
         .arg(&segment_pattern)
         .arg(&playlist_path);
@@ -458,16 +550,13 @@ async fn spawn_continuous_ffmpeg(
     {
         cmd.creation_flags(0x0800_0000);
     }
-    cmd.stdin(std::process::Stdio::null())
+    cmd.kill_on_drop(true)
+        .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::piped());
 
     let mut child = cmd.spawn().map_err(|e| format!("ffmpeg spawn: {}", e))?;
-    let pid = child.id();
-    if let (Some(p), Ok(mut guard)) = (pid, kill.pid.lock()) {
-        *guard = Some(p);
-    }
-    eprintln!("[cast-hls] ffmpeg spawned pid={:?}, seek={:.1}, temp={}", pid, seek_start, temp_dir.display());
+    eprintln!("[cast-hls] ffmpeg spawned for seek={seek_start:.1}");
 
     if let Some(stderr) = child.stderr.take() {
         tokio::spawn(async move {
@@ -480,14 +569,7 @@ async fn spawn_continuous_ffmpeg(
             }
         });
     }
-    tokio::spawn(async move {
-        match child.wait().await {
-            Ok(status) => eprintln!("[cast-hls] ffmpeg exited: {}", status),
-            Err(e) => eprintln!("[cast-hls] ffmpeg wait err: {}", e),
-        }
-    });
-
-    Ok(())
+    Ok(child)
 }
 
 fn apply_headers(cmd: &mut tokio::process::Command, headers: &HashMap<String, String>) {
@@ -499,14 +581,123 @@ fn apply_headers(cmd: &mut tokio::process::Command, headers: &HashMap<String, St
         }
     }
     if !has_ua {
-        cmd.arg("-user_agent").arg("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Harbor/0.8");
+        cmd.arg("-user_agent")
+            .arg("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Harbor/0.8");
     }
     let mut blob = String::new();
     for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" { continue; }
+        if k.to_lowercase() == "user-agent" {
+            continue;
+        }
         blob.push_str(&format!("{}: {}\r\n", k, v));
     }
     if !blob.is_empty() {
         cmd.arg("-headers").arg(blob);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_ffprobe_fields_emitted_before_stream_type() {
+        let output = "codec_name=h264\n\
+codec_type=video\n\
+width=1920\n\
+height=1080\n\
+r_frame_rate=24000/1001\n\
+bit_rate=4000000\n\
+codec_name=aac\n\
+codec_type=audio\n\
+bit_rate=192000\n\
+duration=120.5\n";
+
+        let probe = parse_probe_output(output).expect("parse ffprobe output");
+
+        assert_eq!(probe.video_codec, "h264");
+        assert_eq!(probe.audio_codec, "aac");
+        assert_eq!(probe.width, 1920);
+        assert_eq!(probe.height, 1080);
+        assert!((probe.fps - (24_000.0 / 1_001.0)).abs() < f64::EPSILON);
+        assert_eq!(probe.video_bitrate, 4_000_000);
+        assert_eq!(probe.duration_sec, 120.5);
+    }
+
+    #[test]
+    fn parses_ffprobe_stream_type_emitted_before_fields() {
+        let output = "codec_type=video\n\
+codec_name=h264\n\
+width=1920\n\
+height=1080\n\
+r_frame_rate=24/1\n\
+bit_rate=4000000\n\
+codec_type=audio\n\
+codec_name=aac\n\
+duration=120.5\n";
+
+        let probe = parse_probe_output(output).expect("parse ffprobe output");
+
+        assert_eq!(probe.video_codec, "h264");
+        assert_eq!(probe.audio_codec, "aac");
+    }
+
+    #[tokio::test]
+    async fn stop_session_removes_the_session_and_its_temp_dir() {
+        let state = HlsState::new();
+        let id = Uuid::new_v4().to_string();
+        let temp_dir = std::env::temp_dir().join(format!("harbor-hls-test-{id}"));
+        std::fs::create_dir_all(&temp_dir).expect("create test HLS directory");
+        std::fs::write(temp_dir.join("segment.ts"), b"segment").expect("write test segment");
+        let session = Arc::new(HlsSession {
+            probe: Probe {
+                duration_sec: 1.0,
+                video_codec: "h264".into(),
+                audio_codec: "aac".into(),
+                width: 1,
+                height: 1,
+                fps: 1.0,
+                video_bitrate: 1,
+            },
+            temp_dir: temp_dir.clone(),
+            last_access: std::sync::Mutex::new(Instant::now()),
+            process: tokio::sync::Mutex::new(None),
+        });
+        state.sessions.write().await.insert(id.clone(), session);
+
+        assert!(state.stop_session(&id).await);
+        assert!(!temp_dir.exists());
+        assert!(!state.stop_session(&id).await);
+    }
+
+    #[tokio::test]
+    async fn stop_all_removes_every_session_and_is_idempotent() {
+        let state = HlsState::new();
+        let mut temp_dirs = Vec::new();
+        for _ in 0..2 {
+            let id = Uuid::new_v4().to_string();
+            let temp_dir = std::env::temp_dir().join(format!("harbor-hls-test-{id}"));
+            std::fs::create_dir_all(&temp_dir).expect("create test HLS directory");
+            let session = Arc::new(HlsSession {
+                probe: Probe {
+                    duration_sec: 1.0,
+                    video_codec: "h264".into(),
+                    audio_codec: "aac".into(),
+                    width: 1,
+                    height: 1,
+                    fps: 1.0,
+                    video_bitrate: 1,
+                },
+                temp_dir: temp_dir.clone(),
+                last_access: std::sync::Mutex::new(Instant::now()),
+                process: tokio::sync::Mutex::new(None),
+            });
+            state.sessions.write().await.insert(id, session);
+            temp_dirs.push(temp_dir);
+        }
+
+        assert_eq!(state.stop_all().await, 2);
+        assert!(temp_dirs.iter().all(|path| !path.exists()));
+        assert_eq!(state.stop_all().await, 0);
     }
 }

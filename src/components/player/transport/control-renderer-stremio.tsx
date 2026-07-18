@@ -243,7 +243,11 @@ export function RenderedStremioControl({
     case "play-pause":
       return (
         <Tooltip label={ctx.playing ? tr("Pause") : tr("Play")}>
-          <StremioBtn onClick={ctx.onPlayPause} ariaLabel={ctx.playing ? tr("Pause") : tr("Play")}>
+          <StremioBtn
+            onClick={ctx.onPlayPause}
+            ariaLabel={ctx.playing ? tr("Pause") : tr("Play")}
+            playPause
+          >
             {ctx.playing ? (
               <Pause size={32} strokeWidth={2} fill="currentColor" />
             ) : (

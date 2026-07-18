@@ -101,7 +101,11 @@ fn sanitize_filename(raw: &str) -> String {
         }
     }
     let trimmed = out.trim().trim_end_matches('.').to_string();
-    if trimmed.is_empty() { "recording".into() } else { trimmed }
+    if trimmed.is_empty() {
+        "recording".into()
+    } else {
+        trimmed
+    }
 }
 
 fn now_ms() -> i64 {
@@ -141,6 +145,7 @@ pub async fn dvr_start(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
+    cmd.kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(CREATE_NO_WINDOW);
     let child = cmd.spawn().map_err(|e| format!("spawn mpv: {}", e))?;
@@ -227,7 +232,11 @@ pub async fn dvr_start(
                 }
             };
             if let Some(ok) = exit {
-                let msg = if ok { None } else { Some("mpv exited unexpectedly".into()) };
+                let msg = if ok {
+                    None
+                } else {
+                    Some("mpv exited unexpectedly".into())
+                };
                 let _ = finalize(&app_for_done, &state_arc_done, &id_for_done, msg).await;
                 return;
             }
@@ -243,8 +252,8 @@ async fn finalize(
     id: &str,
     error: Option<String>,
 ) -> Result<(), String> {
-    let mut g = state.lock().await;
-    if let Some(mut rec) = g.remove(id) {
+    let recording = { state.lock().await.remove(id) };
+    if let Some(mut rec) = recording {
         let _ = rec.child.kill().await;
         let bytes = tokio::fs::metadata(&rec.output_path)
             .await
@@ -260,10 +269,18 @@ async fn finalize(
             planned_duration_sec: rec.planned_duration_sec,
             bytes_written: bytes,
             elapsed_sec: elapsed,
-            state: if error.is_some() { "error".into() } else { "done".into() },
+            state: if error.is_some() {
+                "error".into()
+            } else {
+                "done".into()
+            },
             error: error.clone(),
         };
-        let topic = if error.is_some() { "dvr://error" } else { "dvr://done" };
+        let topic = if error.is_some() {
+            "dvr://error"
+        } else {
+            "dvr://done"
+        };
         let _ = app.emit(topic, &payload);
     }
     Ok(())
@@ -280,22 +297,46 @@ pub async fn dvr_stop(
 
 #[tauri::command]
 pub async fn dvr_list(state: State<'_, DvrState>) -> Result<Vec<DvrSession>, String> {
-    let g = state.inner.lock().await;
-    let mut out = Vec::with_capacity(g.len());
-    for (id, rec) in g.iter() {
-        let bytes = tokio::fs::metadata(&rec.output_path)
+    let recordings: Vec<_> = {
+        let g = state.inner.lock().await;
+        g.iter()
+            .map(|(id, rec)| {
+                (
+                    id.clone(),
+                    rec.output_path.clone(),
+                    rec.channel_name.clone(),
+                    rec.program_title.clone(),
+                    rec.started_at,
+                    rec.started_at_ms,
+                    rec.planned_duration_sec,
+                )
+            })
+            .collect()
+    };
+    let mut out = Vec::with_capacity(recordings.len());
+    for (
+        id,
+        output_path,
+        channel_name,
+        program_title,
+        started_at,
+        started_at_ms,
+        planned_duration_sec,
+    ) in recordings
+    {
+        let bytes = tokio::fs::metadata(&output_path)
             .await
             .map(|m| m.len())
             .unwrap_or(0);
         out.push(DvrSession {
-            id: id.clone(),
-            output_path: rec.output_path.to_string_lossy().to_string(),
-            channel_name: rec.channel_name.clone(),
-            program_title: rec.program_title.clone(),
-            started_at_ms: rec.started_at_ms,
-            planned_duration_sec: rec.planned_duration_sec,
+            id,
+            output_path: output_path.to_string_lossy().to_string(),
+            channel_name,
+            program_title,
+            started_at_ms,
+            planned_duration_sec,
             bytes_written: bytes,
-            elapsed_sec: rec.started_at.elapsed().as_secs_f64(),
+            elapsed_sec: started_at.elapsed().as_secs_f64(),
             state: "recording".into(),
             error: None,
         });

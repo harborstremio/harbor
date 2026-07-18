@@ -319,7 +319,6 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             shaderRadius={1}
             intensity={1.05}
             refractionStrength={1.18}
-            spectralStrength={1.08}
             className={`
               shrink-0 rounded-full
               border border-white/[0.10]
@@ -334,10 +333,11 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             <button
               type="button"
               onClick={ctx.onPlayPause}
+              data-player-play-pause
               data-tv-initial-focus
               aria-label={ctx.playing ? t("Pause") : t("Play")}
               className="
-                flex h-full w-full
+                relative flex h-full w-full
                 items-center justify-center
                 rounded-full
                 bg-transparent

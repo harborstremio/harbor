@@ -1,4 +1,3 @@
-import type { AddonRow } from "@/lib/addons";
 import type { Meta } from "@/lib/cinemeta";
 import {
   GENRE,
@@ -57,14 +56,54 @@ export const SPECS: Spec[] = [
     pool: "era",
     fetcher: (p) => jikanByEra("1990-01-01", "1999-12-31", p),
   },
-  { key: "genre-action", title: "Action & Adventure", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Action, p) },
-  { key: "genre-romance", title: "Romance", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Romance, p) },
-  { key: "genre-slice", title: "Slice of Life", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.SliceOfLife, p) },
-  { key: "genre-mecha", title: "Mecha", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Mecha, p) },
-  { key: "genre-fantasy", title: "Fantasy", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Fantasy, p) },
-  { key: "genre-scifi", title: "Sci-Fi", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.SciFi, p) },
-  { key: "genre-psych", title: "Psychological", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Psychological, p) },
-  { key: "genre-horror", title: "Horror & Supernatural", pool: "genre", fetcher: (p) => jikanByGenre(GENRE.Horror, p) },
+  {
+    key: "genre-action",
+    title: "Action & Adventure",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Action, p),
+  },
+  {
+    key: "genre-romance",
+    title: "Romance",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Romance, p),
+  },
+  {
+    key: "genre-slice",
+    title: "Slice of Life",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.SliceOfLife, p),
+  },
+  {
+    key: "genre-mecha",
+    title: "Mecha",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Mecha, p),
+  },
+  {
+    key: "genre-fantasy",
+    title: "Fantasy",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Fantasy, p),
+  },
+  {
+    key: "genre-scifi",
+    title: "Sci-Fi",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.SciFi, p),
+  },
+  {
+    key: "genre-psych",
+    title: "Psychological",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Psychological, p),
+  },
+  {
+    key: "genre-horror",
+    title: "Horror & Supernatural",
+    pool: "genre",
+    fetcher: (p) => jikanByGenre(GENRE.Horror, p),
+  },
 ];
 
 export const HERO_KEYS = new Set(["airing", "top-airing", "upcoming", "popular"]);
@@ -76,18 +115,6 @@ export const ROW_MAX_PAGES = 5;
 export type RowState = { metas: Meta[]; page: number; hasMore: boolean; ready: boolean };
 
 export const EMPTY_ROW: RowState = { metas: [], page: 1, hasMore: false, ready: false };
-
-export function isAnimeRow(row: AddonRow): boolean {
-  if (row.type === "anime") return true;
-  const nameLower = (row.name ?? "").toLowerCase();
-  if (/\b(anime|mal|anilist|kitsu|aniworld|crunchyroll|funimation)\b/.test(nameLower)) return true;
-  const sample = row.metas.slice(0, 6);
-  if (sample.length === 0) return false;
-  const animeIds = sample.filter(
-    (m) => m.id.startsWith("kitsu:") || m.id.startsWith("mal:") || m.id.startsWith("anilist:"),
-  ).length;
-  return animeIds / sample.length >= 0.5;
-}
 
 export function RowSkeleton({ title }: { title: string }) {
   return (

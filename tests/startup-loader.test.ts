@@ -39,7 +39,9 @@ test("startup keeps the app inert behind the existing loader until the first vie
 });
 
 test("native focus is delayed until the single startup surface is removed", () => {
-  const pageLoadHandler = nativeSource.match(/\.on_page_load\([\s\S]*?\n\s*\}\)\n\s*\.setup/)?.[0];
+  const pageLoadHandler = nativeSource.match(
+    /\.on_page_load\([\s\S]*?\r?\n\s*\}\)\r?\n\s*\.setup/,
+  )?.[0];
 
   assert.ok(pageLoadHandler, "main page-load handler must exist");
   assert.match(pageLoadHandler, /window\(\)\.show\(\)/);

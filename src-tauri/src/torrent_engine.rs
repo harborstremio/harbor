@@ -7,12 +7,16 @@ mod trackers;
 
 use std::collections::HashSet;
 use std::net::SocketAddr;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 
 use librqbit::api::TorrentIdOrHash;
 use librqbit::dht::{Dht, PersistentDhtConfig};
-use librqbit::{AddTorrent, AddTorrentOptions, PeerConnectionOptions, Session, SessionOptions, SessionPersistenceConfig};
+use librqbit::{
+    AddTorrent, AddTorrentOptions, PeerConnectionOptions, Session, SessionOptions,
+    SessionPersistenceConfig,
+};
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 use tokio::net::TcpListener;
@@ -26,7 +30,7 @@ struct EngineState {
     ready: bool,
     last_error: Option<String>,
     server: Option<tokio::task::JoinHandle<()>>,
-    sweeper: Option<tokio::task::JoinHandle<()>>,
+    sweeper: Option<CacheSweeper>,
     lan_server: Option<tokio::task::JoinHandle<()>>,
     lan_port: Option<u16>,
     lan_error: Option<String>,
@@ -53,19 +57,79 @@ fn engine() -> &'static Mutex<EngineState> {
 
 pub const LAN_SERVER_PORT: u16 = 11470;
 
-const CACHE_SWEEP_INTERVAL_SECS: u64 = 30;
+const CACHE_SWEEP_INITIAL_DELAY_SECS: u64 = 60;
+const CACHE_SWEEP_INTERVAL_SECS: u64 = 30 * 60;
+static CACHE_SWEEP_RUNNING: AtomicBool = AtomicBool::new(false);
 
-fn spawn_cache_sweeper(app: AppHandle) -> tokio::task::JoinHandle<()> {
-    tokio::spawn(async move {
+struct CacheSweepGuard;
+
+impl Drop for CacheSweepGuard {
+    fn drop(&mut self) {
+        CACHE_SWEEP_RUNNING.store(false, Ordering::Release);
+    }
+}
+
+struct CacheSweeper {
+    task: tokio::task::JoinHandle<()>,
+    cancelled: Arc<AtomicBool>,
+}
+
+impl CacheSweeper {
+    fn cancel(self) {
+        self.cancelled.store(true, Ordering::Release);
+        self.task.abort();
+    }
+}
+
+fn spawn_cache_sweeper(app: AppHandle) -> CacheSweeper {
+    let cancelled = Arc::new(AtomicBool::new(false));
+    let cancelled_for_task = cancelled.clone();
+    let task = tokio::spawn(async move {
+        tokio::time::sleep(Duration::from_secs(CACHE_SWEEP_INITIAL_DELAY_SECS)).await;
         loop {
-            tokio::time::sleep(Duration::from_secs(CACHE_SWEEP_INTERVAL_SECS)).await;
+            if cancelled_for_task.load(Ordering::Acquire) {
+                break;
+            }
             let cfg = read_config(&app);
-            let Ok(dir) = engine_dir(&app, &cfg) else { continue };
-            let retention = cfg.retention_hours.unwrap_or(24);
-            let max_gb = cfg.max_gb.unwrap_or(0);
-            let _ = tokio::task::spawn_blocking(move || cache_sweep::run(&dir, retention, max_gb)).await;
+            if let Ok(dir) = engine_dir(&app, &cfg) {
+                let retention = cfg.retention_hours.unwrap_or(24);
+                let max_gb = cfg.max_gb.unwrap_or(0);
+                let started = std::time::Instant::now();
+                let cancelled_for_sweep = cancelled_for_task.clone();
+                let result = tokio::task::spawn_blocking(move || {
+                    if CACHE_SWEEP_RUNNING
+                        .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+                        .is_err()
+                    {
+                        return None;
+                    }
+                    let _guard = CacheSweepGuard;
+                    Some(cache_sweep::run_with_cancel(
+                        &dir,
+                        retention,
+                        max_gb,
+                        &cancelled_for_sweep,
+                    ))
+                })
+                .await;
+                match result {
+                    Ok(Some(stats)) => eprintln!(
+                        "[torrent-engine] cache sweep completed in {:?}: scanned={} deleted={} reclaimed_bytes={} errors={} cancelled={}",
+                        started.elapsed(),
+                        stats.scanned,
+                        stats.deleted,
+                        stats.reclaimed_bytes,
+                        stats.errors,
+                        stats.cancelled,
+                    ),
+                    Ok(None) => eprintln!("[torrent-engine] cache sweep skipped; another sweep is active"),
+                    Err(error) => eprintln!("[torrent-engine] cache sweep task failed: {error}"),
+                }
+            }
+            tokio::time::sleep(Duration::from_secs(CACHE_SWEEP_INTERVAL_SECS)).await;
         }
-    })
+    });
+    CacheSweeper { task, cancelled }
 }
 
 fn current_session() -> Option<Arc<Session>> {
@@ -158,7 +222,10 @@ struct EngineConfig {
 }
 
 fn config_path(app: &AppHandle) -> Option<std::path::PathBuf> {
-    app.path().app_cache_dir().ok().map(|d| d.join("engine.json"))
+    app.path()
+        .app_cache_dir()
+        .ok()
+        .map(|d| d.join("engine.json"))
 }
 
 fn read_config(app: &AppHandle) -> EngineConfig {
@@ -183,7 +250,6 @@ async fn init(app: AppHandle) -> Result<(), String> {
     let cfg = read_config(&app);
     let dir = engine_dir(&app, &cfg)?;
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-    cache_sweep::run(&dir, cfg.retention_hours.unwrap_or(24), cfg.max_gb.unwrap_or(0));
     let (session, dht_tier) = match new_session(&dir, true, true, true).await {
         Ok(s) => (s, 1u8),
         Err(e1) => {
@@ -191,7 +257,9 @@ async fn init(app: AppHandle) -> Result<(), String> {
             match new_session(&dir, false, true, true).await {
                 Ok(s) => (s, 2u8),
                 Err(e2) => {
-                    eprintln!("[torrent-engine] tier2 unavailable ({e2}); trying cold ephemeral dht");
+                    eprintln!(
+                        "[torrent-engine] tier2 unavailable ({e2}); trying cold ephemeral dht"
+                    );
                     match new_session(&dir, false, true, false).await {
                         Ok(s) => (s, 3u8),
                         Err(e3) => {
@@ -220,7 +288,7 @@ async fn init(app: AppHandle) -> Result<(), String> {
         old.abort();
     }
     if let Some(old) = st.sweeper.take() {
-        old.abort();
+        old.cancel();
     }
     st.session = Some(session);
     st.side_dht = side_dht;
@@ -270,7 +338,7 @@ pub fn stop() {
         server.abort();
     }
     if let Some(sweeper) = st.sweeper.take() {
-        sweeper.abort();
+        sweeper.cancel();
     }
     st.session = None;
     st.side_dht = None;
@@ -396,7 +464,9 @@ pub(crate) async fn ensure_added(
         None => {
             let magnet = build_magnet(hash);
             let seed = match current_side_dht() {
-                Some(d) => dht_boot::seed_peers(&d, magnet.as_str(), 40, Duration::from_secs(3)).await,
+                Some(d) => {
+                    dht_boot::seed_peers(&d, magnet.as_str(), 40, Duration::from_secs(3)).await
+                }
                 None => Vec::new(),
             };
             let opts = AddTorrentOptions {
@@ -464,7 +534,8 @@ pub fn lan_status() -> (bool, Option<u16>, Option<String>) {
 pub async fn start_lan_server(app: &AppHandle) -> Result<u16, String> {
     let session = ensure_session(app).await?;
     stop_lan_server();
-    let listener = match TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], LAN_SERVER_PORT))).await {
+    let listener = match TcpListener::bind(SocketAddr::from(([0, 0, 0, 0], LAN_SERVER_PORT))).await
+    {
         Ok(l) => l,
         Err(e) => {
             let msg = format!("port {LAN_SERVER_PORT} unavailable: {e}");
@@ -499,8 +570,14 @@ pub async fn torrent_engine_select(info_hash: String, file_idx: usize) -> Result
     let id = TorrentIdOrHash::parse(&info_hash).map_err(|e| e.to_string())?;
     let handle = session.get(id).ok_or_else(|| "no torrent".to_string())?;
     let only: HashSet<usize> = HashSet::from([file_idx]);
-    session.update_only_files(&handle, &only).await.map_err(|e| format!("{e:#}"))?;
-    session.unpause(&handle).await.map_err(|e| format!("{e:#}"))?;
+    session
+        .update_only_files(&handle, &only)
+        .await
+        .map_err(|e| format!("{e:#}"))?;
+    session
+        .unpause(&handle)
+        .await
+        .map_err(|e| format!("{e:#}"))?;
     Ok(())
 }
 

@@ -22,12 +22,18 @@ test("liquid glass does not ship the Three.js runtime or types", () => {
   assert.doesNotMatch(source, /from ["']three["']/);
 });
 
-test("liquid glass uses portable WebGL 1 with lifecycle and CSS fallback guards", () => {
-  assert.match(source, /getContext\("webgl"/);
-  assert.doesNotMatch(source, /getContext\("webgl2"/);
-  assert.match(source, /webglcontextlost/);
-  assert.match(source, /visibilitychange/);
-  assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /return null/);
-  assert.match(source, /backdropFilter/);
+test("liquid glass does not keep a GPU render loop alive", () => {
+  assert.doesNotMatch(source, /getContext\("webgl/);
+  assert.doesNotMatch(source, /requestAnimationFrame/);
+  assert.doesNotMatch(source, /<canvas/);
+  assert.match(source, /linear-gradient/);
+  assert.doesNotMatch(source, /backdropFilter/);
+  assert.doesNotMatch(source, /WebkitBackdropFilter/);
+});
+
+test("liquid glass keeps its public compatibility props", () => {
+  assert.doesNotMatch(source, /spectralStrength/);
+  assert.match(source, /refractionStrength/);
+  assert.match(source, /lensStrength/);
+  assert.match(source, /alwaysActive/);
 });

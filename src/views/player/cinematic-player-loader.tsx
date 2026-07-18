@@ -182,7 +182,6 @@ export function CinematicPlayerLoader({
         shaderRadius={1}
         intensity={1.05}
         refractionStrength={1.18}
-        spectralStrength={1.08}
         contentClassName="h-full w-full"
         style={{
           background: "transparent",

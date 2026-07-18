@@ -3,7 +3,7 @@
 use std::ffi::{c_char, c_void, CString};
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Mutex, OnceLock};
 
 use libmpv2::render::{OpenGLInitParams, RenderContext, RenderParam, RenderParamApiType};
 use libmpv2_sys::mpv_handle;
@@ -38,11 +38,7 @@ const NSOPENGL_CONTEXT_PARAM_SURFACE_OPACITY: i32 = 236;
 
 extern "C" {
     fn dlsym(handle: *mut c_void, name: *const c_char) -> *mut c_void;
-    fn dispatch_async_f(
-        queue: *mut c_void,
-        ctx: *mut c_void,
-        work: extern "C" fn(*mut c_void),
-    );
+    fn dispatch_async_f(queue: *mut c_void, ctx: *mut c_void, work: extern "C" fn(*mut c_void));
     static _dispatch_main_q: c_void;
 }
 const RTLD_DEFAULT: *mut c_void = -2isize as *mut c_void;
@@ -57,11 +53,12 @@ pub struct Embed {
     web_view_was_opaque: bool,
     ns_window: Retained<NSWindow>,
     edr: bool,
-    render: Arc<Mutex<RenderContext>>,
+    render: Mutex<RenderContext>,
 }
 
+// SAFETY: the mutex moves ownership into a process-global slot, but every path
+// that touches or drops AppKit state first verifies it is on the main thread.
 unsafe impl Send for Embed {}
-unsafe impl Sync for Embed {}
 
 static EMBED: OnceLock<Mutex<Option<Embed>>> = OnceLock::new();
 
@@ -76,12 +73,15 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
         return Err("ns_window_ptr is zero".into());
     }
 
-    {
-        let mut existing = slot().lock().map_err(|e| format!("slot lock: {}", e))?;
-        if let Some(stale) = existing.take() {
-            eprintln!("[harbor::mpv_mac] WARNING: stale embed present at install; leaking RenderContext to avoid use-after-free");
-            std::mem::forget(stale);
-        }
+    let stale = {
+        slot()
+            .lock()
+            .map_err(|e| format!("slot lock: {}", e))?
+            .take()
+    };
+    if let Some(stale) = stale {
+        eprintln!("[harbor::mpv_mac] replacing stale embed on the main thread");
+        teardown_embed(stale);
     }
 
     unsafe {
@@ -226,7 +226,7 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
             web_view_was_opaque,
             ns_window: ns_window.retain(),
             edr,
-            render: Arc::new(Mutex::new(render)),
+            render: Mutex::new(render),
         });
 
         eprintln!("[harbor::mpv_mac] installed");
@@ -235,6 +235,10 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
 }
 
 pub fn set_hdr_active(active: bool, _bt2020: bool) {
+    if MainThreadMarker::new().is_none() {
+        eprintln!("[harbor::mpv_mac] ignored HDR update off the main thread");
+        return;
+    }
     let Ok(guard) = slot().lock() else {
         return;
     };
@@ -266,8 +270,7 @@ pub fn set_hdr_active(active: bool, _bt2020: bool) {
 }
 
 pub fn install_window_rounding(ns_window_ptr: i64) -> Result<(), String> {
-    let _mtm = MainThreadMarker::new()
-        .ok_or_else(|| "must run on main thread".to_string())?;
+    let _mtm = MainThreadMarker::new().ok_or_else(|| "must run on main thread".to_string())?;
     if ns_window_ptr == 0 {
         return Err("ns_window_ptr is zero".into());
     }
@@ -294,8 +297,7 @@ pub fn install_window_rounding(ns_window_ptr: i64) -> Result<(), String> {
 }
 
 pub fn make_resizable(ns_window_ptr: i64) -> Result<(), String> {
-    let _mtm = MainThreadMarker::new()
-        .ok_or_else(|| "must run on main thread".to_string())?;
+    let _mtm = MainThreadMarker::new().ok_or_else(|| "must run on main thread".to_string())?;
     if ns_window_ptr == 0 {
         return Err("ns_window_ptr is zero".into());
     }
@@ -311,8 +313,8 @@ pub fn make_resizable(ns_window_ptr: i64) -> Result<(), String> {
 }
 
 pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
-    let _mtm = MainThreadMarker::new()
-        .ok_or_else(|| "resize_to must run on main thread".to_string())?;
+    let _mtm =
+        MainThreadMarker::new().ok_or_else(|| "resize_to must run on main thread".to_string())?;
     let guard = slot().lock().map_err(|e| format!("slot lock: {}", e))?;
     let Some(embed) = guard.as_ref() else {
         return Ok(());
@@ -323,18 +325,17 @@ pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
             .superview()
             .ok_or_else(|| "GL view has no superview".to_string())?;
         let parent_bounds = parent.bounds();
-        let native = map_css_geometry(
-            &css,
-            parent_bounds.size.width,
-            parent_bounds.size.height,
-        );
+        let native = map_css_geometry(&css, parent_bounds.size.width, parent_bounds.size.height);
         let native_y = if parent.isFlipped() {
             native.y
         } else {
             parent_bounds.size.height - native.y - native.height
         };
         let frame = objc2_foundation::NSRect {
-            origin: objc2_foundation::NSPoint { x: native.x, y: native_y },
+            origin: objc2_foundation::NSPoint {
+                x: native.x,
+                y: native_y,
+            },
             size: objc2_foundation::NSSize {
                 width: native.width,
                 height: native.height,
@@ -352,6 +353,8 @@ pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
 }
 
 pub fn render_now() -> Result<(), String> {
+    let _mtm =
+        MainThreadMarker::new().ok_or_else(|| "render_now must run on main thread".to_string())?;
     let guard = slot().lock().map_err(|e| format!("slot lock: {}", e))?;
     let Some(embed) = guard.as_ref() else {
         return Ok(());
@@ -364,7 +367,8 @@ pub fn render_now() -> Result<(), String> {
         gl_ctx.makeCurrentContext();
         let view_as_view: &NSView = embed.view.as_super();
         let bounds = view_as_view.bounds();
-        let backing: objc2_foundation::NSRect = msg_send![view_as_view, convertRectToBacking: bounds];
+        let backing: objc2_foundation::NSRect =
+            msg_send![view_as_view, convertRectToBacking: bounds];
         let mut w = backing.size.width as i32;
         let mut h = backing.size.height as i32;
         if w <= 0 || h <= 0 {
@@ -399,10 +403,23 @@ pub fn render_now() -> Result<(), String> {
 }
 
 pub fn uninstall() -> Result<(), String> {
-    let mut guard = slot().lock().map_err(|e| format!("slot lock: {}", e))?;
-    let Some(embed) = guard.take() else {
+    let _mtm =
+        MainThreadMarker::new().ok_or_else(|| "uninstall must run on main thread".to_string())?;
+    let embed = {
+        slot()
+            .lock()
+            .map_err(|e| format!("slot lock: {}", e))?
+            .take()
+    };
+    let Some(embed) = embed else {
         return Ok(());
     };
+    teardown_embed(embed);
+    eprintln!("[harbor::mpv_mac] uninstalled");
+    Ok(())
+}
+
+fn teardown_embed(embed: Embed) {
     unsafe {
         let view_as_view: &NSView = embed.view.as_super();
         view_as_view.removeFromSuperview();
@@ -416,8 +433,6 @@ pub fn uninstall() -> Result<(), String> {
             }
         }
     }
-    eprintln!("[harbor::mpv_mac] uninstalled");
-    Ok(())
 }
 
 fn get_proc_address(_ctx: &(), name: &str) -> *mut c_void {

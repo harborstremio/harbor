@@ -95,7 +95,12 @@ export function TransportKids({
           <span className="w-[68px] shrink-0 font-mono text-[17px] font-bold tabular-nums text-white">
             {fmtTime(snap.positionSec)}
           </span>
-          <KidsSeekBar position={snap.positionSec} duration={snap.durationSec} buffered={snap.bufferedSec} onSeek={onSeek} />
+          <KidsSeekBar
+            position={snap.positionSec}
+            duration={snap.durationSec}
+            buffered={snap.bufferedSec}
+            onSeek={onSeek}
+          />
           <span className="w-[68px] shrink-0 text-end font-mono text-[17px] font-bold tabular-nums text-white">
             {fmtTime(snap.durationSec)}
           </span>
@@ -103,15 +108,21 @@ export function TransportKids({
 
         <div className="pointer-events-auto grid grid-cols-[1fr_auto_1fr] items-center gap-4">
           <div className="flex items-center justify-self-start">
-            <KidsVolume volume={snap.volume} muted={snap.muted} onMute={onMute} onVolume={onVolume} />
+            <KidsVolume
+              volume={snap.volume}
+              muted={snap.muted}
+              onMute={onMute}
+              onVolume={onVolume}
+            />
           </div>
 
           <div className="flex items-center gap-6 justify-self-center">
             <SeekBtn dir={-1} onClick={() => onSeekStep(-10)} label={t("Back 10s")} />
             <button
               onClick={onPlayPause}
+              data-player-play-pause
               aria-label={playing ? t("Pause") : t("Play")}
-              className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white text-[#1f8f88] shadow-[0_14px_36px_-10px_rgba(0,0,0,0.7)] transition-transform hover:scale-105 active:scale-95"
+              className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white text-[#1f8f88] shadow-[0_14px_36px_-10px_rgba(0,0,0,0.7)] transition-transform hover:scale-105 active:scale-95"
             >
               {playing ? (
                 <Pause size={46} strokeWidth={0} fill="currentColor" />
@@ -138,7 +149,11 @@ export function TransportKids({
               </button>
             )}
             <RoundBtn onClick={onFullscreen} label={t("Fullscreen")}>
-              {fullscreen ? <Minimize size={28} strokeWidth={2.2} /> : <Maximize size={28} strokeWidth={2.2} />}
+              {fullscreen ? (
+                <Minimize size={28} strokeWidth={2.2} />
+              ) : (
+                <Maximize size={28} strokeWidth={2.2} />
+              )}
             </RoundBtn>
           </div>
         </div>
@@ -228,7 +243,11 @@ function KidsVolume({
         aria-label={v === 0 ? "Unmute" : "Mute"}
         className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 active:scale-95"
       >
-        {v === 0 ? <VolumeX size={28} strokeWidth={2.2} /> : <Volume2 size={28} strokeWidth={2.2} />}
+        {v === 0 ? (
+          <VolumeX size={28} strokeWidth={2.2} />
+        ) : (
+          <Volume2 size={28} strokeWidth={2.2} />
+        )}
       </button>
       <div
         ref={ref}

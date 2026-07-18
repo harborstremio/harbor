@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
+import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 
 export function usePipMode(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -34,16 +35,20 @@ export function usePipMode(params: {
     };
     void (async () => {
       const { listen } = await import("@tauri-apps/api/event");
-      const onEntered = await listen("pip://entered", () => {
-        setPipMode(true);
-        setChromeHiddenRef.current(true);
-        kickLayout();
-      });
-      const onExited = await listen("pip://exited", () => {
-        setPipMode(false);
-        setChromeHiddenRef.current(false);
-        kickLayout();
-      });
+      const onEntered = makeSafeTauriUnlisten(
+        await listen("pip://entered", () => {
+          setPipMode(true);
+          setChromeHiddenRef.current(true);
+          kickLayout();
+        }),
+      );
+      const onExited = makeSafeTauriUnlisten(
+        await listen("pip://exited", () => {
+          setPipMode(false);
+          setChromeHiddenRef.current(false);
+          kickLayout();
+        }),
+      );
       if (cancelled) {
         try {
           onEntered();

@@ -27,7 +27,7 @@ jobs:
       - name: Setup Vite+
         uses: voidzero-dev/setup-vp@v1
         with:
-          node-version-file: .nvmrc
+          node-version: 24
           cache: true
           run-install: |
             args:
@@ -72,7 +72,11 @@ jobs:
           fi
 
           if (( ${#code_files[@]} )); then
-            vp check --no-fmt "${code_files[@]}"
+            check_log="$(mktemp)"
+            if ! vp check --no-fmt "${code_files[@]}" >"$check_log" 2>&1; then
+              cat "$check_log"
+              exit 1
+            fi
           else
             echo "No changed JavaScript or TypeScript files require lint checks."
           fi

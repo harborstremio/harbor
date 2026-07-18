@@ -1,5 +1,6 @@
 import { malRequest } from "./client";
 import type { MalListStatus } from "./types";
+import { kitsuToAnilist } from "@/lib/providers/anime-mapping";
 
 export type SavedEntry = {
   status: MalListStatus;
@@ -51,7 +52,6 @@ export async function resolveMalMediaId(harborId: string): Promise<number | null
   if (harborId.startsWith("kitsu:")) {
     const id = leadingInt(harborId.slice(6));
     if (id == null) return null;
-    const { kitsuToAnilist } = await import("@/lib/providers/anime-mapping");
     const anilistId = await kitsuToAnilist(id);
     return anilistId != null ? anilistToMal(anilistId) : null;
   }
@@ -81,7 +81,8 @@ export async function saveListEntry(input: {
 }): Promise<SavedEntry> {
   const params = new URLSearchParams();
   if (input.status) params.set("status", input.status);
-  if (input.numEpisodesWatched != null) params.set("num_watched_episodes", String(input.numEpisodesWatched));
+  if (input.numEpisodesWatched != null)
+    params.set("num_watched_episodes", String(input.numEpisodesWatched));
   const data = await malRequest<RawStatus>(`/anime/${input.malId}/my_list_status`, {
     method: "PATCH",
     body: params,

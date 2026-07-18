@@ -11,6 +11,7 @@ import { topMovies, type Meta } from "@/lib/cinemeta";
 import { recentlyPlayed } from "@/lib/playback-history";
 import { useT } from "@/lib/i18n";
 import { listPager } from "@/lib/list-pager";
+import { CATALOG_REQUEST_TIMEOUT_MS, upsertOrdered, withTimeout } from "@/lib/progressive-rows";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useSettings } from "@/lib/settings";
 import { useScrollMemory, useView } from "@/lib/view";
@@ -98,30 +99,36 @@ export function Movies({ active = true }: { active?: boolean }) {
 
   useEffect(() => {
     let cancelled = false;
+    setHero([]);
+    setRows([]);
     (async () => {
       const seen = recentlyPlayed();
       if (settings.tmdbKey) {
-        const heroPool = await buildMovieHero(settings.tmdbKey, seen).catch(() => [] as Meta[]);
         const specs = movieSpecs(settings.tmdbKey, settings.region);
-        const firstPages = await Promise.all(
-          specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
+        const order = specs.map((spec) => spec.key);
+        void withTimeout(buildMovieHero(settings.tmdbKey, seen), CATALOG_REQUEST_TIMEOUT_MS)
+          .then((heroPool) => {
+            if (!cancelled) setHero(heroPool);
+          })
+          .catch(() => {});
+        const results = await Promise.allSettled(
+          specs.map(async (spec) => {
+            const metas = await withTimeout(spec.fetcher(1), CATALOG_REQUEST_TIMEOUT_MS);
+            if (cancelled || metas.length === 0) return false;
+            const row: MovieRow = {
+              key: spec.key,
+              title: spec.title,
+              metas,
+              page: 1,
+              hasMore: !spec.noPaginate && metas.length >= 14,
+              fetcher: spec.noPaginate ? undefined : spec.fetcher,
+            };
+            setRows((current) => upsertOrdered(current, row, order));
+            return true;
+          }),
         );
         if (cancelled) return;
-        const built: MovieRow[] = specs
-          .map((spec, i) => ({
-            key: spec.key,
-            title: spec.title,
-            metas: firstPages[i],
-            page: 1,
-            hasMore: !spec.noPaginate && firstPages[i].length >= 14,
-            fetcher: spec.noPaginate ? undefined : spec.fetcher,
-          }))
-          .filter((r) => r.metas.length > 0);
-        if (built.length > 0) {
-          setHero(heroPool);
-          setRows(built);
-          return;
-        }
+        if (results.some((result) => result.status === "fulfilled" && result.value)) return;
       }
       const genreList = [
         "Action",
@@ -139,11 +146,19 @@ export function Movies({ active = true }: { active?: boolean }) {
         "Documentary",
       ];
       const [top, ...byGenre] = await Promise.all([
-        topMovies().catch(() => [] as Meta[]),
-        ...genreList.map((g) => topMovies(g).catch(() => [] as Meta[])),
+        withTimeout(topMovies(), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+        ...genreList.map((g) =>
+          withTimeout(topMovies(g), CATALOG_REQUEST_TIMEOUT_MS).catch(() => [] as Meta[]),
+        ),
       ]);
       if (cancelled) return;
-      setHero(rotateDaily(top.filter((m) => m.background), HERO_POOL_TARGET, seen));
+      setHero(
+        rotateDaily(
+          top.filter((m) => m.background),
+          HERO_POOL_TARGET,
+          seen,
+        ),
+      );
       const built: MovieRow[] = [
         {
           key: "cinemeta-top",
@@ -244,39 +259,40 @@ export function Movies({ active = true }: { active?: boolean }) {
           {letterboxdRows.map((row, i) => {
             const catalogId = row.key.replace("letterboxd-", "");
             return (
-            <Row
-              key={row.key}
-              title={
-                <>
-                  {t(row.name)}
-                  <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
-                    Letterboxd
-                  </span>
-                </>
-              }
-              titleExtra={
-                <LetterboxdRowMenu
-                  canMoveUp={i > 0}
-                  canMoveDown={i < letterboxdRows.length - 1}
-                  hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
-                  onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
-                  onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
-                  onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
-                />
-              }
-              min={148}
-              shape="portrait"
-              scrollKey={`movies:${row.key}`}
-              onViewAll={
-                row.fetcher
-                  ? () => openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
-                  : undefined
-              }
-            >
-              {row.metas.map((m) => (
-                <PickCard key={m.id} meta={m} />
-              ))}
-            </Row>
+              <Row
+                key={row.key}
+                title={
+                  <>
+                    {t(row.name)}
+                    <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
+                      Letterboxd
+                    </span>
+                  </>
+                }
+                titleExtra={
+                  <LetterboxdRowMenu
+                    canMoveUp={i > 0}
+                    canMoveDown={i < letterboxdRows.length - 1}
+                    hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
+                    onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
+                    onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
+                    onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
+                  />
+                }
+                min={148}
+                shape="portrait"
+                scrollKey={`movies:${row.key}`}
+                onViewAll={
+                  row.fetcher
+                    ? () =>
+                        openGrid({ title: t(row.name), fetcher: row.fetcher!, initial: row.metas })
+                    : undefined
+                }
+              >
+                {row.metas.map((m) => (
+                  <PickCard key={m.id} meta={m} />
+                ))}
+              </Row>
             );
           })}
           {top10.length >= 10 && (

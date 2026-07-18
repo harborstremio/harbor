@@ -6,10 +6,10 @@ use std::time::Duration;
 
 use serde_json::{json, Value};
 use tauri::State;
-use tokio::io::AsyncWriteExt;
 #[cfg(windows)]
 #[allow(unused_imports)]
 use tokio::io::AsyncReadExt;
+use tokio::io::AsyncWriteExt;
 use tokio::process::{Child, Command};
 use tokio::sync::{mpsc, oneshot, Mutex, Notify};
 use uuid::Uuid;
@@ -22,22 +22,117 @@ const THUMB_WIDTH: u32 = 240;
 const SCREENSHOT_QUALITY: u32 = 72;
 const REQUEST_TIMEOUT_MS: u64 = 12000;
 const SEEK_WAIT_MS: u64 = 4000;
+const SHADOW_QUIT_GRACE: Duration = Duration::from_millis(80);
+const SHADOW_KILL_WAIT: Duration = Duration::from_secs(2);
+const THUMB_CACHE_MAX_BYTES: usize = 48 * 1024 * 1024;
+const THUMB_CACHE_MAX_ENTRIES: usize = 160;
 
 type Pending = Arc<Mutex<HashMap<u64, oneshot::Sender<Result<(), String>>>>>;
 
+struct CacheEntry {
+    value: String,
+    bytes: usize,
+    last_used: u64,
+}
+
+struct ThumbCache {
+    entries: HashMap<u32, CacheEntry>,
+    total_bytes: usize,
+    clock: u64,
+    max_bytes: usize,
+    max_entries: usize,
+}
+
+impl ThumbCache {
+    fn new(max_bytes: usize, max_entries: usize) -> Self {
+        Self {
+            entries: HashMap::new(),
+            total_bytes: 0,
+            clock: 0,
+            max_bytes,
+            max_entries,
+        }
+    }
+
+    fn tick(&mut self) -> u64 {
+        self.clock = self.clock.wrapping_add(1);
+        self.clock
+    }
+
+    fn get(&mut self, bucket: u32) -> Option<String> {
+        let last_used = self.tick();
+        self.entries.get_mut(&bucket).map(|entry| {
+            entry.last_used = last_used;
+            entry.value.clone()
+        })
+    }
+
+    fn contains(&self, bucket: u32) -> bool {
+        self.entries.contains_key(&bucket)
+    }
+
+    fn insert(&mut self, bucket: u32, value: String) {
+        let bytes = value.len();
+        if bytes > self.max_bytes || self.max_entries == 0 {
+            return;
+        }
+        if let Some(previous) = self.entries.remove(&bucket) {
+            self.total_bytes = self.total_bytes.saturating_sub(previous.bytes);
+        }
+        while self.entries.len() >= self.max_entries
+            || self.total_bytes.saturating_add(bytes) > self.max_bytes
+        {
+            let Some((&oldest, _)) = self.entries.iter().min_by_key(|(_, entry)| entry.last_used)
+            else {
+                break;
+            };
+            if let Some(removed) = self.entries.remove(&oldest) {
+                self.total_bytes = self.total_bytes.saturating_sub(removed.bytes);
+            }
+        }
+        let last_used = self.tick();
+        self.total_bytes = self.total_bytes.saturating_add(bytes);
+        self.entries.insert(
+            bucket,
+            CacheEntry {
+                value,
+                bytes,
+                last_used,
+            },
+        );
+    }
+
+    fn clear(&mut self) {
+        self.entries.clear();
+        self.total_bytes = 0;
+    }
+
+    #[cfg(test)]
+    fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    #[cfg(test)]
+    fn bytes(&self) -> usize {
+        self.total_bytes
+    }
+}
+
 pub struct ThumbsState {
     inner: Arc<Mutex<Inner>>,
+    spawn_lock: Arc<Mutex<()>>,
 }
 
 struct Inner {
     shadow: Option<Shadow>,
     url: Option<String>,
     session: Option<String>,
-    cache: HashMap<u32, String>,
+    cache: ThumbCache,
     pending: Pending,
     next_request_id: u64,
+    next_worker_id: u64,
     wanted: Option<u32>,
-    busy: bool,
+    active_worker: Option<u64>,
 }
 
 struct Shadow {
@@ -55,12 +150,14 @@ impl ThumbsState {
                 shadow: None,
                 url: None,
                 session: None,
-                cache: HashMap::new(),
+                cache: ThumbCache::new(THUMB_CACHE_MAX_BYTES, THUMB_CACHE_MAX_ENTRIES),
                 pending: Arc::new(Mutex::new(HashMap::new())),
                 next_request_id: 1000,
+                next_worker_id: 1,
                 wanted: None,
-                busy: false,
+                active_worker: None,
             })),
+            spawn_lock: Arc::new(Mutex::new(())),
         }
     }
 }
@@ -71,8 +168,11 @@ pub(crate) fn locate_mpv() -> Option<PathBuf> {
         if let Ok(exe) = std::env::current_exe() {
             if let Some(dir) = exe.parent() {
                 candidates.push(dir.join("mpv.exe").to_string_lossy().into_owned());
-                candidates
-                    .push(dir.join("mpv-x86_64-pc-windows-msvc.exe").to_string_lossy().into_owned());
+                candidates.push(
+                    dir.join("mpv-x86_64-pc-windows-msvc.exe")
+                        .to_string_lossy()
+                        .into_owned(),
+                );
                 for up in ["..", "..\\..", "..\\..\\.."] {
                     candidates.push(
                         dir.join(format!("{up}\\binaries\\mpv-x86_64-pc-windows-msvc.exe"))
@@ -131,40 +231,84 @@ fn cache_dir(session: &str) -> PathBuf {
 }
 
 async fn drop_shadow(shadow: &mut Shadow) {
-    let _ = shadow.writer_tx.send(json!({"command": ["quit"]})).await;
-    tokio::time::sleep(Duration::from_millis(80)).await;
+    let _ = shadow.writer_tx.try_send(json!({"command": ["quit"]}));
+    tokio::time::sleep(SHADOW_QUIT_GRACE).await;
     if shadow.child.try_wait().ok().flatten().is_none() {
-        let _ = shadow.child.start_kill();
+        if let Err(error) = shadow.child.start_kill() {
+            eprintln!("[thumbs] failed to kill shadow mpv: {error}");
+        }
+        if tokio::time::timeout(SHADOW_KILL_WAIT, shadow.child.wait())
+            .await
+            .is_err()
+        {
+            eprintln!("[thumbs] shadow mpv did not exit after kill request");
+        }
     }
-    let _ = shadow.child.wait().await;
-    let _ = std::fs::remove_file(&shadow.pipe);
-    let _ = std::fs::remove_dir_all(&shadow.cache_dir);
+    let _ = tokio::fs::remove_file(&shadow.pipe).await;
+    let _ = tokio::fs::remove_dir_all(&shadow.cache_dir).await;
+}
+
+async fn send_ipc_message(
+    writer_tx: &mpsc::Sender<Value>,
+    message: Value,
+    timeout_duration: Duration,
+) -> Result<(), String> {
+    match tokio::time::timeout(timeout_duration, writer_tx.send(message)).await {
+        Ok(Ok(())) => Ok(()),
+        Ok(Err(_)) => Err("mpv IPC writer closed".to_string()),
+        Err(_) => Err("mpv IPC writer timeout".to_string()),
+    }
 }
 
 #[tauri::command]
 pub async fn thumbs_set_url(state: State<'_, ThumbsState>, url: String) -> Result<(), String> {
-    let mut inner = state.inner.lock().await;
-    if let Some(mut s) = inner.shadow.take() {
+    let shadow = {
+        let mut inner = state.inner.lock().await;
+        let shadow = inner.shadow.take();
+        inner.url = Some(url);
+        inner.session = Some(Uuid::new_v4().simple().to_string());
+        inner.cache.clear();
+        inner.wanted = None;
+        inner.active_worker = None;
+        shadow
+    };
+    let _spawn_guard = state.spawn_lock.lock().await;
+    if let Some(mut s) = shadow {
         drop_shadow(&mut s).await;
     }
-    inner.url = Some(url);
-    inner.session = Some(Uuid::new_v4().simple().to_string());
-    inner.cache.clear();
-    inner.wanted = None;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn thumbs_spawn_eager(state: State<'_, ThumbsState>) -> Result<(), String> {
-    let mut inner = state.inner.lock().await;
-    if inner.shadow.is_some() {
-        return Ok(());
+    let _spawn_guard = state.spawn_lock.lock().await;
+    let (url, session, pending) = {
+        let inner = state.inner.lock().await;
+        if inner.shadow.is_some() {
+            return Ok(());
+        }
+        (
+            inner.url.clone().ok_or_else(|| "no url".to_string())?,
+            inner
+                .session
+                .clone()
+                .ok_or_else(|| "no session".to_string())?,
+            inner.pending.clone(),
+        )
+    };
+    let shadow = spawn_shadow(&url, &session, pending).await?;
+    let stale = {
+        let mut inner = state.inner.lock().await;
+        if inner.session.as_deref() == Some(session.as_str()) && inner.shadow.is_none() {
+            inner.shadow = Some(shadow);
+            None
+        } else {
+            Some(shadow)
+        }
+    };
+    if let Some(mut shadow) = stale {
+        drop_shadow(&mut shadow).await;
     }
-    let url = inner.url.clone().ok_or_else(|| "no url".to_string())?;
-    let session = inner.session.clone().ok_or_else(|| "no session".to_string())?;
-    let pending = inner.pending.clone();
-    let s = spawn_shadow(&url, &session, pending).await?;
-    inner.shadow = Some(s);
     Ok(())
 }
 
@@ -179,76 +323,133 @@ pub async fn thumbs_get(
     let bucket = (time_sec / BUCKET_SECONDS).round() as u32;
     let inner_arc = state.inner.clone();
     let mut inner = inner_arc.lock().await;
-    if let Some(p) = inner.cache.get(&bucket) {
+    if let Some(p) = inner.cache.get(bucket) {
         return Ok(Some(p.clone()));
     }
     if inner.url.is_none() || inner.session.is_none() {
         return Err("no url".to_string());
     }
     inner.wanted = Some(bucket);
-    if !inner.busy {
-        inner.busy = true;
+    if inner.active_worker.is_none() {
+        let worker_id = inner.next_worker_id;
+        inner.next_worker_id = inner.next_worker_id.wrapping_add(1);
+        inner.active_worker = Some(worker_id);
         let arc = inner_arc.clone();
-        tokio::spawn(worker(arc));
+        let spawn_lock = state.spawn_lock.clone();
+        tokio::spawn(worker(arc, spawn_lock, worker_id));
     }
     Ok(None)
 }
 
-async fn worker(inner_arc: Arc<Mutex<Inner>>) {
+async fn worker(inner_arc: Arc<Mutex<Inner>>, spawn_lock: Arc<Mutex<()>>, worker_id: u64) {
     loop {
-        let (bucket, writer_tx, dir, request_id, pending, seek_notify, session) = {
+        let (bucket, url, session, pending, shadow) = {
             let mut inner = inner_arc.lock().await;
+            if inner.active_worker != Some(worker_id) {
+                return;
+            }
             let bucket = match inner.wanted.take() {
                 Some(b) => b,
                 None => {
-                    inner.busy = false;
+                    inner.active_worker = None;
                     return;
                 }
             };
-            if inner.cache.contains_key(&bucket) {
+            if inner.cache.contains(bucket) {
                 continue;
             }
             let url = match inner.url.clone() {
                 Some(u) => u,
                 None => {
-                    inner.busy = false;
+                    inner.active_worker = None;
                     return;
                 }
             };
             let session = match inner.session.clone() {
                 Some(s) => s,
                 None => {
-                    inner.busy = false;
+                    inner.active_worker = None;
                     return;
                 }
             };
-            if inner.shadow.is_none() {
-                let pending = inner.pending.clone();
-                match spawn_shadow(&url, &session, pending).await {
-                    Ok(s) => inner.shadow = Some(s),
-                    Err(_) => {
-                        inner.busy = false;
-                        return;
-                    }
-                }
-            }
-            let id = inner.next_request_id;
-            inner.next_request_id += 1;
-            let shadow = inner.shadow.as_ref().unwrap();
             (
                 bucket,
-                shadow.writer_tx.clone(),
-                shadow.cache_dir.clone(),
-                id,
-                inner.pending.clone(),
-                shadow.seek_notify.clone(),
+                url,
                 session,
+                inner.pending.clone(),
+                inner.shadow.is_some(),
             )
         };
-        let uri = generate_thumb(bucket, &writer_tx, &dir, request_id, &pending, &seek_notify).await;
+        if !shadow {
+            let _spawn_guard = spawn_lock.lock().await;
+            let should_spawn = {
+                let inner = inner_arc.lock().await;
+                inner.active_worker == Some(worker_id)
+                    && inner.session.as_deref() == Some(session.as_str())
+                    && inner.shadow.is_none()
+            };
+            if !should_spawn {
+                let mut inner = inner_arc.lock().await;
+                if inner.active_worker == Some(worker_id) {
+                    inner.active_worker = None;
+                }
+                return;
+            }
+            let new_shadow = match spawn_shadow(&url, &session, pending.clone()).await {
+                Ok(shadow) => shadow,
+                Err(_) => {
+                    let mut inner = inner_arc.lock().await;
+                    if inner.active_worker == Some(worker_id) {
+                        inner.active_worker = None;
+                    }
+                    return;
+                }
+            };
+            let stale = {
+                let mut inner = inner_arc.lock().await;
+                if inner.session.as_deref() == Some(session.as_str()) && inner.shadow.is_none() {
+                    inner.shadow = Some(new_shadow);
+                    None
+                } else {
+                    Some(new_shadow)
+                }
+            };
+            if let Some(mut stale) = stale {
+                drop_shadow(&mut stale).await;
+            }
+        }
+        let (writer_tx, dir, request_id, seek_notify) = {
+            let mut inner = inner_arc.lock().await;
+            if inner.active_worker != Some(worker_id)
+                || inner.session.as_deref() != Some(session.as_str())
+            {
+                if inner.active_worker == Some(worker_id) {
+                    inner.active_worker = None;
+                }
+                return;
+            }
+            let request_id = inner.next_request_id;
+            inner.next_request_id += 1;
+            let Some(shadow) = inner.shadow.as_ref() else {
+                inner.active_worker = None;
+                return;
+            };
+            (
+                shadow.writer_tx.clone(),
+                shadow.cache_dir.clone(),
+                request_id,
+                shadow.seek_notify.clone(),
+            )
+        };
+        let uri =
+            generate_thumb(bucket, &writer_tx, &dir, request_id, &pending, &seek_notify).await;
         let mut inner = inner_arc.lock().await;
-        if inner.session.as_deref() != Some(session.as_str()) {
-            inner.busy = false;
+        if inner.active_worker != Some(worker_id)
+            || inner.session.as_deref() != Some(session.as_str())
+        {
+            if inner.active_worker == Some(worker_id) {
+                inner.active_worker = None;
+            }
             return;
         }
         if let Ok(u) = uri {
@@ -273,9 +474,12 @@ async fn generate_thumb(
     let restart = seek_notify.notified();
     tokio::pin!(restart);
     restart.as_mut().enable();
-    let _ = writer_tx
-        .send(json!({"command": ["seek", target_time, "absolute", "keyframes"]}))
-        .await;
+    send_ipc_message(
+        writer_tx,
+        json!({"command": ["seek", target_time, "absolute", "keyframes"]}),
+        Duration::from_millis(REQUEST_TIMEOUT_MS),
+    )
+    .await?;
     let _ = tokio::time::timeout(Duration::from_millis(SEEK_WAIT_MS), restart).await;
 
     let (done_tx, done_rx) = oneshot::channel::<Result<(), String>>();
@@ -283,12 +487,20 @@ async fn generate_thumb(
         let mut p = pending.lock().await;
         p.insert(request_id, done_tx);
     }
-    let _ = writer_tx
-        .send(json!({
+    if let Err(error) = send_ipc_message(
+        writer_tx,
+        json!({
             "command": ["screenshot-to-file", thumb_str.clone(), "video"],
             "request_id": request_id,
-        }))
-        .await;
+        }),
+        Duration::from_millis(REQUEST_TIMEOUT_MS),
+    )
+    .await
+    {
+        let mut p = pending.lock().await;
+        p.remove(&request_id);
+        return Err(error);
+    }
 
     let result = tokio::time::timeout(Duration::from_millis(REQUEST_TIMEOUT_MS), done_rx).await;
     {
@@ -298,8 +510,10 @@ async fn generate_thumb(
 
     match result {
         Ok(Ok(Ok(()))) => {
-            let bytes = std::fs::read(&thumb_path).map_err(|e| format!("read: {}", e))?;
-            let _ = std::fs::remove_file(&thumb_path);
+            let bytes = tokio::fs::read(&thumb_path)
+                .await
+                .map_err(|e| format!("read: {}", e))?;
+            let _ = tokio::fs::remove_file(&thumb_path).await;
             if bytes.is_empty() {
                 return Err("screenshot empty".to_string());
             }
@@ -313,22 +527,43 @@ async fn generate_thumb(
 
 #[tauri::command]
 pub async fn thumbs_stop(state: State<'_, ThumbsState>) -> Result<(), String> {
-    let mut inner = state.inner.lock().await;
-    if let Some(mut s) = inner.shadow.take() {
-        drop_shadow(&mut s).await;
-    }
-    inner.url = None;
-    inner.session = None;
-    inner.cache.clear();
-    inner.wanted = None;
+    state.stop().await;
     Ok(())
+}
+
+impl ThumbsState {
+    async fn stop(&self) {
+        let shadow = {
+            let mut inner = self.inner.lock().await;
+            let shadow = inner.shadow.take();
+            inner.url = None;
+            inner.session = None;
+            inner.cache.clear();
+            inner.wanted = None;
+            inner.active_worker = None;
+            shadow
+        };
+        let _spawn_guard = self.spawn_lock.lock().await;
+        if let Some(mut s) = shadow {
+            drop_shadow(&mut s).await;
+        }
+    }
+}
+
+pub(crate) fn shutdown(app: &tauri::AppHandle) {
+    use tauri::Manager;
+
+    let state = app.state::<ThumbsState>();
+    tauri::async_runtime::block_on(state.stop());
 }
 
 async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shadow, String> {
     let bin = locate_mpv().ok_or_else(|| "mpv not found".to_string())?;
     let pipe = shadow_pipe(session);
     let dir = cache_dir(session);
-    std::fs::create_dir_all(&dir).map_err(|e| format!("cache dir: {}", e))?;
+    tokio::fs::create_dir_all(&dir)
+        .await
+        .map_err(|e| format!("cache dir: {}", e))?;
 
     let args: Vec<String> = vec![
         format!("--input-ipc-server={}", pipe),
@@ -361,9 +596,17 @@ async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shad
     {
         cmd.creation_flags(CREATE_NO_WINDOW);
     }
-    let child = cmd.spawn().map_err(|e| format!("spawn shadow: {}", e))?;
+    let mut child = cmd.spawn().map_err(|e| format!("spawn shadow: {}", e))?;
 
     tokio::time::sleep(Duration::from_millis(400)).await;
+    if let Some(status) = child
+        .try_wait()
+        .map_err(|e| format!("check shadow process: {e}"))?
+    {
+        let _ = tokio::fs::remove_file(&pipe).await;
+        let _ = tokio::fs::remove_dir_all(&dir).await;
+        return Err(format!("shadow mpv exited during startup: {status}"));
+    }
 
     let (writer_tx, writer_rx) = mpsc::channel::<Value>(64);
     let seek_notify = Arc::new(Notify::new());
@@ -429,30 +672,27 @@ fn spawn_ipc(
             }
         }
         let client = match client {
-            Some(c) => Arc::new(Mutex::new(c)),
+            Some(c) => c,
             None => return,
         };
+        let (mut reader, mut writer) = tokio::io::split(client);
 
-        let read_client = client.clone();
         let read_pending = pending.clone();
         let read_notify = seek_notify.clone();
         tokio::spawn(async move {
             let mut buf = vec![0u8; 8192];
             let mut acc = String::new();
             loop {
-                let n = {
-                    let mut g = read_client.lock().await;
-                    match tokio::time::timeout(
-                        Duration::from_millis(50),
-                        AsyncReadExt::read(&mut *g, &mut buf),
-                    )
-                    .await
-                    {
-                        Ok(Ok(0)) => break,
-                        Ok(Ok(n)) => n,
-                        Ok(Err(_)) => break,
-                        Err(_) => 0,
-                    }
+                let n = match tokio::time::timeout(
+                    Duration::from_millis(50),
+                    AsyncReadExt::read(&mut reader, &mut buf),
+                )
+                .await
+                {
+                    Ok(Ok(0)) => break,
+                    Ok(Ok(n)) => n,
+                    Ok(Err(_)) => break,
+                    Err(_) => 0,
                 };
                 if n == 0 {
                     tokio::time::sleep(Duration::from_millis(20)).await;
@@ -473,11 +713,10 @@ fn spawn_ipc(
         while let Some(msg) = writer_rx.recv().await {
             let mut s = msg.to_string();
             s.push('\n');
-            let mut g = client.lock().await;
-            if g.write_all(s.as_bytes()).await.is_err() {
+            if writer.write_all(s.as_bytes()).await.is_err() {
                 break;
             }
-            let _ = g.flush().await;
+            let _ = writer.flush().await;
         }
     });
 }
@@ -535,4 +774,79 @@ fn spawn_ipc(
             }
         }
     });
+}
+
+#[cfg(test)]
+mod cache_tests {
+    use super::{send_ipc_message, ThumbCache, ThumbsState};
+    use serde_json::json;
+    use std::time::Duration;
+
+    #[test]
+    fn cache_evicts_least_recently_used_entry() {
+        let mut cache = ThumbCache::new(8, 2);
+        cache.insert(1, "1111".into());
+        cache.insert(2, "2222".into());
+        assert_eq!(cache.get(1), Some("1111".into()));
+        cache.insert(3, "3333".into());
+        assert_eq!(cache.get(2), None);
+        assert_eq!(cache.get(1), Some("1111".into()));
+        assert_eq!(cache.get(3), Some("3333".into()));
+    }
+
+    #[test]
+    fn cache_enforces_byte_and_entry_limits() {
+        let mut cache = ThumbCache::new(6, 2);
+        cache.insert(1, "111".into());
+        cache.insert(2, "222".into());
+        cache.insert(3, "333".into());
+        assert_eq!(cache.len(), 2);
+        assert_eq!(cache.bytes(), 6);
+        assert_eq!(cache.get(1), None);
+    }
+
+    #[test]
+    fn cache_rejects_oversized_entries_and_clears_cleanly() {
+        let mut cache = ThumbCache::new(4, 2);
+        cache.insert(1, "12345".into());
+        assert_eq!(cache.len(), 0);
+        cache.insert(2, "1234".into());
+        cache.clear();
+        assert_eq!(cache.len(), 0);
+        assert_eq!(cache.bytes(), 0);
+    }
+
+    #[tokio::test]
+    async fn ipc_send_times_out_when_writer_is_stalled() {
+        let (tx, _rx) = tokio::sync::mpsc::channel(1);
+        tx.send(json!({"first": true})).await.unwrap();
+
+        let result =
+            send_ipc_message(&tx, json!({"second": true}), Duration::from_millis(10)).await;
+
+        assert_eq!(result, Err("mpv IPC writer timeout".to_string()));
+    }
+
+    #[tokio::test]
+    async fn stop_clears_thumbnail_session_state() {
+        let state = ThumbsState::new();
+        {
+            let mut inner = state.inner.lock().await;
+            inner.url = Some("https://example.com/video".into());
+            inner.session = Some("session".into());
+            inner.cache.insert(1, "thumbnail".into());
+            inner.wanted = Some(1);
+            inner.active_worker = Some(1);
+        }
+
+        state.stop().await;
+
+        let inner = state.inner.lock().await;
+        assert!(inner.shadow.is_none());
+        assert!(inner.url.is_none());
+        assert!(inner.session.is_none());
+        assert_eq!(inner.cache.len(), 0);
+        assert!(inner.wanted.is_none());
+        assert!(inner.active_worker.is_none());
+    }
 }

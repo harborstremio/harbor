@@ -1,5 +1,6 @@
 import { MAL_API_BASE } from "./config";
 import { getSession } from "./session";
+import { ensureRefreshed } from "./auth";
 
 export class MalApiError extends Error {
   constructor(
@@ -36,7 +37,6 @@ export async function malRequest<T>(
   });
 
   if (res.status === 401 && !options.accessToken) {
-    const { ensureRefreshed } = await import("./auth");
     const refreshed = await ensureRefreshed();
     if (refreshed) {
       headers["Authorization"] = `Bearer ${refreshed.accessToken}`;

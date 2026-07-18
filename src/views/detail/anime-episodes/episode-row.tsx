@@ -63,12 +63,28 @@ export function AnimeEpisodeRow({
       className="group flex gap-6 rounded-2xl px-4 py-5 transition-colors hover:bg-elevated/30"
     >
       <button
-        onClick={() => openPicker(epMeta, playEpisode, { autoPlay: settings.instantPlay })}
+        onClick={() =>
+          openPicker(epMeta, playEpisode, {
+            autoPlay: settings.instantPlay,
+            resume: !progress.watched && progress.ratio > 0.01,
+          })
+        }
         className="flex min-w-0 flex-1 gap-6 text-start"
       >
         <div className="relative w-[200px] shrink-0">
-          <div className={spoiler?.thumb ? `overflow-hidden rounded-lg ${SPOILER_THUMB_CLASS}` : undefined}>
-            <Poster src={ep.thumbnail ?? undefined} seed={String(ep.id)} ratio="landscape" className="rounded-lg" lazy fallbacks={[ep.thumbnailFallback, meta.background]} />
+          <div
+            className={
+              spoiler?.thumb ? `overflow-hidden rounded-lg ${SPOILER_THUMB_CLASS}` : undefined
+            }
+          >
+            <Poster
+              src={ep.thumbnail ?? undefined}
+              seed={String(ep.id)}
+              ratio="landscape"
+              className="rounded-lg"
+              lazy
+              fallbacks={[ep.thumbnailFallback, meta.background]}
+            />
           </div>
           <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-canvas/40 opacity-0 transition-opacity group-hover:opacity-100">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-ink text-canvas">
@@ -90,7 +106,10 @@ export function AnimeEpisodeRow({
           )}
           {progress.ratio > 0.01 && (
             <div className="absolute inset-x-1 bottom-1 h-[3px] overflow-hidden rounded-full bg-black/55">
-              <div className="h-full rounded-full bg-accent" style={{ width: `${Math.max(2, progress.ratio * 100)}%` }} />
+              <div
+                className="h-full rounded-full bg-accent"
+                style={{ width: `${Math.max(2, progress.ratio * 100)}%` }}
+              />
             </div>
           )}
         </div>
@@ -108,7 +127,9 @@ export function AnimeEpisodeRow({
                 showSeason
                   ? `S${ep.imdbSeason ?? ep.seasonNumber ?? 1} · E${ep.number}`
                   : `E${ep.number}`,
-                ep.absoluteNumber && ep.absoluteNumber !== ep.number ? `Abs E${ep.absoluteNumber}` : null,
+                ep.absoluteNumber && ep.absoluteNumber !== ep.number
+                  ? `Abs E${ep.absoluteNumber}`
+                  : null,
                 ep.length ? t("{n} min", { n: ep.length }) : null,
                 formatAirDate(ep.airdate) || null,
               ]
@@ -116,7 +137,9 @@ export function AnimeEpisodeRow({
                 .join("  ·  ")}
             </span>
             {progress.watched && watchedAgo && (
-              <span className="text-emerald-300/85">· {t("Watched {ago}", { ago: watchedAgo })}</span>
+              <span className="text-emerald-300/85">
+                · {t("Watched {ago}", { ago: watchedAgo })}
+              </span>
             )}
             {!progress.watched && progress.ratio > 0.01 && watchedAgo && (
               <span className="text-accent/85">

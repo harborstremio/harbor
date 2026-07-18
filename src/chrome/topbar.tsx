@@ -10,7 +10,7 @@ import {
   effectiveBinding,
   eventToBinding,
   formatBindingForDisplay,
-  isTypingTarget,
+  shouldHandleGlobalKeyboardEvent,
 } from "@/lib/hotkeys";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
@@ -453,7 +453,7 @@ function SearchPill() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (isTypingTarget(e)) return;
+      if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (eventToBinding(e) !== binding) return;
 
       e.preventDefault();
