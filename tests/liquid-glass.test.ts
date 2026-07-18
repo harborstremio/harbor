@@ -27,7 +27,7 @@ test("liquid glass does not keep a GPU render loop alive", () => {
   assert.doesNotMatch(source, /requestAnimationFrame/);
   assert.doesNotMatch(source, /<canvas/);
   assert.match(source, /linear-gradient/);
-  assert.doesNotMatch(source, /backdropFilter/);
+  assert.match(source, /backdropFilter:\s+variant === "overlay" && backdropBlur/);
   assert.doesNotMatch(source, /WebkitBackdropFilter/);
 });
 
@@ -36,4 +36,7 @@ test("liquid glass keeps its public compatibility props", () => {
   assert.match(source, /refractionStrength/);
   assert.match(source, /lensStrength/);
   assert.match(source, /alwaysActive/);
+  assert.match(source, /surfaceClassName/);
+  assert.match(source, /variant/);
+  assert.match(source, /backdropBlur/);
 });
