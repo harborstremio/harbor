@@ -44,6 +44,7 @@ pub struct MpvStartArgs {
     pub subtitles: Option<Vec<MpvSub>>,
     pub anime4k: Option<bool>,
     pub hdr_to_sdr: Option<bool>,
+    pub rtx_hdr: Option<bool>,
     pub embed: Option<bool>,
     pub anime4k_shaders: Option<Vec<String>>,
     pub d3d11_flip: Option<bool>,
@@ -285,6 +286,7 @@ fn apply_pre_init(
     args: &MpvStartArgs,
     embed_hwnd: Option<&str>,
 ) -> Result<(), String> {
+    let rtx_hdr = cfg!(windows) && args.rtx_hdr.unwrap_or(false);
     // Property sets here are best-effort. Some builds of mpv (e.g. Flatpak's
     // meson build without Lua) omit optional properties like `osc`. Treat
     // PROPERTY_NOT_FOUND as non-fatal so the player still initializes.
@@ -324,7 +326,7 @@ fn apply_pre_init(
             set("force-window", "yes");
         }
     } else if cfg!(windows) {
-        set("hwdec", "auto-copy");
+        set("hwdec", if rtx_hdr { "d3d11va" } else { "auto" });
         set("force-window", "immediate");
     } else {
         set("hwdec", "auto");
@@ -375,7 +377,7 @@ fn apply_pre_init(
     let opt = |k: &str, v: &str| {
         let _ = init.set_property(k, v);
     };
-    if args.hdr_to_sdr.unwrap_or(false) {
+    if args.hdr_to_sdr.unwrap_or(false) && !rtx_hdr {
         opt("tone-mapping", "spline");
         opt("gamut-mapping-mode", "perceptual");
         opt("hdr-compute-peak", "yes");
@@ -390,7 +392,7 @@ fn apply_pre_init(
         #[cfg(windows)]
         {
             opt("target-colorspace-hint", "yes");
-            if embed_hwnd.is_some() {
+            if embed_hwnd.is_some() || rtx_hdr {
                 opt("gpu-api", "d3d11");
             }
         }
@@ -1000,6 +1002,7 @@ pub async fn mpv_command(state: State<'_, MpvState>, cmd: Vec<Value>) -> Result<
 
 const MPV_ALLOWED_COMMANDS: &[&str] = &[
     "af",
+    "vf",
     "seek",
     "stop",
     "frame-step",

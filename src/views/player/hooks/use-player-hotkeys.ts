@@ -13,6 +13,7 @@ export function usePlayerHotkeys(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
   snap: PlayerSnapshot;
   metaId: string;
+  svpActive: boolean;
   drawMode: boolean;
   setDrawMode: Dispatch<SetStateAction<boolean>>;
   closePlayer: () => Promise<void>;
@@ -45,6 +46,7 @@ export function usePlayerHotkeys(params: {
     bridgeRef,
     snap,
     metaId,
+    svpActive,
     drawMode,
     setDrawMode,
     closePlayer,
@@ -90,6 +92,7 @@ export function usePlayerHotkeys(params: {
     cycleSubtitles,
     setShowStats,
     metaId,
+    svpActive,
     onNextEp: canChangeEpisode && adjacent.next ? () => goToEpisode(adjacent.next) : undefined,
     onPrevEp: canChangeEpisode && adjacent.prev ? () => goToEpisode(adjacent.prev) : undefined,
     hasNextEp: canChangeEpisode && !!adjacent.next,

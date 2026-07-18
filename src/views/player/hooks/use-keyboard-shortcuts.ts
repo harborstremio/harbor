@@ -3,6 +3,8 @@ import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
 import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
+import { isWindowsDesktop } from "@/lib/platform";
+import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
 import { useSettings } from "@/lib/settings";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
@@ -24,6 +26,7 @@ export function useKeyboardShortcuts(params: {
   cycleSubtitles: () => void;
   setShowStats: (updater: (prev: boolean) => boolean) => void;
   metaId: string;
+  svpActive: boolean;
   onNextEp?: () => void;
   onPrevEp?: () => void;
   hasNextEp?: boolean;
@@ -60,6 +63,7 @@ export function useKeyboardShortcuts(params: {
     cycleSubtitles,
     setShowStats,
     metaId,
+    svpActive,
     onNextEp,
     onPrevEp,
     hasNextEp,
@@ -234,6 +238,14 @@ export function useKeyboardShortcuts(params: {
       if (match("playerAnime4kOff") && onAnime4kOff) {
         e.preventDefault();
         onAnime4kOff();
+        return;
+      }
+      if (match("playerRtxHdrToggle")) {
+        e.preventDefault();
+        if (e.repeat) return;
+        if (!isWindowsDesktop() || isRtxHdrBlocked(settings.playerHdrToSdr, svpActive)) return;
+        if (bridgeRef.current?.capabilities().engine !== "mpv") return;
+        update({ playerRtxHdr: !settings.playerRtxHdr });
         return;
       }
       if (match("playerPanscanUp") && onPanscanUp) {
@@ -435,6 +447,9 @@ export function useKeyboardShortcuts(params: {
     settings.playerEscExitsFullscreen,
     settings.playerConfirmLeave,
     settings.playerVolumeSfx,
+    settings.playerHdrToSdr,
+    settings.playerRtxHdr,
+    svpActive,
     update,
   ]);
 

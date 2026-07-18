@@ -25,6 +25,7 @@ export type HotkeyId =
   | "playerAnime4kToggle"
   | "playerAnime4kOn"
   | "playerAnime4kOff"
+  | "playerRtxHdrToggle"
   | "playerCrop"
   | "playerPanscanUp"
   | "playerPanscanDown"
@@ -54,6 +55,7 @@ export type HotkeyDef = {
   group?: string;
 };
 
+// oxfmt-ignore
 export const HOTKEYS: HotkeyDef[] = [
   {
     id: "globalSearchFocus",
@@ -201,6 +203,15 @@ export const HOTKEYS: HotkeyDef[] = [
     label: "Anime4K off",
     description: "Turn Anime4K upscaling off.",
     defaultBinding: "ctrl+0",
+  },
+  {
+    id: "playerRtxHdrToggle",
+    scope: "Player",
+    group: "Playback",
+    label: "Toggle RTX Video HDR",
+    description:
+      "Toggle RTX Video HDR during mpv playback. Unavailable while HDR-to-SDR tonemapping or SVP is active.",
+    defaultBinding: "ctrl+h",
   },
 
   {

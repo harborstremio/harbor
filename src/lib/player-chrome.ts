@@ -33,6 +33,7 @@ export type PlayerControlId =
   | "aspect-menu"
   | "anime4k-menu"
   | "hdr-toggle"
+  | "rtx-hdr-toggle"
   | "draw-toggle"
   | "screenshot"
   | "song-id"
@@ -187,6 +188,7 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
     { id: "aspect-menu", slot: "bottom-right", order: 25, hidden: true },
     { id: "anime4k-menu", slot: "bottom-right", order: 27 },
     { id: "hdr-toggle", slot: "bottom-right", order: 28, hidden: true },
+    { id: "rtx-hdr-toggle", slot: "bottom-right", order: 29, hidden: true },
     { id: "speed-menu", slot: "bottom-right", order: 30 },
     { id: "draw-toggle", slot: "bottom-right", order: 40 },
     { id: "screenshot", slot: "bottom-right", order: 45, hidden: true },
@@ -222,6 +224,7 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "aspect-menu", slot: "bottom-right", order: 25, hidden: true },
     { id: "anime4k-menu", slot: "bottom-right", order: 27 },
     { id: "hdr-toggle", slot: "bottom-right", order: 28, hidden: true },
+    { id: "rtx-hdr-toggle", slot: "bottom-right", order: 29, hidden: true },
     { id: "draw-toggle", slot: "bottom-right", order: 30 },
     { id: "screenshot", slot: "bottom-right", order: 35, hidden: true },
     { id: "song-id", slot: "bottom-right", order: 36 },
@@ -266,6 +269,7 @@ export const CONTROL_META: Record<
   },
   "anime4k-menu": { label: "Anime4K", group: "menus", defaultSlot: "bottom-right" },
   "hdr-toggle": { label: "HDR to SDR toggle", group: "menus", defaultSlot: "bottom-right" },
+  "rtx-hdr-toggle": { label: "RTX Video HDR toggle", group: "menus", defaultSlot: "bottom-right" },
   "draw-toggle": { label: "Draw on video", group: "actions", defaultSlot: "bottom-right" },
   screenshot: { label: "Screenshot", group: "actions", defaultSlot: "bottom-right" },
   "song-id": { label: "Identify song", group: "actions", defaultSlot: "bottom-right" },

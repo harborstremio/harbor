@@ -34,6 +34,7 @@ import { SpeedMenu } from "./speed-menu";
 import { AspectMenu } from "./aspect-menu";
 import { Anime4kMenu } from "./anime4k-menu";
 import { HdrToggleStremioBtn } from "./hdr-toggle-btn";
+import { RtxHdrToggleStremioBtn } from "./rtx-hdr-toggle-btn";
 import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
 import { DrawToggle } from "./draw-toggle";
 import { CastButton } from "./cast-button";
@@ -378,6 +379,9 @@ export function RenderedStremioControl({
     case "hdr-toggle":
       if (ctx.engine === "html5") return null;
       return <HdrToggleStremioBtn />;
+    case "rtx-hdr-toggle":
+      if (ctx.engine === "html5") return null;
+      return <RtxHdrToggleStremioBtn meta={ctx.meta} />;
     case "cast":
       return <CastButton onClick={ctx.onCast} capabilities={ctx.capabilities} />;
     case "subtitle-menu":
