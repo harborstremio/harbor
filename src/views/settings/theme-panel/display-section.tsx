@@ -113,6 +113,165 @@ export function DisplaySection() {
         </div>
       </Section>
       <Section
+        title={t("Liquid Glass")}
+        subtitle={t("Choose whether to use Glass effects across the entire theme.")}
+      >
+        <div className="flex w-full flex-col gap-5">
+          <div className="grid w-full grid-cols-2 gap-2 rounded-xl border border-edge-soft bg-surface p-1.5">
+            <button
+              type="button"
+              onClick={() => update({ liquidGlassEnabled: true })}
+              aria-pressed={settings.liquidGlassEnabled ?? true}
+              className={`h-10 rounded-lg text-[13.5px] font-medium transition-all duration-200 ${
+                (settings.liquidGlassEnabled ?? true)
+                  ? "bg-ink text-canvas shadow-sm"
+                  : "bg-edge-soft/50 text-ink-muted hover:bg-edge-soft hover:text-ink"
+              }`}
+            >
+              {t("Glass effects")}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => update({ liquidGlassEnabled: false })}
+              aria-pressed={settings.liquidGlassEnabled === false}
+              className={`h-10 rounded-lg text-[13.5px] font-medium transition-all duration-200 ${
+                settings.liquidGlassEnabled === false
+                  ? "bg-ink text-canvas shadow-sm"
+                  : "bg-edge-soft/50 text-ink-muted hover:bg-edge-soft hover:text-ink"
+              }`}
+            >
+              {t("Without Glass effects")}
+            </button>
+          </div>
+
+          {(settings.liquidGlassEnabled ?? true) && (
+            <div className="flex items-center gap-4 px-1 py-1.5">
+              <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
+                {t("Glass transparency")}
+              </span>
+
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={settings.liquidGlassOpacity ?? 100}
+                onChange={(e) =>
+                  update({
+                    liquidGlassOpacity: Number(e.target.value),
+                  })
+                }
+                className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+              />
+
+              <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+                {settings.liquidGlassOpacity ?? 100}%
+              </span>
+            </div>
+          )}
+        </div>
+      </Section>
+
+      <Section
+        title={t("Dock Magnification")}
+        subtitle={t("Magnify posters on hover and smoothly move nearby items like the macOS Dock.")}
+      >
+        <div className="flex w-full flex-col gap-4">
+          <ToggleRow
+            label={t("Enable poster magnification")}
+            sub={t("Enlarge the focused poster and smoothly move the surrounding posters.")}
+            value={settings.posterDockEnabled ?? false}
+            onChange={(value) =>
+              update({
+                posterDockEnabled: value,
+              })
+            }
+          />
+
+          {(settings.posterDockEnabled ?? false) && (
+            <>
+              <div className="flex items-center gap-4 px-1 py-1.5">
+                <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
+                  {t("Magnification size")}
+                </span>
+
+                <input
+                  type="range"
+                  min="90"
+                  max="130"
+                  step="1"
+                  value={settings.posterDockScale ?? 134}
+                  onChange={(e) =>
+                    update({
+                      posterDockScale: parseInt(e.target.value, 10),
+                    })
+                  }
+                  className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+                />
+
+                <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+                  {settings.posterDockScale ?? 134}%
+                </span>
+
+                {(settings.posterDockScale ?? 134) !== 134 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      update({
+                        posterDockScale: 110,
+                      })
+                    }
+                    className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+                  >
+                    {t("Reset")}
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 px-1 py-1.5">
+                <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
+                  {t("Neighbour effect")}
+                </span>
+
+                <input
+                  type="range"
+                  min="0"
+                  max="90"
+                  step="5"
+                  value={settings.posterDockStrength ?? 70}
+                  onChange={(e) =>
+                    update({
+                      posterDockStrength: parseInt(e.target.value, 10),
+                    })
+                  }
+                  className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+                />
+
+                <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+                  {settings.posterDockStrength ?? 70}%
+                </span>
+
+                {(settings.posterDockStrength ?? 70) !== 70 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      update({
+                        posterDockStrength: 20,
+                      })
+                    }
+                    className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+                  >
+                    {t("Reset")}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+      </Section>
+
+      <Section
         title={t("Sound Effects (SFX)")}
         subtitle={t("Choose your preferred audio feedback for navigation and actions.")}
       >

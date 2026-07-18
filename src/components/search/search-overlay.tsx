@@ -1,6 +1,7 @@
 import { Search, X, Loader2, CornerDownLeft, CalendarRange, Tag } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { TvModalClose } from "@/components/tv-modal-close";
 import { useT } from "@/lib/i18n";
 import { useSearch } from "@/lib/search-context";
@@ -33,6 +34,7 @@ export function SearchOverlay() {
   const [aiMode, setAiMode] = useState(false);
   const [aiRunSignal, setAiRunSignal] = useState(0);
   const { settings, update } = useSettings();
+  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
 
   useEffect(() => {
     if (!open) return;
@@ -135,95 +137,222 @@ export function SearchOverlay() {
         aria-hidden="true"
         onClick={close}
         data-tauri-drag-region
-        className="harbor-search-backdrop absolute inset-0 cursor-default"
+        className={`harbor-search-backdrop absolute inset-0 cursor-default ${
+          liquidGlassEnabled ? "bg-black/30 backdrop-blur-[3px]" : ""
+        }`}
       />
 
       <div
         data-tauri-drag-region
         className="relative mx-auto flex h-full w-full max-w-[1080px] flex-col px-6 py-6 sm:px-10 sm:py-10"
       >
-        <div
-          className={`modal-panel relative flex shrink-0 items-center gap-3 rounded-2xl border bg-elevated/70 px-5 shadow-[0_24px_80px_-30px_rgba(0,0,0,0.7)] transition-colors ${
-            aiMode ? "border-accent/55" : "border-edge-soft/80"
-          }`}
-        >
-          <Search
-            size={22}
-            className={`shrink-0 transition-colors ${aiMode ? "text-accent" : "text-ink-muted"}`}
-            strokeWidth={1.9}
-          />
-          <div className="relative flex-1">
-            <input
-              ref={inputRef}
-              type="search"
-              aria-label={t("Search")}
-              data-tv-text-auto
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && e.shiftKey) {
-                  if (!query.trim()) return;
-                  e.preventDefault();
-                  if (!aiMode) setAiMode(true);
-                  setAiRunSignal((n) => n + 1);
-                  return;
-                }
-                if (e.key !== "Enter") return;
-                if (aiMode) {
-                  if (query.trim()) {
-                    e.preventDefault();
-                    setAiRunSignal((n) => n + 1);
-                  }
-                  return;
-                }
-                if (results?.topMatch) {
-                  e.preventDefault();
-                  recordRecent(query);
-                  const meta = results.topMatch.meta;
-                  setOpen(false);
-                  openMeta(meta);
-                }
-              }}
-              placeholder={aiMode ? "" : t("Search movies, shows, people, genres, years...")}
-              className="h-16 w-full bg-transparent text-[20px] text-ink placeholder:text-ink-subtle focus:outline-none sm:text-[22px]"
-              spellCheck={false}
-              autoComplete="off"
+        {liquidGlassEnabled ? (
+          <ThreeLiquidGlassSurface
+            radius="16px"
+            shaderRadius={0.32}
+            intensity={0.9}
+            refractionStrength={1.34}
+            spectralStrength={0.38}
+            lensStrength={1.05}
+            causticsStrength={0.18}
+            motionSpeed={0.46}
+            motionStrength={0.48}
+            interactive={false}
+            alwaysActive
+            style={{
+              background: aiMode ? "rgba(13,20,30,0.22)" : "rgba(8,13,20,0.14)",
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(90,170,255,0.05), 0 24px 80px -30px rgba(0,0,0,0.74)",
+            }}
+            className={`modal-panel relative shrink-0 overflow-hidden border transition-colors ${
+              aiMode ? "border-accent/55" : "border-white/[0.14]"
+            }`}
+            contentClassName="
+              flex w-full items-center gap-3 px-5
+              text-white/[0.94]
+              [text-shadow:0_1px_2px_rgba(0,0,0,0.6)]
+              [&_.text-ink]:!text-white/[0.96]
+              [&_.text-ink-muted]:!text-white/[0.76]
+              [&_.text-ink-subtle]:!text-white/[0.56]
+            "
+          >
+            <Search
+              size={22}
+              className={`shrink-0 transition-colors ${aiMode ? "text-accent" : "text-ink-muted"}`}
+              strokeWidth={1.9}
             />
-            {aiMode && (
-              <AiExampleHint
-                hidden={query.trim().length > 0}
-                examples={SEARCH_EXAMPLES}
-                prefix=""
-                sizeClass="text-[20px] sm:text-[22px]"
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                type="search"
+                aria-label={t("Search")}
+                data-tv-text-auto
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.shiftKey) {
+                    if (!query.trim()) return;
+                    e.preventDefault();
+                    if (!aiMode) setAiMode(true);
+                    setAiRunSignal((n) => n + 1);
+                    return;
+                  }
+                  if (e.key !== "Enter") return;
+                  if (aiMode) {
+                    if (query.trim()) {
+                      e.preventDefault();
+                      setAiRunSignal((n) => n + 1);
+                    }
+                    return;
+                  }
+                  if (results?.topMatch) {
+                    e.preventDefault();
+                    recordRecent(query);
+                    const meta = results.topMatch.meta;
+                    setOpen(false);
+                    openMeta(meta);
+                  }
+                }}
+                placeholder={aiMode ? "" : t("Search movies, shows, people, genres, years...")}
+                className={`h-16 w-full bg-transparent text-[20px] focus:outline-none sm:text-[22px] ${
+                  liquidGlassEnabled
+                    ? "text-white placeholder:text-white/38 caret-white"
+                    : "text-ink placeholder:text-ink-subtle"
+                }`}
+                spellCheck={false}
+                autoComplete="off"
+              />
+              {aiMode && (
+                <AiExampleHint
+                  hidden={query.trim().length > 0}
+                  examples={SEARCH_EXAMPLES}
+                  prefix=""
+                  sizeClass="text-[20px] sm:text-[22px]"
+                />
+              )}
+            </div>
+            {status === "loading" && (
+              <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />
+            )}
+            <Hint liquidGlassEnabled={liquidGlassEnabled} />
+            {(settings.aiSearchKey.trim() || settings.aiGroqKey.trim()) && (
+              <AiModeButton
+                active={aiMode}
+                currentModel={settings.aiSearchModel}
+                onToggle={() => setAiMode((v) => !v)}
+                onSelectModel={(id) => {
+                  update({ aiSearchModel: id });
+                  setAiMode(true);
+                }}
               />
             )}
-          </div>
-          {status === "loading" && (
-            <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />
-          )}
-          <Hint />
-          {(settings.aiSearchKey.trim() || settings.aiGroqKey.trim()) && (
-            <AiModeButton
-              active={aiMode}
-              currentModel={settings.aiSearchModel}
-              onToggle={() => setAiMode((v) => !v)}
-              onSelectModel={(id) => {
-                update({ aiSearchModel: id });
-                setAiMode(true);
-              }}
+            {query && (
+              <button
+                type="button"
+                aria-label={t("Clear")}
+                onClick={clear}
+                className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                  liquidGlassEnabled
+                    ? "text-white/58 hover:bg-white/12 hover:text-white"
+                    : "text-ink-subtle hover:bg-canvas/60 hover:text-ink"
+                }`}
+              >
+                <X size={18} strokeWidth={2.2} />
+              </button>
+            )}
+          </ThreeLiquidGlassSurface>
+        ) : (
+          <div
+            className={`modal-panel relative flex shrink-0 items-center gap-3 rounded-2xl border bg-elevated/70 px-5 shadow-[0_24px_80px_-30px_rgba(0,0,0,0.7)] transition-colors ${
+              aiMode ? "border-accent/55" : "border-edge-soft/80"
+            }`}
+          >
+            <Search
+              size={22}
+              className={`shrink-0 transition-colors ${aiMode ? "text-accent" : "text-ink-muted"}`}
+              strokeWidth={1.9}
             />
-          )}
-          {query && (
-            <button
-              type="button"
-              aria-label={t("Clear")}
-              onClick={clear}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
-            >
-              <X size={18} strokeWidth={2.2} />
-            </button>
-          )}
-        </div>
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                type="search"
+                aria-label={t("Search")}
+                data-tv-text-auto
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.shiftKey) {
+                    if (!query.trim()) return;
+                    e.preventDefault();
+                    if (!aiMode) setAiMode(true);
+                    setAiRunSignal((n) => n + 1);
+                    return;
+                  }
+                  if (e.key !== "Enter") return;
+                  if (aiMode) {
+                    if (query.trim()) {
+                      e.preventDefault();
+                      setAiRunSignal((n) => n + 1);
+                    }
+                    return;
+                  }
+                  if (results?.topMatch) {
+                    e.preventDefault();
+                    recordRecent(query);
+                    const meta = results.topMatch.meta;
+                    setOpen(false);
+                    openMeta(meta);
+                  }
+                }}
+                placeholder={aiMode ? "" : t("Search movies, shows, people, genres, years...")}
+                className={`h-16 w-full bg-transparent text-[20px] focus:outline-none sm:text-[22px] ${
+                  liquidGlassEnabled
+                    ? "text-white placeholder:text-white/38 caret-white"
+                    : "text-ink placeholder:text-ink-subtle"
+                }`}
+                spellCheck={false}
+                autoComplete="off"
+              />
+              {aiMode && (
+                <AiExampleHint
+                  hidden={query.trim().length > 0}
+                  examples={SEARCH_EXAMPLES}
+                  prefix=""
+                  sizeClass="text-[20px] sm:text-[22px]"
+                />
+              )}
+            </div>
+            {status === "loading" && (
+              <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />
+            )}
+            <Hint liquidGlassEnabled={liquidGlassEnabled} />
+            {(settings.aiSearchKey.trim() || settings.aiGroqKey.trim()) && (
+              <AiModeButton
+                active={aiMode}
+                currentModel={settings.aiSearchModel}
+                onToggle={() => setAiMode((v) => !v)}
+                onSelectModel={(id) => {
+                  update({ aiSearchModel: id });
+                  setAiMode(true);
+                }}
+              />
+            )}
+            {query && (
+              <button
+                type="button"
+                aria-label={t("Clear")}
+                onClick={clear}
+                className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                  liquidGlassEnabled
+                    ? "text-white/58 hover:bg-white/12 hover:text-white"
+                    : "text-ink-subtle hover:bg-canvas/60 hover:text-ink"
+                }`}
+              >
+                <X size={18} strokeWidth={2.2} />
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="relative mt-6 flex-1 overflow-x-hidden overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {!trimmed && <EmptyState onClose={close} onOpenGuide={() => setGuideOpen(true)} />}
@@ -313,10 +442,20 @@ export function SearchOverlay() {
   );
 }
 
-function Hint() {
+function Hint({ liquidGlassEnabled }: { liquidGlassEnabled: boolean }) {
   return (
-    <span className="hidden shrink-0 items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] text-ink-subtle sm:flex">
-      <kbd className="rounded-md border border-edge-soft bg-canvas/60 px-1.5 py-0.5 font-mono text-[10px] text-ink-muted">
+    <span
+      className={`hidden shrink-0 items-center gap-1 text-[11px] font-medium uppercase tracking-[0.16em] sm:flex ${
+        liquidGlassEnabled ? "text-white/55" : "text-ink-subtle"
+      }`}
+    >
+      <kbd
+        className={`rounded-md border px-1.5 py-0.5 font-mono text-[10px] ${
+          liquidGlassEnabled
+            ? "border-white/15 bg-white/[0.07] text-white/72"
+            : "border-edge-soft bg-canvas/60 text-ink-muted"
+        }`}
+      >
         Esc
       </kbd>
     </span>

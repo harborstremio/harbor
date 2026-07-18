@@ -1,5 +1,4 @@
 import { useEffect, useRef, type RefObject } from "react";
-import { shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
 import { SFX } from "@/lib/sfx";
 import { isModalOverlayOpen, modalOverlayClose } from "@/lib/modal-overlay";
 
@@ -78,7 +77,6 @@ const AXIS_TOLERANCE = 24;
 
 let activeSearchEditEl: HTMLElement | null = null;
 let focusStylesInjected = false;
-let hasTvNavigationIntent = false;
 
 function isEditable(el: HTMLElement | null) {
   if (!el) return false;
@@ -134,7 +132,9 @@ export function isVisible(el: HTMLElement) {
 }
 
 function isInSidebar(el: HTMLElement): boolean {
-  return !!el.closest("[data-harbor-sidebar]");
+  if (el.closest("[data-tv-top-chrome]")) return false;
+
+  return !!el.closest("[data-harbor-sidebar], [data-harbor-nav], [data-tv-nav-zone]");
 }
 
 /** Horizontal top chrome (TopDock / Royal / etc.) — not the left sidebar. */
@@ -289,9 +289,19 @@ function getInitialFocus(list: HTMLElement[]) {
   return list.find((el) => el.hasAttribute("data-tv-initial-focus")) ?? list[0] ?? null;
 }
 
-const NAV_FOCUS_SELECTOR =
-  "[data-harbor-nav], [data-tv-nav-zone] button, [data-harbor-sidebar] button, [data-tv-nav-zone] a[href], [data-harbor-sidebar] a[href], [data-tv-nav-zone] [data-focusable='true'], [data-harbor-sidebar] [data-focusable='true']";
+const NAV_FOCUS_SELECTOR = [
+  "[data-tv-nav-zone] button",
+  "[data-harbor-sidebar] button",
+  "[data-harbor-nav] button",
 
+  "[data-tv-nav-zone] a[href]",
+  "[data-harbor-sidebar] a[href]",
+  "[data-harbor-nav] a[href]",
+
+  "[data-tv-nav-zone] [data-focusable='true']",
+  "[data-harbor-sidebar] [data-focusable='true']",
+  "[data-harbor-nav] [data-focusable='true']",
+].join(", ");
 function focusNavChrome() {
   const navItems = Array.from(document.querySelectorAll<HTMLElement>(NAV_FOCUS_SELECTOR)).filter(
     (el) => isVisible(el) && isInNav(el),
@@ -319,7 +329,6 @@ function focusNavChrome() {
 
 /** Focus the page's primary control (Play, etc.) or first content focusable. */
 export function focusTvPageDefault(): void {
-  if (!hasTvNavigationIntent) return;
   ensureFocusStyles();
   const scope = getTopFocusScope();
   if (scope) {
@@ -367,7 +376,7 @@ function ensureFocusStyles() {
   style.textContent = `
     [data-tv-focused="true"] {
       outline: none !important;
-      box-shadow: inset 0 0 0 2px var(--color-accent) !important;
+      box-shadow: 0 0 0 4px var(--tv-focus-ring, #ffffff), 0 0 0 8px rgba(0,0,0,0.35) !important;
       transition: box-shadow 120ms ease;
       z-index: 20;
       position: relative;
@@ -379,7 +388,10 @@ function ensureFocusStyles() {
      */
     [data-tv-search-nav-focused="true"] {
       outline: none !important;
-      box-shadow: inset 0 0 0 2px var(--color-accent) !important;
+      box-shadow:
+        0 0 0 3px var(--tv-focus-accent, var(--accent, #f97316)),
+        0 0 0 6px #ffffff,
+        0 0 0 9px rgba(0, 0, 0, 0.35) !important;
       transition: box-shadow 120ms ease;
       z-index: 20;
       position: relative;
@@ -389,11 +401,16 @@ function ensureFocusStyles() {
       box-shadow: none !important;
     }
 
-    /* Editing keeps the same theme-aware cue without the navigation marker. */
+    /*
+     * Editing mode is white only. The orange navigation marker is removed
+     * when Enter/Space/mouse activates the text field.
+     */
     [data-tv-search-editing-focused="true"],
     [data-search-editing="true"]:not([data-tv-focused="true"]) {
       outline: none !important;
-      box-shadow: inset 0 0 0 2px var(--color-accent) !important;
+      box-shadow:
+        0 0 0 4px #ffffff,
+        0 0 0 8px rgba(0, 0, 0, 0.35) !important;
       transition: box-shadow 120ms ease;
       z-index: 20;
       position: relative;
@@ -644,7 +661,6 @@ function getSpatialOrder(list: HTMLElement[]) {
 }
 
 export function moveFocus(dir: Dir, wrap: boolean = true): void {
-  hasTvNavigationIntent = true;
   const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const root = getActiveModal(active) ?? getTopFocusScope() ?? document;
   const scroll = dir === "left" || dir === "right" ? "nearest" : "center";
@@ -911,7 +927,6 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
 
-      if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (isLocallyManaged(target)) return;
       if (activeIsSearch && isEditingSearch) return;
       if (isEditable(target) && !isSearchLikeField(target)) return;

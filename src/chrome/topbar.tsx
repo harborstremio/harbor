@@ -1,5 +1,5 @@
 import { ArrowLeft, Search, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BackChrome } from "@/chrome/back-chrome";
 import { HarborMark } from "@/components/icons/harbor-mark";
@@ -10,7 +10,7 @@ import {
   effectiveBinding,
   eventToBinding,
   formatBindingForDisplay,
-  shouldHandleGlobalKeyboardEvent,
+  isTypingTarget,
 } from "@/lib/hotkeys";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
@@ -230,18 +230,33 @@ export function TogetherButton({
   connectStyle?: "tab" | "popover";
 } = {}) {
   const { snapshot, modalOpen, openModal, closeModal, clientId } = useTogether();
-
   const { avatar: selfAvatar, color: selfColor } = useSelfIdentity();
-
+  const { settings } = useSettings();
   const t = useT();
+
+  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+
   const live = snapshot.state === "joined";
   const wrapRef = useRef<HTMLDivElement>(null);
+  const popoverPortalRef = useRef<HTMLDivElement>(null);
+
+  const [popoverPosition, setPopoverPosition] = useState({
+    top: 0,
+    left: 0,
+    visibility: "hidden" as "hidden" | "visible",
+  });
 
   useEffect(() => {
     if (!modalOpen) return;
 
     const onDown = (event: MouseEvent) => {
-      if (!wrapRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      const insideButton = wrapRef.current?.contains(target) ?? false;
+
+      const insidePopover = popoverPortalRef.current?.contains(target) ?? false;
+
+      if (!insideButton && !insidePopover) {
         closeModal();
       }
     };
@@ -261,8 +276,79 @@ export function TogetherButton({
     };
   }, [modalOpen, closeModal]);
 
-  const visible = snapshot.participants.slice(0, TOPBAR_MAX_AVATARS);
+  useLayoutEffect(() => {
+    if (!modalOpen) return;
 
+    const anchor = wrapRef.current;
+    const popover = popoverPortalRef.current;
+
+    if (!anchor || !popover) return;
+
+    let frameId: number | null = null;
+
+    const updatePosition = () => {
+      if (frameId != null) {
+        cancelAnimationFrame(frameId);
+      }
+
+      frameId = requestAnimationFrame(() => {
+        const anchorRect = anchor.getBoundingClientRect();
+        const popoverRect = popover.getBoundingClientRect();
+
+        const viewportPadding = 12;
+        const gap = connectStyle === "tab" ? -1 : 8;
+
+        let top =
+          popoverPlacement === "above-left"
+            ? anchorRect.top - popoverRect.height - gap
+            : anchorRect.bottom + gap;
+
+        let left =
+          popoverPlacement === "above-left"
+            ? anchorRect.left
+            : anchorRect.right - popoverRect.width;
+
+        top = Math.max(
+          viewportPadding,
+          Math.min(top, window.innerHeight - popoverRect.height - viewportPadding),
+        );
+
+        left = Math.max(
+          viewportPadding,
+          Math.min(left, window.innerWidth - popoverRect.width - viewportPadding),
+        );
+
+        setPopoverPosition({
+          top,
+          left,
+          visibility: "visible",
+        });
+      });
+    };
+
+    updatePosition();
+
+    const resizeObserver = new ResizeObserver(updatePosition);
+
+    resizeObserver.observe(anchor);
+    resizeObserver.observe(popover);
+
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+
+    return () => {
+      if (frameId != null) {
+        cancelAnimationFrame(frameId);
+      }
+
+      resizeObserver.disconnect();
+
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [connectStyle, modalOpen, popoverPlacement]);
+
+  const visible = snapshot.participants.slice(0, TOPBAR_MAX_AVATARS);
   const overflow = Math.max(0, snapshot.participants.length - TOPBAR_MAX_AVATARS);
 
   const above = popoverPlacement === "above-left";
@@ -278,9 +364,6 @@ export function TogetherButton({
   const sizing =
     modalOpen && !above ? (live ? "h-14 gap-2 px-3" : "h-14 w-11 justify-center") : idleSize;
 
-  /*
-   * شكل الزجاج يتغير عند اتصاله بالـPopover.
-   */
   const glassRadius = modalOpen
     ? above
       ? "0 0 8px 8px"
@@ -295,97 +378,85 @@ export function TogetherButton({
       }`
     : `border border-white/[0.10] ${live ? "text-ink" : "text-ink-muted hover:text-ink"}`;
 
-  return (
-    <div
-      ref={wrapRef}
-      className={`relative ${
-        modalOpen && !above ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""
-      }`}
-    >
-      <ThreeLiquidGlassSurface
-        radius={glassRadius}
-        shaderRadius={variant === "ghost" ? 1 : modalOpen ? 0.3 : 0.48}
-        intensity={0.78}
-        style={{
-          background: "transparent",
-          boxShadow: "none",
-        }}
-        className={`
-          relative inline-flex
-          transition-colors duration-150
-          ${glassChrome}
-          ${modalOpen && !above ? "harbor-wt-tab" : ""}
-        `}
-        contentClassName="h-full w-full"
-      >
-        <button
-          type="button"
-          aria-label={t("chrome.watchTogether")}
-          onClick={() => {
-            if (modalOpen) {
-              closeModal();
-            } else {
-              openModal();
-            }
-          }}
-          className={`
-            harbor-together-btn
-            relative flex items-center
-            rounded-[inherit]
-            border-0 bg-transparent
-            outline-none
-            transition-colors duration-150
-            ${sizing}
-          `}
-        >
-          {live ? (
-            <>
-              <span className="font-mono text-[11.5px] tracking-[0.22em] text-ink">
-                {snapshot.room}
-              </span>
+  /*
+   * الشكل الأصلي قبل إضافة Liquid Glass.
+   */
+  const legacyIdleChrome = `border border-transparent ${
+    variant === "ghost" ? "rounded-full" : "rounded-xl"
+  } ${
+    live
+      ? variant === "ghost"
+        ? "text-ink hover:bg-white/12"
+        : "bg-elevated/70 text-ink hover:bg-elevated"
+      : variant === "ghost"
+        ? "text-ink-muted hover:bg-white/12 hover:text-ink"
+        : "bg-elevated/70 text-ink-muted hover:bg-elevated hover:text-ink"
+  }`;
 
-              <div className="flex -space-x-1.5">
-                {visible.map((participant) => {
-                  const self = participant.id === clientId;
+  const legacyChrome = modalOpen
+    ? `z-[51] harbor-together-surface border border-edge text-ink ${
+        above ? "rounded-t-none rounded-b-lg border-t-0" : "rounded-b-none rounded-t-lg border-b-0"
+      }`
+    : legacyIdleChrome;
 
-                  const fallbackColor = `oklch(0.78 0.13 ${nameHue(participant.name)})`;
+  const toggleModal = () => {
+    if (modalOpen) {
+      closeModal();
+    } else {
+      openModal();
+    }
+  };
 
-                  const avatarSrc = self ? selfAvatar : (participant.avatar ?? null);
+  const buttonContent = (
+    <>
+      {live ? (
+        <>
+          <span className="font-mono text-[11.5px] tracking-[0.22em] text-ink">
+            {snapshot.room}
+          </span>
 
-                  const color = self
-                    ? (selfColor ?? fallbackColor)
-                    : (participant.color ?? fallbackColor);
+          <div className="flex -space-x-1.5">
+            {visible.map((participant) => {
+              const self = participant.id === clientId;
 
-                  if (avatarSrc) {
-                    return (
-                      <span
-                        key={participant.id}
-                        title={participant.name}
-                        className="
+              const fallbackColor = `oklch(0.78 0.13 ${nameHue(participant.name)})`;
+
+              const avatarSrc = self ? selfAvatar : (participant.avatar ?? null);
+
+              const color = self
+                ? (selfColor ?? fallbackColor)
+                : (participant.color ?? fallbackColor);
+
+              if (avatarSrc) {
+                return (
+                  <span
+                    key={participant.id}
+                    title={participant.name}
+                    className="
                           flex h-6 w-6
                           items-center justify-center
                           overflow-hidden rounded-full
                           ring-2 ring-elevated
                         "
-                        style={{
-                          boxShadow: `inset 0 0 0 1.5px ${color}`,
-                        }}
-                      >
-                        <img
-                          src={avatarSrc}
-                          alt=""
-                          draggable={false}
-                          className="h-full w-full object-cover"
-                        />
-                      </span>
-                    );
-                  }
+                    style={{
+                      boxShadow: `inset 0 0 0 1.5px ${color}`,
+                    }}
+                  >
+                    <img
+                      src={avatarSrc}
+                      alt=""
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                    />
+                  </span>
+                );
+              }
 
-                  return (
-                    <span
-                      key={participant.id}
-                      title={participant.name}
-                      className="
+              return (
+                <span
+                  key={participant.id}
+                  title={participant.name}
+                  className="
                         flex h-6 w-6
                         items-center justify-center
                         rounded-full
@@ -393,18 +464,18 @@ export function TogetherButton({
                         text-canvas
                         ring-2 ring-elevated
                       "
-                      style={{
-                        backgroundColor: color,
-                      }}
-                    >
-                      {(participant.name.trim()[0] || "?").toUpperCase()}
-                    </span>
-                  );
-                })}
+                  style={{
+                    backgroundColor: color,
+                  }}
+                >
+                  {(participant.name.trim()[0] || "?").toUpperCase()}
+                </span>
+              );
+            })}
 
-                {overflow > 0 && (
-                  <span
-                    className="
+            {overflow > 0 && (
+              <span
+                className="
                       flex h-6 min-w-[24px]
                       items-center justify-center
                       rounded-full
@@ -413,27 +484,102 @@ export function TogetherButton({
                       text-ink-muted
                       ring-2 ring-elevated
                     "
-                  >
-                    +{overflow}
-                  </span>
-                )}
-              </div>
-            </>
-          ) : (
-            <Users size={17} strokeWidth={1.9} />
-          )}
-        </button>
-      </ThreeLiquidGlassSurface>
-
-      {modalOpen && (
-        <div
-          className={`harbor-wt-modal absolute z-50 ${
-            above ? "bottom-[calc(100%-1px)] start-0" : "end-0 top-[calc(100%-1px)]"
-          }`}
-        >
-          <TogetherPopover placement={popoverPlacement} connectStyle={connectStyle} />
-        </div>
+              >
+                +{overflow}
+              </span>
+            )}
+          </div>
+        </>
+      ) : (
+        <Users size={17} strokeWidth={1.9} />
       )}
+    </>
+  );
+
+  return (
+    <div
+      ref={wrapRef}
+      className={`relative ${
+        modalOpen && !above ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""
+      }`}
+    >
+      {liquidGlassEnabled ? (
+        <ThreeLiquidGlassSurface
+          radius={glassRadius}
+          shaderRadius={variant === "ghost" ? 1 : modalOpen ? 0.3 : 0.48}
+          intensity={0.78}
+          style={{
+            background: "transparent",
+            boxShadow: "none",
+          }}
+          className={`
+            relative inline-flex
+            transition-colors duration-150
+            ${glassChrome}
+            ${modalOpen && !above ? "harbor-wt-tab" : ""}
+          `}
+          contentClassName="h-full w-full"
+        >
+          <button
+            type="button"
+            data-tauri-drag-region="false"
+            aria-label={t("chrome.watchTogether")}
+            onClick={toggleModal}
+            className={`
+              harbor-together-btn
+              relative flex items-center
+              rounded-[inherit]
+              border-0 bg-transparent
+              outline-none
+              transition-colors duration-150
+              ${sizing}
+            `}
+          >
+            {buttonContent}
+          </button>
+        </ThreeLiquidGlassSurface>
+      ) : (
+        <button
+          type="button"
+          data-tauri-drag-region="false"
+          aria-label={t("chrome.watchTogether")}
+          onClick={toggleModal}
+          className={`
+            harbor-together-btn
+            relative flex items-center
+            transition-colors duration-150
+            ${modalOpen && !above ? "harbor-wt-tab" : ""}
+            ${sizing}
+            ${legacyChrome}
+          `}
+        >
+          {buttonContent}
+        </button>
+      )}
+
+      {modalOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={popoverPortalRef}
+            data-tauri-drag-region="false"
+            data-together-popover-portal
+            className="
+              harbor-wt-modal
+              fixed z-[300]
+              isolate
+              pointer-events-auto
+            "
+            style={{
+              top: popoverPosition.top,
+              left: popoverPosition.left,
+              visibility: popoverPosition.visibility,
+            }}
+          >
+            <TogetherPopover placement={popoverPlacement} connectStyle={connectStyle} />
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -449,11 +595,13 @@ function SearchPill() {
   const { settings } = useSettings();
   const t = useT();
 
+  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+
   const binding = effectiveBinding("globalSearchFocus", settings.hotkeys ?? {});
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!shouldHandleGlobalKeyboardEvent(e)) return;
+      if (isTypingTarget(e)) return;
       if (eventToBinding(e) !== binding) return;
 
       e.preventDefault();
@@ -466,6 +614,55 @@ function SearchPill() {
       window.removeEventListener("keydown", onKey);
     };
   }, [binding, setOpen]);
+
+  const searchContent = (
+    <>
+      <Search size={16} strokeWidth={1.75} className="shrink-0 text-ink-subtle" />
+
+      <span className="flex-1 truncate text-[14px] text-ink-subtle">{t("search.placeholder")}</span>
+
+      <kbd
+        className="
+            hidden shrink-0
+            rounded-md
+            border border-white/[0.10]
+            bg-transparent
+            px-1.5 py-0.5
+            font-mono text-[10.5px]
+            font-medium text-ink-subtle
+            sm:inline
+          "
+      >
+        {formatBindingForDisplay(binding)}
+      </kbd>
+    </>
+  );
+
+  if (!liquidGlassEnabled) {
+    return (
+      <button
+        type="button"
+        data-tauri-drag-region="false"
+        onClick={() => setOpen(true)}
+        className="
+          harbor-search-pill
+          flex h-11 w-full
+          items-center gap-3
+          rounded-full
+          border border-edge-soft/60
+          bg-elevated/80 px-5
+          text-start opacity-80
+          outline-none
+          transition-[opacity,background-color]
+          duration-200
+          hover:bg-elevated
+          hover:opacity-100
+        "
+      >
+        {searchContent}
+      </button>
+    );
+  }
 
   return (
     <ThreeLiquidGlassSurface
@@ -499,26 +696,7 @@ function SearchPill() {
           text-start outline-none
         "
       >
-        <Search size={16} strokeWidth={1.75} className="shrink-0 text-ink-subtle" />
-
-        <span className="flex-1 truncate text-[14px] text-ink-subtle">
-          {t("search.placeholder")}
-        </span>
-
-        <kbd
-          className="
-            hidden shrink-0
-            rounded-md
-            border border-white/[0.10]
-            bg-transparent
-            px-1.5 py-0.5
-            font-mono text-[10.5px]
-            font-medium text-ink-subtle
-            sm:inline
-          "
-        >
-          {formatBindingForDisplay(binding)}
-        </kbd>
+        {searchContent}
       </button>
     </ThreeLiquidGlassSurface>
   );
