@@ -45,15 +45,13 @@ export function CinematicPlayerLoader({
 }) {
   const t = useT();
   const { settings } = useSettings();
-
   const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
 
   const kid = useActiveKid();
   const isLocal = isLocalUrl(src.url);
 
   const isInfoHash =
-    (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) &&
-    !src.url.includes("/hlsv2/");
+    (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) && !src.url.includes("/hlsv2/");
 
   const enginePeers = engineStats
     ? engineStats.unchoked > 0
@@ -63,36 +61,24 @@ export function CinematicPlayerLoader({
 
   const engineSpeed = engineStats?.downloadSpeed ?? 0;
 
-  const showEngineActivity =
-    isInfoHash && !!engineStats && (enginePeers > 0 || engineSpeed > 0);
+  const showEngineActivity = isInfoHash && !!engineStats && (enginePeers > 0 || engineSpeed > 0);
 
   const streamBytes = src.streamRef?.size ?? engineStats?.streamLen ?? null;
 
-  const ready = isInfoHash
-    ? readinessScore(engineStats ?? null, true)
-    : 0;
+  const ready = isInfoHash ? readinessScore(engineStats ?? null, true) : 0;
 
-  const heavyForP2p =
-    isInfoHash &&
-    streamBytes != null &&
-    streamBytes > 20 * 1024 ** 3;
+  const heavyForP2p = isInfoHash && streamBytes != null && streamBytes > 20 * 1024 ** 3;
 
   const everPlayedRef = useRef(false);
 
-  const hasProgress = usePlaybackFlag(
-    () => getPlaybackPosition() > 0.3,
-  );
+  const hasProgress = usePlaybackFlag(() => getPlaybackPosition() > 0.3);
 
-  if (
-    hasProgress &&
-    (snap.durationSec > 0 || snap.status === "playing")
-  ) {
+  if (hasProgress && (snap.durationSec > 0 || snap.status === "playing")) {
     everPlayedRef.current = true;
   }
 
   const sessionKey =
-    `${src.meta.id}::${src.episode?.season ?? ""}:` +
-    `${src.episode?.episode ?? ""}`;
+    `${src.meta.id}::${src.episode?.season ?? ""}:` + `${src.episode?.episode ?? ""}`;
 
   const lastSessionRef = useRef(sessionKey);
 
@@ -102,12 +88,7 @@ export function CinematicPlayerLoader({
   }
 
   const showing =
-    forceShow ||
-    (
-      !everPlayedRef.current &&
-      snap.errorCode == null &&
-      snap.status !== "ended"
-    );
+    forceShow || (!everPlayedRef.current && snap.errorCode == null && snap.status !== "ended");
 
   const done = !showing && snap.errorCode == null;
 
@@ -137,7 +118,6 @@ export function CinematicPlayerLoader({
       window.clearTimeout(timer);
     };
   }, [showing]);
-
   if (!mounted) {
     return null;
   }
@@ -156,13 +136,7 @@ export function CinematicPlayerLoader({
         hover:border-white/30 hover:bg-black/60 hover:text-white
       "
     >
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 14 14"
-        fill="none"
-        aria-hidden="true"
-      >
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
         <path
           d="M3.5 3.5l7 7M10.5 3.5l-7 7"
           stroke="currentColor"
@@ -170,15 +144,11 @@ export function CinematicPlayerLoader({
           strokeLinecap="round"
         />
       </svg>
-
       {t("Cancel")}
     </button>
   );
 
-  const backdrop =
-    src.episode?.still ||
-    src.meta.background ||
-    src.meta.poster;
+  const backdrop = src.episode?.still || src.meta.background || src.meta.poster;
 
   return (
     <div
@@ -187,11 +157,7 @@ export function CinematicPlayerLoader({
         absolute inset-0 z-[80] overflow-hidden
         transition-opacity duration-300
         ${kid ? "bg-[#0c4a6e]" : "bg-black"}
-        ${
-          showing
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
-        }
+        ${showing ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}
       `}
     >
       <Topbar connecting />
@@ -204,11 +170,7 @@ export function CinematicPlayerLoader({
           className={`
             absolute inset-0 h-full w-full
             object-cover saturate-150
-            ${
-              kid
-                ? "opacity-20 blur-[36px]"
-                : "opacity-40 blur-[28px]"
-            }
+            ${kid ? "opacity-20 blur-[36px]" : "opacity-40 blur-[28px]"}
           `}
         />
       )}
@@ -237,10 +199,8 @@ export function CinematicPlayerLoader({
                 left: `${left}%`,
                 width: 12 + (index % 3) * 6,
                 height: 12 + (index % 3) * 6,
-                animationDelay:
-                  `-${(1 + ((index * 1.7) % 6)).toFixed(1)}s`,
-                animationDuration:
-                  `${6 + (index % 4)}s`,
+                animationDelay: `-${(1 + ((index * 1.7) % 6)).toFixed(1)}s`,
+                animationDuration: `${6 + (index % 4)}s`,
               }}
             />
           ))}
@@ -284,84 +244,70 @@ export function CinematicPlayerLoader({
           px-8 text-center
         "
       >
-        <LoaderLogoOrText
-          logo={src.meta.logo ?? null}
-          fallbackText={src.meta.name ?? src.title}
-        />
+        <LoaderLogoOrText logo={src.meta.logo ?? null} fallbackText={src.meta.name ?? src.title} />
 
         {src.episode && (
-          <p className="
+          <p
+            className="
             text-[12.5px] font-semibold uppercase
             tracking-[0.32em] text-white/70
-          ">
+          "
+          >
             S{src.episode.imdbSeason ?? src.episode.season}
-            {" · "}
-            E
-            {String(
-              src.episode.imdbEpisode ?? src.episode.episode,
-            ).padStart(2, "0")}
-            {src.episode.name
-              ? ` · ${src.episode.name}`
-              : ""}
+            {" · "}E{String(src.episode.imdbEpisode ?? src.episode.episode).padStart(2, "0")}
+            {src.episode.name ? ` · ${src.episode.name}` : ""}
           </p>
         )}
 
         {isInfoHash ? (
-          <div className="
+          <div
+            className="
             flex w-full max-w-sm
             flex-col items-center gap-3
-          ">
-            <StreamLoadingBar
-              key={src.url}
-              ready={ready}
-              done={done}
-            />
+          "
+          >
+            <StreamLoadingBar key={src.url} ready={ready} done={done} />
 
-            <p className="
+            <p
+              className="
               text-[12.5px] font-medium uppercase
               tracking-[0.18em] text-white/70
-            ">
+            "
+            >
               {t("Loading video")}
             </p>
           </div>
         ) : (
-          <HarborLoader
-            size="md"
-            caption={
-              isLocal
-                ? t("Loading")
-                : t("Loading video")
-            }
-          />
+          <HarborLoader size="md" caption={isLocal ? t("Loading") : t("Loading video")} />
         )}
 
         {!kid && showEngineActivity && (
-          <p className="
+          <p
+            className="
             text-[12.5px] font-medium
             tracking-wide text-white/50
             tabular-nums
-          ">
-            {enginePeers}{" "}
-            {enginePeers === 1
-              ? t("peer")
-              : t("peers")}
+          "
+          >
+            {enginePeers} {enginePeers === 1 ? t("peer") : t("peers")}
             {" · "}
             {fmtSpeed(engineSpeed)}
           </p>
         )}
 
         {!kid && heavyForP2p && (
-          <p className="
+          <p
+            className="
             max-w-md text-[12.5px]
             leading-relaxed text-amber-300/85
-          ">
+          "
+          >
             {t(
               "Heads up: this is a large file for peer-to-peer streaming, so it can take a while to start. A 1080p source or a debrid service will load faster.",
             )}
           </p>
         )}
       </div>
-
       {liquidGlassEnabled ? (
         <ThreeLiquidGlassSurface
           radius="9999px"
