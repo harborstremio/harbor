@@ -407,13 +407,16 @@ export const ContinueCard = memo(function ContinueCard({
           {translatedTitle || hydratedMeta?.name?.trim() || item.name}
         </p>
       </button>
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center">
         <ThreeLiquidGlassSurface
           radius="9999px"
           shaderRadius={1}
           intensity={0.86}
-          className="pointer-events-auto h-14 w-14 border border-white/[0.10]"
-          contentClassName="h-full w-full"
+          variant="overlay"
+          backdropBlur
+          className="pointer-events-none h-14 w-14 group-hover:pointer-events-auto focus-within:pointer-events-auto"
+          surfaceClassName="border border-white/[0.10] opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+          contentClassName="h-full w-full scale-95 opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:scale-100 group-hover:opacity-100 focus-within:scale-100 focus-within:opacity-100"
           style={{
             background: "transparent",
             boxShadow: "none",
@@ -443,18 +446,17 @@ export const ContinueCard = memo(function ContinueCard({
             absolute end-0.5 top-0.5 z-10
             flex h-11 w-11
             items-center justify-center
-            opacity-0
-            transition-opacity duration-200
-            group-hover:opacity-100
-            focus-within:opacity-100
           "
         >
           <ThreeLiquidGlassSurface
             radius="9999px"
             shaderRadius={1}
             intensity={0.74}
-            className="h-9 w-9 border border-white/[0.09]"
-            contentClassName="h-full w-full"
+            variant="overlay"
+            backdropBlur
+            className="pointer-events-none h-9 w-9 group-hover:pointer-events-auto focus-within:pointer-events-auto"
+            surfaceClassName="border border-white/[0.09] opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+            contentClassName="h-full w-full scale-95 opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:scale-100 group-hover:opacity-100 focus-within:scale-100 focus-within:opacity-100"
             style={{
               background: "transparent",
               boxShadow: "none",
