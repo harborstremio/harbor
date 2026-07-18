@@ -32,6 +32,8 @@ type Props = {
   onDismiss?: (item: LibraryItem) => void;
 };
 
+let backdropBlurHasWarmed = false;
+
 export const ContinueCard = memo(function ContinueCard({
   item,
   watched = false,
@@ -41,6 +43,10 @@ export const ContinueCard = memo(function ContinueCard({
   const t = useT();
   const { settings, update } = useSettings();
   const { profiles, activeProfile } = useProfiles();
+  const [hasActivatedGlass, setHasActivatedGlass] = useState(false);
+  const [shouldRevealGlass, setShouldRevealGlass] = useState(false);
+  const hasActivatedGlassRef = useRef(false);
+  const revealFrameRef = useRef<number | null>(null);
   const watcherId = getWatchedBy(item._id);
   const watcher = watcherId ? profiles.find((p) => p.id === watcherId) : null;
   const showWatcher = !!watcher && watcher.id !== activeProfile?.id;
@@ -70,6 +76,42 @@ export const ContinueCard = memo(function ContinueCard({
     : isAnimeCwItem(item) && ep
       ? ep.episode
       : null;
+
+  useEffect(
+    () => () => {
+      if (revealFrameRef.current !== null) {
+        cancelAnimationFrame(revealFrameRef.current);
+      }
+    },
+    [],
+  );
+
+  const activateGlass = () => {
+    if (hasActivatedGlassRef.current) return;
+
+    hasActivatedGlassRef.current = true;
+    setHasActivatedGlass(true);
+
+    if (backdropBlurHasWarmed) {
+      setShouldRevealGlass(true);
+      return;
+    }
+
+    backdropBlurHasWarmed = true;
+    revealFrameRef.current = requestAnimationFrame(() => {
+      revealFrameRef.current = requestAnimationFrame(() => {
+        revealFrameRef.current = null;
+        setShouldRevealGlass(true);
+      });
+    });
+  };
+
+  const glassSurfaceRevealClass = shouldRevealGlass
+    ? "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+    : "opacity-0";
+  const glassContentRevealClass = shouldRevealGlass
+    ? "scale-95 opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:scale-100 group-hover:opacity-100 focus-within:scale-100 focus-within:opacity-100"
+    : "scale-95 opacity-0";
   const sub =
     animeEp && Number.isFinite(animeEp) && animeEp > 0
       ? `Ep ${animeEp}`
@@ -288,7 +330,11 @@ export const ContinueCard = memo(function ContinueCard({
   };
 
   return (
-    <div className="group relative w-full min-w-0">
+    <div
+      className="group relative w-full min-w-0"
+      onPointerEnter={activateGlass}
+      onFocusCapture={activateGlass}
+    >
       <button
         ref={cardRef}
         onClick={onClick}
@@ -413,10 +459,10 @@ export const ContinueCard = memo(function ContinueCard({
           shaderRadius={1}
           intensity={0.86}
           variant="overlay"
-          backdropBlur
+          backdropBlur={hasActivatedGlass}
           className="pointer-events-none h-14 w-14 group-hover:pointer-events-auto focus-within:pointer-events-auto"
-          surfaceClassName="border border-white/[0.10] opacity-0 group-hover:opacity-100 focus-within:opacity-100"
-          contentClassName="h-full w-full scale-95 opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:scale-100 group-hover:opacity-100 focus-within:scale-100 focus-within:opacity-100"
+          surfaceClassName={`border border-white/[0.10] ${glassSurfaceRevealClass}`}
+          contentClassName={`h-full w-full ${glassContentRevealClass}`}
           style={{
             background: "transparent",
             boxShadow: "none",
@@ -453,10 +499,10 @@ export const ContinueCard = memo(function ContinueCard({
             shaderRadius={1}
             intensity={0.74}
             variant="overlay"
-            backdropBlur
+            backdropBlur={hasActivatedGlass}
             className="pointer-events-none h-9 w-9 group-hover:pointer-events-auto focus-within:pointer-events-auto"
-            surfaceClassName="border border-white/[0.09] opacity-0 group-hover:opacity-100 focus-within:opacity-100"
-            contentClassName="h-full w-full scale-95 opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:scale-100 group-hover:opacity-100 focus-within:scale-100 focus-within:opacity-100"
+            surfaceClassName={`border border-white/[0.09] ${glassSurfaceRevealClass}`}
+            contentClassName={`h-full w-full ${glassContentRevealClass}`}
             style={{
               background: "transparent",
               boxShadow: "none",
