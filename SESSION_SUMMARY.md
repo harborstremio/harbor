@@ -1,7 +1,7 @@
 # Session Summary — Harbor Tizen TV Adaptation
 
 ## Overview
-Adapted the Harbor Stremio desktop client fork for Samsung Tizen TVs. Two commits so far, app is functional with login, playback, metadata, and subtitles working. UI has been significantly scaled for 10-foot viewing.
+Adapted the Harbor Stremio desktop client fork for Samsung Tizen TVs. Three commits so far, app is functional with login, playback, metadata, and subtitles working. UI has been significantly scaled for 10-foot viewing.
 
 ---
 
@@ -75,10 +75,36 @@ Adapted the Harbor Stremio desktop client fork for Samsung Tizen TVs. Two commit
 
 ---
 
-## Pending (not yet started)
-- Legendas/addons precisa de proxy real para domínios sem CORS (debrid APIs)
-- Remover cursor quando `tvNavigation` ativo (comentado no CSS, só descomentar)
+## Commit 3: `737ca94` — "feat: configurable CORS proxy for debrid/addon APIs on Tizen/web"
+**Proxy infrastructure to unblock CORS-less domains on Tizen/web (9 files, +232):**
+
+| File | What |
+|------|------|
+| `scripts/proxy-server.mjs` | **New.** Lightweight HTTP proxy server on port 3141. Routes `GET/POST /proxy/{hostname}/{path}` → `https://{hostname}{path}`. Forwards `Authorization` header as `X-Harbor-Auth`. CORS headers on all responses. No external dependencies. |
+| `src/lib/safe-fetch.ts` | Added `setProxyUrl(url)` export (module-level var). Added `PROXY_HOSTS` (debrid APIs: real-debrid, alldebrid, premiumize, debrid-link, torbox) and `PROXY_SUFFIXES` (addon hosts: .elfhosted.com, .strem.fun, .fly.dev, .vercel.app, etc.). `DIRECT_HOSTS` kept for domains with CORS (torrentio, stremio, cinemeta). When `proxyUrl` is set, `rewriteForWeb` routes proxiable domains through `{proxyUrl}/proxy/{hostname}{path}`. |
+| `src/lib/settings/types.ts:74` | Added `proxyUrl: string` to Settings type |
+| `src/lib/settings/defaults.ts:22` | Default `proxyUrl: ""` |
+| `src/lib/settings.tsx:8,156-159` | Imports `setProxyUrl`, `useEffect` calls it on `settings.proxyUrl` change |
+| `src/views/settings/streaming-sources-panel.tsx` | New "CORS Proxy" section with URL input and description |
+| `.npmrc` | **New.** `block-exotic-subdeps=false` — required for pnpm to install `mpegts.js` (depends on `webworkify-webpack` from git) |
+| `package.json` | Added `"proxy": "node scripts/proxy-server.mjs"` script |
+
+**How to use the proxy:**
+```bash
+# 1. Start the proxy server (on your home server/VPS, or same machine)
+npm run proxy
+# or: PORT=3141 node scripts/proxy-server.mjs
+
+# 2. In Harbor Settings → CORS Proxy, enter the proxy URL:
+#    http://192.168.1.100:3141
+```
+
+---
+
+## Pending
+- Remover cursor quando `tvNavigation` ativo (adiado — usuário ainda polindo interface)
 - Testar na TV Samsung real com emulador Tizen
+- Sliders (color picker, jump bar, build-feedback) via dpad
 
 ---
 
@@ -86,6 +112,7 @@ Adapted the Harbor Stremio desktop client fork for Samsung Tizen TVs. Two commit
 ```bash
 npm run build          # Vite production build → dist/
 npm run wgt            # Build + package .wgt
+npm run proxy          # Start CORS proxy server (port 3141)
 # Output: harbor-tizen.wgt (~123 MB)
 # Deploy: sdb push harbor-tizen.wgt /opt/usr/apps/
 ```
