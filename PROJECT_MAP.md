@@ -71,7 +71,7 @@ Any AI modifying this codebase **MUST STRICTLY ENFORCE AND PRESERVE** the follow
 
 ### 👤 Rule 5: Git Author Identity
 
-- When committing any changes, the local git configuration **MUST** be set to `Harbor Dev <dev@harbor.local>` (`git config user.name "Harbor Dev" && git config user.email "dev@harbor.local"`).
+- When committing any changes, the local git configuration **MUST** be set to `2-sa <2-sa@users.noreply.github.com>` (`git config user.name "2-sa" && git config user.email "2-sa@users.noreply.github.com"`).
 
 ---
 
