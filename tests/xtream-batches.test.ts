@@ -29,7 +29,9 @@ test("skips rejected rows without losing progress", async () => {
   const result = await processInBatches([1, 2, 3, 4], {
     batchSize: 2,
     map: (value) => (value % 2 === 0 ? value : null),
-    onBatch: (_batch, state) => progress.push(`${state.processed}/${state.total}`),
+    onBatch: (_batch, state) => {
+      progress.push(`${state.processed}/${state.total}`);
+    },
     yieldControl: async () => {},
   });
 

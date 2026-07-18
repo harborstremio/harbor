@@ -38,7 +38,7 @@ function filenameScore(line: string): number {
   const hasResolution = /\b\d{3,4}p\b/i.test(line) || /\b(?:4k|uhd|2160p)\b/i.test(line);
   const hasEpisode = /\bS\d{1,2}E\d{1,3}\b/i.test(line);
   const hasSource =
-    /\b(?:Blu[.\-]?Ray|WEB[.\-]?DL|WEBRip|HDRip|BDRip|HDTV|REMUX|Remux|HDCAM|TELESYNC|TELECINE|CAM|HDTS|DVDRip)\b/i.test(
+    /\b(?:Blu[.-]?Ray|WEB[.-]?DL|WEBRip|HDRip|BDRip|HDTV|REMUX|Remux|HDCAM|TELESYNC|TELECINE|CAM|HDTS|DVDRip)\b/i.test(
       line,
     );
   const hasCodec = /\b(?:x264|x265|HEVC|AVC|h264|h265|AV1|MPEG2|MPEG-2)\b/i.test(line);

@@ -6,13 +6,13 @@ const SIZE_RX = /(\d+(?:\.\d+)?)\s*(GB|MB|TB|GiB|MiB|TiB)\b/i;
 const SEEDERS_RX = /(?:👥|👤|S:|seeds?:?|\bS\s*=\s*)\s*(\d+)/i;
 const ANIME_HASH_RX = /\[([0-9A-F]{8})\]/i;
 const REPACK_RX = /\bREPACK(\d+)?\b/i;
-const YEAR_RANGE_RX = /\b(19\d\d|20\d\d)[-\.](19\d\d|20\d\d)\b/;
+const YEAR_RANGE_RX = /\b(19\d\d|20\d\d)[-.](19\d\d|20\d\d)\b/;
 const DISC_RX = /\bDISC\s*(\d+)\b/i;
 const EDITION_RX =
   /\b(IMAX|EXTENDED|DIRECTORS?[.\s]?CUT|THEATRICAL|UNRATED|UNCUT|REMASTERED|RESTORATION|CRITERION|OPEN[.\s]?MATTE|HYBRID)\b/i;
 
 const QUALITY_STOP_RX =
-  /\.(?:480p|576p|720p|1080p|1440p|2160p|4k|uhd|hdr|hdr10|dv|dovi|bluray|bdrip|brrip|web[.\-]?dl|webrip|hdrip|hdtv|remux|cam|ts|hdts|tc|scr|x264|x265|hevc|avc|h\.?264|h\.?265|av1|aac|ac3|ddp?|eac3|dts|truehd|atmos|flac|opus|10bit|8bit|repack|proper|extended|directors?|imax|hybrid|hdr10\+|repack\d?|multi|dual|dubbed|sub|subbed|complete|amzn|nf|hulu|max|atvp|dsnp)/i;
+  /\.(?:480p|576p|720p|1080p|1440p|2160p|4k|uhd|hdr|hdr10|dv|dovi|bluray|bdrip|brrip|web[.-]?dl|webrip|hdrip|hdtv|remux|cam|ts|hdts|tc|scr|x264|x265|hevc|avc|h\.?264|h\.?265|av1|aac|ac3|ddp?|eac3|dts|truehd|atmos|flac|opus|10bit|8bit|repack|proper|extended|directors?|imax|hybrid|hdr10\+|repack\d?|multi|dual|dubbed|sub|subbed|complete|amzn|nf|hulu|max|atvp|dsnp)/i;
 
 export function parseEpisodeTitle(
   filename: string,

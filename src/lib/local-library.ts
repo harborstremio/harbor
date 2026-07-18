@@ -303,7 +303,7 @@ export function parseFilename(filename: string): ParsedFilename {
     .replace(NOISE_RX, " ")
     .replace(/\s+/g, " ")
     .trim()
-    .replace(/[[\({].*?[\])\}]/g, "")
+    .replace(/[[({].*?[\])}]/g, "")
     .replace(/[[\](){}]/g, " ")
     .replace(/[\s\-–—_]+$/g, "")
     .replace(/^[\s\-–—_]+/g, "")

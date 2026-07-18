@@ -15,7 +15,7 @@ const SOURCE_RX: Array<[RegExp, Source]> = [
   [/\bSCREENER\b|\bDVDSCR\b|\bDVDScreener\b|\bBDSCR\b|\bWEB[\s._-]?SCR\b|\bSCR\b/i, "SCR"],
   [/\bRemux\b/i, "REMUX"],
   [/\bBluRay\b|\bBDRip\b|\bBRRip\b/i, "BluRay"],
-  [/\bWEB[.\-]?DL\b/i, "WEB-DL"],
+  [/\bWEB[.-]?DL\b/i, "WEB-DL"],
   [/\bWEBRip\b|\bWEB-Rip\b/i, "WEBRip"],
   [/\bHDRip\b/i, "HDRip"],
   [/\bDVDRip\b/i, "DVDRip"],

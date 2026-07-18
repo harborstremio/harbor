@@ -13,7 +13,7 @@ export interface AnimeFranchise {
 }
 
 const SEASON_PATTERNS: RegExp[] = [
-  /[.°'`:!?,_\-(\)[\]{}#]+$/,
+  /[.°'`:!?,_\-()[\]{}#]+$/,
   /\s+season\s*\d+$/i,
   /\s+s\d+$/i,
   /\s+\d+(st|nd|rd|th)\s+season$/i,
