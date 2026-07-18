@@ -229,9 +229,9 @@ async function tryStreamFallback(
 function matchService(text: string): DebridSlug | null {
   const lower = text.toLowerCase();
   if (/\bpremiumize\b/.test(lower)) return "pm";
-  if (/\breal[\s\-]?debrid\b/.test(lower)) return "rd";
+  if (/\breal[\s-]?debrid\b/.test(lower)) return "rd";
   if (/\btorbox\b/.test(lower)) return "tb";
-  if (/\ball[\s\-]?debrid\b/.test(lower)) return "ad";
-  if (/\bdebrid[\s\-]?link\b/.test(lower)) return "dl";
+  if (/\ball[\s-]?debrid\b/.test(lower)) return "ad";
+  if (/\bdebrid[\s-]?link\b/.test(lower)) return "dl";
   return null;
 }

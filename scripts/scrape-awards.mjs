@@ -344,7 +344,7 @@ function classifyLinks($, $row) {
     const text = cleanText($a.text());
     if (seen.has(text)) return;
 
-    if (/^\d{4}(\s*[(\[].*)?$/.test(text)) return;
+    if (/^\d{4}(\s*[([].*)?$/.test(text)) return;
     if (/^\d+(st|nd|rd|th)$/i.test(text)) return;
     if (/^\(.+\)$/.test(text)) return;
     seen.add(text);

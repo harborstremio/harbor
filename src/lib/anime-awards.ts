@@ -19,7 +19,7 @@ export function stripAwardSequelNumber(base: string): string {
   if (!m || m.index === undefined) return base;
   const n = Number(m[1]);
   if (n < 2 || n > 20) return base;
-  const head = base.slice(0, m.index).replace(/[\s:.\-]+$/, "");
+  const head = base.slice(0, m.index).replace(/[\s:.-]+$/, "");
   if (!/[A-Za-z]/.test(head)) return base;
   if (/\b(?:No|Vol|Ver|Chapter|Part|Cour|Ep|Episode)\.?$/i.test(head)) return base;
   return head;

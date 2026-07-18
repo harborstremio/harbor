@@ -5,11 +5,11 @@ const TB_CACHE_RX = /\[TB[+⚡]\]/i;
 const AD_CACHE_RX = /\[AD[+⚡]\]/i;
 const PM_CACHE_RX = /\[PM[+⚡]\]/i;
 const DL_CACHE_RX = /\[DL[+⚡]\]/i;
-const RD_UNCACHED_RX = /\[RD(?:[\s\-]?download|⬇️?|⏳)\]/i;
-const TB_UNCACHED_RX = /\[TB(?:[\s\-]?download|⬇️?|⏳)\]/i;
-const AD_UNCACHED_RX = /\[AD(?:[\s\-]?download|⬇️?|⏳)\]/i;
-const PM_UNCACHED_RX = /\[PM(?:[\s\-]?download|⬇️?|⏳)\]/i;
-const DL_UNCACHED_RX = /\[DL(?:[\s\-]?download|⬇️?|⏳)\]/i;
+const RD_UNCACHED_RX = /\[RD(?:[\s-]?download|⬇️?|⏳)\]/i;
+const TB_UNCACHED_RX = /\[TB(?:[\s-]?download|⬇️?|⏳)\]/i;
+const AD_UNCACHED_RX = /\[AD(?:[\s-]?download|⬇️?|⏳)\]/i;
+const PM_UNCACHED_RX = /\[PM(?:[\s-]?download|⬇️?|⏳)\]/i;
+const DL_UNCACHED_RX = /\[DL(?:[\s-]?download|⬇️?|⏳)\]/i;
 const JACKETTIO_BARE_UNCACHED_RX = /\[(RD|TB|AD|PM|DL|OC|ED|Putio)\]\s+(?:Jackettio|jackettio)\b/i;
 const STREAMFUSION_CACHED_RX = /^⚡instant/im;
 const STREAMFUSION_SERVICE_RX = /^⚡instant\s*\n([^\n]+)/im;
@@ -30,7 +30,7 @@ const SERVICE_CACHED_RX =
 const SERVICE_UNCACHED_RX =
   /(?:⏳|⬇️?|🔻|❌)\s*(?:need[\s_-]?cache|need[\s_-]?to[\s_-]?cache|download(?:\s+via)?|not\s+ready|uncached(?:\s+on)?)?\s*(real[\s\-_]?debrid|realdebrid|rd|torbox|tb|all[\s\-_]?debrid|alldebrid|ad|premiumize|pm|debrid[\s\-_]?link|debridlink|dl)/i;
 
-const COMET_BINGE_RX = /^comet\|([a-z\-]+)\|/i;
+const COMET_BINGE_RX = /^comet\|([a-z-]+)\|/i;
 const ELFHOSTED_CACHE_RX = /\belf[\s\-_]?cache\b|cached\s+on\s+elfhosted/i;
 const COMET_SERVICE_TO_SLUG: Record<string, DebridSlug> = {
   realdebrid: "rd",
@@ -162,13 +162,13 @@ export function parseCacheFlags(
 function mediafusionAbbrevSlug(text: string): DebridSlug | null {
   if (/\bTRB\b/i.test(text) || /\bTorBox\b/i.test(text)) return "tb";
   if (/\bTB\b(?!\w)/i.test(text)) return "tb";
-  if (/\bReal[\s\-]?Debrid\b/i.test(text)) return "rd";
+  if (/\bReal[\s-]?Debrid\b/i.test(text)) return "rd";
   if (/\bRD\b(?!\w)/i.test(text)) return "rd";
   if (/\bAllDebrid\b/i.test(text)) return "ad";
   if (/\bAD\b(?!\w)/i.test(text)) return "ad";
   if (/\bPremiumize\b/i.test(text)) return "pm";
   if (/\bPM\b(?!\w)/i.test(text)) return "pm";
-  if (/\bDebrid[\s\-]?Link\b/i.test(text)) return "dl";
+  if (/\bDebrid[\s-]?Link\b/i.test(text)) return "dl";
   if (/\bDL\b(?!\w)/i.test(text)) return "dl";
   return null;
 }
@@ -177,10 +177,10 @@ function addonNameSlug(name: string | undefined): DebridSlug | null {
   if (!name) return null;
   const lower = name.toLowerCase();
   if (/torbox|trb/.test(lower)) return "tb";
-  if (/real[\s\-]?debrid|\brd\b/.test(lower)) return "rd";
-  if (/all[\s\-]?debrid|\bad\b/.test(lower)) return "ad";
+  if (/real[\s-]?debrid|\brd\b/.test(lower)) return "rd";
+  if (/all[\s-]?debrid|\bad\b/.test(lower)) return "ad";
   if (/premiumize|\bpm\b/.test(lower)) return "pm";
-  if (/debrid[\s\-]?link|\bdl\b/.test(lower)) return "dl";
+  if (/debrid[\s-]?link|\bdl\b/.test(lower)) return "dl";
   return null;
 }
 
@@ -197,7 +197,7 @@ function cometServiceFrom(bingeGroup: string): DebridSlug | null {
 }
 
 function serviceNameToSlug(s: string): DebridSlug | null {
-  const n = s.toLowerCase().replace(/[\s\-]+/g, "");
+  const n = s.toLowerCase().replace(/[\s-]+/g, "");
   if (n === "realdebrid" || n === "rd") return "rd";
   if (n === "torbox" || n === "tb") return "tb";
   if (n === "alldebrid" || n === "ad") return "ad";

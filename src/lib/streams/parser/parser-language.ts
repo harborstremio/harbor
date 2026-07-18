@@ -149,7 +149,7 @@ const FLAG_TO_LANGUAGE: Record<string, string> = {
 
 const FLAG_RX = /[\u{1F1E6}-\u{1F1FF}][\u{1F1E6}-\u{1F1FF}]/gu;
 const ISO_PAIR_RX =
-  /(?:^|[\.\-_\s\[(])(EN|FR|ES|IT|DE|PT|RU|JA|JP|KO|KR|ZH|CN|HI|AR|TR|NL|PL|RO|SV|SE|DA|FI|CS|CZ|HU|TH|UK|UA|VI|GB|US|MX|BR|CA|AU|NZ|TW|HK|IL|HE|SA|AE|EG|GR|ID|MY|PH|IR|FA)(?:[\.\-_\s\])]|$)/g;
+  /(?:^|[.\-_\s[(])(EN|FR|ES|IT|DE|PT|RU|JA|JP|KO|KR|ZH|CN|HI|AR|TR|NL|PL|RO|SV|SE|DA|FI|CS|CZ|HU|TH|UK|UA|VI|GB|US|MX|BR|CA|AU|NZ|TW|HK|IL|HE|SA|AE|EG|GR|ID|MY|PH|IR|FA)(?:[.\-_\s\])]|$)/g;
 const ISO_PAIR_TO_LANGUAGE: Record<string, string> = {
   EN: "English",
   GB: "English",

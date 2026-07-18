@@ -3,7 +3,7 @@ const SE_RE = /\bS(\d{1,2})\s*[._\-\s]?\s*E(\d{1,3})\b/i;
 const X_RE = /\b(\d{1,2})x(\d{1,3})\b/;
 const NOISE_RE =
   /\b(2160p|1080p|720p|480p|4k|uhd|fhd|hd|sd|hevc|x265|x264|h\.?264|h\.?265|web-?dl|web-?rip|bluray|blu-?ray|bdrip|hdrip|dvdrip|hdtv|multi|dual|multi-?sub|subbed|dubbed|imax|remux|10bit|aac|ac3|eac3|dts|ddp?5\.?1|hdr10?|dolby|atmos|vision)\b/gi;
-const BRACKET_RE = /[\[(][^\])]*[\])]/g;
+const BRACKET_RE = /[[(][^\])]*[\])]/g;
 const PREFIX_RE = /^\s*(?:[A-Z]{2,4}|[\u{1F1E6}-\u{1F1FF}]{2})\s*[|\-:]\s*/u;
 
 export function parseSeriesEpisode(name: string): { season: number; episode: number } | null {
@@ -31,7 +31,7 @@ export function cleanTitle(name: string): string {
   s = s.replace(NOISE_RE, " ");
   s = s.replace(/[._]+/g, " ");
   s = s.replace(/\s{2,}/g, " ").trim();
-  s = s.replace(/[\-|:]+\s*$/, "").trim();
+  s = s.replace(/[-|:]+\s*$/, "").trim();
   return s || name.trim();
 }
 

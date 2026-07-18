@@ -89,7 +89,7 @@ function parseInline(src: string): InlineNode[] {
       const prev = i === 0 ? " " : src[i - 1];
       const end = src.indexOf("_", i + 1);
       const next = end >= 0 ? (src[end + 1] ?? " ") : " ";
-      if (end > i + 1 && /[\s.,!?;:"')\]]/.test(prev) && /[\s.,!?;:"'(\[]/.test(next)) {
+      if (end > i + 1 && /[\s.,!?;:"')\]]/.test(prev) && /[\s.,!?;:"'([]/.test(next)) {
         flush();
         out.push({ kind: "italic", children: parseInline(src.slice(i + 1, end)) });
         i = end + 1;

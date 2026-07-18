@@ -125,7 +125,7 @@ const FRANCHISE_STRIP_RX: RegExp[] = [
 export function stripFranchiseSuffix(name: string): string {
   let t = name;
   for (const rx of FRANCHISE_STRIP_RX) t = t.replace(rx, "");
-  return t.replace(/[\s°'."’˚_:\-]+$/g, "").trim();
+  return t.replace(/[\s°'."’˚_:-]+$/g, "").trim();
 }
 
 export function animeFranchiseKey(name: string): string {

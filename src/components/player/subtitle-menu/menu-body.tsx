@@ -88,7 +88,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
         filters: [{ name: "Subtitles", extensions: ["srt", "ass", "ssa", "vtt", "sub"] }],
       });
       if (typeof path !== "string") return;
-      const name = path.split(/[\\\/]/).pop() || tr("Local subtitle");
+      const name = path.split(/[\\/]/).pop() || tr("Local subtitle");
       const ok = await props.onAddSubtitle(path, undefined, name);
       if (ok === false) {
         setLocalError(tr("Couldn't load that subtitle file. Try another."));
