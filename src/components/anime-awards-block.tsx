@@ -7,8 +7,10 @@ import {
   type AwardWin,
 } from "@/lib/anime-awards";
 import { useView } from "@/lib/view";
+import { useT } from "@/lib/i18n";
 
 export function AnimeAwardsBlock({ name, year }: { name: string; year?: number }) {
+  const t = useT();
   const wins = findAnyAwardWins(name, year);
   if (wins.length === 0) return null;
   const groups = groupWinsBySource(name, year);
@@ -17,7 +19,9 @@ export function AnimeAwardsBlock({ name, year }: { name: string; year?: number }
   return (
     <div id="anime-awards-section" className="scroll-mt-24 border-t border-edge-soft pt-14">
       <div className="mb-10 flex items-baseline justify-between gap-4">
-        <h3 className="text-[24px] font-medium tracking-tight text-ink">Anime Awards & Recognition</h3>
+        <h3 className="text-[24px] font-medium tracking-tight text-ink">
+          {t("Anime Awards & Recognition")}
+        </h3>
         <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
           <span className="text-accent">{totalWins}</span> {totalWins === 1 ? "Win" : "Wins"} ·{" "}
           {groups.length} {groups.length === 1 ? "ceremony" : "ceremonies"}

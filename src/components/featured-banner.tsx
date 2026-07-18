@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { observe, usePageVisible } from "@/lib/visibility";
 import { BigCardStack } from "./featured-banner/big-card-stack";
 import { Lightbox } from "./featured-banner/lightbox";
@@ -10,6 +11,7 @@ import type { LightboxState } from "./featured-banner/types";
 const ROTATE_MS = 14000;
 
 export function FeaturedBanner({ items }: { items: Meta[] }) {
+  const t = useT();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [inView, setInView] = useState(true);
@@ -51,7 +53,7 @@ export function FeaturedBanner({ items }: { items: Meta[] }) {
       onMouseLeave={() => setPaused(false)}
     >
       <h2 className="font-display text-[28px] font-medium leading-tight tracking-tight text-ink">
-        Featured & Recommended
+        {t("Featured & Recommended")}
       </h2>
 
       <div className="grid grid-cols-[minmax(0,1fr)_320px] gap-4">

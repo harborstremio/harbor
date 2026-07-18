@@ -6,6 +6,7 @@ import { getCachedPlaylist } from "@/lib/iptv/store";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { useT } from "@/lib/i18n";
 import { useEpg, useNowTick } from "@/views/live/hooks/use-epg";
 import { useIptvPlaylist } from "@/views/live/hooks/use-iptv-playlist";
 import { GuideView } from "@/views/live/guide/guide-view";
@@ -24,6 +25,7 @@ function synthChannelMeta(ch: IptvChannel): Meta {
 }
 
 export function GuideModal({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const { settings } = useSettings();
   const { openPlayer } = useView();
   const m3uSources = useMemo(
@@ -72,7 +74,9 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-[260] flex flex-col bg-canvas/95 backdrop-blur-xl">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-edge-soft/40 px-8 py-5">
         <div className="flex items-center gap-4">
-          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">TV Guide</h2>
+          <h2 className="font-display text-[22px] font-medium tracking-tight text-ink">
+            {t("TV Guide")}
+          </h2>
           {m3uSources.length > 1 && (
             <select
               value={sourceId ?? ""}
@@ -110,7 +114,10 @@ export function GuideModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
         {source && playlist && playlist.channels.length === 0 && (
-          <EmptyMessage title="No channels" body="This playlist hasn't been loaded yet, or it has no channels." />
+          <EmptyMessage
+            title="No channels"
+            body="This playlist hasn't been loaded yet, or it has no channels."
+          />
         )}
         {source && playlist && playlist.channels.length > 0 && (
           <GuideView
