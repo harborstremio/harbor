@@ -4,18 +4,13 @@ import { Row } from "@/components/row";
 import type { Meta } from "@/lib/cinemeta";
 import { type Topic } from "@/lib/feed/genre-topics";
 import { useT } from "@/lib/i18n";
+import { translateRailText } from "@/lib/i18n/rails";
 import { useDedupOnSeenIds } from "@/lib/feed/seen-ids";
 import { tmdbDiscover, tmdbResolveKeywordIds } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { MAX_PAGES, MIN_INITIAL_FILL, SpotlightGateContext } from "./spotlight-gate";
 
-export function TopicSection({
-  topic,
-  mediaType,
-}: {
-  topic: Topic;
-  mediaType: "movie" | "tv";
-}) {
+export function TopicSection({ topic, mediaType }: { topic: Topic; mediaType: "movie" | "tv" }) {
   const t = useT();
   const { settings } = useSettings();
   const dedup = useDedupOnSeenIds(`topic:${mediaType}:${topic.id}`);
@@ -130,9 +125,11 @@ export function TopicSection({
 
   const title = (
     <span className="flex flex-col">
-      <span className="text-[20px] font-medium tracking-tight text-ink">{t(topic.title)}</span>
+      <span className="text-[20px] font-medium tracking-tight text-ink">
+        {translateRailText(t, topic.title)}
+      </span>
       <span className="text-[12px] font-medium uppercase tracking-[0.18em] text-ink-subtle">
-        {t(topic.kicker)}
+        {translateRailText(t, topic.kicker)}
       </span>
     </span>
   );
@@ -146,7 +143,10 @@ export function TopicSection({
             </div>
           ))
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40" />
+            <div
+              key={i}
+              className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40"
+            />
           ))}
     </Row>
   );

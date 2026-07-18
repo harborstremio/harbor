@@ -62,6 +62,7 @@ export function AwardsBlock({ awards }: { awards: AwardEntry[] }) {
 }
 
 function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] }) {
+  const t = useT();
   const { openAward } = useView();
   const wins = entries.filter((e) => e.result === "won" && e.category);
   const noms = entries.filter((e) => e.result === "nominated" && e.category);
@@ -90,27 +91,28 @@ function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] 
         <div className="flex flex-col gap-1.5">
           <h4 className="text-[18px] font-medium tracking-tight text-ink">
             {type === "other" ? (
-              TYPE_TITLE[type]
+              t(TYPE_TITLE[type])
             ) : (
               <button
                 type="button"
                 onClick={() => openAward(type)}
                 className="rounded-sm text-start transition-colors hover:text-accent"
               >
-                {TYPE_TITLE[type]}
+                {t(TYPE_TITLE[type])}
               </button>
             )}
           </h4>
           <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
             {totalWins > 0 && (
               <>
-                <span className="text-accent">{totalWins}</span> {totalWins === 1 ? "Win" : "Wins"}
+                <span className="text-accent">{totalWins}</span>{" "}
+                {totalWins === 1 ? t("Win") : t("Wins")}
               </>
             )}
             {totalWins > 0 && totalNoms > 0 && <span className="mx-2.5 opacity-40">·</span>}
             {totalNoms > 0 && (
               <>
-                {totalNoms} {totalNoms === 1 ? "Nomination" : "Nominations"}
+                {totalNoms} {totalNoms === 1 ? t("Nomination") : t("Nominations")}
               </>
             )}
           </p>
@@ -139,7 +141,7 @@ function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] 
           <div className="flex flex-col gap-2">
             {wins.length > 0 && (
               <h5 className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-ink-subtle">
-                Also Nominated
+                {t("Also Nominated")}
               </h5>
             )}
             <ul className="grid grid-cols-1 gap-x-10 gap-y-0 xl:grid-cols-2">
@@ -156,7 +158,7 @@ function AwardGroup({ type, entries }: { type: AwardType; entries: AwardEntry[] 
 
         {!hasDetail && (
           <p className="text-[13px] leading-relaxed text-ink-subtle">
-            Recognized at the {TYPE_TITLE[type].toLowerCase()}.
+            {t("Recognized at the {award}.", { award: t(TYPE_TITLE[type]) })}
           </p>
         )}
       </div>

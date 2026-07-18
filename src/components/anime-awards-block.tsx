@@ -23,8 +23,8 @@ export function AnimeAwardsBlock({ name, year }: { name: string; year?: number }
           {t("Anime Awards & Recognition")}
         </h3>
         <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-          <span className="text-accent">{totalWins}</span> {totalWins === 1 ? "Win" : "Wins"} ·{" "}
-          {groups.length} {groups.length === 1 ? "ceremony" : "ceremonies"}
+          <span className="text-accent">{totalWins}</span> {totalWins === 1 ? t("Win") : t("Wins")}{" "}
+          · {groups.length} {groups.length === 1 ? t("ceremony") : t("ceremonies")}
         </span>
       </div>
       <div className="flex flex-col gap-14">
@@ -37,6 +37,7 @@ export function AnimeAwardsBlock({ name, year }: { name: string; year?: number }
 }
 
 function SourceGroup({ source, wins }: { source: AwardSourceId; wins: AwardWin[] }) {
+  const t = useT();
   const { openAnimeAward } = useView();
   const meta = awardSourceMeta(source);
   const years = uniqueYears(wins);
@@ -60,7 +61,7 @@ function SourceGroup({ source, wins }: { source: AwardSourceId; wins: AwardWin[]
             onClick={() => openAnimeAward(source)}
             className="group flex items-center gap-1.5 text-start text-[18px] font-medium tracking-tight text-ink transition-colors hover:text-accent"
           >
-            {meta.name}
+            {t(meta.name)}
             <ArrowUpRight
               size={14}
               strokeWidth={2.4}
@@ -68,7 +69,8 @@ function SourceGroup({ source, wins }: { source: AwardSourceId; wins: AwardWin[]
             />
           </button>
           <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-            <span className="text-accent">{wins.length}</span> {wins.length === 1 ? "Win" : "Wins"}
+            <span className="text-accent">{wins.length}</span>{" "}
+            {wins.length === 1 ? t("Win") : t("Wins")}
           </p>
           {years.length > 0 && (
             <p className="mt-1 text-[11px] font-medium tabular-nums text-ink-subtle/80">
@@ -80,7 +82,7 @@ function SourceGroup({ source, wins }: { source: AwardSourceId; wins: AwardWin[]
             onClick={() => openAnimeAward(source)}
             className="mt-1 w-fit text-[11.5px] font-semibold uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-80"
           >
-            See all winners →
+            {t("See all winners →")}
           </button>
         </div>
       </header>
@@ -96,12 +98,13 @@ function SourceGroup({ source, wins }: { source: AwardSourceId; wins: AwardWin[]
 }
 
 function WinRow({ win }: { win: AwardWin }) {
+  const t = useT();
   return (
     <li className="flex items-baseline gap-4 border-b border-edge-soft/30 py-2.5 text-[13px]">
       <span className="w-11 shrink-0 font-semibold tabular-nums text-accent">{win.year}</span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="font-medium leading-tight text-ink">
-          {win.isAOTY ? "Anime of the Year" : win.categoryName.replace(/^Best\s+/i, "Best ")}
+          {win.isAOTY ? t("Anime of the Year") : win.categoryName.replace(/^Best\s+/i, "Best ")}
         </span>
         <span className="truncate text-[12px] leading-tight text-ink-subtle" title={win.title}>
           {win.title}
