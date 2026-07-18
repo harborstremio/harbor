@@ -545,7 +545,23 @@ export function Row({
             }}
             onClickCapture={onClickCapture}
             onDragStart={(e) => e.preventDefault()}
-            className="harbor-row-track grid grid-flow-col items-start gap-5 overflow-x-auto p-5 -m-5 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] *:snap-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] overscroll-x-contain [&_img]:select-none [&_img]:[-webkit-user-drag:none]"
+            className="
+              harbor-row-track
+              grid grid-flow-col items-end gap-5
+              overflow-x-auto
+              px-16 pb-8 pt-28
+              -mx-16 -mb-8 -mt-28
+              scroll-ps-16 scroll-pe-16
+              [scroll-snap-type:x_mandatory]
+              *:snap-start
+              [&::-webkit-scrollbar]:hidden
+              [-ms-overflow-style:none]
+              [scrollbar-width:none]
+              [overflow-anchor:none]
+              overscroll-x-contain
+              [&_img]:select-none
+              [&_img]:[-webkit-user-drag:none]
+            "
             style={{
               gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px`,
               willChange: "transform",

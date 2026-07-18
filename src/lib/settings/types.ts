@@ -62,7 +62,6 @@ export type Settings = {
   playerVolumeSfx: boolean;
   liquidGlassEnabled: boolean;
   liquidGlassOpacity: number;
-  posterGlassFrameEnabled: boolean;
   posterDockEnabled: boolean;
   posterDockScale: number;
   posterDockStrength: number;

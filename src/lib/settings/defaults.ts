@@ -9,7 +9,6 @@ export const DEFAULT: Settings = {
   playerVolumeSfx: false,
   liquidGlassEnabled: true,
   liquidGlassOpacity: 100,
-  posterGlassFrameEnabled: false,
   posterDockEnabled: false,
   posterDockScale: 110,
   posterDockStrength: 20,
