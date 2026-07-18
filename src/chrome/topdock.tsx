@@ -639,10 +639,6 @@ function ProfileChipCompact({
     ? "text-white/[0.96] [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]"
     : "text-ink";
 
-  const mutedTextClass = liquidGlassEnabled
-    ? "text-white/[0.80] [text-shadow:0_1px_2px_rgba(0,0,0,0.66)]"
-    : "text-ink-muted";
-
   const subtleTextClass = liquidGlassEnabled
     ? "text-white/[0.64] [text-shadow:0_1px_2px_rgba(0,0,0,0.60)]"
     : "text-ink-subtle";

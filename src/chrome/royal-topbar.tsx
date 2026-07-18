@@ -17,7 +17,7 @@ import {
   effectiveBinding,
   eventToBinding,
   formatBindingForDisplay,
-  isTypingTarget,
+  shouldHandleGlobalKeyboardEvent,
 } from "@/lib/hotkeys";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
@@ -25,6 +25,7 @@ import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
+import { HoverNavIcon } from "@/chrome/hover-nav-icon";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -88,7 +89,7 @@ export function RoyalTopbar() {
             />
           )}
           <span className="grid h-[18px] w-[18px] place-items-center [&_svg]:h-[18px] [&_svg]:w-[18px]">
-            {item.render(false)}
+            <HoverNavIcon render={item.render} />
           </span>
           <span className="hidden xl:inline">{label}</span>
         </button>
@@ -288,7 +289,7 @@ function SearchPill({ onOpen }: { onOpen: () => void }) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (isTypingTarget(e)) return;
+      if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (eventToBinding(e) !== binding) return;
       e.preventDefault();
       onOpen();
@@ -386,18 +387,10 @@ function RoyalProfileMenu({
       }
     };
 
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    };
-
     document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
 
     return () => {
       document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
     };
   }, [open]);
 

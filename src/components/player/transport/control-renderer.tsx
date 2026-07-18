@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
+import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
 import {
   getCustomIcon,
@@ -60,6 +61,7 @@ import { SpeedMenu } from "./speed-menu";
 import { AspectMenu } from "./aspect-menu";
 import { Anime4kMenu } from "./anime4k-menu";
 import { HdrToggleBigBtn } from "./hdr-toggle-btn";
+import { RtxHdrToggleBigBtn } from "./rtx-hdr-toggle-btn";
 import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
 import { DrawToggle } from "./draw-toggle";
 import { CastButton } from "./cast-button";
@@ -123,7 +125,7 @@ export type ControlContext = {
   onSubDelay: (sec: number) => void;
   onAudioDelay: (sec: number) => void;
   onEnterSync?: () => void;
-  onAddSubtitle: (url: string, lang?: string, title?: string) => void;
+  onAddSubtitle: SubtitleAddHandler;
   onRate: (r: number) => void;
   onPiP: () => void;
   onFullscreen: () => void;
@@ -178,6 +180,7 @@ function PlayPauseControl({
         <button
           type="button"
           onClick={ctx.onPlayPause}
+          data-player-play-pause
           data-tv-initial-focus
           aria-label={ctx.playing ? t("Pause") : t("Play")}
           className={`
@@ -221,6 +224,7 @@ function PlayPauseControl({
         <button
           type="button"
           onClick={ctx.onPlayPause}
+          data-player-play-pause
           data-tv-initial-focus
           aria-label={ctx.playing ? t("Pause") : t("Play")}
           className="
@@ -503,6 +507,10 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     case "hdr-toggle": {
       if (ctx.tight || ctx.engine === "html5") return null;
       return <HdrToggleBigBtn />;
+    }
+    case "rtx-hdr-toggle": {
+      if (ctx.tight || ctx.engine === "html5") return null;
+      return <RtxHdrToggleBigBtn meta={ctx.meta} />;
     }
     case "draw-toggle": {
       if (ctx.compact || !ctx.showDraw) return null;
