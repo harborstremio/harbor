@@ -131,6 +131,14 @@ function MainRoot() {
     }
   }, []);
 
+  // Fail-open: never strand the window on the boot loader when the ready
+  // signal hangs (stalled network, dead query) — reveal the UI anyway.
+  useEffect(() => {
+    if (!startupVisible) return;
+    const t = window.setTimeout(revealApplication, 6000);
+    return () => window.clearTimeout(t);
+  }, [startupVisible, revealApplication]);
+
   return (
     <>
       <App onReady={markAppReady} />

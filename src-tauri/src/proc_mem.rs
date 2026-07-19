@@ -318,6 +318,112 @@ fn read() -> ProcMem {
     out
 }
 
+#[cfg(target_os = "macos")]
+extern "C" {
+    // Private libproc SPI used by Activity Monitor to attribute XPC helper
+    // processes (WKWebView helpers are parented to launchd, so a plain
+    // descendant walk cannot find them).
+    fn responsibility_get_pid_responsible_for_pid(pid: std::ffi::c_int) -> std::ffi::c_int;
+}
+
+#[cfg(target_os = "macos")]
+fn macos_rss(pid: i32) -> u64 {
+    unsafe {
+        let mut info: libc::proc_taskinfo = std::mem::zeroed();
+        let size = std::mem::size_of::<libc::proc_taskinfo>() as i32;
+        let rc = libc::proc_pidinfo(
+            pid,
+            libc::PROC_PIDTASKINFO,
+            0,
+            &mut info as *mut _ as *mut std::ffi::c_void,
+            size,
+        );
+        if rc == size {
+            info.pti_resident_size
+        } else {
+            0
+        }
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn macos_total_phys() -> u64 {
+    unsafe {
+        let mut value: u64 = 0;
+        let mut len = std::mem::size_of::<u64>();
+        let rc = libc::sysctlbyname(
+            b"hw.memsize\0".as_ptr() as *const std::ffi::c_char,
+            &mut value as *mut _ as *mut std::ffi::c_void,
+            &mut len,
+            std::ptr::null_mut(),
+            0,
+        );
+        if rc == 0 {
+            value
+        } else {
+            0
+        }
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn read_macos() -> ProcMem {
+    let mut out = ProcMem {
+        total_phys: macos_total_phys(),
+        ..ProcMem::default()
+    };
+    let self_pid = std::process::id() as i32;
+    out.harbor_rss = macos_rss(self_pid);
+
+    unsafe {
+        let mut count = libc::proc_listallpids(std::ptr::null_mut(), 0);
+        if count <= 0 {
+            out.total = out.harbor_rss;
+            return out;
+        }
+        let mut pids: Vec<i32> = vec![0; count as usize];
+        let buf_bytes = count * std::mem::size_of::<i32>() as i32;
+        count = libc::proc_listallpids(pids.as_mut_ptr() as *mut std::ffi::c_void, buf_bytes);
+        if count <= 0 {
+            out.total = out.harbor_rss;
+            return out;
+        }
+        pids.truncate(count as usize);
+        for pid in pids {
+            if pid == self_pid {
+                continue;
+            }
+            if responsibility_get_pid_responsible_for_pid(pid) != self_pid {
+                continue;
+            }
+            let mut info: libc::proc_bsdinfo = std::mem::zeroed();
+            let size = std::mem::size_of::<libc::proc_bsdinfo>() as i32;
+            let rc = libc::proc_pidinfo(
+                pid,
+                libc::PROC_PIDTBSDINFO,
+                0,
+                &mut info as *mut _ as *mut std::ffi::c_void,
+                size,
+            );
+            if rc != size {
+                continue;
+            }
+            let name_bytes: Vec<u8> = info
+                .pbi_name
+                .iter()
+                .take_while(|&&c| c != 0)
+                .map(|&c| c as u8)
+                .collect();
+            let name = String::from_utf8_lossy(&name_bytes).to_ascii_lowercase();
+            if name.contains("webkit") {
+                out.webview_rss += macos_rss(pid);
+            }
+        }
+    }
+    out.total = out.harbor_rss + out.webview_rss;
+    out
+}
+
 #[tauri::command]
 pub async fn harbor_process_memory() -> ProcMem {
     #[cfg(windows)]
@@ -330,9 +436,26 @@ pub async fn harbor_process_memory() -> ProcMem {
             .await
             .unwrap_or_default()
     }
-    #[cfg(not(any(windows, target_os = "linux")))]
+    #[cfg(target_os = "macos")]
+    {
+        tokio::task::spawn_blocking(read_macos)
+            .await
+            .unwrap_or_default()
+    }
+    #[cfg(not(any(windows, target_os = "linux", target_os = "macos")))]
     {
         ProcMem::default()
+    }
+}
+
+#[cfg(all(test, target_os = "macos"))]
+mod macos_tests {
+    #[test]
+    fn reads_own_rss_and_total_phys() {
+        let m = super::read_macos();
+        assert!(m.harbor_rss > 0, "own rss should be reported");
+        assert!(m.total_phys > 0, "physical memory should be reported");
+        assert!(m.total >= m.harbor_rss);
     }
 }
 

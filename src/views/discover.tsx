@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { BackToTop } from "@/components/back-to-top";
 import { CollectionsRow } from "@/components/collections-row";
 import { CriticsPick } from "@/components/critics-pick";
@@ -11,11 +12,17 @@ import { LanguageTiles } from "@/components/language-tiles";
 import { Row, ScrollRootContext } from "@/components/row";
 import { PickCard } from "@/components/pick-card";
 import type { Meta } from "@/lib/cinemeta";
-import { fetchCriticsPickList, getPool, selectDailyRows, type FeedItem } from "@/lib/feed";
-import { buildFeatured, buildFeaturedFast, rescoreFeatured, type FeaturedResult } from "@/lib/feed/featured";
+import { fetchCriticsPickList, getPool, type FeedItem } from "@/lib/feed";
+import {
+  buildFeatured,
+  buildFeaturedFast,
+  rescoreFeatured,
+  type FeaturedResult,
+} from "@/lib/feed/featured";
+import { discoverDailyRows, discoverKeys, discoverScope } from "./discover/discover-queries";
 import type { FeaturedItem } from "@/lib/feed/featured/types";
 import { prewarmExternalWatched, subscribeExternalWatched } from "@/lib/feed/external-watched";
-import { getStore, subscribe as subscribeTaste } from "@/lib/discover/store";
+import { subscribe as subscribeTaste } from "@/lib/discover/store";
 import { getDownvotedIds, getUpvotedIds, subscribePrefs } from "@/lib/feed/preferences";
 import { recentlyPlayed, subscribePlayback, watchTitleKey } from "@/lib/playback-history";
 import { useSettings } from "@/lib/settings";
@@ -46,7 +53,6 @@ import {
 
 const MAX_RAIL_PAGES = 10;
 const MIN_PAGE_YIELD = 4;
-const ROW_COUNT = 14;
 const DEDUP_PRIORITY = [ANCHOR_TOP_RATED, ANCHOR_AWARDS];
 
 export function Discover({ active = true }: { active?: boolean }) {
@@ -59,6 +65,8 @@ export function Discover({ active = true }: { active?: boolean }) {
   useScrollMemory("discover", scrollRef, active);
 
   const { settings } = useSettings();
+  const queryClient = useQueryClient();
+  const scope = discoverScope(settings);
   const letterboxd = useLetterboxd();
   const t = useT();
   const pageRows = usePageRows("discover");
@@ -119,7 +127,7 @@ export function Discover({ active = true }: { active?: boolean }) {
   epochRef.current = epoch;
 
   const dailyRows = useMemo(
-    () => selectDailyRows(settings.tmdbKey, getStore().affinity, settings, ROW_COUNT),
+    () => discoverDailyRows(settings),
     [settings.tmdbKey, settings.region, settings.streaming, tasteVersion],
   );
   const rowSig = useMemo(() => dailyRows.map((r) => r.id).join("|"), [dailyRows]);
@@ -127,14 +135,26 @@ export function Discover({ active = true }: { active?: boolean }) {
   useEffect(() => {
     let cancelled = false;
     let full = false;
-    buildFeaturedFast(settings.tmdbKey, settings)
+    queryClient
+      .fetchQuery({
+        queryKey: discoverKeys.featuredFast(scope),
+        queryFn: () => buildFeaturedFast(settings.tmdbKey, settings),
+        staleTime: 5 * 60_000,
+      })
       .then((r) => !cancelled && !full && setFeat((prev) => (prev.pool.length ? prev : r)))
       .catch(() => {});
-    buildFeatured(settings.tmdbKey, settings).then((r) => {
-      if (cancelled) return;
-      full = true;
-      setFeat(r);
-    });
+    queryClient
+      .fetchQuery({
+        queryKey: discoverKeys.featured(scope),
+        queryFn: () => buildFeatured(settings.tmdbKey, settings),
+        staleTime: 5 * 60_000,
+      })
+      .then((r) => {
+        if (cancelled) return;
+        full = true;
+        setFeat(r);
+      })
+      .catch(() => {});
     prewarmExternalWatched()
       .then(() => !cancelled && setFeat((prev) => rescoreFeatured(prev.pool)))
       .catch(() => {});
@@ -147,6 +167,8 @@ export function Discover({ active = true }: { active?: boolean }) {
     settings.region,
     settings.feedLocaleBias,
     settings.preferredLanguages,
+    queryClient,
+    scope,
   ]);
 
   useEffect(() => {
@@ -157,9 +179,14 @@ export function Discover({ active = true }: { active?: boolean }) {
       const { filterQueuePool } = await import("@/lib/feed/skipped");
       setQueue(filterQueuePool(p).filter((it) => !hidden.has(it.meta.id)));
     });
-    fetchCriticsPickList(settings.tmdbKey, settings).then(
-      (list) => !cancelled && setCriticsPickList(list.filter((x) => !hidden.has(x.id))),
-    );
+    queryClient
+      .fetchQuery({
+        queryKey: discoverKeys.critics(scope),
+        queryFn: () => fetchCriticsPickList(settings.tmdbKey, settings),
+        staleTime: 5 * 60_000,
+      })
+      .then((list) => !cancelled && setCriticsPickList(list.filter((x) => !hidden.has(x.id))))
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -170,6 +197,8 @@ export function Discover({ active = true }: { active?: boolean }) {
     settings.preferredLanguages,
     settings.tmdbLanguage,
     tasteVersion,
+    queryClient,
+    scope,
   ]);
 
   useEffect(() => {
@@ -238,8 +267,12 @@ export function Discover({ active = true }: { active?: boolean }) {
       if (!def) return;
       const myEpoch = epoch;
       railLoadingRef.current[railId] = true;
-      def
-        .fetch(1)
+      queryClient
+        .fetchQuery({
+          queryKey: discoverKeys.rail(scope, railId, 1),
+          queryFn: () => def.fetch(1),
+          staleTime: 5 * 60_000,
+        })
         .then((list) => {
           if (epochRef.current !== myEpoch) return;
           railPagesRef.current[railId] = 1;
@@ -256,7 +289,7 @@ export function Discover({ active = true }: { active?: boolean }) {
           if (epochRef.current === myEpoch) railLoadingRef.current[railId] = false;
         });
     },
-    [dailyRows, epoch],
+    [dailyRows, epoch, queryClient, scope],
   );
 
   const ensureLoadedRef = useRef(ensureLoaded);
@@ -290,8 +323,12 @@ export function Discover({ active = true }: { active?: boolean }) {
       if (!def) return;
       const next = cur + 1;
       railLoadingRef.current[railId] = true;
-      def
-        .fetch(next)
+      queryClient
+        .fetchQuery({
+          queryKey: discoverKeys.rail(scope, railId, next),
+          queryFn: () => def.fetch(next),
+          staleTime: 5 * 60_000,
+        })
         .then((list) => {
           railPagesRef.current[railId] = next;
           if (list.length < MIN_PAGE_YIELD) railExhaustedRef.current[railId] = true;
@@ -302,7 +339,7 @@ export function Discover({ active = true }: { active?: boolean }) {
           railLoadingRef.current[railId] = false;
         });
     },
-    [dailyRows],
+    [dailyRows, queryClient, scope],
   );
 
   const featuredIds = useMemo(() => new Set(featured.map((m) => m.id)), [featured]);
@@ -377,7 +414,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Featured & Recommended")}
                   hidden={hiddenFeatured}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-featured"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-featured"))
+                  }
                 />
               )}
               <div className={hiddenFeatured ? "pointer-events-none opacity-40" : ""}>
@@ -395,7 +434,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Browse your catalogs")}
                   hidden={hiddenCatalog}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-catalog"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-catalog"))
+                  }
                 />
                 <div className={hiddenCatalog ? "pointer-events-none opacity-40" : ""}>
                   <CatalogBrowser />
@@ -405,7 +446,9 @@ export function Discover({ active = true }: { active?: boolean }) {
                 <SectionEditBar
                   name={t("Can't decide?")}
                   hidden={hiddenSurprise}
-                  onToggle={() => pageRows.persist(togglePageRowHidden(pageRows.custom, "section-surprise"))}
+                  onToggle={() =>
+                    pageRows.persist(togglePageRowHidden(pageRows.custom, "section-surprise"))
+                  }
                 />
                 <div className={hiddenSurprise ? "pointer-events-none opacity-40" : ""}>
                   <SurpriseMe pool={surprisePool} />
@@ -426,34 +469,34 @@ export function Discover({ active = true }: { active?: boolean }) {
           {letterboxdRows.map((row, i) => {
             const catalogId = row.key.replace("letterboxd-", "");
             return (
-            <Row
-              key={row.key}
-              title={
-                <>
-                  {row.name}
-                  <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
-                    Letterboxd
-                  </span>
-                </>
-              }
-              titleExtra={
-                <LetterboxdRowMenu
-                  canMoveUp={i > 0}
-                  canMoveDown={i < letterboxdRows.length - 1}
-                  hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
-                  onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
-                  onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
-                  onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
-                />
-              }
-              min={148}
-              shape="portrait"
-              scrollKey={`discover:${row.key}`}
-            >
-              {row.metas.map((m) => (
-                <PickCard key={m.id} meta={m} />
-              ))}
-            </Row>
+              <Row
+                key={row.key}
+                title={
+                  <>
+                    {row.name}
+                    <span className="ms-2 inline-flex items-center gap-1 rounded-full bg-amber-400/10 px-2 py-[2px] text-[10px] font-semibold uppercase tracking-wider text-amber-300/80">
+                      Letterboxd
+                    </span>
+                  </>
+                }
+                titleExtra={
+                  <LetterboxdRowMenu
+                    canMoveUp={i > 0}
+                    canMoveDown={i < letterboxdRows.length - 1}
+                    hidden={letterboxd.hiddenCatalogs.includes(catalogId)}
+                    onMoveUp={() => letterboxd.moveCatalog(catalogId, -1)}
+                    onMoveDown={() => letterboxd.moveCatalog(catalogId, 1)}
+                    onToggleHidden={() => letterboxd.toggleHidden(catalogId)}
+                  />
+                }
+                min={148}
+                shape="portrait"
+                scrollKey={`discover:${row.key}`}
+              >
+                {row.metas.map((m) => (
+                  <PickCard key={m.id} meta={m} />
+                ))}
+              </Row>
             );
           })}
 
@@ -468,11 +511,21 @@ export function Discover({ active = true }: { active?: boolean }) {
                       hidden={hidden}
                       canMoveUp={idx > 0}
                       canMoveDown={idx >= 0 && idx < orderKeys.length - 1}
-                      onMoveUp={() => pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, -1))}
-                      onMoveDown={() => pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, 1))}
-                      onToggleHidden={() => pageRows.persist(togglePageRowHidden(pageRows.custom, item.key))}
-                      onRename={(label) => pageRows.persist(renamePageRow(pageRows.custom, item.key, label))}
-                      onResetName={() => pageRows.persist(renamePageRow(pageRows.custom, item.key, ""))}
+                      onMoveUp={() =>
+                        pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, -1))
+                      }
+                      onMoveDown={() =>
+                        pageRows.persist(movePageRow(pageRows.custom, railKeys, item.key, 1))
+                      }
+                      onToggleHidden={() =>
+                        pageRows.persist(togglePageRowHidden(pageRows.custom, item.key))
+                      }
+                      onRename={(label) =>
+                        pageRows.persist(renamePageRow(pageRows.custom, item.key, label))
+                      }
+                      onResetName={() =>
+                        pageRows.persist(renamePageRow(pageRows.custom, item.key, ""))
+                      }
                       isRenamed={item.key in pageRows.custom.renamed}
                     />
                     {!hidden && (

@@ -58,6 +58,9 @@ pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
 
 pub static CLOSE_FLUSH_DONE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 static CLOSE_IN_PROGRESS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+/// Tracks WebView2 TrySuspend / SetIsVisible(false) so we can recover on focus.
+#[cfg(windows)]
+static WEBVIEW_SUSPENDED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 #[tauri::command]
 fn harbor_flush_done() {
@@ -113,34 +116,35 @@ async fn save_text_file(path: String, contents: String) -> Result<(), String> {
     std::fs::write(&target, contents.as_bytes()).map_err(|e| format!("write file: {}", e))
 }
 
+/// Resume WebView2 after TrySuspend / SetIsVisible(false). Safe no-op if not suspended.
 #[cfg(windows)]
-fn make_main_transparent(app: &tauri::AppHandle) {
+fn resume_webview_if_needed(app: &tauri::AppHandle) {
     use tauri::Manager;
+    if !WEBVIEW_SUSPENDED.load(std::sync::atomic::Ordering::SeqCst) {
+        return;
+    }
     let Some(window) = app.get_webview_window("main") else {
-        eprintln!("[harbor::transparent] main window missing");
         return;
     };
     let res = window.with_webview(|webview| unsafe {
-        use webview2_com::Microsoft::Web::WebView2::Win32::{
-            ICoreWebView2Controller2, COREWEBVIEW2_COLOR,
-        };
+        use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2_3;
         use windows::core::Interface;
         let controller = webview.controller();
-        match controller.cast::<ICoreWebView2Controller2>() {
-            Ok(controller2) => {
-                let color = COREWEBVIEW2_COLOR { A: 0, R: 0, G: 0, B: 0 };
-                match controller2.SetDefaultBackgroundColor(color) {
-                    Ok(()) => eprintln!("[harbor::transparent] SetDefaultBackgroundColor OK (alpha=0)"),
-                    Err(e) => eprintln!("[harbor::transparent] SetDefaultBackgroundColor FAILED: {:?}", e),
-                }
+        if let Ok(core) = controller.CoreWebView2() {
+            if let Ok(c3) = core.cast::<ICoreWebView2_3>() {
+                let _ = c3.Resume();
             }
-            Err(e) => eprintln!("[harbor::transparent] cast to Controller2 FAILED: {:?}", e),
         }
+        let _ = controller.SetIsVisible(true);
     });
-    if let Err(e) = res {
-        eprintln!("[harbor::transparent] with_webview FAILED: {:?}", e);
+    if res.is_ok() {
+        WEBVIEW_SUSPENDED.store(false, std::sync::atomic::Ordering::SeqCst);
+        eprintln!("[harbor::webview] auto-resumed after suspend");
     }
 }
+
+#[cfg(not(windows))]
+fn resume_webview_if_needed(_app: &tauri::AppHandle) {}
 
 #[cfg(windows)]
 pub(crate) fn force_show_foreground(window: &tauri::WebviewWindow) {
@@ -254,9 +258,18 @@ fn harbor_set_webview_visible(app: tauri::AppHandle, visible: bool) {
         let Some(window) = app.get_webview_window("main") else {
             return;
         };
+        if visible {
+            // Visibility true must always recover from a prior suspend.
+            resume_webview_if_needed(&app);
+        }
         let _ = window.with_webview(move |webview| unsafe {
             let _ = webview.controller().SetIsVisible(visible);
         });
+        if !visible {
+            WEBVIEW_SUSPENDED.store(true, std::sync::atomic::Ordering::SeqCst);
+        } else {
+            WEBVIEW_SUSPENDED.store(false, std::sync::atomic::Ordering::SeqCst);
+        }
     }
     #[cfg(not(windows))]
     {
@@ -285,6 +298,7 @@ fn harbor_try_suspend_webview(app: tauri::AppHandle) {
                 }
             }
         });
+        WEBVIEW_SUSPENDED.store(true, std::sync::atomic::Ordering::SeqCst);
     }
     #[cfg(not(windows))]
     {
@@ -311,6 +325,7 @@ fn harbor_resume_webview(app: tauri::AppHandle) {
             }
             let _ = controller.SetIsVisible(true);
         });
+        WEBVIEW_SUSPENDED.store(false, std::sync::atomic::Ordering::SeqCst);
     }
     #[cfg(not(windows))]
     {
@@ -484,7 +499,10 @@ pub fn run() {
             if webview.label() == "main"
                 && matches!(payload.event(), tauri::webview::PageLoadEvent::Finished)
             {
+                use tauri::Manager;
                 let _ = webview.window().show();
+                // Recover if a prior suspend left the controller invisible.
+                resume_webview_if_needed(webview.window().app_handle());
             }
         })
         .setup(move |app| {
@@ -510,11 +528,37 @@ pub fn run() {
                     }
                 }
             }
+            // Browse with an opaque WebView2 background. Transparent (alpha=0)
+            // is applied only while embedded mpv is active (see use-mpv-embed /
+            // webview_reapply_transparency). Always-on transparency + black HWND
+            // can present as a stuck black window when composition fails.
             #[cfg(windows)]
-            make_main_transparent(&app.handle());
+            webview_helpers::apply_opaque(&app.handle(), "main");
+            // Recover from WebView2 render-process death by reloading in place,
+            // instead of leaving a blank window until app restart.
+            webview_helpers::install_process_failure_watchdog(&app.handle(), "main");
             #[cfg(windows)]
             install_maximize_guard(&app.handle());
             ensure_window_on_screen(&app.handle());
+            // Fail-open: if PageLoadEvent::Finished never arrives (WebView hang),
+            // still show the main window so the user is not stuck on a blank frame.
+            {
+                use tauri::Manager;
+                let handle = app.handle().clone();
+                std::thread::spawn(move || {
+                    std::thread::sleep(std::time::Duration::from_millis(2500));
+                    if let Some(window) = handle.get_webview_window("main") {
+                        let visible = window.is_visible().unwrap_or(false);
+                        if !visible {
+                            eprintln!(
+                                "[harbor::window] fail-open: showing main after page-load timeout"
+                            );
+                            let _ = window.show();
+                        }
+                        resume_webview_if_needed(&handle);
+                    }
+                });
+            }
             #[cfg(target_os = "macos")]
             {
                 use tauri::Manager;
@@ -571,6 +615,11 @@ pub fn run() {
                 }
                 tauri::WindowEvent::Focused(focused) => {
                     use tauri::Emitter;
+                    if *focused {
+                        // Recover stuck-black after TrySuspend / SetIsVisible(false)
+                        // if the frontend never called resume.
+                        resume_webview_if_needed(window.app_handle());
+                    }
                     let minimized = if *focused {
                         false
                     } else {
@@ -640,6 +689,7 @@ pub fn run() {
             mpv::mpv_set_hdr_stage,
             mpv::display_hdr_active,
             webview_helpers::webview_reapply_transparency,
+            webview_helpers::webview_set_opaque,
             mpv::mpv_on_pip_changed,
             mpv::mpv_screenshot_data_url,
             mpv::mpv_save_screenshot,

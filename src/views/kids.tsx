@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CatalogRows } from "@/components/catalog/catalog-rows";
 import { CatalogCustomizeBar } from "@/components/catalog/customize-bar";
 import { ScrollRootContext } from "@/components/row";
 import { TmdbNudge } from "@/components/nudge";
 import { topMovies, type Meta } from "@/lib/cinemeta";
-import { listPager } from "@/lib/list-pager";
+import { useCatalogPage, type CatalogRowSpec } from "@/lib/catalog-page";
 import { recentlyPlayed } from "@/lib/playback-history";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useSettings } from "@/lib/settings";
@@ -18,118 +18,74 @@ import { buildKidsHero, kidsSpecs } from "./kids/kids-specs";
 
 const MAX_PER_ROW = 120;
 
-type KidsRow = {
-  key: string;
-  title: string;
-  metas: Meta[];
-  page: number;
-  hasMore: boolean;
-  fetcher?: (page: number) => Promise<Meta[]>;
-};
+function cinemetaKidsSpecs(): CatalogRowSpec[] {
+  return [
+    {
+      key: "cinemeta-animation",
+      title: "Animated Movies",
+      noPaginate: true,
+      fetcher: async () =>
+        topMovies("Animation")
+          .then(dropUnreleased)
+          .then(dropUnsafeCinemetaKids)
+          .catch(() => [] as Meta[]),
+    },
+    {
+      key: "cinemeta-family",
+      title: "Family Movies",
+      noPaginate: true,
+      fetcher: async () =>
+        topMovies("Family")
+          .then(dropUnreleased)
+          .then(dropUnsafeCinemetaKids)
+          .catch(() => [] as Meta[]),
+    },
+  ];
+}
 
 export function Kids({ active = true }: { active?: boolean }) {
   const { settings } = useSettings();
   const pageRows = usePageRows("kids");
-  const [hero, setHero] = useState<Meta[]>([]);
-  const [rows, setRows] = useState<KidsRow[]>([]);
-  const rowsRef = useRef<KidsRow[]>([]);
-  const loadingRef = useRef<Set<string>>(new Set());
   const scrollRef = useRef<HTMLElement>(null);
   const [scrollEl, setScrollEl] = useState<HTMLElement | null>(null);
 
-  useEffect(() => {
-    rowsRef.current = rows;
-  }, [rows]);
+  const tmdbKey = settings.tmdbKey;
+  const scope = tmdbKey ? `tmdb:${tmdbKey}` : "cinemeta";
+
+  const specs = useMemo<CatalogRowSpec[]>(
+    () => (tmdbKey ? kidsSpecs(tmdbKey) : cinemetaKidsSpecs()),
+    [tmdbKey],
+  );
+
+  const heroFetcher = useCallback(async () => {
+    if (tmdbKey) {
+      const pool = await buildKidsHero(tmdbKey, recentlyPlayed()).catch(() => [] as Meta[]);
+      return dropAdultContent(dropUnreleased(pool));
+    }
+    const animation = await topMovies("Animation")
+      .then(dropUnreleased)
+      .then(dropUnsafeCinemetaKids)
+      .catch(() => [] as Meta[]);
+    return animation.filter((m) => m.background).slice(0, 5);
+  }, [tmdbKey]);
+
+  const mapMetas = useCallback((metas: Meta[]) => dropAdultContent(dropUnreleased(metas)), []);
+
+  const { hero, rows, loadMore } = useCatalogPage({
+    pageId: "kids",
+    scope,
+    specs,
+    heroFetcher,
+    enabled: active,
+    maxPerRow: MAX_PER_ROW,
+    mapMetas: tmdbKey ? mapMetas : undefined,
+  });
 
   useScrollMemory("kids", scrollRef, active);
 
   const scrollCb = useCallback((el: HTMLElement | null) => {
     (scrollRef as { current: HTMLElement | null }).current = el;
     setScrollEl(el);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const seen = recentlyPlayed();
-      if (settings.tmdbKey) {
-        const heroPool = await buildKidsHero(settings.tmdbKey, seen).catch(() => [] as Meta[]);
-        if (cancelled) return;
-        setHero(dropAdultContent(dropUnreleased(heroPool)));
-        const specs = kidsSpecs(settings.tmdbKey);
-        const firstPages = await Promise.all(
-          specs.map((s) => s.fetcher(1).catch(() => [] as Meta[])),
-        );
-        if (cancelled) return;
-        const built: KidsRow[] = specs
-          .map((spec, i) => ({
-            key: spec.key,
-            title: spec.title,
-            metas: firstPages[i],
-            page: 1,
-            hasMore: firstPages[i].length >= 14,
-            fetcher: spec.fetcher,
-          }))
-          .filter((r) => r.metas.length > 0);
-        setRows(built);
-      } else {
-        const [animation, family] = await Promise.all(
-          ["Animation", "Family"].map((genre) =>
-            topMovies(genre)
-              .then(dropUnreleased)
-              .then(dropUnsafeCinemetaKids)
-              .catch(() => [] as Meta[]),
-          ),
-        );
-        if (cancelled) return;
-        setHero(animation.filter((m) => m.background).slice(0, 5));
-        setRows(
-          [
-            { key: "cinemeta-animation", title: "Animated Movies", metas: animation },
-            { key: "cinemeta-family", title: "Family Movies", metas: family },
-          ].map((row) => ({
-            ...row,
-            page: 1,
-            hasMore: false,
-            fetcher: listPager(row.metas),
-          })),
-        );
-      }
-    })().catch(console.error);
-    return () => {
-      cancelled = true;
-    };
-  }, [settings.tmdbKey]);
-
-  const loadMore = useCallback((rowKey: string) => {
-    if (loadingRef.current.has(rowKey)) return;
-    const row = rowsRef.current.find((r) => r.key === rowKey);
-    if (!row || !row.fetcher || !row.hasMore || row.metas.length >= MAX_PER_ROW) return;
-    loadingRef.current.add(rowKey);
-    const next = row.page + 1;
-    row
-      .fetcher(next)
-      .then((more) => {
-        setRows((rs) =>
-          rs.map((r) => {
-            if (r.key !== rowKey) return r;
-            const ids = new Set(r.metas.map((m) => m.id));
-            const fresh = more.filter((m) => !ids.has(m.id));
-            const combined = [...r.metas, ...fresh];
-            const reachedCap = combined.length >= MAX_PER_ROW;
-            return {
-              ...r,
-              metas: reachedCap ? combined.slice(0, MAX_PER_ROW) : combined,
-              page: next,
-              hasMore: !reachedCap && more.length > 0,
-            };
-          }),
-        );
-      })
-      .catch(() => {})
-      .finally(() => {
-        loadingRef.current.delete(rowKey);
-      });
   }, []);
 
   const restRows = useMemo(() => {
@@ -206,12 +162,6 @@ export function Kids({ active = true }: { active?: boolean }) {
             kids
             injectAfter={2}
             injectNode={settings.tmdbKey ? <KidsFranchiseRail /> : undefined}
-          />
-          <img
-            src="/kids/octofooter.svg"
-            alt=""
-            draggable={false}
-            className="pointer-events-none absolute bottom-0 inset-e-0 w-[clamp(150px,18vw,280px)] opacity-95"
           />
         </div>
         <BackToTop scrollRef={scrollRef} />

@@ -11,7 +11,12 @@ import { buildMatchScores, matchBadge, MATCH_CLOSE } from "@/lib/together/source
 import { HostSourceBanner } from "@/components/host-source-banner";
 import { consumeRecentStubEvent } from "@/lib/dead-streams";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
-import { readPlayback, readLastSeriesPlayback, streamMatchesEntry, streamMatchesSource } from "@/lib/playback-history";
+import {
+  readPlayback,
+  readLastSeriesPlayback,
+  streamMatchesEntry,
+  streamMatchesSource,
+} from "@/lib/playback-history";
 import { readSeasonLock } from "@/lib/season-lock";
 import { useSettings } from "@/lib/settings";
 import type { ScoredStream, Tier } from "@/lib/streams/types";
@@ -88,12 +93,26 @@ export function PlayPicker({
   const fs = useWindowFullscreen();
   const { authKey } = useAuth();
   const debrids = useDebridClients();
-  const { snapshot: roomSnapshot, sendInvite, claimHost, wasInvitedTo, clientId, hostSource, roomGuestPick, lastInviteProto } = useTogether();
+  const {
+    snapshot: roomSnapshot,
+    sendInvite,
+    claimHost,
+    wasInvitedTo,
+    clientId,
+    hostSource,
+    roomGuestPick,
+    lastInviteProto,
+  } = useTogether();
   const inSession = roomSnapshot.state === "joined";
   const resolvedImdb = useImdbId(meta, settings.tmdbKey);
   useEffect(() => {
     prefetchSegments(meta, episode);
   }, [meta, episode]);
+  // Warm the player chunk while the best source resolves, so the lazy
+  // PlayerView mounts instantly instead of flashing a blank screen.
+  useEffect(() => {
+    void import("@/views/player");
+  }, []);
   const imdbId = resolvedImdb.id;
   const streamIds = useStreamIds(meta, episode, imdbId);
   const localMatch = useMemo(() => {
@@ -104,7 +123,7 @@ export function PlayPicker({
       ? findLocalEpisodeByIds(episode.season, episode.episode, tmdbId, imdbId)
       : findLocalMovie(tmdbId, imdbId);
   }, [meta.id, imdbId, episode]);
-  const { addons } = useAddons(authKey, settings);
+  const { addons, discovering: discoveringAddons } = useAddons(authKey, settings);
   const [seasonLogo, setSeasonLogo] = useState<string | undefined>(() =>
     peekCachedLogo(settings.tmdbKey, meta, { preferOwn: true }),
   );
@@ -154,7 +173,7 @@ export function PlayPicker({
     strictMode,
     filterDisabled,
   });
-  const baseLangs = settings.preferredLanguages ?? [];
+  const baseLangs = settings.preferredLanguages;
   const isAnimeRequest = useMemo(
     () => (streamIds ?? []).some((id) => id.startsWith("kitsu:") || id.startsWith("mal:")),
     [streamIds],
@@ -162,7 +181,7 @@ export function PlayPicker({
   const preferredLangs = useMemo(() => {
     const codes = settings.preferredAudioLangs ?? [];
     const animeAdd = isAnimeRequest ? ["Japanese"] : [];
-    const all = [...baseLangs, ...codes, ...animeAdd];
+    const all = [...(baseLangs ?? []), ...codes, ...animeAdd];
     const seen = new Set<string>();
     const out: string[] = [];
     for (const lang of all) {
@@ -175,23 +194,24 @@ export function PlayPicker({
     return out;
   }, [baseLangs, settings.preferredAudioLangs, isAnimeRequest]);
   const [langFilter, setLangFilter] = useState(
-    settings.requirePreferredLanguage === true && baseLangs.length > 0,
+    settings.requirePreferredLanguage === true && (baseLangs?.length ?? 0) > 0,
   );
   const [cachedOnly, setCachedOnly] = useState(false);
   const pickerMainRef = useRef<HTMLElement | null>(null);
 
-  const { inviteKey, canInvite, inviteSentRef, hostSourceForMedia, expectHostSource } = useRoomInvite({
-    meta,
-    episode,
-    inSession,
-    roomSnapshot,
-    clientId,
-    hostSource,
-    lastInviteProto,
-    wasInvitedTo,
-    claimHost,
-    sendInvite,
-  });
+  const { inviteKey, canInvite, inviteSentRef, hostSourceForMedia, expectHostSource } =
+    useRoomInvite({
+      meta,
+      episode,
+      inSession,
+      roomSnapshot,
+      clientId,
+      hostSource,
+      lastInviteProto,
+      wasInvitedTo,
+      claimHost,
+      sendInvite,
+    });
 
   useEffect(() => {
     setStrictMode(settings.streamFilterLevel === "strict");
@@ -199,7 +219,8 @@ export function PlayPicker({
   }, [meta.id, episode?.season, episode?.episode, settings.streamFilterLevel]);
 
   const hostMatch = useMemo(
-    () => (hostSourceForMedia && result ? buildMatchScores(result.picker.all, hostSourceForMedia) : null),
+    () =>
+      hostSourceForMedia && result ? buildMatchScores(result.picker.all, hostSourceForMedia) : null,
     [result, hostSourceForMedia],
   );
   const matchFor = useCallback(
@@ -251,10 +272,7 @@ export function PlayPicker({
     return { primary, byTier, all };
   }, [result, langFilter, preferredLangs, cachedOnly, debrids.length, isCached, hostMatch]);
 
-  const anyAddonRanked = useMemo(
-    () => (addons ?? []).some((a) => isAddonRanked(a)),
-    [addons],
-  );
+  const anyAddonRanked = useMemo(() => (addons ?? []).some((a) => isAddonRanked(a)), [addons]);
   const addonOrderMode = settings.streamSort === "addon" || anyAddonRanked;
   const displayStreams = useMemo(() => {
     const all = filteredPicker?.all ?? [];
@@ -285,11 +303,9 @@ export function PlayPicker({
 
   const isAnimeMetaId = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
   const previousPlayback = useMemo(
-  () =>
-    settings.rememberLastStream
-      ? readPlayback(meta.id, episode?.season, episode?.episode)
-      : null,
-  [meta.id, episode?.season, episode?.episode, settings.rememberLastStream],
+    () =>
+      settings.rememberLastStream ? readPlayback(meta.id, episode?.season, episode?.episode) : null,
+    [meta.id, episode?.season, episode?.episode, settings.rememberLastStream],
   );
 
   const seasonLock = settings.seasonSourceLock && meta.type === "series" && !isAnimeMetaId;
@@ -320,8 +336,8 @@ export function PlayPicker({
     hostSource: hostSourceForMedia,
     prefer1080: !!kidProfile,
     preferPacks: seasonLock,
-    season: !isAnimeMetaId ? episode?.season ?? null : null,
-    episode: !isAnimeMetaId ? episode?.episode ?? null : null,
+    season: !isAnimeMetaId ? (episode?.season ?? null) : null,
+    episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
   });
 
   const autoFiredRef = useRef(false);
@@ -348,7 +364,13 @@ export function PlayPicker({
     const m = filteredPicker.all.find((s) => streamMatchesEntry(s, previousPlayback)) ?? null;
     if (!m || isAnimeMetaId || !episode) return m;
     if (m.episode != null && m.episode !== episode.episode) return null;
-    if (m.episode != null && m.season != null && episode.season != null && m.season !== episode.season) return null;
+    if (
+      m.episode != null &&
+      m.season != null &&
+      episode.season != null &&
+      m.season !== episode.season
+    )
+      return null;
     return m;
   }, [filteredPicker, previousPlayback, episode, isAnimeMetaId]);
 
@@ -360,10 +382,10 @@ export function PlayPicker({
   const currentPick: ScoredStream | null = useMemo(() => {
     if (!filteredPicker) return null;
     if (selectedTier && filteredPicker.byTier[selectedTier]) {
-    return filteredPicker.byTier[selectedTier]!;
-  }
+      return filteredPicker.byTier[selectedTier]!;
+    }
     if (previousMatch) return previousMatch;
-    if (sameSourceMatch) return sameSourceMatch;   
+    if (sameSourceMatch) return sameSourceMatch;
     return filteredPicker.primary;
   }, [filteredPicker, selectedTier, previousMatch, sameSourceMatch]);
 
@@ -388,7 +410,17 @@ export function PlayPicker({
     [settings.subtitlePreselect, isDownload, inSession, openPlayer],
   );
 
-  const { onPlay, onCache, queuedHash, debridDown, resetDebridDown, abortResolve, p2pConfirm, confirmP2p, cancelP2p } = usePickHandler({
+  const {
+    onPlay,
+    onCache,
+    queuedHash,
+    debridDown,
+    resetDebridDown,
+    abortResolve,
+    p2pConfirm,
+    confirmP2p,
+    cancelP2p,
+  } = usePickHandler({
     meta: metaForDisplay,
     imdbId,
     imdbIdVerified: resolvedImdb.verified,
@@ -462,8 +494,8 @@ export function PlayPicker({
     isTorrentioStream,
     expectHostSource,
     hostSource: hostSourceForMedia,
-    season: !isAnimeMetaId ? episode?.season ?? null : null,
-    episode: !isAnimeMetaId ? episode?.episode ?? null : null,
+    season: !isAnimeMetaId ? (episode?.season ?? null) : null,
+    episode: !isAnimeMetaId ? (episode?.episode ?? null) : null,
     autoFiredRef,
     setAutoSettleReady,
     setAutoCancelled,
@@ -471,16 +503,15 @@ export function PlayPicker({
   });
 
   const allCount = filteredPicker?.all.length ?? 0;
-  const rawCount =
-    (result?.raw.addon.length ?? 0) +
-    (result?.raw.library.length ?? 0);
+  const rawCount = (result?.raw.addon.length ?? 0) + (result?.raw.library.length ?? 0);
   const addonCount = useMemo(() => {
     if (!filteredPicker) return 0;
     return new Set(filteredPicker.all.map((s) => s.addonId)).size;
   }, [filteredPicker]);
   const addonLogoMap = useMemo(() => {
     const m = new Map<string, string | null>();
-    for (const a of addons ?? []) m.set(a.manifest.id, resolveAddonLogo(a.manifest.logo, a.transportUrl));
+    for (const a of addons ?? [])
+      m.set(a.manifest.id, resolveAddonLogo(a.manifest.logo, a.transportUrl));
     return m;
   }, [addons]);
   const lookupLogo = (id: string): string | null => addonLogoMap.get(id) ?? null;
@@ -489,10 +520,14 @@ export function PlayPicker({
     const seen = new Map<string, { id: string; name: string; logo: string | null }>();
     for (const s of filteredPicker.all) {
       if (seen.has(s.addonId)) continue;
-      seen.set(s.addonId, { id: s.addonId, name: s.addonName, logo: addonLogoMap.get(s.addonId) ?? null });
+      seen.set(s.addonId, {
+        id: s.addonId,
+        name: s.addonName,
+        logo: addonLogoMap.get(s.addonId) ?? null,
+      });
     }
     return [...seen.values()];
-  }, [result, addonLogoMap]);
+  }, [filteredPicker, addonLogoMap]);
   const backdropSrc = episode?.still || meta.background || meta.poster;
 
   const [maxWaitElapsed, setMaxWaitElapsed] = useState(false);
@@ -501,7 +536,7 @@ export function PlayPicker({
     const t = window.setTimeout(() => setMaxWaitElapsed(true), 30_000);
     return () => window.clearTimeout(t);
   }, [streamIds]);
-  const addonsSettled = pipelineDone || maxWaitElapsed;
+  const addonsSettled = (pipelineDone && !discoveringAddons) || maxWaitElapsed;
 
   const noStreamIds = addonsSettled && (!streamIds || streamIds.length === 0);
   const noDebrids = addonsSettled && !!streamIds && streamIds.length > 0 && debrids.length === 0;
@@ -566,8 +601,7 @@ export function PlayPicker({
   }, [attempt, episode, meta.id]);
   useScrollMemory(pickerScrollKey, pickerMainRef, !showAutoTransition);
 
-  const noSourcesConfigured =
-    addons !== null && addons.length === 0 && debrids.length === 0;
+  const noSourcesConfigured = !discoveringAddons && addons.length === 0 && debrids.length === 0;
 
   if (pendingPreselect) {
     return (
@@ -619,11 +653,7 @@ export function PlayPicker({
 
   if (debridDown) {
     return (
-      <DebridDownModal
-        meta={meta}
-        onTryAgain={resetDebridDown}
-        onBack={() => backToDetail()}
-      />
+      <DebridDownModal meta={meta} onTryAgain={resetDebridDown} onBack={() => backToDetail()} />
     );
   }
 
@@ -642,16 +672,33 @@ export function PlayPicker({
   }
 
   return (
-    <main ref={mainRef} data-tv-focus-scope className="absolute inset-0 z-50 overflow-y-auto bg-canvas">
+    <main
+      ref={mainRef}
+      data-tv-focus-scope
+      className="absolute inset-0 z-50 overflow-y-auto bg-canvas"
+    >
       <BackdropLayer src={backdropSrc} />
 
-      <div aria-hidden data-tauri-drag-region={fs ? "false" : "true"} className="absolute inset-x-0 top-0 z-10 h-20" />
+      <div
+        aria-hidden
+        data-tauri-drag-region={fs ? "false" : "true"}
+        className="absolute inset-x-0 top-0 z-10 h-20"
+      />
 
       <div className="relative mx-auto flex min-h-full w-full max-w-5xl flex-col gap-12 px-12 pb-32 pt-32">
-        <PickerHeader meta={metaForDisplay} episode={episode} onBack={backToDetail} onRefresh={refresh} refreshing={loading} />
+        <PickerHeader
+          meta={metaForDisplay}
+          episode={episode}
+          onBack={backToDetail}
+          onRefresh={refresh}
+          refreshing={loading}
+        />
 
         {!isDownload && localMatch && (
-          <LocalStreamCard entry={localMatch} onPlay={() => openPlayerGated(localPlayerSrc(localMatch))} />
+          <LocalStreamCard
+            entry={localMatch}
+            onPlay={() => openPlayerGated(localPlayerSrc(localMatch))}
+          />
         )}
 
         {hostSourceForMedia && <HostSourceBanner source={hostSourceForMedia} />}
@@ -671,7 +718,8 @@ export function PlayPicker({
         {torrentsDisabled() && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-400/10 px-5 py-3.5 text-[13px] text-amber-100">
             <span>
-              Torrents are disabled in settings. Uncached streams will not play unless they come from a debrid service or a direct link.
+              Torrents are disabled in settings. Uncached streams will not play unless they come
+              from a debrid service or a direct link.
             </span>
             <button
               type="button"
@@ -685,6 +733,13 @@ export function PlayPicker({
 
         {!addonsSettled && (!filteredPicker || filteredPicker.all.length === 0) && (
           <CinematicLoader meta={metaForDisplay} />
+        )}
+
+        {allCount > 0 && (!pipelineDone || discoveringAddons) && (
+          <div className="flex items-center gap-2 rounded-xl border border-edge-soft/60 bg-canvas/55 px-4 py-2.5 text-[12.5px] text-ink-muted">
+            <Loader2 size={14} className="animate-spin text-accent" />
+            Showing available results while the remaining sources finish.
+          </div>
         )}
 
         <PickerEmptyLadder
@@ -710,7 +765,9 @@ export function PlayPicker({
 
         {debrids.length > 0 && filteredPicker && filteredPicker.all.length > 0 && <CachedTip />}
 
-        {(settings.pickerLayout === "stremio" || isDownload) && filteredPicker && filteredPicker.all.length > 0 ? (
+        {(settings.pickerLayout === "stremio" || isDownload) &&
+        filteredPicker &&
+        filteredPicker.all.length > 0 ? (
           <StremioLayout
             streams={displayStreams}
             addons={addons}
@@ -725,9 +782,7 @@ export function PlayPicker({
           />
         ) : (
           <>
-            {!loading && result && (
-              <SourceDiagnostic result={result} debrids={debrids} />
-            )}
+            {!loading && result && <SourceDiagnostic result={result} debrids={debrids} />}
 
             {!loading && currentPick && (
               <PrimaryCard
@@ -739,9 +794,7 @@ export function PlayPicker({
                 onPlay={() => playManually(currentPick)}
                 onCache={() => onCache(currentPick)}
                 resolving={resolving?.stream === currentPick}
-                queued={
-                  currentPick.infoHash != null && queuedHash === currentPick.infoHash
-                }
+                queued={currentPick.infoHash != null && queuedHash === currentPick.infoHash}
                 inSession={inSession}
                 isPreviouslyPlayed={previousMatch === currentPick}
                 match={matchFor(currentPick)}
@@ -810,9 +863,9 @@ export function PlayPicker({
           </div>
         )}
       </div>
-      {(settings.pickerLayout === "stremio" || isDownload) && filteredPicker && filteredPicker.all.length > 0 && (
-        <PickerScrollTop scrollRef={mainRef} />
-      )}
+      {(settings.pickerLayout === "stremio" || isDownload) &&
+        filteredPicker &&
+        filteredPicker.all.length > 0 && <PickerScrollTop scrollRef={mainRef} />}
     </main>
   );
 }

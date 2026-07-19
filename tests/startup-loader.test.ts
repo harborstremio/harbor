@@ -50,3 +50,12 @@ test("native focus is delayed until the single startup surface is removed", () =
     /setStartupVisible\(false\);[\s\S]*?removeAttribute\("data-startup-hidden"\)[\s\S]*?harbor_startup_ready/,
   );
 });
+
+test("windows webview stays opaque while browsing and has fail-open show", () => {
+  // Opaque by default — not always-on alpha=0 transparency at setup.
+  assert.match(nativeSource, /webview_helpers::apply_opaque/);
+  assert.doesNotMatch(nativeSource, /make_main_transparent\(/);
+  assert.match(nativeSource, /fail-open: showing main after page-load timeout/);
+  assert.match(nativeSource, /WEBVIEW_SUSPENDED/);
+  assert.match(nativeSource, /resume_webview_if_needed/);
+});

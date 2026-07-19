@@ -79,7 +79,7 @@ windows = { version = "0.61", features = [
 ] }
 window-vibrancy = "0.6"
 wasapi = "0.15"
-webview2-com = "0.37"
+webview2-com = "0.38"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = { version = "0.18", features = ["v3_24"] }

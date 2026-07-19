@@ -59,6 +59,7 @@ let networkBytes = 0;
 let resetAt = 0;
 let lastDumpAt = 0;
 const FULL_HISTORY_MAX = 60_000;
+const probeCleanups: Array<() => void> = [];
 
 function bytesToMB(b: number): number {
   return Math.round((b / 1024 / 1024) * 100) / 100;
@@ -134,10 +135,16 @@ function buildDumpText(): string {
   lines.push("==========================================================");
   lines.push("");
   lines.push("SUMMARY");
-  lines.push(`  baseline heap: ${baselineHeapMB.toFixed(1)} MB`);
-  lines.push(`  current heap:  ${currentHeap.toFixed(1)} MB`);
-  lines.push(`  peak heap:     ${peakHeapMB.toFixed(1)} MB`);
-  lines.push(`  delta:         ${(currentHeap - baselineHeapMB >= 0 ? "+" : "")}${(currentHeap - baselineHeapMB).toFixed(1)} MB`);
+  if (performance.memory) {
+    lines.push(`  baseline heap: ${baselineHeapMB.toFixed(1)} MB`);
+    lines.push(`  current heap:  ${currentHeap.toFixed(1)} MB`);
+    lines.push(`  peak heap:     ${peakHeapMB.toFixed(1)} MB`);
+    lines.push(
+      `  delta:         ${currentHeap - baselineHeapMB >= 0 ? "+" : ""}${(currentHeap - baselineHeapMB).toFixed(1)} MB`,
+    );
+  } else {
+    lines.push("  JS heap:       unavailable in this WebView; use RSS below");
+  }
   lines.push(`  dom nodes:     ${dom.nodes}`);
   lines.push(`  images:        ${dom.imgs}`);
   lines.push(`  videos:        ${dom.vids}`);
@@ -198,7 +205,9 @@ function buildDumpText(): string {
     const end = history[history.length - 1];
     const max = Math.max(...history);
     const arrow = end > start ? "▲" : end < start ? "▼" : "─";
-    lines.push(`  ${arrow} ${name.padEnd(30)} start=${start} end=${end} max=${max} samples=${history.length}`);
+    lines.push(
+      `  ${arrow} ${name.padEnd(30)} start=${start} end=${end} max=${max} samples=${history.length}`,
+    );
   }
   lines.push("");
 
@@ -230,7 +239,9 @@ function buildDumpText(): string {
   lines.push("  time         duration  label");
   const longTasks = eventsSinceReset.filter((s) => s.kind === "longtask");
   for (const t of longTasks) {
-    lines.push(`  ${formatTime(t.ts)}  ${String((t.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${t.label}`);
+    lines.push(
+      `  ${formatTime(t.ts)}  ${String((t.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${t.label}`,
+    );
   }
   if (longTasks.length === 0) lines.push("  (none — main thread stayed responsive)");
   lines.push("");
@@ -239,7 +250,9 @@ function buildDumpText(): string {
   lines.push("  time         duration  component");
   const slowRenders = eventsSinceReset.filter((s) => s.kind === "render");
   for (const r of slowRenders) {
-    lines.push(`  ${formatTime(r.ts)}  ${String((r.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${r.detail?.componentId ?? r.label}`);
+    lines.push(
+      `  ${formatTime(r.ts)}  ${String((r.detail?.durationMs as number) ?? 0).padStart(5, " ")}ms    ${r.detail?.componentId ?? r.label}`,
+    );
   }
   if (slowRenders.length === 0) lines.push("  (none — every tracked render under 16ms)");
   lines.push("");
@@ -315,22 +328,26 @@ function periodicReport() {
   if (heapJumps.length > 0) {
     console.warn("Heap jumps (>5MB) in last window:");
     for (const { s, jump } of heapJumps) {
-      console.warn(`  +${jump.toFixed(1)}MB @ ${new Date(s.ts).toLocaleTimeString()} after ${s.kind}: ${s.label}`);
+      console.warn(
+        `  +${jump.toFixed(1)}MB @ ${new Date(s.ts).toLocaleTimeString()} after ${s.kind}: ${s.label}`,
+      );
     }
   }
   if (navStack.length > 0) {
     const lastNav = navStack[navStack.length - 1];
     const since = (Date.now() - lastNav.at) / 1000;
     const heapDeltaSinceNav = heap - lastNav.heap;
-    console.info(`Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`);
+    console.info(
+      `Last nav: ${lastNav.label} (${since.toFixed(0)}s ago, Δ${heapDeltaSinceNav >= 0 ? "+" : ""}${heapDeltaSinceNav.toFixed(1)}MB since)`,
+    );
   }
   console.groupEnd();
 }
 
-function instrumentFetch() {
-  if (typeof window === "undefined") return;
+function instrumentFetch(): () => void {
+  if (typeof window === "undefined") return () => {};
   const origFetch = window.fetch;
-  window.fetch = async (input, init) => {
+  const instrumentedFetch: typeof window.fetch = async (input, init) => {
     const url = typeof input === "string" ? input : (input as Request).url;
     const startHeap = snapshotHeapMB();
     const startTs = nowMs();
@@ -355,6 +372,10 @@ function instrumentFetch() {
       throw err;
     }
   };
+  window.fetch = instrumentedFetch;
+  return () => {
+    if (window.fetch === instrumentedFetch) window.fetch = origFetch;
+  };
 }
 
 function shortenUrl(url: string): string {
@@ -367,26 +388,26 @@ function shortenUrl(url: string): string {
   }
 }
 
-function instrumentClicks() {
-  if (typeof document === "undefined") return;
-  document.addEventListener(
-    "click",
-    (e) => {
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
-      const label = target.getAttribute("aria-label") ||
-        target.textContent?.trim().slice(0, 40) ||
-        target.tagName.toLowerCase();
-      pushSample("click", label);
-    },
-    { capture: true, passive: true },
-  );
+function instrumentClicks(): () => void {
+  if (typeof document === "undefined") return () => {};
+  const onClick = (e: MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+    const label =
+      target.getAttribute("aria-label") ||
+      target.textContent?.trim().slice(0, 40) ||
+      target.tagName.toLowerCase();
+    pushSample("click", label);
+  };
+  document.addEventListener("click", onClick, { capture: true, passive: true });
+  return () => document.removeEventListener("click", onClick, { capture: true });
 }
 
-function instrumentLongTasks() {
-  if (typeof window === "undefined" || typeof PerformanceObserver === "undefined") return;
+function instrumentLongTasks(): () => void {
+  if (typeof window === "undefined" || typeof PerformanceObserver === "undefined") return () => {};
+  let observer: PerformanceObserver | null = null;
   try {
-    const observer = new PerformanceObserver((list) => {
+    observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         if (entry.duration < 50) continue;
         pushSample("longtask", `${entry.duration.toFixed(0)}ms long task`, {
@@ -397,9 +418,15 @@ function instrumentLongTasks() {
     });
     observer.observe({ entryTypes: ["longtask"] });
   } catch {}
+  return () => {
+    if (observer) observer.disconnect();
+  };
 }
 
-const renderTimings = new Map<string, { count: number; totalMs: number; maxMs: number; lastMs: number }>();
+const renderTimings = new Map<
+  string,
+  { count: number; totalMs: number; maxMs: number; lastMs: number }
+>();
 
 export function recordRender(componentId: string, actualDurationMs: number): void {
   const entry = renderTimings.get(componentId) ?? { count: 0, totalMs: 0, maxMs: 0, lastMs: 0 };
@@ -416,8 +443,22 @@ export function recordRender(componentId: string, actualDurationMs: number): voi
   }
 }
 
-export function getRenderReport(): Array<{ id: string; count: number; totalMs: number; maxMs: number; avgMs: number; lastMs: number }> {
-  const out: Array<{ id: string; count: number; totalMs: number; maxMs: number; avgMs: number; lastMs: number }> = [];
+export function getRenderReport(): Array<{
+  id: string;
+  count: number;
+  totalMs: number;
+  maxMs: number;
+  avgMs: number;
+  lastMs: number;
+}> {
+  const out: Array<{
+    id: string;
+    count: number;
+    totalMs: number;
+    maxMs: number;
+    avgMs: number;
+    lastMs: number;
+  }> = [];
   for (const [id, t] of renderTimings) {
     out.push({
       id,
@@ -458,9 +499,7 @@ export function startProfiler(): void {
   peakHeapMB = baselineHeapMB;
   resetAt = Date.now();
   pushSample("mark", "profiler:start");
-  instrumentFetch();
-  instrumentClicks();
-  instrumentLongTasks();
+  probeCleanups.push(instrumentFetch(), instrumentClicks(), instrumentLongTasks());
   if (typeof window !== "undefined") {
     tickHandle = window.setInterval(() => {
       pushSample("tick", "interval");
@@ -480,6 +519,7 @@ export function stopProfiler(): void {
     clearInterval(tickHandle);
     tickHandle = null;
   }
+  for (const cleanup of probeCleanups.splice(0)) cleanup();
 }
 
 export function markEvent(label: string, detail?: Record<string, unknown>): void {

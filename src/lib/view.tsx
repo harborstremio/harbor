@@ -575,10 +575,11 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         window.__harborProfiler?.recordNav(`view:${v}`);
       }
       if (v === "home") setHomeResetTick((n) => n + 1);
+      // Always clear horizontal poster rails when changing root tabs — keep-alive
+      // pages were leaving mid-scrolled rows everywhere.
+      rowScrollMem.current.clear();
       if (typeof window !== "undefined" && v !== "settings") {
-        window.dispatchEvent(
-          new CustomEvent("harbor:reset-row-scrolls", { detail: { prefix: `${v}:` } }),
-        );
+        window.dispatchEvent(new CustomEvent("harbor:reset-row-scrolls", { detail: {} }));
         const fireScrollTop = () =>
           window.dispatchEvent(new CustomEvent("harbor:scroll-top", { detail: { view: v } }));
         fireScrollTop();

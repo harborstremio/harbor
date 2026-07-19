@@ -45,7 +45,12 @@ export function useFullscreen() {
       window.dispatchEvent(new Event("harbor:mpv-refresh-geom"));
       try {
         const { invoke } = await import("@tauri-apps/api/core");
-        await invoke("webview_reapply_transparency").catch(() => {});
+        // Windows keeps WebView2 opaque outside embedded mpv. Reapplying
+        // transparency for HTML5 or non-embedded mpv fullscreen would undo
+        // that recovery policy and can reintroduce a black WebView surface.
+        if (document.documentElement.dataset.mpvEmbed === "1") {
+          await invoke("webview_reapply_transparency").catch(() => {});
+        }
         await invoke("mpv_force_below").catch(() => {});
         await invoke("hdr_overlay_sync").catch(() => {});
       } catch {

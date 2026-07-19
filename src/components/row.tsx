@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -192,26 +193,22 @@ export function Row({
     if (el.clientWidth > 0 && remaining < 800) onEndRef.current?.();
   };
 
-  const childCount = Children.count(children);
-  const restoredRef = useRef(false);
+  // Keep native CSS grid rails — horizontal virtualization made posters look
+  // mid-scrolled / misaligned. LazyChild + IO is enough for row-sized lists.
+  const items = useMemo(() => Children.toArray(children), [children]);
+  const childCount = items.length;
+
   const userInteractedRef = useRef(false);
-  const { rememberRowScroll, recallRowScroll } = useView();
+  const { rememberRowScroll } = useView();
   useLayoutEffect(() => {
     measure();
+    // Always pin rails to the first poster unless the user scrolled this session.
+    // Restoring saved scrollLeft made every page open mid-row ("posters scrolled").
+    if (trackEl && cellWidth != null && childCount > 0 && !userInteractedRef.current) {
+      if (readPos(trackEl) !== 0) writePos(trackEl, 0);
+    }
     measureScroll();
-    if (!trackEl || cellWidth == null) return;
-    if (scrollKey && !restoredRef.current && childCount > 0) {
-      const n = recallRowScroll(scrollKey);
-      const max = trackEl.scrollWidth - trackEl.clientWidth;
-      const target = n != null && n > 0 && max > 0 ? Math.min(n, max) : 0;
-      if (readPos(trackEl) !== target) writePos(trackEl, target);
-      restoredRef.current = true;
-      return;
-    }
-    if (!userInteractedRef.current && readPos(trackEl) !== 0) {
-      writePos(trackEl, 0);
-    }
-  }, [children, childCount, cellWidth, trackEl, scrollKey, recallRowScroll, effMin]);
+  }, [children, childCount, cellWidth, trackEl, effMin]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -278,13 +275,13 @@ export function Row({
     const onReset = (e: Event) => {
       const detail = (e as CustomEvent<{ prefix?: string }>).detail;
       if (!scrollKey) return;
-      if (!detail?.prefix || !scrollKey.startsWith(detail.prefix)) return;
+      // Empty/missing prefix = reset every rail (nav change). Otherwise match prefix.
+      if (detail?.prefix && !scrollKey.startsWith(detail.prefix)) return;
       if (saveTimer != null) {
         window.clearTimeout(saveTimer);
         saveTimer = null;
       }
       writePos(track, 0);
-      rememberRowScroll(scrollKey, 0);
       userInteractedRef.current = false;
       measureScroll();
     };
@@ -567,12 +564,12 @@ export function Row({
               contain: "layout style",
             }}
           >
-            {Children.map(children, (child, i) => {
+            {items.map((child, i) => {
               const span = isValidElement(child)
                 ? (child.props as { style?: { gridColumn?: string } }).style?.gridColumn
                 : undefined;
               return (
-                <LazyChild eager={i < EAGER_COUNT} shape={shape} span={span}>
+                <LazyChild key={i} eager={i < EAGER_COUNT} shape={shape} span={span}>
                   {child}
                 </LazyChild>
               );
