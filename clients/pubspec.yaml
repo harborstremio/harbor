@@ -1,0 +1,178 @@
+name: harbor
+description: "Harbor — native Stremio client for mobile and TV"
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^3.3.2
+  go_router: ^17.3.0
+  hive_ce: ^2.19.3
+  hive_ce_flutter: ^2.3.4
+  flutter_secure_storage: ^10.3.1
+  dio: ^5.10.0
+  cached_network_image: ^3.4.1
+  video_player: ^2.9.2
+  media_kit: ^1.1.11
+  media_kit_video: ^1.2.5
+  media_kit_libs_video: ^1.0.5
+  # Short UI/volume sound effects (Harbor SFX). Plays runtime-generated WAV
+  # bytes; configured never to request Android audio focus (audioFocus: none)
+  # and to share the app's .playback iOS session, so SFX mix with video audio
+  # without ducking or interrupting the media_kit/native players.
+  audioplayers: ^6.7.1
+  flutter_svg: ^2.0.10+1
+  lottie: ^3.3.2
+  path_provider: ^2.1.6
+  speech_to_text: ^7.4.0
+  crypto: ^3.0.7
+  url_launcher: ^6.3.1
+  # Pure-Dart HTML parser (already transitive) — promoted to a direct dep for
+  # the native AniList comment renderer (no heavyweight flutter_html widget).
+  html: ^0.15.6
+  # App version/build for the bug-report diagnostics (already transitive).
+  package_info_plus: ^10.2.0
+  app_links: ^7.0.0
+  meta: ^1.16.0
+  xml: ^6.6.1
+  youtube_explode_dart: ^3.1.0
+  image_picker: ^1.1.2
+  image: ^4.3.0
+  flutter_chrome_cast: ^1.4.6
+  ed25519_edwards: ^0.3.1
+  qr_flutter: ^4.1.0
+  cryptography: ^2.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+
+  # Generates the native launch screen (black background + Harbor logo) for
+  # Android (incl. the Android 12+ SplashScreen API) and iOS, so the app never
+  # flashes a white page while the Flutter engine boots. Regenerate with
+  # `dart run flutter_native_splash:create` after editing the config below.
+  flutter_native_splash: ^2.4.4
+  flutter_launcher_icons: ^0.14.4
+
+# The native launch screen shown on every platform while Flutter initialises:
+# a black canvas with the centered Harbor mark, matching the app's dark theme.
+flutter_native_splash:
+  color: "#000000"
+  image: assets/brand/harbor-splash.png
+  android: true
+  ios: true
+  web: false
+  android_12:
+    color: "#000000"
+    image: assets/brand/harbor-splash.png
+
+# The app launcher icon — the Harbor mark, matching the desktop app's icon
+# (src-tauri/icons). The composited dark-rounded icon drives iOS and legacy
+# Android; modern Android uses an adaptive icon (white mark on the dark brand
+# background). Regenerate with `dart run flutter_launcher_icons`.
+flutter_launcher_icons:
+  image_path: "assets/brand/harbor-app-icon.png"
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#141A24"
+  adaptive_icon_background: "#151C25"
+  adaptive_icon_foreground: "assets/brand/harbor-icon-foreground.png"
+  min_sdk_android: 21
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  assets:
+    - assets/services/
+    - assets/ratings/
+    - assets/awards/
+    - assets/data/
+    - assets/kids/
+    - assets/kids/doodles/
+    - assets/kids/cta/
+    - assets/kids/avatars/
+    - assets/avatars/
+    - assets/addon_logos/
+    - assets/category/
+    - assets/brand/
+    - assets/badges/
+    - assets/flags/
+    - assets/lottie/
+
+  fonts:
+    # The Harbor brand serif (the wordmark next to the sailboat mark), matching
+    # the web app's Fraunces. Variable font; the logo renders it at weight 500.
+    - family: Fraunces
+      fonts:
+        - asset: assets/fonts/Fraunces.ttf
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package
