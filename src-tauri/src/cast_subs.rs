@@ -1,9 +1,13 @@
+use futures_util::StreamExt;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use uuid::Uuid;
+
+const SUBTITLE_FFMPEG_TIMEOUT: Duration = Duration::from_secs(90);
+const MAX_SUBTITLE_BYTES: usize = 8 * 1024 * 1024;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct CastSub {
@@ -106,7 +110,11 @@ fn ass_alignment(align_x: &str) -> u32 {
 pub fn build_force_style(style: &CastSubStyle) -> String {
     let primary = hex_to_ass_bgr(&style.font_color);
     let outline_color = hex_to_ass_bgr(&style.border_color);
-    let outline = if style.border_size == 0 { 2 } else { style.border_size };
+    let outline = if style.border_size == 0 {
+        2
+    } else {
+        style.border_size
+    };
     let alignment = ass_alignment(&style.align_x);
     format!(
         "Fontsize={},PrimaryColour={},OutlineColour={},BorderStyle=1,Outline={},Shadow=0,Alignment={},MarginV={}",
@@ -153,22 +161,29 @@ fn sniff_format(url: &str, content_type: Option<&str>, declared: Option<&str>) -
     "srt".to_string()
 }
 
-async fn download_remote(url: &str, declared_format: Option<&str>, dir: &Path) -> Option<PathBuf> {
+async fn download_remote(
+    url: &str,
+    declared_format: Option<&str>,
+    dir: &Path,
+    cancellation: &tokio_util::sync::CancellationToken,
+) -> Option<PathBuf> {
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(15))
         .gzip(true)
         .build()
         .ok()?;
-    let res = client
+    let request = client
         .get(url)
         .header(
             "User-Agent",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
         )
         .header("Accept", "*/*")
-        .send()
-        .await
-        .ok()?;
+        .send();
+    let res = tokio::select! {
+        result = request => result.ok()?,
+        _ = cancellation.cancelled() => return None,
+    };
     if !res.status().is_success() {
         return None;
     }
@@ -178,11 +193,30 @@ async fn download_remote(url: &str, declared_format: Option<&str>, dir: &Path) -
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_lowercase());
     let fmt = sniff_format(url, ct.as_deref(), declared_format);
-    let raw = res.bytes().await.ok()?;
+    let mut raw = Vec::new();
+    let mut stream = res.bytes_stream();
+    loop {
+        let next = tokio::select! {
+            chunk = stream.next() => chunk,
+            _ = cancellation.cancelled() => return None,
+        };
+        let Some(chunk) = next else { break };
+        let chunk = chunk.ok()?;
+        if raw.len().saturating_add(chunk.len()) > MAX_SUBTITLE_BYTES {
+            return None;
+        }
+        raw.extend_from_slice(&chunk);
+    }
     let bytes: Vec<u8> = if raw.len() >= 2 && raw[0] == 0x1f && raw[1] == 0x8b {
-        let mut decoder = flate2::read::GzDecoder::new(&raw[..]);
+        let decoder = flate2::read::GzDecoder::new(&raw[..]);
         let mut decoded = Vec::with_capacity(raw.len() * 4);
-        decoder.read_to_end(&mut decoded).ok()?;
+        decoder
+            .take((MAX_SUBTITLE_BYTES + 1) as u64)
+            .read_to_end(&mut decoded)
+            .ok()?;
+        if decoded.len() > MAX_SUBTITLE_BYTES {
+            return None;
+        }
         decoded
     } else {
         raw.to_vec()
@@ -190,7 +224,7 @@ async fn download_remote(url: &str, declared_format: Option<&str>, dir: &Path) -
     let raw_path = dir.join(format!("{}.{}", Uuid::new_v4(), fmt));
     std::fs::write(&raw_path, &bytes).ok()?;
     if fmt == "vtt" {
-        convert_to_srt(&raw_path, dir).await
+        convert_to_srt(&raw_path, dir, cancellation).await
     } else {
         Some(raw_path)
     }
@@ -201,20 +235,29 @@ fn is_http_url(s: &str) -> bool {
     lower.starts_with("http://") || lower.starts_with("https://")
 }
 
-async fn prepare_local(path: &str, declared_format: Option<&str>, dir: &Path) -> Option<PathBuf> {
+async fn prepare_local(
+    path: &str,
+    declared_format: Option<&str>,
+    dir: &Path,
+    cancellation: &tokio_util::sync::CancellationToken,
+) -> Option<PathBuf> {
     let src = PathBuf::from(path);
     if !src.is_file() {
         return None;
     }
     let fmt = sniff_format(path, None, declared_format);
     if fmt == "vtt" {
-        convert_to_srt(&src, dir).await
+        convert_to_srt(&src, dir, cancellation).await
     } else {
         Some(src)
     }
 }
 
-async fn convert_to_srt(input: &Path, dir: &Path) -> Option<PathBuf> {
+async fn convert_to_srt(
+    input: &Path,
+    dir: &Path,
+    cancellation: &tokio_util::sync::CancellationToken,
+) -> Option<PathBuf> {
     let ffmpeg = crate::transcode::locate_ffmpeg()?;
     let out = dir.join(format!("{}.srt", Uuid::new_v4()));
     let mut cmd = tokio::process::Command::new(&ffmpeg);
@@ -232,8 +275,14 @@ async fn convert_to_srt(input: &Path, dir: &Path) -> Option<PathBuf> {
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
-    let status = cmd.status().await.ok()?;
-    if status.success() && out.is_file() {
+    let output = crate::process::output_with_timeout_or_cancel(
+        &mut cmd,
+        SUBTITLE_FFMPEG_TIMEOUT,
+        cancellation,
+    )
+    .await
+    .ok()?;
+    if output.status.success() && out.is_file() {
         Some(out)
     } else {
         None
@@ -245,11 +294,15 @@ async fn extract_embedded(
     src_index: u32,
     headers: &HashMap<String, String>,
     dir: &Path,
+    cancellation: &tokio_util::sync::CancellationToken,
 ) -> Option<PathBuf> {
     let ffmpeg = crate::transcode::locate_ffmpeg()?;
     let out = dir.join(format!("{}.srt", Uuid::new_v4()));
     let mut cmd = tokio::process::Command::new(&ffmpeg);
-    cmd.arg("-hide_banner").arg("-loglevel").arg("error").arg("-y");
+    cmd.arg("-hide_banner")
+        .arg("-loglevel")
+        .arg("error")
+        .arg("-y");
     apply_ffmpeg_headers(&mut cmd, headers);
     cmd.arg("-i")
         .arg(source_url)
@@ -265,8 +318,14 @@ async fn extract_embedded(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
-    let status = cmd.status().await.ok()?;
-    if status.success() && out.is_file() {
+    let output = crate::process::output_with_timeout_or_cancel(
+        &mut cmd,
+        SUBTITLE_FFMPEG_TIMEOUT,
+        cancellation,
+    )
+    .await
+    .ok()?;
+    if output.status.success() && out.is_file() {
         Some(out)
     } else {
         None
@@ -297,6 +356,7 @@ pub async fn prepare(
     source_url: &str,
     headers: &HashMap<String, String>,
     seek_start: f64,
+    cancellation: &tokio_util::sync::CancellationToken,
 ) -> Option<PreparedSub> {
     if sub.off {
         return None;
@@ -306,19 +366,19 @@ pub async fn prepare(
         "external" => {
             let url = sub.url.as_deref()?;
             if is_http_url(url) {
-                download_remote(url, sub.format.as_deref(), &dir).await?
+                download_remote(url, sub.format.as_deref(), &dir, cancellation).await?
             } else {
-                prepare_local(url, sub.format.as_deref(), &dir).await?
+                prepare_local(url, sub.format.as_deref(), &dir, cancellation).await?
             }
         }
         "embedded" => {
             let idx = sub.src_index?;
-            extract_embedded(source_url, idx, headers, &dir).await?
+            extract_embedded(source_url, idx, headers, &dir, cancellation).await?
         }
         _ => return None,
     };
     let path = if seek_start > 1.0 {
-        let shifted = shift_subtitle(&base, seek_start, &dir).await;
+        let shifted = shift_subtitle(&base, seek_start, &dir, cancellation).await;
         shifted.unwrap_or(base)
     } else {
         base
@@ -329,7 +389,12 @@ pub async fn prepare(
     })
 }
 
-async fn shift_subtitle(input: &Path, seek_start: f64, dir: &Path) -> Option<PathBuf> {
+async fn shift_subtitle(
+    input: &Path,
+    seek_start: f64,
+    dir: &Path,
+    cancellation: &tokio_util::sync::CancellationToken,
+) -> Option<PathBuf> {
     let ffmpeg = crate::transcode::locate_ffmpeg()?;
     let out = dir.join(format!("{}.srt", Uuid::new_v4()));
     let mut cmd = tokio::process::Command::new(&ffmpeg);
@@ -351,8 +416,14 @@ async fn shift_subtitle(input: &Path, seek_start: f64, dir: &Path) -> Option<Pat
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null());
-    let status = cmd.status().await.ok()?;
-    if status.success() && out.is_file() {
+    let output = crate::process::output_with_timeout_or_cancel(
+        &mut cmd,
+        SUBTITLE_FFMPEG_TIMEOUT,
+        cancellation,
+    )
+    .await
+    .ok()?;
+    if output.status.success() && out.is_file() {
         Some(out)
     } else {
         None

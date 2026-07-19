@@ -1,5 +1,11 @@
 import { get } from "@/lib/providers/tmdb/tmdb-client";
-import { movieMeta, seriesMeta, type Page, type RawMovie, type RawSeries } from "@/lib/providers/tmdb/tmdb-meta-mappers";
+import {
+  movieMeta,
+  seriesMeta,
+  type Page,
+  type RawMovie,
+  type RawSeries,
+} from "@/lib/providers/tmdb/tmdb-meta-mappers";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import type { Meta } from "@/lib/cinemeta";
 import type { AddonResultGroup } from "@/lib/search-addons";
@@ -56,7 +62,14 @@ export type AnimeHit = {
 
 export type SearchResults = {
   query: string;
-  topMatch: { kind: "movie" | "series"; meta: Meta; popularity: number; backdrop?: string; overview?: string; voteAverage?: number } | null;
+  topMatch: {
+    kind: "movie" | "series";
+    meta: Meta;
+    popularity: number;
+    backdrop?: string;
+    overview?: string;
+    voteAverage?: number;
+  } | null;
   people: SearchPerson[];
   movies: Meta[];
   series: Meta[];
@@ -65,6 +78,7 @@ export type SearchResults = {
   addonGroups: AddonResultGroup[];
   addons: AddonHit[];
   intent: SearchIntent;
+  tmdbUnavailable?: boolean;
 };
 
 export type SearchIntent =
@@ -198,16 +212,53 @@ export async function searchAll(
 ): Promise<SearchResults> {
   const trimmed = query.trim();
   if (!trimmed) {
-    return { query: "", topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], addonGroups: [], addons: [], intent: null };
+    return {
+      query: "",
+      topMatch: null,
+      people: [],
+      movies: [],
+      series: [],
+      liveTv: [],
+      anime: [],
+      addonGroups: [],
+      addons: [],
+      intent: null,
+    };
   }
   if (!key) {
-    return { query: trimmed, topMatch: null, people: [], movies: [], series: [], liveTv: [], anime: [], addonGroups: [], addons: [], intent: detectIntent(trimmed) };
+    return {
+      query: trimmed,
+      topMatch: null,
+      people: [],
+      movies: [],
+      series: [],
+      liveTv: [],
+      anime: [],
+      addonGroups: [],
+      addons: [],
+      intent: detectIntent(trimmed),
+    };
   }
 
   const data = await get<Page<MultiItem>>(key, "search/multi", {
     query: trimmed,
     include_adult: "false",
   });
+  if (!data) {
+    return {
+      query: trimmed,
+      topMatch: null,
+      people: [],
+      movies: [],
+      series: [],
+      liveTv: [],
+      anime: [],
+      addonGroups: [],
+      addons: [],
+      intent: detectIntent(trimmed),
+      tmdbUnavailable: true,
+    };
+  }
   const exclude = new Set(opts.excludeGenres ?? []);
   const hasExcludedGenre = (gs?: number[]) => (gs ?? []).some((id) => exclude.has(id));
   const results = (data?.results ?? []).filter((r) => {
@@ -242,7 +293,10 @@ export async function searchAll(
       }
     } else if (r.media_type === "person") {
       const known = (r.known_for ?? [])
-        .map((k) => (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "")
+        .map(
+          (k) =>
+            (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "",
+        )
         .filter(Boolean)
         .slice(0, 2)
         .join(", ");
@@ -273,7 +327,9 @@ export async function searchAll(
       kind: isMovie ? "movie" : "series",
       meta: isMovie ? movieMeta(winner as RawMovie) : seriesMeta(winner as RawSeries),
       popularity: winner.popularity ?? 0,
-      backdrop: winner.backdrop_path ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}` : undefined,
+      backdrop: winner.backdrop_path
+        ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}`
+        : undefined,
       overview: winner.overview,
       voteAverage: winner.vote_average,
     };
@@ -340,7 +396,10 @@ async function fuzzyPeopleFallback(
     if (seen.has(r.id) || !nameCloseTo(r.name, query)) continue;
     seen.add(r.id);
     const known = (r.known_for ?? [])
-      .map((k) => (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "")
+      .map(
+        (k) =>
+          (k as { title?: string; name?: string }).title ?? (k as { name?: string }).name ?? "",
+      )
       .filter(Boolean)
       .slice(0, 2)
       .join(", ");

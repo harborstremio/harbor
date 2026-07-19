@@ -29,6 +29,7 @@ mod pip;
 #[cfg(target_os = "macos")]
 mod pip_mac;
 mod power;
+mod process;
 mod airplay;
 mod settings_store;
 mod song_id;
@@ -415,7 +416,11 @@ pub fn run() {
     let dvr_state = dvr::DvrState::new();
     let multiview_state = multiview::MultiviewState::new();
     let modal_overlay_state = modal_overlay::ModalOverlayState::new();
-    let app_builder = tauri::Builder::default()
+    let app_builder = tauri::Builder::default();
+    // Let a Linux development build run alongside the installed Harbor app.
+    // Packaged builds keep the normal single-instance behavior.
+    #[cfg(not(all(target_os = "linux", debug_assertions)))]
+    let app_builder = app_builder
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             use tauri::{Emitter, Manager};
             if let Some(w) = app.get_webview_window("main") {
@@ -431,7 +436,8 @@ pub fn run() {
             if let Some(path) = media_file_from_args(&args) {
                 let _ = app.emit("harbor:open-file", path);
             }
-        }))
+        }));
+    let app_builder = app_builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_shell::init())
@@ -683,6 +689,7 @@ pub fn run() {
             multiview::multiview_visibility,
             multiview::multiview_stop_all,
             http_fetch::harbor_fetch,
+            http_fetch::harbor_fetch_cancel,
             discord_rp::discord_set_presence,
             discord_rp::discord_clear,
             discord_rp::discord_set_enabled,

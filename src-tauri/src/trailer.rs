@@ -1,6 +1,7 @@
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime};
+use tauri_plugin_shell::process::CommandEvent;
 use tauri_plugin_shell::ShellExt;
 
 const METADATA_TIMEOUT: Duration = Duration::from_secs(15);
@@ -14,8 +15,7 @@ const FORMAT_HIGH: &str =
     "22/18/best[ext=mp4][vcodec!=none][acodec!=none][height<=720]/best[vcodec!=none][acodec!=none]";
 const FORMAT_1080: &str =
     "bestvideo[height<=1080][ext=mp4]+bestaudio[ext=m4a]/best[height<=1080][ext=mp4]/best[height<=1080]/best";
-const FORMAT_BEST: &str =
-    "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best";
+const FORMAT_BEST: &str = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best";
 
 fn cache_dir() -> PathBuf {
     std::env::temp_dir().join("harbor-trailers")
@@ -74,71 +74,76 @@ struct YtDlpOutput {
     stderr: Vec<u8>,
 }
 
+async fn collect_sidecar_output(
+    cmd: tauri_plugin_shell::process::Command,
+    args: Vec<String>,
+    timeout: Duration,
+    label: &str,
+) -> Result<YtDlpOutput, String> {
+    let (mut events, child) = cmd
+        .args(args)
+        .spawn()
+        .map_err(|error| format!("yt-dlp {label}: {error}"))?;
+    let collect = async {
+        let mut success = false;
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
+        while let Some(event) = events.recv().await {
+            match event {
+                CommandEvent::Stdout(bytes) => stdout.extend(bytes),
+                CommandEvent::Stderr(bytes) => stderr.extend(bytes),
+                CommandEvent::Terminated(payload) => success = payload.code == Some(0),
+                CommandEvent::Error(error) => stderr.extend_from_slice(error.as_bytes()),
+                _ => {}
+            }
+        }
+        YtDlpOutput {
+            success,
+            stdout,
+            stderr,
+        }
+    };
+    match tokio::time::timeout(timeout, collect).await {
+        Ok(output) => Ok(output),
+        Err(_) => {
+            crate::process::terminate_descendants(child.pid()).await;
+            let _ = child.kill();
+            while events.recv().await.is_some() {}
+            Err(format!("yt-dlp {label} timed out"))
+        }
+    }
+}
+
 async fn run_yt_dlp(
     app: &tauri::AppHandle,
     args: Vec<String>,
     timeout: Duration,
     label: &str,
 ) -> Result<YtDlpOutput, String> {
-    match app.shell().sidecar("yt-dlp") {
-        Ok(cmd) => {
-            let sidecar_args = args.clone();
-            let run_sidecar = async move {
-                cmd.args(sidecar_args)
-                    .output()
-                    .await
-                    .map(|out| YtDlpOutput {
-                        success: out.status.success(),
-                        stdout: out.stdout,
-                        stderr: out.stderr,
-                    })
-                    .map_err(|e| format!("yt-dlp {label}: {}", e))
-            };
+    let bundled = match app.shell().sidecar("yt-dlp") {
+        Ok(cmd) => collect_sidecar_output(cmd, args.clone(), timeout, label).await,
+        Err(error) => Err(format!("sidecar init: {error}")),
+    };
 
-            #[cfg(not(target_os = "linux"))]
-            {
-                tokio::time::timeout(timeout, run_sidecar)
-                    .await
-                    .map_err(|_| format!("yt-dlp {label} timed out"))?
-            }
+    #[cfg(not(target_os = "linux"))]
+    return bundled;
 
-            #[cfg(target_os = "linux")]
-            {
-                match tokio::time::timeout(timeout, run_sidecar).await {
-                    Ok(Ok(output)) => return Ok(output),
-                    Ok(Err(err)) => {
-                        eprintln!(
-                            "[harbor::trailer] bundled yt-dlp failed: {err}; trying system yt-dlp"
-                        );
-                    }
-                    Err(_) => return Err(format!("yt-dlp {label} timed out")),
-                }
-            }
-        }
-        Err(err) => {
-            #[cfg(not(target_os = "linux"))]
-            {
-                Err(format!("sidecar init: {}", err))
-            }
-
-            #[cfg(target_os = "linux")]
-            {
-                eprintln!(
-                    "[harbor::trailer] bundled yt-dlp unavailable: {err}; trying system yt-dlp"
-                );
-            }
+    #[cfg(target_os = "linux")]
+    match bundled {
+        Ok(output) => return Ok(output),
+        Err(error) if error.contains("timed out") => return Err(error),
+        Err(error) => {
+            eprintln!("[harbor::trailer] bundled yt-dlp unavailable: {error}; trying system yt-dlp")
         }
     }
 
     #[cfg(target_os = "linux")]
     {
-        let output = tokio::time::timeout(
-            timeout,
-            tokio::process::Command::new("yt-dlp").args(args).output(),
-        )
-        .await
-        .map_err(|_| format!("yt-dlp {label} timed out"))?
-        .map_err(|e| format!("yt-dlp {label}: {}", e))?;
+        let mut command = tokio::process::Command::new("yt-dlp");
+        command.args(args);
+        let output = crate::process::output_with_timeout(&mut command, timeout)
+            .await
+            .map_err(|e| format!("yt-dlp {label}: {e}"))?;
 
         return Ok(YtDlpOutput {
             success: output.status.success(),

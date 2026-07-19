@@ -33,11 +33,9 @@ pub async fn subtitle_extract(
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    let output = match tokio::time::timeout(EXTRACT_TIMEOUT, cmd.output()).await {
-        Ok(Ok(o)) => o,
-        Ok(Err(e)) => return Err(format!("ffmpeg spawn: {}", e)),
-        Err(_) => return Err("subtitle extraction timed out".to_string()),
-    };
+    let output = crate::process::output_with_timeout(&mut cmd, EXTRACT_TIMEOUT)
+        .await
+        .map_err(|error| format!("subtitle extraction: {error}"))?;
     if !output.status.success() {
         let err = String::from_utf8_lossy(&output.stderr);
         return Err(format!(

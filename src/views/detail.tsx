@@ -42,7 +42,10 @@ import {
   type TmdbDetail,
   type WatchProvider,
 } from "@/lib/providers/tmdb";
+import { ParentalIcon } from "@/components/icons/parental-icon";
 import { cinemetaDetails } from "@/lib/providers/cinemeta-details";
+import { fetchParentalGuide, type ParentalGuide } from "@/lib/parental-guide";
+import { ParentalGuideHeroCard } from "./detail/parental-guide-section";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import {
@@ -225,6 +228,7 @@ export function DetailView({
   const [cinemetaRating, setCinemetaRating] = useState<string | null>(null);
   const [harborImdbRating, setHarborImdbRating] = useState<string | null>(null);
   const [watchProviders, setWatchProviders] = useState<WatchProvider[]>([]);
+  const [parentalGuide, setParentalGuide] = useState<ParentalGuide | null | undefined>(undefined);
   const mdblist = useMdblistScores(
     settings.mdblistKey,
     detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null),
@@ -705,6 +709,26 @@ export function DetailView({
     };
   }, [detail, isAnime, settings.tmdbKey, settings.region]);
 
+  useEffect(() => {
+    setParentalGuide(undefined);
+    const imdbId = detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
+    if (!imdbId || !imdbId.startsWith("tt")) {
+      setParentalGuide(null);
+      return;
+    }
+    let cancelled = false;
+    fetchParentalGuide(imdbId, meta.type === "movie" ? "movie" : "tv")
+      .then((g) => {
+        if (!cancelled) setParentalGuide(g);
+      })
+      .catch(() => {
+        if (!cancelled) setParentalGuide(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [detail?.imdbId, meta.id, meta.type]);
+
   const rawTitle = detail?.title ?? meta.name;
   const title = isAnime ? stripFranchiseSuffix(rawTitle) : rawTitle;
   const listSeed: ListItemInput = {
@@ -1137,6 +1161,20 @@ export function DetailView({
           {year}
         </Pill>
       )}
+      {parentalGuide?.mpa_rating && (
+        <Pill
+          onClick={() => {
+            document
+              .getElementById("parental-guide")
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
+          <span className="flex items-center gap-1.5">
+            <ParentalIcon width={12} height={12} strokeWidth={2.2} />
+            {parentalGuide.mpa_rating}
+          </span>
+        </Pill>
+      )}
       {inLocalLibrary && (
         <Pill>
           <span className="flex items-center gap-1.5">
@@ -1479,10 +1517,19 @@ export function DetailView({
       </section>
 
       <div data-tauri-drag-region className="flex flex-col gap-16 px-12 pb-24 pt-14">
-        {(overview || heroAwardsInline) && (
+        {(overview || heroAwardsInline || parentalGuide) && (
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:gap-10">
             {overview && <Synopsis text={overview} />}
-            {heroAwardsInline && <div className="lg:ms-auto lg:shrink-0">{heroAwardsInline}</div>}
+            <div className="flex flex-col gap-4 lg:ms-auto lg:w-[28rem] lg:shrink-0">
+              {parentalGuide && (
+                <ParentalGuideHeroCard
+                  guide={parentalGuide}
+                  imdbId={detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : "")}
+                  mediaType={meta.type === "movie" ? "movie" : "tv"}
+                />
+              )}
+              {heroAwardsInline && <div>{heroAwardsInline}</div>}
+            </div>
           </div>
         )}
         {loading && (meta.type === "series" || isAnime) && <EpisodeGridSkeleton />}

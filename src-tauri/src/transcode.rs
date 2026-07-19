@@ -43,16 +43,32 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
         if let Ok(exe) = std::env::current_exe() {
             if let Some(dir) = exe.parent() {
                 owned.push(dir.join("ffmpeg.exe").to_string_lossy().to_string());
-                owned.push(dir.join(r"..\binaries\ffmpeg.exe").to_string_lossy().to_string());
-                owned.push(dir.join(r"..\..\binaries\ffmpeg.exe").to_string_lossy().to_string());
-                owned.push(dir.join(r"..\..\..\binaries\ffmpeg.exe").to_string_lossy().to_string());
+                owned.push(
+                    dir.join(r"..\binaries\ffmpeg.exe")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+                owned.push(
+                    dir.join(r"..\..\binaries\ffmpeg.exe")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+                owned.push(
+                    dir.join(r"..\..\..\binaries\ffmpeg.exe")
+                        .to_string_lossy()
+                        .to_string(),
+                );
             }
         }
         // Dev tree relative to cwd
         owned.push(r"src-tauri\binaries\ffmpeg.exe".into());
         owned.push(r"binaries\ffmpeg.exe".into());
         // Common manual installs
-        for base in [r"C:\ffmpeg\bin", r"C:\Program Files\ffmpeg\bin", r"C:\Program Files (x86)\ffmpeg\bin"] {
+        for base in [
+            r"C:\ffmpeg\bin",
+            r"C:\Program Files\ffmpeg\bin",
+            r"C:\Program Files (x86)\ffmpeg\bin",
+        ] {
             owned.push(format!(r"{base}\ffmpeg.exe"));
         }
         // Chocolatey
@@ -60,15 +76,27 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
         // Scoop (per-user)
         if let Some(home) = std::env::var_os("USERPROFILE") {
             let h = std::path::PathBuf::from(home);
-            owned.push(h.join(r"scoop\shims\ffmpeg.exe").to_string_lossy().to_string());
-            owned.push(h.join(r"scoop\apps\ffmpeg\current\bin\ffmpeg.exe").to_string_lossy().to_string());
+            owned.push(
+                h.join(r"scoop\shims\ffmpeg.exe")
+                    .to_string_lossy()
+                    .to_string(),
+            );
+            owned.push(
+                h.join(r"scoop\apps\ffmpeg\current\bin\ffmpeg.exe")
+                    .to_string_lossy()
+                    .to_string(),
+            );
         }
         // WinGet — installs under %LOCALAPPDATA%\Microsoft\WinGet\Packages\Gyan.FFmpeg_*\ffmpeg-*-essentials_build\bin
         if let Some(local) = std::env::var_os("LOCALAPPDATA") {
             let winget = std::path::PathBuf::from(&local).join(r"Microsoft\WinGet\Packages");
             if let Ok(entries) = std::fs::read_dir(&winget) {
                 for e in entries.flatten() {
-                    if e.file_name().to_string_lossy().to_lowercase().contains("ffmpeg") {
+                    if e.file_name()
+                        .to_string_lossy()
+                        .to_lowercase()
+                        .contains("ffmpeg")
+                    {
                         if let Ok(subs) = std::fs::read_dir(e.path()) {
                             for s in subs.flatten() {
                                 let candidate = s.path().join(r"bin\ffmpeg.exe");
@@ -95,7 +123,9 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
             if let Some(dir) = exe.parent() {
                 owned.push(dir.join("ffmpeg").to_string_lossy().to_string());
                 owned.push(
-                    dir.join("ffmpeg-x86_64-unknown-linux-gnu").to_string_lossy().to_string(),
+                    dir.join("ffmpeg-x86_64-unknown-linux-gnu")
+                        .to_string_lossy()
+                        .to_string(),
                 );
             }
         }
@@ -156,7 +186,11 @@ pub fn ffmpeg_present() -> bool {
 }
 
 pub fn locate_ffprobe() -> Option<std::path::PathBuf> {
-    let name = if cfg!(windows) { "ffprobe.exe" } else { "ffprobe" };
+    let name = if cfg!(windows) {
+        "ffprobe.exe"
+    } else {
+        "ffprobe"
+    };
     if let Some(ffmpeg) = locate_ffmpeg() {
         if let Some(parent) = ffmpeg.parent() {
             let candidate = parent.join(name);
@@ -194,7 +228,10 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
     let mut cmd = tokio::process::Command::new(&ffprobe);
     cmd.arg("-v").arg("error");
     let mut has_ua = false;
-    if let Some((_, ua)) = headers.iter().find(|(k, _)| k.to_lowercase() == "user-agent") {
+    if let Some((_, ua)) = headers
+        .iter()
+        .find(|(k, _)| k.to_lowercase() == "user-agent")
+    {
         cmd.arg("-user_agent").arg(ua);
         has_ua = true;
     }
@@ -228,7 +265,10 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
     cmd.creation_flags(0x0800_0000);
 
     let fut = async {
-        let output = cmd.output().await.ok()?;
+        let output =
+            crate::process::output_with_timeout(&mut cmd, std::time::Duration::from_secs(12))
+                .await
+                .ok()?;
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
         if !stderr.trim().is_empty() {
@@ -256,18 +296,87 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
         Some(result)
     };
 
-    match tokio::time::timeout(std::time::Duration::from_secs(12), fut).await {
-        Ok(Some(r)) => r,
-        Ok(None) => ProbedCodecs::default(),
-        Err(_) => {
-            eprintln!("[harbor::transcode] ffprobe timed out");
-            ProbedCodecs::default()
-        }
-    }
+    fut.await.unwrap_or_default()
 }
 
 fn default_ua() -> &'static str {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
+
+fn relay_child_stdout(
+    mut child: tokio::process::Child,
+    mut stdout: tokio::process::ChildStdout,
+) -> tokio::sync::mpsc::Receiver<Result<axum::body::Bytes, std::io::Error>> {
+    let (body_tx, body_rx) = tokio::sync::mpsc::channel(8);
+    tokio::spawn(async move {
+        use tokio::io::AsyncReadExt;
+        let mut buffer = vec![0_u8; 64 * 1024];
+        loop {
+            let read_result = tokio::select! {
+                biased;
+                _ = body_tx.closed() => {
+                    let _ = child.kill().await;
+                    let _ = child.wait().await;
+                    eprintln!("[harbor::transcode] client disconnected; ffmpeg stopped");
+                    return;
+                }
+                result = stdout.read(&mut buffer) => result,
+            };
+            match read_result {
+                Ok(0) => break,
+                Ok(read) => {
+                    let bytes = axum::body::Bytes::copy_from_slice(&buffer[..read]);
+                    if body_tx.send(Ok(bytes)).await.is_err() {
+                        let _ = child.kill().await;
+                        eprintln!("[harbor::transcode] client disconnected; ffmpeg stopped");
+                        return;
+                    }
+                }
+                Err(error) => {
+                    let _ = body_tx.send(Err(error)).await;
+                    let _ = child.kill().await;
+                    return;
+                }
+            }
+        }
+        match child.wait().await {
+            Ok(status) => eprintln!("[harbor::transcode] ffmpeg exited: {status}"),
+            Err(error) => eprintln!("[harbor::transcode] ffmpeg wait err: {error}"),
+        }
+    });
+    body_rx
+}
+
+#[cfg(test)]
+mod relay_tests {
+    use super::*;
+
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn dropping_response_stops_stalled_transcoder() {
+        let mut command = tokio::process::Command::new("sh");
+        command
+            .arg("-c")
+            .arg("sleep 30")
+            .stdout(std::process::Stdio::piped());
+        let mut child = command.spawn().expect("spawn stalled child");
+        let pid = child.id().expect("child pid") as i32;
+        let stdout = child.stdout.take().expect("child stdout");
+        let response = relay_child_stdout(child, stdout);
+        drop(response);
+
+        tokio::time::timeout(std::time::Duration::from_secs(2), async {
+            loop {
+                let alive = unsafe { libc::kill(pid, 0) } == 0;
+                if !alive {
+                    break;
+                }
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .expect("stalled child should be killed when response is dropped");
+    }
 }
 
 fn scale_filter(max_height: u32) -> String {
@@ -336,7 +445,10 @@ pub async fn handle_transcode(
         .arg("8");
 
     let mut has_ua = false;
-    if let Some((_, ua)) = headers.iter().find(|(k, _)| k.to_lowercase() == "user-agent") {
+    if let Some((_, ua)) = headers
+        .iter()
+        .find(|(k, _)| k.to_lowercase() == "user-agent")
+    {
         cmd.arg("-user_agent").arg(ua);
         has_ua = true;
     }
@@ -433,7 +545,11 @@ pub async fn handle_transcode(
         .get_args()
         .map(|a| a.to_string_lossy().to_string())
         .collect();
-    eprintln!("[harbor::transcode] spawning: {:?} {}", ffmpeg, args_dbg.join(" "));
+    eprintln!(
+        "[harbor::transcode] spawning: {:?} {}",
+        ffmpeg,
+        args_dbg.join(" ")
+    );
 
     let mut child = match cmd.spawn() {
         Ok(c) => c,
@@ -450,6 +566,7 @@ pub async fn handle_transcode(
     let stdout = match child.stdout.take() {
         Some(s) => s,
         None => {
+            let _ = child.kill().await;
             return (StatusCode::INTERNAL_SERVER_ERROR, "ffmpeg stdout missing").into_response();
         }
     };
@@ -466,21 +583,21 @@ pub async fn handle_transcode(
         });
     }
 
-    tokio::spawn(async move {
-        match child.wait().await {
-            Ok(status) => eprintln!("[harbor::transcode] ffmpeg exited: {status}"),
-            Err(e) => eprintln!("[harbor::transcode] ffmpeg wait err: {e}"),
-        }
-    });
+    let body_rx = relay_child_stdout(child, stdout);
 
-    let reader = tokio_util::io::ReaderStream::with_capacity(stdout, 64 * 1024);
-    let body = Body::from_stream(reader);
+    let body_stream = futures_util::stream::unfold(body_rx, |mut receiver| async move {
+        receiver.recv().await.map(|item| (item, receiver))
+    });
+    let body = Body::from_stream(body_stream);
 
     let mut hmap = HeaderMap::new();
     hmap.insert("Content-Type", HeaderValue::from_static("video/mp2t"));
     hmap.insert("Cache-Control", HeaderValue::from_static("no-cache"));
     hmap.insert("Connection", HeaderValue::from_static("close"));
-    hmap.insert("transferMode.dlna.org", HeaderValue::from_static("Streaming"));
+    hmap.insert(
+        "transferMode.dlna.org",
+        HeaderValue::from_static("Streaming"),
+    );
     hmap.insert(
         "contentFeatures.dlna.org",
         HeaderValue::from_static(
@@ -495,6 +612,46 @@ pub async fn handle_transcode(
     resp.body(body).unwrap_or_else(|_| {
         (StatusCode::INTERNAL_SERVER_ERROR, "response build failed").into_response()
     })
+}
+
+#[cfg(test)]
+mod tests {
+    #[cfg(unix)]
+    #[tokio::test]
+    async fn dropping_stream_receiver_stops_and_reaps_child() {
+        use super::relay_child_stdout;
+        use std::process::Stdio;
+
+        let mut command = tokio::process::Command::new("sh");
+        command
+            .arg("-c")
+            .arg("while :; do printf xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; done")
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .kill_on_drop(true);
+        let mut child = command.spawn().expect("spawn producer");
+        let pid = child.id().expect("child pid") as i32;
+        let stdout = child.stdout.take().expect("child stdout");
+        let mut receiver = relay_child_stdout(child, stdout);
+        receiver
+            .recv()
+            .await
+            .expect("first output")
+            .expect("read output");
+        drop(receiver);
+
+        tokio::time::timeout(std::time::Duration::from_secs(2), async {
+            loop {
+                if unsafe { libc::kill(pid, 0) } == -1 {
+                    break;
+                }
+                tokio::task::yield_now().await;
+            }
+        })
+        .await
+        .expect("child must be killed and reaped");
+    }
 }
 
 #[tauri::command]

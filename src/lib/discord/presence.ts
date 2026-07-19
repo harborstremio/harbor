@@ -92,16 +92,20 @@ function computeBase(): Base {
         posterUrl: (config.showPoster && playback.posterUrl) || HARBOR_LOGO,
         smallImageUrl: (config.showPoster && playback.smallImageUrl) || undefined,
         largeText: playback.year != null ? `${playback.title} (${playback.year})` : playback.title,
-        startTs: live && config.showTimestamp ? nowSec - Math.floor(playback.positionSec) : undefined,
+        startTs:
+          live && config.showTimestamp ? nowSec - Math.floor(playback.positionSec) : undefined,
         endTs: live && config.showTimestamp ? nowSec + Math.floor(remaining) : undefined,
         paused: playback.paused,
       },
-      key: `play:${playback.title}|${state ?? ""}|${playback.paused}|${playback.posterUrl ?? ""}`,
+      key: `play:${playback.title}|${state ?? ""}|${playback.paused}|${playback.posterUrl ?? ""}|${live ? "ts" : "nots"}`,
     };
   }
   if (browse && config.showWhenBrowsing) {
     if (config.hideTitle)
-      return { payload: { details: "Browsing Harbor", posterUrl: HARBOR_LOGO }, key: "browse:hide" };
+      return {
+        payload: { details: "Browsing Harbor", posterUrl: HARBOR_LOGO },
+        key: "browse:hide",
+      };
     return {
       payload: {
         details: browse.details ?? "Browsing Harbor",
