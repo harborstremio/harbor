@@ -63,6 +63,7 @@ export type Settings = {
   experimentalLiquidGlassEnabled: boolean;
   experimentalLiquidGlassOpacity: number;
   defaultLiquidGlassBlur: number;
+  defaultLiquidGlassTint: number;
   posterDockMagnification: boolean;
   blurComments: boolean;
   blurEpisodes: boolean;

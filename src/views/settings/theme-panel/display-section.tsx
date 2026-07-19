@@ -13,6 +13,12 @@ export function DisplaySection() {
   const cardW = Math.round(150 * settings.posterScale);
   const cardH = Math.round(cardW * 1.5);
   const soundEffectsEnabled = settings.soundTheme !== "none";
+  const defaultGlassBlur = Number.isFinite(settings.defaultLiquidGlassBlur)
+    ? settings.defaultLiquidGlassBlur
+    : 2;
+  const defaultGlassTint = Number.isFinite(settings.defaultLiquidGlassTint)
+    ? settings.defaultLiquidGlassTint
+    : 40;
   return (
     <>
       <Section
@@ -145,23 +151,42 @@ export function DisplaySection() {
           </div>
         )}
         {!settings.experimentalLiquidGlassEnabled && (
-          <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
-            <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
-              {t("Default glass blur")}
-            </span>
-            <input
-              type="range"
-              min="0"
-              max="8"
-              step="0.5"
-              value={settings.defaultLiquidGlassBlur}
-              onChange={(e) => update({ defaultLiquidGlassBlur: Number(e.target.value) })}
-              className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-            />
-            <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-              {settings.defaultLiquidGlassBlur}px
-            </span>
-          </div>
+          <>
+            <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
+              <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
+                {t("Default glass blur")}
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="8"
+                step="0.5"
+                value={defaultGlassBlur}
+                onChange={(e) => update({ defaultLiquidGlassBlur: Number(e.target.value) })}
+                className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+              />
+              <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+                {defaultGlassBlur}px
+              </span>
+            </div>
+            <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
+              <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
+                {t("Glass tint")}
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={defaultGlassTint}
+                onChange={(e) => update({ defaultLiquidGlassTint: Number(e.target.value) })}
+                className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+              />
+              <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+                {defaultGlassTint}%
+              </span>
+            </div>
+          </>
         )}
       </Section>
 

@@ -35,7 +35,9 @@ test("liquid glass does not keep a GPU render loop alive", () => {
   assert.doesNotMatch(source, /requestAnimationFrame/);
   assert.doesNotMatch(source, /<canvas/);
   assert.match(source, /linear-gradient/);
-  assert.match(settingsDefaults, /defaultLiquidGlassBlur: 2\.5/);
+  assert.match(settingsDefaults, /defaultLiquidGlassBlur: 2/);
+  assert.match(settingsDefaults, /defaultLiquidGlassTint: 40/);
+  assert.match(source, /Number\.isFinite\(value\)/);
   assert.match(source, /backdropBlur && normalizedBlur > 0/);
   assert.doesNotMatch(source, /WebkitBackdropFilter/);
 });
