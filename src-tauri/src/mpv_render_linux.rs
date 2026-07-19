@@ -14,7 +14,6 @@ use gtk::prelude::*;
 use libmpv2::render::{OpenGLInitParams, RenderContext, RenderParam, RenderParamApiType};
 use libmpv2_sys::mpv_handle;
 
-use crate::mpv::{map_css_geometry, MpvGeometry};
 
 const GL_FRAMEBUFFER_BINDING: u32 = 0x8CA6;
 const GL_FRAMEBUFFER: u32 = 0x8D40;
@@ -57,8 +56,6 @@ struct Embed {
 }
 
 thread_local! {
-    // GTK objects are main-thread-only. Keeping them thread-local makes that
-    // invariant explicit and avoids unsound Send/Sync implementations.
     static EMBED: RefCell<Option<Embed>> = const { RefCell::new(None) };
     static PENDING: RefCell<Option<Pending>> = const { RefCell::new(None) };
 }
@@ -257,7 +254,6 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
         .ok_or_else(|| "no webview child in vbox".to_string())?;
 
     let overlay = gtk::Overlay::new();
-    let fixed = gtk::Fixed::new();
     let area = gtk::GLArea::new();
     // libmpv's update callback is the frame clock. Rendering on every GTK draw
     // as well would duplicate work whenever the transparent WebView repaints.
@@ -266,12 +262,12 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
     area.set_has_depth_buffer(false);
     area.set_has_stencil_buffer(false);
     area.set_app_paintable(true);
-    area.set_size_request(16, 16);
+    area.set_hexpand(true);
+    area.set_vexpand(true);
 
     gtk_window.remove(vbox);
     vbox.remove(&web_view);
-    fixed.put(&area, 0, 0);
-    overlay.add(&fixed);
+    overlay.add(&area);
     overlay.add_overlay(&web_view);
     overlay.set_overlay_pass_through(&web_view, false);
     gtk_window.add(&overlay);
@@ -368,28 +364,11 @@ fn do_render(rc: &RenderContext, area: &gtk::GLArea) {
     let _ = rc.render::<()>(fbo, w, h, true);
 }
 
-pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
+pub fn resize_to(_css: crate::mpv::MpvGeometry) -> Result<(), String> {
     EMBED.with(|slot| {
-        let guard = slot.borrow();
-        let Some(embed) = guard.as_ref() else {
-            return;
-        };
-        let native = map_css_geometry(
-            &css,
-            embed.gtk_window.allocated_width().max(1) as f64,
-            embed.gtk_window.allocated_height().max(1) as f64,
-        );
-        let lw = native.width.round().max(1.0) as i32;
-        let lh = native.height.round().max(1.0) as i32;
-        embed.area.set_size_request(lw, lh);
-        if let Some(parent) = embed.area.parent() {
-            if let Some(fixed) = parent.downcast_ref::<gtk::Fixed>() {
-                let lx = native.x.round() as i32;
-                let ly = native.y.round() as i32;
-                fixed.move_(&embed.area, lx, ly);
-            }
+        if let Some(embed) = slot.borrow().as_ref() {
+            embed.area.queue_render();
         }
-        embed.area.queue_render();
     });
     Ok(())
 }
