@@ -1,5 +1,4 @@
 import { useState, type CSSProperties, type HTMLAttributes, type ReactNode } from "react";
-import { useSettings } from "@/lib/settings";
 
 const LEGACY_SPECTRUM_PROP = `spectral${"Strength"}` as const;
 type LegacySpectrumProps = Partial<Record<typeof LEGACY_SPECTRUM_PROP, number>>;
@@ -21,6 +20,7 @@ export type ExperimentalLiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement>
     surfaceClassName?: string;
     variant?: "default" | "surface" | "overlay";
     backdropBlur?: boolean;
+    rendererOpacity?: number;
   };
 
 function clamp(value: number, minimum: number, maximum: number): number {
@@ -38,6 +38,7 @@ export function ExperimentalLiquidGlassSurface({
   surfaceClassName = "",
   variant = "surface",
   backdropBlur = true,
+  rendererOpacity = 100,
   style,
   radius = "999999px",
   shaderRadius = 1,
@@ -59,7 +60,6 @@ export function ExperimentalLiquidGlassSurface({
   onBlur,
   ...wrapperProps
 }: ExperimentalLiquidGlassSurfaceProps) {
-  const { settings } = useSettings();
   const [keyboardActive, setKeyboardActive] = useState(false);
   const [pressed, setPressed] = useState(false);
 
@@ -70,7 +70,7 @@ export function ExperimentalLiquidGlassSurface({
 
   delete forwardedProps[LEGACY_SPECTRUM_PROP];
 
-  const globalOpacity = clamp((settings.experimentalLiquidGlassOpacity ?? 100) / 100, 0, 1);
+  const globalOpacity = clamp(rendererOpacity / 100, 0, 1);
   const normalizedIntensity = clamp(intensity, 0, 1.5);
   const normalizedRefraction = clamp(refractionStrength, 0, 1.8);
   const normalizedLens = clamp(lensStrength, 0, 2.5);
@@ -79,7 +79,7 @@ export function ExperimentalLiquidGlassSurface({
   const normalizedRadius = clamp(shaderRadius, 0, 1);
   const normalizedSpeed = clamp(motionSpeed, 0, 3);
 
-  const active = alwaysActive || keyboardActive || pressed;
+  const active = alwaysActive || keyboardActive;
   const activeMix = active ? 1 : 0.22;
   const pressedMix = pressed ? 0.88 : 1;
 

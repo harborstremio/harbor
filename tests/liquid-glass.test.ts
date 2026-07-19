@@ -54,6 +54,8 @@ test("experimental liquid glass is opt-in and does not animate continuously", ()
   assert.match(settingsDefaults, /experimentalLiquidGlassEnabled: false/);
   assert.match(settingsDefaults, /experimentalLiquidGlassOpacity: 100/);
   assert.match(source, /settings\.experimentalLiquidGlassEnabled/);
+  assert.doesNotMatch(experimentalSource, /useSettings/);
+  assert.match(experimentalSource, /rendererOpacity/);
   assert.doesNotMatch(experimentalSource, /animationIterationCount:\s*"infinite"/);
   assert.doesNotMatch(experimentalSource, /requestAnimationFrame/);
   assert.doesNotMatch(experimentalSource, /<canvas/);

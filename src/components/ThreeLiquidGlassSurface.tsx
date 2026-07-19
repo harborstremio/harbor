@@ -89,7 +89,12 @@ export function ThreeLiquidGlassSurface(props: LiquidGlassSurfaceProps) {
   const { settings } = useSettings();
 
   if (settings.experimentalLiquidGlassEnabled) {
-    return <ExperimentalLiquidGlassSurface {...props} />;
+    return (
+      <ExperimentalLiquidGlassSurface
+        {...props}
+        rendererOpacity={settings.experimentalLiquidGlassOpacity}
+      />
+    );
   }
 
   return <LiquidGlassSurface {...props} blurRadius={settings.defaultLiquidGlassBlur} />;
