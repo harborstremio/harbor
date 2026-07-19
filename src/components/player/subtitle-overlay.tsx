@@ -22,7 +22,6 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({ text, startSec, s
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [text]);
-  if (!text) return null;
 
   const responsive = useMemo(
     () => (boxH > 0 ? Math.max(0.3, Math.min(2.5, boxH / 1080)) : scale),
@@ -101,6 +100,8 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({ text, startSec, s
   );
 
   const opacity = useMemo(() => clamp(settings.subOpacity ?? 1, 0.1, 1), [settings.subOpacity]);
+
+  if (!text) return null;
 
   return (
     <div
