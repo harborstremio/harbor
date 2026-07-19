@@ -49,10 +49,7 @@ export function updatePosterDock({
     const influence = Math.max(0, 1 - Math.abs(index - activeIndex) / MAX_DISTANCE);
     if (influence <= 0) continue;
     nextItems.add(element);
-    const direction = Math.sign(index - activeIndex);
-    element.style.transform = `translate3d(${direction * influence * 6}px, ${
-      -influence * 6
-    }px, 0) scale(${1 + influence * 0.1})`;
+    element.style.transform = `translate3d(0, ${-influence * 6}px, 0) scale(${1 + influence * 0.1})`;
     element.style.zIndex = String(Math.round(10 + influence * 90));
     element.style.willChange = influence > 0 ? "transform" : "";
     element.style.transition = "transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1)";
