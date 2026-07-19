@@ -40,8 +40,11 @@ import { ClapperMini } from "./icons/clapper-mini";
 import { ImdbIcon } from "./icons/imdb-icon";
 import { MalLogo } from "./icons/mal-logo";
 import { Poster, useLocalizedPoster } from "./poster";
-
-import { CardHoverOverlay, type CardHoverStyle } from "./pick-card/card-hover";
+import {
+  CardHoverOverlay,
+  cardHoverPosterClass,
+  type CardHoverStyle,
+} from "./pick-card/card-hover";
 import { CustomHoverOverlay, customHoverPosterProps } from "./pick-card/custom-hover";
 import { getCustomHover } from "@/lib/custom-hover";
 import { RtBadge } from "./rt-badge";
@@ -91,7 +94,6 @@ export const PickCard = memo(function PickCard({
   const { openMeta, openPicker } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
-  const posterDockEnabled = settings.posterDockEnabled ?? false;
   const cardStyle: CardHoverStyle =
     kids || !settings.hoverPreviewEnabled ? "none" : settings.cardHoverStyle;
   const activeCustom = cardStyle === "custom" ? getCustomHover(settings.customHoverId) : null;
@@ -502,11 +504,7 @@ export const PickCard = memo(function PickCard({
         onPointerEnter={(e) => hoverPreviewEnter(meta, e.currentTarget, e.buttons)}
         onPointerLeave={(e) => hoverPreviewLeave(e.currentTarget)}
         style={customProps?.style}
-        className={`relative w-full [backface-visibility:hidden] [transform:translateZ(0)] ${
-          posterDockEnabled
-            ? ""
-            : "transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] will-change-transform group-hover:[-webkit-transform:translate3d(0,-0.5rem,0)] group-hover:[transform:translate3d(0,-0.5rem,0)]"
-        }`}
+        className="relative w-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] will-change-transform group-hover:[-webkit-transform:translate3d(0,-0.5rem,0)] group-hover:[transform:translate3d(0,-0.5rem,0)]"
       >
         <Poster
           src={posterSrc}
@@ -514,9 +512,10 @@ export const PickCard = memo(function PickCard({
           lowResImdb={imdbId}
           ratio="portrait"
           onError={() => setImgIdx((i) => i + 1)}
-          className="harbor-card-ring rounded-[var(--poster-radius,12px)] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]"
+          className={`harbor-card-ring rounded-[var(--poster-radius,12px)] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)] ${
+            customProps ? customProps.className : cardHoverPosterClass(inCardHover)
+          }`}
         />
-
         {activeCustom ? (
           <CustomHoverOverlay
             config={activeCustom}
