@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { EpisodePanel } from "@/components/player/episode-panel";
 import { ResumePrompt } from "@/components/player/resume-prompt";
 import type { Meta } from "@/lib/cinemeta";
@@ -6,7 +7,7 @@ import type { PlayEpisode } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { HeaderWarning, NoAudioWarning } from "./header-warning";
 
-export function PanelsLayer({
+export const PanelsLayer = memo(function PanelsLayer({
   isSeriesPlayback,
   meta,
   currentEpisode,
@@ -114,9 +115,7 @@ export function PanelsLayer({
       )}
 
       {showHeaderWarning && <HeaderWarning onPickAnother={onPickAnother} />}
-      {showNoAudioWarning && (
-        <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />
-      )}
+      {showNoAudioWarning && <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />}
     </>
   );
-}
+});

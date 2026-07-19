@@ -1,4 +1,4 @@
-import { type ComponentProps, type RefObject } from "react";
+import { memo, type ComponentProps, type RefObject } from "react";
 import { DrawCanvas, StrokesLayer, type Stroke } from "@/components/player/draw-canvas";
 import { StreamSwitcher } from "@/components/player/stream-switcher";
 import { StreamCheckPill } from "@/components/player/stream-check-pill";
@@ -182,7 +182,7 @@ export type PlayerOverlayLayersProps = {
   onSyncPlayPause: () => void;
 };
 
-export function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
+export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
   return (
     <>
       <StageOverlays
@@ -470,4 +470,4 @@ export function PlayerOverlayLayers(p: PlayerOverlayLayersProps) {
       />
     </>
   );
-}
+});

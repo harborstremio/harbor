@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { ComponentProps } from "react";
 import { ClipChooser } from "@/components/player/clip-chooser";
 import { GifRecordPill } from "@/components/player/gif-record-pill";
@@ -10,7 +11,7 @@ import type { useGifRecorder } from "./hooks/use-gif-recorder";
 type SkipProps = ComponentProps<typeof SkipPillContainer>;
 type QuickToolsProps = ComponentProps<typeof QuickTools>;
 
-export function ToolsLayer({
+export const ToolsLayer = memo(function ToolsLayer({
   pipMode,
   drawMode,
   showWaiting,
@@ -57,21 +58,25 @@ export function ToolsLayer({
 }) {
   return (
     <>
-      {!pipMode && !drawMode && !showWaiting && pendingResumeSec == null && pendingSeekSec == null && (
-        <SkipPillContainer
-          skipSegments={skipSegments}
-          durationSec={durationSec}
-          hasNextEpisode={hasNextEpisode}
-          hasNextEpDisplay={hasNextEpDisplay}
-          nextEp={nextEp}
-          nextEpMask={nextEpMask}
-          visible={pillsVisible}
-          allowAutoSkip={allowAutoSkip}
-          onSkip={onSkip}
-          onNextEpisode={onNextEpisode}
-          onCancelAutoNext={onCancelAutoNext}
-        />
-      )}
+      {!pipMode &&
+        !drawMode &&
+        !showWaiting &&
+        pendingResumeSec == null &&
+        pendingSeekSec == null && (
+          <SkipPillContainer
+            skipSegments={skipSegments}
+            durationSec={durationSec}
+            hasNextEpisode={hasNextEpisode}
+            hasNextEpDisplay={hasNextEpDisplay}
+            nextEp={nextEp}
+            nextEpMask={nextEpMask}
+            visible={pillsVisible}
+            allowAutoSkip={allowAutoSkip}
+            onSkip={onSkip}
+            onNextEpisode={onNextEpisode}
+            onCancelAutoNext={onCancelAutoNext}
+          />
+        )}
 
       {!pipMode && !drawMode && (
         <QuickTools
@@ -100,4 +105,4 @@ export function ToolsLayer({
       )}
     </>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { AvatarDock } from "@/components/player/avatar-dock";
 import { ChatOverlay } from "@/components/player/chat-overlay";
 import type { PanelCorner } from "@/lib/player-chrome";
@@ -9,7 +9,7 @@ import { DurationMismatchChip } from "./duration-mismatch-chip";
 import { ForeignNoticeBox } from "./foreign-notice-box";
 import { WaitingForRoom } from "./waiting-for-room";
 
-export function RoomLayer({
+export const RoomLayer = memo(function RoomLayer({
   inRoom,
   pipMode,
   drawMode,
@@ -143,4 +143,4 @@ export function RoomLayer({
       )}
     </>
   );
-}
+});
