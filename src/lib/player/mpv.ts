@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { subtitleDownloadArgs } from "./subtitle-load";
 import { mpvFailureSnapshot } from "./mpv-failure";
-import { isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import {
@@ -393,8 +393,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             () => {},
           );
         }
-        if (opts.embed && opts.getEmbedRect && geomTimer == null) {
+        if (opts.embed && opts.getEmbedRect && geomTimer == null && !isLinuxDesktop()) {
           let lastRect: MpvRect | null = null;
+          let geomDebounce: number | null = null;
           const tick = async () => {
             try {
               const r = await opts.getEmbedRect!();
@@ -415,16 +416,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             } catch {}
           };
           tick();
-          geomTimer = window.setInterval(() => {
-            void tick();
-          }, 250);
           geomKickHandler = () => {
-            void tick();
-            window.setTimeout(() => void tick(), 60);
-            window.setTimeout(() => void tick(), 200);
-            window.setTimeout(() => void tick(), 500);
-            window.setTimeout(() => void tick(), 1000);
-            window.setTimeout(() => void tick(), 1800);
+            if (geomDebounce != null) window.clearTimeout(geomDebounce);
+            geomDebounce = window.setTimeout(() => void tick(), 40);
           };
           geomForceHandler = () => {
             lastRect = null;
