@@ -6,6 +6,8 @@ use std::os::raw::{c_char, c_int};
 use std::ptr::NonNull;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::Mutex;
+use std::time::Instant;
 
 use gtk::gdk;
 use gtk::glib;
@@ -67,6 +69,8 @@ static REDRAW_PENDING: AtomicBool = AtomicBool::new(false);
 static LAST_SURFACE: AtomicU64 = AtomicU64::new(0);
 static PROC_WAYLAND: AtomicBool = AtomicBool::new(false);
 static FBO_ZERO_WARNED: AtomicBool = AtomicBool::new(false);
+static LAST_RENDER: Mutex<Option<Instant>> = Mutex::new(None);
+const RENDER_INTERVAL_US: u64 = 16_000; // cap at ~60 fps
 
 type GlProcLoader = unsafe extern "C" fn(*const c_char) -> *mut c_void;
 
@@ -428,6 +432,16 @@ fn restore_webview(embed: Embed) {
 }
 
 fn schedule_redraw() {
+    {
+        let mut last = LAST_RENDER.lock().unwrap();
+        let now = Instant::now();
+        if let Some(t) = last.as_ref() {
+            if now.duration_since(*t).as_micros() < RENDER_INTERVAL_US as u128 {
+                return;
+            }
+        }
+        *last = Some(now);
+    }
     if REDRAW_PENDING.swap(true, Ordering::AcqRel) {
         return;
     }
