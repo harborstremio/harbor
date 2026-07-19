@@ -62,6 +62,7 @@ export type Settings = {
   playerVolumeSfx: boolean;
   experimentalLiquidGlassEnabled: boolean;
   experimentalLiquidGlassOpacity: number;
+  defaultLiquidGlassBlur: number;
   posterDockMagnification: boolean;
   blurComments: boolean;
   blurEpisodes: boolean;

@@ -479,10 +479,6 @@ function SearchPill() {
       className="
         h-11 w-full
         border border-white/[0.08]
-        opacity-85
-        transition-opacity duration-200
-        hover:opacity-100
-        focus-within:opacity-100
       "
       contentClassName="flex h-full w-full"
     >

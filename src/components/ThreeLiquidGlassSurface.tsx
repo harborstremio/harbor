@@ -31,10 +31,12 @@ export function LiquidGlassSurface({
   refractionStrength: _refractionStrength,
   lensStrength: _lensStrength,
   variant = "default",
-  backdropBlur = false,
+  backdropBlur = true,
+  blurRadius = 2.5,
   ...wrapperProps
-}: LiquidGlassSurfaceProps) {
+}: LiquidGlassSurfaceProps & { blurRadius?: number }) {
   const strength = Math.min(1, Math.max(0, intensity));
+  const normalizedBlur = Math.min(12, Math.max(0, blurRadius));
   const wrapperStyle: CSSProperties = {
     position: "relative",
     isolation: "isolate",
@@ -52,9 +54,10 @@ export function LiquidGlassSurface({
         ? "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.18), 0 8px 22px rgba(0,0,0,0.28)"
         : "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.05)",
     backdropFilter:
-      variant === "overlay" && backdropBlur ? "blur(2.5px) saturate(1.08)" : undefined,
+      backdropBlur && normalizedBlur > 0 ? `blur(${normalizedBlur}px) saturate(1.08)` : undefined,
   };
-  const contentStyle: CSSProperties = backdropBlur ? { transform: "translateZ(0)" } : {};
+  const contentStyle: CSSProperties =
+    backdropBlur && normalizedBlur > 0 ? { transform: "translateZ(0)" } : {};
 
   return (
     <div
@@ -89,5 +92,5 @@ export function ThreeLiquidGlassSurface(props: LiquidGlassSurfaceProps) {
     return <ExperimentalLiquidGlassSurface {...props} />;
   }
 
-  return <LiquidGlassSurface {...props} />;
+  return <LiquidGlassSurface {...props} blurRadius={settings.defaultLiquidGlassBlur} />;
 }

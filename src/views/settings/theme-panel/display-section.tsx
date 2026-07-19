@@ -118,13 +118,10 @@ export function DisplaySection() {
           </div>
         </div>
       </Section>
-      <Section
-        title={t("Enhanced Liquid Glass")}
-        subtitle={t("Try the new glass renderer. The established renderer remains the default.")}
-      >
+      <Section title={t("Liquid Glass")}>
         <ToggleRow
           label={t("Use Enhanced Liquid Glass")}
-          sub={t("This changes only the glass renderer and may use more graphics resources.")}
+          sub={t("May look better while using more graphics resources.")}
           value={settings.experimentalLiquidGlassEnabled}
           onChange={(experimentalLiquidGlassEnabled) => update({ experimentalLiquidGlassEnabled })}
         />
@@ -144,6 +141,25 @@ export function DisplaySection() {
             />
             <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
               {settings.experimentalLiquidGlassOpacity}%
+            </span>
+          </div>
+        )}
+        {!settings.experimentalLiquidGlassEnabled && (
+          <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
+            <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
+              {t("Default glass blur")}
+            </span>
+            <input
+              type="range"
+              min="0"
+              max="8"
+              step="0.5"
+              value={settings.defaultLiquidGlassBlur}
+              onChange={(e) => update({ defaultLiquidGlassBlur: Number(e.target.value) })}
+              className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+            />
+            <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+              {settings.defaultLiquidGlassBlur}px
             </span>
           </div>
         )}

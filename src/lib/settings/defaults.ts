@@ -9,6 +9,7 @@ export const DEFAULT: Settings = {
   playerVolumeSfx: false,
   experimentalLiquidGlassEnabled: false,
   experimentalLiquidGlassOpacity: 100,
+  defaultLiquidGlassBlur: 2.5,
   posterDockMagnification: false,
   blurComments: false,
   blurEpisodes: false,
