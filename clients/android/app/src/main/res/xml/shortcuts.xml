@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App Shortcuts (long-press the launcher icon) that deep-link into Harbor;
+     also the surface Google Assistant discovers. Each targets a harbor:// action
+     the app's DeepLinkService routes. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_search_short"
+        android:shortcutLongLabel="@string/shortcut_search_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="harbor://search"
+            android:targetPackage="com.exrelay.harbor"
+            android:targetClass="com.exrelay.harbor.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="continue"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_continue_short"
+        android:shortcutLongLabel="@string/shortcut_continue_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="harbor://continue"
+            android:targetPackage="com.exrelay.harbor"
+            android:targetClass="com.exrelay.harbor.MainActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="profiles"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_profiles_short"
+        android:shortcutLongLabel="@string/shortcut_profiles_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="harbor://profiles"
+            android:targetPackage="com.exrelay.harbor"
+            android:targetClass="com.exrelay.harbor.MainActivity" />
+    </shortcut>
+</shortcuts>
