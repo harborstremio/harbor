@@ -56,4 +56,5 @@ test("experimental liquid glass is opt-in and does not animate continuously", ()
   assert.doesNotMatch(experimentalSource, /animationIterationCount:\s*"infinite"/);
   assert.doesNotMatch(experimentalSource, /requestAnimationFrame/);
   assert.doesNotMatch(experimentalSource, /<canvas/);
+  assert.match(experimentalSource, /globalOpacity > 0 \? blurValue : undefined/);
 });

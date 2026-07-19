@@ -118,7 +118,8 @@ export function ExperimentalLiquidGlassSurface({
     isolation: "isolate",
     overflow: "hidden",
     borderRadius: radius,
-    backdropFilter: resolvedVariant === "surface" && backdropBlur ? blurValue : undefined,
+    backdropFilter:
+      resolvedVariant === "surface" && backdropBlur && globalOpacity > 0 ? blurValue : undefined,
     background: [
       `linear-gradient(145deg, rgba(255,255,255,${alpha(
         topSurfaceAlpha,
@@ -150,7 +151,8 @@ export function ExperimentalLiquidGlassSurface({
     zIndex: 0,
     borderRadius: "inherit",
     pointerEvents: "none",
-    backdropFilter: resolvedVariant === "overlay" && backdropBlur ? blurValue : undefined,
+    backdropFilter:
+      resolvedVariant === "overlay" && backdropBlur && globalOpacity > 0 ? blurValue : undefined,
     background: [
       `radial-gradient(110% 88% at 50% -9%, rgba(255,255,255,${alpha(
         0.018 * globalOpacity * normalizedIntensity,

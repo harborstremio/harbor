@@ -119,11 +119,11 @@ export function DisplaySection() {
         </div>
       </Section>
       <Section
-        title={t("Experimental Liquid Glass")}
+        title={t("Enhanced Liquid Glass")}
         subtitle={t("Try the new glass renderer. The established renderer remains the default.")}
       >
         <ToggleRow
-          label={t("Use experimental Liquid Glass")}
+          label={t("Use Enhanced Liquid Glass")}
           sub={t("This changes only the glass renderer and may use more graphics resources.")}
           value={settings.experimentalLiquidGlassEnabled}
           onChange={(experimentalLiquidGlassEnabled) => update({ experimentalLiquidGlassEnabled })}
@@ -135,7 +135,7 @@ export function DisplaySection() {
             </span>
             <input
               type="range"
-              min="0"
+              min="5"
               max="100"
               step="5"
               value={settings.experimentalLiquidGlassOpacity}
