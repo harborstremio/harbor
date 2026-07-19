@@ -1,0 +1,610 @@
+{
+  "id": "r_anime",
+  "name": "r/anime Awards",
+  "shortName": "r/anime",
+  "source": "https://animeawards.moe",
+  "updatedAt": "2026-05-24",
+  "categories": {
+    "anime_of_the_year": {
+      "name": "Anime of the Year",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Rakugo Shinjuu"
+        },
+        {
+          "year": 2017,
+          "title": "Rakugo Shinjuu S2"
+        },
+        {
+          "year": 2018,
+          "title": "3-gatsu no Lion 2nd Season"
+        },
+        {
+          "year": 2019,
+          "title": "HUGtto! Precure"
+        },
+        {
+          "year": 2020,
+          "title": "Chihayafuru 3"
+        },
+        {
+          "year": 2021,
+          "title": "Sonny Boy"
+        },
+        {
+          "year": 2022,
+          "title": "Yama no Susume: Next Summit"
+        },
+        {
+          "year": 2023,
+          "title": "BanG Dream! It's MyGO!!!!!"
+        },
+        {
+          "year": 2024,
+          "title": "Dungeon Meshi"
+        },
+        {
+          "year": 2025,
+          "title": "Sono Bisque Doll wa Koi wo Suru Season 2"
+        }
+      ]
+    },
+    "best_film": {
+      "name": "Movie of the Year",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Anthem of the Heart"
+        },
+        {
+          "year": 2017,
+          "title": "The Night is Short, Walk on Girl"
+        },
+        {
+          "year": 2018,
+          "title": "Liz and the Blue Bird"
+        },
+        {
+          "year": 2019,
+          "title": "Non Non Biyori: Vacation"
+        },
+        {
+          "year": 2020,
+          "title": "Ongaku"
+        },
+        {
+          "year": 2021,
+          "title": "Eiga Daisuki Pompo-san"
+        },
+        {
+          "year": 2024,
+          "title": "Mononoke: Karakasa"
+        },
+        {
+          "year": 2025,
+          "title": "Kimi no Iro"
+        }
+      ]
+    },
+    "best_short": {
+      "name": "Short of the Year",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Saiki Kusuo no Ψ-nan"
+        },
+        {
+          "year": 2017,
+          "title": "CRYSTAL CLEAR"
+        },
+        {
+          "year": 2018,
+          "title": "Baja's Studio"
+        },
+        {
+          "year": 2019,
+          "title": "Totsukuni no Shoujo"
+        },
+        {
+          "year": 2020,
+          "title": "Hakumei no Tsubasa"
+        },
+        {
+          "year": 2024,
+          "title": "ONE PIECE FAN LETTER"
+        }
+      ]
+    },
+    "best_animation": {
+      "name": "Best Animation",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Mob Psycho 100"
+        },
+        {
+          "year": 2017,
+          "title": "Land of the Lustrous"
+        },
+        {
+          "year": 2018,
+          "title": "Violet Evergarden"
+        },
+        {
+          "year": 2019,
+          "title": "Mob Psycho 100 II"
+        },
+        {
+          "year": 2021,
+          "title": "Kobayashi-san Chi no Maidragon S"
+        },
+        {
+          "year": 2022,
+          "title": "Yama no Susume: Next Summit"
+        },
+        {
+          "year": 2023,
+          "title": "Onii-chan wa Oshimai!"
+        },
+        {
+          "year": 2024,
+          "title": "Dungeon Meshi"
+        },
+        {
+          "year": 2025,
+          "title": "CITY THE ANIMATION"
+        }
+      ]
+    },
+    "best_action": {
+      "name": "Best Action",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Haikyuu!! (S2 & S3)"
+        },
+        {
+          "year": 2017,
+          "title": "My Hero Academia S2"
+        },
+        {
+          "year": 2018,
+          "title": "Shingeki no Kyojin 3"
+        },
+        {
+          "year": 2019,
+          "title": "Mob Psycho 100 II"
+        },
+        {
+          "year": 2020,
+          "title": "Akudama Drive"
+        },
+        {
+          "year": 2021,
+          "title": "SSSS.DYNAZENON"
+        },
+        {
+          "year": 2022,
+          "title": "Chainsaw Man"
+        },
+        {
+          "year": 2023,
+          "title": "Jujutsu Kaisen 2nd Season"
+        },
+        {
+          "year": 2024,
+          "title": "Dandadan"
+        },
+        {
+          "year": 2025,
+          "title": "Chainsaw Man: Reze-hen"
+        }
+      ]
+    },
+    "best_adventure": {
+      "name": "Best Adventure",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Flip Flappers"
+        },
+        {
+          "year": 2020,
+          "title": "Hakumei no Tsubasa"
+        },
+        {
+          "year": 2021,
+          "title": "Mushoku Tensei: Isekai Ittara Honki Dasu (Part 1 and Part 2)"
+        },
+        {
+          "year": 2022,
+          "title": "Dragon Quest: Dai no Daibouken (2020)"
+        },
+        {
+          "year": 2023,
+          "title": "Suzume no Tojimari"
+        },
+        {
+          "year": 2024,
+          "title": "Sousou no Frieren"
+        },
+        {
+          "year": 2025,
+          "title": "Dungeon ni Deai wo Motomeru no wa Machigatteiru Darou ka V: Houjou no Megami-hen"
+        }
+      ]
+    },
+    "best_comedy": {
+      "name": "Best Comedy",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Saiki Kusuo no Ψ-nan"
+        },
+        {
+          "year": 2017,
+          "title": "KonoSuba 2"
+        },
+        {
+          "year": 2018,
+          "title": "Hinamatsuri"
+        },
+        {
+          "year": 2019,
+          "title": "Kaguya-sama"
+        },
+        {
+          "year": 2020,
+          "title": "Kaguya-sama Season 2"
+        },
+        {
+          "year": 2021,
+          "title": "Zombie Land Saga: Revenge"
+        },
+        {
+          "year": 2022,
+          "title": "Bocchi the Rock!"
+        },
+        {
+          "year": 2023,
+          "title": "Isekai Oji-san"
+        },
+        {
+          "year": 2024,
+          "title": "Hime-sama, \"Goumon\" no Jikan desu"
+        },
+        {
+          "year": 2025,
+          "title": "Ninja to Koroshiya no Futarigurashi"
+        }
+      ]
+    },
+    "best_drama": {
+      "name": "Best Drama",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Rakugo Shinjuu"
+        },
+        {
+          "year": 2017,
+          "title": "Rakugo Shinjuu S2"
+        },
+        {
+          "year": 2018,
+          "title": "3-gatsu no Lion 2nd Season"
+        },
+        {
+          "year": 2019,
+          "title": "Beastars"
+        },
+        {
+          "year": 2020,
+          "title": "Chihayafuru 3"
+        },
+        {
+          "year": 2021,
+          "title": "NOMAD: Megalo Box 2"
+        },
+        {
+          "year": 2022,
+          "title": "Shoujo☆Kageki Revue Starlight Movie"
+        },
+        {
+          "year": 2023,
+          "title": "BanG Dream! It's MyGO!!!!!"
+        },
+        {
+          "year": 2024,
+          "title": "Look Back"
+        },
+        {
+          "year": 2025,
+          "title": "Medalist"
+        }
+      ]
+    },
+    "best_romance": {
+      "name": "Best Romance",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Shirayuki-hime S2"
+        },
+        {
+          "year": 2017,
+          "title": "Tsuki ga Kirei"
+        },
+        {
+          "year": 2018,
+          "title": "Bloom Into You"
+        },
+        {
+          "year": 2019,
+          "title": "Araburu Kisetsu no Otome-domo yo"
+        },
+        {
+          "year": 2020,
+          "title": "Kimi to, Nami ni Noretara"
+        },
+        {
+          "year": 2021,
+          "title": "Shinigami Bocchan to Kuro Maid"
+        },
+        {
+          "year": 2022,
+          "title": "Kaguya-sama wa Kokurasetai: Ultra Romantic"
+        },
+        {
+          "year": 2023,
+          "title": "Kimi wa Houkago Insomnia"
+        },
+        {
+          "year": 2024,
+          "title": "Kimi ni Todoke 3RD SEASON"
+        },
+        {
+          "year": 2025,
+          "title": "Sono Bisque Doll wa Koi wo Suru Season 2"
+        }
+      ]
+    },
+    "best_slice_of_life": {
+      "name": "Best Slice of Life",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Flying Witch"
+        },
+        {
+          "year": 2017,
+          "title": "Girls' Last Tour"
+        },
+        {
+          "year": 2018,
+          "title": "Yama no Susume: Third Season"
+        },
+        {
+          "year": 2019,
+          "title": "Non Non Biyori: Vacation"
+        },
+        {
+          "year": 2020,
+          "title": "Eizouken ni wa Te wo Dasu na!"
+        },
+        {
+          "year": 2021,
+          "title": "Non Non Biyori: Nonstop"
+        },
+        {
+          "year": 2022,
+          "title": "ARIA The BENEDIZIONE"
+        },
+        {
+          "year": 2023,
+          "title": "Aikatsu! 10th STORY: Mirai e no STARWAY (2023)"
+        },
+        {
+          "year": 2024,
+          "title": "Yuru Camp△ SEASON 3"
+        },
+        {
+          "year": 2025,
+          "title": "Sora-iro Utility (TV)"
+        }
+      ]
+    },
+    "best_suspense": {
+      "name": "Best Suspense",
+      "winners": [
+        {
+          "year": 2020,
+          "title": "Re:Zero Season 2"
+        },
+        {
+          "year": 2021,
+          "title": "Sonny Boy"
+        },
+        {
+          "year": 2022,
+          "title": "Cyberpunk: Edgerunners"
+        },
+        {
+          "year": 2023,
+          "title": "PLUTO"
+        },
+        {
+          "year": 2024,
+          "title": "Kusuriya no Hitorigoto"
+        },
+        {
+          "year": 2025,
+          "title": "Takopii no Genzai"
+        }
+      ]
+    },
+    "best_background_art": {
+      "name": "Best Background Art",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Uchouten Kazoku 2"
+        },
+        {
+          "year": 2018,
+          "title": "After the Rain"
+        },
+        {
+          "year": 2019,
+          "title": "Zoku Owarimonogatari"
+        },
+        {
+          "year": 2021,
+          "title": "Sonny Boy"
+        },
+        {
+          "year": 2022,
+          "title": "Deaimon"
+        },
+        {
+          "year": 2023,
+          "title": "Tengoku Daimakyou"
+        },
+        {
+          "year": 2024,
+          "title": "Ochibi-san"
+        },
+        {
+          "year": 2025,
+          "title": "CITY THE ANIMATION"
+        }
+      ]
+    },
+    "best_character_design": {
+      "name": "Best Character Design",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Kiznaiver"
+        },
+        {
+          "year": 2017,
+          "title": "ACCA: 13-ku Kansatsu-ka"
+        },
+        {
+          "year": 2018,
+          "title": "Cardcaptor Sakura: Clear Card"
+        },
+        {
+          "year": 2019,
+          "title": "Aikatsu Friends!"
+        },
+        {
+          "year": 2021,
+          "title": "Sonny Boy"
+        },
+        {
+          "year": 2022,
+          "title": "Do It Yourself!!"
+        },
+        {
+          "year": 2023,
+          "title": "Onii-chan wa Oshimai!"
+        },
+        {
+          "year": 2024,
+          "title": "Dungeon Meshi"
+        },
+        {
+          "year": 2025,
+          "title": "Ginga Tokkyuu Milky☆Subway"
+        }
+      ]
+    },
+    "best_cinematography": {
+      "name": "Best Cinematography",
+      "winners": [
+        {
+          "year": 2016,
+          "title": "Flip Flappers"
+        },
+        {
+          "year": 2017,
+          "title": "Land of the Lustrous"
+        },
+        {
+          "year": 2018,
+          "title": "After the Rain"
+        },
+        {
+          "year": 2019,
+          "title": "BEASTARS"
+        },
+        {
+          "year": 2021,
+          "title": "SSSS.DYNAZENON"
+        },
+        {
+          "year": 2022,
+          "title": "Yojouhan Time Machine Blues"
+        },
+        {
+          "year": 2023,
+          "title": "Tsurune: Tsunagari no Issha"
+        },
+        {
+          "year": 2024,
+          "title": "Dungeon Meshi"
+        },
+        {
+          "year": 2025,
+          "title": "Hikaru ga Shinda Natsu"
+        }
+      ]
+    },
+    "best_score": {
+      "name": "Best Soundtrack",
+      "winners": [
+        {
+          "year": 2024,
+          "title": "Monogatari Series: Off & Monster Season"
+        },
+        {
+          "year": 2025,
+          "title": "New PANTY & STOCKING with GARTERBELT"
+        }
+      ]
+    },
+    "best_character": {
+      "name": "Character of the Year",
+      "winners": [
+        {
+          "year": 2024,
+          "title": "MONOGATARI Series: OFF & MONSTER Season"
+        }
+      ]
+    },
+    "best_va": {
+      "name": "Best VA Performance",
+      "winners": [
+        {
+          "year": 2021,
+          "title": "Vanitas"
+        },
+        {
+          "year": 2023,
+          "title": "Mitsumi Iwakura"
+        },
+        {
+          "year": 2024,
+          "title": "The Apothecary Diaries"
+        },
+        {
+          "year": 2025,
+          "title": "Aoi Yuuki as Maomao"
+        }
+      ]
+    }
+  }
+}

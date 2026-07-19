@@ -1,0 +1,877 @@
+{
+  "source": "Crunchyroll Anime Awards",
+  "wikipedia": "https://en.wikipedia.org/wiki/Crunchyroll_Anime_Awards",
+  "updatedAt": "2026-05-24",
+  "categories": {
+    "anime_of_the_year": {
+      "name": "Anime of the Year",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Yuri on Ice"
+        },
+        {
+          "year": 2018,
+          "title": "Made in Abyss"
+        },
+        {
+          "year": 2019,
+          "title": "Devilman Crybaby"
+        },
+        {
+          "year": 2020,
+          "title": "Demon Slayer: Kimetsu no Yaiba"
+        },
+        {
+          "year": 2021,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2022,
+          "title": "Attack on Titan: The Final Season Part 1"
+        },
+        {
+          "year": 2023,
+          "title": "Cyberpunk: Edgerunners"
+        },
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2025,
+          "title": "Solo Leveling"
+        },
+        {
+          "year": 2026,
+          "title": "My Hero Academia: Final Season"
+        }
+      ]
+    },
+    "best_film": {
+      "name": "Film of the Year",
+      "winners": [
+        {
+          "year": 2018,
+          "title": "Your Name"
+        },
+        {
+          "year": 2019,
+          "title": "My Hero Academia: Two Heroes"
+        },
+        {
+          "year": 2022,
+          "title": "Demon Slayer: Kimetsu no Yaiba – The Movie: Mugen Train"
+        },
+        {
+          "year": 2023,
+          "title": "Jujutsu Kaisen 0"
+        },
+        {
+          "year": 2024,
+          "title": "Suzume"
+        },
+        {
+          "year": 2025,
+          "title": "Look Back"
+        },
+        {
+          "year": 2026,
+          "title": "Demon Slayer: Kimetsu no Yaiba – The Movie: Infinity Castle"
+        }
+      ]
+    },
+    "best_continuing_series": {
+      "name": "Best Continuing Series",
+      "winners": [
+        {
+          "year": 2018,
+          "title": "March Comes in Like a Lion"
+        },
+        {
+          "year": 2019,
+          "title": "Dragon Ball Super"
+        },
+        {
+          "year": 2023,
+          "title": "One Piece"
+        },
+        {
+          "year": 2024,
+          "title": "One Piece"
+        },
+        {
+          "year": 2025,
+          "title": "Demon Slayer: Kimetsu no Yaiba Hashira Training Arc"
+        },
+        {
+          "year": 2026,
+          "title": "One Piece"
+        }
+      ]
+    },
+    "best_new_series": {
+      "name": "Best New Series",
+      "winners": [
+        {
+          "year": 2023,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2024,
+          "title": "Chainsaw Man"
+        },
+        {
+          "year": 2025,
+          "title": "Solo Leveling"
+        },
+        {
+          "year": 2026,
+          "title": "Gachiakuta"
+        }
+      ]
+    },
+    "best_original_anime": {
+      "name": "Best Original Anime",
+      "winners": [
+        {
+          "year": 2023,
+          "title": "Lycoris Recoil"
+        },
+        {
+          "year": 2024,
+          "title": "Buddy Daddies"
+        },
+        {
+          "year": 2025,
+          "title": "Ninja Kamui"
+        },
+        {
+          "year": 2026,
+          "title": "Lazarus"
+        }
+      ]
+    },
+    "best_animation": {
+      "name": "Best Animation",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Yuri on Ice"
+        },
+        {
+          "year": 2018,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2019,
+          "title": "Violet Evergarden"
+        },
+        {
+          "year": 2020,
+          "title": "Mob Psycho 100 II"
+        },
+        {
+          "year": 2021,
+          "title": "Keep Your Hands Off Eizouken!"
+        },
+        {
+          "year": 2022,
+          "title": "Demon Slayer: Kimetsu no Yaiba Mugen Train Arc"
+        },
+        {
+          "year": 2023,
+          "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc"
+        },
+        {
+          "year": 2024,
+          "title": "Demon Slayer: Kimetsu no Yaiba Swordsmith Village Arc"
+        },
+        {
+          "year": 2025,
+          "title": "Demon Slayer: Kimetsu no Yaiba Hashira Training Arc"
+        },
+        {
+          "year": 2026,
+          "title": "Solo Leveling: Arise from the Shadow"
+        }
+      ]
+    },
+    "best_director": {
+      "name": "Best Director",
+      "winners": [
+        {
+          "year": 2020,
+          "title": "Attack on Titan"
+        },
+        {
+          "year": 2021,
+          "title": "Keep Your Hands Off Eizouken!"
+        },
+        {
+          "year": 2022,
+          "title": "Odd Taxi"
+        },
+        {
+          "year": 2023,
+          "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc"
+        },
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2025,
+          "title": "Frieren: Beyond Journey's End"
+        },
+        {
+          "year": 2026,
+          "title": "The Apothecary Diaries"
+        }
+      ]
+    },
+    "best_action": {
+      "name": "Best Action",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Mob Psycho 100"
+        },
+        {
+          "year": 2018,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2022,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2023,
+          "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc"
+        },
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2025,
+          "title": "Solo Leveling"
+        },
+        {
+          "year": 2026,
+          "title": "Solo Leveling: Arise from the Shadow"
+        }
+      ]
+    },
+    "best_fantasy": {
+      "name": "Best Fantasy",
+      "winners": [
+        {
+          "year": 2020,
+          "title": "The Promised Neverland"
+        },
+        {
+          "year": 2021,
+          "title": "Re:Zero − Starting Life in Another World"
+        },
+        {
+          "year": 2022,
+          "title": "That Time I Got Reincarnated as a Slime"
+        },
+        {
+          "year": 2023,
+          "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc"
+        },
+        {
+          "year": 2024,
+          "title": "Demon Slayer: Kimetsu no Yaiba Swordsmith Village Arc"
+        }
+      ]
+    },
+    "best_isekai": {
+      "name": "Best Isekai",
+      "winners": [
+        {
+          "year": 2025,
+          "title": "Re:Zero − Starting Life in Another World"
+        },
+        {
+          "year": 2026,
+          "title": "Re:Zero − Starting Life in Another World"
+        }
+      ]
+    },
+    "best_drama": {
+      "name": "Best Drama",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Erased"
+        },
+        {
+          "year": 2018,
+          "title": "The Ancient Magus' Bride"
+        },
+        {
+          "year": 2020,
+          "title": "Vinland Saga"
+        },
+        {
+          "year": 2021,
+          "title": "Fruits Basket"
+        },
+        {
+          "year": 2022,
+          "title": "To Your Eternity"
+        },
+        {
+          "year": 2023,
+          "title": "Attack on Titan: The Final Season Part 2"
+        },
+        {
+          "year": 2024,
+          "title": "Attack on Titan: The Final Season The Final Chapters Special 1"
+        },
+        {
+          "year": 2025,
+          "title": "Frieren: Beyond Journey's End"
+        },
+        {
+          "year": 2026,
+          "title": "The Apothecary Diaries"
+        }
+      ]
+    },
+    "best_comedy": {
+      "name": "Best Comedy",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Haven't You Heard? I'm Sakamoto"
+        },
+        {
+          "year": 2018,
+          "title": "Miss Kobayashi's Dragon Maid"
+        },
+        {
+          "year": 2020,
+          "title": "Kaguya-sama: Love Is War"
+        },
+        {
+          "year": 2021,
+          "title": "Kaguya-sama: Love Is War?"
+        },
+        {
+          "year": 2022,
+          "title": "Komi Can't Communicate"
+        },
+        {
+          "year": 2023,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2024,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2025,
+          "title": "Mashle: Magic and Muscles The Divine Visionary Candidate Exam Arc"
+        },
+        {
+          "year": 2026,
+          "title": "Dandadan"
+        }
+      ]
+    },
+    "best_romance": {
+      "name": "Best Romance",
+      "winners": [
+        {
+          "year": 2022,
+          "title": "Horimiya"
+        },
+        {
+          "year": 2023,
+          "title": "Kaguya-sama: Love Is War – Ultra Romantic"
+        },
+        {
+          "year": 2024,
+          "title": "Horimiya: The Missing Pieces"
+        },
+        {
+          "year": 2025,
+          "title": "Blue Box"
+        },
+        {
+          "year": 2026,
+          "title": "The Fragrant Flower Blooms with Dignity"
+        }
+      ]
+    },
+    "best_slice_of_life": {
+      "name": "Best Slice of Life",
+      "winners": [
+        {
+          "year": 2018,
+          "title": "Girls' Last Tour"
+        },
+        {
+          "year": 2024,
+          "title": "Bocchi the Rock!"
+        },
+        {
+          "year": 2025,
+          "title": "Makeine: Too Many Losing Heroines!"
+        },
+        {
+          "year": 2026,
+          "title": "Spy × Family"
+        }
+      ]
+    },
+    "best_background_art": {
+      "name": "Best Background Art",
+      "winners": [
+        {
+          "year": 2025,
+          "title": "Frieren: Beyond Journey's End"
+        },
+        {
+          "year": 2026,
+          "title": "Gachiakuta"
+        }
+      ]
+    },
+    "best_character_design": {
+      "name": "Best Character Design",
+      "winners": [
+        {
+          "year": 2019,
+          "title": "JoJo's Bizarre Adventure: Golden Wind"
+        },
+        {
+          "year": 2021,
+          "title": "Toilet-Bound Hanako-kun"
+        },
+        {
+          "year": 2022,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2023,
+          "title": "Demon Slayer: Kimetsu no Yaiba Entertainment District Arc"
+        },
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2025,
+          "title": "Dandadan"
+        },
+        {
+          "year": 2026,
+          "title": "Gachiakuta"
+        }
+      ]
+    },
+    "best_cinematography": {
+      "name": "Best Cinematography",
+      "winners": [
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        }
+      ]
+    },
+    "best_art_direction": {
+      "name": "Best Art Direction",
+      "winners": [
+        {
+          "year": 2024,
+          "title": "Demon Slayer: Kimetsu no Yaiba Swordsmith Village Arc"
+        }
+      ]
+    },
+    "best_score": {
+      "name": "Best Score",
+      "winners": [
+        {
+          "year": 2018,
+          "title": "Made in Abyss"
+        },
+        {
+          "year": 2021,
+          "title": "Tower of God"
+        },
+        {
+          "year": 2022,
+          "title": "Demon Slayer: Kimetsu no Yaiba Mugen Train Arc"
+        },
+        {
+          "year": 2023,
+          "title": "Attack on Titan: The Final Season Part 2"
+        },
+        {
+          "year": 2024,
+          "title": "Attack on Titan: The Final Season The Final Chapters Special 1"
+        },
+        {
+          "year": 2025,
+          "title": "Solo Leveling"
+        },
+        {
+          "year": 2026,
+          "title": "Demon Slayer: Kimetsu no Yaiba – The Movie: Infinity Castle"
+        }
+      ]
+    },
+    "best_song": {
+      "name": "Best Anime Song",
+      "winners": [
+        {
+          "year": 2023,
+          "title": "Attack on Titan: The Final Season Part 2"
+        },
+        {
+          "year": 2024,
+          "title": "Oshi no Ko"
+        },
+        {
+          "year": 2025,
+          "title": "Dandadan"
+        },
+        {
+          "year": 2026,
+          "title": "Chainsaw Man – The Movie: Reze Arc"
+        }
+      ]
+    },
+    "best_opening": {
+      "name": "Best Opening",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Yuri on Ice"
+        },
+        {
+          "year": 2018,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2019,
+          "title": "Darling in the Franxx"
+        },
+        {
+          "year": 2020,
+          "title": "Mob Psycho 100 II"
+        },
+        {
+          "year": 2021,
+          "title": "Beastars"
+        },
+        {
+          "year": 2022,
+          "title": "Attack on Titan: The Final Season Part 1"
+        },
+        {
+          "year": 2023,
+          "title": "Attack on Titan: The Final Season Part 2"
+        },
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2025,
+          "title": "Dandadan"
+        },
+        {
+          "year": 2026,
+          "title": "Dandadan"
+        }
+      ]
+    },
+    "best_ending": {
+      "name": "Best Ending",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Yuri on Ice"
+        },
+        {
+          "year": 2018,
+          "title": "Miss Kobayashi's Dragon Maid"
+        },
+        {
+          "year": 2020,
+          "title": "Kaguya-sama: Love Is War"
+        },
+        {
+          "year": 2021,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2022,
+          "title": "Demon Slayer: Kimetsu no Yaiba Mugen Train Arc"
+        },
+        {
+          "year": 2023,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2025,
+          "title": "Solo Leveling"
+        },
+        {
+          "year": 2026,
+          "title": "My Hero Academia: Final Season"
+        }
+      ]
+    },
+    "best_boy": {
+      "name": "Best Boy",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Yuri on Ice"
+        },
+        {
+          "year": 2018,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2019,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2020,
+          "title": "Demon Slayer: Kimetsu no Yaiba"
+        },
+        {
+          "year": 2021,
+          "title": "Haikyu!! To the Top"
+        },
+        {
+          "year": 2022,
+          "title": "Ranking of Kings"
+        }
+      ]
+    },
+    "best_girl": {
+      "name": "Best Girl",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Re:Zero − Starting Life in Another World"
+        },
+        {
+          "year": 2018,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2019,
+          "title": "Rascal Does Not Dream of Bunny Girl Senpai"
+        },
+        {
+          "year": 2020,
+          "title": "The Rising of the Shield Hero"
+        },
+        {
+          "year": 2021,
+          "title": "Kaguya-sama: Love Is War?"
+        },
+        {
+          "year": 2022,
+          "title": "Jujutsu Kaisen"
+        }
+      ]
+    },
+    "best_protagonist": {
+      "name": "Best Protagonist",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2018,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2019,
+          "title": "That Time I Got Reincarnated as a Slime"
+        },
+        {
+          "year": 2020,
+          "title": "Dr. Stone"
+        },
+        {
+          "year": 2021,
+          "title": "My Next Life as a Villainess: All Routes Lead to Doom!"
+        },
+        {
+          "year": 2022,
+          "title": "Odd Taxi"
+        }
+      ]
+    },
+    "best_antagonist": {
+      "name": "Best Antagonist",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Erased"
+        },
+        {
+          "year": 2018,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2019,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2020,
+          "title": "The Promised Neverland"
+        },
+        {
+          "year": 2021,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2022,
+          "title": "Attack on Titan: The Final Season Part 1"
+        }
+      ]
+    },
+    "best_couple": {
+      "name": "Best Couple",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Yuri on Ice"
+        },
+        {
+          "year": 2020,
+          "title": "Kaguya-sama: Love Is War"
+        },
+        {
+          "year": 2021,
+          "title": "TONIKAWA: Over The Moon For You"
+        }
+      ]
+    },
+    "best_fight": {
+      "name": "Best Fight",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Mob Psycho 100"
+        },
+        {
+          "year": 2021,
+          "title": "My Hero Academia"
+        },
+        {
+          "year": 2022,
+          "title": "Jujutsu Kaisen"
+        }
+      ]
+    },
+    "must_protect": {
+      "name": "Must Protect Character",
+      "winners": [
+        {
+          "year": 2023,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2024,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2025,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2026,
+          "title": "Spy × Family"
+        }
+      ]
+    },
+    "global_impact": {
+      "name": "Global Impact",
+      "winners": [
+        {
+          "year": 2025,
+          "title": "Attack on Titan"
+        }
+      ]
+    },
+    "heartwarming_scene": {
+      "name": "Most Heartwarming Scene",
+      "winners": [
+        {
+          "year": 2017,
+          "title": "Yuri on Ice"
+        }
+      ]
+    },
+    "best_cgi": {
+      "name": "Best CGI",
+      "winners": [
+        {
+          "year": 2018,
+          "title": "Land of the Lustrous"
+        }
+      ]
+    },
+    "best_main_character": {
+      "name": "Best Main Character",
+      "winners": [
+        {
+          "year": 2023,
+          "title": "Attack on Titan: The Final Season Part 2"
+        },
+        {
+          "year": 2024,
+          "title": "One Piece"
+        },
+        {
+          "year": 2025,
+          "title": "Solo Leveling"
+        },
+        {
+          "year": 2026,
+          "title": "The Apothecary Diaries"
+        }
+      ]
+    },
+    "best_supporting": {
+      "name": "Best Supporting",
+      "winners": [
+        {
+          "year": 2023,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2024,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2025,
+          "title": "Frieren: Beyond Journey's End"
+        },
+        {
+          "year": 2026,
+          "title": "My Hero Academia: Final Season"
+        }
+      ]
+    }
+  }
+}

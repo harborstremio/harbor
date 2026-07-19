@@ -1,0 +1,386 @@
+{
+  "id": "animation_kobe",
+  "name": "Animation Kobe",
+  "shortName": "Animation Kobe",
+  "wikipedia": "https://en.wikipedia.org/wiki/Animation_Kobe",
+  "updatedAt": "2026-05-24",
+  "categories": {
+    "best_film": {
+      "name": "Theatrical Film Award",
+      "winners": [
+        {
+          "year": 1996,
+          "title": "Ghost in the Shell"
+        },
+        {
+          "year": 1997,
+          "title": "Princess Mononoke"
+        },
+        {
+          "year": 1998,
+          "title": "Pokémon: Mewtwo Strikes Back"
+        },
+        {
+          "year": 1999,
+          "title": "Cardcaptor Sakura The Movie"
+        },
+        {
+          "year": 2000,
+          "title": "Cardcaptor Sakura The Movie 2: The Sealed Card"
+        },
+        {
+          "year": 2001,
+          "title": "Spirited Away"
+        },
+        {
+          "year": 2002,
+          "title": "The Cat Returns"
+        },
+        {
+          "year": 2003,
+          "title": "Millennium Actress"
+        },
+        {
+          "year": 2004,
+          "title": "Ghost in the Shell 2: Innocence"
+        },
+        {
+          "year": 2005,
+          "title": "New Translation Zeta Gundam: Heirs to the Stars"
+        },
+        {
+          "year": 2006,
+          "title": "The Girl Who Leapt Through Time"
+        },
+        {
+          "year": 2007,
+          "title": "Paprika"
+        },
+        {
+          "year": 2008,
+          "title": "Evangelion: 1.0 You Are (Not) Alone"
+        },
+        {
+          "year": 2009,
+          "title": "WALL-E"
+        },
+        {
+          "year": 2010,
+          "title": "The Disappearance of Haruhi Suzumiya"
+        },
+        {
+          "year": 2011,
+          "title": "Macross Frontier: Sayonara no Tsubasa"
+        },
+        {
+          "year": 2012,
+          "title": "K-On! The Movie"
+        },
+        {
+          "year": 2013,
+          "title": "The Garden of Words"
+        },
+        {
+          "year": 2014,
+          "title": "Puella Magi Madoka Magica: Rebellion"
+        },
+        {
+          "year": 2015,
+          "title": "Ghost in the Shell: The New Movie"
+        }
+      ]
+    },
+    "best_tv": {
+      "name": "Television Award",
+      "winners": [
+        {
+          "year": 1996,
+          "title": "Neon Genesis Evangelion"
+        },
+        {
+          "year": 1997,
+          "title": "Revolutionary Girl Utena"
+        },
+        {
+          "year": 1998,
+          "title": "Cowboy Bebop"
+        },
+        {
+          "year": 1999,
+          "title": "∀ Gundam"
+        },
+        {
+          "year": 2000,
+          "title": "Infinite Ryvius"
+        },
+        {
+          "year": 2001,
+          "title": "Angelic Layer"
+        },
+        {
+          "year": 2002,
+          "title": "RahXephon"
+        },
+        {
+          "year": 2003,
+          "title": "Mobile Suit Gundam SEED"
+        },
+        {
+          "year": 2004,
+          "title": "Fullmetal Alchemist"
+        },
+        {
+          "year": 2005,
+          "title": "Gankutsuō: The Count of Monte Cristo"
+        },
+        {
+          "year": 2006,
+          "title": "The Melancholy of Haruhi Suzumiya"
+        },
+        {
+          "year": 2007,
+          "title": "Code Geass"
+        },
+        {
+          "year": 2008,
+          "title": "Code Geass R2"
+        },
+        {
+          "year": 2009,
+          "title": "Eden of the East"
+        },
+        {
+          "year": 2010,
+          "title": "K-On!!"
+        },
+        {
+          "year": 2011,
+          "title": "Puella Magi Madoka Magica"
+        },
+        {
+          "year": 2012,
+          "title": "YuruYuri"
+        },
+        {
+          "year": 2013,
+          "title": "Attack on Titan"
+        },
+        {
+          "year": 2014,
+          "title": "Love Live!"
+        },
+        {
+          "year": 2015,
+          "title": "Shirobako"
+        }
+      ]
+    },
+    "best_packaged": {
+      "name": "Packaged Work Award",
+      "winners": [
+        {
+          "year": 1996,
+          "title": "Key the Metal Idol"
+        },
+        {
+          "year": 1997,
+          "title": "Gundam Wing: Endless Waltz"
+        },
+        {
+          "year": 1998,
+          "title": "Sakura Taisen 2 ~Kimi, Shinitamou koto Nakare~"
+        },
+        {
+          "year": 1999,
+          "title": "Blue Submarine No. 6"
+        },
+        {
+          "year": 2000,
+          "title": "Shenmue"
+        },
+        {
+          "year": 2001,
+          "title": "Gran Turismo 3: A-Spec"
+        },
+        {
+          "year": 2002,
+          "title": "Voices of a Distant Star"
+        },
+        {
+          "year": 2003,
+          "title": "Sentō Yōsei Yukikaze"
+        },
+        {
+          "year": 2004,
+          "title": "Haré+Guu FINAL"
+        },
+        {
+          "year": 2005,
+          "title": "Diebuster"
+        },
+        {
+          "year": 2006,
+          "title": "The Wings of Rean"
+        },
+        {
+          "year": 2007,
+          "title": "Ghost in the Shell: Stand Alone Complex - Solid State Society"
+        }
+      ]
+    },
+    "best_network": {
+      "name": "Network Award",
+      "winners": [
+        {
+          "year": 1996,
+          "title": "Jungle Park"
+        },
+        {
+          "year": 1997,
+          "title": "Girlfriend of Steel"
+        },
+        {
+          "year": 1998,
+          "title": "Not awarded"
+        },
+        {
+          "year": 2000,
+          "title": "Pokémon Gold and Silver"
+        },
+        {
+          "year": 2001,
+          "title": "Phantasy Star Online"
+        },
+        {
+          "year": 2002,
+          "title": "Final Fantasy XI"
+        },
+        {
+          "year": 2003,
+          "title": "Grand-Ma"
+        },
+        {
+          "year": 2004,
+          "title": "Ski Jumping Pairs"
+        },
+        {
+          "year": 2005,
+          "title": "Mayutoro The Toons"
+        },
+        {
+          "year": 2006,
+          "title": "Yawaraka Sensha"
+        },
+        {
+          "year": 2007,
+          "title": "Second Life"
+        },
+        {
+          "year": 2008,
+          "title": "Hatsune Miku"
+        },
+        {
+          "year": 2009,
+          "title": "Melancholy of Haruhi-chan Suzumiya"
+        },
+        {
+          "year": 2010,
+          "title": "Miku no Nichi Kanshasai 39's Giving Day"
+        },
+        {
+          "year": 2011,
+          "title": "Hetalia: World Series"
+        },
+        {
+          "year": 2012,
+          "title": "Osawari Tantei: Nameko Saibai Kit"
+        }
+      ]
+    },
+    "best_theme_song": {
+      "name": "Theme Song Award",
+      "winners": [
+        {
+          "year": 1996,
+          "title": "Best Theme Song"
+        },
+        {
+          "year": 1997,
+          "title": "Best Music Composing"
+        },
+        {
+          "year": 1998,
+          "title": "Not awarded"
+        },
+        {
+          "year": 1999,
+          "title": "AM Kobe Award"
+        },
+        {
+          "year": 2000,
+          "title": "AM Kobe Award"
+        },
+        {
+          "year": 2001,
+          "title": "AM Kobe Award"
+        },
+        {
+          "year": 2002,
+          "title": "AM Kobe Award"
+        },
+        {
+          "year": 2003,
+          "title": "AM Kobe Award"
+        },
+        {
+          "year": 2004,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2005,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2006,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2007,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2008,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2009,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2010,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2011,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2012,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2013,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2014,
+          "title": "Radio Kansai Award"
+        },
+        {
+          "year": 2015,
+          "title": "Radio Kansai Award"
+        }
+      ]
+    }
+  }
+}
