@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { PlayerStatus } from "@/lib/player/bridge";
@@ -7,7 +7,7 @@ import {
   initialBufferingIndicatorState,
 } from "./buffering-indicator-state";
 
-export function BufferingIndicator({
+export const BufferingIndicator = memo(function BufferingIndicator({
   buffering,
   status,
   suppressed,
@@ -49,4 +49,4 @@ export function BufferingIndicator({
     />,
     playPauseButton,
   );
-}
+});

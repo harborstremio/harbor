@@ -1,7 +1,9 @@
 import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
-import { browseFetcher, listBrowseCatalogs, type BrowseCatalog } from "@/lib/catalog-browse";
+import { browseFetcher, listBrowseCatalogs } from "@/lib/catalog-browse";
+import { queryKeys } from "@/lib/query";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
@@ -85,7 +87,10 @@ function PillSelect({
         </span>
         {hasLogos && <OptionIcon logo={valueLogo} label={value} />}
         <span className="max-w-[180px] truncate text-[13.5px] font-medium text-ink">{value}</span>
-        <ChevronDown size={14} className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={14}
+          className={`text-ink-muted transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute start-0 top-[calc(100%+8px)] z-30 flex max-h-[340px] w-[300px] max-w-[calc(100vw-3rem)] flex-col overflow-hidden rounded-2xl border border-edge bg-canvas shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-xl">
@@ -115,12 +120,16 @@ function PillSelect({
                     setOpen(false);
                   }}
                   className={`flex items-center gap-2.5 px-3.5 py-2 text-start transition-colors ${
-                    sel ? "bg-elevated text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+                    sel
+                      ? "bg-elevated text-ink"
+                      : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
                   }`}
                 >
                   {hasLogos && <OptionIcon logo={o.logo} label={o.label} />}
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className={`truncate text-[13.5px] ${sel ? "font-semibold" : ""}`}>{o.label}</span>
+                    <span className={`truncate text-[13.5px] ${sel ? "font-semibold" : ""}`}>
+                      {o.label}
+                    </span>
                     {o.sub && <span className="truncate text-[11px] text-ink-subtle">{o.sub}</span>}
                   </span>
                 </button>
@@ -137,20 +146,16 @@ export function CatalogBrowser() {
   const t = useT();
   const { authKey } = useAuth();
   const { openGrid } = useView();
-  const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
   const [type, setType] = useState("");
   const [catKey, setCatKey] = useState("");
   const [genre, setGenre] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    void listBrowseCatalogs(authKey).then((list) => {
-      if (!cancelled) setCatalogs(list);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [authKey]);
+  // Shares the TanStack Query entry the catalogs prefetch already warms.
+  const { data: catalogs = [] } = useQuery({
+    queryKey: queryKeys.catalog.list(authKey),
+    queryFn: () => listBrowseCatalogs(authKey),
+    staleTime: 5 * 60_000,
+  });
 
   const types = useMemo(() => {
     const seen = new Set<string>();
@@ -176,7 +181,10 @@ export function CatalogBrowser() {
     }
   }, [ofType, catKey]);
 
-  const selected = useMemo(() => catalogs.find((c) => c.key === catKey) ?? null, [catalogs, catKey]);
+  const selected = useMemo(
+    () => catalogs.find((c) => c.key === catKey) ?? null,
+    [catalogs, catKey],
+  );
 
   if (catalogs.length === 0 || types.length === 0) return null;
 
@@ -190,7 +198,9 @@ export function CatalogBrowser() {
 
   return (
     <div className="flex shrink-0 flex-col gap-3">
-      <h2 className="text-[15px] font-semibold tracking-tight text-ink">{t("Browse your catalogs")}</h2>
+      <h2 className="text-[15px] font-semibold tracking-tight text-ink">
+        {t("Browse your catalogs")}
+      </h2>
       <div className="flex w-fit max-w-full flex-wrap items-center gap-2 rounded-2xl bg-elevated/30 p-2 ring-1 ring-edge-soft/50">
         <PillSelect
           label={t("Type")}
@@ -203,7 +213,12 @@ export function CatalogBrowser() {
           value={selected?.name ?? "—"}
           valueLogo={selected?.addonLogo}
           hasLogos
-          options={ofType.map((c) => ({ value: c.key, label: c.name, sub: c.addonName, logo: c.addonLogo }))}
+          options={ofType.map((c) => ({
+            value: c.key,
+            label: c.name,
+            sub: c.addonName,
+            logo: c.addonLogo,
+          }))}
           onChange={(v) => {
             setCatKey(v);
             setGenre(null);

@@ -2,9 +2,10 @@
 
 ## Task Completion Requirements
 
-- Run `vp check` for files changed by the task before considering it complete.
-- Run `vp run typecheck` after TypeScript changes.
+- Run `pnpm run check` (`vp check`) for files changed by the task before considering it complete.
+- Run `pnpm run typecheck` (`tsc -b --pretty false`) after TypeScript changes.
 - Run `cargo check --manifest-path src-tauri/Cargo.toml` after Rust changes.
+- Run `pnpm tauri:build:linux-system` (`tauri build --config src-tauri/tauri.linux-system.conf.json`) to build the full Linux binary.
 - Test platform-specific changes on the affected platform when possible.
 - Do not leave warnings or errors introduced by the task unresolved.
 - If a repository-wide check fails on untouched files, record the baseline and do not reformat or refactor unrelated files.
@@ -39,6 +40,7 @@ When trade-offs are required, prefer predictable behavior over clever or tempora
 - `src/components/`: Reusable interface components.
 - `src/hooks/`: Shared React behavior.
 - `src/lib/`: Framework-independent TypeScript utilities.
+- `src/router/`: TanStack Router shell and view/path synchronization.
 - `src-tauri/`: Tauri application and native Rust integrations.
 - `src-tauri/src/`: Native commands, playback, window management, and platform-specific code.
 - `harbor-core/`: Shared Rust stream parsing and ranking logic.

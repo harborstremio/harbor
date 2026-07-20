@@ -31,6 +31,10 @@ const stremioButtonSource = readFileSync(
   new URL("../src/components/player/transport/stremio-btn.tsx", import.meta.url),
   "utf8",
 );
+const fullscreenSource = readFileSync(
+  new URL("../src/views/player/hooks/use-fullscreen.ts", import.meta.url),
+  "utf8",
+);
 
 test("native mpv buffering is published through the player snapshot", () => {
   assert.match(nativeMpvSource, /\("paused-for-cache",\s*\d+,\s*PropertyKind::Flag\)/);
@@ -54,4 +58,11 @@ test("playback stalls use a distinct quiet buffering indicator", () => {
   assert.match(bufferingIndicatorSource, /motion-safe:animate-spin/);
   assert.match(controlRendererSource, /data-player-play-pause/);
   assert.match(stremioButtonSource, /data-player-play-pause/);
+});
+
+test("fullscreen only reapplies WebView transparency for embedded mpv", () => {
+  assert.match(
+    fullscreenSource,
+    /dataset\.mpvEmbed === "1"[\s\S]*?invoke\("webview_reapply_transparency"\)/,
+  );
 });

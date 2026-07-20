@@ -19,7 +19,9 @@ import {
 import { useCustomLists } from "@/lib/custom-lists";
 import { StreamingRail } from "@/components/streaming-rail";
 import { TopRankCard } from "@/components/top-rank-card";
+import { useQueryClient } from "@tanstack/react-query";
 import { hasTmdbProviderAddon, loadAddonRows, userAddons, type AddonRow } from "@/lib/addons";
+import { queryKeys } from "@/lib/query";
 import { isAnimeRow } from "@/lib/is-anime-row";
 import { buildArabicHomeRows } from "@/lib/arabic/home-rows";
 import { useAuth } from "@/lib/auth";
@@ -87,6 +89,7 @@ import type { SourceRow } from "@/lib/custom-sources";
 export function Home({ active = true, onReady }: { active?: boolean; onReady?: () => void }) {
   const { authKey, user } = useAuth();
   const { settings, update } = useSettings();
+  const queryClient = useQueryClient();
   const t = useT();
   const uiLang = useUiLanguage();
   const [editMode, setEditMode] = useState(false);
@@ -192,9 +195,14 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       setHeroReady(true);
 
       const dedupRows = isClassic ? false : !settings.homeShowAllAddonRows;
-      const addons = await loadAddonRows(authKey, { dedup: dedupRows }).catch(
-        () => [] as AddonRow[],
-      );
+      // TanStack Query cache so revisiting home reuses addon catalog rows.
+      const addons = await queryClient
+        .fetchQuery({
+          queryKey: [...queryKeys.catalog.rows(authKey), { dedup: dedupRows }] as const,
+          queryFn: () => loadAddonRows(authKey, { dedup: dedupRows }),
+          staleTime: 3 * 60_000,
+        })
+        .catch(() => [] as AddonRow[]);
       if (cancelled) return;
       const filtered = isClassic
         ? addons
@@ -212,6 +220,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     };
   }, [
     authKey,
+    queryClient,
     settings.tmdbKey,
     settings.tmdbLanguage,
     settings.region,

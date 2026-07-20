@@ -28,27 +28,34 @@ export function EmptyState({
 
 export function NoSourcesState({
   addonCount,
+  hasDebrid,
   streamIds,
   isAnime,
 }: {
   addonCount: number;
+  hasDebrid: boolean;
   streamIds: string[];
   isAnime: boolean;
 }) {
   const isWeb = typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
-  const tip = isAnime
-    ? "Anime sources are usually richer through Torrentio's anime config or AIOStreams. Make sure one is installed in Stremio."
-    : isWeb
-      ? "On the web, Harbor can only reach addons that allow browser access (Torrentio, TorBox, Cinemeta). For unreleased titles, no source typically exists yet."
-      : "Try signing in to Stremio so Harbor can use your addon collection. Older or foreign titles often need Torrentio + a debrid addon to find anything.";
+  const libraryOnly = hasDebrid && addonCount === 0;
+  const tip = libraryOnly
+    ? "Harbor searched your debrid library, but this title is not already saved there. Install a stream addon if you want to search for new torrents."
+    : isAnime
+      ? "Anime sources are usually richer through Torrentio's anime config or AIOStreams. Make sure one is installed in Stremio."
+      : isWeb
+        ? "On the web, Harbor can only reach addons that allow browser access (Torrentio, TorBox, Cinemeta). For unreleased titles, no source typically exists yet."
+        : "Try signing in to Stremio so Harbor can use your addon collection. Older or foreign titles often need Torrentio + a debrid addon to find anything.";
   return (
     <div className="rounded-[24px] border border-edge-soft/70 bg-canvas/80 px-9 py-11">
       <div className="flex flex-col items-center gap-5 text-center">
         <p className="text-[10.5px] font-bold uppercase tracking-[0.42em] text-ink-subtle">
-          No source returned a stream
+          {libraryOnly ? "Not found in your debrid library" : "No source returned a stream"}
         </p>
         <h2 className="font-display text-[28px] leading-tight text-ink">
-          Harbor queried {addonCount} addon{addonCount === 1 ? "" : "s"} and got nothing back
+          {libraryOnly
+            ? "Your library does not contain a matching file"
+            : `Harbor queried ${addonCount} addon${addonCount === 1 ? "" : "s"} and got nothing back`}
         </h2>
         <p className="max-w-md text-[13.5px] leading-relaxed text-ink-muted">{tip}</p>
         <p className="text-[10.5px] font-mono uppercase tracking-[0.18em] text-ink-subtle/70">
@@ -82,8 +89,8 @@ export function FilteredOutState({
           Strict filters dropped everything
         </h2>
         <p className="max-w-lg text-[14px] leading-relaxed text-ink-muted">
-          Harbor blocks suspicious files and mismatched releases by default. For older shows
-          and unusual titles this is sometimes too tight.
+          Harbor blocks suspicious files and mismatched releases by default. For older shows and
+          unusual titles this is sometimes too tight.
         </p>
         {groups.length > 0 && (
           <ul className="flex flex-wrap justify-center gap-2 pt-1">

@@ -1,8 +1,11 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Lock } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { ProfileChip } from "@/chrome/sidebar/profile-chip";
 import { useT } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
+import { preloadNavPage } from "@/lib/query";
 import { useSettings } from "@/lib/settings";
 import { useHarborLogo } from "@/lib/harbor-logo";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
@@ -13,7 +16,17 @@ import { KidsSidebarDoodles } from "./kids-sidebar-doodles";
 import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 
-const PRIMARY_IDS = new Set(["home", "discover", "catalogs", "movies", "shows", "kids", "anime", "live", "vod"]);
+const PRIMARY_IDS = new Set([
+  "home",
+  "discover",
+  "catalogs",
+  "movies",
+  "shows",
+  "kids",
+  "anime",
+  "live",
+  "vod",
+]);
 
 export function Sidebar() {
   const { view, setView, chromeHidden } = useView();
@@ -79,7 +92,11 @@ export function Sidebar() {
                   alt="o"
                   draggable={false}
                   className="inline-block h-[0.92em] w-auto"
-                  style={{ transform: "translateY(0.08em)", marginLeft: "-5px", marginRight: "-5px" }}
+                  style={{
+                    transform: "translateY(0.08em)",
+                    marginLeft: "-5px",
+                    marginRight: "-5px",
+                  }}
                 />
                 r
               </span>
@@ -131,8 +148,12 @@ export function Sidebar() {
               </div>
               {!collapsed && (
                 <div className="hidden min-w-0 flex-1 lg:block">
-                  <div className="truncate text-[13.5px] font-medium text-ink-muted">{t("chrome.locked")}</div>
-                  <div className="truncate text-[12px] text-ink-subtle">{t("chrome.parentalOn")}</div>
+                  <div className="truncate text-[13.5px] font-medium text-ink-muted">
+                    {t("chrome.locked")}
+                  </div>
+                  <div className="truncate text-[12px] text-ink-subtle">
+                    {t("chrome.parentalOn")}
+                  </div>
                 </div>
               )}
             </div>
@@ -175,9 +196,14 @@ function ScrollableNav({
   onPinNav: (v: View) => void;
 }) {
   const { settings } = useSettings();
+  const { authKey } = useAuth();
+  const queryClient = useQueryClient();
   const kid = useActiveKid();
   const t = useT();
   const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
+  const warm = (view: View) => {
+    preloadNavPage(queryClient, view, settings.tmdbKey, settings.region, authKey, settings);
+  };
   const isItemVisible = (item: NavItem) => {
     if (kid) return item.view === "kids";
     if (item.view === "kids") return false;
@@ -236,6 +262,7 @@ function ScrollableNav({
               big={!!kid}
               active={view === item.view}
               onClick={() => setView(item.view)}
+              onIntent={() => warm(item.view)}
             />
           ))}
         </div>
@@ -284,6 +311,7 @@ function NavItem({
   label,
   active,
   onClick,
+  onIntent,
   gated,
   collapsed,
   big,
@@ -293,6 +321,8 @@ function NavItem({
   label: string;
   active?: boolean;
   onClick?: () => void;
+  /** TanStack Query preload on hover/focus. */
+  onIntent?: () => void;
   gated?: boolean;
   collapsed?: boolean;
   big?: boolean;
@@ -304,7 +334,11 @@ function NavItem({
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => {
+        setHovered(true);
+        onIntent?.();
+      }}
+      onFocus={() => onIntent?.()}
       onMouseLeave={() => setHovered(false)}
       data-harbor-nav={view}
       data-active={active ? "" : undefined}
@@ -334,4 +368,3 @@ function NavItem({
     </button>
   );
 }
-

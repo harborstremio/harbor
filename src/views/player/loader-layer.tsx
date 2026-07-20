@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { ComponentProps } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import type { PlayerSrc } from "@/lib/view";
@@ -5,7 +6,7 @@ import { CinematicPlayerLoader } from "./cinematic-player-loader";
 import { LiveChannelError } from "./live-channel-error";
 import { LocalFileError } from "./local-file-error";
 
-export function LoaderLayer({
+export const LoaderLayer = memo(function LoaderLayer({
   src,
   snap,
   isLocalSrc,
@@ -59,4 +60,4 @@ export function LoaderLayer({
       )}
     </>
   );
-}
+});

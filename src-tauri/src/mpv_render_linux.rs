@@ -5,7 +5,7 @@ use std::ffi::{c_void, CString};
 use std::os::raw::{c_char, c_int};
 use std::ptr::NonNull;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI32, AtomicU64, Ordering};
 
 use gtk::gdk;
 use gtk::glib;
@@ -13,8 +13,6 @@ use gtk::glib::translate::{Stash, ToGlibPtr};
 use gtk::prelude::*;
 use libmpv2::render::{OpenGLInitParams, RenderContext, RenderParam, RenderParamApiType};
 use libmpv2_sys::mpv_handle;
-
-use crate::mpv::{map_css_geometry, MpvGeometry};
 
 const GL_FRAMEBUFFER_BINDING: u32 = 0x8CA6;
 const GL_FRAMEBUFFER: u32 = 0x8D40;
@@ -57,15 +55,15 @@ struct Embed {
 }
 
 thread_local! {
-    // GTK objects are main-thread-only. Keeping them thread-local makes that
-    // invariant explicit and avoids unsound Send/Sync implementations.
     static EMBED: RefCell<Option<Embed>> = const { RefCell::new(None) };
     static PENDING: RefCell<Option<Pending>> = const { RefCell::new(None) };
 }
 
 static REDRAW_PENDING: AtomicBool = AtomicBool::new(false);
-static LAST_SURFACE: AtomicU64 = AtomicU64::new(0);
 static PROC_WAYLAND: AtomicBool = AtomicBool::new(false);
+static FBO_WIDTH: AtomicI32 = AtomicI32::new(-1);
+static FBO_HEIGHT: AtomicI32 = AtomicI32::new(-1);
+static LAST_SURFACE: AtomicU64 = AtomicU64::new(0);
 static FBO_ZERO_WARNED: AtomicBool = AtomicBool::new(false);
 
 type GlProcLoader = unsafe extern "C" fn(*const c_char) -> *mut c_void;
@@ -134,7 +132,7 @@ fn current_fbo() -> i32 {
     }
 }
 
-fn fbo_color_size() -> Option<(i32, i32)> {
+fn query_fbo_dimensions() -> Option<(i32, i32)> {
     let get_attach: unsafe extern "C" fn(u32, u32, u32, *mut c_int) =
         resolve_gl(b"glGetFramebufferAttachmentParameteriv\0")?;
     let bind_rb: unsafe extern "C" fn(u32, u32) = resolve_gl(b"glBindRenderbuffer\0")?;
@@ -257,7 +255,6 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
         .ok_or_else(|| "no webview child in vbox".to_string())?;
 
     let overlay = gtk::Overlay::new();
-    let fixed = gtk::Fixed::new();
     let area = gtk::GLArea::new();
     // libmpv's update callback is the frame clock. Rendering on every GTK draw
     // as well would duplicate work whenever the transparent WebView repaints.
@@ -266,12 +263,15 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
     area.set_has_depth_buffer(false);
     area.set_has_stencil_buffer(false);
     area.set_app_paintable(true);
-    area.set_size_request(16, 16);
+    // GLArea fills the full overlay via GTK expand flags. This avoids
+    // set_size_request which on Wayland constrains the window's minimum
+    // size to the video resolution.
+    area.set_hexpand(true);
+    area.set_vexpand(true);
 
     gtk_window.remove(vbox);
     vbox.remove(&web_view);
-    fixed.put(&area, 0, 0);
-    overlay.add(&fixed);
+    overlay.add(&area);
     overlay.add_overlay(&web_view);
     overlay.set_overlay_pass_through(&web_view, false);
     gtk_window.add(&overlay);
@@ -283,6 +283,17 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
     let mpv = pending.mpv;
     let backend = pending.backend;
     let display_native = pending.display_native;
+
+    // Invalidate cached FBO dimensions on GLArea resize so the next
+    // render call re-queries the physical GPU dimensions. This avoids
+    // synchronous GL queries on every frame.
+    let area_clone = area.clone();
+    area.connect_resize(move |_a, _w, _h| {
+        FBO_WIDTH.store(-1, Ordering::Relaxed);
+        FBO_HEIGHT.store(-1, Ordering::Relaxed);
+        area_clone.queue_render();
+    });
+
     area.connect_render(move |area, _ctx| {
         let mut slot = render_cell.borrow_mut();
         if slot.is_none() {
@@ -345,21 +356,29 @@ fn build_render_context(
 fn do_render(rc: &RenderContext, area: &gtk::GLArea) {
     area.attach_buffers();
     let fbo = current_fbo();
-    let (w, h, measured) = match fbo_color_size() {
-        Some((mw, mh)) => (mw, mh, true),
-        None => (
-            area.allocated_width().max(1),
-            area.allocated_height().max(1),
-            false,
-        ),
-    };
+
+    let mut w = FBO_WIDTH.load(Ordering::Relaxed);
+    let mut h = FBO_HEIGHT.load(Ordering::Relaxed);
+    if w <= 0 || h <= 0 {
+        // Query physical FBO dimensions on first render or after resize.
+        // This avoids synchronous GL queries on every frame; the result
+        // is cached and only invalidated by the GLArea::resize signal.
+        if let Some((mw, mh)) = query_fbo_dimensions() {
+            w = mw;
+            h = mh;
+        } else {
+            w = area.allocated_width().max(1);
+            h = area.allocated_height().max(1);
+        }
+        FBO_WIDTH.store(w, Ordering::Relaxed);
+        FBO_HEIGHT.store(h, Ordering::Relaxed);
+    }
+
     let packed = ((w as u64) << 32) | (h as u32 as u64);
     if LAST_SURFACE.swap(packed, Ordering::Relaxed) != packed {
         eprintln!(
-            "[harbor::mpv_linux] render surface {}x{} px ({})",
-            w,
-            h,
-            if measured { "measured fbo" } else { "computed scale" }
+            "[harbor::mpv_linux] render surface {}x{} px",
+            w, h,
         );
     }
     if fbo == 0 && !FBO_ZERO_WARNED.swap(true, Ordering::Relaxed) {
@@ -368,28 +387,14 @@ fn do_render(rc: &RenderContext, area: &gtk::GLArea) {
     let _ = rc.render::<()>(fbo, w, h, true);
 }
 
-pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
+// On Wayland, the GLArea fills the full window via GTK expand flags,
+// so geometry tracking is not needed. This function is kept for API
+// compatibility but is a no-op on Linux.
+pub fn resize_to(_css: crate::mpv::MpvGeometry) -> Result<(), String> {
     EMBED.with(|slot| {
-        let guard = slot.borrow();
-        let Some(embed) = guard.as_ref() else {
-            return;
-        };
-        let native = map_css_geometry(
-            &css,
-            embed.gtk_window.allocated_width().max(1) as f64,
-            embed.gtk_window.allocated_height().max(1) as f64,
-        );
-        let lw = native.width.round().max(1.0) as i32;
-        let lh = native.height.round().max(1.0) as i32;
-        embed.area.set_size_request(lw, lh);
-        if let Some(parent) = embed.area.parent() {
-            if let Some(fixed) = parent.downcast_ref::<gtk::Fixed>() {
-                let lx = native.x.round() as i32;
-                let ly = native.y.round() as i32;
-                fixed.move_(&embed.area, lx, ly);
-            }
+        if let Some(embed) = slot.borrow().as_ref() {
+            embed.area.queue_render();
         }
-        embed.area.queue_render();
     });
     Ok(())
 }

@@ -7,6 +7,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Check, HardDrive, Layers, Pencil, Play, Plus, RotateCcw, Star } from "lucide-react";
 import { animeDetails, type FranchiseEntry } from "@/lib/providers/anime-detail";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
@@ -83,6 +84,7 @@ import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import { useScrollMemory, useView, type PlayEpisode } from "@/lib/view";
 import { prefetchSegments } from "@/lib/skip-intro";
 import { useT } from "@/lib/i18n";
+import { queryKeys } from "@/lib/query";
 import { AddToListMenu } from "@/components/lists/add-to-list-menu";
 import type { ListItemInput } from "@/lib/custom-lists";
 import { AddToAnilistButton } from "./detail/add-to-anilist-button";
@@ -192,6 +194,7 @@ export function DetailView({
 }) {
   const t = useT();
   const { settings, update } = useSettings();
+  const queryClient = useQueryClient();
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const [detail, setDetail] = useState<TmdbDetail | null>(null);
@@ -618,9 +621,21 @@ export function DetailView({
           setBackdrops(res.backdrops);
           return res.detail;
         })
-      : settingsRef.current.tmdbKey
-        ? tmdbDetails(settingsRef.current.tmdbKey, meta).then((d) => d ?? cinemetaDetails(meta))
-        : cinemetaDetails(meta);
+      : queryClient.fetchQuery({
+          queryKey: queryKeys.detail.data(
+            meta.id,
+            meta.type,
+            settingsRef.current.tmdbKey,
+            settingsRef.current.tmdbLanguage,
+          ),
+          queryFn: () =>
+            settingsRef.current.tmdbKey
+              ? tmdbDetails(settingsRef.current.tmdbKey, meta).then(
+                  (data) => data ?? cinemetaDetails(meta),
+                )
+              : cinemetaDetails(meta),
+          staleTime: 30 * 60_000,
+        });
     work
       .then((d) => {
         if (cancelled) return;
@@ -644,6 +659,7 @@ export function DetailView({
     isAnime,
     addonNative,
     detectedKitsu,
+    queryClient,
   ]);
 
   useEffect(() => {

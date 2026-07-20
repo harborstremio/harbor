@@ -14,5 +14,7 @@ export function StartupLoader({ ready, onComplete }: { ready: boolean; onComplet
   }, [animationReady, host, onComplete, ready]);
 
   if (!host) return null;
-  return createPortal(<HarborLoader size="lg" onReady={handleAnimationReady} />, host);
+  // md matches every other full-screen loader (play transition, player), so
+  // the boat doesn't visibly shrink when the next loading screen appears.
+  return createPortal(<HarborLoader size="md" onReady={handleAnimationReady} />, host);
 }
