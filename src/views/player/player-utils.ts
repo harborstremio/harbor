@@ -57,6 +57,7 @@ export async function pickBridge(
     anime4k: boolean;
     hdrToSdr: boolean;
     rtxHdr?: boolean;
+    rtxVsr?: boolean;
     embed?: boolean;
     anime4kShaders?: string[];
     d3d11Flip?: boolean;

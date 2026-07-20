@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
 import { applyMotionInterp } from "@/lib/player/motion-interp";
-import { applyRtxHdr, resetRtxHdrState } from "@/lib/player/rtx-hdr";
+import { applyRtxVideo, resetRtxVideoState } from "@/lib/player/rtx-video";
 import { applySubStyle } from "@/lib/player/sub-style";
 import type { useSettings } from "@/lib/settings";
 
@@ -56,18 +56,29 @@ export function useSubStyleApply(params: {
     settings.subBold,
   ]);
 
-  useEffect(() => () => resetRtxHdrState(), [bridgeKey]);
+  useEffect(() => () => resetRtxVideoState(), [bridgeKey]);
 
   useEffect(() => {
     if (engine !== "mpv") return;
     if ((isMacDesktop() || isLinuxDesktop()) && settings.playerMpvEmbed) return;
     if (!bridgeReady) return;
     if (!mediaReady || !sourceGamma) {
-      void applyRtxHdr(false, svpActive, settings.playerHdrToSdr, bridgeKey);
+      void applyRtxVideo(
+        { hdr: false, vsr: false, svpActive, hdrToSdr: settings.playerHdrToSdr },
+        bridgeKey,
+      );
       return;
     }
     void applyMotionInterp(settings.playerMotionInterp && !svpActive);
-    void applyRtxHdr(settings.playerRtxHdr, svpActive, settings.playerHdrToSdr, bridgeKey);
+    void applyRtxVideo(
+      {
+        hdr: settings.playerRtxHdr,
+        vsr: settings.playerRtxVsr,
+        svpActive,
+        hdrToSdr: settings.playerHdrToSdr,
+      },
+      bridgeKey,
+    );
   }, [
     engine,
     bridgeReady,
@@ -79,5 +90,6 @@ export function useSubStyleApply(params: {
     settings.playerMotionInterp,
     settings.playerHdrToSdr,
     settings.playerRtxHdr,
+    settings.playerRtxVsr,
   ]);
 }

@@ -4,7 +4,7 @@ import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
 import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
 import { isWindowsDesktop } from "@/lib/platform";
-import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
+import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
 import { useSettings } from "@/lib/settings";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
@@ -248,6 +248,14 @@ export function useKeyboardShortcuts(params: {
         update({ playerRtxHdr: !settings.playerRtxHdr });
         return;
       }
+      if (match("playerRtxVsrToggle")) {
+        e.preventDefault();
+        if (e.repeat) return;
+        if (!isWindowsDesktop() || isRtxVsrBlocked(svpActive)) return;
+        if (bridgeRef.current?.capabilities().engine !== "mpv") return;
+        update({ playerRtxVsr: !settings.playerRtxVsr });
+        return;
+      }
       if (match("playerPanscanUp") && onPanscanUp) {
         e.preventDefault();
         onPanscanUp();
@@ -449,6 +457,7 @@ export function useKeyboardShortcuts(params: {
     settings.playerVolumeSfx,
     settings.playerHdrToSdr,
     settings.playerRtxHdr,
+    settings.playerRtxVsr,
     svpActive,
     update,
   ]);

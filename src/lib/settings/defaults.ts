@@ -160,6 +160,7 @@ export const DEFAULT: Settings = {
   keepSourceNextEpisode: false,
   playerHdrToSdr: true,
   playerRtxHdr: false,
+  playerRtxVsr: false,
   playerMacEdr: false,
   playerDisplayPanel: "auto",
   playerMotionInterp: false,

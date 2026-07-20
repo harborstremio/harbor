@@ -26,6 +26,7 @@ export type HotkeyId =
   | "playerAnime4kOn"
   | "playerAnime4kOff"
   | "playerRtxHdrToggle"
+  | "playerRtxVsrToggle"
   | "playerCrop"
   | "playerPanscanUp"
   | "playerPanscanDown"
@@ -212,6 +213,15 @@ export const HOTKEYS: HotkeyDef[] = [
     description:
       "Toggle RTX Video HDR during mpv playback. Unavailable while HDR-to-SDR tonemapping or SVP is active.",
     defaultBinding: "ctrl+h",
+  },
+  {
+    id: "playerRtxVsrToggle",
+    scope: "Player",
+    group: "Playback",
+    label: "Toggle RTX Super Resolution",
+    description:
+      "Toggle RTX Video Super Resolution during mpv playback. Unavailable while SVP is active.",
+    defaultBinding: "ctrl+u",
   },
 
   {

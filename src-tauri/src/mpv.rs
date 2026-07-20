@@ -45,6 +45,7 @@ pub struct MpvStartArgs {
     pub anime4k: Option<bool>,
     pub hdr_to_sdr: Option<bool>,
     pub rtx_hdr: Option<bool>,
+    pub rtx_vsr: Option<bool>,
     pub embed: Option<bool>,
     pub anime4k_shaders: Option<Vec<String>>,
     pub d3d11_flip: Option<bool>,
@@ -289,6 +290,10 @@ fn apply_pre_init(
     embed_hwnd: Option<&str>,
 ) -> Result<(), String> {
     let rtx_hdr = cfg!(windows) && args.rtx_hdr.unwrap_or(false);
+    let rtx_vsr = cfg!(windows) && args.rtx_vsr.unwrap_or(false);
+    // RTX Video HDR and RTX Video Super Resolution both require native
+    // D3D11 hardware frames for mpv's d3d11vpp filter.
+    let rtx_video = rtx_hdr || rtx_vsr;
     // Property sets here are best-effort. Some builds of mpv (e.g. Flatpak's
     // meson build without Lua) omit optional properties like `osc`. Treat
     // PROPERTY_NOT_FOUND as non-fatal so the player still initializes.
@@ -328,7 +333,7 @@ fn apply_pre_init(
             set("force-window", "yes");
         }
     } else if cfg!(windows) {
-        set("hwdec", if rtx_hdr { "d3d11va" } else { "auto" });
+        set("hwdec", if rtx_video { "d3d11va" } else { "auto" });
         set("force-window", "immediate");
     } else {
         set("hwdec", "auto");
@@ -394,7 +399,7 @@ fn apply_pre_init(
         #[cfg(windows)]
         {
             opt("target-colorspace-hint", "yes");
-            if embed_hwnd.is_some() || rtx_hdr {
+            if embed_hwnd.is_some() || rtx_video {
                 opt("gpu-api", "d3d11");
             }
         }
