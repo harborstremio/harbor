@@ -10,6 +10,7 @@ import { useSettings } from "@/lib/settings";
 import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
 import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
+import { observe } from "@/lib/visibility";
 
 type Ratio = "portrait" | "landscape" | "wide";
 
@@ -125,6 +126,7 @@ export function usePosterChain(
   }, [rpdbKey, metaId, altId, metaPoster, animeImdb, animeTvdb, animeTmdb, localized, pending]);
   const sig = candidates.join("|");
   const failedRef = useRef<Set<string>>(new Set());
+  const attemptsRef = useRef({ sig, n: 0 });
   const sigRef = useRef(sig);
   const [, bump] = useReducer((n: number) => n + 1, 0);
   if (sigRef.current !== sig) {
@@ -132,6 +134,26 @@ export function usePosterChain(
     failedRef.current = new Set();
   }
   const src = candidates.find((u) => !failedRef.current.has(u));
+  const wedged = src === undefined && candidates.length > 0;
+  useEffect(() => {
+    if (!wedged) return;
+    if (attemptsRef.current.sig !== sig) attemptsRef.current = { sig, n: 0 };
+    const retryNow = () => {
+      failedRef.current = new Set();
+      bump();
+    };
+    // All candidates failed (often a transient CDN blip or rate limit):
+    // retry with a bounded exponential ladder plus network recovery.
+    let timer: number | undefined;
+    if (attemptsRef.current.n < 4) {
+      timer = window.setTimeout(retryNow, 1200 * 2 ** attemptsRef.current.n++);
+    }
+    window.addEventListener("online", retryNow);
+    return () => {
+      window.removeEventListener("online", retryNow);
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [wedged, sig]);
   return {
     src,
     onError: () => {
@@ -208,6 +230,9 @@ export function Poster({
     }
   }, [exhausted]);
 
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const retryRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     if (!exhausted) return;
     const retryNow = () => {
@@ -216,11 +241,36 @@ export function Poster({
       setIdx(0);
       setRetry((r) => r + 1);
     };
+    retryRef.current = retryNow;
+    let timer: number | undefined;
+    const cancel = () => {
+      if (timer !== undefined) {
+        window.clearTimeout(timer);
+        timer = undefined;
+      }
+    };
+    // Fast exponential ladder first, then keep retrying at a capped pace while
+    // the card is on screen. CDN blips and rate limits (metahub/RPDB/TMDB 429
+    // bursts on home load) outlive a finite ladder, and the `online` event
+    // never fires for them — without this, cards stay blank forever (#747).
+    const schedule = () => {
+      if (timer !== undefined) return;
+      timer = window.setTimeout(retryNow, Math.min(1200 * 2 ** retry, 30_000));
+    };
     window.addEventListener("online", retryNow);
-    const timer = retry < 4 ? window.setTimeout(retryNow, 1200 * 2 ** retry) : undefined;
+    const onVisibility = () => {
+      if (!document.hidden) retryNow();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    const el = rootRef.current;
+    const offViewport = el ? observe(el, (visible) => (visible ? schedule() : cancel())) : null;
+    if (!el) schedule();
     return () => {
+      retryRef.current = null;
       window.removeEventListener("online", retryNow);
-      if (timer) window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+      offViewport?.();
+      cancel();
     };
   }, [exhausted, retry]);
 
@@ -264,6 +314,8 @@ export function Poster({
 
   return (
     <div
+      ref={rootRef}
+      onPointerEnter={() => retryRef.current?.()}
       className={`harbor-poster your-card relative w-full overflow-hidden rounded-[var(--poster-radius,12px)] ${className}`}
       style={showPlate ? { background: gradient(hue) } : undefined}
     >
