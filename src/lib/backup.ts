@@ -19,6 +19,7 @@ function isPortable(key: string): boolean {
   if (!key.startsWith("harbor.")) return false;
   if (key === "harbor.auth" || key.startsWith("harbor.auth.")) return false;
   if (key === "harbor.together.clientId") return false;
+  if (key.startsWith("harbor.sync.")) return false;
   return true;
 }
 

@@ -8,6 +8,7 @@ import { ModalOverlayApp } from "@/views/modal-overlay-app";
 import { HdrOverlayApp } from "@/views/hdr-overlay-app";
 import { PipApp } from "@/views/pip";
 import { RemoteApp } from "@/views/remote-app";
+import { initSyncEngine } from "@/lib/sync/engine";
 import "@/index.css";
 
 function detectRemoteMode(): boolean {
@@ -94,6 +95,10 @@ if (import.meta.env.DEV)
       }
     })(),
   );
+if (!isPip && !isModal && !isHdrOverlay && !isRemote) {
+  void initSyncEngine();
+}
+
 if (import.meta.env.DEV && !isPip && !isModal && !isHdrOverlay && !isRemote) {
   void import("./lib/streams/__fixtures__/verify").then((m) => m.logVerificationReport());
 }
