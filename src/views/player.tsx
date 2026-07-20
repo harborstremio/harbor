@@ -133,8 +133,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const videoMountRef = useRef<HTMLDivElement>(null);
   const bridgeRef = useRef<PlayerBridge | null>(null);
-  const srcRef = useRef(src);
-  srcRef.current = src;
   const selfFrameReadyRef = useRef(false);
   const { fullscreen, toggleFullscreen } = useFullscreen();
   const { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive } = usePlayerBridge({
@@ -837,18 +835,17 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   );
 
   const onLoaderRetry = useCallback(() => {
-    const s = srcRef.current;
     const b = bridgeRef.current;
     if (b) {
       void b.load({
-        url: s.url,
-        subtitles: s.subtitles,
-        notWebReady: s.notWebReady,
-        isLive: s.meta.id?.startsWith("iptv:"),
-        headers: s.headers,
+        url: src.url,
+        subtitles: src.subtitles,
+        notWebReady: src.notWebReady,
+        isLive: src.meta.id?.startsWith("iptv:"),
+        headers: src.headers,
       });
     }
-  }, []);
+  }, [src]);
 
   const overlayProps: PlayerOverlayLayersProps = {
     snap,
