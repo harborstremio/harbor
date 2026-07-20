@@ -11,6 +11,7 @@ import { pushActivityHint } from "@/lib/discord/activity-hint";
 import { isWeb } from "@/lib/platform";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { AddonDescription } from "./addon-description";
 import { AddonDocumentation } from "./addon-documentation";
 import { categoryLabel } from "./addons-types";
@@ -41,6 +42,8 @@ export function AddonDetail({
   showToast: (kind: "ok" | "error", text: string) => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const tv = settings.tvNavigation;
   const m = resolved.manifest;
   const c = resolved.curated;
   const isConfigurable =
@@ -162,7 +165,7 @@ export function AddonDetail({
   }, [resolved.transportUrl]);
 
   return (
-    <main ref={mainRef} className="h-full overflow-y-auto px-12 pb-0 pt-24">
+    <main ref={mainRef} data-tv-content-zone className="h-full overflow-y-auto px-12 pb-0 pt-24">
       <header className="relative isolate -mx-12 -mt-24 flex min-h-[460px] items-start gap-10 px-12 pt-32 pb-10">
         <DetailHeaderBackdrop
           logo={resolveAddonLogo(m?.logo, resolved.transportUrl) ?? undefined}
@@ -200,7 +203,7 @@ export function AddonDetail({
             {categoryLabel(c?.category ?? categorizeAddon(resolved)) ?? t("Addon")}
             {m?.id && <> · <span className="font-mono normal-case tracking-normal">{m.id}</span></>}
           </span>
-          <h1 className="font-display text-[36px] font-medium leading-tight tracking-tight text-ink">
+          <h1 className="font-display font-medium leading-tight tracking-tight text-ink" style={{ fontSize: tv ? "46px" : "36px" }}>
             {nameOf(resolved)}
           </h1>
           {risingEntry && (
@@ -216,7 +219,8 @@ export function AddonDetail({
             {busy === "remove" ? (
               <button
                 disabled
-                className="flex h-11 items-center gap-2 rounded-full bg-elevated/60 px-5 text-[13.5px] font-semibold text-ink-muted ring-1 ring-edge-soft"
+                className="flex items-center gap-2 rounded-full bg-elevated/60 px-5 font-semibold text-ink-muted ring-1 ring-edge-soft"
+                style={{ height: tv ? "3.5rem" : "2.75rem", fontSize: tv ? "17px" : "13.5px" }}
               >
                 <Loader2 size={14} strokeWidth={2.4} className="animate-spin" />
                 {t("Removing")}
@@ -224,7 +228,8 @@ export function AddonDetail({
             ) : busy === "install" ? (
               <button
                 disabled
-                className="flex h-11 items-center gap-2 rounded-full bg-ink/85 px-5 text-[13.5px] font-semibold text-canvas/80"
+                className="flex items-center gap-2 rounded-full bg-ink/85 px-5 font-semibold text-canvas/80"
+                style={{ height: tv ? "3.5rem" : "2.75rem", fontSize: tv ? "17px" : "13.5px" }}
               >
                 <Loader2 size={14} strokeWidth={2.4} className="animate-spin" />
                 {t("Installing")}
@@ -232,7 +237,7 @@ export function AddonDetail({
             ) : installed ? (
               <button
                 onClick={() => void handleUninstall()}
-                className="group/pill flex h-11 items-center gap-2 rounded-full bg-elevated/70 px-5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-danger/15 hover:text-danger hover:ring-danger/30"
+                className="group/pill flex items-center gap-2 rounded-full bg-elevated/70 px-5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-danger/15 hover:text-danger hover:ring-danger/30"
               >
                 <Check size={14} strokeWidth={2.4} className="block text-accent group-hover/pill:hidden" />
                 <Trash2 size={14} strokeWidth={2.2} className="hidden group-hover/pill:block" />
@@ -242,7 +247,7 @@ export function AddonDetail({
             ) : isConfigurable ? (
               <button
                 onClick={() => openInstallerViewport(configureUrl, nameOf(resolved), resolveAddonLogo(m?.logo, resolved.transportUrl))}
-                className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+                className="flex items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
               >
                 <Settings2 size={14} strokeWidth={2.2} />
                 {t("Configure & install")}
@@ -250,7 +255,7 @@ export function AddonDetail({
             ) : (
               <button
                 onClick={() => void handleInstall()}
-                className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+                className="flex items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
               >
                 {t("Install")}
               </button>
@@ -258,7 +263,7 @@ export function AddonDetail({
             {!installed && isConfigurable && !busy && !web && (
               <button
                 onClick={() => void handleInstall()}
-                className="flex h-11 items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="flex items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 {t("Install default")}
               </button>
@@ -266,7 +271,7 @@ export function AddonDetail({
             {installed && isConfigurable && !busy && (
               <button
                 onClick={() => openInstallerViewport(configureUrl, nameOf(resolved), resolveAddonLogo(m?.logo, resolved.transportUrl))}
-                className="flex h-11 items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                className="flex items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
               >
                 <Settings2 size={14} strokeWidth={2.2} />
                 {t("Reconfigure")}
@@ -274,14 +279,14 @@ export function AddonDetail({
             )}
             <button
               onClick={() => copy("https")}
-              className="flex h-11 items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              className="flex items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
             >
               {copied === "https" ? <Check size={14} strokeWidth={2.4} /> : <Copy size={14} strokeWidth={2.2} />}
               {copied === "https" ? t("Copied") : t("Copy URL")}
             </button>
             <button
               onClick={() => copy("stremio")}
-              className="flex h-11 items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              className="flex items-center gap-2 rounded-full border border-edge-soft px-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
             >
               {copied === "stremio" ? <Check size={14} strokeWidth={2.4} /> : <ExternalLink size={14} strokeWidth={2.2} />}
               {copied === "stremio" ? t("Copied") : t("stremio:// link")}
@@ -291,14 +296,14 @@ export function AddonDetail({
                 <span className="mx-1 h-6 w-px shrink-0 bg-edge-soft" aria-hidden />
                 <button
                   onClick={openRate}
-                  className="flex h-11 items-center gap-2 rounded-full border border-accent/40 bg-accent-soft px-5 text-[13.5px] font-semibold text-accent transition-colors hover:border-accent hover:bg-accent-soft/80"
+                  className="flex items-center gap-2 rounded-full border border-accent/40 bg-accent-soft px-5 text-[13.5px] font-semibold text-accent transition-colors hover:border-accent hover:bg-accent-soft/80"
                 >
                   <Star size={14} strokeWidth={2.4} fill="currentColor" className="harbor-rating-star" />
                   {t("Rate")}
                 </button>
                 <button
                   onClick={() => openUrl(addonSiteUrl(community.slug))}
-                  className="flex h-11 items-center gap-2 rounded-full border border-edge-soft ps-2 pe-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+                  className="flex items-center gap-2 rounded-full border border-edge-soft ps-2 pe-5 text-[13.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
                 >
                   <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-canvas ring-1 ring-edge-soft">
                     <img

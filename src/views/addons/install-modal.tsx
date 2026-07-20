@@ -131,6 +131,9 @@ export function AddonInstallModal({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      data-tv-focus-scope
       className="fixed inset-0 z-[140] flex items-center justify-center bg-black/72 backdrop-blur-md animate-in fade-in duration-150"
       onClick={(e) => {
         if (!installStage && !done && e.target === e.currentTarget) onClose();
@@ -169,6 +172,7 @@ export function AddonInstallModal({
           </div>
           <button
             onClick={onClose}
+            data-tv-modal-close
             disabled={!!installStage && !done}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-raised text-ink-muted transition-colors hover:bg-canvas/55 hover:text-ink disabled:opacity-40 disabled:hover:bg-raised disabled:hover:text-ink-muted"
             aria-label={t("Close")}
@@ -524,6 +528,7 @@ function SuccessPane({
       <button
         type="button"
         onClick={onClose}
+        data-tv-modal-close
         className="mt-2 flex h-10 items-center gap-1.5 rounded-full bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90"
       >
         {t("Done")}

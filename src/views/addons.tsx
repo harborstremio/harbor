@@ -295,18 +295,23 @@ export function AddonsView() {
                   <button
                     key={tabId}
                     onClick={() => setTab(tabId)}
-                    className={`flex h-12 items-center gap-2 rounded-full px-4 text-[14px] font-semibold transition-colors ${
+                    className={`flex items-center gap-2 rounded-full px-4 font-semibold transition-colors ${
                       active
                         ? "bg-ink text-canvas"
                         : "text-ink-muted hover:bg-elevated hover:text-ink"
                     }`}
+                    style={{
+                      height: settings.tvNavigation ? "4rem" : "3rem",
+                      fontSize: settings.tvNavigation ? "18px" : "14px",
+                    }}
                   >
-                    <Check size={15} strokeWidth={2.6} className={active ? "" : "text-accent"} />
+                    <Check size={settings.tvNavigation ? 18 : 15} strokeWidth={2.6} className={active ? "" : "text-accent"} />
                     <span>{t("Installed")}</span>
                     <span
-                      className={`min-w-[1.5rem] rounded-full px-1.5 py-0.5 text-[11.5px] font-bold tabular-nums ${
+                      className={`min-w-[1.5rem] rounded-full px-1.5 py-0.5 font-bold tabular-nums ${
                         active ? "bg-canvas/15 text-canvas" : "bg-edge text-ink-muted"
                       }`}
+                      style={{ fontSize: settings.tvNavigation ? "14px" : "11.5px" }}
                     >
                       {installedIds.size}
                     </span>
@@ -319,11 +324,15 @@ export function AddonsView() {
                     setTab(tabId);
                     if (tabId === "browse") setCategoryFilter(null);
                   }}
-                  className={`flex h-12 items-center rounded-full px-5 text-[14px] font-semibold transition-colors ${
+                  className={`flex items-center rounded-full px-5 font-semibold transition-colors ${
                     active
                       ? "bg-ink text-canvas"
                       : "text-ink-muted hover:bg-elevated hover:text-ink"
                   }`}
+                  style={{
+                    height: settings.tvNavigation ? "4rem" : "3rem",
+                    fontSize: settings.tvNavigation ? "18px" : "14px",
+                  }}
                 >
                   {tabId === "discover" ? t("Discover") : t("Browse")}
                 </button>
@@ -357,11 +366,15 @@ export function AddonsView() {
                 }
               }}
               title={settings.showAdultAddons ? t("Hide adult addons") : t("Show adult addons")}
-              className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[11.5px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 font-semibold uppercase tracking-[0.14em] transition-colors ${
                 settings.showAdultAddons
                   ? "border-ink bg-ink/10 text-ink"
                   : "border-edge-soft text-ink-subtle hover:border-edge hover:text-ink-muted"
               }`}
+              style={{
+                height: settings.tvNavigation ? "3rem" : "2.25rem",
+                fontSize: settings.tvNavigation ? "14px" : "11.5px",
+              }}
             >
               <span
                 className={`flex h-3 w-3 items-center justify-center rounded-sm border ${
@@ -379,7 +392,11 @@ export function AddonsView() {
             {tab === "browse" && (
               <button
                 onClick={() => setFiltersOpen((v) => !v)}
-                className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle transition-colors hover:border-edge hover:text-ink-muted"
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-edge-soft px-3 font-semibold uppercase tracking-[0.14em] text-ink-subtle transition-colors hover:border-edge hover:text-ink-muted"
+                style={{
+                  height: settings.tvNavigation ? "3rem" : "2.25rem",
+                  fontSize: settings.tvNavigation ? "14px" : "11.5px",
+                }}
               >
                 <ChevronRight
                   size={13}
@@ -401,11 +418,15 @@ export function AddonsView() {
               <div className="flex flex-wrap items-center gap-2 pb-1">
                 <button
                   onClick={() => setCategoryFilter(null)}
-                  className={`flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${
+                  className={`flex items-center gap-2 rounded-full px-4 font-semibold transition-colors ${
                     categoryFilter == null
                       ? "bg-ink text-canvas"
                       : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated/70 hover:text-ink"
                   }`}
+                  style={{
+                    height: settings.tvNavigation ? "3.25rem" : "2.5rem",
+                    fontSize: settings.tvNavigation ? "17px" : "13.5px",
+                  }}
                 >
                   {t("All")}
                 </button>
@@ -415,11 +436,15 @@ export function AddonsView() {
                     <button
                       key={c.slug}
                       onClick={() => setCategoryFilter(c.slug)}
-                      className={`flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${
+                      className={`flex items-center gap-2 rounded-full px-4 font-semibold transition-colors ${
                         active
                           ? "bg-ink text-canvas"
                           : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated/70 hover:text-ink"
                       }`}
+                      style={{
+                        height: settings.tvNavigation ? "3.25rem" : "2.5rem",
+                        fontSize: settings.tvNavigation ? "17px" : "13.5px",
+                      }}
                     >
                       <span>{c.name}</span>
                     </button>
@@ -434,11 +459,15 @@ export function AddonsView() {
                       type="button"
                       onClick={() => setBrowseMode(m.id)}
                       title={t(m.sub)}
-                      className={`flex h-10 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-semibold transition-colors ${
+                      className={`flex items-center gap-1.5 rounded-full px-3.5 font-semibold transition-colors ${
                         active
                           ? "bg-ink text-canvas"
                           : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated/70 hover:text-ink"
                       }`}
+                      style={{
+                        height: settings.tvNavigation ? "3.25rem" : "2.5rem",
+                        fontSize: settings.tvNavigation ? "17px" : "13px",
+                      }}
                     >
                       <m.Icon size={13} strokeWidth={2.4} className={active ? "" : "text-accent"} />
                       {t(m.label)}
@@ -451,7 +480,7 @@ export function AddonsView() {
         )}
       </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-12 pb-20 pt-6">
+      <div ref={scrollRef} data-tv-content-zone className="flex-1 overflow-y-auto px-12 pb-20 pt-6">
         {loading && allAddons.length === 0 ? (
           <div className="flex h-full items-center justify-center py-24">
             <HarborLoader size="lg" caption={t("Loading the catalog")} keyed />

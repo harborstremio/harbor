@@ -142,7 +142,7 @@ export function Row({
 }) {
   const { settings } = useSettings();
   const t = useT();
-  const effMin = Math.max(72, Math.round(min * settings.posterScale));
+  const effMin = Math.max(72, Math.round(min * (settings.tvNavigation ? 1.3 : 1) * settings.posterScale));
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [trackEl, setTrackEl] = useState<HTMLDivElement | null>(null);

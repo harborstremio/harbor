@@ -3,6 +3,7 @@ import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { AddonStarBadge } from "@/components/addon-star-badge";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { idOf } from "./addons-utils";
 import { TorrentioHeroArt } from "./torrentio-hero-art";
 
@@ -20,6 +21,8 @@ export function HeroCard({
   installed: boolean;
 }) {
   const t = useT();
+  const { settings } = useSettings();
+  const tv = settings.tvNavigation;
   const c = resolved.curated;
   if (!c?.hero) return null;
   const isTorrentio = idOf(resolved) === "com.stremio.torrentio.addon";
@@ -54,15 +57,15 @@ export function HeroCard({
       <div className="relative z-10 flex flex-1 flex-col justify-center gap-7 px-10 py-10">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10.5px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
+            <span className="font-bold uppercase tracking-[0.32em] text-ink-subtle" style={{ fontSize: tv ? "13px" : "10.5px" }}>
               {c.hero.eyebrow}
             </span>
             <AddonStarBadge manifestId={resolved.manifest?.id} size="md" />
           </div>
-          <h2 className="font-display text-[42px] font-medium leading-[1.05] tracking-tight text-ink">
+          <h2 className="font-display font-medium leading-[1.05] tracking-tight text-ink" style={{ fontSize: tv ? "54px" : "42px" }}>
             {c.hero.title}
           </h2>
-          <p className="max-w-[26rem] text-[14.5px] leading-relaxed text-ink-muted">
+          <p className="max-w-[26rem] leading-relaxed text-ink-muted" style={{ fontSize: tv ? "18px" : "14.5px" }}>
             {c.hero.subtitle}
           </p>
         </div>
@@ -72,15 +75,19 @@ export function HeroCard({
               e.stopPropagation();
               installed ? onUninstall() : onInstall();
             }}
-            className={`h-9 rounded-full px-5 text-[13px] font-semibold transition-all ${
+            className={`rounded-full px-5 font-semibold transition-all ${
               installed
                 ? "bg-elevated/70 text-ink ring-1 ring-edge-soft hover:bg-danger/15 hover:text-danger hover:ring-danger/30"
                 : "bg-ink text-canvas hover:opacity-90 active:scale-[0.97]"
             }`}
+            style={{
+              height: tv ? "3rem" : "2.25rem",
+              fontSize: tv ? "17px" : "13px",
+            }}
           >
             {installed ? t("Installed") : t("Get")}
           </button>
-          <span className="inline-flex h-9 items-center gap-1 rounded-full px-4 text-[12.5px] font-medium text-ink-muted transition-colors group-hover:text-ink">
+          <span className="inline-flex items-center gap-1 rounded-full px-4 font-medium text-ink-muted transition-colors group-hover:text-ink" style={{ height: tv ? "3rem" : "2.25rem", fontSize: tv ? "16px" : "12.5px" }}>
             {t("View details")}
             <ChevronRight size={13} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5 rtl:-scale-x-100" />
           </span>

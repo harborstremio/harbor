@@ -40,7 +40,7 @@ const MENU_KEYS = new Set(['ContextMenu']);
 
 const MODAL_SELECTOR = '[role="dialog"], [aria-modal="true"]';
 const LOCAL_KEYBOARD_SELECTOR = [
-  '[role="listbox"]', '[role="menu"]', '[role="grid"]', '[role="tree"]', '[role="tablist"]',
+  '[role="listbox"]', '[role="menu"]', '[role="grid"]', '[role="tree"]', '[role="tablist"]', '[role="slider"]',
 ].join(', ');
 
 const AXIS_TOLERANCE = 24;
@@ -644,6 +644,10 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
       if (dir) {
         if (!arrowsRef.current) return;
+
+        const isHorizontal = dir === 'left' || dir === 'right';
+        if (isHorizontal && active && isInHero(active)) return;
+
         e.preventDefault();
         e.stopPropagation();
         moveFocus(dir, wrapRef.current);

@@ -206,7 +206,7 @@ export function OrganizeAddonsPage({
   const showBackups = !!authKey && phase.kind !== "loadError";
 
   return (
-    <div className="fixed inset-0 z-[140] flex flex-col bg-canvas animate-in fade-in duration-150">
+    <div role="dialog" aria-modal="true" data-tv-focus-scope className="fixed inset-0 z-[140] flex flex-col bg-canvas animate-in fade-in duration-150">
       <header
         data-tauri-drag-region
         className="relative z-50 shrink-0 border-b border-edge-soft bg-canvas/85 backdrop-blur-xl"
@@ -214,6 +214,7 @@ export function OrganizeAddonsPage({
         <div className="mx-auto flex w-full max-w-[1160px] items-center gap-4 px-6 py-5 sm:px-10">
           <button
             onClick={onClose}
+            data-tv-modal-close
             disabled={saving}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-elevated text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink disabled:opacity-40"
             aria-label={t("Back to addons")}
@@ -269,6 +270,7 @@ export function OrganizeAddonsPage({
             <div className="flex shrink-0 items-center gap-2.5">
               <button
                 onClick={onClose}
+                data-tv-modal-close
                 disabled={saving}
                 className="flex h-11 items-center rounded-full bg-elevated px-5 text-[13.5px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink disabled:opacity-40"
               >

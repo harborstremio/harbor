@@ -5,6 +5,7 @@ import { HoverTooltip } from "@/components/hover-tooltip";
 import { isAddonEnabled, setAddonEnabled } from "@/lib/addon-store";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { addonKey, idOf, nameOf, subtitleFromManifest } from "./addons-utils";
 
 export function InstalledPane({
@@ -23,6 +24,7 @@ export function InstalledPane({
   onReorder?: () => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const q = search?.trim().toLowerCase() ?? "";
   const filtered = q
     ? installed.filter((r) => {
@@ -59,7 +61,11 @@ export function InstalledPane({
           <button
             onClick={onReorder}
             title={t("Change the order addons are tried in")}
-            className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle transition-colors hover:border-edge hover:text-ink-muted"
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-edge-soft px-3 font-semibold uppercase tracking-[0.14em] text-ink-subtle transition-colors hover:border-edge hover:text-ink-muted"
+            style={{
+              height: settings.tvNavigation ? "3rem" : "2.25rem",
+              fontSize: settings.tvNavigation ? "14px" : "11.5px",
+            }}
           >
             <ArrowUpDown size={13} strokeWidth={2.4} />
             {t("Reorder")}
@@ -93,6 +99,7 @@ function InstalledRow({
   onManage?: (r: ResolvedAddon) => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const r = resolved;
   const [busy, setBusy] = useState(false);
   const [enabled, setEnabled] = useState(() => isAddonEnabled(r.transportUrl));
@@ -143,8 +150,8 @@ function InstalledRow({
         />
       </div>
       <div className={`flex min-w-0 flex-1 flex-col gap-0.5 ${enabled ? "" : "opacity-55"}`}>
-        <span className="truncate text-[14px] font-medium text-ink">{nameOf(r)}</span>
-        <span className="truncate text-[11.5px] text-ink-subtle">
+        <span className="truncate font-medium text-ink" style={{ fontSize: settings.tvNavigation ? "18px" : "14px" }}>{nameOf(r)}</span>
+        <span className="truncate text-ink-subtle" style={{ fontSize: settings.tvNavigation ? "14px" : "11.5px" }}>
           {enabled ? subtitleFromManifest(r) : t("Off · catalogs and streams hidden")}
         </span>
       </div>
@@ -161,14 +168,24 @@ function InstalledRow({
             role="switch"
             aria-checked={enabled}
             aria-label={enabled ? t("Turn {name} off", { name: nameOf(r) }) : t("Turn {name} on", { name: nameOf(r) })}
-            className={`relative h-[22px] w-10 shrink-0 rounded-full outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 ${
+            className={`relative shrink-0 rounded-full outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-accent/50 ${
               enabled ? "bg-accent" : "bg-edge/70 ring-1 ring-inset ring-edge-soft"
             }`}
+            style={{
+              height: settings.tvNavigation ? "2.75rem" : "1.375rem",
+              width: settings.tvNavigation ? "5rem" : "2.5rem",
+            }}
           >
             <span
-              className={`absolute start-[3px] top-[3px] h-4 w-4 rounded-full bg-ink shadow-[0_1px_2px_rgba(0,0,0,0.5)] transition-transform duration-200 ${
+              className={`absolute start-[3px] top-[3px] rounded-full bg-ink shadow-[0_1px_2px_rgba(0,0,0,0.5)] transition-transform duration-200 ${
                 enabled ? "translate-x-[18px] rtl:-translate-x-[18px]" : "translate-x-0"
               }`}
+              style={{
+                height: settings.tvNavigation ? "2rem" : "1rem",
+                width: settings.tvNavigation ? "2rem" : "1rem",
+                ...(settings.tvNavigation && enabled ? { transform: "translateX(2rem)" } : {}),
+                ...(settings.tvNavigation && !enabled ? { transform: "translateX(0)" } : {}),
+              }}
             />
           </button>
         </HoverTooltip>
@@ -180,7 +197,8 @@ function InstalledRow({
             onManage(r);
           }}
           title={t("Re-configure this addon and apply the updated link")}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-raised px-3.5 py-1.5 text-[12px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-elevated hover:text-ink hover:ring-edge"
+          className="flex shrink-0 items-center gap-1.5 rounded-full bg-raised px-3.5 py-1.5 font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-elevated hover:text-ink hover:ring-edge"
+          style={{ fontSize: settings.tvNavigation ? "15px" : "12px" }}
         >
           <Settings2 size={12} strokeWidth={2.2} />
           {t("Manage")}
@@ -189,11 +207,12 @@ function InstalledRow({
       <button
         onClick={handleUninstall}
         disabled={busy}
-        className={`group/pill flex shrink-0 items-center gap-1 rounded-full px-3.5 py-1.5 text-[12px] font-semibold ring-1 transition-colors ${
+        className={`group/pill flex shrink-0 items-center gap-1 rounded-full px-3.5 py-1.5 font-semibold ring-1 transition-colors ${
           busy
             ? "bg-danger/15 text-danger ring-danger/30"
             : "bg-elevated/70 text-ink ring-edge-soft hover:bg-danger/15 hover:text-danger hover:ring-danger/30"
         }`}
+        style={{ fontSize: settings.tvNavigation ? "15px" : "12px" }}
       >
         {busy ? (
           <>

@@ -1779,15 +1779,14 @@ html[data-theme-card="crunch"][dir="rtl"] .harbor-profile-dropdown {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
-/* ── TV focus ring (static fallback) ── */
+/* ── TV focus ring injected dynamically by keyboard-navigation.ts ── */
 
-[data-tv-focused="true"] {
-  outline: none !important;
-  box-shadow: 0 0 0 5px #3b82f6, 0 0 0 10px rgba(0,0,0,0.4) !important;
-  border-radius: 4px;
-  transition: box-shadow 150ms ease-out;
-  position: relative;
-  z-index: 1;
+/* ── TV navigation: hide mouse cursor ── */
+
+html[data-tv-navigation="true"],
+html[data-tv-navigation="true"] * {
+  cursor: none !important;
+  caret-color: transparent !important;
 }
 
 /* ── TV navigation: disable text selection ── */

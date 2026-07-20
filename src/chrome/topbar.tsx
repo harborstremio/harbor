@@ -54,6 +54,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
     <header className={`fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-24`}>
       <div
         {...dragProps}
+        data-tv-top-chrome
         className="relative z-10 grid h-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:px-8"
       >
         <div
@@ -334,9 +335,14 @@ function SearchPill() {
       data-tauri-drag-region="false"
       onClick={() => setOpen(true)}
       className="harbor-search-pill flex h-14 w-full items-center gap-3 rounded-full border border-edge-soft/60 bg-elevated/80 px-5 text-start opacity-80 transition-[opacity,background-color] duration-200 hover:bg-elevated hover:opacity-100"
+      style={
+        settings.tvNavigation
+          ? { height: "4.5rem", gap: "1rem", paddingLeft: "1.75rem", paddingRight: "1.75rem", fontSize: "22px" }
+          : undefined
+      }
     >
-      <Search size={20} strokeWidth={1.75} className="text-ink-subtle" />
-      <span className="flex-1 truncate text-[18px] text-ink-subtle">{t("search.placeholder")}</span>
+      <Search size={settings.tvNavigation ? 24 : 20} strokeWidth={1.75} className="text-ink-subtle" />
+      <span className="flex-1 truncate text-ink-subtle" style={{ fontSize: settings.tvNavigation ? "22px" : "18px" }}>{t("search.placeholder")}</span>
       <kbd className="hidden shrink-0 rounded-md border border-edge-soft bg-canvas/50 px-1.5 py-0.5 font-mono text-[14px] font-medium text-ink-subtle sm:inline">
         {formatBindingForDisplay(binding)}
       </kbd>
