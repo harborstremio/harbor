@@ -65,6 +65,7 @@ export type Settings = {
   defaultLiquidGlassBlur: number;
   defaultLiquidGlassTint: number;
   posterDockMagnification: boolean;
+  posterDockTransitionMs: number;
   blurComments: boolean;
   blurEpisodes: boolean;
   tmdbKey: string;

@@ -12,6 +12,7 @@ export const DEFAULT: Settings = {
   defaultLiquidGlassBlur: 2,
   defaultLiquidGlassTint: 40,
   posterDockMagnification: false,
+  posterDockTransitionMs: 760,
   blurComments: false,
   blurEpisodes: false,
   tmdbKey: "",
