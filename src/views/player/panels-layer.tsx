@@ -87,7 +87,6 @@ export const PanelsLayer = memo(function PanelsLayer({
             `}
             contentClassName="h-full w-full"
             style={{
-              background: "transparent",
               boxShadow: episodesOnLeft
                 ? "inset -1px 0 0 rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)"
                 : "inset 1px 0 0 rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",

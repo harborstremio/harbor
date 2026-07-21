@@ -32,8 +32,6 @@ type Props = {
   onDismiss?: (item: LibraryItem) => void;
 };
 
-let backdropBlurHasWarmed = false;
-
 export const ContinueCard = memo(function ContinueCard({
   item,
   watched = false,
@@ -43,8 +41,6 @@ export const ContinueCard = memo(function ContinueCard({
   const t = useT();
   const { settings, update } = useSettings();
   const { profiles, activeProfile } = useProfiles();
-  const hasActivatedGlassRef = useRef(false);
-  const revealFrameRef = useRef<number | null>(null);
   const watcherId = getWatchedBy(item._id);
   const watcher = watcherId ? profiles.find((p) => p.id === watcherId) : null;
   const showWatcher = !!watcher && watcher.id !== activeProfile?.id;
@@ -74,29 +70,6 @@ export const ContinueCard = memo(function ContinueCard({
     : isAnimeCwItem(item) && ep
       ? ep.episode
       : null;
-
-  useEffect(
-    () => () => {
-      if (revealFrameRef.current !== null) {
-        cancelAnimationFrame(revealFrameRef.current);
-      }
-    },
-    [],
-  );
-
-  const activateGlass = () => {
-    if (hasActivatedGlassRef.current) return;
-    hasActivatedGlassRef.current = true;
-    if (backdropBlurHasWarmed) {
-      return;
-    }
-    backdropBlurHasWarmed = true;
-    revealFrameRef.current = requestAnimationFrame(() => {
-      revealFrameRef.current = requestAnimationFrame(() => {
-        revealFrameRef.current = null;
-      });
-    });
-  };
 
   const sub =
     animeEp && Number.isFinite(animeEp) && animeEp > 0
@@ -316,11 +289,7 @@ export const ContinueCard = memo(function ContinueCard({
   };
 
   return (
-    <div
-      className="group relative w-full min-w-0"
-      onPointerEnter={activateGlass}
-      onFocusCapture={activateGlass}
-    >
+    <div className="group relative w-full min-w-0">
       <button
         ref={cardRef}
         onClick={onClick}
@@ -445,11 +414,13 @@ export const ContinueCard = memo(function ContinueCard({
           shaderRadius={0.58}
           intensity={0.9}
           style={{
-            background: "transparent",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
           }}
           className="
-            pointer-events-none h-14 w-14 group-hover:pointer-events-auto focus-within:pointer-events-auto
+            pointer-events-none h-14 w-14 scale-95 rounded-full border border-white/[0.10] opacity-0
+            transition-[opacity,transform] duration-[120ms]
+            group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100
+            focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100
           "
           contentClassName="flex h-full w-full"
         >
@@ -484,11 +455,13 @@ export const ContinueCard = memo(function ContinueCard({
             shaderRadius={0.58}
             intensity={0.9}
             style={{
-              background: "transparent",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
             className="
-            pointer-events-none h-9 w-9 group-hover:pointer-events-auto focus-within:pointer-events-auto
+            pointer-events-none h-9 w-9 scale-95 rounded-full border border-white/[0.09] opacity-0
+            transition-[opacity,transform] duration-[120ms]
+            group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100
+            focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100
           "
             contentClassName="flex h-full w-full"
           >

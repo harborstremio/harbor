@@ -436,7 +436,6 @@ export function Transport({
                   interactive={false}
                   alwaysActive
                   style={{
-                    background: "transparent",
                     boxShadow:
                       "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
                   }}
