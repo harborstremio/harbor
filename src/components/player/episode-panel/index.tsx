@@ -215,9 +215,7 @@ export function EpisodePanel({
           alwaysActive
           style={{
             background:
-              "linear-gradient(145deg, rgba(255,255,255,0.055), rgba(10,12,18,0.16) 48%, rgba(255,255,255,0.018))",
-            WebkitBackdropFilter: "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
-            backdropFilter: "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
+              "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
             boxShadow:
               corner === "top-left" || corner === "bottom-left"
                 ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
@@ -260,8 +258,6 @@ export function EpisodePanel({
                   style={{
                     background:
                       "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
-                    WebkitBackdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
-                    backdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
                     boxShadow:
                       "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
                   }}
