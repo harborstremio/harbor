@@ -14,6 +14,14 @@ import type { Settings } from "./types";
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
+function sanitizePosterDockTransition(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return DEFAULT.posterDockTransitionMs;
+  }
+
+  return Math.min(1500, Math.max(250, Math.round(value)));
+}
+
 function legacySeekStep(direction: "back" | "forward"): number | undefined {
   try {
     const raw = localStorage.getItem(`harbor.seek-step.${direction}`);
@@ -152,6 +160,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     return {
       ...DEFAULT,
       ...parsed,
+      posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
       subProvidersEnabled: {
