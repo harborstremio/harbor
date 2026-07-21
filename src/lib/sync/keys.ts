@@ -1,10 +1,50 @@
+// Device-local caches and derived data never sync: they are rebuildable from
+// upstream APIs, can grow past the server's 400k-char per-doc limit (413),
+// and waste the account's doc quota. Only user state (settings, profiles,
+// auth, library, progress) belongs in the sync set. Keep this aligned with
+// the prunable-cache registry in src/lib/storage-recovery.ts.
 const EXCLUDED_PREFIXES = [
+  // Anime metadata caches
   "harbor.animefillercache",
-  "harbor.anime.hero.hosted",
-  "harbor.anime.toppicks.shown",
+  "harbor.anime_awards.metas.",
+  "harbor.anime.hero.",
+  "harbor.anime.herologos",
+  "harbor.anime.toppicks.",
+  "harbor.anime.recs_by_mal.",
+  "harbor.anime.mal_id_by_franchise.",
+  "harbor.anime.detected.",
   "harbor.anilist.collection.",
+  "harbor.jikancatalog",
+  "harbor.malscorecache",
+  // Cross-service ID mapping caches
+  "harbor.armcache",
+  "harbor.armkitsucache",
+  "harbor.armsrcmalcache",
+  "harbor.extkitsucache",
+  "harbor.anidbtvdbcache",
+  "harbor.tmdb.imdb.",
+  "harbor.tmdb.personName.",
+  "harbor.imdb.tmdb.",
+  // Provider/API response caches
+  "harbor.omdb.",
+  "harbor.awards.wikidata",
+  "harbor.mdblist.cards",
+  "harbor.snap.",
+  "harbor.picker-cache.",
+  // Feed and hero curation caches
+  "harbor.discover.",
+  "harbor.shows.hero.pool.",
+  "harbor.lastseason.",
+  "harbor.surprise.recent.",
+  "harbor.build.rating.",
+  "harbor.stremio-addons.velocity.",
+  // Device-local operational state
   "harbor.dead-streams",
   "harbor.calendar.webhook.last",
+  "harbor.webhook.lastTick",
+  "harbor.scroll.",
+  "harbor.iptv.hydration.",
+  "harbor.iptv.epgmap.",
   "harbor.addons.seeded",
   "harbor.scope.seeded",
 ] as const;
