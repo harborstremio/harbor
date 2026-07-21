@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { memo, type RefObject } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlayerShell, type PlayerShellProps } from "@/lib/player-shells/registry";
@@ -6,7 +6,7 @@ import { writePlayerPrefs } from "@/lib/player-prefs";
 import { writePlayerVolume } from "@/lib/player-volume";
 import type { useVideoDownload } from "./hooks/use-video-download";
 
-export function ShellLayer({
+export const ShellLayer = memo(function ShellLayer({
   shellId,
   shellSnap,
   snapRef,
@@ -232,4 +232,4 @@ export function ShellLayer({
       sleep={sleep}
     />
   );
-}
+});

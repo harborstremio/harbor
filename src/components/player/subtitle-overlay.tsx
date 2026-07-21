@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useActiveKid } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 
@@ -8,7 +8,7 @@ type Props = {
   scale?: number;
 };
 
-export function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
+export const SubtitleOverlay = memo(function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
   const { settings } = useSettings();
   const kid = useActiveKid();
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -22,53 +22,86 @@ export function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [text]);
-  if (!text) return null;
 
-  const responsive = boxH > 0 ? Math.max(0.3, Math.min(2.5, boxH / 1080)) : scale;
-  const baseFont = kid ? Math.max(54, clamp(settings.subFontSize, 16, 120)) : clamp(settings.subFontSize, 16, 120);
-  const fontSize = Math.round(baseFont * responsive);
-  const marginY = clamp(settings.subMarginY, 0, 100);
+  const responsive = useMemo(
+    () => (boxH > 0 ? Math.max(0.3, Math.min(2.5, boxH / 1080)) : scale),
+    [boxH, scale],
+  );
+  const baseFont = useMemo(
+    () =>
+      kid
+        ? Math.max(54, clamp(settings.subFontSize, 16, 120))
+        : clamp(settings.subFontSize, 16, 120),
+    [kid, settings.subFontSize],
+  );
+  const fontSize = useMemo(() => Math.round(baseFont * responsive), [baseFont, responsive]);
+  const marginY = useMemo(() => clamp(settings.subMarginY, 0, 100), [settings.subMarginY]);
   const fontColor = settings.subFontColor || "#FFFFFF";
   const align = settings.subAlignX || "center";
-  const family = fontFamilyFor(settings.subFontFamily);
-  const style = kid ? "shadow" : settings.subStyle ?? "shadow";
-  const lines = text.split("\n");
+  const family = useMemo(() => fontFamilyFor(settings.subFontFamily), [settings.subFontFamily]);
+  const style = kid ? "shadow" : (settings.subStyle ?? "shadow");
+  const lines = useMemo(() => text.split("\n"), [text]);
 
-  const justify = align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
+  const justify =
+    align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
 
-  const baseTextStyle: React.CSSProperties = {
-    color: fontColor,
-    fontFamily: family,
-    fontWeight: kid || settings.subBold ? 700 : 400,
-    fontSize: `${fontSize}px`,
-    lineHeight: 1.2,
-    letterSpacing: `${(-0.005 + (settings.subLineSpacing ?? 0) * 0.06).toFixed(3)}em`,
-    whiteSpace: "pre-wrap",
-    textAlign: align as "left" | "center" | "right",
-  };
+  const borderSize = useMemo(
+    () => Math.max(1, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive)),
+    [settings.subBorderSize, responsive],
+  );
+  const borderColor = settings.subBorderColor || "#000000";
 
-  if (style === "outline") {
-    const borderSize = Math.max(1, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive));
-    const borderColor = settings.subBorderColor || "#000000";
-    baseTextStyle.textShadow = buildOutline(borderColor, borderSize);
-  } else if (style === "shadow") {
-    baseTextStyle.textShadow =
-      "0 1px 2px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.85), 0 0 18px rgba(0,0,0,0.55)";
-  }
+  const textShadow = useMemo(() => {
+    if (style === "outline") {
+      return buildOutline(borderColor, borderSize);
+    } else if (style === "shadow") {
+      return "0 1px 2px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.85), 0 0 18px rgba(0,0,0,0.55)";
+    }
+    return undefined;
+  }, [style, borderColor, borderSize]);
 
-  const boxOpacity = clamp(settings.subBoxOpacity, 0, 1);
-  const boxRgb = hexToRgb(settings.subBoxColor || "#000000");
-  const boxStyle: React.CSSProperties | undefined =
-    style === "box"
-      ? {
-          backgroundColor: `rgba(${boxRgb.r}, ${boxRgb.g}, ${boxRgb.b}, ${boxOpacity})`,
-          padding: `${Math.round(fontSize * 0.18)}px ${Math.round(fontSize * 0.5)}px`,
-          borderRadius: `${Math.round(fontSize * 0.25)}px`,
-          backdropFilter: "blur(2px)",
-        }
-      : undefined;
+  const baseTextStyle: React.CSSProperties = useMemo(
+    () => ({
+      color: fontColor,
+      fontFamily: family,
+      fontWeight: kid || settings.subBold ? 700 : 400,
+      fontSize: `${fontSize}px`,
+      lineHeight: 1.2,
+      letterSpacing: `${(-0.005 + (settings.subLineSpacing ?? 0) * 0.06).toFixed(3)}em`,
+      whiteSpace: "pre-wrap",
+      textAlign: align as "left" | "center" | "right",
+      ...(textShadow ? { textShadow } : {}),
+    }),
+    [
+      fontColor,
+      family,
+      kid,
+      settings.subBold,
+      fontSize,
+      settings.subLineSpacing,
+      align,
+      textShadow,
+    ],
+  );
 
-  const opacity = clamp(settings.subOpacity ?? 1, 0.1, 1);
+  const boxOpacity = useMemo(() => clamp(settings.subBoxOpacity, 0, 1), [settings.subBoxOpacity]);
+  const boxRgb = useMemo(() => hexToRgb(settings.subBoxColor || "#000000"), [settings.subBoxColor]);
+  const boxStyle: React.CSSProperties | undefined = useMemo(
+    () =>
+      style === "box"
+        ? {
+            backgroundColor: `rgba(${boxRgb.r}, ${boxRgb.g}, ${boxRgb.b}, ${boxOpacity})`,
+            padding: `${Math.round(fontSize * 0.18)}px ${Math.round(fontSize * 0.5)}px`,
+            borderRadius: `${Math.round(fontSize * 0.25)}px`,
+            backdropFilter: "blur(2px)",
+          }
+        : undefined,
+    [style, boxRgb, boxOpacity, fontSize],
+  );
+
+  const opacity = useMemo(() => clamp(settings.subOpacity ?? 1, 0.1, 1), [settings.subOpacity]);
+
+  if (!text) return null;
 
   return (
     <div
@@ -86,7 +119,7 @@ export function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
       </div>
     </div>
   );
-}
+});
 
 function fontFamilyFor(family: string | undefined): string {
   if (family?.startsWith("custom:")) {

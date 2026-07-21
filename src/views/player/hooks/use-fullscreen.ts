@@ -38,6 +38,7 @@ export function useFullscreen() {
   useEffect(() => {
     if (!fullscreen) return;
     let cancelled = false;
+    let kickDebounce: number | null = null;
     const mpvKick = async () => {
       if (cancelled) return;
       window.dispatchEvent(new Event("resize"));
@@ -66,13 +67,15 @@ export function useFullscreen() {
     };
     void reassertOs();
     void mpvKick();
-    const delays = [60, 160, 320, 640, 1100, 1700, 2400, 3200, 4200];
-    const timers = delays.map((d) => window.setTimeout(() => void mpvKick(), d));
-    const sustain = window.setInterval(() => void mpvKick(), 2000);
+    const onResize = () => {
+      if (kickDebounce != null) window.clearTimeout(kickDebounce);
+      kickDebounce = window.setTimeout(() => void mpvKick(), 80);
+    };
+    window.addEventListener("resize", onResize);
     return () => {
       cancelled = true;
-      timers.forEach((t) => window.clearTimeout(t));
-      window.clearInterval(sustain);
+      if (kickDebounce != null) window.clearTimeout(kickDebounce);
+      window.removeEventListener("resize", onResize);
     };
   }, [fullscreen]);
 

@@ -9,8 +9,7 @@
 
 ### A Stremio Client Built for Adventure!
 
-
-Offering things like a native player, a stream ranking engine, Wikidata, watch parties, PiP, DVR, Live TV, anime, a theme engine, and much more. Check out our website at www.harbor.site for an immersive experience. 
+Offering things like a native player, a stream ranking engine, Wikidata, watch parties, PiP, DVR, Live TV, anime, a theme engine, and much more. Check out our website at www.harbor.site for an immersive experience.
 
 <br/>
 
@@ -28,26 +27,26 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 </div>
 
 <br/>
-
+<h4 align="center">💬 New: By popular demand, join our community discord for support and help (https://discord.gg/gUGg4YSsg)!</h4>
 <p align="center">
   <img src="https://harbor.site/readme-media/hero.png" width="900">
   <br/>
   <sub>Harbor on launch: a rotating hero, Continue Watching, and full width rails. Works on Cinemeta out of the box; richer with a free TMDB key.</sub>
 </p>
 
-
-
 > [!IMPORTANT]
 > Harbor is a media player and a client for the open Stremio addon protocol. It hosts, indexes, and ships no media, and it bundles no content addons. You bring your own addons and sources. See the [Disclaimer](#disclaimer).
->Harbor is not for-profit and is a passion project, you are free to sell, re-use or profit off of it. All of your bugs, issues and feedbacks will be addressed promptly as long as scope permits. Please leave a Issue if you have feedback or a bug, so we can better address you. It is HIGHLY reccomended that you build your OWN Harbor from the latest source when available, as our bundled releases will not include windows/os certification/sig (it is a free project) so to avoid any popups we suggest building it yourself. We will try to push updates frequently but we are sometimes segmented by our timezones so it may take some time for your bugs to be rolled into the update endpoint and for us to test it! Thank you for trying it out and helping us make it a better project!
->Stremio has released their **[Supporter tier](https://blog.stremio.com/stremio-supporters-a-way-to-sustain-our-development/)** PLEASE CONSIDER SUPPORTING THEM AND BUYING THIS. We heavily encourage you to use Stremio's Official Apps on Mobile, and Tvs. Harbor is NOT a stremio competitor, it is a different flavor of player for the ecosystem. To get the most out of Harbor, please sign up with a [stremio account](https://stremio.com) (it's free) To Support Stremio visit : https://www.stremio.com/donate (P.S.A Harbor is not endorsed by or created by Stremio ltd or it's contributors it is a independent open sourced project)
-<br/>
-ATTENTION: HARBOR DOES NOT AND WILL NOT HAVE A DISCORD OR ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations or to join their discord, IT IS NOT US. Have an issue? Open it on github so you and everyone else can know and see exactly how we messed up, and how we will fix it! Yes we do see your emails to bugs@harbor.site and Bug reports to the bug endpoint FYI the fastest way to get our attention is through github, we will still handle unique reports that have not been already sorted. Want to donate to a good cause visit: National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/) or St.Jude's (https://www.stjude.org/) email us with a receipt of your donation and we will implement your features in a priority manner. Include NPCF , EFF or SaintJude in title so we can track you! If you have a preferred cause visit https://www.charitynavigator.org/ and donate to a top rated charity of your choice and include CHARITY in email title
-<br/>
-<br/>
-HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR IT. WE DO NOT PROVIDE ANY CONTENT OR TELL YOU HOW TO DO IT. IT IS JUST CODE ON A REPO. IT'S CONTRIBUTORS ARE NOT RESPONSIBLE FOR WHAT YOU DO WITH IT OR WHAT STREMIO ADDONS AND SOURCES YOU ALREADY HAVE. FOLLOW ALL LAWS OF YOUR JURIDSTICTION. 
+> Harbor is not for-profit and is a passion project, you are free to sell, re-use or profit off of it. All of your bugs, issues and feedbacks will be addressed promptly as long as scope permits. Please leave a Issue if you have feedback or a bug, so we can better address you. It is HIGHLY reccomended that you build your OWN Harbor from the latest source when available, as our bundled releases will not include windows/os certification/sig (it is a free project) so to avoid any popups we suggest building it yourself. We will try to push updates frequently but we are sometimes segmented by our timezones so it may take some time for your bugs to be rolled into the update endpoint and for us to test it! Thank you for trying it out and helping us make it a better project!
+> Stremio has released their **[Supporter tier](https://blog.stremio.com/stremio-supporters-a-way-to-sustain-our-development/)** PLEASE CONSIDER SUPPORTING THEM AND BUYING THIS. We heavily encourage you to use Stremio's Official Apps on Mobile, and Tvs. Harbor is NOT a stremio competitor, it is a different flavor of player for the ecosystem. To get the most out of Harbor, please sign up with a [stremio account](https://stremio.com) (it's free) To Support Stremio visit : https://www.stremio.com/donate (P.S.A Harbor is not endorsed by or created by Stremio ltd or it's contributors it is a independent open sourced project)
+> <br/>
+
+ATTENTION: HARBOR DOES NOT AND WILL NOT ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations, IT IS NOT US. Have an issue? Open it on github so you and everyone else can know and see exactly how we messed up, and how we will fix it! Yes we do see your emails to bugs@harbor.site and Bug reports to the bug endpoint FYI the fastest way to get our attention is through github, we will still handle unique reports that have not been already sorted. Want to donate to a good cause visit: National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/) or St.Jude's (https://www.stjude.org/) email us with a receipt of your donation and we will implement your features in a priority manner. Include NPCF , EFF or SaintJude in title so we can track you! If you have a preferred cause visit https://www.charitynavigator.org/ and donate to a top rated charity of your choice and include CHARITY in email title
 <br/>
 <br/>
+HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR IT. WE DO NOT PROVIDE ANY CONTENT OR TELL YOU HOW TO DO IT. IT IS JUST CODE ON A REPO. IT'S CONTRIBUTORS ARE NOT RESPONSIBLE FOR WHAT YOU DO WITH IT OR WHAT STREMIO ADDONS AND SOURCES YOU ALREADY HAVE. FOLLOW ALL LAWS OF YOUR JURIDSTICTION.
+<br/>
+<br/>
+
 <details>
 <summary><kbd>Table of contents</kbd></summary>
 
@@ -84,10 +83,10 @@ HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR 
 
 ## Why Harbor
 
-**Harbor** is a self contained desktop client for the Stremio ecosystem. Out of the box it runs on Cinemeta. Add a free TMDB key and it blossoms into your ultimate companion for discovering and watching content. Harbor was built around the Stremio addon ecosystem with deep native integration of popular services and features into the UI. 
+**Harbor** is a self contained desktop client for the Stremio ecosystem. Out of the box it runs on Cinemeta. Add a free TMDB key and it blossoms into your ultimate companion for discovering and watching content. Harbor was built around the Stremio addon ecosystem with deep native integration of popular services and features into the UI.
 
 - **A native player.** libmpv decodes virtually any codec and container, with HDR passthrough, skip intro/outro, Anime4K upscaling shaders, and more. Delivering the same quality you are used to, but on a native custom player.
-- **Customize it your way.** Harbor is built in rust and tauri, allowing full on demand customization of the entire application. Harbor does not inject into stremio web, it is its own from scratch shell, layered over the stremio ecosystem, allowing you to go beyond the traditional themeing. Customize the player's UI, your fonts, seek bar, colors or the entire thing! 
+- **Customize it your way.** Harbor is built in rust and tauri, allowing full on demand customization of the entire application. Harbor does not inject into stremio web, it is its own from scratch shell, layered over the stremio ecosystem, allowing you to go beyond the traditional themeing. Customize the player's UI, your fonts, seek bar, colors or the entire thing!
 - **Theme Studio & Editor** Noob friendly theme studio lets anyone create their own custom theme with no code. Those that want control over every file can use a built in code editor for your themes.
 - **Intelligent stream ranking.** A pure Rust engine (compiled to WASM, with a TypeScript fallback) that parses every stream, filters out scams and fakes, and ranks high quality sources first.
 - **Corpus Engine.** During the initial release of In-cinema movies, Harbor gates the results based on heuristic factors like file size, average quality consensus, year and metadata ranking and other factors to deliver you a cleaner experience during the period of a fresh release. Harbor will surface the most likely CAMS, TeleSyncs/Telecines and other reasonable options without you needing to do anything.
@@ -96,10 +95,10 @@ HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR 
 - **Stremio-addons.net Integration.** The first platform with direct community ratings, top trending, and manifest feed to the [Stremio-addons.net](https://stremio-addons.net) API
 - **Watch together, on your own relay.** A synced watch party with live on screen cursors and drawing, on a relay that deploys to your own Cloudflare account in one click. No central server.
 - **Live TV and Multiview.** Bring M3U or Xtream playlists and get a real EPG grid guide, favorites, catchup, and up to four channels at once in a grid. Missed the show? play a rerun or record the next episode using built in DVR. Switch channels while in the live player at any time with the TV Guide
-- **Stream switcher** In player switcher allows you to hop streams if you get served a bad one without leaving the player and going through results again. Play next episodes with ease on the player UI controls or in a full "Next Up" sidebar. 
+- **Stream switcher** In player switcher allows you to hop streams if you get served a bad one without leaving the player and going through results again. Play next episodes with ease on the player UI controls or in a full "Next Up" sidebar.
 - **Casts across the room.** DLNA/UPnP, Chromecast, AirPlay, and Roku via a bundled Rust cast server and a web cast receiver.
-- **Integrations.** Feature rich discord rich presence integration, webhooks for Discord and Telegram, Trakt Sync, and native integrations to TMDB, OMDB, Fanart.Tv, RPDB and more! Customize the  location and what badges are shown.
-- **And much more! (seriously this would be very long)** 
+- **Integrations.** Feature rich discord rich presence integration, webhooks for Discord and Telegram, Trakt Sync, and native integrations to TMDB, OMDB, Fanart.Tv, RPDB and more! Customize the location and what badges are shown.
+- **And much more! (seriously this would be very long)**
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
 ## Feature Tour
@@ -175,18 +174,18 @@ Eleven themes and seven font pairings, a live theme studio for every token, cust
 
 Harbor is organized into ten primary rooms, each with its own cinematic hero and curated rails, plus per title flows layered on top.
 
-| Room | What you get |
-|---|---|
-| **Home** | Rotating four slide hero with an image derived color halo &middot; Continue Watching (16:9 cards, polled while focused) &middot; Top 10 numerals row &middot; trending, theaters, popular, and per service rails &middot; Trakt recommendation rails &middot; a drag to reorder row customizer &middot; a Classic Stremio mode that renders raw addon catalogs |
-| **Discover** | A taste scored feed of up to 14 daily rails &middot; a cinematic featured banner that excludes what you have watched &middot; a genre tile grid &middot; a daily editorial Critics Pick &middot; a teaser into the swipeable Discovery Queue |
-| **Movies** | A CinemaHero banner &middot; Top 10 Today numerals &middot; 15+ paginating rails: trending, in theaters, mood rows, all time greats, hidden gems, quick watches under 90 minutes, decade rows, world cinema rows, documentaries |
-| **Shows** | A PeekHero banner &middot; Continue Watching for in progress series &middot; 18+ rails: on tonight, premiered this month, network rows (HBO, Apple TV+, AMC, FX and more), limited series, prestige drama, K-drama, British television |
-| **Anime** | An award winner first hero with a personalized Top Picks panel &middot; a genre "tune picks" filter &middot; Continue Watching scoped to Kitsu/MAL &middot; 18 spec driven rails by era, genre, and ranking, with award badges on winners |
-| **Live TV** | M3U and Xtream playlists as a real EPG grid guide &middot; categories and favorites &middot; a channel picker &middot; top network rows by region &middot; catchup &middot; and Multiview (several channels at once) |
-| **Calendar** | A month grid across five sources (All/TMDB, Library, Trakt watchlist, Trakt anticipated, Custom) &middot; filter pills with live counts &middot; a day modal with posters and synopses |
-| **My Library** | Watchlist, History, Local files, library repair, and a full Trakt library browser when connected |
-| **Addons** | Discover, Browse, and Installed tabs &middot; the [stremio-addons.net](https://stremio-addons.net) community index &middot; add by URL &middot; configurable addon setup viewport &middot; addon detail pages with related and recommended &middot; an adult age gate |
-| **Settings** | Thirteen sections: account and profiles, library repair, Trakt, parental, relay, streaming keys, languages, player layout, hotkeys, bandwidth, themes, advanced, and onboarding replay |
+| Room           | What you get                                                                                                                                                                                                                                                                                                                                                   |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Home**       | Rotating four slide hero with an image derived color halo &middot; Continue Watching (16:9 cards, polled while focused) &middot; Top 10 numerals row &middot; trending, theaters, popular, and per service rails &middot; Trakt recommendation rails &middot; a drag to reorder row customizer &middot; a Classic Stremio mode that renders raw addon catalogs |
+| **Discover**   | A taste scored feed of up to 14 daily rails &middot; a cinematic featured banner that excludes what you have watched &middot; a genre tile grid &middot; a daily editorial Critics Pick &middot; a teaser into the swipeable Discovery Queue                                                                                                                   |
+| **Movies**     | A CinemaHero banner &middot; Top 10 Today numerals &middot; 15+ paginating rails: trending, in theaters, mood rows, all time greats, hidden gems, quick watches under 90 minutes, decade rows, world cinema rows, documentaries                                                                                                                                |
+| **Shows**      | A PeekHero banner &middot; Continue Watching for in progress series &middot; 18+ rails: on tonight, premiered this month, network rows (HBO, Apple TV+, AMC, FX and more), limited series, prestige drama, K-drama, British television                                                                                                                         |
+| **Anime**      | An award winner first hero with a personalized Top Picks panel &middot; a genre "tune picks" filter &middot; Continue Watching scoped to Kitsu/MAL &middot; 18 spec driven rails by era, genre, and ranking, with award badges on winners                                                                                                                      |
+| **Live TV**    | M3U and Xtream playlists as a real EPG grid guide &middot; categories and favorites &middot; a channel picker &middot; top network rows by region &middot; catchup &middot; and Multiview (several channels at once)                                                                                                                                           |
+| **Calendar**   | A month grid across five sources (All/TMDB, Library, Trakt watchlist, Trakt anticipated, Custom) &middot; filter pills with live counts &middot; a day modal with posters and synopses                                                                                                                                                                         |
+| **My Library** | Watchlist, History, Local files, library repair, and a full Trakt library browser when connected                                                                                                                                                                                                                                                               |
+| **Addons**     | Discover, Browse, and Installed tabs &middot; the [stremio-addons.net](https://stremio-addons.net) community index &middot; add by URL &middot; configurable addon setup viewport &middot; addon detail pages with related and recommended &middot; an adult age gate                                                                                          |
+| **Settings**   | Thirteen sections: account and profiles, library repair, Trakt, parental, relay, streaming keys, languages, player layout, hotkeys, bandwidth, themes, advanced, and onboarding replay                                                                                                                                                                         |
 
 Per title flows add **Detail**, **Person**, **Award**, **Service**, and **Filter** views on top of the rooms above, each with full backdrops, clickable award laurels, drill down modals, and per key scroll memory.
 
@@ -206,12 +205,12 @@ When you press play, Harbor collects stream offers from every installed addon in
 parse  ->  trust  ->  score  ->  rank
 ```
 
-| Stage | What happens |
-|---|---|
+| Stage     | What happens                                                                                                                                                                                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Parse** | Extracts resolution, HDR flavor (Dolby Vision, HDR10, HDR10+, HLG), video codec, source type, audio codec and channel layout (Atmos, TrueHD, DTS-HD MA, 5.1/7.1), languages, file size, seeders, container, release group, edition tags, season/episode, and an anime aware filename pass for CRC and batch ranges |
-| **Trust** | Drops dead links, placeholders, cams and telecines, trailers and extras, undersized stubs, cinema window fakes, and title, year, season, or episode mismatches; floats well regarded release groups upward |
-| **Score** | Rewards debrid cached sources, resolution, HDR and lossless audio, seeders, trusted release groups, REMUX, and preferred language matches; penalizes cams, mismatches, and implausible sizes. Every signal is recorded so the reason is inspectable |
-| **Rank** | Sorts into quality tiers (4K DV, 4K HDR, 4K, 1080p HDR, 1080p, 720p, SD) and surfaces the best cached pick first, with partial results streamed to the UI as addons respond |
+| **Trust** | Drops dead links, placeholders, cams and telecines, trailers and extras, undersized stubs, cinema window fakes, and title, year, season, or episode mismatches; floats well regarded release groups upward                                                                                                         |
+| **Score** | Rewards debrid cached sources, resolution, HDR and lossless audio, seeders, trusted release groups, REMUX, and preferred language matches; penalizes cams, mismatches, and implausible sizes. Every signal is recorded so the reason is inspectable                                                                |
+| **Rank**  | Sorts into quality tiers (4K DV, 4K HDR, 4K, 1080p HDR, 1080p, 720p, SD) and surfaces the best cached pick first, with partial results streamed to the UI as addons respond                                                                                                                                        |
 
 Debrid services are checked live and uniformly: **Real-Debrid, AllDebrid, Premiumize, Debrid-Link, and TorBox**. Cache hints embedded by popular addons are read directly, and every torrent hash is cross checked against your debrid library to catch what the cache API misses. No debrid is required: Harbor can stream torrents directly through the bundled Stremio Server engine. All keys stay on your device.
 
@@ -221,17 +220,17 @@ Debrid services are checked live and uniformly: **Real-Debrid, AllDebrid, Premiu
 
 A native libmpv player, with HLS and MPEG-TS engines for live and broadcast sources, and an Auto mode that picks the right backend per source.
 
-| Capability | Detail |
-|---|---|
-| **Engines** | Native libmpv (bundled) or HTML5/WebView2, with an Auto mode; hls.js and mpegts.js for live; embedded or separate window mpv |
-| **Resilience** | Auto retry and auto advance that detect black screens, frozen positions, and hard stalls; fallback to the Stremio Server HLS transcoder on a decode error; automatic live IPTV reconnect |
-| **Picture** | HDR passthrough, HDR to SDR tonemapping (bt.2446a), Anime4K GLSL upscaling shaders, a stats overlay |
-| **Skip segments** | Intro, outro, and recap detection from AniSkip, TheIntroDB, and embedded chapter markers |
-| **Subtitles** | OpenSubtitles v3 and Wyzie plus your subtitle addons, deduped and language ranked; SRT/VTT/ASS/SUB with encoding detection; **dual tracks**; full styling (font, size, color, outline, box, margin, alignment, custom font upload); SDH and forced flags; ASS override; per item delay; and a show/hide toggle in picture in picture |
-| **Resume and sync** | Picks up from your saved position, merged with Stremio library mtime; writes progress back every few seconds and flags watched at 85% |
-| **Convenience** | Picture in picture, A/B loop, sleep timer, frame grab, stream download via bundled yt-dlp, next/previous episode with auto advance, and a fully remappable 21 action hotkey set |
-| **Seek bar** | Flat, glass, pinstripe, rainbow, or custom image styles; adjustable height, color, and dot shape, or use custom JS, all with a live preview |
-| **Player Editor** | Change your players UI layout, style, and more with a 1:1 player editor |
+| Capability          | Detail                                                                                                                                                                                                                                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Engines**         | Native libmpv (bundled) or HTML5/WebView2, with an Auto mode; hls.js and mpegts.js for live; embedded or separate window mpv                                                                                                                                                                                                         |
+| **Resilience**      | Auto retry and auto advance that detect black screens, frozen positions, and hard stalls; fallback to the Stremio Server HLS transcoder on a decode error; automatic live IPTV reconnect                                                                                                                                             |
+| **Picture**         | HDR passthrough, HDR to SDR tonemapping (bt.2446a), Anime4K GLSL upscaling shaders, a stats overlay                                                                                                                                                                                                                                  |
+| **Skip segments**   | Intro, outro, and recap detection from AniSkip, TheIntroDB, and embedded chapter markers                                                                                                                                                                                                                                             |
+| **Subtitles**       | OpenSubtitles v3 and Wyzie plus your subtitle addons, deduped and language ranked; SRT/VTT/ASS/SUB with encoding detection; **dual tracks**; full styling (font, size, color, outline, box, margin, alignment, custom font upload); SDH and forced flags; ASS override; per item delay; and a show/hide toggle in picture in picture |
+| **Resume and sync** | Picks up from your saved position, merged with Stremio library mtime; writes progress back every few seconds and flags watched at 85%                                                                                                                                                                                                |
+| **Convenience**     | Picture in picture, A/B loop, sleep timer, frame grab, stream download via bundled yt-dlp, next/previous episode with auto advance, and a fully remappable 21 action hotkey set                                                                                                                                                      |
+| **Seek bar**        | Flat, glass, pinstripe, rainbow, or custom image styles; adjustable height, color, and dot shape, or use custom JS, all with a live preview                                                                                                                                                                                          |
+| **Player Editor**   | Change your players UI layout, style, and more with a 1:1 player editor                                                                                                                                                                                                                                                              |
 
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
@@ -262,15 +261,15 @@ Send any playback across the room through a bundled Rust cast server and a web c
 
 ### Live TV and Multiview
 
-| Area | Detail |
-|---|---|
-| **Sources** | M3U playlist URLs, Xtream Codes credentials (auto builds M3U + EPG), and standalone XMLTV; multiple playlists, on demand refresh, edit, delete, and export back to `.m3u` |
-| **Browser** | A responsive channel grid with logos, live program titles and progress, favorites, and posters for matched titles |
-| **Categories** | A chip strip and a searchable sidebar with counts; a Favorites virtual category; live text search |
-| **Top networks** | Auto generated curated network rows by region (US, UK, Brazil and more), with HD preferring channel scoring |
-| **EPG guide** | A horizontal timeline grid with a Now indicator and per program blocks; ended programs with catchup are replayable |
-| **Catchup** | Auto detected timeshift across default, append, shift, flussonic, and Xtream methods |
-| **Multiview** | One, two, three, or 2x2 streams at once; per tile channel swap, audio focus, and auto reconnect; native video geometry synced to the window layout |
+| Area             | Detail                                                                                                                                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sources**      | M3U playlist URLs, Xtream Codes credentials (auto builds M3U + EPG), and standalone XMLTV; multiple playlists, on demand refresh, edit, delete, and export back to `.m3u` |
+| **Browser**      | A responsive channel grid with logos, live program titles and progress, favorites, and posters for matched titles                                                         |
+| **Categories**   | A chip strip and a searchable sidebar with counts; a Favorites virtual category; live text search                                                                         |
+| **Top networks** | Auto generated curated network rows by region (US, UK, Brazil and more), with HD preferring channel scoring                                                               |
+| **EPG guide**    | A horizontal timeline grid with a Now indicator and per program blocks; ended programs with catchup are replayable                                                        |
+| **Catchup**      | Auto detected timeshift across default, append, shift, flussonic, and Xtream methods                                                                                      |
+| **Multiview**    | One, two, three, or 2x2 streams at once; per tile channel swap, audio focus, and auto reconnect; native video geometry synced to the window layout                        |
 
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
@@ -297,30 +296,30 @@ The Addons room is a full browser and installer for the Stremio ecosystem.
 
 Harbor's theme engine changes more than colors. A theme can reshape the entire navigation layout.
 
-| | |
-|---|---|
-| **11 presets** | Harbor (default), Nord, Stremio, Crunchy, Royal, Dracula, Forest, Noir, Aurora, MinUI, Velvet |
-| **Layouts** | Left sidebar, top dock, icon rail, Stremio rail, floating dock, or fully custom HTML/CSS chrome |
-| **Fonts** | Seven pairings plus custom TTF/OTF/WOFF/WOFF2 upload |
-| **Surfaces** | Five card styles, four button styles, an optional animated bokeh layer, and a full bleed background image with a dim slider |
+|                  |                                                                                                                                                                |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **11 presets**   | Harbor (default), Nord, Stremio, Crunchy, Royal, Dracula, Forest, Noir, Aurora, MinUI, Velvet                                                                  |
+| **Layouts**      | Left sidebar, top dock, icon rail, Stremio rail, floating dock, or fully custom HTML/CSS chrome                                                                |
+| **Fonts**        | Seven pairings plus custom TTF/OTF/WOFF/WOFF2 upload                                                                                                           |
+| **Surfaces**     | Five card styles, four button styles, an optional animated bokeh layer, and a full bleed background image with a dim slider                                    |
 | **Theme Studio** | A live slide in editor with Look, Layout, and Code tabs; a 10 swatch color editor; a custom chrome builder; raw CSS/HTML/JS layers; and a built in cheat sheet |
-| **Library** | Import and export `.harborstyle` files, manage a personal theme library, and apply, copy, download, or delete any theme, with a badge marking imported themes |
+| **Library**      | Import and export `.harborstyle` files, manage a personal theme library, and apply, copy, download, or delete any theme, with a badge marking imported themes  |
 
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
 ### Integrations
 
-| Service | What it adds |
-|---|---|
-| **Cinemeta** | Works out of the box: catalogs, metadata, and posters with no key |
+| Service             | What it adds                                                                                                                                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cinemeta**        | Works out of the box: catalogs, metadata, and posters with no key                                                                                                                                                                 |
 | **TMDB** (free key) | Trending, In Theaters, On The Air, Top Rated, and eight per service rails (Netflix, Disney+, Hulu, Prime, Apple TV+, Max, Paramount+, Peacock), region aware Watch on chips, trailers, full cast and crew, and IMDb ID resolution |
-| **RPDB** | Bakes rating overlays directly onto posters, for both IMDb and TMDB ID schemes, with transparent fallback |
-| **OMDB** | IMDb, Rotten Tomatoes, and Metascore ratings, a Certified Fresh flag, and structured award counts, with a daily request budget |
-| **Fanart.tv** | HD logos, backdrops, posters, banners, and thumbs for movies and series |
-| **Kitsu / AniZip** | Anime metadata, cross database ID mapping, and per episode detail |
-| **Trakt** | OAuth device sign in, automatic scrobbling, watchlist and history, personalized movie and series recommendations, an Up Next calendar rail, and your avatar in the sidebar |
-| **Stremio** | Account sign in, Continue Watching sync, installed-addon collection sync, and catalog, meta, stream, and subtitle resources from every installed addon |
-| **Debrid** | Real-Debrid, AllDebrid, Premiumize, Debrid-Link, and TorBox for cached, instant playback |
+| **RPDB**            | Bakes rating overlays directly onto posters, for both IMDb and TMDB ID schemes, with transparent fallback                                                                                                                         |
+| **OMDB**            | IMDb, Rotten Tomatoes, and Metascore ratings, a Certified Fresh flag, and structured award counts, with a daily request budget                                                                                                    |
+| **Fanart.tv**       | HD logos, backdrops, posters, banners, and thumbs for movies and series                                                                                                                                                           |
+| **Kitsu / AniZip**  | Anime metadata, cross database ID mapping, and per episode detail                                                                                                                                                                 |
+| **Trakt**           | OAuth device sign in, automatic scrobbling, watchlist and history, personalized movie and series recommendations, an Up Next calendar rail, and your avatar in the sidebar                                                        |
+| **Stremio**         | Account sign in, Continue Watching sync, installed-addon collection sync, and catalog, meta, stream, and subtitle resources from every installed addon                                                                            |
+| **Debrid**          | Real-Debrid, AllDebrid, Premiumize, Debrid-Link, and TorBox for cached, instant playback                                                                                                                                          |
 
 Awards laurels surface across detail pages, covering Oscar, Emmy, BAFTA, Golden Globe, SAG, Cannes, Berlin, Critics Choice, and Annie/Kobe honors.
 
@@ -378,12 +377,12 @@ Harbor is built to keep your data on your machine.
 
 Download the latest build for macOS or Windows from the [Releases page][releases], or open Harbor in your browser.
 
-| Platform | Format |
-|---|---|
-| **macOS** | `.dmg` (macOS 11.0 or newer) |
-| **Windows** | `.exe` NSIS installer (current user install) |
-| **Web** | Open in any modern browser, nothing to install |
-| **Linux** | In testing, coming soon (`.deb`, `.rpm`, and `.AppImage` planned) |
+| Platform    | Format                                                            |
+| ----------- | ----------------------------------------------------------------- |
+| **macOS**   | `.dmg` (macOS 11.0 or newer)                                      |
+| **Windows** | `.exe` NSIS installer (current user install)                      |
+| **Web**     | Open in any modern browser, nothing to install                    |
+| **Linux**   | In testing, coming soon (`.deb`, `.rpm`, and `.AppImage` planned) |
 
 > [!NOTE]
 > macOS, Windows, and the web are supported at launch. A native Linux build is in testing right now.
@@ -406,18 +405,18 @@ Linux is up and running natively, and it is in active testing right now. We deci
 
 All keys and preferences live in **Settings** and persist locally. Nothing is sent to a Harbor server.
 
-| Setting | Default | What it does |
-|---|---|---|
-| `Stremio sign in` | signed out | Library sync, Continue Watching, and installed-addon collection |
-| `TMDB API key` | none | Unlocks trending, in theaters, on the air, top rated, per service rails, and Watch on chips |
-| `RPDB API key` | none | Bakes rating overlays onto posters |
-| `OMDB API key` | none | Adds Rotten Tomatoes and Metascore ratings and award counts |
-| `Fanart.tv API key` | none | Adds HD logos, backdrops, and artwork |
-| `Region` | `US` | ISO 3166-1; drives theatrical windows and streaming availability |
-| `Debrid keys` | none | Real-Debrid, AllDebrid, Premiumize, Debrid-Link, TorBox; used by the stream engine |
-| `Player engine` | `Auto` | Auto, native libmpv, or HTML5/WebView2 |
-| `Stream safety filter` | `Strict` | Strict, Balanced, or Off; controls how aggressively cams and mismatches are dropped |
-| `Trakt` | disconnected | OAuth device sign in for scrobbling, watchlist, history, and recommendations |
+| Setting                | Default      | What it does                                                                                |
+| ---------------------- | ------------ | ------------------------------------------------------------------------------------------- |
+| `Stremio sign in`      | signed out   | Library sync, Continue Watching, and installed-addon collection                             |
+| `TMDB API key`         | none         | Unlocks trending, in theaters, on the air, top rated, per service rails, and Watch on chips |
+| `RPDB API key`         | none         | Bakes rating overlays onto posters                                                          |
+| `OMDB API key`         | none         | Adds Rotten Tomatoes and Metascore ratings and award counts                                 |
+| `Fanart.tv API key`    | none         | Adds HD logos, backdrops, and artwork                                                       |
+| `Region`               | `US`         | ISO 3166-1; drives theatrical windows and streaming availability                            |
+| `Debrid keys`          | none         | Real-Debrid, AllDebrid, Premiumize, Debrid-Link, TorBox; used by the stream engine          |
+| `Player engine`        | `Auto`       | Auto, native libmpv, or HTML5/WebView2                                                      |
+| `Stream safety filter` | `Strict`     | Strict, Balanced, or Off; controls how aggressively cams and mismatches are dropped         |
+| `Trakt`                | disconnected | OAuth device sign in for scrobbling, watchlist, history, and recommendations                |
 
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
@@ -623,7 +622,6 @@ Harbor stands on the shoulders of a generous open ecosystem and the people who b
 - **Tauri**, **React**, **Vite**, **Tailwind CSS**, **Rust**, and **Lucide** for the foundation.
 - **OpenSubtitles**, **Wyzie**, **AniSkip**, and **TheIntroDB** for subtitles and skip data.
 
-
 Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
@@ -644,6 +642,7 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 </div>
 
 <!-- reference links -->
+
 [releases]: https://github.com/harborstremio/harbor/releases
 [issues]: https://github.com/harborstremio/harbor/issues
 [discussions]: https://github.com/harborstremio/harbor/discussions
@@ -653,6 +652,7 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 [rust]: https://www.rust-lang.org/
 
 <!-- badges -->
+
 [badge-version]: https://img.shields.io/badge/version-0.9.21-D9A441?style=for-the-badge&labelColor=1a1a1a
 [badge-license]: https://img.shields.io/badge/license-MIT-D9A441?style=for-the-badge&labelColor=1a1a1a
 [badge-tauri]: https://img.shields.io/badge/Tauri-2-24C8DB?style=for-the-badge&logo=tauri&logoColor=white&labelColor=1a1a1a

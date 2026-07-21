@@ -66,6 +66,7 @@ pub struct MpvGeometry {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(not(any(windows, test)), allow(dead_code))]
 pub(crate) struct NativeMpvRect {
     pub x: f64,
     pub y: f64,
@@ -73,6 +74,7 @@ pub(crate) struct NativeMpvRect {
     pub height: f64,
 }
 
+#[cfg_attr(not(any(windows, test)), allow(dead_code))]
 pub(crate) fn map_css_geometry(
     css: &MpvGeometry,
     native_width: f64,
@@ -1117,12 +1119,12 @@ pub async fn mpv_set_geometry(
             g.as_ref().map(|s| s.embedded).unwrap_or(false)
         };
         if embedded {
-            let (tx, rx) = std::sync::mpsc::sync_channel::<()>(1);
+            // GLArea fills the full window via GTK expand flags, so
+            // geometry tracking is redundant. We still dispatch to the
+            // main thread as a rendering tickle for the GLArea.
             let _ = app.run_on_main_thread(move || {
                 let _ = crate::mpv_render_linux::resize_to(geom);
-                let _ = tx.send(());
             });
-            let _ = rx.recv_timeout(std::time::Duration::from_millis(300));
             return Ok(());
         }
     }

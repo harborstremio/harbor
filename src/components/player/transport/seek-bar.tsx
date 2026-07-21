@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import {
   usePlaybackPositionGated,
@@ -40,16 +40,23 @@ export function SeekBar({
   const pct = Math.max(0, Math.min(1, value / dur)) * 100;
   const cacheFill = Math.max(0, Math.min(1, (position + buffered) / dur));
   const fullyCached = downloaded >= 0.999;
-  const bufferedPct =
-    fullyCached || settings.seekBarFill === false ? 0 : Math.max(cacheFill, downloaded) * 100;
+  const bufferedPct = useMemo(
+    () =>
+      fullyCached || settings.seekBarFill === false ? 0 : Math.max(cacheFill, downloaded) * 100,
+    [fullyCached, settings.seekBarFill, cacheFill, downloaded],
+  );
   const skipSegments = useSkipSegmentsView();
-  const segmentSpans = skipSegments
-    .filter((s) => s.endSec > s.startSec && durationSec > 0)
-    .map((s) => ({
-      startPct: Math.max(0, Math.min(100, (s.startSec / dur) * 100)),
-      endPct: Math.max(0, Math.min(100, (s.endSec / dur) * 100)),
-      color: s.kind === "ad" ? "rgba(239,68,68,0.9)" : undefined,
-    }));
+  const segmentSpans = useMemo(
+    () =>
+      skipSegments
+        .filter((s) => s.endSec > s.startSec && durationSec > 0)
+        .map((s) => ({
+          startPct: Math.max(0, Math.min(100, (s.startSec / dur) * 100)),
+          endPct: Math.max(0, Math.min(100, (s.endSec / dur) * 100)),
+          color: s.kind === "ad" ? "rgba(239,68,68,0.9)" : undefined,
+        })),
+    [skipSegments, durationSec, dur],
+  );
 
   const clearInteraction = () => {
     setScrub(null);
