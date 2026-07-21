@@ -60,37 +60,44 @@ export const PanelsLayer = memo(function PanelsLayer({
   onPickAnother: () => void;
 }) {
   const t = useT();
+  const episodesOnLeft = episodesCorner === "top-left" || episodesCorner === "bottom-left";
+
   return (
     <>
       {upNextButtonVisible && (
-        <div className="pointer-events-auto absolute right-0 top-1/2 z-20 h-32 w-11 -translate-y-1/2">
+        <div
+          className={`pointer-events-auto absolute top-1/2 z-20 h-32 w-11 -translate-y-1/2 ${
+            episodesOnLeft ? "left-0" : "right-0"
+          }`}
+        >
           <ThreeLiquidGlassSurface
-            radius="16px 0 0 16px"
+            radius={episodesOnLeft ? "0 16px 16px 0" : "16px 0 0 16px"}
             shaderRadius={0.28}
             intensity={0.1}
             refractionStrength={0.08}
             interactive={false}
             alwaysActive
-            className="
+            className={`
               group
               h-full
               w-full
               border-y
-              border-l
               border-white/[0.10]
-            "
+              ${episodesOnLeft ? "border-r" : "border-l"}
+            `}
             contentClassName="h-full w-full"
             style={{
               background: "transparent",
-              boxShadow:
-                "inset 1px 0 0 rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+              boxShadow: episodesOnLeft
+                ? "inset -1px 0 0 rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)"
+                : "inset 1px 0 0 rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
           >
             <button
               type="button"
               onClick={onOpenEpisodePanel}
               aria-label={t("Up next")}
-              className="
+              className={`
                 flex
                 h-full
                 w-full
@@ -98,14 +105,14 @@ export const PanelsLayer = memo(function PanelsLayer({
                 items-center
                 justify-center
                 gap-2.5
-                rounded-l-2xl
+                ${episodesOnLeft ? "rounded-r-2xl" : "rounded-l-2xl"}
                 bg-transparent
                 text-ink
                 outline-none
                 transition-transform
                 duration-150
                 active:scale-[0.97]
-              "
+              `}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
