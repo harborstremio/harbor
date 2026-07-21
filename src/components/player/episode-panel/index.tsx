@@ -224,137 +224,140 @@ export function EpisodePanel({
           className={`h-full w-full ${
             corner === "top-left" || corner === "bottom-left" ? "border-r" : "border-l"
           } border-white/[0.10]`}
-          contentClassName="flex h-full w-full flex-col overflow-hidden"
+          contentClassName="relative h-full w-full overflow-hidden"
         >
-          {pickingFor ? (
-            <StreamsView
-              meta={meta}
-              episode={pickingFor}
-              onBack={() => setPickingFor(null)}
-              onClose={onClose}
-              onPick={handlePickStream}
-            />
-          ) : (
-            <>
-              <header className="flex items-center justify-between gap-3 px-6 pb-4 pt-7">
-                <div>
-                  <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-                    {t("Up Next")}
-                  </p>
-                  <h2 className="mt-1 font-display text-[22px] font-semibold leading-tight text-ink">
-                    {meta.name}
-                  </h2>
-                </div>
-                <ThreeLiquidGlassSurface
-                  radius="9999px"
-                  shaderRadius={0.5}
-                  intensity={0.1}
-                  refractionStrength={0.78}
-                  lensStrength={1}
-                  causticsStrength={0.05}
-                  motionSpeed={0.5}
-                  interactive={false}
-                  alwaysActive
-                  style={{
-                    background:
-                      "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
-                    boxShadow:
-                      "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
-                  }}
-                  className="h-11 w-11 shrink-0 border border-white/[0.12]"
-                  contentClassName="flex h-full w-full"
-                >
-                  <button
-                    aria-label={t("Close")}
-                    onClick={onClose}
-                    data-tv-modal-close
-                    className="
+          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 bg-[#080c12]/55" />
+          <div className="relative z-10 flex h-full w-full flex-col">
+            {pickingFor ? (
+              <StreamsView
+                meta={meta}
+                episode={pickingFor}
+                onBack={() => setPickingFor(null)}
+                onClose={onClose}
+                onPick={handlePickStream}
+              />
+            ) : (
+              <>
+                <header className="flex items-center justify-between gap-3 px-6 pb-4 pt-7">
+                  <div>
+                    <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
+                      {t("Up Next")}
+                    </p>
+                    <h2 className="mt-1 font-display text-[22px] font-semibold leading-tight text-ink">
+                      {meta.name}
+                    </h2>
+                  </div>
+                  <ThreeLiquidGlassSurface
+                    radius="9999px"
+                    shaderRadius={0.5}
+                    intensity={0.1}
+                    refractionStrength={0.78}
+                    lensStrength={1}
+                    causticsStrength={0.05}
+                    motionSpeed={0.5}
+                    interactive={false}
+                    alwaysActive
+                    style={{
+                      background:
+                        "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
+                      boxShadow:
+                        "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                    }}
+                    className="h-11 w-11 shrink-0 border border-white/[0.12]"
+                    contentClassName="flex h-full w-full"
+                  >
+                    <button
+                      aria-label={t("Close")}
+                      onClick={onClose}
+                      data-tv-modal-close
+                      className="
                     flex h-full w-full items-center justify-center rounded-full
                     bg-transparent text-ink-muted
                     transition-[color,transform]
                     hover:text-ink active:scale-[0.96]
                   "
-                  >
-                    <X size={18} strokeWidth={2.2} />
-                  </button>
-                </ThreeLiquidGlassSurface>
-              </header>
-              <div className="flex items-center justify-between gap-3 px-6 pb-3">
-                {currentEpisode ? (
-                  <p className="min-w-0 truncate text-[12.5px] text-ink-subtle">
-                    {t("Now playing: {label}", {
-                      label: `S${currentEpisode.imdbSeason ?? currentEpisode.season} · E${String(currentEpisode.imdbEpisode ?? currentEpisode.episode).padStart(2, "0")}${
-                        currentEpisode.name ? ` · ${currentEpisode.name}` : ""
-                      }`,
-                    })}
-                  </p>
-                ) : (
-                  <span />
-                )}
-                {seasons.length > 1 && (
-                  <SeasonPicker seasons={seasons} active={season} onChange={setSeason} />
-                )}
-              </div>
-              <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
-                {loading && episodes.length === 0 && (
-                  <div className="flex items-center justify-center py-16">
-                    <HarborLoader size="sm" />
-                  </div>
-                )}
-                {!loading && episodes.length === 0 && (
-                  <p className="px-2 py-10 text-center text-[13.5px] text-ink-muted">
-                    {t("No episodes found for this season.")}
-                  </p>
-                )}
-                {episodes.length > 0 && (
-                  <div className="flex flex-col gap-3">
-                    {episodes.map((ep) => {
-                      const key = `${ep.season}:${ep.episode}`;
-                      const isCurrent = !!currentEpisode && sameEpisode(ep, currentEpisode);
-                      const isNextUp = !!nextEp && sameEpisode(ep, nextEp);
-                      return (
-                        <EpisodeRow
-                          key={key}
-                          episode={ep}
-                          expanded={expandedEp === key}
-                          onToggle={() => setExpandedEp((cur) => (cur === key ? null : key))}
-                          onPlay={() => {
-                            if (isCurrent) {
-                              if (roomGuest) return;
-                              onRestart?.();
-                              onClose();
-                            } else {
-                              handlePlay(ep);
-                            }
-                          }}
-                          isCurrent={isCurrent}
-                          watched={watchedFor?.(ep) ?? false}
-                          spoiler={spoilerMaskFor(settings, {
-                            watched: isCurrent || (watchedFor?.(ep) ?? false),
-                            isNextUp,
-                          })}
-                        />
-                      );
-                    })}
-                  </div>
-                )}
-                {!loading && nextSeason !== undefined && (
-                  <button
-                    onClick={() => setSeason(nextSeason)}
-                    className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
-                  >
-                    {t("Season {n}", { n: nextSeason })}
-                    <ChevronRight size={16} strokeWidth={2.4} />
-                  </button>
-                )}
-              </div>
-              <footer className="border-t border-edge-soft/60 px-6 py-4 text-[12px] text-ink-subtle">
-                {manualMode
-                  ? t("Manual mode: clicking Play opens the source picker here.")
-                  : t("Instant Play: clicking Play queues the next stream automatically.")}
-              </footer>
-            </>
-          )}
+                    >
+                      <X size={18} strokeWidth={2.2} />
+                    </button>
+                  </ThreeLiquidGlassSurface>
+                </header>
+                <div className="flex items-center justify-between gap-3 px-6 pb-3">
+                  {currentEpisode ? (
+                    <p className="min-w-0 truncate text-[12.5px] text-ink-subtle">
+                      {t("Now playing: {label}", {
+                        label: `S${currentEpisode.imdbSeason ?? currentEpisode.season} · E${String(currentEpisode.imdbEpisode ?? currentEpisode.episode).padStart(2, "0")}${
+                          currentEpisode.name ? ` · ${currentEpisode.name}` : ""
+                        }`,
+                      })}
+                    </p>
+                  ) : (
+                    <span />
+                  )}
+                  {seasons.length > 1 && (
+                    <SeasonPicker seasons={seasons} active={season} onChange={setSeason} />
+                  )}
+                </div>
+                <div ref={listRef} className="flex-1 overflow-y-auto px-4 pb-8 pt-2">
+                  {loading && episodes.length === 0 && (
+                    <div className="flex items-center justify-center py-16">
+                      <HarborLoader size="sm" />
+                    </div>
+                  )}
+                  {!loading && episodes.length === 0 && (
+                    <p className="px-2 py-10 text-center text-[13.5px] text-ink-muted">
+                      {t("No episodes found for this season.")}
+                    </p>
+                  )}
+                  {episodes.length > 0 && (
+                    <div className="flex flex-col gap-3">
+                      {episodes.map((ep) => {
+                        const key = `${ep.season}:${ep.episode}`;
+                        const isCurrent = !!currentEpisode && sameEpisode(ep, currentEpisode);
+                        const isNextUp = !!nextEp && sameEpisode(ep, nextEp);
+                        return (
+                          <EpisodeRow
+                            key={key}
+                            episode={ep}
+                            expanded={expandedEp === key}
+                            onToggle={() => setExpandedEp((cur) => (cur === key ? null : key))}
+                            onPlay={() => {
+                              if (isCurrent) {
+                                if (roomGuest) return;
+                                onRestart?.();
+                                onClose();
+                              } else {
+                                handlePlay(ep);
+                              }
+                            }}
+                            isCurrent={isCurrent}
+                            watched={watchedFor?.(ep) ?? false}
+                            spoiler={spoilerMaskFor(settings, {
+                              watched: isCurrent || (watchedFor?.(ep) ?? false),
+                              isNextUp,
+                            })}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
+                  {!loading && nextSeason !== undefined && (
+                    <button
+                      onClick={() => setSeason(nextSeason)}
+                      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+                    >
+                      {t("Season {n}", { n: nextSeason })}
+                      <ChevronRight size={16} strokeWidth={2.4} />
+                    </button>
+                  )}
+                </div>
+                <footer className="border-t border-edge-soft/60 px-6 py-4 text-[12px] text-ink-subtle">
+                  {manualMode
+                    ? t("Manual mode: clicking Play opens the source picker here.")
+                    : t("Instant Play: clicking Play queues the next stream automatically.")}
+                </footer>
+              </>
+            )}
+          </div>
         </ThreeLiquidGlassSurface>
       </aside>
     </div>
