@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import stremioWordmark from "@/assets/stremio-wordmark.png";
 import { AuthModal } from "@/components/auth-modal";
 import { useAuth } from "@/lib/auth";
@@ -46,9 +46,11 @@ export function AccountStub() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 
-  useEffect(() => {
+  const [prevDisplayName, setPrevDisplayName] = useState(displayName);
+  if (prevDisplayName !== displayName) {
+    setPrevDisplayName(displayName);
     setNameDraft(displayName);
-  }, [displayName]);
+  }
 
   const stremioAvatar = user?.avatar ?? null;
   const harborAvatar = settings.harborAvatar;
