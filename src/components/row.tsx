@@ -349,8 +349,9 @@ export function Row({
       gap: GAP,
       scrollPosition: readPos(track),
       rtl: isRtlTrack(track),
+      transitionMs: settings.posterDockTransitionMs,
     });
-  }, [cellWidth, dockEnabled, effMin, resetPosterDock]);
+  }, [cellWidth, dockEnabled, effMin, resetPosterDock, settings.posterDockTransitionMs]);
 
   const schedulePosterDock = useCallback(
     (clientX: number) => {

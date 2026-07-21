@@ -3,10 +3,20 @@ const SCALE = 1.12;
 const SPREAD = 26;
 const LIFT = 7;
 
-const TRANSITION = "transform 760ms cubic-bezier(0.22, 0.61, 0.36, 1)";
+const MIN_TRANSITION_MS = 250;
+const MAX_TRANSITION_MS = 1500;
 
 const activeItems = new WeakMap<HTMLElement, Set<HTMLElement>>();
 const visuals = new WeakMap<HTMLElement, HTMLElement>();
+const transitionDurations = new WeakMap<HTMLElement, number>();
+
+function transitionFor(duration: number): string {
+  const milliseconds = Number.isFinite(duration)
+    ? Math.min(MAX_TRANSITION_MS, Math.max(MIN_TRANSITION_MS, Math.round(duration)))
+    : 760;
+
+  return `transform ${milliseconds}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
+}
 
 function getVisual(element: HTMLElement): HTMLElement {
   const cached = visuals.get(element);
@@ -44,6 +54,7 @@ export function updatePosterDock({
   gap,
   scrollPosition,
   rtl,
+  transitionMs,
 }: {
   track: HTMLElement;
   pointerX: number;
@@ -51,6 +62,7 @@ export function updatePosterDock({
   gap: number;
   scrollPosition: number;
   rtl: boolean;
+  transitionMs: number;
 }): void {
   const rect = track.getBoundingClientRect();
   const stride = cellWidth + gap;
@@ -93,7 +105,10 @@ export function updatePosterDock({
     if (!previousItems?.has(element)) {
       visual.style.transformOrigin = "center bottom";
       visual.style.willChange = "transform";
-      visual.style.transition = TRANSITION;
+    }
+    if (transitionDurations.get(visual) !== transitionMs) {
+      visual.style.transition = transitionFor(transitionMs);
+      transitionDurations.set(visual, transitionMs);
     }
     element.style.zIndex = String(Math.round(1 + smooth * 99));
 
