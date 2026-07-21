@@ -6,6 +6,7 @@ import type { PanelCorner } from "@/lib/player-chrome";
 import type { PlayEpisode } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { HeaderWarning, NoAudioWarning } from "./header-warning";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 export const PanelsLayer = memo(function PanelsLayer({
   isSeriesPlayback,
@@ -62,31 +63,72 @@ export const PanelsLayer = memo(function PanelsLayer({
   return (
     <>
       {upNextButtonVisible && (
-        <button
-          onClick={onOpenEpisodePanel}
-          aria-label={t("Up next")}
-          className={`group absolute top-1/2 z-20 flex h-32 -translate-y-1/2 flex-col items-center justify-center gap-2.5 bg-elevated/95 text-ink shadow-[0_10px_32px_-10px_rgba(0,0,0,0.6)] backdrop-blur-md transition-[padding,background] duration-200 hover:bg-elevated ${
-            episodesCorner === "top-left" || episodesCorner === "bottom-left"
-              ? "left-0 rounded-r-2xl border-y border-r border-edge-soft pl-2 pr-2.5 hover:pr-3"
-              : "right-0 rounded-l-2xl border-y border-l border-edge-soft pl-2.5 pr-2 hover:pl-3"
-          }`}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path
-              d="M3 6h13M3 12h13M3 18h9M18 8l4 4-4 4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span
-            className="text-[11px] font-semibold uppercase tracking-[0.28em]"
-            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        <div className="pointer-events-auto absolute right-0 top-1/2 z-20 h-32 w-11 -translate-y-1/2">
+          <ThreeLiquidGlassSurface
+            radius="16px 0 0 16px"
+            shaderRadius={0.28}
+            intensity={0.1}
+            refractionStrength={0.08}
+            interactive={false}
+            alwaysActive
+            className="
+              group
+              h-full
+              w-full
+              border-y
+              border-l
+              border-white/[0.10]
+            "
+            contentClassName="h-full w-full"
+            style={{
+              background: "transparent",
+              boxShadow:
+                "inset 1px 0 0 rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+            }}
           >
-            {t("Up Next")}
-          </span>
-        </button>
+            <button
+              type="button"
+              onClick={onOpenEpisodePanel}
+              aria-label={t("Up next")}
+              className="
+                flex
+                h-full
+                w-full
+                flex-col
+                items-center
+                justify-center
+                gap-2.5
+                rounded-l-2xl
+                bg-transparent
+                text-ink
+                outline-none
+                transition-transform
+                duration-150
+                active:scale-[0.97]
+              "
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path
+                  d="M3 6h13M3 12h13M3 18h9M18 8l4 4-4 4"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+
+              <span
+                className="text-[11px] font-semibold uppercase tracking-[0.28em]"
+                style={{
+                  writingMode: "vertical-rl",
+                  transform: "rotate(180deg)",
+                }}
+              >
+                {t("Up Next")}
+              </span>
+            </button>
+          </ThreeLiquidGlassSurface>
+        </div>
       )}
 
       {isSeriesPlayback && (

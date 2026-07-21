@@ -419,8 +419,8 @@ export function TogetherPopover({
       data-tv-focus-scope
       aria-label={t("Watch together")}
       radius="16px"
-      shaderRadius={0.3}
-      intensity={0.74}
+      shaderRadius={0.58}
+      intensity={0.2}
       interactive={false}
       alwaysActive
       style={{

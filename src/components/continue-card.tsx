@@ -456,17 +456,16 @@ export const ContinueCard = memo(function ContinueCard({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center">
         <ThreeLiquidGlassSurface
           radius="9999px"
-          shaderRadius={1}
-          intensity={0.86}
-          variant="overlay"
-          backdropBlur={hasActivatedGlass}
-          className="pointer-events-none h-14 w-14 group-hover:pointer-events-auto focus-within:pointer-events-auto"
-          surfaceClassName={`border border-white/[0.10] ${glassSurfaceRevealClass}`}
-          contentClassName={`h-full w-full ${glassContentRevealClass}`}
+          shaderRadius={0.58}
+          intensity={0.9}
           style={{
             background: "transparent",
-            boxShadow: "none",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
           }}
+          className="
+            pointer-events-none h-14 w-14 group-hover:pointer-events-auto focus-within:pointer-events-auto
+          "
+          contentClassName="flex h-full w-full"
         >
           <button
             type="button"
@@ -496,17 +495,16 @@ export const ContinueCard = memo(function ContinueCard({
         >
           <ThreeLiquidGlassSurface
             radius="9999px"
-            shaderRadius={1}
-            intensity={0.74}
-            variant="overlay"
-            backdropBlur={hasActivatedGlass}
-            className="pointer-events-none h-9 w-9 group-hover:pointer-events-auto focus-within:pointer-events-auto"
-            surfaceClassName={`border border-white/[0.09] ${glassSurfaceRevealClass}`}
-            contentClassName={`h-full w-full ${glassContentRevealClass}`}
+            shaderRadius={0.58}
+            intensity={0.9}
             style={{
               background: "transparent",
-              boxShadow: "none",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
+            className="
+            pointer-events-none h-9 w-9 group-hover:pointer-events-auto focus-within:pointer-events-auto
+          "
+            contentClassName="flex h-full w-full"
           >
             <button
               type="button"
