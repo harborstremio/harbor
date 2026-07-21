@@ -1,18 +1,38 @@
-const MAX_DISTANCE = 2.5;
-const affectedItems = new WeakMap<HTMLElement, Set<HTMLElement>>();
+import { animate } from "motion";
+
+const DISTANCE = 190;
+const SCALE = 1.12;
+const SPREAD = 26;
+const LIFT = 7;
+
+const SPRING = {
+  type: "spring",
+  mass: 0.1,
+  stiffness: 100,
+  damping: 20,
+} as const;
+
+const activeItems = new WeakMap<HTMLElement, Set<HTMLElement>>();
+const animations = new WeakMap<HTMLElement, ReturnType<typeof animate>>();
+
+function move(element: HTMLElement, x: number, y: number, scale: number): void {
+  animations.get(element)?.stop();
+
+  animations.set(element, animate(element, { x, y, scale }, SPRING));
+}
 
 function resetItem(element: HTMLElement): void {
-  element.style.transform = "translate3d(0, 0, 0) scale(1)";
+  move(element, 0, 0, 1);
   element.style.zIndex = "";
   element.style.willChange = "";
-  element.style.transition = "transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1)";
 }
 
 export function resetPosterDock(track: HTMLElement): void {
-  for (const element of affectedItems.get(track) ?? []) {
-    resetItem(element);
+  for (const child of track.children) {
+    resetItem(child as HTMLElement);
   }
-  affectedItems.delete(track);
+
+  activeItems.delete(track);
 }
 
 export function updatePosterDock({
@@ -32,34 +52,50 @@ export function updatePosterDock({
 }): void {
   const rect = track.getBoundingClientRect();
   const stride = cellWidth + gap;
+
   if (rect.width <= 0 || stride <= 0) return;
 
   const viewportX = pointerX - rect.left;
+
   const contentX = rtl
-    ? track.scrollWidth - (viewportX + scrollPosition)
+    ? track.scrollWidth - viewportX - scrollPosition
     : viewportX + scrollPosition;
+
   const activeIndex = (contentX - cellWidth / 2) / stride;
-
+  const range = Math.ceil(DISTANCE / stride);
   const nextItems = new Set<HTMLElement>();
-  const previousItems = affectedItems.get(track);
-  const firstIndex = Math.max(0, Math.ceil(activeIndex - MAX_DISTANCE));
-  const lastIndex = Math.min(track.children.length - 1, Math.floor(activeIndex + MAX_DISTANCE));
 
-  for (let index = firstIndex; index <= lastIndex; index += 1) {
+  const first = Math.max(0, Math.floor(activeIndex - range));
+  const last = Math.min(track.children.length - 1, Math.ceil(activeIndex + range));
+
+  for (let index = first; index <= last; index += 1) {
     const element = track.children[index] as HTMLElement;
-    const influence = Math.max(0, 1 - Math.abs(index - activeIndex) / MAX_DISTANCE);
-    if (influence <= 0) continue;
+
+    const rawDistance = (activeIndex - index) * stride;
+    const pointerDistance = rtl ? -rawDistance : rawDistance;
+    const influence = Math.max(0, 1 - Math.abs(pointerDistance) / DISTANCE);
+
+    if (influence === 0) continue;
+
+    const smooth = Math.sin((influence * Math.PI) / 2);
+    const normalized = Math.max(-1, Math.min(1, pointerDistance / DISTANCE));
+
+    const scale = 1 + (SCALE - 1) * smooth;
+    const x = -normalized * SPREAD * smooth;
+    const y = -LIFT * smooth;
+
     nextItems.add(element);
-    if (!previousItems?.has(element)) {
-      element.style.willChange = "transform";
-      element.style.transition = "transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1)";
-    }
-    element.style.transform = `translate3d(0, ${-influence * 6}px, 0) scale(${1 + influence * 0.1})`;
-    element.style.zIndex = String(Math.round(10 + influence * 90));
+
+    element.style.transformOrigin = "center bottom";
+    element.style.willChange = "transform";
+    element.style.zIndex = String(Math.round(1 + smooth * 99));
+
+    move(element, x, y, scale);
   }
 
-  for (const element of previousItems ?? []) {
+  for (const element of activeItems.get(track) ?? []) {
     if (!nextItems.has(element)) resetItem(element);
   }
-  affectedItems.set(track, nextItems);
+
+  activeItems.set(track, nextItems);
 }
