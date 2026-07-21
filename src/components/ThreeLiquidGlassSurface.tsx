@@ -10,7 +10,6 @@ export type LiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   alwaysActive?: boolean;
   intensity?: number;
   refractionStrength?: number;
-  spectralStrength?: number;
   lensStrength?: number;
   causticsStrength?: number;
   motionSpeed?: number;
@@ -36,7 +35,6 @@ export function LiquidGlassSurface({
   alwaysActive: _alwaysActive,
   intensity = 1,
   refractionStrength: _refractionStrength,
-  spectralStrength: _spectralStrength,
   lensStrength: _lensStrength,
   causticsStrength: _causticsStrength,
   motionSpeed: _motionSpeed,

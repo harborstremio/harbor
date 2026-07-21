@@ -131,7 +131,6 @@ export function TopDock() {
             intensity={1.05}
             shaderRadius={0.58}
             refractionStrength={1.42}
-            spectralStrength={0.5}
             lensStrength={1.05}
             interactive={false}
             alwaysActive
