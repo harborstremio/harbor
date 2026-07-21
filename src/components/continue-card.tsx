@@ -43,8 +43,6 @@ export const ContinueCard = memo(function ContinueCard({
   const t = useT();
   const { settings, update } = useSettings();
   const { profiles, activeProfile } = useProfiles();
-  const [hasActivatedGlass, setHasActivatedGlass] = useState(false);
-  const [shouldRevealGlass, setShouldRevealGlass] = useState(false);
   const hasActivatedGlassRef = useRef(false);
   const revealFrameRef = useRef<number | null>(null);
   const watcherId = getWatchedBy(item._id);
@@ -88,30 +86,18 @@ export const ContinueCard = memo(function ContinueCard({
 
   const activateGlass = () => {
     if (hasActivatedGlassRef.current) return;
-
     hasActivatedGlassRef.current = true;
-    setHasActivatedGlass(true);
-
     if (backdropBlurHasWarmed) {
-      setShouldRevealGlass(true);
       return;
     }
-
     backdropBlurHasWarmed = true;
     revealFrameRef.current = requestAnimationFrame(() => {
       revealFrameRef.current = requestAnimationFrame(() => {
         revealFrameRef.current = null;
-        setShouldRevealGlass(true);
       });
     });
   };
 
-  const glassSurfaceRevealClass = shouldRevealGlass
-    ? "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
-    : "opacity-0";
-  const glassContentRevealClass = shouldRevealGlass
-    ? "scale-95 opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:scale-100 group-hover:opacity-100 focus-within:scale-100 focus-within:opacity-100"
-    : "scale-95 opacity-0";
   const sub =
     animeEp && Number.isFinite(animeEp) && animeEp > 0
       ? `Ep ${animeEp}`
