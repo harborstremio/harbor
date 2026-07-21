@@ -1,4 +1,12 @@
-import { SyncApi, SyncApiError, type PushDoc, type PushResult, type SyncDoc } from "./api";
+import {
+  MAX_DOC_CIPHERTEXT_CHARS,
+  MAX_DOC_KEY_CHARS,
+  SyncApi,
+  SyncApiError,
+  type PushDoc,
+  type PushResult,
+  type SyncDoc,
+} from "./api.ts";
 import {
   KDF_ITERATIONS,
   decryptDoc,
@@ -8,9 +16,9 @@ import {
   generateKdfSalt,
   unwrapDataKey,
   wrapDataKey,
-} from "./crypto";
-import { fnv1a64, isSyncableKey } from "./keys";
-import { mergeDoc } from "./merge";
+} from "./crypto.ts";
+import { fnv1a64, isSyncableKey } from "./keys.ts";
+import { mergeDoc } from "./merge.ts";
 import {
   buildAdoptionSummary,
   needsAdoptionPrompt,
@@ -18,14 +26,14 @@ import {
   type AdoptionPlan,
   type AdoptionSummary,
   type SnapshotMap,
-} from "./adopt";
+} from "./adopt.ts";
 import {
   clearSyncSession,
   loadSyncSession,
   saveSyncSession,
   syncEndpoint,
   type SyncSession,
-} from "./session";
+} from "./session.ts";
 
 const STATE_KEY = "harbor.sync.state.v1";
 const RELOAD_GUARD_KEY = "harbor.sync.reloaded.v1";
@@ -319,6 +327,12 @@ async function resolveConflict(
 
   const ciphertext =
     merged === null ? null : await encryptDoc(activeSession.dataKeyB64, result.key, merged);
+  // An oversized merge result would make the server reject the request with
+  // 413; keep it local and let the next push cycle report it as skipped.
+  if (exceedsDocLimits(result.key, ciphertext)) {
+    saveState();
+    return;
+  }
   const response = await apiFor(activeSession).putDocs([
     { key: result.key, ciphertext, baseRev: result.doc.rev, updatedAt: Date.now() },
   ]);
@@ -327,31 +341,50 @@ async function resolveConflict(
   saveState();
 }
 
-async function pushDirty(): Promise<boolean> {
+function exceedsDocLimits(key: string, ciphertext: string | null): boolean {
+  return (
+    key.length > MAX_DOC_KEY_CHARS ||
+    (ciphertext !== null && ciphertext.length > MAX_DOC_CIPHERTEXT_CHARS)
+  );
+}
+
+async function pushDirty(): Promise<{ pushed: boolean; oversized: number }> {
   const activeSession = session;
-  if (!activeSession) return false;
+  if (!activeSession) return { pushed: false, oversized: 0 };
 
   const pending = Array.from(dirty.keys())
     .filter(isSyncableKey)
     .map((key) => ({ key, value: storedValue(key) }));
-  if (pending.length === 0) return false;
+  if (pending.length === 0) return { pushed: false, oversized: 0 };
 
+  let pushed = false;
+  let oversized = 0;
   for (let offset = 0; offset < pending.length; offset += 100) {
     const batch = pending.slice(offset, offset + 100);
     const docs: PushDoc[] = [];
     for (const entry of batch) {
+      const ciphertext =
+        entry.value === null
+          ? null
+          : await encryptDoc(activeSession.dataKeyB64, entry.key, entry.value);
+      // One oversized doc makes the server reject the whole batch with 413,
+      // which would wedge sync for every other key. Keep it local instead.
+      if (exceedsDocLimits(entry.key, ciphertext)) {
+        oversized += 1;
+        dirty.delete(entry.key);
+        continue;
+      }
       docs.push({
         key: entry.key,
-        ciphertext:
-          entry.value === null
-            ? null
-            : await encryptDoc(activeSession.dataKeyB64, entry.key, entry.value),
+        ciphertext,
         baseRev: state.docs[entry.key]?.rev ?? 0,
         updatedAt: dirty.get(entry.key)?.updatedAt ?? Date.now(),
       });
     }
+    if (docs.length === 0) continue;
 
     const response = await apiFor(activeSession).putDocs(docs);
+    pushed = true;
     const submitted = new Map(batch.map((entry) => [entry.key, entry.value]));
     for (const result of response.results) {
       if (result.status === "ok") {
@@ -364,7 +397,7 @@ async function pushDirty(): Promise<boolean> {
     saveState();
   }
 
-  return true;
+  return { pushed, oversized };
 }
 
 function errorCode(error: unknown): string {
@@ -397,9 +430,9 @@ async function performSync(): Promise<void> {
   try {
     await pullRemote(true);
     scanChangedKeys();
-    const pushed = await pushDirty();
-    if (pushed) await pullRemote(true);
-    updateStatus({ lastSyncAt: Date.now(), error: null });
+    const push = await pushDirty();
+    if (push.pushed) await pullRemote(true);
+    updateStatus({ lastSyncAt: Date.now(), error: push.oversized > 0 ? "doc_too_large" : null });
   } catch (error) {
     handleSyncError(error);
     throw error;

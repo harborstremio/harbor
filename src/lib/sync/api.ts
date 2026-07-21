@@ -2,6 +2,14 @@
 // The settings UI requires a custom server URL while the official option is disabled.
 export const DEFAULT_SYNC_ENDPOINT: string = "https://harbor-sync.invalid";
 
+/**
+ * Server-enforced per-doc limits, mirrored from exceedsDocLimit in
+ * harbor-sync/src/handlers.ts. Any doc beyond these makes the server reject
+ * the entire batch with HTTP 413.
+ */
+export const MAX_DOC_KEY_CHARS = 256;
+export const MAX_DOC_CIPHERTEXT_CHARS = 400_000;
+
 export type SyncDoc = {
   key: string;
   rev: number;

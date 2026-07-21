@@ -1,4 +1,4 @@
-import { DEFAULT_SYNC_ENDPOINT } from "./api";
+import { DEFAULT_SYNC_ENDPOINT } from "./api.ts";
 
 const SESSION_KEY = "harbor.sync.session.v1";
 const ENDPOINT_KEY = "harbor.sync.endpoint";

@@ -2857,6 +2857,7 @@
   "settings.sync.deletingAccount": "جارٍ حذف الحساب…",
   "settings.sync.e2eWarning": "بياناتك مشفّرة من طرف إلى طرف. إذا نسيت كلمة مرورك، فلا يمكن استعادة بياناتك.",
   "settings.sync.email": "البريد الإلكتروني",
+  "settings.sync.error.docTooLarge": "بعض البيانات كبيرة جدًا بحيث لا يمكن مزامنتها وبقيت على هذا الجهاز. كل شيء آخر يبقى متزامنًا.",
   "settings.sync.error.emailTaken": "يوجد حساب بالفعل لهذا البريد الإلكتروني.",
   "settings.sync.error.generic": "حدث خطأ ما. يُرجى المحاولة مرة أخرى.",
   "settings.sync.error.invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",

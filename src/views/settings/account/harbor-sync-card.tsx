@@ -25,6 +25,8 @@ const ERROR_KEYS: Record<string, string> = {
   unauthorized: "settings.sync.error.unauthorized",
   network: "settings.sync.error.network",
   network_failure: "settings.sync.error.network",
+  too_large: "settings.sync.error.docTooLarge",
+  doc_too_large: "settings.sync.error.docTooLarge",
 };
 
 function syncErrorKey(error: unknown): string {

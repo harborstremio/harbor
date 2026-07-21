@@ -3601,6 +3601,7 @@
   "settings.sync.deletingAccount": "Deleting account…",
   "settings.sync.e2eWarning": "Your data is end-to-end encrypted. If you forget your password, your data cannot be recovered.",
   "settings.sync.email": "Email",
+  "settings.sync.error.docTooLarge": "Some data is too large to sync and was kept on this device. Everything else stays in sync.",
   "settings.sync.error.emailTaken": "An account already exists for this email address.",
   "settings.sync.error.generic": "Something went wrong. Please try again.",
   "settings.sync.error.invalidCredentials": "Incorrect email or password.",

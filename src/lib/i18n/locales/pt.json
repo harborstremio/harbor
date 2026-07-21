@@ -3543,6 +3543,7 @@
   "settings.sync.deletingAccount": "Excluindo conta…",
   "settings.sync.e2eWarning": "Seus dados são criptografados de ponta a ponta. Se você esquecer sua senha, seus dados não poderão ser recuperados.",
   "settings.sync.email": "E-mail",
+  "settings.sync.error.docTooLarge": "Alguns dados são grandes demais para sincronizar e permaneceram neste dispositivo. Todo o resto continua sincronizado.",
   "settings.sync.error.emailTaken": "Já existe uma conta para este endereço de e-mail.",
   "settings.sync.error.generic": "Algo deu errado. Tente novamente.",
   "settings.sync.error.invalidCredentials": "E-mail ou senha incorretos.",
