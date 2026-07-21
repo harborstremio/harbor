@@ -40,7 +40,7 @@ export function TogetherPopover({
   } = useTogether();
   const { openSettings, openPicker, topKind } = useView();
   const { settings, update } = useSettings();
-  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+  const liquidGlassEnabled = true;
 
   const strongTextClass = liquidGlassEnabled
     ? "text-white/[0.96] [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]"

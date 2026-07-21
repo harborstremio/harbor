@@ -28,7 +28,7 @@ export function TopDock() {
   const { locked, unlock, hiddenTabs } = useParental();
   const { settings } = useSettings();
 
-  const navbarLiquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+  const navbarLiquidGlassEnabled = true;
 
   const { setOpen: setSearchOpen } = useSearch();
   const t = useT();
@@ -630,7 +630,7 @@ function ProfileChipCompact({
 
   const otherProfiles = profiles.filter((profile) => profile.id !== activeProfile?.id);
 
-  const liquidGlassEnabled = settings.liquidGlassEnabled ?? true;
+  const liquidGlassEnabled = true;
 
   /*
    * These contrast helpers are active only in Liquid Glass mode.
@@ -638,10 +638,6 @@ function ProfileChipCompact({
   const strongTextClass = liquidGlassEnabled
     ? "text-white/[0.96] [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]"
     : "text-ink";
-
-  const mutedTextClass = liquidGlassEnabled
-    ? "text-white/[0.80] [text-shadow:0_1px_2px_rgba(0,0,0,0.66)]"
-    : "text-ink-muted";
 
   const subtleTextClass = liquidGlassEnabled
     ? "text-white/[0.64] [text-shadow:0_1px_2px_rgba(0,0,0,0.60)]"
