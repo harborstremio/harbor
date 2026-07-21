@@ -11,6 +11,8 @@ export type LiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   intensity?: number;
   refractionStrength?: number;
   lensStrength?: number;
+  causticsStrength?: number;
+  motionSpeed?: number;
   contentClassName?: string;
   surfaceClassName?: string;
   variant?: "default" | "overlay";
@@ -34,6 +36,8 @@ export function LiquidGlassSurface({
   intensity = 1,
   refractionStrength: _refractionStrength,
   lensStrength: _lensStrength,
+  causticsStrength: _causticsStrength,
+  motionSpeed: _motionSpeed,
   variant = "default",
   backdropBlur = true,
   blurRadius = 2.5,
