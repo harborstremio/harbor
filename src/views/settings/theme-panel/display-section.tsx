@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FormatBadge, type BadgeKind } from "@/components/format-badge";
 import previewPoster from "@/assets/preview/poster1.webp";
+import previewPoster2 from "@/assets/preview/poster2.webp";
+import previewPoster3 from "@/assets/preview/poster3.webp";
+import previewPoster4 from "@/assets/preview/poster4.webp";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { resetPosterDock, updatePosterDock } from "@/lib/poster-dock";
 import { Section, Segmented, ToggleRow } from "../shared";
 import { SFX } from "@/lib/sfx";
 
@@ -115,13 +119,48 @@ export function DisplaySection() {
                 )}
               </p>
             </div>
-            <ToggleRow
-              label={t("Poster Dock magnification")}
-              sub={t("Gently magnify nearby posters as you move across a poster row.")}
-              value={settings.posterDockMagnification}
-              onChange={(posterDockMagnification) => update({ posterDockMagnification })}
-            />
           </div>
+        </div>
+        <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/35 p-5">
+          <ToggleRow
+            label={t("Poster Dock magnification")}
+            sub={t("Gently magnify nearby posters as you move across a poster row.")}
+            value={settings.posterDockMagnification}
+            onChange={(posterDockMagnification) => update({ posterDockMagnification })}
+          />
+          {settings.posterDockMagnification && (
+            <>
+              <div className="flex items-center gap-4 px-1 py-1.5">
+                <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
+                  {t("Animation speed")}
+                </span>
+                <input
+                  type="range"
+                  min="250"
+                  max="1500"
+                  step="10"
+                  value={settings.posterDockTransitionMs}
+                  onChange={(event) =>
+                    update({ posterDockTransitionMs: Number(event.target.value) })
+                  }
+                  className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
+                />
+                <span className="w-16 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+                  {settings.posterDockTransitionMs}ms
+                </span>
+                {settings.posterDockTransitionMs !== 760 && (
+                  <button
+                    type="button"
+                    onClick={() => update({ posterDockTransitionMs: 760 })}
+                    className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+                  >
+                    {t("Reset")}
+                  </button>
+                )}
+              </div>
+              <PosterDockPreview transitionMs={settings.posterDockTransitionMs} />
+            </>
+          )}
         </div>
       </Section>
       <Section title={t("Liquid Glass")}>
@@ -416,6 +455,82 @@ export function DisplaySection() {
         )}
       </Section>
     </>
+  );
+}
+
+function PosterDockPreview({ transitionMs }: { transitionMs: number }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number | null>(null);
+  const pointerXRef = useRef<number | null>(null);
+
+  const update = () => {
+    frameRef.current = null;
+    const track = trackRef.current;
+    const pointerX = pointerXRef.current;
+    if (!track || pointerX === null) return;
+
+    updatePosterDock({
+      track,
+      pointerX,
+      cellWidth: 80,
+      gap: 12,
+      scrollPosition: 0,
+      rtl: false,
+      transitionMs,
+    });
+  };
+
+  const schedule = (pointerX: number) => {
+    pointerXRef.current = pointerX;
+    if (frameRef.current === null) frameRef.current = requestAnimationFrame(update);
+  };
+
+  useEffect(
+    () => () => {
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+      if (trackRef.current) resetPosterDock(trackRef.current);
+    },
+    [],
+  );
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+        Live preview
+      </span>
+      <div
+        ref={trackRef}
+        onPointerMove={(event) => schedule(event.clientX)}
+        onPointerLeave={() => {
+          pointerXRef.current = null;
+          if (trackRef.current) resetPosterDock(trackRef.current);
+        }}
+        className="flex items-start gap-3 overflow-visible px-3 pb-4 pt-2"
+      >
+        {[
+          previewPoster,
+          previewPoster2,
+          previewPoster3,
+          previewPoster4,
+          previewPoster,
+          previewPoster2,
+        ].map((poster, index) => (
+          <div key={`${poster}-${index}`} className="w-20 shrink-0">
+            <div
+              data-preview-anchor
+              className="overflow-hidden rounded-lg shadow-[0_6px_16px_-8px_rgba(0,0,0,0.8)]"
+            >
+              <img
+                src={poster}
+                alt=""
+                draggable={false}
+                className="aspect-[2/3] w-full object-cover"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

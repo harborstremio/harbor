@@ -349,8 +349,9 @@ export function Row({
       gap: GAP,
       scrollPosition: readPos(track),
       rtl: isRtlTrack(track),
+      transitionMs: settings.posterDockTransitionMs,
     });
-  }, [cellWidth, dockEnabled, effMin, resetPosterDock]);
+  }, [cellWidth, dockEnabled, effMin, resetPosterDock, settings.posterDockTransitionMs]);
 
   const schedulePosterDock = useCallback(
     (clientX: number) => {
@@ -556,7 +557,7 @@ export function Row({
             }}
             onClickCapture={onClickCapture}
             onDragStart={(e) => e.preventDefault()}
-            className="harbor-row-track grid grid-flow-col items-start gap-5 overflow-x-auto px-5 pb-5 pt-8 -mx-5 -mb-5 -mt-8 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] *:snap-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] overscroll-x-contain [&_img]:select-none [&_img]:[-webkit-user-drag:none]"
+            className="harbor-row-track grid grid-flow-col items-start gap-5 overflow-x-auto px-5 pb-8 pt-14 -mx-5 -mb-8 -mt-14 scroll-ps-5 scroll-pe-5 [scroll-snap-type:x_mandatory] *:snap-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [overflow-anchor:none] overscroll-x-contain [&_img]:select-none [&_img]:[-webkit-user-drag:none]"
             style={{
               gridAutoColumns: cellWidth != null ? `${cellWidth}px` : `${effMin}px`,
               willChange: "transform",
@@ -606,15 +607,18 @@ function EdgeArrow({
       >
         <ThreeLiquidGlassSurface
           radius="9999px"
-          shaderRadius={1}
-          intensity={1}
-          variant="overlay"
-          backdropBlur
-          className={`h-11 w-11 pointer-events-auto ${
-            visible
-              ? "opacity-0 group-hover/row:opacity-100 focus-within:opacity-100"
-              : "pointer-events-none opacity-0"
-          }`}
+          shaderRadius={0.58}
+          intensity={0.9}
+          style={{
+            background: "transparent",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+          }}
+          className={`h-11 w-11 pointer-events-auto border border-white/[0.08]
+            transition-opacity duration-200 ${
+              visible
+                ? "opacity-85 group-hover/row:opacity-100 focus-within:opacity-100"
+                : "pointer-events-none opacity-0"
+            }`}
           contentClassName="flex h-full w-full items-center justify-center"
         >
           <button
@@ -623,11 +627,11 @@ function EdgeArrow({
             aria-label={label}
             tabIndex={visible ? 0 : -1}
             className="
-      flex h-full w-full
-      items-center justify-center
-      rounded-full bg-transparent
-      text-ink outline-none
-    "
+            flex h-full w-full
+            items-center justify-center
+            rounded-full bg-transparent
+            text-ink outline-none
+          "
           >
             {side === "left" ? (
               <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" />
@@ -648,15 +652,18 @@ function EdgeArrow({
     >
       <ThreeLiquidGlassSurface
         radius="9999px"
-        shaderRadius={1}
-        intensity={1}
-        variant="overlay"
-        backdropBlur
-        className={`h-11 w-11 pointer-events-auto ${
-          visible
-            ? "opacity-0 group-hover/row:opacity-100 focus-within:opacity-100"
-            : "pointer-events-none opacity-0"
-        }`}
+        shaderRadius={0.58}
+        intensity={0.9}
+        style={{
+          background: "transparent",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+        }}
+        className={`h-11 w-11 pointer-events-auto border border-white/[0.08]
+            transition-opacity duration-200 ${
+              visible
+                ? "opacity-85 group-hover/row:opacity-100 focus-within:opacity-100"
+                : "pointer-events-none opacity-0"
+            }`}
         contentClassName="flex h-full w-full items-center justify-center"
       >
         <button
