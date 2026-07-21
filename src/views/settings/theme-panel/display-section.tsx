@@ -10,6 +10,9 @@ import { resetPosterDock, updatePosterDock } from "@/lib/poster-dock";
 import { Section, Segmented, ToggleRow } from "../shared";
 import { SFX } from "@/lib/sfx";
 
+const DEFAULT_GLASS_BLUR = 2.5;
+const DEFAULT_GLASS_TINT = 40;
+
 export function DisplaySection() {
   const t = useT();
   const { settings, update } = useSettings();
@@ -19,10 +22,10 @@ export function DisplaySection() {
   const soundEffectsEnabled = settings.soundTheme !== "none";
   const defaultGlassBlur = Number.isFinite(settings.defaultLiquidGlassBlur)
     ? settings.defaultLiquidGlassBlur
-    : 2;
+    : DEFAULT_GLASS_BLUR;
   const defaultGlassTint = Number.isFinite(settings.defaultLiquidGlassTint)
     ? settings.defaultLiquidGlassTint
-    : 40;
+    : DEFAULT_GLASS_TINT;
   return (
     <>
       <Section
@@ -207,6 +210,15 @@ export function DisplaySection() {
               <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
                 {defaultGlassBlur}px
               </span>
+              {defaultGlassBlur !== DEFAULT_GLASS_BLUR && (
+                <button
+                  type="button"
+                  onClick={() => update({ defaultLiquidGlassBlur: DEFAULT_GLASS_BLUR })}
+                  className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+                >
+                  {t("Reset")}
+                </button>
+              )}
             </div>
             <div className="mt-4 flex items-center gap-4 px-1 py-1.5">
               <span className="w-40 shrink-0 text-[13.5px] font-medium text-ink">
@@ -224,6 +236,15 @@ export function DisplaySection() {
               <span className="w-14 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
                 {defaultGlassTint}%
               </span>
+              {defaultGlassTint !== DEFAULT_GLASS_TINT && (
+                <button
+                  type="button"
+                  onClick={() => update({ defaultLiquidGlassTint: DEFAULT_GLASS_TINT })}
+                  className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+                >
+                  {t("Reset")}
+                </button>
+              )}
             </div>
           </>
         )}

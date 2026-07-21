@@ -58,7 +58,7 @@ export function LiquidGlassSurface({
         ? `linear-gradient(145deg, rgba(255,255,255,${0.09 + strength * 0.04}), rgba(255,255,255,0.028))`
         : `linear-gradient(145deg, rgba(255,255,255,${0.045 + strength * 0.025}), rgba(255,255,255,0.012))`,
       `linear-gradient(118deg, rgba(255,255,255,${0.022 + strength * 0.018}) 0%, rgba(255,255,255,${0.008 + strength * 0.006}) 24%, transparent 48%)`,
-      `radial-gradient(78% 110% at -20% 50%, rgba(95,190,255,${0.022 + strength * 0.026}) 0%, transparent 62%), radial-gradient(78% 110% at 120% 50%, rgba(255,120,205,${0.018 + strength * 0.022}) 0%, transparent 62%)`,
+      `radial-gradient(78% 110% at -20% 50%, rgba(95,190,255,${0.012 + strength * 0.015}) 0%, transparent 62%), radial-gradient(78% 110% at 120% 50%, rgba(255,120,205,${0.01 + strength * 0.013}) 0%, transparent 62%)`,
     ].join(", "),
     backgroundColor:
       variant === "overlay"
