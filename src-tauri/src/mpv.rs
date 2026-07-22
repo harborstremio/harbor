@@ -384,6 +384,13 @@ fn apply_pre_init(
     let opt = |k: &str, v: &str| {
         let _ = init.set_property(k, v);
     };
+    // mpv's d3d11vpp filter (RTX Video HDR / RTX VSR) only works on the
+    // native D3D11 GPU context. gpu-api is init-only while the in-player RTX
+    // toggles can enable the filter mid-session, so force it for every
+    // Windows session regardless of the tonemapping branch below. d3d11 is
+    // already mpv's preferred API on Windows; user extra-options still win.
+    #[cfg(windows)]
+    opt("gpu-api", "d3d11");
     if args.hdr_to_sdr.unwrap_or(false) && !rtx_hdr {
         opt("tone-mapping", "spline");
         opt("gamut-mapping-mode", "perceptual");
@@ -397,12 +404,7 @@ fn apply_pre_init(
         opt("target-colorspace-hint", "yes");
     } else {
         #[cfg(windows)]
-        {
-            opt("target-colorspace-hint", "yes");
-            if embed_hwnd.is_some() || rtx_video {
-                opt("gpu-api", "d3d11");
-            }
-        }
+        opt("target-colorspace-hint", "yes");
         #[cfg(target_os = "macos")]
         {
             opt("target-colorspace-hint", "yes");

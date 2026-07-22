@@ -12,6 +12,7 @@ import {
 // of options is active.
 const RTX_VF_LABEL = "@harbor-rtx";
 const HINT_MODE_PROPERTY = "target-colorspace-hint-mode";
+const HWDEC_PROPERTY = "hwdec";
 
 export interface RtxVideoRequest {
   hdr: boolean;
@@ -23,6 +24,8 @@ export interface RtxVideoRequest {
 let appliedFilter: string | null = null;
 let previousHintMode: unknown;
 let hasPreviousHintMode = false;
+let previousHwdec: unknown;
+let hasPreviousHwdec = false;
 let currentSessionKey: string | number | null = null;
 let applyQueue = Promise.resolve();
 let stateGeneration = 0;
@@ -42,6 +45,8 @@ async function applyRtxVideoNow(req: RtxVideoRequest, sessionKey: string | numbe
     appliedFilter = null;
     previousHintMode = undefined;
     hasPreviousHintMode = false;
+    previousHwdec = undefined;
+    hasPreviousHwdec = false;
   }
   const hdrRequested = req.hdr && !isRtxHdrBlocked(req.hdrToSdr, req.svpActive);
   const vsrRequested = req.vsr && !isRtxVsrBlocked(req.svpActive);
@@ -61,6 +66,23 @@ async function applyRtxVideoNow(req: RtxVideoRequest, sessionKey: string | numbe
       hdrActive = hdrRequested && eligibleSdr;
       if (vsrRequested && eligibleSdr) vsrScale = rtxVsrScaleForSource(width, height);
     } catch {
+      hdrActive = false;
+      vsrScale = null;
+    }
+  }
+
+  // d3d11vpp requires native D3D11 hardware frames. Sessions that start with
+  // both RTX features off run hwdec=auto, and hwdec is the one requirement
+  // mpv lets us change at runtime — switch the decoder over before installing
+  // the filter and restore it once neither feature is active.
+  if ((hdrActive || vsrScale != null) && !hasPreviousHwdec) {
+    try {
+      const snapshot = await invoke<unknown>("mpv_get_property", { name: HWDEC_PROPERTY });
+      await invoke("mpv_set_property", { name: HWDEC_PROPERTY, value: "d3d11va" });
+      previousHwdec = snapshot;
+      hasPreviousHwdec = true;
+    } catch (error) {
+      console.warn("[rtx-video] could not switch to native D3D11 decoding", error);
       hdrActive = false;
       vsrScale = null;
     }
@@ -112,6 +134,17 @@ async function applyRtxVideoNow(req: RtxVideoRequest, sessionKey: string | numbe
     previousHintMode = undefined;
     hasPreviousHintMode = false;
   }
+
+  // Restore the original decoder once our filter is no longer installed,
+  // including after a failed install.
+  if (appliedFilter == null && hasPreviousHwdec) {
+    await invoke("mpv_set_property", {
+      name: HWDEC_PROPERTY,
+      value: previousHwdec,
+    }).catch(() => {});
+    previousHwdec = undefined;
+    hasPreviousHwdec = false;
+  }
 }
 
 export function applyRtxVideo(req: RtxVideoRequest, sessionKey: string | number): Promise<void> {
@@ -131,4 +164,6 @@ export function resetRtxVideoState(): void {
   appliedFilter = null;
   previousHintMode = undefined;
   hasPreviousHintMode = false;
+  previousHwdec = undefined;
+  hasPreviousHwdec = false;
 }
