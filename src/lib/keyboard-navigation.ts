@@ -113,6 +113,12 @@ function setPointerModality() {
   document.querySelectorAll<HTMLElement>('[data-search-nav-mode="true"]').forEach((field) => {
     clearSearchNavMode(field);
   });
+
+  // A control focused by TV navigation can still match :focus-visible after its
+  // TV marker is removed. Drop that stale focus so pointer movement does not
+  // replace the inset TV ring with the regular outer keyboard outline.
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  if (active && !isEditable(active)) active.blur();
 }
 
 /** Scroll/layout can synthesize pointermove without motion — require real movement. */
@@ -912,6 +918,10 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
+
+      // Tab is native keyboard navigation, but does not call moveFocus().
+      // Restore keyboard modality so its focus cues are not hidden after mouse use.
+      if (e.key === "Tab") setKeysModality();
 
       const target = e.target instanceof HTMLElement ? e.target : null;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
