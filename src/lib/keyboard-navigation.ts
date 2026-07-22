@@ -80,6 +80,55 @@ let activeSearchEditEl: HTMLElement | null = null;
 let focusStylesInjected = false;
 let hasTvNavigationIntent = false;
 
+type InputModality = "pointer" | "keys";
+
+/**
+ * null until the first user input: TV/HTPC boots keep the focus ring visible,
+ * while mouse/scroll activity switches to pointer modality and hides TV visuals.
+ */
+let inputModality: InputModality | null = null;
+let lastPointerMoveX: number | null = null;
+let lastPointerMoveY: number | null = null;
+
+/** Mirror modality on <html> so injected TV ring styles can be scoped to it. */
+function reflectModalityAttr() {
+  if (typeof document === "undefined" || !inputModality) return;
+  document.documentElement.setAttribute("data-input-modality", inputModality);
+}
+
+function setKeysModality() {
+  if (inputModality === "keys") return;
+  inputModality = "keys";
+  reflectModalityAttr();
+}
+
+function setPointerModality() {
+  if (inputModality === "pointer") return;
+  inputModality = "pointer";
+  reflectModalityAttr();
+
+  // Mouse users get native focus behavior: drop TV rings and un-arm any
+  // read-only nav-mode text fields so they type like normal inputs.
+  clearTvFocusRing();
+  document.querySelectorAll<HTMLElement>('[data-search-nav-mode="true"]').forEach((field) => {
+    clearSearchNavMode(field);
+  });
+
+  // A control focused by TV navigation can still match :focus-visible after its
+  // TV marker is removed. Drop that stale focus so pointer movement does not
+  // replace the inset TV ring with the regular outer keyboard outline.
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  if (active && !isEditable(active)) active.blur();
+}
+
+/** Scroll/layout can synthesize pointermove without motion — require real movement. */
+function notePointerMove(x: number, y: number) {
+  const moved = lastPointerMoveX !== null && (x !== lastPointerMoveX || y !== lastPointerMoveY);
+  lastPointerMoveX = x;
+  lastPointerMoveY = y;
+  if (moved) setPointerModality();
+}
+
 function isEditable(el: HTMLElement | null) {
   if (!el) return false;
   const tag = el.tagName;
@@ -364,8 +413,10 @@ function ensureFocusStyles() {
 
   const style = document.createElement("style");
   style.setAttribute("data-tv-focus-styles", "true");
+  // TV rings are keyboard/remote affordances. Pointer modality (mouse/touch)
+  // keeps native focus visuals, so every ring rule is scoped to non-pointer.
   style.textContent = `
-    [data-tv-focused="true"] {
+    html:not([data-input-modality="pointer"]) [data-tv-focused="true"] {
       outline: none !important;
       box-shadow: inset 0 0 0 2px var(--color-accent) !important;
       transition: box-shadow 120ms ease;
@@ -377,7 +428,7 @@ function ensureFocusStyles() {
      * Text fields are often nested inside a label/card. Put the TV focus ring
      * on that visible container so Settings search looks like every other item.
      */
-    [data-tv-search-nav-focused="true"] {
+    html:not([data-input-modality="pointer"]) [data-tv-search-nav-focused="true"] {
       outline: none !important;
       box-shadow: inset 0 0 0 2px var(--color-accent) !important;
       transition: box-shadow 120ms ease;
@@ -385,13 +436,13 @@ function ensureFocusStyles() {
       position: relative;
     }
 
-    [data-tv-search-nav-focused="true"] [data-tv-focused="true"] {
+    html:not([data-input-modality="pointer"]) [data-tv-search-nav-focused="true"] [data-tv-focused="true"] {
       box-shadow: none !important;
     }
 
     /* Editing keeps the same theme-aware cue without the navigation marker. */
-    [data-tv-search-editing-focused="true"],
-    [data-search-editing="true"]:not([data-tv-focused="true"]) {
+    html:not([data-input-modality="pointer"]) [data-tv-search-editing-focused="true"],
+    html:not([data-input-modality="pointer"]) [data-search-editing="true"]:not([data-tv-focused="true"]) {
       outline: none !important;
       box-shadow: inset 0 0 0 2px var(--color-accent) !important;
       transition: box-shadow 120ms ease;
@@ -399,7 +450,7 @@ function ensureFocusStyles() {
       position: relative;
     }
 
-    [data-tv-search-editing-focused="true"] [data-search-editing="true"] {
+    html:not([data-input-modality="pointer"]) [data-tv-search-editing-focused="true"] [data-search-editing="true"] {
       box-shadow: none !important;
     }
   `;
@@ -479,6 +530,14 @@ function clearSearchVisualFocus() {
       el.removeAttribute("data-tv-search-nav-focused");
       el.removeAttribute("data-tv-search-editing-focused");
     });
+}
+
+/** Ring the visible field container (label/panel) instead of the bare input. */
+function markSearchEditingVisual(el: HTMLElement) {
+  const visual = getSearchFocusVisual(el);
+  if (visual && visual !== el) {
+    visual.setAttribute("data-tv-search-editing-focused", "true");
+  }
 }
 
 function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "center") {
@@ -564,10 +623,7 @@ function enterSearchEditMode(el: HTMLElement) {
   el.removeAttribute("data-tv-focused");
   el.setAttribute("data-search-editing", "true");
 
-  const visual = getSearchFocusVisual(el);
-  if (visual && visual !== el) {
-    visual.setAttribute("data-tv-search-editing-focused", "true");
-  }
+  markSearchEditingVisual(el);
 
   el.focus({ preventScroll: true });
 
@@ -645,6 +701,7 @@ function getSpatialOrder(list: HTMLElement[]) {
 
 export function moveFocus(dir: Dir, wrap: boolean = true): void {
   hasTvNavigationIntent = true;
+  setKeysModality();
   const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const root = getActiveModal(active) ?? getTopFocusScope() ?? document;
   const scroll = dir === "left" || dir === "right" ? "nearest" : "center";
@@ -862,6 +919,10 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       if (e.defaultPrevented) return;
       if (e.altKey || e.ctrlKey || e.metaKey) return;
 
+      // Tab is native keyboard navigation, but does not call moveFocus().
+      // Restore keyboard modality so its focus cues are not hidden after mouse use.
+      if (e.key === "Tab") setKeysModality();
+
       const target = e.target instanceof HTMLElement ? e.target : null;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
@@ -883,7 +944,9 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         activeSearchEditEl = active;
         active.removeAttribute("data-tv-focused");
         active.setAttribute("data-search-editing", "true");
+        // Drop stale rings elsewhere, then ring this field's own container.
         clearSearchVisualFocus();
+        markSearchEditingVisual(active);
 
         if (isBackKey(e)) {
           e.preventDefault();
@@ -986,6 +1049,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     };
 
     const onPointerDown = (e: PointerEvent) => {
+      setPointerModality();
       const pointerTarget = e.target instanceof HTMLElement ? e.target : null;
       const clickedTextField = pointerTarget?.closest<HTMLElement>("input, textarea");
       const clickedSearch =
@@ -1025,10 +1089,17 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     window.addEventListener("beforeinput", onBeforeInput, true);
     window.addEventListener("pointerdown", onPointerDown, true);
 
+    const onPointerMove = (e: PointerEvent) => notePointerMove(e.screenX, e.screenY);
+    const onWheel = () => setPointerModality();
+    window.addEventListener("pointermove", onPointerMove, true);
+    window.addEventListener("wheel", onWheel, { capture: true, passive: true });
+
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("beforeinput", onBeforeInput, true);
       window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("pointermove", onPointerMove, true);
+      window.removeEventListener("wheel", onWheel, true);
       if (remoteBackOwner === owner) {
         remoteBackFns = {};
         remoteBackOwner = null;
