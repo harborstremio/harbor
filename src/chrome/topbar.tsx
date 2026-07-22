@@ -1,5 +1,5 @@
 import { ArrowLeft, Search, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { BackChrome } from "@/chrome/back-chrome";
 import { HarborMark } from "@/components/icons/harbor-mark";
@@ -234,14 +234,30 @@ export function TogetherButton({
   const { avatar: selfAvatar, color: selfColor } = useSelfIdentity();
 
   const t = useT();
+
   const live = snapshot.state === "joined";
+  const above = popoverPlacement === "above-left";
+
   const wrapRef = useRef<HTMLDivElement>(null);
+  const popoverPortalRef = useRef<HTMLDivElement>(null);
+
+  const [popoverPosition, setPopoverPosition] = useState({
+    top: 0,
+    left: 0,
+    visibility: "hidden" as "hidden" | "visible",
+  });
 
   useEffect(() => {
     if (!modalOpen) return;
 
     const onDown = (event: MouseEvent) => {
-      if (!wrapRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+
+      const insideButton = wrapRef.current?.contains(target) ?? false;
+
+      const insidePopover = popoverPortalRef.current?.contains(target) ?? false;
+
+      if (!insideButton && !insidePopover) {
         closeModal();
       }
     };
@@ -261,11 +277,96 @@ export function TogetherButton({
     };
   }, [modalOpen, closeModal]);
 
+  useLayoutEffect(() => {
+    if (!modalOpen) return;
+
+    const anchor = wrapRef.current;
+    const popover = popoverPortalRef.current;
+
+    if (!anchor || !popover) return;
+
+    let frameId: number | null = null;
+
+    const updatePosition = () => {
+      const anchorRect = anchor.getBoundingClientRect();
+      const popoverRect = popover.getBoundingClientRect();
+
+      const viewportPadding = 12;
+      const gap = -1;
+
+      const direction = window.getComputedStyle(document.documentElement).direction;
+
+      const rtl = direction === "rtl";
+
+      let top: number;
+      let left: number;
+
+      if (above) {
+        top = anchorRect.top - popoverRect.height + gap;
+
+        left = rtl ? anchorRect.right - popoverRect.width : anchorRect.left;
+      } else {
+        top = anchorRect.bottom + gap;
+
+        left = rtl ? anchorRect.left : anchorRect.right - popoverRect.width;
+      }
+
+      top = Math.max(
+        viewportPadding,
+        Math.min(top, window.innerHeight - popoverRect.height - viewportPadding),
+      );
+
+      left = Math.max(
+        viewportPadding,
+        Math.min(left, window.innerWidth - popoverRect.width - viewportPadding),
+      );
+
+      setPopoverPosition({
+        top,
+        left,
+        visibility: "visible",
+      });
+    };
+
+    const schedulePositionUpdate = () => {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+
+      frameId = requestAnimationFrame(updatePosition);
+    };
+
+    /*
+     * أول حساب يتم مباشرة حتى لا تظهر القائمة
+     * لحظة في مكان قديم.
+     */
+    updatePosition();
+
+    const resizeObserver = new ResizeObserver(schedulePositionUpdate);
+
+    resizeObserver.observe(anchor);
+    resizeObserver.observe(popover);
+
+    window.addEventListener("resize", schedulePositionUpdate);
+
+    window.addEventListener("scroll", schedulePositionUpdate, true);
+
+    return () => {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+
+      resizeObserver.disconnect();
+
+      window.removeEventListener("resize", schedulePositionUpdate);
+
+      window.removeEventListener("scroll", schedulePositionUpdate, true);
+    };
+  }, [modalOpen, above]);
+
   const visible = snapshot.participants.slice(0, TOPBAR_MAX_AVATARS);
 
   const overflow = Math.max(0, snapshot.participants.length - TOPBAR_MAX_AVATARS);
-
-  const above = popoverPlacement === "above-left";
 
   const idleSize = live
     ? variant === "ghost"
@@ -278,9 +379,6 @@ export function TogetherButton({
   const sizing =
     modalOpen && !above ? (live ? "h-14 gap-2 px-3" : "h-14 w-11 justify-center") : idleSize;
 
-  /*
-   * شكل الزجاج يتغير عند اتصاله بالـPopover.
-   */
   const glassRadius = modalOpen
     ? above
       ? "0 0 8px 8px"
@@ -290,10 +388,31 @@ export function TogetherButton({
       : "12px";
 
   const glassChrome = modalOpen
-    ? `z-[51] harbor-together-surface border border-edge text-ink ${
-        above ? "border-t-0" : "border-b-0"
-      }`
-    : `border border-white/[0.10] ${live ? "text-ink" : "text-ink-muted hover:text-ink"}`;
+    ? `
+        z-[51]
+        harbor-together-surface
+        border border-edge
+        text-ink
+        ${above ? "border-t-0" : "border-b-0"}
+      `
+    : `
+        border border-white/[0.10]
+        ${live ? "text-ink" : "text-ink-muted hover:text-ink"}
+      `;
+
+  const toggleModal = () => {
+    if (modalOpen) {
+      closeModal();
+      return;
+    }
+
+    setPopoverPosition((current) => ({
+      ...current,
+      visibility: "hidden",
+    }));
+
+    openModal();
+  };
 
   return (
     <div
@@ -305,9 +424,8 @@ export function TogetherButton({
       <ThreeLiquidGlassSurface
         radius={glassRadius}
         shaderRadius={variant === "ghost" ? 1 : modalOpen ? 0.3 : 0.48}
-        intensity={0.78}
+        intensity={0.9}
         style={{
-          background: "transparent",
           boxShadow: "none",
         }}
         className={`
@@ -320,14 +438,11 @@ export function TogetherButton({
       >
         <button
           type="button"
+          data-tauri-drag-region="false"
           aria-label={t("chrome.watchTogether")}
-          onClick={() => {
-            if (modalOpen) {
-              closeModal();
-            } else {
-              openModal();
-            }
-          }}
+          aria-haspopup="dialog"
+          aria-expanded={modalOpen}
+          onClick={toggleModal}
           className={`
             harbor-together-btn
             relative flex items-center
@@ -425,15 +540,31 @@ export function TogetherButton({
         </button>
       </ThreeLiquidGlassSurface>
 
-      {modalOpen && (
-        <div
-          className={`harbor-wt-modal absolute z-50 ${
-            above ? "bottom-[calc(100%-1px)] start-0" : "end-0 top-[calc(100%-1px)]"
-          }`}
-        >
-          <TogetherPopover placement={popoverPlacement} connectStyle={connectStyle} />
-        </div>
-      )}
+      {modalOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={popoverPortalRef}
+            data-tv-focus-scope
+            data-tauri-drag-region="false"
+            data-together-popover-portal
+            className="
+              harbor-wt-modal
+              pointer-events-auto
+              fixed
+              z-[300]
+              isolate
+            "
+            style={{
+              top: popoverPosition.top,
+              left: popoverPosition.left,
+              visibility: popoverPosition.visibility,
+            }}
+          >
+            <TogetherPopover placement={popoverPlacement} connectStyle={connectStyle} />
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
@@ -473,7 +604,6 @@ function SearchPill() {
       shaderRadius={0.58}
       intensity={0.9}
       style={{
-        background: "transparent",
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
       }}
       className="

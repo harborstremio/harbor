@@ -38,8 +38,11 @@ export function SearchOverlay() {
   useEffect(() => {
     if (!open) return;
 
+    let input: HTMLInputElement | null = null;
+    let panel: Element | null = null;
+
     const id = window.setTimeout(() => {
-      const input = inputRef.current;
+      input = inputRef.current;
       if (!input) return;
 
       // Search Overlay opens directly in typing mode. It must never inherit
@@ -48,6 +51,9 @@ export function SearchOverlay() {
       input.removeAttribute("data-search-nav-mode");
       input.removeAttribute("data-tv-focused");
       input.setAttribute("data-search-editing", "true");
+      // Ring the whole search bar panel, not the bare input.
+      panel = input.closest("[data-tv-text-field]");
+      panel?.setAttribute("data-tv-search-editing-focused", "true");
       input.focus({ preventScroll: true });
 
       const len = input.value.length;
@@ -60,7 +66,8 @@ export function SearchOverlay() {
 
     return () => {
       window.clearTimeout(id);
-      inputRef.current?.removeAttribute("data-search-editing");
+      input?.removeAttribute("data-search-editing");
+      panel?.removeAttribute("data-tv-search-editing-focused");
       document.body.style.overflow = "";
     };
   }, [open]);
@@ -124,6 +131,7 @@ export function SearchOverlay() {
         className="relative mx-auto flex h-full w-full max-w-[1080px] flex-col px-6 py-6 sm:px-10 sm:py-10"
       >
         <div
+          data-tv-text-field
           className={`modal-panel relative flex shrink-0 items-center gap-3 rounded-2xl border bg-elevated/70 px-5 shadow-[0_24px_80px_-30px_rgba(0,0,0,0.7)] transition-colors ${
             aiMode ? "border-accent/55" : "border-edge-soft/80"
           }`}

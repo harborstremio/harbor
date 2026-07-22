@@ -184,7 +184,6 @@ export function CinematicPlayerLoader({
         refractionStrength={1.18}
         contentClassName="h-full w-full"
         style={{
-          background: "transparent",
           boxShadow: "none",
         }}
       >
