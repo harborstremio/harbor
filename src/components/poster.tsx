@@ -259,7 +259,12 @@ export function Poster({
     );
     if (isOffline) wasOfflineRef.current = true;
     retryRef.current = () => {
-      if (!candidates.some((url) => posterRetryPolicy.isCooling(url))) retryNow();
+      if (
+        wasOfflineRef.current === false &&
+        !candidates.some((url) => posterRetryPolicy.isCooling(url))
+      ) {
+        retryNow();
+      }
     };
     let timer: number | undefined;
     const cancel = () => {
@@ -269,13 +274,14 @@ export function Poster({
       }
     };
     const schedule = () => {
-      if (timer !== undefined) return;
+      if (timer !== undefined || wasOfflineRef.current) return;
       const delay = posterRetryPolicy.delayFor(retry);
       if (delay !== null) timer = window.setTimeout(retryNow, delay);
     };
 
     const onOffline = () => {
       wasOfflineRef.current = true;
+      cancel();
     };
     const onOnline = () => {
       if (!wasOfflineRef.current) return;
