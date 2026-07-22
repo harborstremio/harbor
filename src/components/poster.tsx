@@ -211,8 +211,6 @@ export function Poster({
   const failedRef = useRef<Set<string>>(new Set());
   const firedRef = useRef(false);
   const failBurstRef = useRef<{ t: number; n: number }>({ t: 0, n: 0 });
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const retryRef = useRef<(() => void) | null>(null);
   const wasOfflineRef = useRef(false);
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
