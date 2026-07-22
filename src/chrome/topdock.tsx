@@ -128,7 +128,7 @@ export function TopDock() {
             data-tv-top-chrome
             radius="99999px"
             motionSpeed={0.5}
-            intensity={1.05}
+            intensity={0.3}
             shaderRadius={0.58}
             refractionStrength={1.42}
             lensStrength={1.05}
@@ -888,7 +888,7 @@ function ProfileChipCompact({
         <ThreeLiquidGlassSurface
           radius={glassRadius}
           shaderRadius={1}
-          intensity={0.78}
+          intensity={0.1}
           style={{
             background: open ? "rgba(8,12,18,0.15)" : "rgba(255,255,255,0.028)",
             boxShadow: open
@@ -975,7 +975,7 @@ function ProfileChipCompact({
                 aria-label={name}
                 radius="16px"
                 shaderRadius={0.3}
-                intensity={0.74}
+                intensity={0.1}
                 refractionStrength={1.42}
                 lensStrength={1.05}
                 interactive={false}

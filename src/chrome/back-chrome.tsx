@@ -24,7 +24,6 @@ export function BackChrome() {
       `}
       contentClassName="h-full w-full"
       style={{
-        background: "transparent",
         boxShadow: "none",
       }}
     >

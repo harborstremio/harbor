@@ -5,6 +5,7 @@ import type { SkipSegment } from "@/lib/skip-intro";
 import type { SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
 import { useT } from "@/lib/i18n";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 export function SkipPill({
   segment,
@@ -50,8 +51,7 @@ export function SkipPill({
 
   const isOutroNext = mounted.kind === "outro" && hasNextEp && !!nextEp;
   const finalLeadSec = typeof leadSec === "number" && leadSec > 0 ? leadSec : 15;
-  const inCountdownWindow =
-    isOutroNext && remainingSec > 0 && remainingSec <= finalLeadSec;
+  const inCountdownWindow = isOutroNext && remainingSec > 0 && remainingSec <= finalLeadSec;
 
   if (isOutroNext && inCountdownWindow && nextEp) {
     return (
@@ -84,30 +84,88 @@ export function SkipPill({
     <div
       className={`pointer-events-none absolute end-7 z-30 flex items-center gap-2 transition-all duration-200 ease-out ${
         visible && show
-          ? "bottom-44 opacity-100 translate-y-0"
-          : "bottom-40 opacity-0 translate-y-2"
+          ? "bottom-44 translate-y-0 opacity-100"
+          : "bottom-40 translate-y-2 opacity-0"
       }`}
     >
-      <button
-        type="button"
-        onClick={action}
-        className={`pointer-events-auto inline-flex items-center gap-2 rounded-full border bg-black/75 px-5 py-2.5 text-[14px] font-semibold text-white shadow-[0_18px_50px_-15px_rgba(0,0,0,0.85)] backdrop-blur-md transition-[background-color,transform] hover:bg-black/90 active:scale-[0.97] ${
-          isAd ? "border-rose-400/50" : "border-white/20"
-        }`}
+      <ThreeLiquidGlassSurface
+        radius="9999px"
+        shaderRadius={0.28}
+        intensity={0.9}
+        refractionStrength={0.8}
+        interactive={false}
+        style={{
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+        }}
+        className="pointer-events-auto inline-flex h-[42px] w-fit shrink-0"
+        surfaceClassName={`border ${isAd ? "border-rose-400/50" : "border-white/[0.08]"}`}
+        contentClassName="flex h-full w-full"
       >
-        {isAd ? <AdSkipIcon className="h-[18px] w-[18px]" /> : <Icon size={18} strokeWidth={2.2} />}
-        {label}
-      </button>
-      {onDismiss && !isOutroNext && (
         <button
           type="button"
-          onClick={onDismiss}
-          aria-label={t("Hide this Skip button")}
-          title={t("Hide this Skip button")}
-          className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/75 text-white/70 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.85)] backdrop-blur-md transition-colors hover:bg-black/90 hover:text-white active:scale-[0.97]"
+          onClick={action}
+          className="
+            inline-flex
+            h-full
+            w-full
+            items-center
+            gap-2
+            rounded-full
+            bg-transparent
+            px-5
+            text-[14px]
+            font-semibold
+            text-white
+            transition-transform
+            active:scale-[0.97]
+          "
         >
-          <X size={16} strokeWidth={2.4} />
+          {isAd ? (
+            <AdSkipIcon className="h-[18px] w-[18px]" />
+          ) : (
+            <Icon size={18} strokeWidth={2.2} />
+          )}
+
+          {label}
         </button>
+      </ThreeLiquidGlassSurface>
+
+      {onDismiss && !isOutroNext && (
+        <ThreeLiquidGlassSurface
+          radius="9999px"
+          shaderRadius={0.28}
+          intensity={0.9}
+          refractionStrength={0.8}
+          interactive={false}
+          style={{
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+          }}
+          className="pointer-events-auto h-9 w-9 shrink-0"
+          surfaceClassName="border border-white/[0.08]"
+          contentClassName="flex h-full w-full"
+        >
+          <button
+            type="button"
+            onClick={onDismiss}
+            aria-label={t("Hide this Skip button")}
+            title={t("Hide this Skip button")}
+            className="
+              flex
+              h-full
+              w-full
+              items-center
+              justify-center
+              rounded-full
+              bg-transparent
+              text-white/70
+              transition-[color,transform]
+              hover:text-white
+              active:scale-[0.97]
+            "
+          >
+            <X size={16} strokeWidth={2.4} />
+          </button>
+        </ThreeLiquidGlassSurface>
       )}
     </div>
   );
@@ -143,9 +201,7 @@ function UpNextCard({
   return (
     <div
       className={`pointer-events-none absolute end-7 z-30 transition-all duration-200 ease-out ${
-        visible
-          ? "bottom-44 opacity-100 translate-y-0"
-          : "bottom-40 opacity-0 translate-y-2"
+        visible ? "bottom-44 opacity-100 translate-y-0" : "bottom-40 opacity-0 translate-y-2"
       }`}
     >
       <div className="pointer-events-auto relative flex w-[360px] overflow-hidden rounded-2xl border border-white/15 bg-black/80 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.9)] backdrop-blur-md">
@@ -171,9 +227,7 @@ function UpNextCard({
               <div className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-white/55">
                 {t("Up next in {s}s", { s: seconds })}
               </div>
-              <div className="mt-0.5 truncate text-[13.5px] font-semibold text-white">
-                {title}
-              </div>
+              <div className="mt-0.5 truncate text-[13.5px] font-semibold text-white">{title}</div>
               {title !== epLabel && (
                 <div className="truncate text-[11.5px] text-white/55">{epLabel}</div>
               )}
