@@ -610,7 +610,6 @@ function EdgeArrow({
           shaderRadius={0.58}
           intensity={0.9}
           style={{
-            background: "transparent",
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
           }}
           className={`h-11 w-11 pointer-events-auto border border-white/[0.08]
@@ -655,7 +654,6 @@ function EdgeArrow({
         shaderRadius={0.58}
         intensity={0.9}
         style={{
-          background: "transparent",
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
         }}
         className={`h-11 w-11 pointer-events-auto border border-white/[0.08]

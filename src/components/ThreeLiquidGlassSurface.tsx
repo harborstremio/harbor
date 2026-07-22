@@ -48,49 +48,38 @@ export function LiquidGlassSurface({
   const normalizedBlur = clampSetting(blurRadius, 2, 12);
   const normalizedTint = clampSetting(tintOpacity, 40, 100);
   const blurEnabled = backdropBlur && normalizedBlur > 0;
-  const wrapperStyle: CSSProperties = {
+  const surfaceStyle: CSSProperties = {
     position: "relative",
     isolation: "isolate",
     overflow: "hidden",
     borderRadius: radius,
-    ...style,
-  };
-  const surfaceStyle: CSSProperties = {
-    backgroundImage:
+    backgroundImage: [
       variant === "overlay"
         ? `linear-gradient(145deg, rgba(255,255,255,${0.09 + strength * 0.04}), rgba(255,255,255,0.028))`
         : `linear-gradient(145deg, rgba(255,255,255,${0.045 + strength * 0.025}), rgba(255,255,255,0.012))`,
-    backgroundColor: blurEnabled
-      ? `color-mix(in srgb, var(--color-canvas) ${normalizedTint}%, transparent)`
-      : variant === "overlay"
+      `linear-gradient(118deg, rgba(255,255,255,${0.022 + strength * 0.018}) 0%, rgba(255,255,255,${0.008 + strength * 0.006}) 24%, transparent 48%)`,
+      `radial-gradient(78% 110% at -20% 50%, rgba(95,190,255,${0.012 + strength * 0.015}) 0%, transparent 62%), radial-gradient(78% 110% at 120% 50%, rgba(255,120,205,${0.01 + strength * 0.013}) 0%, transparent 62%)`,
+    ].join(", "),
+    backgroundColor:
+      variant === "overlay"
         ? "rgba(8,12,20,0.28)"
-        : "transparent",
+        : `color-mix(in srgb, var(--color-canvas) ${normalizedTint}%, transparent)`,
     boxShadow:
       variant === "overlay"
         ? "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.18), 0 8px 22px rgba(0,0,0,0.28)"
         : "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.05)",
     backdropFilter: blurEnabled ? `blur(${normalizedBlur}px) saturate(1.08)` : undefined,
+    ...style,
   };
-  const contentStyle: CSSProperties = blurEnabled ? { transform: "translateZ(0)" } : {};
 
   return (
     <div
       {...wrapperProps}
-      style={wrapperStyle}
+      style={surfaceStyle}
       data-liquid-glass={interactive ? "interactive" : "static"}
-      className={className}
+      className={`${className} ${surfaceClassName}`}
     >
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 z-0 rounded-[inherit] ${surfaceClassName}`}
-        style={surfaceStyle}
-      />
-      <div
-        className={`relative z-10 isolate h-full w-full ${contentClassName}`}
-        style={contentStyle}
-      >
-        {children}
-      </div>
+      <div className={`relative z-10 isolate h-full w-full ${contentClassName}`}>{children}</div>
     </div>
   );
 }

@@ -108,7 +108,7 @@ export function RoyalTopbar() {
           data-tauri-drag-region
           data-tv-top-chrome
           radius="10px"
-          intensity={1.05}
+          intensity={0.1}
           shaderRadius={0.58}
           refractionStrength={1.42}
           lensStrength={1.05}
@@ -429,12 +429,29 @@ function RoyalProfileMenu({
   const avatarSrc = activeProfile?.avatar ?? settings.harborAvatar ?? user?.avatar ?? null;
   const otherProfiles = profiles.filter((p) => p.id !== activeProfile?.id);
 
+  const sizing = open ? "h-14 gap-2 ps-1 pe-3" : "h-9 gap-2 ps-1 pe-3";
+  const glassRadius = open ? "8px 8px 0 0" : "9999px";
+
+  const glassChrome = open
+    ? `
+        z-[51]
+        harbor-together-surface
+        border border-white/[0.18] border-b-0
+        text-white
+        [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]
+      `
+    : `
+        border border-white/[0.12]
+        text-white/[0.88]
+        [text-shadow:0_1px_2px_rgba(0,0,0,0.68)]
+        hover:border-white/[0.22]
+        hover:text-white
+      `;
+
   const dismiss = (run: () => void) => {
     setOpen(false);
     run();
   };
-
-  const triggerRadius = open ? "10px 10px 0 0" : "10px";
 
   return (
     <div
@@ -442,48 +459,49 @@ function RoyalProfileMenu({
       className={`relative ${open ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""}`}
     >
       <ThreeLiquidGlassSurface
-        radius={triggerRadius}
-        shaderRadius={open ? 0.3 : 0.48}
-        intensity={0.78}
-        refractionStrength={1.42}
-        lensStrength={1.05}
-        interactive={false}
+        radius={glassRadius}
+        shaderRadius={1}
+        intensity={0.1}
         style={{
-          background: "transparent",
-          boxShadow: "none",
+          background: open ? "rgba(8,12,18,0.15)" : "rgba(255,255,255,0.028)",
+          boxShadow: open
+            ? "inset 0 1px 0 rgba(255,255,255,0.17)"
+            : "inset 0 1px 0 rgba(255,255,255,0.10)",
         }}
         className={`
           relative inline-flex
-          border border-white/[0.10]
-          text-ink-muted
           transition-colors duration-150
-          hover:border-white/[0.20]
-          hover:text-ink
-          ${open ? "z-[51] harbor-wt-tab border-b-0 text-ink" : ""}
+          ${glassChrome}
+          ${open ? "harbor-wt-tab" : ""}
         `}
         contentClassName="h-full w-full"
       >
         <button
           type="button"
           data-tauri-drag-region="false"
+          aria-label={name}
           onClick={() => setOpen((current) => !current)}
+          data-open={String(open)}
           aria-haspopup="menu"
           aria-expanded={open}
           className={`
             harbor-together-btn
             harbor-profile-btn
-            relative flex items-center gap-2
+            relative flex items-center
             rounded-[inherit]
             border-0 bg-transparent
-            ps-1 pe-2.5
-            text-[13px] font-medium
             outline-none
             transition-colors duration-150
-            ${open ? "h-14" : "h-9"}
+            ${sizing}
           `}
         >
           <span
-            className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-white/25"
+            className="
+              flex h-7 w-7 shrink-0
+              items-center justify-center
+              overflow-hidden rounded-full
+              ring-1 ring-white/25
+            "
             style={{ background: color }}
           >
             {avatarSrc ? (
@@ -497,7 +515,10 @@ function RoyalProfileMenu({
               <CatAvatar className="h-full w-full" />
             )}
           </span>
-          <span className="hidden max-w-[8rem] truncate md:inline">{name}</span>
+
+          <span className="hidden max-w-[8rem] truncate text-white/[0.96] [text-shadow:0_1px_2px_rgba(0,0,0,0.72)] md:inline">
+            {name}
+          </span>
         </button>
       </ThreeLiquidGlassSurface>
 
@@ -509,7 +530,13 @@ function RoyalProfileMenu({
             data-tv-focus-scope
             data-tauri-drag-region="false"
             data-profile-dropdown-portal
-            className="harbor-royal-menu harbor-wt-modal fixed z-[300] isolate w-60 pointer-events-auto"
+            className="
+              harbor-wt-modal
+              fixed z-[300]
+              isolate
+              w-60
+              pointer-events-auto
+            "
             style={{
               top: popoverPosition.top,
               left: popoverPosition.left,
@@ -521,7 +548,7 @@ function RoyalProfileMenu({
               aria-label={name}
               radius="16px"
               shaderRadius={0.3}
-              intensity={0.74}
+              intensity={0.1}
               refractionStrength={1.42}
               lensStrength={1.05}
               interactive={false}
@@ -533,8 +560,21 @@ function RoyalProfileMenu({
                 boxShadow:
                   "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(110,185,255,0.07), 0 24px 60px -20px rgba(0,0,0,0.76)",
               }}
-              className="w-full overflow-hidden border border-white/15 border-t-0 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8)] animate-popover-in"
-              contentClassName="flex w-full flex-col overflow-hidden"
+              className="
+                harbor-together-surface
+                harbor-profile-dropdown
+                w-full overflow-hidden
+                border border-white/15
+                border-t-0
+                shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8)]
+                animate-popover-in
+              "
+              contentClassName="
+                flex w-full flex-col
+                overflow-hidden
+                text-white/[0.94]
+                [text-shadow:0_1px_2px_rgba(0,0,0,0.66)]
+              "
             >
               <TvModalClose onClose={() => setOpen(false)} label={t("common.close")} />
               <div className="border-b border-white/[0.14] px-4 py-3">
