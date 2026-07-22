@@ -236,6 +236,13 @@ pub async fn mpv_probe(_app: AppHandle) -> MpvProbe {
     }
 }
 
+pub(crate) fn supports_vapoursynth_filter() -> bool {
+    force_c_numeric_locale();
+    Mpv::new()
+        .and_then(|mpv| mpv.set_property("vf", "vapoursynth"))
+        .is_ok()
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AudioDevice {
     pub name: String,

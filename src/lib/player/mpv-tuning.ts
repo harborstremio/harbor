@@ -52,7 +52,9 @@ export function compileMpvOptions(s: Settings): string {
 export function svpMpvLines(s: Settings, svpActive: boolean): string {
   if (!svpActive || !s.svpVpyPath) return "";
   const vpy = s.svpVpyPath.replace(/\\/g, "/");
-  return [`vf=vapoursynth=[${vpy}]`, "hwdec=auto-copy", "hr-seek-framedrop=no"].join("\n");
+  return [`vf=@harbor-svp:vapoursynth=[${vpy}]`, "hwdec=auto-copy", "hr-seek-framedrop=no"].join(
+    "\n",
+  );
 }
 
 export function mergeMpvOptions(s: Settings, svpActive: boolean): string | undefined {

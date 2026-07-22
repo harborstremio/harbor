@@ -21,7 +21,11 @@ function autoActive(settings: Settings, src: PlayerSrc): boolean {
 
 type Anime4kDims = { srcWidth: number; displayWidth: number };
 
-const SECONDARY_TO_PRIMARY: Partial<Record<Anime4kMode, Anime4kMode>> = { AA: "A", BB: "B", CA: "C" };
+const SECONDARY_TO_PRIMARY: Partial<Record<Anime4kMode, Anime4kMode>> = {
+  AA: "A",
+  BB: "B",
+  CA: "C",
+};
 
 function screenWidthPx(): number {
   if (typeof window === "undefined") return 0;
@@ -47,11 +51,15 @@ export function anime4kShadersFor(
   c: Anime4kChoice,
   dims?: Anime4kDims,
 ): string[] {
-  if (c === "off") return [];
+  if (!settings.playerAnime4k || c === "off") return [];
   const tier = gatedTier(settings);
   if (c === "auto") {
     if (!autoActive(settings, src)) return [];
-    return anime4kChain(settings.playerAnime4kFolder, gatedMode(settings.playerAnime4kMode as Anime4kMode, dims), tier);
+    return anime4kChain(
+      settings.playerAnime4kFolder,
+      gatedMode(settings.playerAnime4kMode as Anime4kMode, dims),
+      tier,
+    );
   }
   return anime4kChain(settings.playerAnime4kFolder, gatedMode(c, dims), tier);
 }
@@ -74,11 +82,15 @@ export function useAnime4k(
 
   const setMode = (c: string) => {
     update({ playerAnime4kOverride: c });
-    bridgeRef.current?.setAnime4kShaders(anime4kShadersFor(settings, src, c as Anime4kChoice, dims));
+    bridgeRef.current?.setAnime4kShaders(
+      anime4kShadersFor(settings, src, c as Anime4kChoice, dims),
+    );
   };
 
   const displayMode: Anime4kChoice =
-    choice === "auto" && autoActive(settings, src) ? (settings.playerAnime4kMode as Anime4kMode) : choice;
+    choice === "auto" && autoActive(settings, src)
+      ? (settings.playerAnime4kMode as Anime4kMode)
+      : choice;
 
   return { mode: displayMode, setMode, available };
 }

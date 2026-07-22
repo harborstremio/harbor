@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import type { Settings } from "../src/lib/settings/types.ts";
-import { compileMpvOptions } from "../src/lib/player/mpv-tuning.ts";
+import { compileMpvOptions, svpMpvLines } from "../src/lib/player/mpv-tuning.ts";
 import { resolvePlaybackDownloadedFraction } from "../src/lib/player/playback-clock.ts";
 
 test("only the P2P engine reports whole-file download progress", () => {
@@ -54,4 +54,14 @@ test("bigger buffer mode increases Harbor defaults and waits for a useful reserv
   assert.ok(options.includes("cache-pause-wait=10"));
   assert.ok(!options.includes("demuxer-max-bytes=150MiB"));
   assert.ok(!options.includes("demuxer-readahead-secs=20"));
+});
+
+test("SVP uses a removable labeled VapourSynth filter", () => {
+  const settings = { svpVpyPath: "/home/user/.local/share/harbor/svp/svp.vpy" } as Settings;
+  const options = svpMpvLines(settings, true).split("\n");
+  assert.equal(
+    options[0],
+    "vf=@harbor-svp:vapoursynth=[/home/user/.local/share/harbor/svp/svp.vpy]",
+  );
+  assert.ok(options.includes("hwdec=auto-copy"));
 });

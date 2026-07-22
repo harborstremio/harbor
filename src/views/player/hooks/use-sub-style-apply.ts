@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
+import { isMacDesktop } from "@/lib/platform";
 import { applyMotionInterp } from "@/lib/player/motion-interp";
 import { applyRtxHdr, resetRtxHdrState } from "@/lib/player/rtx-hdr";
 import { applySubStyle } from "@/lib/player/sub-style";
@@ -60,13 +60,17 @@ export function useSubStyleApply(params: {
 
   useEffect(() => {
     if (engine !== "mpv") return;
-    if ((isMacDesktop() || isLinuxDesktop()) && settings.playerMpvEmbed) return;
+    if (isMacDesktop() && settings.playerMpvEmbed) return;
     if (!bridgeReady) return;
-    if (!mediaReady || !sourceGamma) {
+    if (!mediaReady) {
       void applyRtxHdr(false, svpActive, settings.playerHdrToSdr, bridgeKey);
       return;
     }
     void applyMotionInterp(settings.playerMotionInterp && !svpActive);
+    if (!sourceGamma) {
+      void applyRtxHdr(false, svpActive, settings.playerHdrToSdr, bridgeKey);
+      return;
+    }
     void applyRtxHdr(settings.playerRtxHdr, svpActive, settings.playerHdrToSdr, bridgeKey);
   }, [
     engine,

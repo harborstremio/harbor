@@ -128,7 +128,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     if (svpFilterFailed) return;
     if (!(mpvOptions?.extraOptions ?? "").includes("vapoursynth")) return;
     svpFilterFailed = true;
-    invoke("mpv_set_property", { name: "vf", value: "" }).catch(() => {});
+    invoke("mpv_command", { cmd: ["vf", "remove", "@harbor-svp"] }).catch(() => {});
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("harbor:svp-failed"));
     }

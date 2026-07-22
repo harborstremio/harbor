@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 
 export type SvpStatus = {
+  supported: boolean;
+  reason?: string | null;
   installed: boolean;
   ready: boolean;
   loadable?: boolean | null;
