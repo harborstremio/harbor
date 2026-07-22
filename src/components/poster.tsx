@@ -11,8 +11,11 @@ import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime
 import { tmdbLocalizedPoster } from "@/lib/providers/tmdb/tmdb-images";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
 import { observe } from "@/lib/visibility";
+import { PosterRetryPolicy, POSTER_RETRY_LIMIT } from "./poster-retry";
 
 type Ratio = "portrait" | "landscape" | "wide";
+
+const posterRetryPolicy = new PosterRetryPolicy();
 
 export function useLocalizedPoster(metaId: string): string | undefined {
   const { settings } = useSettings();
@@ -208,6 +211,9 @@ export function Poster({
   const failedRef = useRef<Set<string>>(new Set());
   const firedRef = useRef(false);
   const failBurstRef = useRef<{ t: number; n: number }>({ t: 0, n: 0 });
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const retryRef = useRef<(() => void) | null>(null);
+  const wasOfflineRef = useRef(false);
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
   useEffect(() => {
@@ -219,7 +225,12 @@ export function Poster({
   }, [sig]);
 
   let cursor = idx;
-  while (cursor < candidates.length && failedRef.current.has(candidates[cursor])) cursor++;
+  while (
+    cursor < candidates.length &&
+    (failedRef.current.has(candidates[cursor]) || posterRetryPolicy.isCooling(candidates[cursor]))
+  ) {
+    cursor++;
+  }
   const current: string | undefined = candidates[cursor];
   const exhausted = candidates.length > 0 && cursor >= candidates.length;
 
@@ -241,7 +252,17 @@ export function Poster({
       setIdx(0);
       setRetry((r) => r + 1);
     };
-    retryRef.current = retryNow;
+    const isCoolingDown = candidates.some((url) => posterRetryPolicy.isCooling(url));
+    const isOffline = navigator.onLine === false;
+    const canAutomaticallyRetry = posterRetryPolicy.canAutomaticallyRetry(
+      candidates,
+      retry,
+      !isOffline,
+    );
+    if (isOffline) wasOfflineRef.current = true;
+    retryRef.current = () => {
+      if (!candidates.some((url) => posterRetryPolicy.isCooling(url))) retryNow();
+    };
     let timer: number | undefined;
     const cancel = () => {
       if (timer !== undefined) {
@@ -249,25 +270,47 @@ export function Poster({
         timer = undefined;
       }
     };
-    // Fast exponential ladder first, then keep retrying at a capped pace while
-    // the card is on screen. CDN blips and rate limits (metahub/RPDB/TMDB 429
-    // bursts on home load) outlive a finite ladder, and the `online` event
-    // never fires for them — without this, cards stay blank forever (#747).
     const schedule = () => {
       if (timer !== undefined) return;
-      timer = window.setTimeout(retryNow, Math.min(1200 * 2 ** retry, 30_000));
+      const delay = posterRetryPolicy.delayFor(retry);
+      if (delay !== null) timer = window.setTimeout(retryNow, delay);
     };
-    window.addEventListener("online", retryNow);
+
+    const onOffline = () => {
+      wasOfflineRef.current = true;
+    };
+    const onOnline = () => {
+      if (!wasOfflineRef.current) return;
+      wasOfflineRef.current = false;
+      posterRetryPolicy.clear(candidates);
+      retryNow();
+    };
+
+    window.addEventListener("offline", onOffline);
+    window.addEventListener("online", onOnline);
     const onVisibility = () => {
-      if (!document.hidden) retryNow();
+      if (!document.hidden && wasOfflineRef.current === false) retryRef.current?.();
     };
     document.addEventListener("visibilitychange", onVisibility);
+
+    if (!canAutomaticallyRetry) {
+      if (retry >= POSTER_RETRY_LIMIT && !isCoolingDown) posterRetryPolicy.cool(candidates);
+      return () => {
+        retryRef.current = null;
+        window.removeEventListener("offline", onOffline);
+        window.removeEventListener("online", onOnline);
+        document.removeEventListener("visibilitychange", onVisibility);
+        cancel();
+      };
+    }
+
     const el = rootRef.current;
     const offViewport = el ? observe(el, (visible) => (visible ? schedule() : cancel())) : null;
     if (!el) schedule();
     return () => {
       retryRef.current = null;
-      window.removeEventListener("online", retryNow);
+      window.removeEventListener("offline", onOffline);
+      window.removeEventListener("online", onOnline);
       document.removeEventListener("visibilitychange", onVisibility);
       offViewport?.();
       cancel();
@@ -316,6 +359,7 @@ export function Poster({
     <div
       ref={rootRef}
       onPointerEnter={() => retryRef.current?.()}
+      onFocusCapture={() => retryRef.current?.()}
       className={`harbor-poster your-card relative w-full overflow-hidden rounded-[var(--poster-radius,12px)] ${className}`}
       style={showPlate ? { background: gradient(hue) } : undefined}
     >
@@ -340,6 +384,7 @@ export function Poster({
           decoding="async"
           loading={lazy ? "lazy" : undefined}
           onLoad={() => {
+            posterRetryPolicy.clear([current]);
             setLoaded(true);
             setDisplayed(current);
           }}
