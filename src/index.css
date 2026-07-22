@@ -2268,11 +2268,20 @@ html[data-theme-layout="minui"] .anime-award-banner-logo {
 
 button:focus-visible,
 a:focus-visible,
+input:focus-visible,
 select:focus-visible,
 summary:focus-visible,
+textarea:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid var(--color-accent) !important;
   outline-offset: 2px;
+}
+
+/* Search overlay: the editing indicator rings the whole search bar panel,
+   not the bare input. Keys/TV modality swaps this for the injected TV ring. */
+[data-search-overlay] [data-tv-search-editing-focused="true"] {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 3px;
 }
 
 /* Opaque-surface overrides for translucent "glass" facet (aurora + any user glass theme).

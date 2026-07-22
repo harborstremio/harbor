@@ -206,23 +206,29 @@ fn native_display(backend: Backend) -> u64 {
     native as u64
 }
 
-pub fn enforce_nvidia_x11() {
+pub fn configure_nvidia_graphics() {
     if !std::path::Path::new("/proc/driver/nvidia/version").exists() {
         return;
-    }
-    if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
-        eprintln!("[harbor::mpv_linux] NVIDIA detected; setting WEBKIT_DISABLE_DMABUF_RENDERER=1 (WebKitGTK DMABUF renderer blanks on NVIDIA)");
-        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
     }
     let wayland = std::env::var("XDG_SESSION_TYPE")
         .map(|v| v.eq_ignore_ascii_case("wayland"))
         .unwrap_or(false)
-        || std::env::var("WAYLAND_DISPLAY").map(|v| !v.is_empty()).unwrap_or(false);
-    if !wayland {
+        || std::env::var("WAYLAND_DISPLAY")
+            .map(|v| !v.is_empty())
+            .unwrap_or(false);
+    if wayland {
+        if std::env::var("__NV_DISABLE_EXPLICIT_SYNC").is_err() {
+            eprintln!("[harbor::mpv_linux] NVIDIA + Wayland detected; setting __NV_DISABLE_EXPLICIT_SYNC=1");
+            std::env::set_var("__NV_DISABLE_EXPLICIT_SYNC", "1");
+        }
         return;
     }
-    eprintln!("[harbor::mpv_linux] NVIDIA + Wayland detected; forcing GDK_BACKEND=x11 (EGL on NVIDIA-Wayland crashes the GL context)");
-    std::env::set_var("GDK_BACKEND", "x11");
+    if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+        eprintln!(
+            "[harbor::mpv_linux] NVIDIA + X11 detected; setting WEBKIT_DISABLE_DMABUF_RENDERER=1"
+        );
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
 }
 
 pub fn prepare(mpv_ctx: NonNull<mpv_handle>) -> Result<(), String> {

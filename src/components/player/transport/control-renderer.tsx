@@ -317,9 +317,9 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
         <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
           <ThreeLiquidGlassSurface
             radius="9999px"
-            shaderRadius={1}
-            intensity={1.05}
-            refractionStrength={1.18}
+            shaderRadius={0.28}
+            intensity={0.9}
+            refractionStrength={0.08}
             className={`
               shrink-0 rounded-full
               border border-white/[0.10]
@@ -327,8 +327,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             `}
             contentClassName="h-full w-full"
             style={{
-              background: "transparent",
-              boxShadow: "none",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
           >
             <button

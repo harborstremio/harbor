@@ -416,7 +416,7 @@ pub fn run() {
     #[cfg(windows)]
     svp::prime_svp_env();
     #[cfg(target_os = "linux")]
-    mpv_render_linux::enforce_nvidia_x11();
+    mpv_render_linux::configure_nvidia_graphics();
     let _ = rustls::crypto::ring::default_provider().install_default();
     trailer::sweep_cache();
     let proxy_state = tauri::async_runtime::block_on(stream_proxy::ProxyState::start())

@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
@@ -11,7 +12,9 @@ export function FloatingBack({
 }) {
   const { canGoBack, goBack, exitPlayback, topKind, chromeHidden } = useView();
   const t = useT();
+
   if (!canGoBack || chromeHidden) return null;
+
   const deep =
     topKind === "meta" ||
     topKind === "collection" ||
@@ -22,19 +25,69 @@ export function FloatingBack({
     topKind === "service" ||
     topKind === "addon-detail" ||
     topKind === "queue";
+
   if (!deep) return null;
+
   void exitPlayback;
-  const onClick = goBack;
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={t("common.back")}
-      style={{ position: "fixed", top: offsetTop, insetInlineStart: offsetLeft, zIndex: 70 }}
-      className="flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-canvas/90 ps-3 pe-5 text-[13.5px] font-medium text-ink-muted shadow-[0_10px_24px_-12px_rgba(0,0,0,0.6)] backdrop-blur-md transition-colors hover:bg-canvas hover:text-ink"
+    <div
+      style={{
+        position: "fixed",
+        top: offsetTop,
+        insetInlineStart: offsetLeft,
+        zIndex: 70,
+      }}
     >
-      <ArrowLeft size={15} className="dir-icon" />
-      {t("common.back")}
-    </button>
+      <ThreeLiquidGlassSurface
+        radius="9999px"
+        shaderRadius={0.28}
+        intensity={0.1}
+        refractionStrength={0.08}
+        interactive={false}
+        alwaysActive
+        className="
+          h-10
+          w-fit
+          shrink-0
+          rounded-full
+          border
+          border-white/[0.10]
+        "
+        contentClassName="flex h-full w-full"
+        style={{
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+        }}
+      >
+        <button
+          type="button"
+          onClick={goBack}
+          aria-label={t("common.back")}
+          className="
+            flex
+            h-full
+            w-full
+            items-center
+            gap-2
+            rounded-full
+            bg-transparent
+            ps-3
+            pe-5
+            text-[13.5px]
+            font-medium
+            text-ink-muted
+            outline-none
+            transition-[color,transform]
+            duration-150
+            hover:text-ink
+            active:scale-[0.97]
+          "
+        >
+          <ArrowLeft size={15} className="dir-icon" />
+
+          {t("common.back")}
+        </button>
+      </ThreeLiquidGlassSurface>
+    </div>
   );
 }
