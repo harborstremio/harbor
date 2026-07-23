@@ -29,6 +29,7 @@ function sameEpisode(a: PlayEpisode, b: PlayEpisode): boolean {
 }
 
 export function EpisodePanel({
+  engine,
   open,
   onClose,
   meta,
@@ -40,6 +41,7 @@ export function EpisodePanel({
   nextEp,
   onRestart,
 }: {
+  engine: "html5" | "mpv";
   open: boolean;
   onClose: () => void;
   meta: Meta;
@@ -52,6 +54,7 @@ export function EpisodePanel({
   onRestart?: () => void;
 }) {
   const t = useT();
+  const isMpv = engine === "mpv";
   const { settings, update } = useSettings();
   const { openPicker, replacePlayerSrc } = useView();
   const debrids = useDebridClients();
@@ -213,20 +216,36 @@ export function EpisodePanel({
           motionSpeed={0.5}
           interactive={false}
           alwaysActive
-          style={{
-            background:
-              "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
-            boxShadow:
-              corner === "top-left" || corner === "bottom-left"
-                ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
-                : "inset 1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)",
-          }}
+          style={
+            isMpv
+              ? {
+                  background:
+                    "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+                  boxShadow:
+                    corner === "top-left" || corner === "bottom-left"
+                      ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
+                      : "inset 1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                }
+              : {
+                  background:
+                    "linear-gradient(145deg, rgba(255,255,255,0.055), rgba(10,12,18,0.16) 48%, rgba(255,255,255,0.018))",
+                  WebkitBackdropFilter:
+                    "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
+                  backdropFilter: "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
+                  boxShadow:
+                    corner === "top-left" || corner === "bottom-left"
+                      ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
+                      : "inset 1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                }
+          }
           className={`h-full w-full ${
             corner === "top-left" || corner === "bottom-left" ? "border-r" : "border-l"
           } border-white/[0.10]`}
           contentClassName="relative h-full w-full overflow-hidden"
         >
-          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 bg-[#080c12]/55" />
+          {isMpv && (
+            <div aria-hidden className="pointer-events-none absolute inset-0 z-0 bg-[#080c12]/55" />
+          )}
           <div className="relative z-10 flex h-full w-full flex-col">
             {pickingFor ? (
               <StreamsView
@@ -257,12 +276,23 @@ export function EpisodePanel({
                     motionSpeed={0.5}
                     interactive={false}
                     alwaysActive
-                    style={{
-                      background:
-                        "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
-                      boxShadow:
-                        "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
-                    }}
+                    style={
+                      isMpv
+                        ? {
+                            background:
+                              "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
+                            boxShadow:
+                              "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                          }
+                        : {
+                            background:
+                              "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
+                            WebkitBackdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
+                            backdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
+                            boxShadow:
+                              "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                          }
+                    }
                     className="h-11 w-11 shrink-0 border border-white/[0.12]"
                     contentClassName="flex h-full w-full"
                   >

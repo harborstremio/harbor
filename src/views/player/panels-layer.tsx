@@ -9,6 +9,7 @@ import { HeaderWarning, NoAudioWarning } from "./header-warning";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 export const PanelsLayer = memo(function PanelsLayer({
+  engine,
   isSeriesPlayback,
   meta,
   currentEpisode,
@@ -34,6 +35,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   onDismissNoAudio,
   onPickAnother,
 }: {
+  engine: "html5" | "mpv";
   isSeriesPlayback: boolean;
   meta: Meta;
   currentEpisode: PlayEpisode | undefined;
@@ -60,7 +62,10 @@ export const PanelsLayer = memo(function PanelsLayer({
   onPickAnother: () => void;
 }) {
   const t = useT();
+
   const episodesOnLeft = episodesCorner === "top-left" || episodesCorner === "bottom-left";
+
+  const isMpv = engine === "mpv";
 
   return (
     <>
@@ -72,12 +77,16 @@ export const PanelsLayer = memo(function PanelsLayer({
         >
           <ThreeLiquidGlassSurface
             radius={episodesOnLeft ? "0 16px 16px 0" : "16px 0 0 16px"}
-            shaderRadius={0.28}
-            intensity={0.1}
+            shaderRadius={0.48}
+            intensity={0.3}
             refractionStrength={0.08}
             interactive={false}
             alwaysActive
-            experimentalStyle={{ background: "rgba(8,12,18,0.35)" }}
+            experimentalStyle={{
+              background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+              backdropFilter: "blur(18px) saturate(1.25)",
+              WebkitBackdropFilter: "blur(18px) saturate(1.25)",
+            }}
             className={`
               group
               h-full
@@ -140,6 +149,7 @@ export const PanelsLayer = memo(function PanelsLayer({
 
       {isSeriesPlayback && (
         <EpisodePanel
+          engine={engine}
           open={episodePanelOpen && !episodesHidden}
           onClose={onCloseEpisodePanel}
           meta={meta}
@@ -164,6 +174,7 @@ export const PanelsLayer = memo(function PanelsLayer({
       )}
 
       {showHeaderWarning && <HeaderWarning onPickAnother={onPickAnother} />}
+
       {showNoAudioWarning && <NoAudioWarning onUseMpv={onUseMpv} onDismiss={onDismissNoAudio} />}
     </>
   );

@@ -9,6 +9,7 @@ import { useSettings } from "@/lib/settings";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 export function SkipPill({
+  engine,
   segment,
   hasNextEp,
   nextEp,
@@ -21,6 +22,7 @@ export function SkipPill({
   onCancelAutoNext,
   onDismiss,
 }: {
+  engine: "html5" | "mpv";
   segment: SkipSegment | null;
   hasNextEp: boolean;
   nextEp: PlayEpisode | null;
@@ -80,7 +82,7 @@ export function SkipPill({
           : t("Skip Credits");
   const action = isOutroNext ? onNextEpisode : onSkip;
   const Icon = isOutroNext ? ChevronsRight : FastForward;
-
+  const isMpv = engine === "mpv";
   return (
     <div
       className={`pointer-events-none absolute end-7 z-30 flex items-center gap-2 transition-all duration-200 ease-out ${
@@ -91,10 +93,16 @@ export function SkipPill({
     >
       <ThreeLiquidGlassSurface
         radius="9999px"
-        shaderRadius={0.28}
-        intensity={0.9}
-        refractionStrength={0.8}
+        shaderRadius={0.48}
+        intensity={0.3}
+        refractionStrength={0.08}
         interactive={false}
+        alwaysActive
+        experimentalStyle={{
+          background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+          backdropFilter: "blur(18px) saturate(1.25)",
+          WebkitBackdropFilter: "blur(18px) saturate(1.25)",
+        }}
         style={{
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
         }}
@@ -134,10 +142,16 @@ export function SkipPill({
       {onDismiss && !isOutroNext && (
         <ThreeLiquidGlassSurface
           radius="9999px"
-          shaderRadius={0.28}
-          intensity={0.9}
-          refractionStrength={0.8}
+          shaderRadius={0.48}
+          intensity={0.3}
+          refractionStrength={0.08}
           interactive={false}
+          alwaysActive
+          experimentalStyle={{
+            background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+            backdropFilter: "blur(18px) saturate(1.25)",
+            WebkitBackdropFilter: "blur(18px) saturate(1.25)",
+          }}
           style={{
             boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
           }}

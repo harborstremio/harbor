@@ -164,18 +164,22 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
   switch (id) {
     case "back": {
       if (!ctx.onBack) return null;
+
+      const isMpv = ctx.engine === "mpv";
+
       return (
         <Tooltip label={t("Back")} side="bottom">
           <ThreeLiquidGlassSurface
             radius="9999px"
-            shaderRadius={0.28}
-            intensity={0.1}
-            causticsStrength={0.8}
+            shaderRadius={0.48}
+            intensity={0.3}
+            refractionStrength={0.08}
             interactive={false}
             alwaysActive
             experimentalStyle={{
-              background:
-                "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+              background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+              backdropFilter: "blur(18px) saturate(1.25)",
+              WebkitBackdropFilter: "blur(18px) saturate(1.25)",
             }}
             style={{
               transition: "opacity 300ms ease-out",
@@ -338,17 +342,23 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       const sizeClass = ctx.tight ? "h-12 w-12" : ctx.compact ? "h-14 w-14" : "h-16 w-16";
 
       const iconSize = ctx.tight ? 28 : ctx.compact ? 32 : 36;
+      const isMpv = ctx.engine === "mpv";
 
       return (
         <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
           <ThreeLiquidGlassSurface
             radius="9999px"
-            shaderRadius={0.28}
-            intensity={0.9}
+            shaderRadius={0.48}
+            intensity={0.3}
             refractionStrength={0.08}
+            interactive={false}
+            alwaysActive
             experimentalStyle={{
-              background:
-                "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+              background: isMpv
+                ? "linear-gradient(145deg, rgba(4,6,10,0.68), rgba(4,6,10,0.60) 48%, rgba(4,6,10,0.66))"
+                : "transparent",
+              backdropFilter: isMpv ? undefined : "blur(18px) saturate(1.25)",
+              WebkitBackdropFilter: isMpv ? undefined : "blur(18px) saturate(1.25)",
             }}
             className={`
               shrink-0 rounded-full
@@ -357,7 +367,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
               transition-opacity duration-300
               ${ctx.active ? "opacity-100" : "opacity-0"}
             `}
-            contentClassName="h-full w-full"
+            contentClassName="h-full w-full bg-transparent"
             style={{
               transition: "opacity 300ms ease-out",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",

@@ -13,6 +13,7 @@ export function nextEpisodeLead(setting: number, durationSec: number): number {
 }
 
 export function SkipPillContainer({
+  engine,
   skipSegments,
   durationSec,
   hasNextEpisode,
@@ -25,6 +26,7 @@ export function SkipPillContainer({
   onNextEpisode,
   onCancelAutoNext,
 }: {
+  engine: "html5" | "mpv";
   skipSegments: SkipSegment[];
   durationSec: number;
   hasNextEpisode: boolean;
@@ -96,7 +98,10 @@ export function SkipPillContainer({
       : null;
   useEffect(() => {
     if (!buttonKey || settings.skipButtonHideSec <= 0) return;
-    const id = window.setTimeout(() => setAutoHiddenKey(buttonKey), settings.skipButtonHideSec * 1000);
+    const id = window.setTimeout(
+      () => setAutoHiddenKey(buttonKey),
+      settings.skipButtonHideSec * 1000,
+    );
     return () => window.clearTimeout(id);
   }, [buttonKey, settings.skipButtonHideSec]);
   const skipHidden =
@@ -106,6 +111,7 @@ export function SkipPillContainer({
 
   return (
     <SkipPill
+      engine={engine}
       segment={activeSkip}
       hasNextEp={hasNextEpDisplay && leadSec > 0}
       nextEp={nextEp}
