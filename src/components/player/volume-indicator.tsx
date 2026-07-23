@@ -68,9 +68,9 @@ export function VolumeIndicator({
         alwaysActive
         backdropBlur
         style={{
-          background: "rgba(255,255,255,0.001)",
-          WebkitBackdropFilter: "blur(8px) saturate(1.45) brightness(1.04) contrast(1.05)",
-          backdropFilter: "blur(8px) saturate(1.45) brightness(1.04) contrast(1.05)",
+          // mpv video is composited outside WebKit, so a canvas tint would
+          // obscure it instead of producing a true backdrop blur.
+          backgroundColor: "transparent",
           overflow: "hidden",
           boxShadow:
             "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(80,150,225,0.07), 0 22px 58px -22px rgba(0,0,0,0.90)",
