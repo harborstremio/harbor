@@ -673,7 +673,7 @@ function Control({
         data-tauri-drag-region="false"
         aria-label={label}
         onClick={onClick}
-        className={`harbor-win-control ${danger ? "harbor-win-close" : ""} flex h-full w-full items-center justify-center rounded-[inherit] bg-transparent text-ink-muted outline-none transition-colors duration-150 ${
+        className={`harbor-win-control ${danger ? "harbor-win-close" : ""} flex h-full w-full items-center justify-center rounded-[12px] bg-transparent text-ink-muted outline-none transition-colors duration-150 ${
           danger ? "hover:bg-[#e5484d] hover:text-white" : "hover:bg-white/[0.06] hover:text-ink"
         }`}
       >
