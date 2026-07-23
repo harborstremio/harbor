@@ -115,13 +115,13 @@ export function VolumeIndicator({
         </span>
 
         <span className="flex min-w-0 flex-1 flex-col gap-2.5">
-          <span className="flex items-center justify-between gap-4">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/[0.62]">
+          <span className="flex items-baseline justify-between gap-4">
+            <span className="text-[14px] font-semibold uppercase tracking-[0.18em]">
               {t("Volume")}
             </span>
 
             <span
-              className="font-mono text-[22px] font-bold tabular-nums leading-none"
+              className="font-sans text-[17px] font-normal tabular-nums leading-none"
               style={{
                 color: boosting ? color : "rgba(255,255,255,0.94)",
               }}
