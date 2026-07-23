@@ -27,7 +27,6 @@ import {
 } from "@/lib/player-chrome";
 import { renderControl, type ControlContext } from "./transport/control-renderer";
 import { SongIdToast } from "@/components/song-id-toast";
-import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { useCastModalPlay } from "./use-cast-modal-play";
 
 export function Transport({
@@ -438,37 +437,7 @@ export function Transport({
         />
         <div className="pointer-events-auto relative flex items-start gap-2">
           {controlsInSlot(chromeConfig, "top-left").map((c) => (
-            <Fragment key={c.id}>
-              {c.id === "back" ? (
-                <ThreeLiquidGlassSurface
-                  radius="9999px"
-                  shaderRadius={0.28}
-                  intensity={0.1}
-                  causticsStrength={0.8}
-                  interactive={false}
-                  alwaysActive
-                  style={{
-                    boxShadow:
-                      "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
-                  }}
-                  className={`h-11 w-11 shrink-0 ${fadeClassName}`}
-                  surfaceClassName="border border-white/[0.08]"
-                  contentClassName="
-                    flex h-full w-full items-center justify-center
-                    [&_button]:!h-full
-                    [&_button]:!w-full
-                    [&_button]:!rounded-full
-                    [&_button]:!bg-transparent
-                    [&_button]:!shadow-none
-                    [&_button]:!ring-0
-                  "
-                >
-                  {renderControl(c.id, ctx)}
-                </ThreeLiquidGlassSurface>
-              ) : (
-                renderFadedControl(c.id)
-              )}
-            </Fragment>
+            <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
           ))}
         </div>
         <div className="relative flex items-start gap-2">
