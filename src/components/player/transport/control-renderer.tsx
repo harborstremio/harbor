@@ -173,7 +173,12 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             causticsStrength={0.8}
             interactive={false}
             alwaysActive
+            experimentalStyle={{
+              background:
+                "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+            }}
             style={{
+              transition: "opacity 300ms ease-out",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
             className={`h-11 w-11 shrink-0 border border-white/[0.08] transition-opacity duration-300 ${
@@ -341,6 +346,10 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             shaderRadius={0.28}
             intensity={0.9}
             refractionStrength={0.08}
+            experimentalStyle={{
+              background:
+                "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+            }}
             className={`
               shrink-0 rounded-full
               border border-white/[0.10]
@@ -350,6 +359,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             `}
             contentClassName="h-full w-full"
             style={{
+              transition: "opacity 300ms ease-out",
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
           >

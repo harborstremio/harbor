@@ -5,6 +5,7 @@ import type { SkipSegment } from "@/lib/skip-intro";
 import type { SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 export function SkipPill({
@@ -189,6 +190,7 @@ function UpNextCard({
   onCancel?: () => void;
 }) {
   const t = useT();
+  const { settings } = useSettings();
   const seconds = Math.max(0, Math.ceil(remainingSec));
   const progress = Math.min(1, Math.max(0, 1 - seconds / leadSec));
   const epLabel =
@@ -204,7 +206,11 @@ function UpNextCard({
         visible ? "bottom-44 opacity-100 translate-y-0" : "bottom-40 opacity-0 translate-y-2"
       }`}
     >
-      <div className="pointer-events-auto relative flex w-[360px] overflow-hidden rounded-2xl border border-white/15 bg-black/80 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.9)] backdrop-blur-md">
+      <div
+        className={`pointer-events-auto relative flex w-[360px] overflow-hidden rounded-2xl border border-white/15 shadow-[0_24px_60px_-15px_rgba(0,0,0,0.9)] backdrop-blur-md ${
+          settings.experimentalLiquidGlassEnabled ? "bg-[#080c12]/35" : "bg-black/80"
+        }`}
+      >
         <div className="relative aspect-[16/10] w-[148px] shrink-0 overflow-hidden bg-white/5">
           {ep.still && !hideStill ? (
             <img

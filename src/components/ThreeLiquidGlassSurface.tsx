@@ -17,6 +17,8 @@ export type LiquidGlassSurfaceProps = HTMLAttributes<HTMLDivElement> & {
   surfaceClassName?: string;
   variant?: "default" | "overlay";
   backdropBlur?: boolean;
+  defaultStyle?: CSSProperties;
+  experimentalStyle?: CSSProperties;
 };
 
 function clampSetting(value: number, fallback: number, maximum: number): number {
@@ -88,13 +90,19 @@ export function LiquidGlassSurface({
  * Keeps the established renderer as the default. The newer treatment is
  * deliberately opt-in while its visual and performance characteristics mature.
  */
-export function ThreeLiquidGlassSurface(props: LiquidGlassSurfaceProps) {
+export function ThreeLiquidGlassSurface({
+  defaultStyle,
+  experimentalStyle,
+  style,
+  ...props
+}: LiquidGlassSurfaceProps) {
   const { settings } = useSettings();
 
   if (settings.experimentalLiquidGlassEnabled) {
     return (
       <ExperimentalLiquidGlassSurface
         {...props}
+        style={{ ...style, ...experimentalStyle }}
         rendererOpacity={settings.experimentalLiquidGlassOpacity}
       />
     );
@@ -103,6 +111,7 @@ export function ThreeLiquidGlassSurface(props: LiquidGlassSurfaceProps) {
   return (
     <LiquidGlassSurface
       {...props}
+      style={{ ...style, ...defaultStyle }}
       blurRadius={settings.defaultLiquidGlassBlur}
       tintOpacity={settings.defaultLiquidGlassTint}
     />
