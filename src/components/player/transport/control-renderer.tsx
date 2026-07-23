@@ -324,6 +324,8 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
               shrink-0 rounded-full
               border border-white/[0.10]
               ${sizeClass}
+              transition-opacity duration-300
+              ${ctx.active ? "opacity-100" : "opacity-0"}
             `}
             contentClassName="h-full w-full"
             style={{
