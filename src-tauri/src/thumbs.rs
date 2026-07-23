@@ -583,6 +583,10 @@ async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shad
         format!("--screenshot-jpeg-quality={}", SCREENSHOT_QUALITY),
         "--screenshot-tag-colorspace=no".into(),
         "--hr-seek=no".into(),
+        // End-of-options terminator: without it, an addon-controlled stream
+        // URL beginning with `-`/`--` (e.g. `--log-file=<path>`) would be
+        // parsed by mpv as an option, allowing arbitrary file writes.
+        "--".into(),
         url.to_string(),
     ];
 
