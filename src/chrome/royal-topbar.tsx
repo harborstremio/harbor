@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { LogIn, LogOut, Pencil, Search, Settings as SettingsLucide, Users } from "lucide-react";
 import { createPortal } from "react-dom";
 import { HarborMark } from "@/components/icons/harbor-mark";
@@ -29,6 +36,87 @@ import { HoverNavIcon } from "@/chrome/hover-nav-icon";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+type RoyalGlassProps = ComponentProps<typeof ThreeLiquidGlassSurface>;
+
+function RoyalSettingsGlass({
+  children,
+  className = "",
+  contentClassName = "",
+  style,
+  radius = "999999px",
+  intensity = 1,
+  shaderRadius,
+  interactive,
+  alwaysActive,
+  refractionStrength,
+  lensStrength,
+  causticsStrength,
+  motionSpeed,
+  surfaceClassName,
+  variant,
+  backdropBlur,
+  ...htmlProps
+}: RoyalGlassProps) {
+  const { settings } = useSettings();
+
+  const enabled = settings.experimentalLiquidGlassEnabled;
+  const opacityScale = Math.min(1, Math.max(0, settings.experimentalLiquidGlassOpacity / 100));
+  const resolvedIntensity = Math.min(1.5, Math.max(0, intensity * opacityScale));
+
+  const {
+    background: _background,
+    backgroundColor: _backgroundColor,
+    backgroundImage: _backgroundImage,
+    backdropFilter: _backdropFilter,
+    ...sharedStyle
+  } = style ?? {};
+
+  if (!enabled) {
+    return (
+      <div
+        {...htmlProps}
+        className={className}
+        data-liquid-glass="disabled"
+        style={{
+          position: "relative",
+          isolation: "isolate",
+          overflow: "hidden",
+          borderRadius: radius,
+          backgroundColor: "var(--color-canvas)",
+          backgroundImage: "none",
+          backdropFilter: "none",
+          ...sharedStyle,
+        }}
+      >
+        <div className={`relative z-10 isolate h-full w-full ${contentClassName}`}>{children}</div>
+      </div>
+    );
+  }
+
+  return (
+    <ThreeLiquidGlassSurface
+      {...htmlProps}
+      radius={radius}
+      shaderRadius={shaderRadius}
+      interactive={interactive}
+      alwaysActive={alwaysActive}
+      intensity={resolvedIntensity}
+      refractionStrength={refractionStrength}
+      lensStrength={lensStrength}
+      causticsStrength={causticsStrength}
+      motionSpeed={motionSpeed}
+      surfaceClassName={surfaceClassName}
+      variant={variant}
+      backdropBlur={backdropBlur}
+      className={className}
+      contentClassName={contentClassName}
+      style={sharedStyle}
+    >
+      {children}
+    </ThreeLiquidGlassSurface>
+  );
+}
 
 export function RoyalTopbar() {
   const { view, setView, chromeHidden } = useView();
@@ -104,7 +192,7 @@ export function RoyalTopbar() {
             : "translate-y-0 opacity-100"
         }`}
       >
-        <ThreeLiquidGlassSurface
+        <RoyalSettingsGlass
           data-tauri-drag-region
           data-tv-top-chrome
           radius="10px"
@@ -215,7 +303,7 @@ export function RoyalTopbar() {
               </div>
             )}
           </div>
-        </ThreeLiquidGlassSurface>
+        </RoyalSettingsGlass>
       </header>
       {pinFor !== null && (
         <ParentalPinModal
@@ -458,7 +546,7 @@ function RoyalProfileMenu({
       ref={wrapRef}
       className={`relative ${open ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""}`}
     >
-      <ThreeLiquidGlassSurface
+      <RoyalSettingsGlass
         radius={glassRadius}
         shaderRadius={1}
         intensity={0.1}
@@ -520,7 +608,7 @@ function RoyalProfileMenu({
             {name}
           </span>
         </button>
-      </ThreeLiquidGlassSurface>
+      </RoyalSettingsGlass>
 
       {open &&
         typeof document !== "undefined" &&
@@ -543,7 +631,7 @@ function RoyalProfileMenu({
               visibility: popoverPosition.visibility,
             }}
           >
-            <ThreeLiquidGlassSurface
+            <RoyalSettingsGlass
               role="menu"
               aria-label={name}
               radius="16px"
@@ -646,7 +734,7 @@ function RoyalProfileMenu({
                   </MenuItem>
                 )}
               </div>
-            </ThreeLiquidGlassSurface>
+            </RoyalSettingsGlass>
           </div>,
           document.body,
         )}

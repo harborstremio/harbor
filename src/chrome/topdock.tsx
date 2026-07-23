@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentProps } from "react";
 import { createPortal } from "react-dom";
 import { LogOut, Pencil, Search, Settings as SettingsIcon, Users } from "lucide-react";
 import { HarborMark } from "@/components/icons/harbor-mark";
@@ -22,6 +22,87 @@ import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-ite
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+type SettingsLiquidGlassProps = ComponentProps<typeof ThreeLiquidGlassSurface>;
+
+function SettingsLiquidGlass({
+  children,
+  className = "",
+  contentClassName = "",
+  style,
+  radius = "999999px",
+  intensity = 1,
+  shaderRadius,
+  interactive,
+  alwaysActive,
+  refractionStrength,
+  lensStrength,
+  causticsStrength,
+  motionSpeed,
+  surfaceClassName,
+  variant,
+  backdropBlur,
+  ...htmlProps
+}: SettingsLiquidGlassProps) {
+  const { settings } = useSettings();
+
+  const enabled = settings.experimentalLiquidGlassEnabled;
+  const opacityScale = Math.min(1, Math.max(0, settings.experimentalLiquidGlassOpacity / 100));
+  const resolvedIntensity = Math.min(1.5, Math.max(0, intensity * opacityScale));
+
+  const {
+    background: _background,
+    backgroundColor: _backgroundColor,
+    backgroundImage: _backgroundImage,
+    backdropFilter: _backdropFilter,
+    ...sharedStyle
+  } = style ?? {};
+
+  if (!enabled) {
+    return (
+      <div
+        {...htmlProps}
+        className={className}
+        data-liquid-glass="disabled"
+        style={{
+          position: "relative",
+          isolation: "isolate",
+          overflow: "hidden",
+          borderRadius: radius,
+          backgroundColor: "var(--color-canvas)",
+          backgroundImage: "none",
+          backdropFilter: "none",
+          ...sharedStyle,
+        }}
+      >
+        <div className={`relative z-10 isolate h-full w-full ${contentClassName}`}>{children}</div>
+      </div>
+    );
+  }
+
+  return (
+    <ThreeLiquidGlassSurface
+      {...htmlProps}
+      radius={radius}
+      shaderRadius={shaderRadius}
+      interactive={interactive}
+      alwaysActive={alwaysActive}
+      intensity={resolvedIntensity}
+      refractionStrength={refractionStrength}
+      lensStrength={lensStrength}
+      causticsStrength={causticsStrength}
+      motionSpeed={motionSpeed}
+      surfaceClassName={surfaceClassName}
+      variant={variant}
+      backdropBlur={backdropBlur}
+      className={className}
+      contentClassName={contentClassName}
+      style={sharedStyle}
+    >
+      {children}
+    </ThreeLiquidGlassSurface>
+  );
+}
 
 export function TopDock() {
   const { view, setView, chromeHidden } = useView();
@@ -123,7 +204,7 @@ export function TopDock() {
         `}
       >
         {navbarLiquidGlassEnabled ? (
-          <ThreeLiquidGlassSurface
+          <SettingsLiquidGlass
             data-tauri-drag-region
             data-tv-top-chrome
             radius="99999px"
@@ -271,7 +352,7 @@ export function TopDock() {
                 </div>
               )}
             </div>
-          </ThreeLiquidGlassSurface>
+          </SettingsLiquidGlass>
         ) : (
           <div
             data-tauri-drag-region
@@ -885,7 +966,7 @@ function ProfileChipCompact({
       `}
     >
       {liquidGlassEnabled ? (
-        <ThreeLiquidGlassSurface
+        <SettingsLiquidGlass
           radius={glassRadius}
           shaderRadius={1}
           intensity={0.1}
@@ -924,7 +1005,7 @@ function ProfileChipCompact({
           >
             {buttonContent}
           </button>
-        </ThreeLiquidGlassSurface>
+        </SettingsLiquidGlass>
       ) : (
         <button
           type="button"
@@ -970,7 +1051,7 @@ function ProfileChipCompact({
             }}
           >
             {liquidGlassEnabled ? (
-              <ThreeLiquidGlassSurface
+              <SettingsLiquidGlass
                 role="menu"
                 aria-label={name}
                 radius="16px"
@@ -1004,7 +1085,7 @@ function ProfileChipCompact({
                 "
               >
                 {dropdownContent}
-              </ThreeLiquidGlassSurface>
+              </SettingsLiquidGlass>
             ) : (
               <div
                 role="menu"
