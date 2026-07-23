@@ -174,8 +174,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
             interactive={false}
             alwaysActive
             style={{
-              boxShadow:
-                "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
             className={`h-11 w-11 shrink-0 border border-white/[0.08] transition-opacity duration-300 ${
               ctx.active ? "opacity-100" : "opacity-0"
@@ -188,7 +187,11 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
               aria-label={t("Back")}
               className="pointer-events-auto flex h-full w-full items-center justify-center rounded-full bg-transparent text-white transition-colors hover:bg-white/[0.06]"
             >
-              {iconUrl ? <CustomIcon url={iconUrl} size={24} /> : <ChevronLeft size={26} strokeWidth={2.2} />}
+              {iconUrl ? (
+                <CustomIcon url={iconUrl} size={24} />
+              ) : (
+                <ChevronLeft size={26} strokeWidth={2.2} />
+              )}
             </button>
           </ThreeLiquidGlassSurface>
         </Tooltip>
