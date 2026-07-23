@@ -77,6 +77,7 @@ export const PanelsLayer = memo(function PanelsLayer({
             refractionStrength={0.08}
             interactive={false}
             alwaysActive
+            experimentalStyle={{ background: "rgba(8,12,18,0.35)" }}
             className={`
               group
               h-full

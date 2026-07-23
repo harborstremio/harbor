@@ -120,7 +120,9 @@ export function SeriesEpisodes({
           for (const k of combinedWatched) if (k.startsWith(`${s.seasonNumber}:`)) n += 1;
           return `S${s.seasonNumber} ${n}/${s.episodeCount}`;
         });
-      console.debug(`[season-default] ${meta.id} pick=${def} hint=${resumeSeason} [${counts.join(", ")}]`);
+      console.debug(
+        `[season-default] ${meta.id} pick=${def} hint=${resumeSeason} [${counts.join(", ")}]`,
+      );
     }
     setActive(def);
   }, [meta.id, seasons, combinedWatched, resumeSeason]);
@@ -166,7 +168,9 @@ export function SeriesEpisodes({
     if (Object.keys(tvdbStills).length === 0) return enrichedBase;
     return enrichedBase.map((ep) => {
       if (ep.stillPath || ep.stillUrl) return ep;
-      const img = tvdbStills[`s${ep.seasonNumber}e${ep.episodeNumber}`] ?? tvdbStills[`abs${ep.episodeNumber}`];
+      const img =
+        tvdbStills[`s${ep.seasonNumber}e${ep.episodeNumber}`] ??
+        tvdbStills[`abs${ep.episodeNumber}`];
       return img ? { ...ep, stillUrl: img } : ep;
     });
   }, [enrichedBase, tvdbStills]);
@@ -217,7 +221,7 @@ export function SeriesEpisodes({
   const orderedEps = arcActive
     ? arc.episodes
     : ordering
-      ? ordering.bySeason.get(orderSeasonEff) ?? []
+      ? (ordering.bySeason.get(orderSeasonEff) ?? [])
       : [];
   const orderedLoading = arcActive && arc.loading;
 
@@ -246,7 +250,31 @@ export function SeriesEpisodes({
   return (
     <div data-episodes className="flex scroll-mt-24 flex-col gap-6">
       <div className="flex items-end justify-between gap-6">
-        <h3 className="text-[22px] font-medium tracking-tight text-ink">{t("Episodes")}</h3>
+        <div className="flex min-w-0 items-center gap-3">
+          <h3 className="shrink-0 text-[22px] font-medium tracking-tight text-ink">
+            {t("Episodes")}
+          </h3>
+          {panelActive ? (
+            <TvdbOrderPanel
+              items={picker.items}
+              activeKey={picker.activeKey}
+              onSelect={picker.onSelect}
+              orderTypes={orderTypes}
+              activeType={settings.tvdbSeasonType}
+              onSelectType={(v) => update({ tvdbSeasonType: v })}
+            />
+          ) : (
+            (picker.items.length > 1 || arcAvailable) && (
+              <SeasonArcPicker
+                items={picker.items}
+                activeKey={picker.activeKey}
+                onSelect={picker.onSelect}
+                mode={arcAvailable ? mode : undefined}
+                onModeChange={arcAvailable ? setMode : undefined}
+              />
+            )
+          )}
+        </div>
         <div className="flex items-center gap-2.5">
           <RandomEpisodeButton meta={meta} seasons={seasons} />
           <EpisodeLayoutToggle
@@ -275,130 +303,121 @@ export function SeriesEpisodes({
               setSearchOpen(false);
             }}
           />
-          {panelActive ? (
-            <TvdbOrderPanel
-              items={picker.items}
-              activeKey={picker.activeKey}
-              onSelect={picker.onSelect}
-              orderTypes={orderTypes}
-              activeType={settings.tvdbSeasonType}
-              onSelectType={(v) => update({ tvdbSeasonType: v })}
-            />
-          ) : (
-            (picker.items.length > 1 || arcAvailable) && (
-              <SeasonArcPicker
-                items={picker.items}
-                activeKey={picker.activeKey}
-                onSelect={picker.onSelect}
-                mode={arcAvailable ? mode : undefined}
-                onModeChange={arcAvailable ? setMode : undefined}
-              />
-            )
-          )}
         </div>
       </div>
 
       {!aiMode && searchOpen && <EpisodeSearchBar value={epSearch} onChange={setEpSearch} />}
 
       {aiMode ? (
-        <EpisodeAiMode meta={meta} videos={cinemetaVideos} imdbId={imdbId} onExit={() => setAiMode(false)} />
+        <EpisodeAiMode
+          meta={meta}
+          videos={cinemetaVideos}
+          imdbId={imdbId}
+          onExit={() => setAiMode(false)}
+        />
       ) : searching ? (
         <CrossSeasonResults meta={meta} videos={cinemetaVideos} query={epSearch} imdbId={imdbId} />
       ) : (
-      <>
-
-      {altActive && (
-        <OrderedEpisodes
-          meta={meta}
-          episodes={orderedEps}
-          loading={orderedLoading}
-          traktKey={traktKey}
-          traktWatched={traktWatched}
-          stremioWatched={stremioWatched}
-          simklWatched={simklWatched}
-          cinemetaVideos={cinemetaVideos}
-          seriesImdbId={imdbId}
-          onContextMenu={openWatchedMenu}
-        />
-      )}
-
-      {!altActive && activeSeason && (activeSeason.airDate || activeSeason.episodeCount > 0) && (
-        <p className="text-[13px] text-ink-subtle">
-          {activeSeason.episodeCount === 1
-            ? t("{n} episode", { n: activeSeason.episodeCount })
-            : t("{n} episodes", { n: activeSeason.episodeCount })}
-          {activeSeason.airDate && ` · ${activeSeason.airDate.slice(0, 4)}`}
-        </p>
-      )}
-
-      {!altActive && loading && <EpisodeGridSkeleton />}
-
-      {!altActive && !loading && enrichedEpisodes.length === 0 && (
-        <CinemetaFallback meta={meta} videos={cinemetaVideos} season={active} />
-      )}
-
-      {!altActive && !loading && enrichedEpisodes.length > 0 && (
-        <div key={settings.episodeLayout} className="animate-fade-in">
-          {settings.episodeLayout !== "list" ? (
-            <EpisodeStrip
-              layout={settings.episodeLayout === "grid" ? "grid" : "strip"}
+        <>
+          {altActive && (
+            <OrderedEpisodes
               meta={meta}
-              seriesImdbId={imdbId}
+              episodes={orderedEps}
+              loading={orderedLoading}
+              traktKey={traktKey}
+              traktWatched={traktWatched}
+              stremioWatched={stremioWatched}
+              simklWatched={simklWatched}
               cinemetaVideos={cinemetaVideos}
-              episodes={enrichedEpisodes}
-              progressFor={(ep) =>
-                getEpisodeProgress(
-                  meta.id,
-                  ep.seasonNumber,
-                  ep.episodeNumber,
-                  ep.runtime,
-                  traktKey,
-                  traktWatched,
-                  stremioWatched,
-                  undefined,
-                  simklWatched,
-                )
-              }
-              thumbnailFor={(ep) =>
-                cinemetaVideos?.find(
-                  (v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber,
-                )?.thumbnail
-              }
-              spoilerFor={(ep) => spoilerFor(ep.episodeNumber)}
+              seriesImdbId={imdbId}
               onContextMenu={openWatchedMenu}
             />
-          ) : (
-            <div className="flex flex-col gap-1">
-              {enrichedEpisodes.map((ep) => (
-                <EpisodeRow
-                  key={ep.id}
+          )}
+
+          {!altActive &&
+            activeSeason &&
+            (activeSeason.airDate || activeSeason.episodeCount > 0) && (
+              <p className="text-[13px] text-ink-subtle">
+                {activeSeason.episodeCount === 1
+                  ? t("{n} episode", { n: activeSeason.episodeCount })
+                  : t("{n} episodes", { n: activeSeason.episodeCount })}
+                {activeSeason.airDate && ` · ${activeSeason.airDate.slice(0, 4)}`}
+              </p>
+            )}
+
+          {!altActive && loading && <EpisodeGridSkeleton />}
+
+          {!altActive && !loading && enrichedEpisodes.length === 0 && (
+            <CinemetaFallback meta={meta} videos={cinemetaVideos} season={active} />
+          )}
+
+          {!altActive && !loading && enrichedEpisodes.length > 0 && (
+            <div key={settings.episodeLayout} className="animate-fade-in">
+              {settings.episodeLayout !== "list" ? (
+                <EpisodeStrip
+                  layout={settings.episodeLayout === "grid" ? "grid" : "strip"}
                   meta={meta}
-                  ep={ep}
-                  cinemetaThumbnail={
+                  seriesImdbId={imdbId}
+                  cinemetaVideos={cinemetaVideos}
+                  episodes={enrichedEpisodes}
+                  progressFor={(ep) =>
+                    getEpisodeProgress(
+                      meta.id,
+                      ep.seasonNumber,
+                      ep.episodeNumber,
+                      ep.runtime,
+                      traktKey,
+                      traktWatched,
+                      stremioWatched,
+                      undefined,
+                      simklWatched,
+                    )
+                  }
+                  thumbnailFor={(ep) =>
                     cinemetaVideos?.find(
                       (v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber,
                     )?.thumbnail
                   }
-                  cinemetaVideos={cinemetaVideos}
-                  seriesImdbId={imdbId}
-                  progress={progressByEp.get(ep.episodeNumber)!}
-                  spoiler={spoilerFor(ep.episodeNumber)}
+                  spoilerFor={(ep) => spoilerFor(ep.episodeNumber)}
                   onContextMenu={openWatchedMenu}
                 />
-              ))}
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {enrichedEpisodes.map((ep) => (
+                    <EpisodeRow
+                      key={ep.id}
+                      meta={meta}
+                      ep={ep}
+                      cinemetaThumbnail={
+                        cinemetaVideos?.find(
+                          (v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber,
+                        )?.thumbnail
+                      }
+                      cinemetaVideos={cinemetaVideos}
+                      seriesImdbId={imdbId}
+                      progress={progressByEp.get(ep.episodeNumber)!}
+                      spoiler={spoilerFor(ep.episodeNumber)}
+                      onContextMenu={openWatchedMenu}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
-      {!altActive && settings.episodeLayout === "list" && (
-        <EpisodeJumper scrollRef={scrollRef} totalEpisodes={enrichedEpisodes.length} />
-      )}
-      </>
+          {!altActive && settings.episodeLayout === "list" && (
+            <EpisodeJumper scrollRef={scrollRef} totalEpisodes={enrichedEpisodes.length} />
+          )}
+        </>
       )}
       {watchedMenu && (
         <EpisodeWatchedMenu
           metaId={meta.id}
-          meta={{ type: "series", name: meta.name, poster: meta.poster, background: meta.background }}
+          meta={{
+            type: "series",
+            name: meta.name,
+            poster: meta.poster,
+            background: meta.background,
+          }}
           target={watchedMenu}
           onClose={() => setWatchedMenu(null)}
         />
@@ -406,4 +425,3 @@ export function SeriesEpisodes({
     </div>
   );
 }
-

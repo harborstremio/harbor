@@ -135,7 +135,10 @@ export function AnimeEpisodes({
     [currentId, franchise, franchiseEpisodes, openMeta],
   );
   const entryEpisodes = useMemo(
-    () => (activeIsAnchor ? episodes : franchiseEpisodes.filter((ep) => ep.sourceMetaId === activeEntryId)),
+    () =>
+      activeIsAnchor
+        ? episodes
+        : franchiseEpisodes.filter((ep) => ep.sourceMetaId === activeEntryId),
     [activeIsAnchor, franchiseEpisodes, activeEntryId, episodes],
   );
   const tvdbPanel = useAnimeTvdbPanel(
@@ -235,7 +238,12 @@ export function AnimeEpisodes({
   const [searchOpen, setSearchOpen] = useState(false);
   const [aiMode, setAiMode] = useState(false);
   const aiProvider = providerForModel(settings.aiSearchModel);
-  const ai = useAnimeAiSearch(meta.name, displayEpisodes, settings.aiSearchKey, settings.aiSearchModel);
+  const ai = useAnimeAiSearch(
+    meta.name,
+    displayEpisodes,
+    settings.aiSearchKey,
+    settings.aiSearchModel,
+  );
   const filteredEpisodes = useMemo(() => {
     if (aiMode && ai.matched) return displayEpisodes.filter((e) => ai.matched!.has(e.number));
     const q = query.trim().toLowerCase();
@@ -281,94 +289,102 @@ export function AnimeEpisodes({
   return (
     <div data-anime-episodes className="flex flex-col gap-6 scroll-mt-24">
       <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-6">
-        <h3 className="text-[22px] font-medium tracking-tight text-ink">
-          {isOneOff ? t("Movie") : t("Episodes")}
-        </h3>
-        <div className="flex items-center gap-4">
-          {!isOneOff && (
-            <p className="text-[13px] text-ink-subtle">
-              {displayEpisodes.length === 1
-                ? t("{n} episode", { n: displayEpisodes.length })
-                : t("{n} episodes", { n: displayEpisodes.length })}
-            </p>
-          )}
-          {!isOneOff && <AnimeRandomButton episodes={displayEpisodes} metaForEp={routing.metaForEp} />}
-          {!isOneOff && (
-            <EpisodeLayoutToggle
-              value={settings.episodeLayout}
-              onChange={(v) => update({ episodeLayout: v })}
-            />
-          )}
-          {!isOneOff && (
-            <EpisodeGridControls
-              sort={settings.episodeSort}
-              onSort={(s) => update({ episodeSort: s })}
-              allWatched={allWatched}
-              onMarkSeason={markSeason}
-            />
-          )}
-          {!isOneOff && (
-            <EpisodeSearchToggle
-              searchActive={searchOpen || query.trim().length > 0}
-              aiMode={aiMode}
-              aiEnabled={!!settings.aiSearchKey.trim()}
-              aiProvider={aiProvider}
-              onSearch={() => {
-                setSearchOpen((v) => !v);
-                setAiMode(false);
-                ai.reset();
-              }}
-              onAskAi={() => {
-                setAiMode(true);
-                setSearchOpen(false);
-                setQuery("");
-              }}
-            />
-          )}
-          {isOneOff ? null : panelExtras ? (
-            <TvdbOrderPanel
-              items={panelExtras.items}
-              activeKey={panelExtras.activeKey}
-              onSelect={panelExtras.onSelect}
-              orderTypes={panelExtras.orderTypes}
-              activeType={panelExtras.activeType}
-              onSelectType={(v) => update({ tvdbSeasonType: v })}
-            />
-          ) : tvdbPanel.active ? (
-            <div
-              aria-hidden
-              className="h-10 w-44 animate-pulse rounded-full border border-edge-soft/50 bg-elevated/40"
-            />
-          ) : order ? (
-            <SeasonArcPicker
-              items={pickerItems}
-              activeKey={franchiseActiveKey ?? order.activeKey}
-              onSelect={selectPickerItem}
-            />
-          ) : franchise.length > 1 ? (
-            <AnimeSeasonPicker
-              franchise={franchise}
-              activeEntryId={activeEntryId}
-              onSelectEntry={onSelectEntry}
-            />
-          ) : null}
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <h3 className="shrink-0 text-[22px] font-medium tracking-tight text-ink">
+              {isOneOff ? t("Movie") : t("Episodes")}
+            </h3>
+            {isOneOff ? null : panelExtras ? (
+              <TvdbOrderPanel
+                items={panelExtras.items}
+                activeKey={panelExtras.activeKey}
+                onSelect={panelExtras.onSelect}
+                orderTypes={panelExtras.orderTypes}
+                activeType={panelExtras.activeType}
+                onSelectType={(v) => update({ tvdbSeasonType: v })}
+              />
+            ) : tvdbPanel.active ? (
+              <div
+                aria-hidden
+                className="h-10 w-44 animate-pulse rounded-full border border-edge-soft/50 bg-elevated/40"
+              />
+            ) : order ? (
+              <SeasonArcPicker
+                items={pickerItems}
+                activeKey={franchiseActiveKey ?? order.activeKey}
+                onSelect={selectPickerItem}
+              />
+            ) : franchise.length > 1 ? (
+              <AnimeSeasonPicker
+                franchise={franchise}
+                activeEntryId={activeEntryId}
+                onSelectEntry={onSelectEntry}
+              />
+            ) : null}
+          </div>
+          <div className="flex items-center gap-4">
+            {!isOneOff && (
+              <p className="text-[13px] text-ink-subtle">
+                {displayEpisodes.length === 1
+                  ? t("{n} episode", { n: displayEpisodes.length })
+                  : t("{n} episodes", { n: displayEpisodes.length })}
+              </p>
+            )}
+            {!isOneOff && (
+              <AnimeRandomButton episodes={displayEpisodes} metaForEp={routing.metaForEp} />
+            )}
+            {!isOneOff && (
+              <EpisodeLayoutToggle
+                value={settings.episodeLayout}
+                onChange={(v) => update({ episodeLayout: v })}
+              />
+            )}
+            {!isOneOff && (
+              <EpisodeGridControls
+                sort={settings.episodeSort}
+                onSort={(s) => update({ episodeSort: s })}
+                allWatched={allWatched}
+                onMarkSeason={markSeason}
+              />
+            )}
+            {!isOneOff && (
+              <EpisodeSearchToggle
+                searchActive={searchOpen || query.trim().length > 0}
+                aiMode={aiMode}
+                aiEnabled={!!settings.aiSearchKey.trim()}
+                aiProvider={aiProvider}
+                onSearch={() => {
+                  setSearchOpen((v) => !v);
+                  setAiMode(false);
+                  ai.reset();
+                }}
+                onAskAi={() => {
+                  setAiMode(true);
+                  setSearchOpen(false);
+                  setQuery("");
+                }}
+              />
+            )}
+          </div>
         </div>
-      </div>
-      {!isOneOff && aiMode && (
-        <AnimeAiBar
-          provider={aiProvider}
-          loading={ai.status === "loading"}
-          onSubmit={ai.run}
-          onExit={() => {
-            setAiMode(false);
-            ai.reset();
-          }}
-        />
-      )}
-      {!isOneOff && !aiMode && searchOpen && (
-        <EpisodeSearch query={query} onQuery={setQuery} matched={filteredEpisodes?.length ?? null} />
-      )}
+        {!isOneOff && aiMode && (
+          <AnimeAiBar
+            provider={aiProvider}
+            loading={ai.status === "loading"}
+            onSubmit={ai.run}
+            onExit={() => {
+              setAiMode(false);
+              ai.reset();
+            }}
+          />
+        )}
+        {!isOneOff && !aiMode && searchOpen && (
+          <EpisodeSearch
+            query={query}
+            onQuery={setQuery}
+            matched={filteredEpisodes?.length ?? null}
+          />
+        )}
       </div>
       {isOneOff ? (
         <MovieEntryCard meta={meta} ep={episodes[0]} watched={anilistCompleted || malCompleted} />
@@ -423,7 +439,12 @@ export function AnimeEpisodes({
           meta={
             watchedMenu.metaId
               ? routing.manualMetaFor(watchedMenu.metaId)
-              : { type: "series", name: meta.name, poster: meta.poster, background: meta.background }
+              : {
+                  type: "series",
+                  name: meta.name,
+                  poster: meta.poster,
+                  background: meta.background,
+                }
           }
           target={watchedMenu}
           onClose={() => setWatchedMenu(null)}

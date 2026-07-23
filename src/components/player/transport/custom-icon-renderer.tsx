@@ -43,36 +43,6 @@ export function renderCustomIconControl(
 ): ReactNode | undefined {
   const t = ctx.t ?? translate;
   switch (id) {
-    case "back": {
-      if (!ctx.onBack) return null;
-      return (
-        <Tooltip label={t("Back")} side="bottom">
-          <button
-            onClick={ctx.onBack}
-            aria-label={t("Back")}
-            className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/80"
-          >
-            <CustomIcon url={iconUrl} size={24} />
-          </button>
-        </Tooltip>
-      );
-    }
-    case "play-pause": {
-      const iconSize = ctx.tight ? 28 : ctx.compact ? 32 : 36;
-      const boxSize = ctx.tight ? "h-12 w-12" : ctx.compact ? "h-14 w-14" : "h-16 w-16";
-      return (
-        <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
-          <button
-            onClick={ctx.onPlayPause}
-            data-player-play-pause
-            aria-label={ctx.playing ? t("Pause") : t("Play")}
-            className={`relative flex items-center justify-center rounded-full bg-white/12 text-white backdrop-blur-md transition-[background-color,transform] hover:bg-white/22 active:scale-95 ${boxSize}`}
-          >
-            <CustomIcon url={iconUrl} size={iconSize} />
-          </button>
-        </Tooltip>
-      );
-    }
     case "seek-back": {
       if (ctx.tight || ctx.isLiveChannel) return null;
       const seconds = ctx.seekBackStepSec;

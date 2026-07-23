@@ -336,10 +336,6 @@ export function TogetherButton({
       frameId = requestAnimationFrame(updatePosition);
     };
 
-    /*
-     * أول حساب يتم مباشرة حتى لا تظهر القائمة
-     * لحظة في مكان قديم.
-     */
     updatePosition();
 
     const resizeObserver = new ResizeObserver(schedulePositionUpdate);
@@ -662,14 +658,27 @@ function Control({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      aria-label={label}
-      onClick={onClick}
-      className={`harbor-win-control ${danger ? "harbor-win-close" : ""} flex h-11 w-12 items-center justify-center rounded-xl bg-elevated/70 text-ink-muted transition-colors duration-150 ${
-        danger ? "hover:bg-[#e5484d] hover:text-white" : "hover:bg-elevated hover:text-ink"
-      }`}
+    <ThreeLiquidGlassSurface
+      radius="12px"
+      shaderRadius={0.48}
+      intensity={0.9}
+      style={{
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+      }}
+      className="h-11 w-12 shrink-0 border border-white/[0.10]"
+      contentClassName="h-full w-full"
     >
-      {children}
-    </button>
+      <button
+        type="button"
+        data-tauri-drag-region="false"
+        aria-label={label}
+        onClick={onClick}
+        className={`harbor-win-control ${danger ? "harbor-win-close" : ""} flex h-full w-full items-center justify-center rounded-[12px] bg-transparent text-ink-muted outline-none transition-colors duration-150 ${
+          danger ? "hover:bg-[#e5484d] hover:text-white" : "hover:bg-white/[0.06] hover:text-ink"
+        }`}
+      >
+        {children}
+      </button>
+    </ThreeLiquidGlassSurface>
   );
 }

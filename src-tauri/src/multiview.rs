@@ -551,8 +551,11 @@ fn spawn_mpv(
 }
 
 fn ipc_loadfile_msg(url: &str) -> String {
-    let escaped = url.replace('\\', "\\\\").replace('"', "\\\"");
-    format!("{{\"command\":[\"loadfile\",\"{escaped}\",\"replace\"]}}")
+    // Serialize via serde_json so control characters (notably `\n`/`\r`) are
+    // correctly escaped. Hand-building this JSON let a newline in an
+    // addon-controlled stream URL inject a second mpv IPC command line
+    // (the protocol is newline-delimited), reaching commands such as `run`.
+    serde_json::json!({ "command": ["loadfile", url, "replace"] }).to_string()
 }
 
 const IPC_WAKE_REDRAW: &str = "{\"command\":[\"set_property\",\"video-zoom\",0]}";

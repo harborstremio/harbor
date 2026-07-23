@@ -22,11 +22,11 @@ import {
   readPlayerChromeConfig,
   writePlayerChromeConfig,
   type PlayerChromeConfig,
+  type PlayerControlId,
   type TimeFormat,
 } from "@/lib/player-chrome";
 import { renderControl, type ControlContext } from "./transport/control-renderer";
 import { SongIdToast } from "@/components/song-id-toast";
-import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { useCastModalPlay } from "./use-cast-modal-play";
 
 export function Transport({
@@ -415,54 +415,35 @@ export function Transport({
     onAnime4kMode,
     anime4kAvailable,
   };
+  const fadeClassName = `transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`;
+  const renderFadedControl = (id: PlayerControlId) => {
+    const control = renderControl(id, ctx);
+
+    if (control == null || id === "back" || id === "play-pause") return control;
+
+    return <div className={fadeClassName}>{control}</div>;
+  };
+
   return (
     <>
       <SongIdToast />
       <div
         data-tauri-drag-region={fullscreen ? undefined : ""}
-        className={`pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between bg-gradient-to-b from-black/55 via-black/15 to-transparent px-7 pt-4 pb-8 transition-opacity duration-300 ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between px-7 pt-4 pb-8"
       >
-        <div className="pointer-events-auto flex items-start gap-2">
+        <div
+          aria-hidden
+          className={`absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-transparent ${fadeClassName}`}
+        />
+        <div className="pointer-events-auto relative flex items-start gap-2">
           {controlsInSlot(chromeConfig, "top-left").map((c) => (
-            <Fragment key={c.id}>
-              {c.id === "back" ? (
-                <ThreeLiquidGlassSurface
-                  radius="9999px"
-                  shaderRadius={0.28}
-                  intensity={0.1}
-                  causticsStrength={0.8}
-                  interactive={false}
-                  alwaysActive
-                  style={{
-                    boxShadow:
-                      "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
-                  }}
-                  className="h-11 w-11 shrink-0"
-                  surfaceClassName="border border-white/[0.08]"
-                  contentClassName="
-                    flex h-full w-full items-center justify-center
-                    [&_button]:!h-full
-                    [&_button]:!w-full
-                    [&_button]:!rounded-full
-                    [&_button]:!bg-transparent
-                    [&_button]:!shadow-none
-                    [&_button]:!ring-0
-                  "
-                >
-                  {renderControl(c.id, ctx)}
-                </ThreeLiquidGlassSurface>
-              ) : (
-                renderControl(c.id, ctx)
-              )}
-            </Fragment>
+            <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
           ))}
         </div>
-        <div className="flex items-start gap-2">
+        <div className="relative flex items-start gap-2">
           <div className="pointer-events-auto flex items-start gap-2">
             {controlsInSlot(chromeConfig, "top-right").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
         </div>
@@ -471,51 +452,59 @@ export function Transport({
       <div
         ref={controlsRef}
         dir="ltr"
-        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 bg-gradient-to-t from-black/70 via-black/25 to-transparent ${
+        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 ${
           tight ? "px-3 pt-6 pb-3" : "px-7 pt-10 pb-5"
-        } transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
+        }`}
       >
-        <div dir="ltr" className="pointer-events-auto flex items-center gap-3">
+        <div
+          aria-hidden
+          className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent ${fadeClassName}`}
+        />
+        <div dir="ltr" className="pointer-events-auto relative flex items-center gap-3">
           {isLiveChannel ? (
             <>
-              <LiveBadge />
-              <div className="flex-1">
+              <div className={fadeClassName}>
+                <LiveBadge />
+              </div>
+              <div className={`flex-1 ${fadeClassName}`}>
                 <LiveSeekBar durationSec={snap.durationSec} onSeek={onSeek} active={visible} />
               </div>
-              <GoToLive durationSec={snap.durationSec} onSeek={onSeek} />
+              <div className={fadeClassName}>
+                <GoToLive durationSec={snap.durationSec} onSeek={onSeek} />
+              </div>
             </>
           ) : (
             <>
               {controlsInSlot(chromeConfig, "seek-leading").map((c) => (
-                <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+                <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
               ))}
-              <div className="flex-1">
+              <div className={`flex-1 ${fadeClassName}`}>
                 <SeekBar durationSec={snap.durationSec} onSeek={onSeek} active={visible} />
               </div>
               {controlsInSlot(chromeConfig, "seek-trailing").map((c) => (
-                <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+                <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
               ))}
             </>
           )}
         </div>
         <div
-          className={`pointer-events-auto grid items-center ${
+          className={`pointer-events-auto relative grid items-center ${
             compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
           }`}
         >
           <div className="flex min-w-0 items-center gap-2 justify-self-start">
             {controlsInSlot(chromeConfig, "bottom-left").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
           <div className="flex items-center gap-1.5">
             {controlsInSlot(chromeConfig, "bottom-center").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
           <div className="flex items-center gap-1.5 justify-self-end">
             {controlsInSlot(chromeConfig, "bottom-right").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
         </div>

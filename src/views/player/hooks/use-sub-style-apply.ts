@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
+import { isMacDesktop } from "@/lib/platform";
 import { applyMotionInterp } from "@/lib/player/motion-interp";
 import { applyRtxVideo, resetRtxVideoState } from "@/lib/player/rtx-video";
 import { applySubStyle } from "@/lib/player/sub-style";
@@ -60,9 +60,9 @@ export function useSubStyleApply(params: {
 
   useEffect(() => {
     if (engine !== "mpv") return;
-    if ((isMacDesktop() || isLinuxDesktop()) && settings.playerMpvEmbed) return;
+    if (isMacDesktop() && settings.playerMpvEmbed) return;
     if (!bridgeReady) return;
-    if (!mediaReady || !sourceGamma) {
+    if (!mediaReady) {
       void applyRtxVideo(
         { hdr: false, vsr: false, svpActive, hdrToSdr: settings.playerHdrToSdr },
         bridgeKey,
@@ -70,6 +70,13 @@ export function useSubStyleApply(params: {
       return;
     }
     void applyMotionInterp(settings.playerMotionInterp && !svpActive);
+    if (!sourceGamma) {
+      void applyRtxVideo(
+        { hdr: false, vsr: false, svpActive, hdrToSdr: settings.playerHdrToSdr },
+        bridgeKey,
+      );
+      return;
+    }
     void applyRtxVideo(
       {
         hdr: settings.playerRtxHdr,

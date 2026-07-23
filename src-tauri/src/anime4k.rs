@@ -31,8 +31,12 @@ fn shaders_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
 #[tauri::command]
 pub fn anime4k_dir(app: tauri::AppHandle) -> Result<Option<String>, String> {
     let dir = shaders_dir(&app)?;
-    let marker = dir.join("Anime4K_Clamp_Highlights.glsl");
-    if marker.exists() {
+    let complete = FILES.iter().all(|(_, local)| {
+        std::fs::metadata(dir.join(local))
+            .map(|metadata| metadata.len() > 0)
+            .unwrap_or(false)
+    });
+    if complete {
         Ok(Some(dir.to_string_lossy().into_owned()))
     } else {
         Ok(None)
