@@ -52,8 +52,6 @@ export function VolumeIndicator({
         absolute z-30
         w-64
         ${POS[position]}
-        transition-opacity duration-200 ease-out
-        ${state.visible ? "opacity-100" : "opacity-0"}
       `}
     >
       <ThreeLiquidGlassSurface
@@ -75,12 +73,14 @@ export function VolumeIndicator({
           boxShadow:
             "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(80,150,225,0.07), 0 22px 58px -22px rgba(0,0,0,0.90)",
         }}
-        className="
+        className={`
           harbor-together-surface
           relative w-full
           rounded-[20px]
           border border-white/[0.15]
-        "
+          transition-opacity duration-200 ease-out
+          ${state.visible ? "opacity-100" : "opacity-0"}
+        `}
         surfaceClassName="
           border border-white/[0.07]
         "
