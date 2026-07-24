@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Loader2, Palette } from "lucide-react";
+import { ArrowLeft, Check, Download, Loader2, Palette } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useTogether } from "@/lib/together/provider";
@@ -12,6 +12,7 @@ import { ShownBadgesPicker, pickableBadges } from "./shown-badges-picker";
 import { ProfileMedia } from "./profile-media";
 import { LocationSelect } from "./location-select";
 import { CustomizationPanel } from "./customization/customization-panel";
+import { LetterboxdImportModal } from "@/components/letterboxd/letterboxd-import-modal";
 import { AboutEditor } from "./customization/about-editor";
 import { useCustomUrlAvailability, type UrlStatus } from "./use-customurl-availability";
 import type { Badge, ProfileSettingsInput, ProfileSummary } from "./profile-types";
@@ -79,6 +80,7 @@ export function ProfileSettings({
   const [pickingLists, setPickingLists] = useState(false);
   const [pickingBadges, setPickingBadges] = useState(false);
   const [customizing, setCustomizing] = useState(false);
+  const [importingLbx, setImportingLbx] = useState(false);
   const badgeOptions = pickableBadges(badges ?? []);
   const bodyRef = useRef<HTMLDivElement>(null);
   const urlStatus = useCustomUrlAvailability(form.customUrl, summary.handle, summary.customUrl ?? "");
@@ -241,6 +243,20 @@ export function ProfileSettings({
               </button>
             </div>
 
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="min-w-0">
+                <div className="text-[13px] font-medium text-ink">Import from Letterboxd</div>
+                <div className="text-[12px] text-ink-subtle">Import your ratings, watched films, and watchlist from a Letterboxd ZIP export</div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setImportingLbx(true)}
+                className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-4 text-[14px] font-medium text-ink ring-1 ring-edge-soft hover:bg-elevated"
+              >
+                <Download size={16} /> Import
+              </button>
+            </div>
+
             <div className="flex items-center justify-between gap-3 rounded-[10px] bg-elevated px-3 py-2.5 ring-1 ring-edge-soft">
               <div className="min-w-0">
                 <div className="text-[13px] font-medium text-ink">Private profile</div>
@@ -314,6 +330,7 @@ export function ProfileSettings({
           onSaved={onSaved}
         />
       )}
+      {importingLbx && <LetterboxdImportModal onClose={() => setImportingLbx(false)} />}
     </>
   );
 }
