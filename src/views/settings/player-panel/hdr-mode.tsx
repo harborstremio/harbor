@@ -6,7 +6,7 @@ import { DisplayPanelSelector } from "./display-panel-selector";
 
 type HdrMode = "sdr" | "hdrWindow" | "hdrEmbedded";
 
-const MODE_FLAGS: Record
+const MODE_FLAGS: Record<
   HdrMode,
   {
     playerHdrToSdr: boolean;
