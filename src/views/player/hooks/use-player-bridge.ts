@@ -121,9 +121,12 @@ export function usePlayerBridge(params: {
           src,
           (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
         ),
-        // Only macOS has a native embedded-EDR implementation
-        // (mpv_render_mac.rs); gate on the platform + the user's HDR mode.
-        macEdr: isMacDesktop() && settings.playerMacEdr,
+        // macOS is the only platform with a native embedded-EDR path
+        // (mpv_render_mac.rs). The macOS settings UI exposes the "Embed mpv
+        // inside Harbor window" and "HDR-to-SDR tonemapping" toggles rather
+        // than the Windows-only HdrModePicker, so derive EDR from those two
+        // instead of a stored flag no macOS UI ever writes. See #361.
+        macEdr: isMacDesktop() && embedActive && !settings.playerHdrToSdr,
         extraOptions: mergeMpvOptions(settings, svpOn),
         getEmbedRect,
       });
