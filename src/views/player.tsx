@@ -612,6 +612,9 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const videoFill = useVideoFill(bridgeRef, src.url, playing);
   useLivePictureEq(bridgeRef, src.url);
   const anime4k = useAnime4k(bridgeRef, src.url, src, snap.videoWidth);
+  const [mouseSpeedActive, setMouseSpeedActive] = useState(false);
+  const mouseHoldTimerRef = useRef<number | null>(null);
+  const wasMouseHoldRef = useRef(false);
   const { holdSpeedActive, showStats } = usePlayerHotkeys({
     bridgeRef,
     snap,
@@ -856,7 +859,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     subShowInPip: settings.subShowInPip,
     subAssNative,
     showStats,
-    holdSpeedActive,
+    holdSpeedActive: holdSpeedActive || mouseSpeedActive,
     volumeIndicator,
     volumeHudPosition: settings.playerVolumeHudPosition,
     videoFillPill: videoFill.pill,
@@ -1018,12 +1021,50 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
         e.currentTarget.scrollTop = 0;
       }}
     >
-      <div
+     <div
         ref={videoMountRef}
         className="absolute inset-0"
+        onPointerDown={(e) => {
+          if (e.target !== e.currentTarget) return;
+          if (drawMode || pipMode || e.button !== 0) return;
+          
+          wasMouseHoldRef.current = false;
+          mouseHoldTimerRef.current = window.setTimeout(() => {
+            if (snapRef.current.status !== "playing") return;
+            wasMouseHoldRef.current = true;
+            setMouseSpeedActive(true);
+            bridgeRef.current?.setSpeed?.(2);
+          }, 400);
+        }}
+        onPointerUp={() => {
+          if (mouseHoldTimerRef.current) {
+            clearTimeout(mouseHoldTimerRef.current);
+            mouseHoldTimerRef.current = null;
+          }
+          if (mouseSpeedActive) {
+            setMouseSpeedActive(false);
+            bridgeRef.current?.setSpeed?.(1);
+          }
+        }}
+        onPointerLeave={() => {
+          if (mouseHoldTimerRef.current) {
+            clearTimeout(mouseHoldTimerRef.current);
+            mouseHoldTimerRef.current = null;
+          }
+          if (mouseSpeedActive) {
+            setMouseSpeedActive(false);
+            bridgeRef.current?.setSpeed?.(1);
+          }
+        }}
         onClick={(e) => {
           if (e.target !== e.currentTarget) return;
           if (drawMode || pipMode) return;
+          
+          if (wasMouseHoldRef.current) {
+            wasMouseHoldRef.current = false;
+            return;
+          }
+          
           const resuming = snap.status !== "playing";
           playPauseToggle();
           if (resuming) hideForResume();
