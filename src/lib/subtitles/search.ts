@@ -23,6 +23,18 @@ export type StreamHints = {
   preferHearingImpaired?: boolean;
 };
 
+// Matches the OpenSubtitles addon detection used by addon-logo.tsx.
+const OPENSUBTITLES_ADDON_RX = /opensubtitles/i;
+
+function hasOpenSubtitlesAddon(addons: Addon[] | undefined): boolean {
+  if (!addons || addons.length === 0) return false;
+  return addons.some(
+    (a) =>
+      OPENSUBTITLES_ADDON_RX.test(a.manifest?.id ?? "") ||
+      OPENSUBTITLES_ADDON_RX.test(a.manifest?.name ?? ""),
+  );
+}
+
 export async function searchSubtitles(
   q: SubSearchQuery,
   opts: SearchOptions,
@@ -30,7 +42,12 @@ export async function searchSubtitles(
   const want = opts.providers ?? {};
   const wyzieOn = want.wyzie === true;
   const addonsOn = want.addons ?? true;
-  const osOn = want.opensubtitles ?? true;
+  // The built-in OpenSubtitles search steps aside when an OpenSubtitles addon
+  // is installed and addon search is on, so results are never duplicated (#872).
+  const osAddonActive = addonsOn && hasOpenSubtitlesAddon(opts.addons);
+  const osOn = (want.opensubtitles ?? true) && !osAddonActive;
+  if (osAddonActive && (want.opensubtitles ?? true))
+    dinfo("[subs] built-in opensubtitles stepping aside: OpenSubtitles addon installed");
   dinfo("[subs] search", { q, providers: { osOn, addonsOn, wyzieOn }, addons: opts.addons?.length ?? 0 });
   const tasks: Array<{ name: string; p: Promise<SubResult[]> }> = [];
   if (osOn)
