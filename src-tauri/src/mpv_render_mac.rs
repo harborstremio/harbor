@@ -26,7 +26,14 @@ const NSOPENGL_PROFILE_VERSION_3_2_CORE: u32 = 0x3200;
 
 #[link(name = "CoreGraphics", kind = "framework")]
 extern "C" {
+    #[allow(dead_code)]
     static kCGColorSpaceExtendedLinearDisplayP3: *const c_void;
+    // The embedded player drives mpv with target-trc=pq (see apply_mac_edr in
+    // mpv.rs), so the window has to be tagged with a matching PQ colorspace.
+    // Tagging it ExtendedLinearDisplayP3 makes CoreAnimation read PQ-encoded
+    // values as linear light, which crushes the image (see #361).
+    static kCGColorSpaceITUR_2100_PQ: *const c_void;
+    static kCGColorSpaceDisplayP3_PQ: *const c_void;
     fn CGColorSpaceCreateWithName(name: *const c_void) -> *mut c_void;
     fn CGColorSpaceRelease(space: *mut c_void);
 }
@@ -139,7 +146,19 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
         };
 
         let pf = if edr {
-            make_pf(true).or_else(|| make_pf(false))
+            match make_pf(true) {
+                Some(pf) => {
+                    eprintln!("[harbor::mpv_mac] float (EDR-capable) pixel format selected");
+                    Some(pf)
+                }
+                None => {
+                    eprintln!(
+                        "[harbor::mpv_mac] WARNING: float pixel format unavailable, \
+                         falling back to 8-bit; EDR output will be clipped"
+                    );
+                    make_pf(false)
+                }
+            }
         } else {
             make_pf(false)
         }
@@ -234,7 +253,7 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
     Ok(())
 }
 
-pub fn set_hdr_active(active: bool, _bt2020: bool) {
+pub fn set_hdr_active(active: bool, bt2020: bool) {
     if MainThreadMarker::new().is_none() {
         eprintln!("[harbor::mpv_mac] ignored HDR update off the main thread");
         return;
@@ -252,7 +271,17 @@ pub fn set_hdr_active(active: bool, _bt2020: bool) {
         let view_as_view: &NSView = embed.view.as_super();
         let _: () = msg_send![view_as_view, setWantsExtendedDynamicRangeOpenGLSurface: active];
         if active {
-            let cg = CGColorSpaceCreateWithName(kCGColorSpaceExtendedLinearDisplayP3);
+            // Match the primaries mpv was told to output in apply_mac_edr().
+            let space_name = if bt2020 {
+                kCGColorSpaceITUR_2100_PQ
+            } else {
+                kCGColorSpaceDisplayP3_PQ
+            };
+            eprintln!(
+                "[harbor::mpv_mac] HDR on: tagging window {} (PQ)",
+                if bt2020 { "BT.2020" } else { "Display P3" }
+            );
+            let cg = CGColorSpaceCreateWithName(space_name);
             if !cg.is_null() {
                 let nscs_alloc: *mut AnyObject = msg_send![objc2::class!(NSColorSpace), alloc];
                 let nscs: *mut AnyObject = msg_send![nscs_alloc, initWithCGColorSpace: cg];
