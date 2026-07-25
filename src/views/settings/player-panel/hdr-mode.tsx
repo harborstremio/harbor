@@ -1,158 +1,178 @@
-import { useSettings } from "@/lib/settings";
-import { isWindowsDesktop } from "@/lib/platform";
-import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
-import { useT } from "@/lib/i18n";
-import { DisplayPanelSelector } from "./display-panel-selector";
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { emptySnapshot, type PlayerBridge, type PlayerSnapshot } from "@/lib/player/bridge";
+import { probeMpv } from "@/lib/player/mpv";
+import { mergeMpvOptions } from "@/lib/player/mpv-tuning";
+import { anime4kShadersFor, type Anime4kChoice } from "./use-anime4k";
+import type { PlayerSrc } from "@/lib/view";
+import type { Settings } from "@/lib/settings";
+import { setPlaybackClock } from "@/lib/player/playback-clock";
+import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import { svpEnsureRunning, svpStatus } from "@/lib/svp";
+import { isAnimeMedia, isSvpActiveForMedia } from "@/lib/player/svp-policy";
+import { pickBridge } from "../player-utils";
 
-type HdrMode = "sdr" | "hdrWindow" | "hdrEmbedded";
-
-const MODE_FLAGS: Record<
-  HdrMode,
-  {
-    playerHdrToSdr: boolean;
-    playerHdrOpaqueWindow: boolean;
-    playerHdrStage: "auto" | "off" | "always";
-  }
-> = {
-  sdr: { playerHdrToSdr: true, playerHdrOpaqueWindow: false, playerHdrStage: "off" },
-  hdrWindow: { playerHdrToSdr: false, playerHdrOpaqueWindow: true, playerHdrStage: "off" },
-  hdrEmbedded: { playerHdrToSdr: false, playerHdrOpaqueWindow: false, playerHdrStage: "auto" },
-};
-
-function deriveMode(s: { playerHdrToSdr: boolean; playerHdrOpaqueWindow: boolean }): HdrMode {
-  if (s.playerHdrOpaqueWindow) return "hdrWindow";
-  if (s.playerHdrToSdr) return "sdr";
-  return "hdrEmbedded";
+function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean {
+  return (
+    a.status !== b.status ||
+    a.durationSec !== b.durationSec ||
+    a.volume !== b.volume ||
+    a.muted !== b.muted ||
+    a.rate !== b.rate ||
+    a.audioTracks !== b.audioTracks ||
+    a.subtitleTracks !== b.subtitleTracks ||
+    a.chapters !== b.chapters ||
+    a.subDelaySec !== b.subDelaySec ||
+    a.audioDelaySec !== b.audioDelaySec ||
+    a.subText !== b.subText ||
+    a.subStartSec !== b.subStartSec ||
+    a.audioNormalize !== b.audioNormalize ||
+    a.videoWidth !== b.videoWidth ||
+    a.videoHeight !== b.videoHeight ||
+    a.hdrGamma !== b.hdrGamma ||
+    a.errorMessage !== b.errorMessage ||
+    a.errorCode !== b.errorCode
+  );
 }
 
-export function HdrModePicker() {
-  const { settings, update } = useSettings();
-  const t = useT();
-  const current = deriveMode(settings);
-  const svpAlwaysActive =
-    settings.playerSvp && settings.svpVpyPath.length > 0 && settings.svpScope === "all";
-  const rtxHdrUnavailable = isRtxHdrBlocked(settings.playerHdrToSdr, svpAlwaysActive);
+export function usePlayerBridge(params: {
+  bridgeRef: RefObject<PlayerBridge | null>;
+  videoMountRef: RefObject<HTMLDivElement | null>;
+  src: PlayerSrc;
+  settings: Settings;
+}) {
+  const { bridgeRef, videoMountRef, src, settings } = params;
 
-  const options: Array<{
-    id: HdrMode;
-    label: string;
-    sub: string;
-    recommended?: boolean;
-    experimental?: boolean;
-  }> = [
-    {
-      id: "sdr",
-      label: t("Tonemap to SDR"),
-      sub: t(
-        "Maps HDR down to SDR with bt.2446a. Works on any display. Pick this if HDR looks washed-out or grey.",
-      ),
-      recommended: true,
-    },
-    {
-      id: "hdrWindow",
-      label: t("True HDR, separate window"),
-      sub: t(
-        "Plays HDR in its own window so Windows shows real HDR and the SDR brightness slider stops dimming it. The most reliable way to get true HDR.",
-      ),
-    },
-    {
-      id: "hdrEmbedded",
-      label: t("True HDR, embedded"),
-      sub: t(
-        "Keeps HDR inside Harbor with the controls floating above the video. Subtitles render on the video. If the control bar does not appear, press Esc or use separate window.",
-      ),
-      experimental: true,
-    },
-  ];
+  const [snap, setSnap] = useState<PlayerSnapshot>(emptySnapshot);
+  const prevSnapRef = useRef<PlayerSnapshot>(emptySnapshot);
+  const [engine, setEngine] = useState<"html5" | "mpv">("html5");
+  const [autoFallbackTried, setAutoFallbackTried] = useState(false);
 
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {t("HDR")}
-      </span>
-      <div className="flex flex-col gap-2.5">
-        {options.map((o) => {
-          const selected = current === o.id;
-          return (
-            <button
-              key={o.id}
-              type="button"
-              onClick={() => update(MODE_FLAGS[o.id])}
-              className={`flex items-start gap-3.5 rounded-2xl border px-5 py-4 text-start transition-colors ${
-                selected
-                  ? "border-ink bg-elevated"
-                  : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
-              }`}
-            >
-              <span
-                className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  selected ? "border-ink" : "border-edge"
-                }`}
-              >
-                {selected && <span className="h-2.5 w-2.5 rounded-full bg-ink" />}
-              </span>
-              <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[15px] font-semibold text-ink">{o.label}</span>
-                  {o.recommended && (
-                    <span className="rounded-md bg-accent/15 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-accent">
-                      {t("Recommended")}
-                    </span>
-                  )}
-                  {o.experimental && (
-                    <span className="rounded-md bg-ink/10 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
-                      {t("Experimental")}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[12.5px] leading-snug text-ink-muted">{o.sub}</span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      <DisplayPanelSelector />
-      {isWindowsDesktop() && (
-        <button
-          type="button"
-          disabled={rtxHdrUnavailable}
-          onClick={() => update({ playerRtxHdr: !settings.playerRtxHdr })}
-          className={`mt-1 flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-start transition-colors ${
-            rtxHdrUnavailable
-              ? "cursor-not-allowed border-edge-soft bg-canvas/20 opacity-50"
-              : settings.playerRtxHdr
-                ? "border-ink bg-elevated"
-                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
-          }`}
-        >
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[15px] font-semibold text-ink">{t("RTX Video HDR")}</span>
-              <span className="rounded-md bg-ink/10 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
-                {t("Nvidia only")}
-              </span>
-            </div>
-            <span className="text-[12.5px] leading-snug text-ink-muted">
-              {t(
-                "Upconverts SDR video to HDR on an Nvidia RTX GPU (turn on RTX Video HDR in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.",
-              )}
-            </span>
-          </div>
-          <span
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-              settings.playerRtxHdr && !rtxHdrUnavailable ? "bg-ink" : "bg-edge"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
-                settings.playerRtxHdr && !rtxHdrUnavailable
-                  ? "translate-x-[22px]"
-                  : "translate-x-0.5"
-              }`}
-            />
-          </span>
-        </button>
-      )}
-    </div>
+  const hdrOpaqueWindow = isWindowsDesktop() && settings.playerHdrOpaqueWindow;
+  const embedActive = settings.playerMpvEmbed && !hdrOpaqueWindow;
+  const isAnimeSrc = isAnimeMedia(src.meta);
+  const anime4kOn = settings.playerAnime4k && (!settings.playerAnime4kAnimeOnly || isAnimeSrc);
+  const svpRequested = isSvpActiveForMedia(settings, src.meta);
+  const [svpRuntimeReady, setSvpRuntimeReady] = useState<boolean | null>(
+    isLinuxDesktop() && svpRequested ? null : true,
   );
+  useEffect(() => {
+    if (!svpRequested || !isLinuxDesktop()) {
+      setSvpRuntimeReady(true);
+      return;
+    }
+    let active = true;
+    setSvpRuntimeReady(null);
+    void svpStatus()
+      .then((status) => {
+        if (active)
+          setSvpRuntimeReady(status.supported && status.ready && status.loadable !== false);
+      })
+      .catch(() => {
+        if (active) setSvpRuntimeReady(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [svpRequested, settings.svpVpyPath]);
+  const svpPending = svpRequested && svpRuntimeReady === null;
+  const svpOn = svpRequested && svpRuntimeReady === true;
+  useEffect(() => {
+    if (svpOn) void svpEnsureRunning().catch(() => {});
+  }, [svpOn]);
+  const isLiveLike =
+    !!src.meta.id?.startsWith("iptv:") ||
+    (!!src.meta.type &&
+      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+  const chosenEngine =
+    isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
+  const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
+  const [bridgeReady, setBridgeReady] = useState(false);
+  useEffect(() => {
+    if (svpPending) return;
+    const host = videoMountRef.current;
+    if (!host) return;
+    let cancelled = false;
+    let off: (() => void) | null = null;
+    let bridge: PlayerBridge | null = null;
+    setBridgeReady(false);
+    (async () => {
+      const want = chosenEngine;
+      const getEmbedRect = async () => {
+        const el = videoMountRef.current;
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return {
+          cssLeft: r.left,
+          cssTop: r.top,
+          cssWidth: r.width,
+          cssHeight: r.height,
+          cssViewW: document.documentElement.clientWidth,
+          cssViewH: document.documentElement.clientHeight,
+        };
+      };
+      const { bridge: choose, engine: chosen } = await pickBridge(want, src.notWebReady === true, {
+        anime4k: anime4kOn,
+        hdrToSdr: settings.playerHdrToSdr,
+        rtxHdr: settings.playerRtxHdr && !settings.playerHdrToSdr && !svpOn,
+        embed: embedActive,
+        d3d11Flip: settings.playerD3d11Flip,
+        anime4kShaders: anime4kShadersFor(
+          settings,
+          src,
+          (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
+        ),
+        // Only macOS has a native embedded-EDR implementation
+        // (mpv_render_mac.rs); gate on the platform + the user's HDR mode.
+        macEdr: isMacDesktop() && settings.playerMacEdr,
+        extraOptions: mergeMpvOptions(settings, svpOn),
+        getEmbedRect,
+      });
+      if (cancelled) {
+        choose.destroy();
+        return;
+      }
+      bridge = choose;
+      bridge.attach(host);
+      bridgeRef.current = bridge;
+      setEngine(chosen);
+      off = bridge.subscribe((s) => {
+        setPlaybackClock(s.positionSec, s.bufferedSec);
+        if (snapChangedIgnoringClock(prevSnapRef.current, s)) {
+          prevSnapRef.current = s;
+          setSnap(s);
+        }
+      });
+      setBridgeReady(true);
+    })();
+    return () => {
+      cancelled = true;
+      setBridgeReady(false);
+      off?.();
+      bridge?.destroy();
+      bridgeRef.current = null;
+      setPlaybackClock(0, 0);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bridgeKey, svpPending]);
+
+  useEffect(() => {
+    if (engine !== "html5") return;
+    if (autoFallbackTried) return;
+    if (settings.playerEngine !== "auto") return;
+    if (snap.errorCode !== "decode" && snap.errorCode !== "codec" && !snap.noAudio) return;
+    (async () => {
+      const probe = await probeMpv();
+      if (probe.available) setAutoFallbackTried(true);
+    })();
+  }, [engine, autoFallbackTried, snap.errorCode, snap.noAudio, settings.playerEngine]);
+
+  useEffect(() => {
+    if (!bridgeReady || engine !== "mpv") return;
+    bridgeRef.current?.setHdrToSdr?.(
+      settings.playerHdrToSdr,
+      settings.playerDisplayPanel === "oled",
+    );
+  }, [bridgeReady, engine, settings.playerHdrToSdr, settings.playerDisplayPanel, bridgeRef]);
+
+  return { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive: svpOn };
 }
