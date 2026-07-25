@@ -12,30 +12,11 @@ const MODE_FLAGS: Record<
     playerHdrToSdr: boolean;
     playerHdrOpaqueWindow: boolean;
     playerHdrStage: "auto" | "off" | "always";
-    // macOS-only: drives the native EDR/extended-dynamic-range surface in
-    // mpv_render_mac.rs. Ignored on other platforms, but must be set here or
-    // the embedded macOS player can never receive true HDR (see #361).
-    playerMacEdr: boolean;
   }
 > = {
-  sdr: {
-    playerHdrToSdr: true,
-    playerHdrOpaqueWindow: false,
-    playerHdrStage: "off",
-    playerMacEdr: false,
-  },
-  hdrWindow: {
-    playerHdrToSdr: false,
-    playerHdrOpaqueWindow: true,
-    playerHdrStage: "off",
-    playerMacEdr: false,
-  },
-  hdrEmbedded: {
-    playerHdrToSdr: false,
-    playerHdrOpaqueWindow: false,
-    playerHdrStage: "auto",
-    playerMacEdr: true,
-  },
+  sdr: { playerHdrToSdr: true, playerHdrOpaqueWindow: false, playerHdrStage: "off" },
+  hdrWindow: { playerHdrToSdr: false, playerHdrOpaqueWindow: true, playerHdrStage: "off" },
+  hdrEmbedded: { playerHdrToSdr: false, playerHdrOpaqueWindow: false, playerHdrStage: "auto" },
 };
 
 function deriveMode(s: { playerHdrToSdr: boolean; playerHdrOpaqueWindow: boolean }): HdrMode {
