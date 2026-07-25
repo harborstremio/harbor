@@ -6,7 +6,7 @@ import { anime4kShadersFor, type Anime4kChoice } from "./use-anime4k";
 import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
 import { setPlaybackClock } from "@/lib/player/playback-clock";
-import { isLinuxDesktop, isWindowsDesktop } from "@/lib/platform";
+import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { svpEnsureRunning, svpStatus } from "@/lib/svp";
 import { isAnimeMedia, isSvpActiveForMedia } from "@/lib/player/svp-policy";
 import { pickBridge } from "../player-utils";
@@ -121,7 +121,9 @@ export function usePlayerBridge(params: {
           src,
           (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
         ),
-        macEdr: false,
+        // Only macOS has a native embedded-EDR implementation
+        // (mpv_render_mac.rs); gate on the platform + the user's HDR mode.
+        macEdr: isMacDesktop() && settings.playerMacEdr,
         extraOptions: mergeMpvOptions(settings, svpOn),
         getEmbedRect,
       });
