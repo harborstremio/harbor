@@ -10,7 +10,7 @@ use libmpv2_sys::mpv_handle;
 use objc2::rc::Retained;
 use objc2::runtime::AnyObject;
 use objc2::{msg_send, AnyThread, ClassType, MainThreadOnly, Message};
-use objc2_app_kit::{NSOpenGLPixelFormat, NSOpenGLView, NSView, NSWindow, NSWindowOrderingMode};
+use objc2_app_kit::{NSOpenGLPixelFormat, NSOpenGLView, NSView, NSWindow};
 use objc2_foundation::{MainThreadMarker, NSNumber, NSString};
 
 use crate::mpv::{map_css_geometry, MpvGeometry};
@@ -26,7 +26,12 @@ const NSOPENGL_PROFILE_VERSION_3_2_CORE: u32 = 0x3200;
 
 #[link(name = "CoreGraphics", kind = "framework")]
 extern "C" {
+    #[allow(dead_code)]
     static kCGColorSpaceExtendedLinearDisplayP3: *const c_void;
+    // apply_mac_edr() drives mpv with target-trc=pq, so the video surface has
+    // to be tagged with a matching PQ space or the values are read as linear.
+    static kCGColorSpaceITUR_2100_PQ: *const c_void;
+    static kCGColorSpaceDisplayP3_PQ: *const c_void;
     fn CGColorSpaceCreateWithName(name: *const c_void) -> *mut c_void;
     fn CGColorSpaceRelease(space: *mut c_void);
 }
@@ -43,6 +48,21 @@ extern "C" {
 }
 const RTLD_DEFAULT: *mut c_void = -2isize as *mut c_void;
 
+/// Convert a rect expressed in the parent window's contentView coordinates
+/// into screen coordinates, so the video child window can be positioned.
+unsafe fn content_rect_to_screen(
+    parent: &NSWindow,
+    rect: objc2_foundation::NSRect,
+) -> objc2_foundation::NSRect {
+    let Some(content_view) = parent.contentView() else {
+        return rect;
+    };
+    let nil_view: *const AnyObject = std::ptr::null();
+    let in_window: objc2_foundation::NSRect =
+        msg_send![&*content_view, convertRect: rect, toView: nil_view];
+    msg_send![parent, convertRectToScreen: in_window]
+}
+
 fn main_queue() -> *mut c_void {
     unsafe { (&_dispatch_main_q as *const c_void) as *mut c_void }
 }
@@ -52,6 +72,11 @@ pub struct Embed {
     web_view: Option<Retained<NSView>>,
     web_view_was_opaque: bool,
     ns_window: Retained<NSWindow>,
+    // The GL surface lives in its own borderless child window so the HDR
+    // colorspace can be applied to the video alone. NSWindow::setColorSpace is
+    // per-window, so tagging the main window would also re-interpret the sRGB
+    // WebView UI drawn on top of it (see #361).
+    video_window: Retained<NSWindow>,
     edr: bool,
     render: Mutex<RenderContext>,
 }
@@ -160,17 +185,42 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
 
         let subviews = content_view.subviews();
         let first_subview: Option<Retained<NSView>> = subviews.firstObject();
-        if let Some(reference) = first_subview.as_deref() {
-            content_view.addSubview_positioned_relativeTo(
-                view_as_view,
-                NSWindowOrderingMode::Below,
-                Some(reference),
-            );
-        } else {
-            content_view.addSubview(view_as_view);
-        }
+
+        // Borderless child window that carries only the video surface.
+        let screen_rect = content_rect_to_screen(ns_window, bounds);
+        let win_alloc = NSWindow::alloc(mtm);
+        let style_borderless: usize = 0;
+        let backing_buffered: usize = 2;
+        let video_window: Option<Retained<NSWindow>> = msg_send![
+            win_alloc,
+            initWithContentRect: screen_rect,
+            styleMask: style_borderless,
+            backing: backing_buffered,
+            defer: false,
+        ];
+        let video_window =
+            video_window.ok_or_else(|| "video NSWindow init failed".to_string())?;
+        let _: () = msg_send![&*video_window, setOpaque: true];
+        let _: () = msg_send![&*video_window, setHasShadow: false];
+        let _: () = msg_send![&*video_window, setIgnoresMouseEvents: true];
+        let _: () = msg_send![&*video_window, setReleasedWhenClosed: false];
+        let black_bg: *mut AnyObject = msg_send![objc2::class!(NSColor), blackColor];
+        let _: () = msg_send![&*video_window, setBackgroundColor: black_bg];
+        let _: () = msg_send![&*video_window, setContentView: view_as_view];
         let mask = NS_VIEW_AUTORESIZE_WIDTH | NS_VIEW_AUTORESIZE_HEIGHT;
         let _: () = msg_send![view_as_view, setAutoresizingMask: mask];
+        let ordered_below: isize = -1;
+        let _: () = msg_send![
+            ns_window,
+            addChildWindow: &*video_window,
+            ordered: ordered_below,
+        ];
+        // The child window is ordered behind the parent, so the parent has to
+        // stay non-opaque for the video to show through it.
+        let _: () = msg_send![ns_window, setOpaque: false];
+        let clear_bg: *mut AnyObject = msg_send![objc2::class!(NSColor), clearColor];
+        let _: () = msg_send![ns_window, setBackgroundColor: clear_bg];
+        eprintln!("[harbor::mpv_mac] video child window attached");
 
         let _: () = msg_send![view_as_view, setWantsLayer: true];
         if let Some(layer) = view_as_view.layer() {
@@ -225,6 +275,7 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
             web_view: first_subview,
             web_view_was_opaque,
             ns_window: ns_window.retain(),
+            video_window,
             edr,
             render: Mutex::new(render),
         });
@@ -234,7 +285,7 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
     Ok(())
 }
 
-pub fn set_hdr_active(active: bool, _bt2020: bool) {
+pub fn set_hdr_active(active: bool, bt2020: bool) {
     if MainThreadMarker::new().is_none() {
         eprintln!("[harbor::mpv_mac] ignored HDR update off the main thread");
         return;
@@ -252,18 +303,31 @@ pub fn set_hdr_active(active: bool, _bt2020: bool) {
         let view_as_view: &NSView = embed.view.as_super();
         let _: () = msg_send![view_as_view, setWantsExtendedDynamicRangeOpenGLSurface: active];
         if active {
-            let cg = CGColorSpaceCreateWithName(kCGColorSpaceExtendedLinearDisplayP3);
+            // Match the primaries apply_mac_edr() told mpv to output.
+            let space_name = if bt2020 {
+                kCGColorSpaceITUR_2100_PQ
+            } else {
+                kCGColorSpaceDisplayP3_PQ
+            };
+            let cg = CGColorSpaceCreateWithName(space_name);
             if !cg.is_null() {
                 let nscs_alloc: *mut AnyObject = msg_send![objc2::class!(NSColorSpace), alloc];
                 let nscs: *mut AnyObject = msg_send![nscs_alloc, initWithCGColorSpace: cg];
                 if !nscs.is_null() {
-                    let _: () = msg_send![&*embed.ns_window, setColorSpace: nscs];
+                    // Only the video window: the parent keeps its sRGB space so
+                    // the WebView UI is not re-interpreted.
+                    let _: () = msg_send![&*embed.video_window, setColorSpace: nscs];
+                    eprintln!(
+                        "[harbor::mpv_mac] HDR on: video window tagged {} (PQ)",
+                        if bt2020 { "BT.2020" } else { "Display P3" }
+                    );
                 }
                 CGColorSpaceRelease(cg);
             }
         } else {
             let nil: *mut AnyObject = std::ptr::null_mut();
-            let _: () = msg_send![&*embed.ns_window, setColorSpace: nil];
+            let _: () = msg_send![&*embed.video_window, setColorSpace: nil];
+            eprintln!("[harbor::mpv_mac] HDR off: video window colorspace reset");
         }
     }
     schedule_redraw();
@@ -320,18 +384,20 @@ pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
         return Ok(());
     };
     unsafe {
-        let view_as_view: &NSView = embed.view.as_super();
-        let parent = view_as_view
-            .superview()
-            .ok_or_else(|| "GL view has no superview".to_string())?;
-        let parent_bounds = parent.bounds();
+        // The GL view now fills its own child window, so geometry updates move
+        // that window instead of repositioning a subview.
+        let parent_content = embed
+            .ns_window
+            .contentView()
+            .ok_or_else(|| "parent window has no contentView".to_string())?;
+        let parent_bounds = parent_content.bounds();
         let native = map_css_geometry(&css, parent_bounds.size.width, parent_bounds.size.height);
-        let native_y = if parent.isFlipped() {
+        let native_y = if parent_content.isFlipped() {
             native.y
         } else {
             parent_bounds.size.height - native.y - native.height
         };
-        let frame = objc2_foundation::NSRect {
+        let rect_in_content = objc2_foundation::NSRect {
             origin: objc2_foundation::NSPoint {
                 x: native.x,
                 y: native_y,
@@ -341,9 +407,8 @@ pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
                 height: native.height,
             },
         };
-        view_as_view.setFrame(frame);
-        let mask: usize = 0;
-        let _: () = msg_send![view_as_view, setAutoresizingMask: mask];
+        let screen_rect = content_rect_to_screen(&embed.ns_window, rect_in_content);
+        let _: () = msg_send![&*embed.video_window, setFrame: screen_rect, display: true];
         if let Some(gl_ctx) = embed.view.openGLContext() {
             let _: () = msg_send![&*gl_ctx, update];
         }
@@ -421,6 +486,8 @@ pub fn uninstall() -> Result<(), String> {
 
 fn teardown_embed(embed: Embed) {
     unsafe {
+        let _: () = msg_send![&*embed.ns_window, removeChildWindow: &*embed.video_window];
+        let _: () = msg_send![&*embed.video_window, orderOut: std::ptr::null::<AnyObject>()];
         let view_as_view: &NSView = embed.view.as_super();
         view_as_view.removeFromSuperview();
         if let Some(wv) = embed.web_view.as_deref() {
