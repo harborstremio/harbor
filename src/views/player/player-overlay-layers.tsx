@@ -255,6 +255,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
       )}
 
       <ToolsLayer
+        engine={p.engine}
         pipMode={p.pipMode}
         drawMode={p.drawMode}
         showWaiting={p.showWaiting}
@@ -443,6 +444,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
       />
 
       <PanelsLayer
+        engine={p.engine}
         isSeriesPlayback={p.isSeriesPlayback}
         meta={p.src.meta}
         currentEpisode={p.src.episode}

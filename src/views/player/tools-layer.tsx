@@ -12,6 +12,7 @@ type SkipProps = ComponentProps<typeof SkipPillContainer>;
 type QuickToolsProps = ComponentProps<typeof QuickTools>;
 
 export const ToolsLayer = memo(function ToolsLayer({
+  engine,
   pipMode,
   drawMode,
   showWaiting,
@@ -34,6 +35,7 @@ export const ToolsLayer = memo(function ToolsLayer({
   gif,
   clip,
 }: {
+  engine: "html5" | "mpv";
   pipMode: boolean;
   drawMode: boolean;
   showWaiting: boolean;
@@ -64,6 +66,7 @@ export const ToolsLayer = memo(function ToolsLayer({
         pendingResumeSec == null &&
         pendingSeekSec == null && (
           <SkipPillContainer
+            engine={engine}
             skipSegments={skipSegments}
             durationSec={durationSec}
             hasNextEpisode={hasNextEpisode}
