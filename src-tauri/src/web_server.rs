@@ -137,6 +137,34 @@ mod pairing_tests {
     }
 
     #[test]
+    fn the_web_policy_leaves_no_room_for_injected_script() {
+        let directive = |name: &str| {
+            WEB_CSP
+                .split(';')
+                .map(str::trim)
+                .find(|d| d.starts_with(name))
+                .unwrap_or_else(|| panic!("{name} missing from the policy"))
+        };
+
+        // The whole point: injected markup must not be able to run.
+        let script = directive("script-src");
+        assert!(!script.contains("unsafe-inline"), "{script}");
+        assert!(!script.contains("unsafe-eval"), "{script}");
+        assert!(!script.contains("http:"), "{script}");
+        assert_eq!(script, "script-src 'self'");
+
+        assert_eq!(directive("object-src"), "object-src 'none'");
+        assert_eq!(directive("frame-src"), "frame-src 'none'");
+        assert_eq!(directive("frame-ancestors"), "frame-ancestors 'none'");
+        assert_eq!(directive("base-uri"), "base-uri 'self'");
+        assert_eq!(directive("form-action"), "form-action 'none'");
+
+        // Addons and artwork live on arbitrary hosts, so these stay open.
+        assert!(directive("img-src").contains("https:"));
+        assert!(directive("connect-src").contains("https:"));
+    }
+
+    #[test]
     fn refuses_a_cross_site_page_dialling_in() {
         // Our own remote page: Origin matches the address it was served from.
         assert!(origin_is_self(&headers(&[
@@ -180,6 +208,35 @@ fn is_spa_path(raw_path: &str) -> bool {
         || raw_path.starts_with("/remote/")
 }
 
+/// Content-Security-Policy for the browser build.
+///
+/// `tauri.conf.json`'s CSP only covers the desktop webview; assets served here
+/// went out with no policy at all, so the browser build had no second line of
+/// defence behind any HTML injection. Mirrors the desktop policy: scripts only
+/// from the bundle (which also denies `eval`), no plugins, no framing, while
+/// images, media and XHR stay open because addons live on arbitrary hosts, and
+/// remote styles and fonts stay allowed over https because the page loads its
+/// typefaces from Fontshare and Google Fonts.
+const WEB_CSP: &str = "default-src 'self'; \
+script-src 'self'; \
+style-src 'self' 'unsafe-inline' https:; \
+img-src 'self' data: blob: https: http:; \
+media-src 'self' blob: https: http:; \
+connect-src 'self' https: http: ws: wss:; \
+font-src 'self' data: https:; \
+object-src 'none'; \
+frame-src 'none'; \
+frame-ancestors 'none'; \
+base-uri 'self'; \
+form-action 'none'";
+
+fn security_headers(builder: axum::http::response::Builder) -> axum::http::response::Builder {
+    builder
+        .header(header::CONTENT_SECURITY_POLICY, WEB_CSP)
+        .header(header::X_CONTENT_TYPE_OPTIONS, "nosniff")
+        .header(header::REFERRER_POLICY, "no-referrer")
+}
+
 fn serve_bundled_asset(app: &AppHandle, raw_path: &str) -> Response<Body> {
     let resolver = app.asset_resolver();
     let path = if is_spa_path(raw_path) {
@@ -197,15 +254,13 @@ fn serve_bundled_asset(app: &AppHandle, raw_path: &str) -> Response<Body> {
             } else {
                 "public, max-age=31536000, immutable"
             };
-            Response::builder()
-                .status(StatusCode::OK)
+            security_headers(Response::builder().status(StatusCode::OK))
                 .header(header::CONTENT_TYPE, a.mime_type)
                 .header(header::CACHE_CONTROL, cache)
                 .body(Body::from(a.bytes))
                 .unwrap()
         }
-        None => Response::builder()
-            .status(StatusCode::NOT_FOUND)
+        None => security_headers(Response::builder().status(StatusCode::NOT_FOUND))
             .header(header::CONTENT_TYPE, "text/plain")
             .body(Body::from(
                 "Harbor web assets are not available in this build.",
@@ -246,6 +301,10 @@ async fn proxy_dev_frontend(path_and_query: &str) -> Option<Response<Body>> {
     }
     out_headers.insert(header::CACHE_CONTROL, HeaderValue::from_static("no-cache"));
     *builder.headers_mut().unwrap() = out_headers;
+    // No CSP on this path: it proxies the Vite dev server, whose HTML carries an
+    // inline bootstrap script for hot reload that `script-src 'self'` would
+    // block. Only reachable under `tauri dev`; the bundled assets a shipped
+    // build serves always get the policy.
     builder.body(Body::from(bytes)).ok()
 }
 
