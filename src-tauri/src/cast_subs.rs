@@ -265,6 +265,8 @@ async fn convert_to_srt(
         .arg("-loglevel")
         .arg("error")
         .arg("-y")
+        .arg("-protocol_whitelist")
+        .arg(crate::transcode::input_protocol_whitelist(&input.to_string_lossy()))
         .arg("-i")
         .arg(input)
         .arg(&out);
@@ -304,7 +306,9 @@ async fn extract_embedded(
         .arg("error")
         .arg("-y");
     apply_ffmpeg_headers(&mut cmd, headers);
-    cmd.arg("-i")
+    cmd.arg("-protocol_whitelist")
+        .arg(crate::transcode::input_protocol_whitelist(source_url))
+        .arg("-i")
         .arg(source_url)
         .arg("-map")
         .arg(format!("0:s:{}", src_index))
@@ -338,13 +342,7 @@ fn apply_ffmpeg_headers(cmd: &mut tokio::process::Command, headers: &HashMap<Str
             cmd.arg("-user_agent").arg(v);
         }
     }
-    let mut blob = String::new();
-    for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" {
-            continue;
-        }
-        blob.push_str(&format!("{}: {}\r\n", k, v));
-    }
+    let blob = crate::transcode::header_blob(headers);
     if !blob.is_empty() {
         cmd.arg("-headers").arg(blob);
     }
@@ -402,6 +400,8 @@ async fn shift_subtitle(
         .arg("-loglevel")
         .arg("error")
         .arg("-y")
+        .arg("-protocol_whitelist")
+        .arg(crate::transcode::input_protocol_whitelist(&input.to_string_lossy()))
         .arg("-ss")
         .arg(format!("{:.3}", seek_start))
         .arg("-i")

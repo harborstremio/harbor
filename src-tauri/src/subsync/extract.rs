@@ -10,17 +10,6 @@ const MIN_SILENCE: &str = "0.35";
 const SPEECH_FILTER: &str = "aformat=channel_layouts=mono,highpass=f=200,lowpass=f=3000";
 const HARD_TIMEOUT_SECS: u64 = 90;
 
-fn header_blob(headers: &HashMap<String, String>) -> String {
-    let mut blob = String::new();
-    for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" {
-            continue;
-        }
-        blob.push_str(&format!("{}: {}\r\n", k, v));
-    }
-    blob
-}
-
 fn parse_after(line: &str, tag: &str) -> Option<f32> {
     let idx = line.find(tag)?;
     let rest = &line[idx + tag.len()..];
@@ -59,11 +48,13 @@ pub async fn speech_intervals(
         .find(|(k, _)| k.to_lowercase() == "user-agent")
         .map(|(_, v)| v.clone());
     cmd.arg("-user_agent").arg(ua.unwrap_or_else(|| "Harbor".into()));
-    let blob = header_blob(headers);
+    let blob = crate::transcode::header_blob(headers);
     if !blob.is_empty() {
         cmd.arg("-headers").arg(blob);
     }
-    cmd.arg("-ss")
+    cmd.arg("-protocol_whitelist")
+        .arg(crate::transcode::input_protocol_whitelist(url))
+        .arg("-ss")
         .arg(format!("{}", start_sec))
         .arg("-t")
         .arg(format!("{}", len_sec))

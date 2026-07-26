@@ -371,6 +371,8 @@ async fn probe_source(url: &str, headers: &HashMap<String, String>) -> Result<Pr
         .arg("stream=codec_name,codec_type,width,height,r_frame_rate,bit_rate:format=duration,bit_rate")
         .arg("-of")
         .arg("default=noprint_wrappers=1:nokey=0")
+        .arg("-protocol_whitelist")
+        .arg(crate::transcode::input_protocol_whitelist(url))
         // Pass the input via `-i` so an addon-controlled URL beginning with
         // `-` is treated as ffprobe's input value, not parsed as a flag.
         .arg("-i")
@@ -491,7 +493,9 @@ async fn spawn_continuous_ffmpeg(
         .arg("-fflags")
         .arg("+genpts+discardcorrupt");
     apply_headers(&mut cmd, headers);
-    cmd.arg("-ss")
+    cmd.arg("-protocol_whitelist")
+        .arg(crate::transcode::input_protocol_whitelist(media_url))
+        .arg("-ss")
         .arg(format!("{:.6}", seek_start))
         .arg("-i")
         .arg(media_url)
@@ -587,13 +591,7 @@ fn apply_headers(cmd: &mut tokio::process::Command, headers: &HashMap<String, St
         cmd.arg("-user_agent")
             .arg("Mozilla/5.0 (Windows NT 10.0; Win64; x64) Harbor/0.8");
     }
-    let mut blob = String::new();
-    for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" {
-            continue;
-        }
-        blob.push_str(&format!("{}: {}\r\n", k, v));
-    }
+    let blob = crate::transcode::header_blob(headers);
     if !blob.is_empty() {
         cmd.arg("-headers").arg(blob);
     }
