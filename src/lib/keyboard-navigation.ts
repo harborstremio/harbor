@@ -183,7 +183,8 @@ export function isVisible(el: HTMLElement) {
 }
 
 function isInSidebar(el: HTMLElement): boolean {
-  return !!el.closest("[data-harbor-sidebar]");
+  if (el.closest("[data-tv-top-chrome]")) return false;
+  return !!el.closest("[data-harbor-sidebar], [data-tv-nav-zone]");
 }
 
 /** Horizontal top chrome (TopDock / Royal / etc.) — not the left sidebar. */
@@ -307,6 +308,16 @@ function hasHorizontalNeighborInRow(
     if (Math.abs(dst.cy - src.cy) >= rowSlop) return false;
     return dir === "left" ? dst.cx < src.cx - 8 : dst.cx > src.cx + 8;
   });
+}
+
+function isTargetInHorizontalDirection(
+  from: HTMLElement,
+  target: HTMLElement,
+  dir: "left" | "right",
+): boolean {
+  const fromX = getRect(from).cx;
+  const targetX = getRect(target).cx;
+  return dir === "left" ? targetX < fromX - 8 : targetX > fromX + 8;
 }
 
 function getActiveModal(target: HTMLElement | null): HTMLElement | null {
@@ -705,31 +716,27 @@ export function moveFocus(dir: Dir, wrap: boolean = true): void {
   const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const root = getActiveModal(active) ?? getTopFocusScope() ?? document;
   const scroll = dir === "left" || dir === "right" ? "nearest" : "center";
+  const horizontalDir = dir === "left" || dir === "right" ? dir : null;
 
-  if (active && dir === "left" && !isInSidebar(active)) {
-    if (!hasHorizontalNeighborInRow(active, "left", root)) {
+  if (active && horizontalDir && !isInSidebar(active) && !isInTopChrome(active)) {
+    if (!hasHorizontalNeighborInRow(active, horizontalDir, root)) {
       const sidebarItems = getFocusable(root).filter(isInSidebar);
       const targetNav = findClosestByY(active, sidebarItems);
-      if (targetNav) {
-        SFX.navigate(dir, getSoundType(targetNav));
+      if (targetNav && isTargetInHorizontalDirection(active, targetNav, horizontalDir)) {
+        SFX.navigate(horizontalDir, getSoundType(targetNav));
         focusElement(targetNav, "none");
         return;
       }
-      // Start of a content row with no sidebar — stay put.
+      // The row ended away from the sidebar (or this layout has none) — stay put.
       return;
     }
   }
 
-  if (active && dir === "right" && !isInSidebar(active)) {
-    // End of a shelf (loaded or still loading) — stay put; Down is how you leave the row.
-    if (!hasHorizontalNeighborInRow(active, "right", root)) return;
-  }
-
-  if (active && dir === "right" && isInSidebar(active)) {
+  if (active && horizontalDir && isInSidebar(active)) {
     const contentItems = getFocusable(root).filter((el) => !isInSidebar(el));
     const targetContent = findClosestByY(active, contentItems);
-    if (targetContent) {
-      SFX.navigate(dir, getSoundType(targetContent));
+    if (targetContent && isTargetInHorizontalDirection(active, targetContent, horizontalDir)) {
+      SFX.navigate(horizontalDir, getSoundType(targetContent));
       focusElement(targetContent, "center");
       return;
     }
@@ -928,6 +935,12 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
       const activeIsSearch = isSearchLikeField(active);
       const isEditingSearch = !!activeSearchEditEl && activeSearchEditEl === active;
+      const isNavigatingSearch =
+        activeIsSearch &&
+        !!active?.hasAttribute("data-search-nav-mode") &&
+        !e.isComposing &&
+        e.key !== "Process" &&
+        document.hasFocus();
 
       const isSearchOverlayAutoText =
         !!active &&
@@ -974,7 +987,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
         return;
       }
 
-      if (!shouldHandleGlobalKeyboardEvent(e)) return;
+      if (!isNavigatingSearch && !shouldHandleGlobalKeyboardEvent(e)) return;
       if (isLocallyManaged(target)) return;
       if (activeIsSearch && isEditingSearch) return;
       if (isEditable(target) && !isSearchLikeField(target)) return;
@@ -1048,6 +1061,24 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
       e.stopPropagation();
     };
 
+    const onFocusIn = (e: FocusEvent) => {
+      const field = e.target instanceof HTMLElement ? e.target : null;
+      if (inputModality !== "keys" || !field) return;
+      if (field.matches("[data-tv-text-auto]") || activeSearchEditEl === field) return;
+
+      if (!isSearchLikeField(field) || !field.closest("[data-tv-text-field]")) {
+        clearTvFocusRing(field);
+        return;
+      }
+
+      const visual = getSearchFocusVisual(field);
+      const alreadyMarked =
+        field.hasAttribute("data-search-nav-mode") &&
+        field.hasAttribute("data-tv-focused") &&
+        visual?.hasAttribute("data-tv-search-nav-focused");
+      if (!alreadyMarked) focusElement(field, "nearest");
+    };
+
     const onPointerDown = (e: PointerEvent) => {
       setPointerModality();
       const pointerTarget = e.target instanceof HTMLElement ? e.target : null;
@@ -1087,6 +1118,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
     window.addEventListener("keydown", onKeyDown, true);
     window.addEventListener("beforeinput", onBeforeInput, true);
+    window.addEventListener("focusin", onFocusIn, true);
     window.addEventListener("pointerdown", onPointerDown, true);
 
     const onPointerMove = (e: PointerEvent) => notePointerMove(e.screenX, e.screenY);
@@ -1097,6 +1129,7 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
     return () => {
       window.removeEventListener("keydown", onKeyDown, true);
       window.removeEventListener("beforeinput", onBeforeInput, true);
+      window.removeEventListener("focusin", onFocusIn, true);
       window.removeEventListener("pointerdown", onPointerDown, true);
       window.removeEventListener("pointermove", onPointerMove, true);
       window.removeEventListener("wheel", onWheel, true);

@@ -5554,7 +5554,11 @@ export function SettingsNav({
         </div>
       )}
       <div className="px-3 pb-3">
-        <div className="flex h-10 items-center gap-2 rounded-xl bg-elevated/70 px-3 shadow-[inset_0_0_0_1px_var(--color-edge-soft)]">
+        <div
+          data-settings-search-field
+          data-tv-text-field
+          className="flex h-10 items-center gap-2 rounded-xl bg-elevated/70 px-3 shadow-[inset_0_0_0_1px_var(--color-edge-soft)]"
+        >
           <svg
             width="14"
             height="14"
@@ -5574,6 +5578,7 @@ export function SettingsNav({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("Search settings")}
+            aria-describedby="settings-search-mode"
             className="min-w-0 flex-1 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-subtle"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -5610,6 +5615,27 @@ export function SettingsNav({
               </svg>
             </button>
           )}
+        </div>
+        <div
+          id="settings-search-mode"
+          data-settings-search-mode
+          aria-live="polite"
+          className="flex min-h-5 items-center px-2 pt-1 text-[10.5px] leading-none"
+        >
+          <span
+            data-settings-search-nav-hint
+            className="hidden items-center gap-1.5 text-ink-subtle"
+          >
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-ink-subtle" />
+            {t("Press Enter or Space to type")}
+          </span>
+          <span
+            data-settings-search-edit-hint
+            className="hidden items-center gap-1.5 font-semibold text-accent"
+          >
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+            {t("Text mode — Esc to exit")}
+          </span>
         </div>
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 pb-8">
