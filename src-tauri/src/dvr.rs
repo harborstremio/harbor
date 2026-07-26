@@ -137,10 +137,19 @@ pub async fn dvr_start(
         .arg("--force-window=no")
         .arg("--vo=null")
         .arg("--ao=null")
+        // The channel URL comes from a third-party M3U playlist. Refuse to read
+        // a user config or load scripts so a hostile playlist cannot reach mpv
+        // behaviour the recording itself does not need.
+        .arg("--no-config")
+        .arg("--load-scripts=no")
         .arg("--cache=yes")
         .arg("--network-timeout=60")
         .arg("--user-agent=VLC/3.0.20 LibVLC/3.0.20")
         .arg(format!("--stream-record={}", output_path.display()))
+        // End-of-options terminator: without it a playlist-controlled URL
+        // beginning with `-`/`--` (e.g. `--script=<path>`, `--log-file=<path>`)
+        // is parsed by mpv as an option instead of the media to record.
+        .arg("--")
         .arg(&args.url);
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())

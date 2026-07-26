@@ -5,6 +5,21 @@ const EXTGRP = "#EXTGRP:";
 const EXTVLCOPT = "#EXTVLCOPT:";
 const KODIPROP = "#KODIPROP:";
 
+/**
+ * Playlists are third-party content and their URLs are handed to native players
+ * (mpv, ffmpeg) as arguments. A leading `-` would be parsed as an option there,
+ * so drop those entries at the source; control characters are rejected for the
+ * same reason (they can split a line in newline-delimited native protocols).
+ */
+export function isPlayableChannelUrl(url: string): boolean {
+  const value = url.trim();
+  if (!value) return false;
+  if (value.startsWith("-")) return false;
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f]/.test(value)) return false;
+  return true;
+}
+
 export function parseM3u(text: string, baseId: string): IptvChannel[] {
   const lines = text.replace(/^﻿/, "").split(/\r?\n/);
   const out: IptvChannel[] = [];
@@ -36,6 +51,10 @@ export function parseM3u(text: string, baseId: string): IptvChannel[] {
     if (line.startsWith("#")) continue;
     const pipe = line.indexOf("|");
     const url = pipe >= 0 ? line.slice(0, pipe) : line;
+    if (!isPlayableChannelUrl(url)) {
+      pending = null;
+      continue;
+    }
     if (!pending) {
       pending = {
         durationSec: null,
@@ -155,7 +174,10 @@ function captureVlcOpt(rest: string, attrs: Record<string, string>): void {
   const eq = rest.indexOf("=");
   if (eq < 0) return;
   const key = rest.slice(0, eq).trim().toLowerCase();
-  const val = rest.slice(eq + 1).trim().replace(/^"|"$/g, "");
+  const val = rest
+    .slice(eq + 1)
+    .trim()
+    .replace(/^"|"$/g, "");
   if (!val) return;
   if (key === "http-user-agent") attrs["vlcopt-user-agent"] = val;
   else if (key === "http-referrer") attrs["vlcopt-referrer"] = val;
@@ -177,7 +199,8 @@ function capturePipeOpts(rest: string, attrs: Record<string, string>): void {
     const val = safeDecode(pair.slice(eq + 1).trim());
     if (!val) continue;
     if (key === "user-agent" && !attrs["vlcopt-user-agent"]) attrs["vlcopt-user-agent"] = val;
-    else if ((key === "referer" || key === "referrer") && !attrs["vlcopt-referrer"]) attrs["vlcopt-referrer"] = val;
+    else if ((key === "referer" || key === "referrer") && !attrs["vlcopt-referrer"])
+      attrs["vlcopt-referrer"] = val;
     else if (key === "cookie" && !attrs["vlcopt-cookie"]) attrs["vlcopt-cookie"] = val;
   }
 }
@@ -211,8 +234,7 @@ export function deriveEpgFromGetPhp(playlistUrl: string): string | null {
 export function deriveEpgUrls(playlistUrl: string): string[] {
   try {
     const u = new URL(playlistUrl);
-    const isXtream =
-      u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
+    const isXtream = u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
     if (!isXtream) return [];
     const username = u.searchParams.get("username");
     const password = u.searchParams.get("password");

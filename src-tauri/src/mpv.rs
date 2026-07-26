@@ -1678,6 +1678,10 @@ pub async fn mpv_clip_save(
     } else {
         cmd.arg("--sid=no").arg("--no-sub");
     }
+    // End-of-options terminator: the source path comes from the player and can
+    // be an addon-controlled URL, so a leading `-`/`--` must not be parsed as
+    // an mpv option. Matches the shadow-mpv spawn in `thumbs.rs`.
+    cmd.arg("--");
     cmd.arg(&src);
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::null())
