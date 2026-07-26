@@ -13,7 +13,7 @@ export function DetailRail({
   items: ResolvedAddon[];
   installedIds: Set<string>;
   onOpen: (id: string) => void;
-  onInstall: (r: ResolvedAddon) => Promise<void>;
+  onInstall: (r: ResolvedAddon) => Promise<boolean>;
 }) {
   if (items.length === 0) return null;
   return (

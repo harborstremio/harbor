@@ -22,7 +22,7 @@ export function Rail({
   layout: string;
   items: ResolvedAddon[];
   onOpen: (id: string) => void;
-  onInstall: (r: ResolvedAddon) => Promise<void>;
+  onInstall: (r: ResolvedAddon) => Promise<boolean>;
   onUninstall: (r: ResolvedAddon) => Promise<void>;
   installedIds: Set<string>;
 }) {
@@ -60,7 +60,7 @@ export function Rail({
               key={addonKey(r)}
               resolved={r}
               onOpen={() => onOpen(idOf(r))}
-              onInstall={() => onInstall(r)}
+              onInstall={() => void onInstall(r)}
               onUninstall={() => onUninstall(r)}
               installed={installedIds.has(idOf(r))}
             />
@@ -73,7 +73,7 @@ export function Rail({
               key={addonKey(r)}
               resolved={r}
               onOpen={() => onOpen(idOf(r))}
-              onInstall={() => onInstall(r)}
+              onInstall={() => void onInstall(r)}
               onUninstall={() => onUninstall(r)}
               installed={installedIds.has(idOf(r))}
             />
@@ -86,7 +86,7 @@ export function Rail({
               key={addonKey(r)}
               resolved={r}
               onOpen={() => onOpen(idOf(r))}
-              onInstall={() => onInstall(r)}
+              onInstall={() => void onInstall(r)}
               installed={installedIds.has(idOf(r))}
             />
           ))}

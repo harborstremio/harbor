@@ -19,9 +19,12 @@ export function DiscoverPane({
   onRefetch,
 }: {
   hero: { entry: { id: string }; resolved: ResolvedAddon } | null;
-  rails: { rail: { id: string; title: string; blurb?: string; layout: string }; items: ResolvedAddon[] }[];
+  rails: {
+    rail: { id: string; title: string; blurb?: string; layout: string };
+    items: ResolvedAddon[];
+  }[];
   onOpen: (id: string) => void;
-  onInstall: (r: ResolvedAddon) => Promise<void>;
+  onInstall: (r: ResolvedAddon) => Promise<boolean>;
   onUninstall: (r: ResolvedAddon) => Promise<void>;
   onCategorySelect: (cat: string) => void;
   installedIds: Set<string>;
@@ -39,9 +42,13 @@ export function DiscoverPane({
     <div className="flex flex-col gap-12">
       {!authKey && (
         <div className="rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] px-5 py-4 text-[13.5px] text-ink">
-          <p className="font-semibold text-amber-200">{t("Sign in to sync your addons across devices")}</p>
+          <p className="font-semibold text-amber-200">
+            {t("Sign in to sync your addons across devices")}
+          </p>
           <p className="mt-1 text-ink-muted">
-            {t("Anything you install in Harbor pushes back to your Stremio account so it shows up on mobile too. Sign in via the avatar in the bottom-left of the sidebar.")}
+            {t(
+              "Anything you install in Harbor pushes back to your Stremio account so it shows up on mobile too. Sign in via the avatar in the bottom-left of the sidebar.",
+            )}
           </p>
         </div>
       )}
