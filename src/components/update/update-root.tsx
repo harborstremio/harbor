@@ -8,13 +8,17 @@ import {
   updateAvailable,
   useUpdate,
 } from "@/lib/updater/use-update";
+import { isLinuxDesktop } from "@/lib/platform";
 import { UpdateCard } from "./update-card";
 
 export function UpdateRoot() {
   const u = useUpdate();
   useEffect(() => {
+    if (isLinuxDesktop()) return;
     startUpdateWatcher();
   }, []);
+
+  if (isLinuxDesktop()) return null;
 
   if (u.panelOpen) return createPortal(<UpdateCard />, document.body);
   if (!updateAvailable(u)) return null;

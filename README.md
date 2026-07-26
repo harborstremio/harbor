@@ -18,7 +18,8 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 [![Tauri][badge-tauri]][tauri] &nbsp;
 [![React][badge-react]][react] &nbsp;
 [![Rust core][badge-rust]][rust] &nbsp;
-[![Platforms][badge-platforms]][releases]
+[![Platforms][badge-platforms]][releases] &nbsp;
+[![Linux packages][badge-linux-packages]][linux-packages]
 
 <br/>
 
@@ -39,6 +40,9 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 > Harbor is not for-profit and is a passion project, you are free to sell, re-use or profit off of it. All of your bugs, issues and feedbacks will be addressed promptly as long as scope permits. Please leave a Issue if you have feedback or a bug, so we can better address you. It is HIGHLY reccomended that you build your OWN Harbor from the latest source when available, as our bundled releases will not include windows/os certification/sig (it is a free project) so to avoid any popups we suggest building it yourself. We will try to push updates frequently but we are sometimes segmented by our timezones so it may take some time for your bugs to be rolled into the update endpoint and for us to test it! Thank you for trying it out and helping us make it a better project!
 > Stremio has released their **[Supporter tier](https://blog.stremio.com/stremio-supporters-a-way-to-sustain-our-development/)** PLEASE CONSIDER SUPPORTING THEM AND BUYING THIS. We heavily encourage you to use Stremio's Official Apps on Mobile, and Tvs. Harbor is NOT a stremio competitor, it is a different flavor of player for the ecosystem. To get the most out of Harbor, please sign up with a [stremio account](https://stremio.com) (it's free) To Support Stremio visit : https://www.stremio.com/donate (P.S.A Harbor is not endorsed by or created by Stremio ltd or it's contributors it is a independent open sourced project)
 > <br/>
+
+> [!NOTE]
+> Unofficial Linux `.deb`, `.rpm`, and Flatpak packages are maintained at [AdityaHebballe/harbor-linux-builds](https://github.com/AdityaHebballe/harbor-linux-builds). Official Linux packages are coming soon.
 
 ATTENTION: HARBOR DOES NOT AND WILL NOT ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations, IT IS NOT US. Have an issue? Open it on github so you and everyone else can know and see exactly how we messed up, and how we will fix it! Yes we do see your emails to bugs@harbor.site and Bug reports to the bug endpoint FYI the fastest way to get our attention is through github, we will still handle unique reports that have not been already sorted. Want to donate to a good cause visit: National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/) or St.Jude's (https://www.stjude.org/) email us with a receipt of your donation and we will implement your features in a priority manner. Include NPCF , EFF or SaintJude in title so we can track you! If you have a preferred cause visit https://www.charitynavigator.org/ and donate to a top rated charity of your choice and include CHARITY in email title
 <br/>
@@ -375,27 +379,17 @@ Harbor is built to keep your data on your machine.
 
 ## Install
 
-Download the latest build for macOS or Windows from the [Releases page][releases], or open Harbor in your browser.
+Download the latest build for macOS or Windows from the [Releases page][releases], use the [unofficial Linux packages](https://github.com/AdityaHebballe/harbor-linux-builds), or open Harbor in your browser.
 
-| Platform    | Format                                                            |
-| ----------- | ----------------------------------------------------------------- |
-| **macOS**   | `.dmg` (macOS 11.0 or newer)                                      |
-| **Windows** | `.exe` NSIS installer (current user install)                      |
-| **Web**     | Open in any modern browser, nothing to install                    |
-| **Linux**   | In testing, coming soon (`.deb`, `.rpm`, and `.AppImage` planned) |
+| Platform    | Format                                                                                                   |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| **macOS**   | `.dmg` (macOS 11.0 or newer)                                                                             |
+| **Windows** | `.exe` NSIS installer (current user install)                                                             |
+| **Web**     | Open in any modern browser, nothing to install                                                           |
+| **Linux**   | [Unofficial `.deb`, `.rpm`, and Flatpak packages](https://github.com/AdityaHebballe/harbor-linux-builds) |
 
 > [!NOTE]
-> macOS, Windows, and the web are supported at launch. A native Linux build is in testing right now.
-
-### Linux (in testing, coming soon)
-
-<p align="center">
-  <img src="https://harbor.site/readme-media/linux.png" width="900">
-  <br/>
-  <sub>Harbor running natively on Linux, in a Together watch party.</sub>
-</p>
-
-Linux is up and running natively, and it is in active testing right now. We decided to take a couple extra weeks so the native player feels great for full time Linux users before we call it ready. Coming soon.
+> Linux packages above are community-maintained. Official Harbor Linux packages are coming soon.
 
 **Out of the box, Harbor works on Cinemeta.** You can browse, play, and cast immediately. Adding a free **TMDB key** in Settings is optional and unlocks the richer trending, theaters, per service, and Watch on experiences described above. Your installed Stremio addons merge in automatically when you sign in, deduplicated against the built in rails.
 
@@ -464,7 +458,7 @@ pnpm run setup
 pnpm tauri build
 ```
 
-Bundles are emitted for your platform (dmg on macOS, NSIS on Windows; Linux deb, rpm, and AppImage targets are in progress).
+Bundles are emitted for your platform (dmg on macOS, NSIS on Windows, and deb, rpm, and AppImage on Linux).
 
 </details>
 
@@ -556,7 +550,7 @@ Directional, not a set of promises. Priorities shift with feedback.
 - [x] First class anime room with Kitsu and AniZip
 - [x] Theme studio with custom layouts
 - [x] macOS, Windows, and web launch builds
-- [ ] Native Linux build (in testing, a couple weeks of native player polish to go)
+- [ ] Official Linux packages
 - [ ] Expanded casting device matrix (AirPlay 2, more Roku and Chromecast targets)
 - [ ] More translations
 - [ ] A growing theme gallery
@@ -644,6 +638,7 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 <!-- reference links -->
 
 [releases]: https://github.com/harborstremio/harbor/releases
+[linux-packages]: https://github.com/AdityaHebballe/harbor-linux-builds
 [issues]: https://github.com/harborstremio/harbor/issues
 [discussions]: https://github.com/harborstremio/harbor/discussions
 [license]: ./LICENSE
@@ -658,4 +653,5 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 [badge-tauri]: https://img.shields.io/badge/Tauri-2-24C8DB?style=for-the-badge&logo=tauri&logoColor=white&labelColor=1a1a1a
 [badge-react]: https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=white&labelColor=1a1a1a
 [badge-rust]: https://img.shields.io/badge/core-Rust%20to%20WASM-DEA584?style=for-the-badge&logo=rust&logoColor=white&labelColor=1a1a1a
-[badge-platforms]: https://img.shields.io/badge/macOS%20%C2%B7%20Windows%20%C2%B7%20Web-Linux%20soon-8a8a8a?style=for-the-badge&labelColor=1a1a1a
+[badge-platforms]: https://img.shields.io/badge/macOS%20%C2%B7%20Windows%20%C2%B7%20Web-8a8a8a?style=for-the-badge&labelColor=1a1a1a
+[badge-linux-packages]: https://img.shields.io/badge/Linux-packages-8a8a8a?style=for-the-badge&labelColor=1a1a1a
