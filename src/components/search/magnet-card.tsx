@@ -2,6 +2,7 @@ import { AlertCircle, FileVideo, Loader2, Magnet, Play } from "lucide-react";
 import { useMemo, useState } from "react";
 import { awaitCastServerReady } from "@/lib/stremio-server";
 import { parseMagnet } from "@/lib/torrent/magnet";
+import { primeEngineToken } from "@/lib/torrent/engine-token";
 import {
   buildTorrentStreamUrl,
   createAndListFiles,
@@ -51,10 +52,14 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
   const onPlay = async () => {
     setMode("starting");
     setError(null);
+    // Load the engine key before any stream URL is built below.
+    await primeEngineToken();
     const ready = await awaitCastServerReady(8000);
     if (!ready) {
       setMode("error");
-      setError("The bundled streaming engine is not running. Direct torrent play needs the desktop app.");
+      setError(
+        "The bundled streaming engine is not running. Direct torrent play needs the desktop app.",
+      );
       return;
     }
     const created = await createAndListFiles(parsed.infoHash, parsed.trackers);
@@ -85,7 +90,9 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
           >
             <Play size={18} className="shrink-0 text-ink-muted" />
             <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{f.name}</span>
-            <span className="shrink-0 text-[12px] tabular-nums text-ink-subtle">{formatSize(f.length)}</span>
+            <span className="shrink-0 text-[12px] tabular-nums text-ink-subtle">
+              {formatSize(f.length)}
+            </span>
           </button>
         ))}
       </div>
@@ -98,7 +105,9 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
         <Magnet size={22} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">Torrent link</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+          Torrent link
+        </span>
         <span className="truncate text-[15px] font-semibold text-ink">{title}</span>
         <span className="text-[12.5px] text-ink-subtle">
           {error ?? "Streams directly from peers over your own connection."}

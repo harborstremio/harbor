@@ -1,4 +1,5 @@
 import { getStremioServerUrl, remoteStreamServerUrl } from "@/lib/stremio-server";
+import { engineToken, isLocalEngineBase, primeEngineToken, withEngineToken } from "./engine-token";
 
 export type TorrentFile = {
   idx: number;
@@ -40,8 +41,12 @@ export function buildTorrentStreamUrl(opts: {
   const trackers = opts.trackers ?? trackersFromSources(opts.sources);
   for (const t of trackers) params.append("tr", t);
   if (opts.filename) params.set("f", opts.filename);
+  const base = opts.base ?? getStremioServerUrl();
+  // This route adds the torrent, so the bundled engine requires its key. Call
+  // `primeEngineToken()` on the async path that leads here.
+  if (isLocalEngineBase(base) && engineToken()) params.set("tok", engineToken());
   const qs = params.toString();
-  return `${opts.base ?? getStremioServerUrl()}/${opts.infoHash.toLowerCase()}/${idx}${qs ? `?${qs}` : ""}`;
+  return `${base}/${opts.infoHash.toLowerCase()}/${idx}${qs ? `?${qs}` : ""}`;
 }
 
 export function isVideoFile(f: TorrentFile): boolean {
@@ -64,8 +69,12 @@ export async function createAndListFiles(
     seriesInfo && seriesInfo.season != null && seriesInfo.episode != null
       ? { season: seriesInfo.season, episode: seriesInfo.episode }
       : {};
+  const target = base ?? getStremioServerUrl();
+  const createUrl = isLocalEngineBase(target)
+    ? withEngineToken(`${target}/${hash}/create`, await primeEngineToken())
+    : `${target}/${hash}/create`;
   try {
-    const res = await fetch(`${base ?? getStremioServerUrl()}/${hash}/create`, {
+    const res = await fetch(createUrl, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -148,7 +157,10 @@ export function directStreamAvailable(stream: { infoHash?: string | null }): boo
 
 const P2P_MIN_SEEDERS = 2;
 
-export function engineP2pEligible(stream: { infoHash?: string | null; seeders?: number | null }): boolean {
+export function engineP2pEligible(stream: {
+  infoHash?: string | null;
+  seeders?: number | null;
+}): boolean {
   if (torrentsDisabled()) return false;
   if (!directStreamAvailable(stream)) return false;
   if (stream.seeders != null && stream.seeders < P2P_MIN_SEEDERS) return false;

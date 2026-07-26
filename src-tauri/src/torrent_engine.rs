@@ -166,6 +166,42 @@ pub struct AddResult {
     info_hash: String,
     files: Vec<EngineFile>,
     stream_base: String,
+    /// Access key for `stream_base`. See `engine_token`.
+    stream_token: String,
+}
+
+/// Access key for the engine's HTTP routes.
+///
+/// Two of those routes add a torrent as a side effect, and the server answers
+/// on localhost (and on the LAN while casting), where neither a web page nor
+/// another device is authenticated by anything else. Harbor puts this key on
+/// every engine URL it builds; requests arriving without it are refused.
+///
+/// One value per process, so URLs handed to mpv or a cast device stay valid for
+/// as long as they are being played.
+pub(crate) fn engine_token() -> &'static str {
+    static TOKEN: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    TOKEN
+        .get_or_init(|| uuid::Uuid::new_v4().simple().to_string())
+        .as_str()
+}
+
+/// Length-independent, non-short-circuiting comparison.
+pub(crate) fn token_matches(candidate: &str) -> bool {
+    let (a, b) = (candidate.as_bytes(), engine_token().as_bytes());
+    if a.len() != b.len() {
+        return false;
+    }
+    let mut diff = 0u8;
+    for (x, y) in a.iter().zip(b.iter()) {
+        diff |= x ^ y;
+    }
+    diff == 0
+}
+
+#[tauri::command]
+pub fn torrent_engine_token() -> String {
+    engine_token().to_string()
 }
 
 #[derive(Serialize)]
@@ -445,6 +481,7 @@ pub async fn torrent_engine_add(
         info_hash,
         files,
         stream_base: format!("http://127.0.0.1:{port}/stream"),
+        stream_token: engine_token().to_string(),
     })
 }
 

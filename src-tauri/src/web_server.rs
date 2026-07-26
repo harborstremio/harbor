@@ -21,6 +21,138 @@ fn is_tauri_dev() -> bool {
     tauri::is_dev()
 }
 
+/// Pairing secret for the remote control socket.
+///
+/// The remote server listens on every interface, and a WebSocket upgrade is not
+/// subject to the same-origin policy: without a secret, any LAN host — and any
+/// web page the user happens to have open, by dialling 127.0.0.1 — could drive
+/// the app's navigation, typing and playback. The desktop UI hands this token to
+/// the phone inside the `/remote` link, so pairing stays a copy-the-address step.
+///
+/// Generated once per process and kept across start/stop so a link that was
+/// already shared with a phone keeps working.
+fn pair_token() -> &'static str {
+    static TOKEN: OnceLock<String> = OnceLock::new();
+    TOKEN
+        .get_or_init(|| uuid::Uuid::new_v4().simple().to_string())
+        .as_str()
+}
+
+/// Length-independent, non-short-circuiting comparison.
+fn secret_eq(a: &str, b: &str) -> bool {
+    let (a, b) = (a.as_bytes(), b.as_bytes());
+    if a.len() != b.len() {
+        return false;
+    }
+    let mut diff = 0u8;
+    for (x, y) in a.iter().zip(b.iter()) {
+        diff |= x ^ y;
+    }
+    diff == 0
+}
+
+fn query_param(uri: &axum::http::Uri, key: &str) -> Option<String> {
+    let query = uri.query()?;
+    for pair in query.split('&') {
+        let Some((k, v)) = pair.split_once('=') else {
+            continue;
+        };
+        if k == key {
+            return Some(percent_decode(v));
+        }
+    }
+    None
+}
+
+fn percent_decode(raw: &str) -> String {
+    let bytes = raw.replace('+', " ").into_bytes();
+    let mut out: Vec<u8> = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            let hex = std::str::from_utf8(&bytes[i + 1..i + 3]).ok();
+            if let Some(byte) = hex.and_then(|h| u8::from_str_radix(h, 16).ok()) {
+                out.push(byte);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+/// A browser sends `Origin` on every WebSocket handshake. Ours is served from
+/// the same address the socket lives on, so anything else is a cross-site page
+/// dialling in and is refused even if it somehow learned the token.
+fn origin_is_self(headers: &HeaderMap) -> bool {
+    let Some(origin) = headers.get(header::ORIGIN).and_then(|v| v.to_str().ok()) else {
+        // Non-browser client (no Origin): the token alone gates it.
+        return true;
+    };
+    let origin_authority = origin
+        .split_once("://")
+        .map(|(_, rest)| rest)
+        .unwrap_or(origin);
+    let host = headers
+        .get(header::HOST)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or_default();
+    !host.is_empty() && origin_authority == host
+}
+
+#[cfg(test)]
+mod pairing_tests {
+    use super::*;
+
+    fn headers(pairs: &[(&str, &str)]) -> HeaderMap {
+        let mut map = HeaderMap::new();
+        for (name, value) in pairs {
+            map.insert(
+                HeaderName::from_bytes(name.as_bytes()).unwrap(),
+                HeaderValue::from_str(value).unwrap(),
+            );
+        }
+        map
+    }
+
+    #[test]
+    fn only_the_pairing_token_opens_the_socket() {
+        assert!(secret_eq(pair_token(), pair_token()));
+        assert!(!secret_eq("", pair_token()));
+        assert!(!secret_eq(&pair_token()[..8], pair_token()));
+        assert!(!secret_eq(&format!("{}x", pair_token()), pair_token()));
+    }
+
+    #[test]
+    fn reads_the_token_out_of_the_upgrade_query() {
+        let uri: axum::http::Uri = "/api/remote?token=abc%2D123&x=1".parse().unwrap();
+        assert_eq!(query_param(&uri, "token").as_deref(), Some("abc-123"));
+        // A valueless parameter earlier in the string must not end the scan.
+        let uri: axum::http::Uri = "/api/remote?flag&token=xyz".parse().unwrap();
+        assert_eq!(query_param(&uri, "token").as_deref(), Some("xyz"));
+        let uri: axum::http::Uri = "/api/remote".parse().unwrap();
+        assert_eq!(query_param(&uri, "token"), None);
+    }
+
+    #[test]
+    fn refuses_a_cross_site_page_dialling_in() {
+        // Our own remote page: Origin matches the address it was served from.
+        assert!(origin_is_self(&headers(&[
+            ("host", "192.168.1.3:11471"),
+            ("origin", "http://192.168.1.3:11471"),
+        ])));
+        // A random website the user has open, reaching for loopback.
+        assert!(!origin_is_self(&headers(&[
+            ("host", "127.0.0.1:11471"),
+            ("origin", "https://evil.example"),
+        ])));
+        // Non-browser client: no Origin, so the token alone decides.
+        assert!(origin_is_self(&headers(&[("host", "127.0.0.1:11471")])));
+    }
+}
+
 static RUNNING: AtomicBool = AtomicBool::new(false);
 static NEXT_CLIENT_ID: AtomicU64 = AtomicU64::new(1);
 
@@ -134,8 +266,22 @@ async fn serve_http(
 async fn remote_ws_handler(
     ws: WebSocketUpgrade,
     State(state): State<ServeState>,
-) -> impl IntoResponse {
+    uri: axum::http::Uri,
+    headers: HeaderMap,
+) -> Response<Body> {
+    let token = query_param(&uri, "token").unwrap_or_default();
+    if !secret_eq(&token, pair_token()) || !origin_is_self(&headers) {
+        eprintln!("[web-serve] rejected unpaired remote connection");
+        return Response::builder()
+            .status(StatusCode::UNAUTHORIZED)
+            .header(header::CONTENT_TYPE, "text/plain")
+            .body(Body::from(
+                "Not paired. Open the phone remote using the link shown in Harbor's settings.",
+            ))
+            .unwrap();
+    }
     ws.on_upgrade(move |socket| handle_remote_socket(socket, state))
+        .into_response()
 }
 
 async fn handle_remote_socket(socket: WebSocket, state: ServeState) {
@@ -253,6 +399,13 @@ pub fn web_serve_stop() {
 #[tauri::command]
 pub fn web_serve_status() -> bool {
     RUNNING.load(Ordering::SeqCst)
+}
+
+/// Pairing token for the remote socket. Desktop UI only — it is never served
+/// over HTTP, otherwise it would not gate anything.
+#[tauri::command]
+pub fn remote_pair_token() -> String {
+    pair_token().to_string()
 }
 
 /// Push a JSON text frame to every connected remote client.

@@ -27,6 +27,83 @@ async fn health() -> &'static str {
     "ok"
 }
 
+/// Guard for every route that streams or adds a torrent.
+///
+/// Without it, a plain cross-origin `GET` from any web page — or any host on
+/// the Wi-Fi once the LAN server is on — reaches `h_remote_stream`, which adds
+/// the requested info hash and starts downloading and seeding it. Harbor puts
+/// the key on the URLs it builds (`?tok=`), and mpv / cast devices simply fetch
+/// the URL they were given, so nothing legitimate needs to know about it.
+fn authorized(query: Option<&str>, headers: &HeaderMap) -> bool {
+    if let Some(value) = headers
+        .get("x-harbor-engine-token")
+        .and_then(|v| v.to_str().ok())
+    {
+        if super::token_matches(value) {
+            return true;
+        }
+    }
+    let Some(raw) = query else { return false };
+    for pair in raw.split('&') {
+        let Some((key, value)) = pair.split_once('=') else {
+            continue;
+        };
+        if key == "tok" {
+            if let Some(decoded) = urldecode(value) {
+                return super::token_matches(&decoded);
+            }
+        }
+    }
+    false
+}
+
+#[cfg(test)]
+mod auth_tests {
+    use super::*;
+
+    fn key() -> String {
+        crate::torrent_engine::engine_token().to_string()
+    }
+
+    #[test]
+    fn accepts_the_engine_key_from_query_or_header() {
+        let query = format!("tok={}", key());
+        assert!(authorized(Some(&query), &HeaderMap::new()));
+
+        let with_other_params = format!("tr=udp%3A%2F%2Ftracker&tok={}&f=file.mkv", key());
+        assert!(authorized(Some(&with_other_params), &HeaderMap::new()));
+
+        let mut headers = HeaderMap::new();
+        headers.insert("x-harbor-engine-token", key().parse().unwrap());
+        assert!(authorized(None, &headers));
+    }
+
+    #[test]
+    fn refuses_everything_else() {
+        // The drive-by case: a plain cross-origin GET carries no key at all.
+        assert!(!authorized(None, &HeaderMap::new()));
+        assert!(!authorized(Some(""), &HeaderMap::new()));
+        assert!(!authorized(Some("tr=udp%3A%2F%2Ftracker"), &HeaderMap::new()));
+        assert!(!authorized(Some("tok="), &HeaderMap::new()));
+        assert!(!authorized(Some("tok=00000000000000000000000000000000"), &HeaderMap::new()));
+        // A prefix of the real key must not pass.
+        let truncated = format!("tok={}", &key()[..8]);
+        assert!(!authorized(Some(&truncated), &HeaderMap::new()));
+
+        let mut headers = HeaderMap::new();
+        headers.insert("x-harbor-engine-token", "nope".parse().unwrap());
+        assert!(!authorized(None, &headers));
+    }
+}
+
+fn unauthorized() -> Response {
+    (
+        StatusCode::FORBIDDEN,
+        "Missing or invalid engine key. This endpoint is only for Harbor on this machine.",
+    )
+        .into_response()
+}
+
 async fn h_settings() -> Response {
     let body = serde_json::json!({
         "values": {
@@ -105,8 +182,13 @@ fn urldecode(input: &str) -> Option<String> {
 async fn h_create(
     State(_session): State<Arc<Session>>,
     Path(hash): Path<String>,
+    RawQuery(query): RawQuery,
+    headers: HeaderMap,
     Json(body): Json<CreateBody>,
 ) -> Response {
+    if !authorized(query.as_deref(), &headers) {
+        return unauthorized();
+    }
     let trackers = trackers_from_sources(body.peer_search.and_then(|p| p.sources));
     match super::ensure_added(&hash, trackers, None).await {
         Ok((_info_hash, files)) => {
@@ -130,6 +212,9 @@ async fn h_remote_stream(
     RawQuery(query): RawQuery,
     headers: HeaderMap,
 ) -> Response {
+    if !authorized(query.as_deref(), &headers) {
+        return unauthorized();
+    }
     let trackers = trackers_from_query(query);
     if let Err(e) = super::ensure_added(&hash, trackers, Some(file_id)).await {
         return (StatusCode::NOT_FOUND, e).into_response();
@@ -140,8 +225,12 @@ async fn h_remote_stream(
 async fn h_stream(
     State(session): State<Arc<Session>>,
     Path((hash, file_id)): Path<(String, usize)>,
+    RawQuery(query): RawQuery,
     headers: HeaderMap,
 ) -> Response {
+    if !authorized(query.as_deref(), &headers) {
+        return unauthorized();
+    }
     stream_file(&session, &hash, file_id, &headers).await
 }
 
