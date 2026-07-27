@@ -2284,6 +2284,15 @@ textarea:focus-visible,
   outline-offset: 3px;
 }
 
+[data-settings-search-field][data-tv-search-nav-focused="true"]
+  + [data-settings-search-mode]
+  [data-settings-search-nav-hint],
+[data-settings-search-field][data-tv-search-editing-focused="true"]
+  + [data-settings-search-mode]
+  [data-settings-search-edit-hint] {
+  display: inline-flex;
+}
+
 /* Opaque-surface overrides for translucent "glass" facet (aurora + any user glass theme).
    Derived from each theme's own --color-canvas via color-mix so they adapt per theme.
    Canvas/bokeh page background is intentionally left untouched. Opaque themes

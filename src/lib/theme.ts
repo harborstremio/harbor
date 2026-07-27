@@ -21,7 +21,18 @@ export type ThemePresetId =
   | "forest"
   | "noir";
 
-export type ThemeLayout = "sidebar" | "topdock" | "rail" | "stremio" | "minui" | "dracula" | "nord" | "forest" | "royal" | "cinematic" | "custom";
+export type ThemeLayout =
+  | "sidebar"
+  | "topdock"
+  | "rail"
+  | "stremio"
+  | "minui"
+  | "dracula"
+  | "nord"
+  | "forest"
+  | "royal"
+  | "cinematic"
+  | "custom";
 export type ThemeCardStyle = "flat" | "glass" | "stremio" | "minui" | "crunch" | "noir" | "custom";
 export type ThemeButtonStyle = "flat" | "glossy" | "minui" | "crunch" | "noir" | "custom";
 
@@ -1282,7 +1293,7 @@ html[data-theme-layout="custom"] [class*="shadow-"] { --tw-shadow: 0 0 #0000; }
 /* Selection / focus accent everywhere = blue */
 html[data-theme-layout="custom"] ::selection { background: rgba(53,116,252,0.35); }`;
 
-const feishinHtml = `<aside class="fsh-rail" data-tauri-drag-region>
+const feishinHtml = `<aside class="fsh-rail" data-tv-nav-zone data-tauri-drag-region>
   <div class="fsh-actionbar">
     <button class="fsh-search" type="button" onclick="window.harbor.search()" aria-label="Search" title="Search">
       <svg class="fsh-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
@@ -1385,7 +1396,8 @@ export const BETA_THEMES: ThemePreset[] = [
   {
     id: "elegantfin" as ThemePresetId,
     name: "ElegantFin",
-    blurb: "Dark navy glass with one purple accent, rounded cards, and a soft shine sweep. Ported from Jellyfin's ElegantFin.",
+    blurb:
+      "Dark navy glass with one purple accent, rounded cards, and a soft shine sweep. Ported from Jellyfin's ElegantFin.",
     swatch: ["#111827", "#1e2836", "#775bf4"],
     tokens: {
       "--color-canvas": "#111827",
@@ -1413,7 +1425,8 @@ export const BETA_THEMES: ThemePreset[] = [
   {
     id: "feishin" as ThemePresetId,
     name: "Feishin",
-    blurb: "Layered near-black with one electric-blue accent, tight 5px corners, and heavy Inter. Ported from the Feishin player.",
+    blurb:
+      "Layered near-black with one electric-blue accent, tight 5px corners, and heavy Inter. Ported from the Feishin player.",
     swatch: ["#0C0C0C", "#141414", "#3574FC"],
     tokens: {
       "--color-canvas": "#0C0C0C",
@@ -1491,8 +1504,7 @@ export const FEATURED_CUSTOM_THEMES: ThemePreset[] = [
       "--color-danger": "#b91c1c",
     },
     background: {
-      image:
-        "radial-gradient(ellipse 120% 70% at 50% -10%, #ffffff 0%, #f4f4f6 45%, #ececef 100%)",
+      image: "radial-gradient(ellipse 120% 70% at 50% -10%, #ffffff 0%, #f4f4f6 45%, #ececef 100%)",
       dim: 0,
     },
     layout: "minui",
@@ -1524,8 +1536,7 @@ export const TEMPLATE_THEMES: ThemePreset[] = [
       "--color-danger": "#e87474",
     },
     background: {
-      image:
-        "radial-gradient(ellipse 100% 70% at 50% 0%, #3a1f44 0%, #1f1226 40%, #0c0610 100%)",
+      image: "radial-gradient(ellipse 100% 70% at 50% 0%, #3a1f44 0%, #1f1226 40%, #0c0610 100%)",
       dim: 0,
     },
     layout: "rail",
