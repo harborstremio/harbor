@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useSettings } from "@/lib/settings";
+import { useDebridSecrets } from "@/lib/secret-store";
 import { createAllDebrid } from "./alldebrid";
 import { createDebridLink } from "./debridlink";
 import { createPremiumize } from "./premiumize";
@@ -26,17 +26,10 @@ export function buildDebridClients(keys: DebridKeys): DebridStore[] {
 }
 
 export function useDebridClients(): DebridStore[] {
-  const { settings } = useSettings();
+  const keys = useDebridSecrets();
   return useMemo(
-    () =>
-      buildDebridClients({
-        rdKey: settings.rdKey,
-        tbKey: settings.tbKey,
-        adKey: settings.adKey,
-        pmKey: settings.pmKey,
-        dlKey: settings.dlKey,
-      }),
-    [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey],
+    () => buildDebridClients(keys),
+    [keys.rdKey, keys.tbKey, keys.adKey, keys.pmKey, keys.dlKey],
   );
 }
 

@@ -28,7 +28,7 @@ export function StreamPriorityCard() {
   const t = useT();
   const { authKey } = useAuth();
   const { settings, update } = useSettings();
-  const { addons } = useAddons(authKey, settings);
+  const { addons } = useAddons(authKey);
   const [announce, setAnnounce] = useState("");
   const prefs = settings.streamPriority;
 

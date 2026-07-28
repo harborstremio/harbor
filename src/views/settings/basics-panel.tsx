@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useDebridSecrets } from "@/lib/secret-store";
 import { PlayModePanel } from "./player-panel";
 import { Section, useSettingsActiveContext } from "./shared";
 
@@ -17,10 +18,15 @@ export function BasicsPanel() {
   const { user } = useAuth();
   const { settings } = useSettings();
   const { setActive } = useSettingsActiveContext();
+  const debridSecrets = useDebridSecrets();
 
-  const debridCount = [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(
-    Boolean,
-  ).length;
+  const debridCount = [
+    debridSecrets.rdKey,
+    debridSecrets.tbKey,
+    debridSecrets.adKey,
+    debridSecrets.pmKey,
+    debridSecrets.dlKey,
+  ].filter(Boolean).length;
   const langs = settings.preferredLanguages;
   const langLabel =
     langs.length === 0 ? t("Any") : langs.length === 1 ? langs[0] : t("{n} languages", { n: langs.length });

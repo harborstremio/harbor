@@ -12,16 +12,22 @@ import {
   uninstallAddon,
 } from "@/lib/addon-store";
 import { openUrl } from "@/lib/window";
-import { useSettings, type StreamingService } from "@/lib/settings";
+import { type StreamingService } from "@/lib/settings";
+import { getSecret, useDebridSecrets } from "@/lib/secret-store";
 
-export function pickDebridForAddon(s: ReturnType<typeof useSettings>["settings"]):
+export function pickDebridForAddon():
   | { service: string; key: string; label: string }
   | null {
-  if (s.tbKey) return { service: "torbox", key: s.tbKey, label: "TorBox" };
-  if (s.rdKey) return { service: "realdebrid", key: s.rdKey, label: "Real-Debrid" };
-  if (s.adKey) return { service: "alldebrid", key: s.adKey, label: "AllDebrid" };
-  if (s.pmKey) return { service: "premiumize", key: s.pmKey, label: "Premiumize" };
-  if (s.dlKey) return { service: "debridlink", key: s.dlKey, label: "Debrid-Link" };
+  const tbKey = getSecret("harbor.debrid.tbKey") ?? "";
+  const rdKey = getSecret("harbor.debrid.rdKey") ?? "";
+  const adKey = getSecret("harbor.debrid.adKey") ?? "";
+  const pmKey = getSecret("harbor.debrid.pmKey") ?? "";
+  const dlKey = getSecret("harbor.debrid.dlKey") ?? "";
+  if (tbKey) return { service: "torbox", key: tbKey, label: "TorBox" };
+  if (rdKey) return { service: "realdebrid", key: rdKey, label: "Real-Debrid" };
+  if (adKey) return { service: "alldebrid", key: adKey, label: "AllDebrid" };
+  if (pmKey) return { service: "premiumize", key: pmKey, label: "Premiumize" };
+  if (dlKey) return { service: "debridlink", key: dlKey, label: "Debrid-Link" };
   return null;
 }
 
@@ -30,18 +36,17 @@ export function RecommendedAddonCard({
   title,
   blurb,
   urlBuilder,
-  settings,
 }: {
   id: string;
   title: string;
   blurb: string;
   urlBuilder: (service: string, apiKey: string) => string;
-  settings: ReturnType<typeof useSettings>["settings"];
 }) {
   const [installed, setInstalled] = useState(() => isInstalled(id));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const debrid = pickDebridForAddon(settings);
+  const debridSecrets = useDebridSecrets();
+  const debrid = pickDebridForAddon();
 
   useEffect(() => {
     setInstalled(isInstalled(id));
@@ -52,7 +57,7 @@ export function RecommendedAddonCard({
     const stale = !current || current.service !== debrid.service || current.apiKey !== debrid.key.trim();
     if (!stale) return;
     installAddon(id, urlBuilder(debrid.service, debrid.key)).catch(() => {});
-  }, [id, debrid, urlBuilder, settings.tbKey, settings.rdKey, settings.adKey, settings.pmKey, settings.dlKey]);
+  }, [id, debrid, urlBuilder, debridSecrets.tbKey, debridSecrets.rdKey, debridSecrets.adKey, debridSecrets.pmKey, debridSecrets.dlKey]);
 
   const onInstall = async () => {
     if (!debrid) return;

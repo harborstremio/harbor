@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useSettings } from "@/lib/settings";
+import { useDebridSecrets } from "@/lib/secret-store";
 import { useT } from "@/lib/i18n";
 import { activeLayout } from "@/lib/theme";
 import { useView } from "@/lib/view";
@@ -1422,12 +1423,14 @@ export function SettingsNav({
     settings.tvdbKey,
   ].filter(Boolean).length;
 
+  const debridSecrets = useDebridSecrets();
+
   const debridKeys = [
-    settings.rdKey,
-    settings.tbKey,
-    settings.adKey,
-    settings.pmKey,
-    settings.dlKey,
+    debridSecrets.rdKey,
+    debridSecrets.tbKey,
+    debridSecrets.adKey,
+    debridSecrets.pmKey,
+    debridSecrets.dlKey,
   ].filter(Boolean).length;
 
   const debridChip = libraryKeys > 0 ? `${libraryKeys}/5` : null;

@@ -12,6 +12,7 @@ import {
 } from "@/lib/bug-report";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { getSecret } from "@/lib/secret-store";
 import { Section } from "./shared";
 import { ContributorCard } from "./bug-report/contributor-card";
 import { DiagnosticsCard } from "./bug-report/diagnostics-card";
@@ -49,7 +50,13 @@ export function BugReportPanel() {
       hasRpdb: !!settings.rpdbKey,
       hasTrakt: !!settings.traktAccessToken,
       hasStremio: !!auth.authKey,
-      debridCount: [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(Boolean).length,
+      debridCount: [
+        getSecret("harbor.debrid.rdKey"),
+        getSecret("harbor.debrid.tbKey"),
+        getSecret("harbor.debrid.adKey"),
+        getSecret("harbor.debrid.pmKey"),
+        getSecret("harbor.debrid.dlKey"),
+      ].filter(Boolean).length,
       addonCount: 0,
       iptvCount: settings.iptvPlaylists.length,
     }).then((d) => {
@@ -65,11 +72,6 @@ export function BugReportPanel() {
     settings.rpdbKey,
     settings.traktAccessToken,
     settings.iptvPlaylists.length,
-    settings.rdKey,
-    settings.tbKey,
-    settings.adKey,
-    settings.pmKey,
-    settings.dlKey,
     auth.authKey,
   ]);
 

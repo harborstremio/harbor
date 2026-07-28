@@ -76,11 +76,6 @@ export type Settings = {
   imdbApiFallback: boolean;
   fanartKey: string;
   tvdbKey: string;
-  rdKey: string;
-  tbKey: string;
-  adKey: string;
-  pmKey: string;
-  dlKey: string;
   region: string;
   preferredLanguages: string[];
   requirePreferredLanguage: boolean;

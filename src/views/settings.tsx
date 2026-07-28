@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { getSecret, setSecret, useDebridSecrets } from "@/lib/secret-store";
 import { AccountStub } from "./settings/account";
 import { AdvancedPanel } from "./settings/advanced-panel";
 import { RemotesPanel } from "./settings/remotes-panel";
@@ -176,11 +177,20 @@ export function Settings() {
   const [rpdbDraft, setRpdbDraft] = useState(settings.rpdbKey);
   const [fanartDraft, setFanartDraft] = useState(settings.fanartKey);
   const [tvdbDraft, setTvdbDraft] = useState(settings.tvdbKey);
-  const [rdDraft, setRdDraft] = useState(settings.rdKey);
-  const [tbDraft, setTbDraft] = useState(settings.tbKey);
-  const [adDraft, setAdDraft] = useState(settings.adKey);
-  const [pmDraft, setPmDraft] = useState(settings.pmKey);
-  const [dlDraft, setDlDraft] = useState(settings.dlKey);
+  const [rdDraft, setRdDraft] = useState(getSecret("harbor.debrid.rdKey") ?? "");
+  const [tbDraft, setTbDraft] = useState(getSecret("harbor.debrid.tbKey") ?? "");
+  const [adDraft, setAdDraft] = useState(getSecret("harbor.debrid.adKey") ?? "");
+  const [pmDraft, setPmDraft] = useState(getSecret("harbor.debrid.pmKey") ?? "");
+  const [dlDraft, setDlDraft] = useState(getSecret("harbor.debrid.dlKey") ?? "");
+  const debridSecrets = useDebridSecrets();
+
+  useEffect(() => {
+    setRdDraft(debridSecrets.rdKey);
+    setTbDraft(debridSecrets.tbKey);
+    setAdDraft(debridSecrets.adKey);
+    setPmDraft(debridSecrets.pmKey);
+    setDlDraft(debridSecrets.dlKey);
+  }, [debridSecrets.rdKey, debridSecrets.tbKey, debridSecrets.adKey, debridSecrets.pmKey, debridSecrets.dlKey]);
   const [savedKey, setSavedKey] = useState<SavedKey | null>(null);
   const { settingsSectionRequest } = useView();
   const [active, setActive] = useState<SectionId>(
@@ -266,11 +276,11 @@ export function Settings() {
     }
     else if (which === "fanart") update({ fanartKey: trimmed });
     else if (which === "tvdb") update({ tvdbKey: trimmed });
-    else if (which === "rd") update({ rdKey: trimmed });
-    else if (which === "tb") update({ tbKey: trimmed });
-    else if (which === "ad") update({ adKey: trimmed });
-    else if (which === "pm") update({ pmKey: trimmed });
-    else if (which === "dl") update({ dlKey: trimmed });
+    else if (which === "rd") setSecret("harbor.debrid.rdKey", trimmed);
+    else if (which === "tb") setSecret("harbor.debrid.tbKey", trimmed);
+    else if (which === "ad") setSecret("harbor.debrid.adKey", trimmed);
+    else if (which === "pm") setSecret("harbor.debrid.pmKey", trimmed);
+    else if (which === "dl") setSecret("harbor.debrid.dlKey", trimmed);
     setSavedKey(which);
     setTimeout(() => setSavedKey((s) => (s === which ? null : s)), 1400);
   };

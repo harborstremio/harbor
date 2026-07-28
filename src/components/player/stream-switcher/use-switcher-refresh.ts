@@ -21,7 +21,7 @@ export function useSwitcherRefresh(params: {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const debrids = useDebridClients();
-  const { addons } = useAddons(authKey, settings);
+  const { addons } = useAddons(authKey);
   const [refreshing, setRefreshing] = useState(false);
   const acRef = useRef<AbortController | null>(null);
 

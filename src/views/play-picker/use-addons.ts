@@ -7,9 +7,7 @@ import {
   type Addon,
 } from "@/lib/addons";
 import { applyOrderToItems, loadDisplayOrder } from "@/lib/addons-store/reorder";
-import type { useSettings } from "@/lib/settings";
-
-type Settings = ReturnType<typeof useSettings>["settings"];
+import { useDebridSecrets } from "@/lib/secret-store";
 
 function hasAnyResources(a: Addon): boolean {
   return (a.manifest.resources ?? []).length > 0;
@@ -31,22 +29,23 @@ async function resolveManifests(addons: Addon[]): Promise<Addon[]> {
   );
 }
 
-export function useAddons(authKey: string | null, settings: Settings): {
+export function useAddons(authKey: string | null): {
   addons: Addon[] | null;
   userHasStreamAddons: boolean;
 } {
   const [addons, setAddons] = useState<Addon[] | null>(null);
   const [userHasStreamAddons, setUserHasStreamAddons] = useState(false);
+  const debridSecrets = useDebridSecrets();
   useEffect(() => {
     let cancelled = false;
     const debridKeys = {
-      rdKey: settings.rdKey,
-      tbKey: settings.tbKey,
-      adKey: settings.adKey,
-      pmKey: settings.pmKey,
-      dlKey: settings.dlKey,
+      rdKey: debridSecrets.rdKey,
+      tbKey: debridSecrets.tbKey,
+      adKey: debridSecrets.adKey,
+      pmKey: debridSecrets.pmKey,
+      dlKey: debridSecrets.dlKey,
     };
-    const torbox = torboxAddonFor(settings.tbKey);
+    const torbox = torboxAddonFor(debridSecrets.tbKey);
     (async () => {
       const stremioAddons = filterEnabled(authKey ? await userAddons(authKey).catch(() => []) : []);
       const installed = filterEnabled(await fetchInstalledAddons().catch(() => []));
@@ -83,7 +82,7 @@ export function useAddons(authKey: string | null, settings: Settings): {
           a.transportUrl?.includes("stremio.torbox.app"),
       );
       console.info(
-        `[picker] authKey=${authKey ? "yes" : "no"} tbKey=${settings.tbKey ? `set(${settings.tbKey.slice(0, 8)}…)` : "EMPTY"} stremioAddons=${stremioAddons.length} installed=${installed.length} merged=${merged.length} userStreamCount=${userStreamCount} hasTorbox=${existingTorboxIdx >= 0} torboxAutoAddable=${!!torbox}`,
+        `[picker] authKey=${authKey ? "yes" : "no"} tbKey=${debridSecrets.tbKey ? `set(${debridSecrets.tbKey.slice(0, 8)}…)` : "EMPTY"} stremioAddons=${stremioAddons.length} installed=${installed.length} merged=${merged.length} userStreamCount=${userStreamCount} hasTorbox=${existingTorboxIdx >= 0} torboxAutoAddable=${!!torbox}`,
       );
       if (torbox) {
         if (existingTorboxIdx >= 0) {
@@ -107,7 +106,7 @@ export function useAddons(authKey: string | null, settings: Settings): {
     return () => {
       cancelled = true;
     };
-  }, [authKey, settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey]);
+  }, [authKey, debridSecrets.rdKey, debridSecrets.tbKey, debridSecrets.adKey, debridSecrets.pmKey, debridSecrets.dlKey]);
 
   return { addons, userHasStreamAddons };
 }

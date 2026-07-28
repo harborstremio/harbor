@@ -9,6 +9,7 @@ import { buildDebridClients } from "@/lib/debrid/registry";
 import type { DebridStore } from "@/lib/debrid/types";
 import { loadEffective } from "@/lib/settings/profile-store";
 import type { Settings } from "@/lib/settings";
+import { getSecret } from "@/lib/secret-store";
 
 export type AutoDlContext = {
   settings: Settings;
@@ -51,7 +52,7 @@ function hasResources(a: Addon): boolean {
   return (a.manifest.resources ?? []).length > 0;
 }
 
-async function gatherStreamAddons(authKey: string | null, settings: Settings): Promise<Addon[]> {
+async function gatherStreamAddons(authKey: string | null): Promise<Addon[]> {
   const stremio = filterEnabled(authKey ? await userAddons(authKey).catch(() => []) : []);
   const installed = filterEnabled(await fetchInstalledAddons().catch(() => []));
   const merged: Addon[] = [];
@@ -75,13 +76,13 @@ async function gatherStreamAddons(authKey: string | null, settings: Settings): P
   const order = loadDisplayOrder();
   const ordered = order.length > 0 ? applyOrderToItems(resolved, order) : resolved;
   const list = withDebridKeys(ordered, {
-    rdKey: settings.rdKey,
-    tbKey: settings.tbKey,
-    adKey: settings.adKey,
-    pmKey: settings.pmKey,
-    dlKey: settings.dlKey,
+    rdKey: getSecret("harbor.debrid.rdKey") ?? "",
+    tbKey: getSecret("harbor.debrid.tbKey") ?? "",
+    adKey: getSecret("harbor.debrid.adKey") ?? "",
+    pmKey: getSecret("harbor.debrid.pmKey") ?? "",
+    dlKey: getSecret("harbor.debrid.dlKey") ?? "",
   });
-  const torbox = torboxAddonFor(settings.tbKey);
+  const torbox = torboxAddonFor(getSecret("harbor.debrid.tbKey") ?? "");
   if (torbox) {
     const i = list.findIndex(
       (a) => a.manifest.id === "app.torbox.stremio" || a.transportUrl?.includes("stremio.torbox.app"),
@@ -98,12 +99,12 @@ async function gatherStreamAddons(authKey: string | null, settings: Settings): P
 export async function gatherContext(): Promise<AutoDlContext> {
   const settings = readSettings();
   const debrids = buildDebridClients({
-    rdKey: settings.rdKey,
-    tbKey: settings.tbKey,
-    adKey: settings.adKey,
-    pmKey: settings.pmKey,
-    dlKey: settings.dlKey,
+    rdKey: getSecret("harbor.debrid.rdKey") ?? "",
+    tbKey: getSecret("harbor.debrid.tbKey") ?? "",
+    adKey: getSecret("harbor.debrid.adKey") ?? "",
+    pmKey: getSecret("harbor.debrid.pmKey") ?? "",
+    dlKey: getSecret("harbor.debrid.dlKey") ?? "",
   });
-  const addons = await gatherStreamAddons(readAuthKey(), settings);
+  const addons = await gatherStreamAddons(readAuthKey());
   return { settings, debrids, addons };
 }

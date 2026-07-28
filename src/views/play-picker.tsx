@@ -110,7 +110,7 @@ export function PlayPicker({
       ? findLocalEpisodeByIds(episode.season, episode.episode, tmdbId, imdbId)
       : findLocalMovie(tmdbId, imdbId);
   }, [meta.id, imdbId, episode]);
-  const { addons } = useAddons(authKey, settings);
+  const { addons } = useAddons(authKey);
   const [seasonLogo, setSeasonLogo] = useState<string | undefined>(() =>
     peekCachedLogo(settings.tmdbKey, meta, { preferOwn: true }),
   );

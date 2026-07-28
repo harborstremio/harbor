@@ -34,7 +34,7 @@ export function StreamsView({
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const debrids = useDebridClients();
-  const { addons } = useAddons(authKey, settings);
+  const { addons } = useAddons(authKey);
   const imdbId = useImdbId(meta, settings.tmdbKey).id;
   const streamIds = useStreamIds(meta, episode, imdbId);
   const animeTitles = useAnimeAltTitles(meta);

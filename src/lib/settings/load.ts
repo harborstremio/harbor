@@ -21,6 +21,7 @@ const RETIRED_GEMINI = new Set([
 ]);
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
+import { setSecret } from "@/lib/secret-store";
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
@@ -194,6 +195,19 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     delete parsed.scrapers;
     delete parsed.scrapersAcknowledged;
     delete parsed._scrapersV2;
+    for (const [legacy, vault] of [
+      ["rdKey", "harbor.debrid.rdKey"],
+      ["tbKey", "harbor.debrid.tbKey"],
+      ["adKey", "harbor.debrid.adKey"],
+      ["pmKey", "harbor.debrid.pmKey"],
+      ["dlKey", "harbor.debrid.dlKey"],
+    ] as const) {
+      const v = (parsed as Record<string, unknown>)[legacy];
+      if (typeof v === "string" && v.length > 0) {
+        setSecret(vault, v);
+        delete (parsed as Record<string, unknown>)[legacy];
+      }
+    }
     return {
       ...DEFAULT,
       ...parsed,

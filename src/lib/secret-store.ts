@@ -1,16 +1,35 @@
 import { invoke } from "@tauri-apps/api/core";
+import { useSyncExternalStore } from "react";
 
 const SECRET_PREFIXES = [
   "harbor.simkl.session.v1",
   "harbor.trakt.session.v1",
   "harbor.mal.session.v1",
   "harbor.anilist.session.v1",
+  "harbor.debrid.rdKey",
+  "harbor.debrid.tbKey",
+  "harbor.debrid.adKey",
+  "harbor.debrid.pmKey",
+  "harbor.debrid.dlKey",
 ];
 
 let store: Record<string, string> = {};
 let rustAvailable = false;
 let loaded = false;
 let persistTimer: number | null = null;
+
+type Listener = () => void;
+const listeners = new Set<Listener>();
+let emit = function emitImpl(): void {
+  debridSnapshot = computeDebridSnapshot();
+  for (const l of listeners) l();
+};
+function subscribe(l: Listener): () => void {
+  listeners.add(l);
+  return () => {
+    listeners.delete(l);
+  };
+}
 
 function isSecretKey(key: string): boolean {
   return SECRET_PREFIXES.some((p) => key === p || key.startsWith(`${p}.`));
@@ -45,7 +64,6 @@ export async function loadSecrets(): Promise<void> {
     }
   } catch {
     rustAvailable = false;
-    return;
   }
 
   let migrated = false;
@@ -73,6 +91,7 @@ export async function loadSecrets(): Promise<void> {
       void 0;
     }
   }
+  emit();
 }
 
 export function getSecret(key: string): string | null {
@@ -96,6 +115,7 @@ export function setSecret(key: string, value: string | null): void {
     if (value == null) delete store[key];
     else store[key] = value;
     schedulePersist();
+    emit();
     try {
       localStorage.removeItem(key);
     } catch {
@@ -109,4 +129,47 @@ export function setSecret(key: string, value: string | null): void {
   } catch {
     void 0;
   }
+  emit();
+}
+
+export type DebridSecrets = {
+  rdKey: string;
+  tbKey: string;
+  adKey: string;
+  pmKey: string;
+  dlKey: string;
+};
+
+const DEBRID_KEYS: (keyof DebridSecrets)[] = [
+  "rdKey",
+  "tbKey",
+  "adKey",
+  "pmKey",
+  "dlKey",
+];
+
+function computeDebridSnapshot(): DebridSecrets {
+  const out = {} as DebridSecrets;
+  for (const k of DEBRID_KEYS) {
+    out[k] = getSecret(`harbor.debrid.${k}`) ?? "";
+  }
+  return out;
+}
+
+let debridSnapshot: DebridSecrets = computeDebridSnapshot();
+
+const EMPTY: DebridSecrets = {
+  rdKey: "",
+  tbKey: "",
+  adKey: "",
+  pmKey: "",
+  dlKey: "",
+};
+
+export function useDebridSecrets(): DebridSecrets {
+  return useSyncExternalStore(
+    subscribe,
+    () => debridSnapshot,
+    () => EMPTY,
+  );
 }

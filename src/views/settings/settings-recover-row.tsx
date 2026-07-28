@@ -5,7 +5,7 @@ import { applyLegacyToActive, recoverableLegacyBlob } from "@/lib/settings/profi
 import type { Settings } from "@/lib/settings/types";
 import { useT } from "@/lib/i18n";
 
-const KEY_FIELDS = ["rdKey", "tbKey", "adKey", "pmKey", "dlKey", "tmdbKey", "rpdbKey"] as const;
+const KEY_FIELDS = ["tmdbKey", "rpdbKey"] as const;
 
 function legacyDiffers(blob: string, cur: Settings): boolean {
   try {

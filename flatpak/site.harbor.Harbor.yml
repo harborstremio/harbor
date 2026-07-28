@@ -30,6 +30,20 @@ build-options:
 modules:
   - shared-modules/libayatana-appindicator/libayatana-appindicator-gtk3.json
 
+  - name: gnome-keyring
+    buildsystem: meson
+    config-opts:
+      - -Dlibgcrypt=false
+      - -Dssh-agent=false
+      - -Dpkcs11=false
+      - -Dmanpage=false
+      - -Dgtk4=false
+    sources:
+      - type: git
+        url: https://gitlab.gnome.org/GNOME/gnome-keyring.git
+        tag: "48.0"
+
+
   - name: libass
     buildsystem: autotools
     config-opts:
