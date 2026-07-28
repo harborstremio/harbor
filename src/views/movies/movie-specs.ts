@@ -5,7 +5,7 @@ import { pickMoodSpecs } from "@/lib/feed/moods";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
 import { tmdbDiscover, tmdbMovieRow, tmdbTrending } from "@/lib/providers/tmdb";
 
-export const HERO_POOL_TARGET = 5;
+export const HERO_POOL_TARGET = 12;
 
 export type RowSpec = {
   key: string;

@@ -31,7 +31,7 @@ import { useScrollMemory, useView } from "@/lib/view";
 import { buildShowHero, bucketCopy } from "./shows/hero-curation";
 import { showSpecs } from "./shows/show-specs";
 
-const HERO_POOL_TARGET = 6;
+const HERO_POOL_TARGET = 12;
 const MAX_PER_ROW = 30;
 
 type ShowRow = {

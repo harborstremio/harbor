@@ -694,7 +694,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
           sources: fm.sources,
         },
       });
-      if (out.length >= 4) break;
+      if (out.length >= 10) break;
     }
     return out;
   }, [heroPool, heroSourceRow]);

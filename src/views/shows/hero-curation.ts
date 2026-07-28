@@ -2,7 +2,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { TV_GENRES } from "@/lib/feed/tags";
 import { tmdbDiscover, tmdbSeriesRow, tmdbTrending } from "@/lib/providers/tmdb";
 
-const HERO_POOL_TARGET = 6;
+const HERO_POOL_TARGET = 12;
 const HERO_CANDIDATE_TARGET = 240;
 const POOL_CACHE_KEY = "harbor.shows.hero.pool.v2";
 const POOL_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
