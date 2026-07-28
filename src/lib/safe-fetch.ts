@@ -123,6 +123,24 @@ function isIdempotent(method: string | undefined): boolean {
   return m === "GET" || m === "HEAD" || m === "OPTIONS";
 }
 
+function isLocalhost(host: string): boolean {
+  const h = host.trim().toLowerCase().replace(/^\[|\]$/g, "");
+  if (h === "localhost" || h === "127.0.0.1" || h === "::1") return true;
+  try {
+    const hostname = new URL(h.includes("://") ? h : `http://${h}`)
+      .hostname.replace(/^\[|\]$/g, "");
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") return true;
+  } catch {
+  }
+  return false;
+}
+
+function guardRejectionHost(e: unknown): string | null {
+  const raw = typeof e === "string" ? e : ((e as { message?: string } | undefined)?.message ?? "");
+  const m = raw.match(/blocked internal target:\s*(\S+)/i);
+  return m ? m[1] : null;
+}
+
 // The Tauri http plugin rejects an aborted request with a plain Error("Request cancelled").
 // Normalize it to a standard AbortError so callers (and the global rejection handler) treat
 // a cancel as the benign abort it is instead of surfacing the app-wide error screen.
@@ -177,9 +195,11 @@ export const safeFetch: typeof fetch = (input, init) => {
   if (isTauri) {
     if (typeof input === "string") {
       const exec = isIdempotent(init?.method)
-        ? tauriHarborFetch(input, init).catch(
-            () => normalizeAbort(tauriFetchImpl(input as string, init as RequestInit) as Promise<Response>),
-          )
+        ? tauriHarborFetch(input, init).catch((e) => {
+            const blocked = guardRejectionHost(e);
+            if (blocked !== null && !isLocalhost(blocked)) throw e;
+            return normalizeAbort(tauriFetchImpl(input as string, init as RequestInit) as Promise<Response>);
+          })
         : tauriHarborFetch(input, init);
       return withDeadline(exec, init?.signal);
     }
