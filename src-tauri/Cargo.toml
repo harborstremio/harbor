@@ -56,7 +56,7 @@ rust_cast = { path = "vendor/rust_cast", version = "0.20" }
 mdns-sd = "0.13"
 rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
 harbor-core = { path = "../harbor-core" }
-librqbit = { version = "=8.1.1", default-features = false, features = ["rust-tls"] }
+librqbit = { version = "=8.1.1", default-features = false, features = ["default-tls"] }
 url = "2"
 realfft = "3"
 ort = { version = "=2.0.0-rc.10", optional = true }
