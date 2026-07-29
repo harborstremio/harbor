@@ -42,9 +42,7 @@ pnpm-debug.log*
 local_docs/
 .diag/
 
-# Stripped IP assets (legal) - do not re-commit
-public/avatars/
-public/kids/avatars/
+
 public/awards/
 src/assets/awards/
 src/assets/manga-badges/
