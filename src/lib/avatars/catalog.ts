@@ -1,7 +1,11 @@
 export type AvatarItem = { id: string; name: string };
-export type AvatarGroup = { group: string; items: AvatarItem[] };
+export type AvatarGroup = { group: string; items: AvatarItem[]; transparent?: boolean };
 
 export const avatarUrl = (id: string): string => `/avatars/${id}.webp`;
+
+export function isRemovedBuiltinAvatar(id: string): boolean {
+  return false;
+}
 
 export const AVATAR_CATALOG: AvatarGroup[] = [
   {
