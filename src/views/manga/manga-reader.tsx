@@ -350,7 +350,7 @@ export function MangaReader({
   const focus = prefs.focusMode;
   const barVisible = focus ? edge.top : chromeOpen;
   const footerVisible = focus ? edge.bottom : chromeOpen;
-  const controlsVisible = focus ? true : chromeOpen;
+  const controlsVisible = focus ? edge.top || edge.bottom : chromeOpen;
   const bookResume = useMemo(
     () => startPage ?? resumePageForChapter(pid, manga.id, manga.title, chapter.id, chapter.chapter) ?? 0,
     [chapter.id, startPage, pid, manga.id, manga.title],

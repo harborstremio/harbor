@@ -2,7 +2,7 @@ import { AppWindow, Move, PanelTop, Sparkles } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { FEATURED_CUSTOM_THEMES, THEME_PRESETS, type ThemeSettings } from "@/lib/theme";
 import { useT } from "@/lib/i18n";
-import { Section } from "./shared";
+import { Section, Segmented } from "./shared";
 import { NewBadge } from "./new-badge";
 import { BackgroundPicker } from "./theme-panel/background-picker";
 import { ColorThemeBody } from "./theme-panel/color-theme-body";
@@ -97,8 +97,8 @@ export function ThemePanel() {
         >
           <NativeTitleBarRow />
           <HybridBarRow />
-          <TopbarScrollBlurRow />
-          <CleanTopBarRow />
+          <TopbarAppearanceRow />
+          {settings.topbarAppearance !== "transparent" && <TopbarScrollBlurRow />}
         </Section>
       )}
 
@@ -262,40 +262,43 @@ function TopbarScrollBlurRow() {
   );
 }
 
-function CleanTopBarRow() {
+function TopbarAppearanceRow() {
   const t = useT();
   const { settings, update } = useSettings();
-  const on = settings.transparentTopBar;
+  const nativeOn = settings.useNativeTitleBar;
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5">
+    <div className={`flex items-start gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3.5 ${nativeOn ? "opacity-55" : ""}`}>
       <span
         className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-          on ? "bg-accent/15 text-accent" : "bg-raised text-ink-subtle"
+          nativeOn ? "bg-raised text-ink-subtle" : "bg-accent/15 text-accent"
         }`}
       >
         <Sparkles size={15} strokeWidth={2.2} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-[14px] font-medium text-ink">{t("Clean, transparent top bar")}</span>
+        <span className="text-[14px] font-medium text-ink">{t("Top-right controls")}</span>
         <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("On by default. The top-bar icons sit clean over the artwork with no pill behind them, and Watch Together opens as a top-right panel. Turn it off to bring back the filled pill buttons.")}
+          {nativeOn
+            ? t("The operating system draws native window controls, so Harbor cannot change their appearance.")
+            : t("Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.")}
         </p>
+        <div className={nativeOn ? "pointer-events-none mt-2" : "mt-2"}>
+          <Segmented
+            value={settings.topbarAppearance}
+            options={[
+              { value: "transparent", label: t("Clean transparent") },
+              { value: "glass", label: t("Liquid glass") },
+              { value: "filled", label: t("Filled") },
+            ]}
+            onChange={(topbarAppearance) =>
+              update({
+                topbarAppearance,
+                transparentTopBar: topbarAppearance === "transparent",
+              })
+            }
+          />
+        </div>
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={on}
-        onClick={() => update({ transparentTopBar: !on })}
-        className={`mt-1 flex h-6 w-11 shrink-0 items-center rounded-full px-0.5 transition-colors ${
-          on ? "bg-accent" : "bg-raised"
-        }`}
-      >
-        <span
-          className={`h-5 w-5 rounded-full bg-canvas shadow-sm transition-transform ${
-            on ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"
-          }`}
-        />
-      </button>
     </div>
   );
 }

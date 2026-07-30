@@ -50,6 +50,9 @@ export function createForwardingMpvBridge(): ForwardingBridge {
     setSubtitleTrack(id) {
       void set("sid", id == null ? "no" : Number(id) || id);
     },
+    setSecondarySubtitleTrack(id) {
+      void set("secondary-sid", id == null ? "no" : Number(id) || id);
+    },
     setSubVisible(on) {
       void set("sub-visibility", on);
     },

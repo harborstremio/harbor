@@ -362,6 +362,9 @@ const player: Record<string, string> = {
   "{word} {n} seconds. Hold for options": "{word} {n} segundos. Segure para opções",
   "{word} {n}s · hold for options": "{word} {n}s · segure para opções",
   "Still searching {count} more…": "Ainda a procurar em mais {count}…",
+  "2nd": "2.ª",
+  "Show as second subtitle": "Mostrar como segunda legenda",
+  "Stop showing as second subtitle": "Deixar de mostrar como segunda legenda",
 };
 
 export default player;

@@ -181,6 +181,7 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     ("video-params/gamma", 16, PropertyKind::String),
     ("demuxer-cache-duration", 17, PropertyKind::Double),
     ("paused-for-cache", 18, PropertyKind::Flag),
+    ("secondary-sub-text", 19, PropertyKind::String),
 ];
 
 #[derive(Clone, Copy)]

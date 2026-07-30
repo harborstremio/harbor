@@ -34,6 +34,7 @@ export function createHtml5Bridge(): PlayerBridge {
   let audioProbeDone = false;
   const subTracks: SubTrack[] = [];
   let activeSubId: string | null = null;
+  let secondarySubId: string | null = null;
   let subDelaySec = 0;
   let cueTickerRaf: number | null = null;
   let lastCueId = "";
@@ -119,6 +120,7 @@ export function createHtml5Bridge(): PlayerBridge {
       title: t.title,
       kind: "subtitle" as const,
       selected: t.id === activeSubId,
+      secondary: t.id === secondarySubId,
       external: t.external,
       url: t.url,
       release: t.metadata?.release,
@@ -130,22 +132,32 @@ export function createHtml5Bridge(): PlayerBridge {
   const tickCues = () => {
     if (!video) return;
     const t = (Number.isFinite(video.currentTime) ? video.currentTime : 0) - subDelaySec;
+    let changed = false;
     const track = subTracks.find((s) => s.id === activeSubId);
     if (!track || !track.cues) {
       if (snap.subText !== "") {
         snap.subText = "";
         snap.subStartSec = 0;
-        emit();
+        changed = true;
       }
-      return;
+    } else {
+      const cue = findActiveCue(track.cues, t);
+      const cueId = cue ? `${cue.start}|${cue.text}` : "";
+      if (cueId !== lastCueId) {
+        lastCueId = cueId;
+        snap.subText = cue?.text ?? "";
+        snap.subStartSec = cue?.start ?? 0;
+        changed = true;
+      }
     }
-    const cue = findActiveCue(track.cues, t);
-    const cueId = cue ? `${cue.start}|${cue.text}` : "";
-    if (cueId === lastCueId) return;
-    lastCueId = cueId;
-    snap.subText = cue?.text ?? "";
-    snap.subStartSec = cue?.start ?? 0;
-    emit();
+    const second = secondarySubId ? subTracks.find((s) => s.id === secondarySubId) : null;
+    const secondCue = second?.cues ? findActiveCue(second.cues, t) : null;
+    const secondText = secondCue?.text ?? "";
+    if (secondText !== snap.secondarySubText) {
+      snap.secondarySubText = secondText;
+      changed = true;
+    }
+    if (changed) emit();
   };
 
   const cueTickLoop = () => {
@@ -396,10 +408,12 @@ export function createHtml5Bridge(): PlayerBridge {
       }
       subTracks.length = 0;
       activeSubId = null;
+      secondarySubId = null;
       subDelaySec = 0;
       lastCueId = "";
       snap.subText = "";
       snap.subStartSec = 0;
+      snap.secondarySubText = "";
       snap.subDelaySec = 0;
       if (src.subtitles?.length) {
         for (let i = 0; i < src.subtitles.length; i++) {
@@ -529,6 +543,17 @@ export function createHtml5Bridge(): PlayerBridge {
       } else {
         snap.subText = "";
         snap.subStartSec = 0;
+      }
+      refreshSnapshot();
+      tickCues();
+    },
+    setSecondarySubtitleTrack(id) {
+      secondarySubId = id;
+      if (id == null) {
+        snap.secondarySubText = "";
+      } else {
+        const track = subTracks.find((t) => t.id === id);
+        if (track) void ensureLoaded(track);
       }
       refreshSnapshot();
       tickCues();

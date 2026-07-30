@@ -9,6 +9,7 @@ import { Section, ToggleRow } from "./shared";
 import { SubtitleStylePanel } from "./player-panel";
 import { LanguagesPicker } from "./streaming-panel";
 import { DisplayLanguageSection } from "./language-panel/display-language-section";
+import { DualSubtitleSection } from "./language-panel/dual-subtitle-section";
 import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
 
 const IMAGE_LANG_OPTIONS = ["Original", ...ALL_LANGUAGE_NAMES];
@@ -100,6 +101,8 @@ export function LanguagePanel() {
         />
       </div>
     </Section>
+
+    <DualSubtitleSection />
 
     <Section
       title={t("Subtitle style")}

@@ -131,12 +131,22 @@ export function useSleepAtEnd(): boolean {
   return useSyncExternalStore(subscribe, getSleepAtEnd, getSleepAtEnd);
 }
 
+let playingKey: string | null = null;
+
+export function setQueuePlaying(meta: Meta | null, episode?: PlayEpisode): void {
+  const next = meta ? keyOf(meta, episode) : null;
+  if (next === playingKey) return;
+  playingKey = next;
+  queuePruneWatched();
+}
+
 export function queuePruneWatched(): void {
-  const next = items.filter((i) =>
-    i.episode
+  const next = items.filter((i) => {
+    if (playingKey && keyOf(i.meta, i.episode) === playingKey) return true;
+    return i.episode
       ? !isManuallyWatched(i.meta.id, i.episode.season ?? 0, i.episode.episode ?? 0)
-      : !isMovieWatchedLocal(i.meta.id),
-  );
+      : !isMovieWatchedLocal(i.meta.id);
+  });
   if (next.length === items.length) return;
   items = next;
   persist();

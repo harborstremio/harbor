@@ -160,9 +160,11 @@ export function PlaylistVodView({ active }: { active: boolean }) {
             return {
               season: Number(match?.[1]) || 1,
               episode: Number(match?.[2]) || 0,
-              title: channel.name,
+              title: channel.attrs["episode-title"] || channel.name,
               url: channel.url,
               logo: channel.logo,
+              durationSec: channel.durationSec,
+              plot: channel.attrs["episode-plot"] || null,
             };
           });
           const seasons = [...new Set(episodes.map((episode) => episode.season))].sort(

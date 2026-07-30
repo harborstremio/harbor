@@ -18,6 +18,7 @@ import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { currentAuthor } from "@/lib/theme-auth";
 import { useScrollMemory, useView } from "@/lib/view";
+import { pushBackHandler } from "@/lib/back-intercept";
 import { consumeProfileEditIntent } from "@/lib/social/open-profile";
 import { BadgesRow } from "./badges-row";
 import { CommentsSection } from "./comments-section";
@@ -92,6 +93,17 @@ export function ProfileView({
   useEffect(() => {
     if (isOwner && consumeProfileEditIntent(handle)) setEditing(true);
   }, [isOwner, handle]);
+
+  useEffect(() => {
+    if (!editing && !arranging && !pickingLists && expanded == null) return;
+    return pushBackHandler(() => {
+      if (pickingLists) return setPickingLists(false), true;
+      if (expanded != null) return setExpanded(null), true;
+      if (arranging) return setArranging(false), true;
+      if (editing) return setEditing(false), true;
+      return false;
+    });
+  }, [editing, arranging, pickingLists, expanded]);
 
   if (state === "loading") return <ProfileSkeleton />;
   if (state === "error") return <ProfileError onRetry={reload} onBack={goBack} />;

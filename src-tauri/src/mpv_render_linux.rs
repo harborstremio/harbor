@@ -216,16 +216,14 @@ pub fn configure_nvidia_graphics() {
         || std::env::var("WAYLAND_DISPLAY")
             .map(|v| !v.is_empty())
             .unwrap_or(false);
-    if wayland {
-        if std::env::var("__NV_DISABLE_EXPLICIT_SYNC").is_err() {
-            eprintln!("[harbor::mpv_linux] NVIDIA + Wayland detected; setting __NV_DISABLE_EXPLICIT_SYNC=1");
-            std::env::set_var("__NV_DISABLE_EXPLICIT_SYNC", "1");
-        }
-        return;
+    if wayland && std::env::var("__NV_DISABLE_EXPLICIT_SYNC").is_err() {
+        eprintln!("[harbor::mpv_linux] NVIDIA + Wayland detected; setting __NV_DISABLE_EXPLICIT_SYNC=1");
+        std::env::set_var("__NV_DISABLE_EXPLICIT_SYNC", "1");
     }
     if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
         eprintln!(
-            "[harbor::mpv_linux] NVIDIA + X11 detected; setting WEBKIT_DISABLE_DMABUF_RENDERER=1"
+            "[harbor::mpv_linux] NVIDIA + {} detected; setting WEBKIT_DISABLE_DMABUF_RENDERER=1 to stop WebKit crashing in nvidia-eglcore while releasing Skia GL contexts",
+            if wayland { "Wayland" } else { "X11" }
         );
         std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
     }

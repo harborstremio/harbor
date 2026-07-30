@@ -1,5 +1,5 @@
 import { safeFetch } from "@/lib/safe-fetch";
-import { authToken, refreshToken } from "@/lib/theme-auth";
+import { authToken, currentAuthor, refreshToken } from "@/lib/theme-auth";
 import type {
   ActivityItem,
   Badge,
@@ -38,7 +38,19 @@ export class ProfileApiError extends Error {
   }
 }
 
-export function fetchSummary(handle: string, signal?: AbortSignal) {
+function foldHandle(s: string): string {
+  return s.replace(/[‎‏‪-‮⁦-⁩]/g, "").trim().toLowerCase();
+}
+
+function sameHandle(mine: string | null | undefined, viewing: string): boolean {
+  return !!mine && foldHandle(mine) === foldHandle(viewing);
+}
+
+export async function fetchSummary(handle: string, signal?: AbortSignal) {
+  const summary = await getJson<ProfileSummary>(`/u/${encodeURIComponent(handle)}`, signal);
+  if (summary.isOwner) return summary;
+  if (!authToken() || !sameHandle(currentAuthor()?.handle, handle)) return summary;
+  if (!(await refreshToken())) return summary;
   return getJson<ProfileSummary>(`/u/${encodeURIComponent(handle)}`, signal);
 }
 

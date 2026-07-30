@@ -1,6 +1,5 @@
 import { Check, LayoutGrid, Loader2, Palette } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useAuth } from "@/lib/auth";
 import { useTogether } from "@/lib/together/provider";
 import { useProfiles } from "@/lib/profiles";
 import { nameEquals } from "@/lib/account/name-sync";
@@ -63,12 +62,11 @@ export function ProfileSettings({
   onSaved: (next: ProfileSummary) => void;
   onArrange?: () => void;
 }) {
-  const { authKey } = useAuth();
   const { displayName, setDisplayName } = useTogether();
   const { activeProfile, updateProfile } = useProfiles();
   const { settings, update: updateSettings } = useSettings();
   const [form, setForm] = useState<ProfileSettingsInput>({
-    alias: summary.alias,
+    alias: summary.alias?.trim() || summary.handle || "",
     description: summary.description ?? "",
     location: summary.location ?? "",
     pronouns: summary.pronouns ?? "",
@@ -112,7 +110,11 @@ export function ProfileSettings({
   };
 
   const save = async (after?: () => void) => {
-    if (!authKey) return;
+    if (!form.alias.trim()) {
+      setError("Add a display name first. It is the name shown on your profile.");
+      bodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     if (urlBlocked) return setError("That custom url is not available.");
     setSaving(true);
     setError(null);
@@ -152,7 +154,7 @@ export function ProfileSettings({
             </button>
             <button
               onClick={() => void save()}
-              disabled={saving || !form.alias.trim() || urlBlocked}
+              disabled={saving}
               className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               <Check size={18} /> {saving ? "Saving" : "Save"}
@@ -294,7 +296,7 @@ export function ProfileSettings({
                 <button
                   type="button"
                   onClick={() => void save(onArrange)}
-                  disabled={saving || !form.alias.trim() || urlBlocked}
+                  disabled={saving}
                   className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-[10px] px-4 text-[14px] font-medium text-ink ring-1 ring-edge-soft hover:bg-elevated disabled:opacity-40"
                 >
                   <LayoutGrid size={16} /> Arrange

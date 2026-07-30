@@ -60,6 +60,7 @@ export function useAccountMenu() {
       handle = currentAuthor()?.handle;
     }
     if (handle) openProfile(handle);
+    else setAuthOpen(true);
   };
 
   const toggleStatus = () => {

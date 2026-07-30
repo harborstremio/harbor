@@ -7,6 +7,7 @@ import { useView } from "@/lib/view";
 import { dispatchTvNav } from "@/lib/keyboard-navigation";
 import { publishGamepads } from "./store";
 import { resetLiveGamepad, setLiveAxis, setLiveButton } from "./live";
+import { startWebGamepadSource } from "./web-source";
 import type { GamepadEventPayload, GamepadInfo, GpAxis, GpButton } from "./protocol";
 import {
   NAV_AXIS,
@@ -26,9 +27,19 @@ function synthKey({ key, code }: PlayerKey): void {
   window.dispatchEvent(new KeyboardEvent("keyup", init));
 }
 
+let nativePads: GamepadInfo[] = [];
+let webPads: GamepadInfo[] = [];
+
+function publishMerged(): void {
+  publishGamepads([...nativePads, ...webPads]);
+}
+
 function seedList(): void {
   void invoke<GamepadInfo[]>("gamepad_list")
-    .then((list) => publishGamepads(list ?? []))
+    .then((list) => {
+      nativePads = list ?? [];
+      publishMerged();
+    })
     .catch(() => {});
 }
 
@@ -36,6 +47,11 @@ export function useGamepad(): void {
   const { settings } = useSettings();
   const { player } = useView();
   const enabled = settings.controllerSupportEnabled;
+  const backgroundInput = settings.controllerBackgroundInput;
+
+  useEffect(() => {
+    void invoke("gamepad_set_background_input", { allowed: backgroundInput }).catch(() => {});
+  }, [backgroundInput]);
 
   const cfgRef = useRef({
     deadzone: settings.controllerDeadzone,
@@ -157,10 +173,27 @@ export function useGamepad(): void {
       else unlisten = safe;
     });
 
+    const stopWebSource = startWebGamepadSource({
+      onButton: (button, isPressed) => {
+        setLiveButton(button, isPressed);
+        onButton(button, isPressed);
+      },
+      onAxis: (axis, value) => {
+        setLiveAxis(axis, value);
+        onAxis(axis, value);
+      },
+      onPads: (pads) => {
+        webPads = pads;
+        publishMerged();
+      },
+    });
+
     return () => {
       cancelled = true;
       stopAll();
+      stopWebSource();
       axisDir.clear();
+      webPads = [];
       resetLiveGamepad();
       unlisten?.();
       void invoke("gamepad_set_enabled", { enabled: false }).catch(() => {});

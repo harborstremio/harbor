@@ -54,7 +54,22 @@ export function setWindowFullscreen(v: boolean): void {
   emit();
 }
 
+async function maximizeInstead(on: boolean): Promise<boolean> {
+  if (!isTauri()) return false;
+  if (loadStoredSettings().fullscreenMode !== "maximized") return false;
+  try {
+    const { getCurrentWindow } = await import("@tauri-apps/api/window");
+    const w = getCurrentWindow();
+    if (await w.isFullscreen().catch(() => false)) await w.setFullscreen(false).catch(() => {});
+    await (on ? w.maximize() : w.unmaximize()).catch(() => {});
+  } catch {
+    return false;
+  }
+  return true;
+}
+
 export async function enterWindowFullscreen(): Promise<void> {
+  if (await maximizeInstead(true)) return;
   setWindowFullscreen(true);
   if (isTauri()) {
     try {
@@ -73,6 +88,7 @@ export async function exitWindowFullscreen(): Promise<void> {
     suppressNextExit = false;
     return;
   }
+  if (!windowFullscreen && (await maximizeInstead(false))) return;
   setWindowFullscreen(false);
   if (isTauri()) {
     try {

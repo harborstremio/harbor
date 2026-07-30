@@ -33,6 +33,23 @@ export const COUNTRIES: Country[] = [
   { code: "NZ", name: "New Zealand" },
   { code: "ZA", name: "South Africa" },
   { code: "AE", name: "United Arab Emirates" },
+  { code: "SA", name: "Saudi Arabia" },
+  { code: "IQ", name: "Iraq" },
+  { code: "EG", name: "Egypt" },
+  { code: "KW", name: "Kuwait" },
+  { code: "QA", name: "Qatar" },
+  { code: "BH", name: "Bahrain" },
+  { code: "OM", name: "Oman" },
+  { code: "JO", name: "Jordan" },
+  { code: "LB", name: "Lebanon" },
+  { code: "PS", name: "Palestine" },
+  { code: "SY", name: "Syria" },
+  { code: "YE", name: "Yemen" },
+  { code: "MA", name: "Morocco" },
+  { code: "DZ", name: "Algeria" },
+  { code: "TN", name: "Tunisia" },
+  { code: "LY", name: "Libya" },
+  { code: "SD", name: "Sudan" },
 ];
 
 const BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c]));

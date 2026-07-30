@@ -5,8 +5,10 @@ import type { SkipSegment } from "@/lib/skip-intro";
 import type { SpoilerMask } from "@/lib/spoilers";
 import type { PlayEpisode } from "@/lib/view";
 import { useT } from "@/lib/i18n";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 export function SkipPill({
+  engine,
   segment,
   hasNextEp,
   nextEp,
@@ -19,6 +21,7 @@ export function SkipPill({
   onCancelAutoNext,
   onDismiss,
 }: {
+  engine: "html5" | "mpv";
   segment: SkipSegment | null;
   hasNextEp: boolean;
   nextEp: PlayEpisode | null;
@@ -79,6 +82,7 @@ export function SkipPill({
           : t("Skip Credits");
   const action = isOutroNext ? onNextEpisode : onSkip;
   const Icon = isOutroNext ? ChevronsRight : FastForward;
+  const isMpv = engine === "mpv";
 
   return (
     <div
@@ -88,26 +92,50 @@ export function SkipPill({
           : "bottom-40 opacity-0 translate-y-2"
       }`}
     >
-      <button
-        type="button"
-        onClick={action}
-        className={`pointer-events-auto inline-flex items-center gap-2 rounded-full border bg-black/75 px-5 py-2.5 text-[14px] font-semibold text-white shadow-[0_18px_50px_-15px_rgba(0,0,0,0.85)] backdrop-blur-md transition-[background-color,transform] hover:bg-black/90 active:scale-[0.97] ${
-          isAd ? "border-rose-400/50" : "border-white/20"
-        }`}
+      <ThreeLiquidGlassSurface
+        radius="9999px"
+        shaderRadius={0.48}
+        intensity={0.3}
+        refractionStrength={0.08}
+        interactive={false}
+        alwaysActive
+        experimentalStyle={{
+          background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+          backdropFilter: "blur(18px) saturate(1.25)",
+          WebkitBackdropFilter: "blur(18px) saturate(1.25)",
+        }}
+        style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+        className="pointer-events-auto inline-flex h-[42px] w-fit shrink-0"
+        surfaceClassName={`border ${isAd ? "border-rose-400/50" : "border-white/[0.08]"}`}
+        contentClassName="flex h-full w-full"
       >
-        {isAd ? <AdSkipIcon className="h-[18px] w-[18px]" /> : <Icon size={18} strokeWidth={2.2} />}
-        {label}
-      </button>
-      {onDismiss && !isOutroNext && (
-        <button
-          type="button"
-          onClick={onDismiss}
-          aria-label={t("Hide this Skip button")}
-          title={t("Hide this Skip button")}
-          className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/75 text-white/70 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.85)] backdrop-blur-md transition-colors hover:bg-black/90 hover:text-white active:scale-[0.97]"
-        >
-          <X size={16} strokeWidth={2.4} />
+        <button type="button" onClick={action} className="inline-flex h-full w-full items-center gap-2 rounded-full bg-transparent px-5 text-[14px] font-semibold text-white transition-transform active:scale-[0.97]">
+          {isAd ? <AdSkipIcon className="h-[18px] w-[18px]" /> : <Icon size={18} strokeWidth={2.2} />}
+          {label}
         </button>
+      </ThreeLiquidGlassSurface>
+      {onDismiss && !isOutroNext && (
+        <ThreeLiquidGlassSurface
+          radius="9999px"
+          shaderRadius={0.48}
+          intensity={0.3}
+          refractionStrength={0.08}
+          interactive={false}
+          alwaysActive
+          experimentalStyle={{
+            background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+            backdropFilter: "blur(18px) saturate(1.25)",
+            WebkitBackdropFilter: "blur(18px) saturate(1.25)",
+          }}
+          style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+          className="pointer-events-auto h-9 w-9 shrink-0"
+          surfaceClassName="border border-white/[0.08]"
+          contentClassName="flex h-full w-full"
+        >
+          <button type="button" onClick={onDismiss} aria-label={t("Hide this Skip button")} title={t("Hide this Skip button")} className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-white/70 transition-[color,transform] hover:text-white active:scale-[0.97]">
+            <X size={16} strokeWidth={2.4} />
+          </button>
+        </ThreeLiquidGlassSurface>
       )}
     </div>
   );

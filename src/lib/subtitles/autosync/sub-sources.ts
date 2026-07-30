@@ -16,6 +16,7 @@ export type ProviderCtx = {
   enabled?: Partial<Record<SubProviderId, boolean>>;
   netAllowed?: boolean;
   timeoutMs?: number;
+  bypassCache?: boolean;
 };
 
 export type SourceSubCandidate = {
@@ -135,13 +136,15 @@ async function cachedSearch(
 ): Promise<SourceSubCandidate[] | null> {
   const key = `${source.id}|${queryKey(q)}`;
   const now = Date.now();
-  const mem = memCache.get(key);
-  if (mem && mem.expires > now) return mem.value;
-  if (persist.load) {
-    const p = await persist.load(key).catch(() => null);
-    if (p && p.expires > now) {
-      memCache.set(key, p);
-      return p.value;
+  if (!ctx.bypassCache) {
+    const mem = memCache.get(key);
+    if (mem && mem.expires > now) return mem.value;
+    if (persist.load) {
+      const p = await persist.load(key).catch(() => null);
+      if (p && p.expires > now) {
+        memCache.set(key, p);
+        return p.value;
+      }
     }
   }
   if (ctx.netAllowed === false) return null;

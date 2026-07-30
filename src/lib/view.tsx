@@ -8,6 +8,7 @@ import type { StreamingService } from "./settings";
 import { useTogether } from "./together/provider";
 import type { SportsGame } from "./sports/espn";
 import { beginMarathonAdvance } from "./fullscreen-state";
+import { consumeBack } from "./back-intercept";
 
 export type View = "home" | "settings" | "anime" | "discover" | "catalogs" | "addons" | "calendar" | "movies" | "shows" | "kids" | "library" | "live" | "vod" | "downloads" | "wrapped" | "manga" | "people";
 
@@ -475,6 +476,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const canGoForward = forwardStack.length > 0;
 
   const pop = useCallback(() => {
+    if (consumeBack()) return;
     const cur = stackRef.current;
     if (cur.length <= 1) return;
     const nextStack = cur.slice(0, -1);

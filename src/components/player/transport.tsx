@@ -22,6 +22,7 @@ import {
   readPlayerChromeConfig,
   writePlayerChromeConfig,
   type PlayerChromeConfig,
+  type PlayerControlId,
   type TimeFormat,
 } from "@/lib/player-chrome";
 import { renderControl, type ControlContext } from "./transport/control-renderer";
@@ -404,24 +405,29 @@ export function Transport({
     onAnime4kMode,
     anime4kAvailable,
   };
+  const fadeClassName = `transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`;
+  const renderFadedControl = (id: PlayerControlId) => {
+    const control = renderControl(id, ctx);
+    if (control == null || id === "back" || id === "play-pause") return control;
+    return <div className={fadeClassName}>{control}</div>;
+  };
   return (
     <>
       <SongIdToast />
       <div
         data-tauri-drag-region={fullscreen ? undefined : ""}
-        className={`pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between bg-gradient-to-b from-black/55 via-black/15 to-transparent px-7 pt-4 pb-8 transition-opacity duration-300 ${
-          visible ? "opacity-100" : "opacity-0"
-        }`}
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between px-7 pt-4 pb-8"
       >
-        <div className="pointer-events-auto flex items-start gap-2">
+        <div aria-hidden className={`absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-transparent ${fadeClassName}`} />
+        <div className="pointer-events-auto relative flex items-start gap-2">
           {controlsInSlot(chromeConfig, "top-left").map((c) => (
-            <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+            <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
           ))}
         </div>
-        <div className="flex items-start gap-2">
+        <div className="relative flex items-start gap-2">
           <div className="pointer-events-auto flex items-start gap-2">
             {controlsInSlot(chromeConfig, "top-right").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
         </div>
@@ -430,49 +436,50 @@ export function Transport({
       <div
         ref={controlsRef}
         dir="ltr"
-        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 bg-gradient-to-t from-black/70 via-black/25 to-transparent ${
+        className={`pointer-events-none absolute inset-x-0 bottom-0 z-20 flex flex-col gap-2.5 ${
           tight ? "px-3 pt-6 pb-3" : "px-7 pt-10 pb-5"
-        } transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
+        }`}
       >
-        <div dir="ltr" className="pointer-events-auto flex items-center gap-3">
+        <div aria-hidden className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent ${fadeClassName}`} />
+        <div dir="ltr" className="pointer-events-auto relative flex items-center gap-3">
           {isLiveChannel ? (
             <>
-              <LiveBadge />
-              <div className="flex-1">
+              <div className={fadeClassName}><LiveBadge /></div>
+              <div className={`flex-1 ${fadeClassName}`}>
                 <LiveSeekBar durationSec={snap.durationSec} onSeek={onSeek} active={visible} />
               </div>
-              <GoToLive durationSec={snap.durationSec} onSeek={onSeek} />
+              <div className={fadeClassName}><GoToLive durationSec={snap.durationSec} onSeek={onSeek} /></div>
             </>
           ) : (
             <>
               {controlsInSlot(chromeConfig, "seek-leading").map((c) => (
-                <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+                <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
               ))}
-              <div className="flex-1">
+              <div className={`flex-1 ${fadeClassName}`}>
                 <SeekBar durationSec={snap.durationSec} onSeek={onSeek} active={visible} />
               </div>
               {controlsInSlot(chromeConfig, "seek-trailing").map((c) => (
-                <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+                <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
               ))}
             </>
           )}
         </div>
-        <div className={`pointer-events-auto grid items-center ${
+        <div className={`pointer-events-auto relative grid items-center ${
           compact ? "grid-cols-[auto_1fr_auto] gap-2" : "grid-cols-[1fr_auto_1fr] gap-4"
         }`}>
           <div className="flex min-w-0 items-center gap-2 justify-self-start">
             {controlsInSlot(chromeConfig, "bottom-left").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
           <div className="flex items-center gap-1.5">
             {controlsInSlot(chromeConfig, "bottom-center").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
           <div className="flex items-center gap-1.5 justify-self-end">
             {controlsInSlot(chromeConfig, "bottom-right").map((c) => (
-              <Fragment key={c.id}>{renderControl(c.id, ctx)}</Fragment>
+              <Fragment key={c.id}>{renderFadedControl(c.id)}</Fragment>
             ))}
           </div>
         </div>

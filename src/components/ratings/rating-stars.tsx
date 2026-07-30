@@ -3,6 +3,40 @@ import { Star } from "lucide-react";
 
 const STARS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+function fillLevel(n: number, active: number): 0 | 0.5 | 1 {
+  if (active >= n) return 1;
+  if (active === n - 0.5) return 0.5;
+  return 0;
+}
+
+function StarGlyph({ size, fill }: { size: number; fill: 0 | 0.5 | 1 }) {
+  if (fill !== 0.5) {
+    return (
+      <Star
+        size={size}
+        fill={fill ? "currentColor" : "none"}
+        className={fill ? "text-ink" : "text-ink-subtle/25"}
+      />
+    );
+  }
+  return (
+    <span className="relative inline-flex shrink-0" style={{ width: size, height: size }}>
+      <Star size={size} fill="none" className="text-ink-subtle/25" />
+      <span className="absolute inset-y-0 start-0 w-1/2 overflow-hidden">
+        <Star size={size} fill="currentColor" className="text-ink" />
+      </span>
+    </span>
+  );
+}
+
+function valueAt(n: number, e: React.MouseEvent<HTMLElement>): number {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
+  const firstHalf = rtl ? ratio >= 0.5 : ratio < 0.5;
+  return firstHalf ? n - 0.5 : n;
+}
+
 export function RatingStars({
   value,
   onChange,
@@ -29,12 +63,7 @@ export function RatingStars({
         aria-label={ariaLabel ?? `${value} out of 10`}
       >
         {STARS.map((n) => (
-          <Star
-            key={n}
-            size={size}
-            fill={n <= value ? "currentColor" : "none"}
-            className={n <= value ? "text-ink" : "text-ink-subtle/25"}
-          />
+          <StarGlyph key={n} size={size} fill={fillLevel(n, value)} />
         ))}
       </div>
     );
@@ -53,6 +82,7 @@ export function RatingStars({
       aria-valuemin={0}
       aria-valuemax={10}
       aria-valuenow={value}
+      aria-valuetext={`${value} / 10`}
       onMouseLeave={() => set(0)}
     >
       {STARS.map((n) => (
@@ -61,18 +91,12 @@ export function RatingStars({
           type="button"
           aria-label={`${n} / 10`}
           className="flex items-center justify-center rounded-md p-1 outline-none transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.28] focus-visible:scale-[1.28] active:scale-90 motion-reduce:transition-none motion-reduce:hover:scale-100"
-          onMouseEnter={() => set(n)}
+          onMouseMove={(e) => set(valueAt(n, e))}
           onFocus={() => set(n)}
           onBlur={() => set(0)}
-          onClick={() => onChange?.(n)}
+          onClick={(e) => onChange?.(valueAt(n, e))}
         >
-          <Star
-            size={size}
-            fill={n <= active ? "currentColor" : "none"}
-            className={`transition-colors duration-150 ${
-              n <= active ? "text-ink" : "text-ink-subtle/30"
-            }`}
-          />
+          <StarGlyph size={size} fill={fillLevel(n, active)} />
         </button>
       ))}
     </div>

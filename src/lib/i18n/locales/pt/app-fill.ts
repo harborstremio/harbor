@@ -653,6 +653,20 @@ const appFill: Record<string, string> = {
   "Keep the original look, scaled by your size. It multiplies the built-in size, so different releases can still differ.": "Mantém a aparência original, ajustada pelo seu tamanho. Multiplica o tamanho embutido, então lançamentos diferentes ainda podem variar.",
   "Force your size, font, and color onto styled subs so every file looks consistent. Best fix if embedded sizes keep changing, or for Arabic and subs showing boxes. Can affect karaoke and signs.": "Força seu tamanho, fonte e cor nas legendas estilizadas para que todo arquivo fique consistente. Melhor solução se os tamanhos embutidos mudam sempre, ou para árabe e legendas mostrando quadros. Pode afetar karaokê e placas.",
   "Embedded subtitles changing size between titles, or showing empty boxes? Switch to Use my style for a consistent size. For boxes, also choose Arabic under Font.": "Legendas embutidas mudando de tamanho entre títulos ou mostrando quadros vazios? Mude para Usar meu estilo para um tamanho consistente. Para quadros, escolha também Árabe em Fonte.",
+  "Refresh subtitles": "Atualizar legendas",
+  "Search all sources again for more subtitles": "Buscar em todas as fontes novamente por mais legendas",
+  "Searching every source again": "Buscando em todas as fontes novamente",
+  "Pick the subtitle that fits this release": "Escolher a legenda que combina com esta versão",
+  "Already on the closest match for this release": "Já está na legenda mais próxima desta versão",
+  "Switch to {name}: {why}": "Mudar para {name}: {why}",
+  "Switch to {name}": "Mudar para {name}",
+  "Searching every source for more subtitles…": "Buscando mais legendas em todas as fontes…",
+  "Added {count} more subtitles.": "{count} legendas adicionadas.",
+  "No new subtitles found beyond what is already listed.": "Nenhuma legenda nova além das já listadas.",
+  "{time} left": "faltam {time}",
+  "Loading your library…": "Carregando sua biblioteca…",
+  "Keep controlling Harbor in the background": "Continuar controlando o Harbor em segundo plano",
+  "Off by default, so your controller only drives Harbor while it is the focused window. Leave it off if you play games with the same controller.": "Desativado por padrão, para que o controle só comande o Harbor enquanto ele for a janela em foco. Deixe desativado se você joga com o mesmo controle.",
 };
 
 export default appFill;

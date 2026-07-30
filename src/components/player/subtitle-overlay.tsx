@@ -6,9 +6,15 @@ type Props = {
   text: string;
   startSec: number;
   scale?: number;
+  secondaryText?: string;
 };
 
-export const SubtitleOverlay = memo(function SubtitleOverlay({ text, startSec, scale = 1 }: Props) {
+export const SubtitleOverlay = memo(function SubtitleOverlay({
+  text,
+  startSec,
+  scale = 1,
+  secondaryText = "",
+}: Props) {
   const { settings } = useSettings();
   const kid = useActiveKid();
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -44,6 +50,8 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({ text, startSec, s
 
   const justify =
     align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
+  const alignItems =
+    align === "left" ? "items-start" : align === "right" ? "items-end" : "items-center";
 
   const borderSize = useMemo(
     () => Math.max(1, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive)),
@@ -101,23 +109,55 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({ text, startSec, s
 
   const opacity = useMemo(() => clamp(settings.subOpacity ?? 1, 0.1, 1), [settings.subOpacity]);
 
-  if (!text) return null;
-
-  return (
-    <div
-      key={startSec}
-      ref={wrapRef}
-      className={`pointer-events-none absolute inset-x-0 z-10 flex ${justify} px-[6%]`}
-      style={{ bottom: `${marginY}%`, opacity }}
-    >
-      <div className="max-w-[80%]" style={boxStyle}>
-        <div style={baseTextStyle}>
-          {lines.map((line, i) => (
-            <div key={i}>{line}</div>
-          ))}
-        </div>
+  const secondScale = useMemo(
+    () => clamp(settings.subSecondaryScale ?? 0.85, 0.4, 1.4),
+    [settings.subSecondaryScale],
+  );
+  const secondTop = (settings.subSecondaryPlacement ?? "top") === "top";
+  const secondTextStyle: React.CSSProperties = useMemo(
+    () => ({ ...baseTextStyle, fontSize: `${Math.round(fontSize * secondScale)}px` }),
+    [baseTextStyle, fontSize, secondScale],
+  );
+  const secondBlock = secondaryText ? (
+    <div className="max-w-[80%]" style={boxStyle}>
+      <div style={secondTextStyle}>
+        {secondaryText.split("\n").map((line, i) => (
+          <div key={i}>{line}</div>
+        ))}
       </div>
     </div>
+  ) : null;
+
+  if (!text && !secondaryText) return null;
+
+  return (
+    <>
+      {secondBlock && secondTop && (
+        <div
+          className={`pointer-events-none absolute inset-x-0 z-10 flex ${justify} px-[6%]`}
+          style={{ top: `${marginY}%`, opacity }}
+        >
+          {secondBlock}
+        </div>
+      )}
+      <div
+        key={startSec}
+        ref={wrapRef}
+        className={`pointer-events-none absolute inset-x-0 z-10 flex flex-col gap-1.5 ${alignItems} px-[6%]`}
+        style={{ bottom: `${marginY}%`, opacity }}
+      >
+        {secondBlock && !secondTop && secondBlock}
+        {text && (
+          <div className="max-w-[80%]" style={boxStyle}>
+            <div style={baseTextStyle}>
+              {lines.map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 });
 

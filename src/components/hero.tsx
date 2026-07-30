@@ -131,7 +131,7 @@ export const Hero = memo(function Hero({
     const resolve: Promise<{ logo?: string; background?: string }> = isTmdb
       ? Promise.all([
           tmdbLogo(settings.tmdbKey, meta.id, meta.originalLanguage),
-          tmdbMovieImages(settings.tmdbKey, meta.id).then((urls) => urls[0]),
+          tmdbMovieImages(settings.tmdbKey, meta.id, meta.originalLanguage).then((urls) => urls[0]),
         ]).then(([logo, background]) => ({ logo, background }))
       : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) => ({
           logo: full?.logo,

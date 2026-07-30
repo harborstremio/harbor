@@ -44,6 +44,16 @@ export function ControllersPanel() {
           value={enabled}
           onChange={(v) => update({ controllerSupportEnabled: v })}
         />
+        {enabled && (
+          <ToggleRow
+            label={t("Keep controlling Harbor in the background")}
+            sub={t(
+              "Off by default, so your controller only drives Harbor while it is the focused window. Leave it off if you play games with the same controller.",
+            )}
+            value={settings.controllerBackgroundInput}
+            onChange={(v) => update({ controllerBackgroundInput: v })}
+          />
+        )}
       </Section>
 
       <ControllerPreview enabled={enabled} />

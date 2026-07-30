@@ -73,8 +73,6 @@ const settings: Record<string, string> = {
   "Max size (GB)": "الحجم الأقصى (غيغابايت)",
   "Caps file size. Unknown sizes still pass.": "يحدّ من حجم الملف. الأحجام غير المعروفة تمر أيضًا.",
   "No dimensions set. This filter matches every stream.": "لم تُحدَّد أي معايير. هذا الفلتر يطابق كل مصدر.",
-  "Liquid glass row arrows": "أسهم الصفوف بتأثير الزجاج السائل",
-  "Render the row scroll arrows as a refracting liquid-glass button. Off by default; needs WebGL and falls back automatically.": "اعرض أسهم تمرير الصفوف كزر زجاجي سائل يكسر الضوء. معطّل افتراضيًا، ويتطلب WebGL مع تراجع تلقائي عند عدم توفره.",
   "Trying source {n}": "جارٍ تجربة المصدر {n}",
   "Connecting": "جارٍ الاتصال",
   "Last source wasn't actually cached on your debrid yet. Trying another.": "لم يكن المصدر الأخير مخزّنًا فعليًا على debrid الخاص بك بعد. جارٍ تجربة مصدر آخر.",

@@ -403,6 +403,9 @@ const player: Record<string, string> = {
   "{word} {n} seconds. Hold for options": "{word} {n} ثانية. اضغط مطولاً للخيارات",
   "{word} {n}s · hold for options": "{word} {n}ث · اضغط مطولاً للخيارات",
   "Still searching {count} more…": "لا يزال البحث في {count} أخرى…",
+  "2nd": "الثانية",
+  "Show as second subtitle": "عرضها كترجمة ثانية",
+  "Stop showing as second subtitle": "إيقاف عرضها كترجمة ثانية",
 };
 
 export default player;

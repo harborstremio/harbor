@@ -80,9 +80,9 @@ export function useSubtitleChoices(src: PlayerSrc) {
           {
             timeoutMs: 7_000,
             providers: {
-              wyzie: enabled.wyzie ?? true,
-              addons: enabled.addons ?? true,
-              opensubtitles: enabled.opensubtitles ?? true,
+              wyzie: enabled.wyzie === true,
+              addons: enabled.addons !== false,
+              opensubtitles: enabled.opensubtitles !== false,
             },
             addons,
             preferredLangs,

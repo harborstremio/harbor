@@ -15,48 +15,16 @@ export function DisplaySection() {
   return (
     <>
       <PosterCardSection previewPoster={previewPoster} />
-      <ToggleRow
-        label={t("Liquid glass row arrows")}
-        newId="theme:liquid-glass"
-        sub={t("Render the row scroll arrows as a refracting liquid-glass button. Off by default; needs WebGL and falls back automatically.")}
-        value={settings.liquidGlass}
-        onChange={(v) => update({ liquidGlass: v })}
-      />
-      <ToggleRow
-        label={t("Poster dock magnification")}
-        newId="theme:poster-dock"
-        sub={t("Gently magnify nearby posters as you move across a poster row, like a dock. Off by default.")}
-        value={settings.posterDockMagnification}
-        onChange={(posterDockMagnification) => update({ posterDockMagnification })}
-      />
-      {settings.posterDockMagnification && (
-        <div className="flex items-center gap-4 px-1 py-1.5">
-          <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">{t("Animation speed")}</span>
-          <input
-            type="range"
-            min="250"
-            max="1500"
-            step="10"
-            value={settings.posterDockTransitionMs}
-            onChange={(e) => update({ posterDockTransitionMs: Number(e.target.value) })}
-            className="h-1 flex-1 appearance-none rounded-full bg-edge-soft accent-ink"
-          />
-          <span className="w-16 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
-            {settings.posterDockTransitionMs}ms
-          </span>
-          {settings.posterDockTransitionMs !== 760 && (
-            <button
-              type="button"
-              onClick={() => update({ posterDockTransitionMs: 760 })}
-              className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
-            >
-              {t("Reset")}
-            </button>
-          )}
-        </div>
-      )}
-      {settings.liquidGlass && (
-        <>
+      <Section title={t("Liquid Glass")}>
+        <ToggleRow
+          label={t("Use liquid glass")}
+          newId="theme:liquid-glass"
+          sub={t("Use liquid glass for the search pill and row scroll arrows. The appearance settings below are shared by glass surfaces across Harbor.")}
+          value={settings.liquidGlass}
+          onChange={(v) => update({ liquidGlass: v })}
+        />
+        {settings.liquidGlass && (
+          <>
           <ToggleRow
             label={t("Enhanced liquid glass")}
             sub={t("A richer glass treatment. May look better while using more graphics resources.")}
@@ -109,8 +77,9 @@ export function DisplaySection() {
               </div>
             </>
           )}
-        </>
-      )}
+          </>
+        )}
+      </Section>
 
       <Section
         title={t("Sound effects")}
@@ -399,4 +368,3 @@ function SizeSlider({
     </div>
   );
 }
-

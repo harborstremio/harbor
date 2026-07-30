@@ -95,13 +95,24 @@ export async function tmdbDefaultPoster(key: string, metaId: string): Promise<st
   return url;
 }
 
-export async function tmdbMovieImages(key: string, metaId: string): Promise<string[]> {
-  const data = await fetchMovieAssets(key, metaId);
+export async function tmdbMovieImages(
+  key: string,
+  metaId: string,
+  originalLang?: string | null,
+): Promise<string[]> {
+  const data = await fetchMovieAssets(key, metaId, originalLang);
   const seen = new Set<string>();
   const out: string[] = [];
-  for (const b of (data?.backdrops ?? []).sort(
-    (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
-  )) {
+  
+  const score = (b: { iso_639_1?: string | null; vote_average?: number }) => {
+    const r = imageLangRank(b.iso_639_1, originalLang);
+    const base = r >= 0 ? r * 100 : 0;
+    return base + (b.vote_average ?? 0);
+  };
+  
+  const sorted = [...(data?.backdrops ?? [])].sort((a, b) => score(b) - score(a));
+  
+  for (const b of sorted) {
     if (!b.file_path || seen.has(b.file_path)) continue;
     seen.add(b.file_path);
     out.push(`${IMG}/w780${b.file_path}`);

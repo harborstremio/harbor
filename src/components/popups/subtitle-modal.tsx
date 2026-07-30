@@ -16,12 +16,20 @@ export type SubtitleModalState = {
 type Props = {
   state: SubtitleModalState;
   onSelect: (id: string | null) => void;
+  onSelectSecondary: (id: string | null) => void;
   onDelay: (sec: number) => void;
   onAddSubtitle: SubtitleAddHandler;
   onClose: () => void;
 };
 
-export function SubtitleModal({ state, onSelect, onDelay, onAddSubtitle, onClose }: Props) {
+export function SubtitleModal({
+  state,
+  onSelect,
+  onSelectSecondary,
+  onDelay,
+  onAddSubtitle,
+  onClose,
+}: Props) {
   return (
     <div
       className="fixed inset-0 flex items-end justify-end"
@@ -39,6 +47,7 @@ export function SubtitleModal({ state, onSelect, onDelay, onAddSubtitle, onClose
           selectedId={state.selectedId}
           delaySec={state.delaySec}
           onSelect={onSelect}
+          onSelectSecondary={onSelectSecondary}
           onDelay={onDelay}
           onAddSubtitle={onAddSubtitle}
           metaImdbId={state.metaImdbId}

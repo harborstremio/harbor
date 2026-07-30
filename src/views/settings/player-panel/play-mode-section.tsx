@@ -1,5 +1,6 @@
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { STALL_WAIT_OPTIONS, stallWaitSec } from "@/lib/player/stall-wait";
 
 export function PlayModePanel() {
   const { settings, update } = useSettings();
@@ -107,10 +108,37 @@ export function PlayModePanel() {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[15px] font-semibold text-ink">{t("Auto-skip stalled streams")}</span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("If a stream hasn't started playing within 10 seconds (a dead source or an addon that's down), automatically try the next available stream. Off by default.")}
+            {t("If a stream hasn't started playing in time (a dead source or an addon that's down), automatically try the next available stream. Off by default.")}
           </span>
         </div>
       </button>
+      {settings.autoNextStreamOnStall && (
+        <div className="ms-1 flex flex-col gap-2.5 rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4">
+          <span className="text-[13px] font-semibold text-ink">{t("How long to wait first")}</span>
+          <span className="text-[12.5px] leading-snug text-ink-muted">
+            {t("Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.")}
+          </span>
+          <div className="flex flex-wrap gap-2 pt-0.5">
+            {STALL_WAIT_OPTIONS.map((sec) => {
+              const on = stallWaitSec(settings.autoNextStreamOnStallSec) === sec;
+              return (
+                <button
+                  key={sec}
+                  type="button"
+                  onClick={() => update({ autoNextStreamOnStallSec: sec })}
+                  className={`flex h-9 items-center rounded-full px-4 text-[12.5px] font-semibold transition-colors ${
+                    on
+                      ? "bg-ink text-canvas"
+                      : "bg-elevated text-ink-muted ring-1 ring-edge-soft hover:text-ink"
+                  }`}
+                >
+                  {sec >= 60 ? t("1 min") : t("{n} sec", { n: sec })}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <button
         type="button"
         onClick={() => update({ resumePrompt: !settings.resumePrompt })}
@@ -208,6 +236,35 @@ export function PlayModePanel() {
           </span>
         </div>
       </button>
+      <div
+        id="set-fullscreen-mode"
+        className="mt-1 flex scroll-mt-28 flex-col gap-2.5 rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4"
+      >
+        <span className="text-[15px] font-semibold text-ink">{t("What fullscreen does")}</span>
+        <span className="text-[12.5px] leading-snug text-ink-muted">
+          {t("True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.")}
+        </span>
+        <div className="flex flex-wrap gap-2 pt-0.5">
+          {([
+            { id: "fullscreen", label: t("True fullscreen") },
+            { id: "maximized", label: t("Maximize") },
+          ] as const).map((m) => {
+            const on = (settings.fullscreenMode ?? "fullscreen") === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => update({ fullscreenMode: m.id })}
+                className={`flex h-10 items-center rounded-full px-5 text-[13px] font-semibold transition-colors ${
+                  on ? "bg-ink text-canvas" : "bg-elevated text-ink-muted ring-1 ring-edge-soft hover:text-ink"
+                }`}
+              >
+                {m.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <button
         type="button"
         onClick={() => update({ fullscreenRestorePosition: !settings.fullscreenRestorePosition })}

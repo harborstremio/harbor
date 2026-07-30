@@ -92,6 +92,23 @@ export function updateAvailable(s: UpdateState): boolean {
   return s.status === "available" || s.status === "downloading" || s.status === "downloaded";
 }
 
+const BETA_HEADERS = { headers: { "x-harbor-channel": "beta" } };
+
+async function runningPrerelease(): Promise<boolean> {
+  try {
+    const [{ getVersion }, res] = await Promise.all([
+      import("@tauri-apps/api/app"),
+      fetch("https://harbor.site/updates/latest.json", { cache: "no-store" }),
+    ]);
+    if (!res.ok) return false;
+    const stable = (await res.json()) as { version?: string };
+    if (!stable.version) return false;
+    return cmpVersion(await getVersion(), stable.version) > 0;
+  } catch {
+    return false;
+  }
+}
+
 function betaChannel(): boolean {
   try {
     const raw = localStorage.getItem("harbor.settings");
@@ -109,7 +126,11 @@ export async function checkForUpdate(manual = false): Promise<void> {
   }
   set({ status: "checking", manualCheck: manual, error: null });
   try {
-    const update = await check(betaChannel() ? { headers: { "x-harbor-channel": "beta" } } : undefined);
+    const wantBeta = betaChannel();
+    let update = await check(wantBeta ? BETA_HEADERS : undefined);
+    if (!update && !wantBeta && (await runningPrerelease())) {
+      update = await check(BETA_HEADERS);
+    }
     if (!update) {
       set({ status: "uptodate", version: null, notes: null });
       return;
@@ -191,9 +212,10 @@ export async function openManualDownload(): Promise<void> {
   let target = "https://harbor.site";
   try {
     const { safeFetch } = await import("@/lib/safe-fetch");
+    const beta = betaChannel() || (await runningPrerelease());
     const res = await safeFetch(
       "https://harbor.site/updates/latest.json",
-      betaChannel() ? { headers: { "x-harbor-channel": "beta" } } : undefined,
+      beta ? BETA_HEADERS : undefined,
     );
     const manifest = (await res.json()) as { platforms?: Record<string, { url?: string }> };
     const platforms = manifest.platforms ?? {};
@@ -202,7 +224,9 @@ export async function openManualDownload(): Promise<void> {
     const key =
       Object.keys(platforms).find((k) => k.toLowerCase().startsWith(want)) ?? Object.keys(platforms)[0];
     const url = key ? platforms[key]?.url : undefined;
-    if (typeof url === "string" && url) target = url;
+    if (typeof url === "string" && url) {
+      target = url.endsWith(".app.tar.gz") ? `${url.slice(0, -".app.tar.gz".length)}.dmg` : url;
+    }
   } catch {
     /* fall back to the site download */
   }

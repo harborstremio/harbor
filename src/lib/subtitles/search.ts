@@ -6,6 +6,7 @@ import { searchAddons } from "./providers/addons";
 import { searchOpenSubtitlesV3 } from "./providers/opensubtitles-v3";
 import { searchExtraSubSources, toSubResult, type ProviderCtx } from "./autosync/sub-sources";
 import { langScore, normalizeLang } from "./language";
+import { detectSource, parseRelease, releaseAffinity, type ReleaseTags } from "./release-match";
 import { SUBTITLE_PROVIDER_TIMEOUT_MS, withSubtitleTimeout } from "./autoload";
 
 export type SearchOptions = {
@@ -88,45 +89,45 @@ export async function searchSubtitles(
   return ranked;
 }
 
-const RELEASE_GROUP_RX = /[-.][A-Z0-9]{2,}$|\b(EVO|RARBG|YTS|YIFY|FGT|PSA|TBS|GalaxyRG|GalaxyTV|MeGusta|ION10|EZTV|NTb|FLUX|TEPES|KOGi|SMURF|RZeroX|d3g|TGx)\b/gi;
-
-function extractReleaseGroup(text: string | null | undefined): string | null {
-  if (!text) return null;
-  const matches = text.match(RELEASE_GROUP_RX);
-  if (!matches || matches.length === 0) return null;
-  const last = matches[matches.length - 1].replace(/^[-.]/, "").toUpperCase();
-  return last.length >= 2 ? last : null;
+export function streamTagsOf(hints: StreamHints): ReleaseTags {
+  const parsed = parseRelease(hints.release);
+  return {
+    ...parsed,
+    source: detectSource(hints.source) ?? parsed.source,
+    resolution: normalizeResolution(hints.resolution) ?? parsed.resolution,
+  };
 }
 
-function sourceTokens(source: string | null | undefined): string[] {
-  if (!source) return [];
-  const s = source.toLowerCase();
-  if (s.includes("bluray") || s === "remux" || s.includes("bdrip")) return ["bluray", "bdrip", "remux"];
-  if (s.includes("web-dl") || s === "webdl" || s.includes("webrip")) return ["web-dl", "webdl", "webrip", "web"];
-  if (s.includes("hdtv")) return ["hdtv"];
-  if (s.includes("dvd")) return ["dvd", "dvdrip"];
-  return [s];
+function normalizeResolution(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const s = raw.toLowerCase();
+  if (s === "4k" || s === "uhd" || s.includes("2160")) return "2160p";
+  const m = s.match(/(2160|1080|720|576|480)/);
+  return m ? `${m[1]}p` : null;
+}
+
+export function subtitleText(r: SubResult): string {
+  return `${r.release ?? ""} ${r.title ?? ""} ${r.url ?? ""}`;
+}
+
+export function streamMatchDetail(
+  r: SubResult,
+  hints: StreamHints | undefined,
+): { score: number; reasons: string[] } {
+  if (!hints) return { score: 0, reasons: [] };
+  const { score, reasons } = releaseAffinity(streamTagsOf(hints), subtitleText(r));
+  let total = score;
+  const out = [...reasons];
+  if (r.hash === "moviehash") {
+    total += 200;
+    out.unshift("exact file match");
+  }
+  if (r.hearingImpaired && !hints.preferHearingImpaired) total -= 25;
+  return { score: total, reasons: out };
 }
 
 export function streamMatchScore(r: SubResult, hints: StreamHints | undefined): number {
-  if (!hints) return 0;
-  const release = extractReleaseGroup(hints.release);
-  const subText = `${r.release ?? ""} ${r.title ?? ""} ${r.url ?? ""}`.toLowerCase();
-  let score = 0;
-  if (release && subText.includes(release.toLowerCase())) score += 120;
-  const wantSrc = sourceTokens(hints.source);
-  for (const src of wantSrc) {
-    if (subText.includes(src)) {
-      score += 40;
-      break;
-    }
-  }
-  if (hints.resolution) {
-    const res = hints.resolution.toLowerCase();
-    if (subText.includes(res) || (res === "4k" && subText.includes("2160p"))) score += 8;
-  }
-  if (r.hearingImpaired && !hints.preferHearingImpaired) score -= 25;
-  return score;
+  return streamMatchDetail(r, hints).score;
 }
 
 function sourcePriority(source: SubResult["source"]): number {

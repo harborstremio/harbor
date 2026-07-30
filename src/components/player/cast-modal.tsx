@@ -1,5 +1,5 @@
-import { ChevronLeft, ListVideo, Search, X } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChevronLeft, Library, ListVideo, Search, X } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useQueue } from "@/lib/queue";
@@ -13,11 +13,16 @@ import { QueuePanel } from "./cast-modal/queue-panel";
 import { SearchPanel } from "./cast-modal/search-panel";
 import { TitlePanel } from "./cast-modal/title-panel";
 
+const LibraryPanel = lazy(() =>
+  import("./cast-modal/library-panel").then((m) => ({ default: m.LibraryPanel })),
+);
+
 type StackView =
   | { kind: "title"; meta: Meta }
   | { kind: "person"; id: number; name: string }
   | { kind: "search" }
   | { kind: "queue" }
+  | { kind: "library" }
   | { kind: "episodes"; meta: Meta; imdbId: string | null }
   | { kind: "genre"; name: string; genreId?: number; mediaType: "movie" | "tv" };
 
@@ -69,6 +74,8 @@ export function CastModal({
     setStack((s) => (s[s.length - 1].kind === "search" ? s : [...s, { kind: "search" }]));
   const openQueueView = () =>
     setStack((s) => (s[s.length - 1].kind === "queue" ? s : [...s, { kind: "queue" }]));
+  const openLibrary = () =>
+    setStack((s) => (s[s.length - 1].kind === "library" ? s : [...s, { kind: "library" }]));
   const openEpisodes = (m: Meta, id: string | null) =>
     setStack((s) => [...s, { kind: "episodes", meta: m, imdbId: id }]);
   const openGenre = (name: string, genreId: number, mediaType: "movie" | "tv") => {
@@ -192,6 +199,16 @@ export function CastModal({
                 )}
               </button>
             )}
+            {view.kind !== "library" && (
+              <button
+                type="button"
+                onClick={openLibrary}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                aria-label={t("Library")}
+              >
+                <Library size={18} strokeWidth={2.2} />
+              </button>
+            )}
             {view.kind !== "search" && (
               <button
                 type="button"
@@ -266,6 +283,16 @@ export function CastModal({
                 />
               ) : view.kind === "queue" ? (
                 <QueuePanel onPlay={play} currentMeta={meta} currentEpisode={currentEpisode} />
+              ) : view.kind === "library" ? (
+                <Suspense
+                  fallback={
+                    <p className="px-5 py-10 text-center text-[13px] text-white/50">
+                      {t("Loading your library…")}
+                    </p>
+                  }
+                >
+                  <LibraryPanel />
+                </Suspense>
               ) : (
                 <SearchPanel tmdbKey={tmdbKey} onOpenTitle={openTitle} onOpenPerson={openPerson} />
               )}

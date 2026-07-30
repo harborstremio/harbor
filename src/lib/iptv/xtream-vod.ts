@@ -24,7 +24,7 @@ type EpisodeRow = {
   title?: string;
   container_extension?: string;
   season?: string | number;
-  info?: { movie_image?: string };
+  info?: { movie_image?: string; duration_secs?: string | number; plot?: string };
 };
 type SeriesInfo = { episodes?: Record<string, EpisodeRow[]> };
 type XtreamSeries = Pick<SeriesRow, "series_id" | "name" | "cover" | "category_id">;
@@ -172,8 +172,12 @@ export async function fetchXtreamSeriesEpisodes(
         group: series.category_id ?? null,
         url: buildSeriesUrl(creds, ep.id, ep.container_extension),
         catchupSource: null,
-        durationSec: null,
-        attrs: { "tvg-type": "series" },
+        durationSec: Number(ep.info?.duration_secs) || null,
+        attrs: {
+          "tvg-type": "series",
+          ...(ep.title?.trim() ? { "episode-title": ep.title.trim() } : {}),
+          ...(ep.info?.plot?.trim() ? { "episode-plot": ep.info.plot.trim() } : {}),
+        },
       });
     }
   }

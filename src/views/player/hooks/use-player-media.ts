@@ -24,6 +24,7 @@ import { useSubDrop } from "./use-sub-drop";
 import { useSubStyleApply } from "./use-sub-style-apply";
 import { useAssNormalize } from "./use-ass-normalize";
 import { useTrackAutoload } from "./use-track-autoload";
+import { useSecondarySub } from "./use-secondary-sub";
 import { useAutoSync } from "./use-auto-sync";
 import { publishAutoSync } from "@/components/player/autosync/autosync-store";
 import { useVideoDownload } from "./use-video-download";
@@ -176,6 +177,12 @@ export function usePlayerMedia(params: {
     if (!bridgeReady) return;
     bridgeRef.current?.setSubVisible(subNativeRender);
   }, [subEmbed, hdrNativeSurface, subNativeRender, selectedSubTrack?.id, bridgeReady, bridgeKey]);
+  useSecondarySub({
+    bridgeRef,
+    snap,
+    sourceUrl: src.url,
+    lang: settings.secondarySubLang,
+  });
   useEffect(() => {
     clearImportedSubs();
   }, [src.meta.id]);

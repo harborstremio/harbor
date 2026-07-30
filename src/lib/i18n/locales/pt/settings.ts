@@ -72,8 +72,6 @@ const settings: Record<string, string> = {
   "Max size (GB)": "Tamanho máximo (GB)",
   "Caps file size. Unknown sizes still pass.": "Limita o tamanho do arquivo. Tamanhos desconhecidos ainda passam.",
   "No dimensions set. This filter matches every stream.": "Nenhum critério definido. Este filtro corresponde a todas as fontes.",
-  "Liquid glass row arrows": "Setas de rolagem com vidro líquido",
-  "Render the row scroll arrows as a refracting liquid-glass button. Off by default; needs WebGL and falls back automatically.": "Exibe as setas de rolagem das fileiras como um botão de vidro líquido que refrata a luz. Desativado por padrão; requer WebGL e recorre a uma alternativa automaticamente.",
   "Trying source {n}": "Testando a fonte {n}",
   "Last source wasn't actually cached on your debrid yet. Trying another.": "A última fonte ainda não estava em cache no seu debrid. Tentando outra.",
   "A TOP 10 corner ribbon on the Top 10 rail posters. The watchlist marker auto-moves to the opposite corner so nothing overlaps.": "Uma fita TOP 10 no canto dos pôsteres da faixa Top 10. O marcador de watchlist se move automaticamente para o canto oposto para que nada se sobreponha.",

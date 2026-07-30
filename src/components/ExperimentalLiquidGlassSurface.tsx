@@ -78,6 +78,7 @@ export function ExperimentalLiquidGlassSurface({
   const normalizedMotion = clamp(motionStrength, 0, 2);
   const normalizedRadius = clamp(shaderRadius, 0, 1);
   const normalizedSpeed = clamp(motionSpeed, 0, 3);
+  const { transition: callerTransition, ...callerStyle } = style ?? {};
 
   const active = alwaysActive || keyboardActive;
   const activeMix = active ? 1 : 0.22;
@@ -141,8 +142,11 @@ export function ExperimentalLiquidGlassSurface({
       `transform ${transitionMs}ms cubic-bezier(0.2, 0.8, 0.2, 1)`,
       `background ${transitionMs}ms ease`,
       `box-shadow ${transitionMs}ms ease`,
-    ].join(", "),
-    ...style,
+      callerTransition,
+    ]
+      .filter(Boolean)
+      .join(", "),
+    ...callerStyle,
   };
 
   const surfaceStyle: CSSProperties = {

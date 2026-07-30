@@ -6,6 +6,7 @@ export type SubtitleMenuProps = {
   selectedId: string | null;
   delaySec: number;
   onSelect: (id: string | null) => void;
+  onSelectSecondary?: (id: string | null) => void;
   onDelay: (sec: number) => void;
   onEnterSync?: () => void;
   onAddSubtitle: SubtitleAddHandler;

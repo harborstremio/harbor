@@ -31,7 +31,7 @@ export function SidePanel({
       return;
     }
     let cancelled = false;
-    tmdbMovieImages(settings.tmdbKey, meta.id)
+    tmdbMovieImages(settings.tmdbKey, meta.id, meta.originalLanguage)
       .then((urls) => {
         if (cancelled) return;
         setStills(urls);

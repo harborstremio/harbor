@@ -58,9 +58,23 @@ pub fn read_torrents_disabled(app: &tauri::AppHandle) -> bool {
     parse_torrents_disabled(&s)
 }
 
+pub fn read_defer_torrent_engine(app: &tauri::AppHandle) -> bool {
+    let Ok(path) = settings_path(app) else {
+        return false;
+    };
+    let Ok(s) = std::fs::read_to_string(&path) else {
+        return false;
+    };
+    parse_bool_flag(&s, "deferTorrentEngine")
+}
+
 fn parse_torrents_disabled(json: &str) -> bool {
-    let needle = "\"torrentsDisabled\"";
-    let Some(idx) = json.find(needle) else {
+    parse_bool_flag(json, "torrentsDisabled")
+}
+
+fn parse_bool_flag(json: &str, key: &str) -> bool {
+    let needle = format!("\"{}\"", key);
+    let Some(idx) = json.find(&needle) else {
         return false;
     };
     let rest = &json[idx + needle.len()..];

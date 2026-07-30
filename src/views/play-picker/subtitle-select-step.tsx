@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Captions, CaptionsOff, Check, Languages, Loader2, Play } from "lucide-react";
 import { Flag } from "@/components/flag";
+import { useContextMenu } from "@/lib/context-menu";
 import { languageName } from "@/lib/subtitles/language";
+import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
 import type { SubResult } from "@/lib/subtitles/types";
 import { useT } from "@/lib/i18n";
 import type { PlayEpisode, PlayerSrc } from "@/lib/view";
@@ -243,10 +245,26 @@ function TrackRow({
   onPick: () => void;
 }) {
   const t = useT();
+  const { open } = useContextMenu();
   const title = result.title || languageName(result.lang);
   return (
     <button
       onClick={onPick}
+      onContextMenu={(e) =>
+        open(e, {
+          kind: "subtitle",
+          label: title,
+          download: result.url
+            ? () =>
+                saveSubtitleToDisk(result.url, {
+                  title,
+                  lang: result.lang,
+                  format: result.format,
+                  label: t("Subtitle"),
+                })
+            : undefined,
+        })
+      }
       className={`flex min-h-[56px] w-full items-center gap-3.5 rounded-2xl px-4 py-2.5 text-start transition-colors ${
         selected ? "bg-accent/12 ring-1 ring-accent/50" : "hover:bg-canvas/50"
       }`}

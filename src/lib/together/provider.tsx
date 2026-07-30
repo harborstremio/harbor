@@ -3,7 +3,7 @@ import { useSettings } from "@/lib/settings";
 import { randomUuid } from "@/lib/uuid";
 import { TogetherClient, type RoomEvent, type RoomSnapshot } from "./client";
 import { useSelfIdentity } from "./use-self-identity";
-import { relayOutdated } from "./relay-version";
+import { isPublicRelay, relayOutdated } from "./relay-version";
 import { deriveHostSource, deriveRoomGuestPick, type HostSourceInfo, type LastInviteMeta } from "./room-derive";
 import { applyRoomEvent } from "./provider-events";
 import type {
@@ -441,7 +441,10 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
   const hostSource = useMemo(() => deriveHostSource(snapshot), [snapshot]);
   const roomGuestPick = deriveRoomGuestPick(snapshot, clientIdRef.current, lastInviteRef.current);
   const lastInviteProto = lastInviteRef.current?.proto ?? 0;
-  const isRelayOutdated = snapshot.state === "joined" && relayOutdated(snapshot.relayVersion);
+  const isRelayOutdated =
+    snapshot.state === "joined" &&
+    !isPublicRelay(relayUrl ?? "") &&
+    relayOutdated(snapshot.relayVersion);
 
   const value: TogetherValue = useMemo(
     () => ({

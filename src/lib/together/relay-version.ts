@@ -1,4 +1,4 @@
-export const REQUIRED_RELAY_VERSION = 10;
+export const REQUIRED_RELAY_VERSION = 11;
 export const HARBOR_PUBLIC_RELAY = "wss://pub.harbor.site";
 
 export function relayOutdated(version: number | null | undefined): boolean {

@@ -10,8 +10,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ChevronRight } from "lucide-react";
-import { NavChevron } from "./nav-arrow";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
@@ -448,6 +448,8 @@ export function Row({
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    dockPointerXRef.current = null;
+    resetPosterDock();
     if (e.button !== 0 || e.pointerType === "touch") return;
     if (!(e.target as Element).closest("button")) return;
     const el = trackRef.current;
@@ -632,33 +634,39 @@ function EdgeArrow({
 }) {
   const t = useT();
   const label = t(side === "left" ? "Scroll left" : "Scroll right");
-  const enter = side === "left" ? "-translate-x-2.5" : "translate-x-2.5";
-  const chev = !visible
-    ? "opacity-0"
-    : always
-      ? "opacity-100"
-      : `opacity-0 ${enter} scale-[0.6] group-hover/edge:opacity-100 group-hover/edge:translate-x-0 group-hover/edge:scale-100 group-focus-visible/edge:opacity-100 group-focus-visible/edge:translate-x-0 group-focus-visible/edge:scale-100`;
+  const sideClass = side === "left" ? "start-0 justify-start" : "end-0 justify-end";
   return (
     <div
-      className={`pointer-events-none absolute inset-y-0 z-30 flex w-16 -translate-y-[7%] items-center ${
-        side === "left" ? "start-[-40px] justify-start" : "end-[-40px] justify-end"
+      className={`pointer-events-none absolute inset-y-0 z-30 flex w-14 items-center ${sideClass} ${
+        always ? `transition-opacity duration-200 ${visible ? "opacity-100" : "opacity-0"}` : ""
       }`}
     >
-      <button
-        type="button"
-        onClick={onClick}
-        aria-label={label}
-        tabIndex={visible ? 0 : -1}
-        className={`group/edge grid h-full w-full place-items-center ${
-          visible ? "pointer-events-auto" : "pointer-events-none"
+      <ThreeLiquidGlassSurface
+        radius="9999px"
+        shaderRadius={0.58}
+        intensity={0.9}
+        interactive={false}
+        alwaysActive
+        experimentalStyle={{
+          background:
+            "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
+        }}
+        style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+        className={`h-11 w-11 pointer-events-auto border border-white/[0.08] transition-opacity duration-200 ${
+          visible ? "opacity-85 group-hover/row:opacity-100 focus-within:opacity-100" : "pointer-events-none opacity-0"
         }`}
+        contentClassName="flex h-full w-full items-center justify-center"
       >
-        <span
-          className={`grid place-items-center text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] transition-all duration-[320ms] ease-[cubic-bezier(0.34,1.45,0.5,1)] group-active/edge:scale-90 ${chev}`}
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={label}
+          tabIndex={visible ? 0 : -1}
+          className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink outline-none"
         >
-          <NavChevron dir={side} size={54} />
-        </span>
-      </button>
+          {side === "left" ? <ChevronLeft size={22} strokeWidth={2.2} className="dir-icon" /> : <ChevronRight size={22} strokeWidth={2.2} className="dir-icon" />}
+        </button>
+      </ThreeLiquidGlassSurface>
     </div>
   );
 }

@@ -1,16 +1,19 @@
-import { Check, FolderOpen, Languages, Loader2, Search as SearchIcon, SlidersHorizontal, Timer, Wand2, X } from "lucide-react";
+import { Check, FolderOpen, Languages, Loader2, Search as SearchIcon, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Flag } from "@/components/flag";
 import { markImportedSub } from "@/lib/player/imported-subs";
+import { setSecondarySub } from "@/lib/player/secondary-sub";
 import { useT } from "@/lib/i18n";
-import { openSyncBar } from "@/lib/player/sub-sync";
-import { useAutoSyncHandle } from "@/components/player/autosync/autosync-store";
 import { Tooltip } from "../transport/tooltip";
 import { SearchSection } from "./search-section";
 import { VariantRow } from "./variant-row";
+import { MenuHeader } from "./menu-header";
+import { pickBestMatch } from "./best-match";
+import { useSubtitleSearch } from "./subtitle-search-store";
 import { Count, EmptyState, ImportBanner, Tab, ToggleChip } from "./menu-body-parts";
 import type { SubtitleMenuProps } from "./types";
-import { groupByLang, isVeryNewRelease } from "./utils";
+import { subtitleTrackLanguageLabel } from "@/lib/subtitles/track-label";
+import { groupByLang, isVeryNewRelease, variantTitle } from "./utils";
 
 type SourceFilter = "all" | "embedded" | "external";
 const ALL_LANGS = "__all__";
@@ -69,12 +72,28 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   const [localError, setLocalError] = useState<string | null>(null);
   const delayNonZero = delaySec !== 0;
-  const autoSync = useAutoSyncHandle();
   const selectedTrack = useMemo(() => tracks.find((t) => t.id === selectedId) ?? null, [tracks, selectedId]);
-  const autoSyncBusy = autoSync?.status === "analyzing";
-  const autoSyncApplied = autoSync?.status === "synced" || autoSync?.status === "best-effort";
-  const autoSyncOn = autoSyncBusy || autoSyncApplied;
-  const canAutoSync = selectedTrack?.external === true || autoSyncOn;
+  const secondaryTrack = useMemo(() => tracks.find((t) => t.secondary) ?? null, [tracks]);
+  const pickSecondary = props.onSelectSecondary ?? setSecondarySub;
+  const search = useSubtitleSearch();
+
+  const best = useMemo(
+    () => pickBestMatch(visibleVariants, search?.hints ?? null),
+    [visibleVariants, search],
+  );
+  const bestMatchHint = useMemo(() => {
+    if (!best) return null;
+    if (best.track.id === selectedId) return tr("Already on the closest match for this release");
+    const why = best.reasons.slice(0, 2).join(", ");
+    return why
+      ? tr("Switch to {name}: {why}", { name: variantTitle(best.track), why })
+      : tr("Switch to {name}", { name: variantTitle(best.track) });
+  }, [best, selectedId, tr]);
+
+  const applyBestMatch = () => {
+    if (!best || best.track.id === selectedId) return;
+    onSelect(best.track.id);
+  };
 
   const loadLocal = async () => {
     setLocalError(null);
@@ -103,105 +122,15 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* ── Header ── */}
-      <header className="flex items-center justify-between border-b border-edge-soft px-4 py-2.5">
-        <div className="flex items-center gap-2.5">
-          <span className="text-[13.5px] font-semibold text-ink">{tr("Subtitles")}</span>
-          {tracks.length > 0 && (
-            <span className="text-[11.5px] tabular-nums text-ink-subtle">
-              {tracks.length}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Tooltip
-            label={
-              autoSyncBusy
-                ? tr("Cancel auto-sync")
-                : autoSyncApplied
-                  ? tr("Turn off auto-sync")
-                  : canAutoSync
-                    ? tr("Auto-sync this subtitle now")
-                    : tr("Pick an external subtitle to auto-sync")
-            }
-            side="bottom"
-            align="end"
-          >
-            <button
-              type="button"
-              disabled={!canAutoSync}
-              onClick={() => {
-                if (!canAutoSync) return;
-                if (autoSyncOn) {
-                  autoSync?.stop();
-                  return;
-                }
-                autoSync?.run();
-                onClose();
-              }}
-              aria-label={tr("Auto sync")}
-              aria-pressed={autoSyncOn}
-              className={`flex h-9 items-center gap-1.5 rounded-full px-3 text-[12.5px] font-semibold transition-colors ${
-                autoSyncOn
-                  ? "bg-accent text-canvas hover:brightness-110"
-                  : canAutoSync
-                    ? "text-ink-muted hover:bg-raised hover:text-ink"
-                    : "cursor-not-allowed text-ink-subtle/50"
-              }`}
-            >
-              {autoSyncBusy ? (
-                <Loader2 size={14} strokeWidth={2.4} className="animate-spin motion-reduce:animate-none" />
-              ) : (
-                <Wand2 size={14} strokeWidth={2.2} />
-              )}
-              {autoSyncBusy ? tr("Cancel sync") : autoSyncApplied ? tr("Synced: on") : tr("Auto sync")}
-            </button>
-          </Tooltip>
-
-          {/* ── Sync button → opens the floating player-level bar ── */}
-          <Tooltip label={tr("Subtitle sync")} side="bottom" align="end">
-            <button
-              type="button"
-              onClick={() => {
-                openSyncBar();
-                onClose();
-              }}
-              aria-label={tr("Subtitle sync")}
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-            >
-              <Timer size={16} strokeWidth={2} />
-              {/* badge when delay is active */}
-              {delayNonZero && (
-                <span className="absolute end-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent" />
-              )}
-            </button>
-          </Tooltip>
-
-          {/* ── Style bar button ── */}
-          {onOpenStyleBar && (
-            <button
-              type="button"
-              onClick={() => {
-                onOpenStyleBar();
-                onClose();
-              }}
-              aria-label={tr("Subtitle appearance")}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-            >
-              <SlidersHorizontal size={18} strokeWidth={2} />
-            </button>
-          )}
-
-          <button
-            onClick={onClose}
-            aria-label={tr("Close")}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-raised hover:text-ink"
-          >
-            <X size={16} strokeWidth={2.2} />
-          </button>
-        </div>
-      </header>
+      <MenuHeader
+        count={tracks.length}
+        selectedTrack={selectedTrack}
+        delayNonZero={delayNonZero}
+        onOpenStyleBar={onOpenStyleBar}
+        onClose={onClose}
+        onBestMatch={applyBestMatch}
+        bestMatchHint={bestMatchHint}
+      />
 
       {/* ── Body ── */}
       <div className="flex min-h-0 flex-1">
@@ -229,6 +158,27 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             </span>
             {offSelected ? tr("Off") : tr("On")}
           </button>
+
+          {secondaryTrack && (
+            <div className="mt-1 flex items-center gap-1 rounded-md bg-accent/10 px-2 py-1.5 ring-1 ring-accent/25">
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="text-[9.5px] font-bold uppercase tracking-[0.14em] text-accent">
+                  {tr("2nd")}
+                </span>
+                <span className="truncate text-[11px] font-medium text-ink">
+                  {subtitleTrackLanguageLabel(secondaryTrack)}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => pickSecondary(null)}
+                aria-label={tr("Stop showing as second subtitle")}
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+              >
+                <X size={11} strokeWidth={2.6} />
+              </button>
+            </div>
+          )}
 
           {groups.length > 0 && (
             <div className="mt-1.5 mb-0.5 px-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
@@ -312,6 +262,20 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             </div>
           )}
 
+          {search?.status === "searching" && (
+            <p className="flex shrink-0 items-center gap-2 border-b border-edge-soft px-3 py-1.5 text-[11.5px] text-ink-subtle">
+              <Loader2 size={12} className="animate-spin motion-reduce:animate-none" />
+              {tr("Searching every source for more subtitles…")}
+            </p>
+          )}
+          {search?.status === "idle" && search.lastAdded != null && (
+            <p className="shrink-0 border-b border-edge-soft px-3 py-1.5 text-[11.5px] text-ink-subtle">
+              {search.lastAdded > 0
+                ? tr("Added {count} more subtitles.", { count: search.lastAdded })
+                : tr("No new subtitles found beyond what is already listed.")}
+            </p>
+          )}
+
           {searchOpen ? (
             <div className="flex min-h-0 flex-1 flex-col">
               <SearchSection {...props} />
@@ -332,9 +296,13 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
                       key={t.id}
                       track={t}
                       selected={t.id === selectedId}
+                      isSecondary={t.id === secondaryTrack?.id}
                       onPick={() => {
                         onSelect(t.id);
                       }}
+                      onPickSecondary={() =>
+                        pickSecondary(t.id === secondaryTrack?.id ? null : t.id)
+                      }
                     />
                   ))}
                 </div>

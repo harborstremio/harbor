@@ -7,8 +7,9 @@ import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
 import { getCustomIcon, type ControlVariant, type CustomIconMap, type PlayerControlId, type TimeFormat, type VolumeStyle } from "@/lib/player-chrome";
 import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
-import { renderCustomIconControl } from "./custom-icon-renderer";
+import { CustomIcon, renderCustomIconControl } from "./custom-icon-renderer";
 import { hdrFormatLabel, realQualityLabel } from "@/lib/player/resolution-label";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 function getControlState(id: PlayerControlId, ctx: ControlContext): string | undefined {
   const preview = ctx.previewStates?.[id];
@@ -141,22 +142,46 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
   const t = ctx.t ?? translate;
   const state = getControlState(id, ctx);
   const iconUrl = getCustomIcon(ctx.customIcons, id, state);
-  if (iconUrl) {
+  if (iconUrl && id !== "back" && id !== "play-pause") {
     const custom = renderCustomIconControl(id, ctx, iconUrl);
     if (custom !== undefined) return custom;
   }
   switch (id) {
     case "back": {
       if (!ctx.onBack) return null;
+      const isMpv = ctx.engine === "mpv";
       return (
         <Tooltip label={t("Back")} side="bottom">
-          <button
-            onClick={ctx.onBack}
-            aria-label={t("Back")}
-            className="pointer-events-auto flex h-12 w-12 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
+          <ThreeLiquidGlassSurface
+            radius="9999px"
+            shaderRadius={0.48}
+            intensity={0.3}
+            refractionStrength={0.08}
+            interactive={false}
+            alwaysActive
+            experimentalStyle={{
+              background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+              backdropFilter: "blur(18px) saturate(1.25)",
+              WebkitBackdropFilter: "blur(18px) saturate(1.25)",
+            }}
+            style={{
+              transition: "opacity 300ms ease-out",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+            }}
+            className={`h-11 w-11 shrink-0 border border-white/[0.08] transition-opacity duration-300 ${
+              ctx.active ? "opacity-100" : "opacity-0"
+            }`}
+            contentClassName="flex h-full w-full items-center justify-center"
           >
-            <ChevronLeft size={26} strokeWidth={2.2} />
-          </button>
+            <button
+              type="button"
+              onClick={ctx.onBack}
+              aria-label={t("Back")}
+              className="pointer-events-auto flex h-full w-full items-center justify-center rounded-full bg-transparent text-white transition-colors hover:bg-white/[0.06]"
+            >
+              {iconUrl ? <CustomIcon url={iconUrl} size={24} /> : <ChevronLeft size={26} strokeWidth={2.2} />}
+            </button>
+          </ThreeLiquidGlassSurface>
         </Tooltip>
       );
     }
@@ -303,21 +328,51 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       return <SeekStepBtn direction="back" seconds={10} onSeekStep={ctx.onSeekStep} />;
     }
     case "play-pause": {
+      const sizeClass = ctx.tight ? "h-12 w-12" : ctx.compact ? "h-14 w-14" : "h-16 w-16";
+      const iconSize = ctx.tight ? 28 : ctx.compact ? 32 : 36;
+      const isMpv = ctx.engine === "mpv";
       return (
         <Tooltip label={ctx.playing ? t("Pause") : t("Play")}>
-          <button
-            onClick={ctx.onPlayPause}
-            className={`flex items-center justify-center rounded-full bg-white/[0.16] text-white transition-[background-color,transform] hover:bg-white/22 active:scale-95 ${
-              ctx.tight ? "h-12 w-12" : ctx.compact ? "h-14 w-14" : "h-16 w-16"
+          <ThreeLiquidGlassSurface
+            radius="9999px"
+            shaderRadius={0.48}
+            intensity={0.3}
+            refractionStrength={0.08}
+            interactive={false}
+            alwaysActive
+            experimentalStyle={{
+              background: isMpv
+                ? "linear-gradient(145deg, rgba(4,6,10,0.68), rgba(4,6,10,0.60) 48%, rgba(4,6,10,0.66))"
+                : "transparent",
+              backdropFilter: isMpv ? undefined : "blur(18px) saturate(1.25)",
+              WebkitBackdropFilter: isMpv ? undefined : "blur(18px) saturate(1.25)",
+            }}
+            className={`shrink-0 rounded-full border border-white/[0.10] ${sizeClass} transition-opacity duration-300 ${
+              ctx.active ? "opacity-100" : "opacity-0"
             }`}
-            aria-label={ctx.playing ? t("Pause") : t("Play")}
+            contentClassName="h-full w-full bg-transparent"
+            style={{
+              transition: "opacity 300ms ease-out",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+            }}
           >
-            {ctx.playing ? (
-              <PauseCircle size={ctx.tight ? 28 : ctx.compact ? 32 : 36} strokeWidth={1.5} />
-            ) : (
-              <PlayCircle size={ctx.tight ? 28 : ctx.compact ? 32 : 36} strokeWidth={1.5} />
-            )}
-          </button>
+            <button
+              type="button"
+              onClick={ctx.onPlayPause}
+              data-player-play-pause
+              data-tv-initial-focus
+              aria-label={ctx.playing ? t("Pause") : t("Play")}
+              className="relative flex h-full w-full items-center justify-center rounded-full bg-transparent text-white outline-none transition-transform duration-150 active:scale-95"
+            >
+              {iconUrl ? (
+                <CustomIcon url={iconUrl} size={iconSize} />
+              ) : ctx.playing ? (
+                <PauseCircle size={iconSize} strokeWidth={1.5} />
+              ) : (
+                <PlayCircle size={iconSize} strokeWidth={1.5} />
+              )}
+            </button>
+          </ThreeLiquidGlassSurface>
         </Tooltip>
       );
     }

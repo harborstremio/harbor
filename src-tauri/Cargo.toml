@@ -64,7 +64,7 @@ ndarray = { version = "0.16", optional = true }
 whisper-rs = { version = "0.14", optional = true }
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell", "Win32_Graphics_Gdi", "Win32_Graphics_Dxgi", "Win32_Graphics_Dxgi_Common", "Win32_System_Threading", "Win32_System_JobObjects", "Win32_System_ProcessStatus", "Win32_System_Diagnostics_ToolHelp", "Win32_System_SystemInformation", "Win32_System_LibraryLoader", "Win32_System_WinRT", "Media", "Foundation", "Storage_Streams"] }
+windows = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_UI_WindowsAndMessaging", "Win32_UI_Shell", "Win32_Graphics_Gdi", "Win32_Graphics_Dxgi", "Win32_Graphics_Dxgi_Common", "Win32_System_Threading", "Win32_System_Power", "Win32_System_JobObjects", "Win32_System_ProcessStatus", "Win32_System_Diagnostics_ToolHelp", "Win32_System_SystemInformation", "Win32_System_LibraryLoader", "Win32_System_WinRT", "Media", "Foundation", "Storage_Streams"] }
 window-vibrancy = "0.6"
 wasapi = "0.15"
 webview2-com = "0.37"

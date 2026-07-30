@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { HarborLoader } from "@/components/harbor-loader";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
 import type { PanelCorner } from "@/lib/player-chrome";
@@ -30,6 +31,7 @@ function sameEpisode(a: PlayEpisode, b: PlayEpisode): boolean {
 }
 
 export function EpisodePanel({
+  engine,
   open,
   onClose,
   meta,
@@ -41,6 +43,7 @@ export function EpisodePanel({
   nextEp,
   onRestart,
 }: {
+  engine: "html5" | "mpv";
   open: boolean;
   onClose: () => void;
   meta: Meta;
@@ -53,6 +56,7 @@ export function EpisodePanel({
   onRestart?: () => void;
 }) {
   const t = useT();
+  const isMpv = engine === "mpv";
   const { settings, update } = useSettings();
   const { openPicker, replacePlayerSrc } = useView();
   const queue = useQueue();
@@ -72,7 +76,9 @@ export function EpisodePanel({
   const [resolvingFor, setResolvingFor] = useState<PlayEpisode | null>(null);
   const [showEpsOpen, setShowEpsOpen] = useState(false);
   const hasQueue = queue.length > 0;
-  const followQueue = settings.queueDrivesNav && hasQueue && meta.type === "series";
+  const isSeries = meta.type === "series";
+  const followQueue = settings.queueDrivesNav && hasQueue && isSeries;
+  const showQueueList = hasQueue && (followQueue || !isSeries);
   useEffect(() => {
     if (!open) {
       setExpandedEp(null);
@@ -186,8 +192,8 @@ export function EpisodePanel({
       <aside
         role="dialog"
         aria-label={t("Up next")}
-        className={`absolute top-0 flex h-full w-full max-w-[440px] flex-col overflow-hidden bg-surface shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] transition-transform duration-300 ease-out ${
-          corner === "top-left" || corner === "bottom-left" ? "left-0 border-r border-edge-soft" : "right-0 border-l border-edge-soft"
+        className={`absolute top-0 h-full w-full max-w-[440px] overflow-hidden shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] transition-transform duration-300 ease-out ${
+          corner === "top-left" || corner === "bottom-left" ? "left-0" : "right-0"
         } ${
           open
             ? "translate-x-0"
@@ -196,6 +202,40 @@ export function EpisodePanel({
               : "translate-x-full"
         }`}
       >
+        <ThreeLiquidGlassSurface
+          radius={corner === "top-left" || corner === "bottom-left" ? "0 24px 24px 0" : "24px 0 0 24px"}
+          shaderRadius={0.42}
+          intensity={0.1}
+          refractionStrength={0.62}
+          lensStrength={0.9}
+          causticsStrength={0.06}
+          motionSpeed={0.5}
+          interactive={false}
+          alwaysActive
+          style={
+            isMpv
+              ? {
+                  background:
+                    "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+                  boxShadow:
+                    corner === "top-left" || corner === "bottom-left"
+                      ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
+                      : "inset 1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                }
+              : {
+                  background:
+                    "linear-gradient(145deg, rgba(255,255,255,0.055), rgba(10,12,18,0.16) 48%, rgba(255,255,255,0.018))",
+                  WebkitBackdropFilter: "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
+                  backdropFilter: "blur(18px) saturate(1.38) brightness(1.025) contrast(1.025)",
+                  boxShadow:
+                    corner === "top-left" || corner === "bottom-left"
+                      ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
+                      : "inset 1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                }
+          }
+          className={`h-full w-full ${corner === "top-left" || corner === "bottom-left" ? "border-r" : "border-l"} border-white/[0.10]`}
+          contentClassName="relative flex h-full w-full flex-col overflow-hidden"
+        >
         {pickingFor ? (
           <StreamsView
             meta={meta}
@@ -215,13 +255,45 @@ export function EpisodePanel({
                   {meta.name}
                 </h2>
               </div>
-              <button
-                aria-label={t("Close")}
-                onClick={onClose}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-elevated text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+              <ThreeLiquidGlassSurface
+                radius="9999px"
+                shaderRadius={0.5}
+                intensity={0.1}
+                refractionStrength={0.78}
+                lensStrength={1}
+                causticsStrength={0.05}
+                motionSpeed={0.5}
+                interactive={false}
+                alwaysActive
+                style={
+                  isMpv
+                    ? {
+                        background:
+                          "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
+                        boxShadow:
+                          "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                      }
+                    : {
+                        background:
+                          "linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018))",
+                        WebkitBackdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
+                        backdropFilter: "blur(12px) saturate(1.42) brightness(1.035)",
+                        boxShadow:
+                          "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                      }
+                }
+                className="h-11 w-11 shrink-0 border border-white/[0.12]"
+                contentClassName="flex h-full w-full"
               >
-                <X size={18} strokeWidth={2.2} />
-              </button>
+                <button
+                  aria-label={t("Close")}
+                  onClick={onClose}
+                  data-tv-modal-close
+                  className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink-muted transition-[color,transform] hover:text-ink active:scale-[0.96]"
+                >
+                  <X size={18} strokeWidth={2.2} />
+                </button>
+              </ThreeLiquidGlassSurface>
             </header>
             <div className="flex items-center justify-between gap-3 px-6 pb-3">
               {currentEpisode ? (
@@ -258,7 +330,7 @@ export function EpisodePanel({
                   </button>
                 </div>
               )}
-              {followQueue && (
+              {showQueueList && (
                 <QueueUpNext
                   meta={meta}
                   currentEpisode={currentEpisode}
@@ -343,6 +415,7 @@ export function EpisodePanel({
             </footer>
           </>
         )}
+        </ThreeLiquidGlassSurface>
       </aside>
     </div>
   );

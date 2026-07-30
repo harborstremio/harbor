@@ -122,6 +122,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let mpvStarted = false;
   let suppressEndFileUntil = 0;
   let svpFilterFailed = false;
+  let secondarySid: string | null = null;
   const urlByExternalFilename = new Map<
     string,
     { url: string; release?: string; provider?: string; matchScore?: number }
@@ -192,7 +193,13 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           const forced = t.forced === true;
           const isDefault = t.default === true;
           const hearingImpaired = t["hearing-impaired"] === true;
-          const selected = t.selected === true;
+          const mainSelection =
+            typeof t["main-selection"] === "number" ? (t["main-selection"] as number) : null;
+          const isSecondary =
+            type === "sub" &&
+            t.selected === true &&
+            (mainSelection === 1 || (mainSelection == null && id === secondarySid));
+          const selected = t.selected === true && !isSecondary;
           const codec = codecDesc ? codecDesc.toUpperCase() : undefined;
           const baseLabel = title || lang || `${type} ${id}`;
           const tags: string[] = [];
@@ -219,6 +226,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             forced,
             default: isDefault,
             hearingImpaired,
+            secondary: isSecondary,
             url: external && externalFilename ? extMeta?.url : undefined,
             release: extMeta?.release,
             provider: extMeta?.provider,
@@ -234,6 +242,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       if (name === "audio-delay" && typeof data === "number") snap.audioDelaySec = data;
       if (name === "sub-text") snap.subText = typeof data === "string" ? data : "";
       if (name === "sub-start" && typeof data === "number") snap.subStartSec = data;
+      if (name === "secondary-sub-text") {
+        snap.secondarySubText = typeof data === "string" ? data : "";
+      }
       if (name === "dwidth" && typeof data === "number") snap.videoWidth = data;
       if (name === "dheight" && typeof data === "number") snap.videoHeight = data;
       if (name === "video-params/gamma" && typeof data === "string" && data) snap.hdrGamma = data;
@@ -310,6 +321,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.subtitleTracks = [];
       snap.subText = "";
       snap.subStartSec = 0;
+      snap.secondarySubText = "";
+      secondarySid = null;
       snap.positionSec = 0;
       snap.durationSec = 0;
       snap.bufferedSec = 0;
@@ -461,6 +474,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     seek(sec) {
       snap.subText = "";
       snap.subStartSec = 0;
+      snap.secondarySubText = "";
       emit();
       invoke("mpv_command", { cmd: ["seek", sec, "absolute", "exact"] }).catch(() => {});
     },
@@ -493,6 +507,15 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         snap.subStartSec = 0;
         emit();
       }
+    },
+    setSecondarySubtitleTrack(id) {
+      secondarySid = id;
+      snap.secondarySubText = "";
+      emit();
+      invoke("mpv_set_property", {
+        name: "secondary-sid",
+        value: id == null ? "no" : Number(id) || id,
+      }).catch(() => {});
     },
     setSubVisible(on) {
       invoke("mpv_set_property", { name: "sub-visibility", value: on }).catch(() => {});

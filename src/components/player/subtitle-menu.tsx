@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { modalOverlayClose, modalOverlayEmitState, modalOverlayOpen } from "@/lib/modal-overlay";
 import { openStyleBar } from "@/lib/player/sub-presets";
+import { setSecondarySub } from "@/lib/player/secondary-sub";
 import { useT } from "@/lib/i18n";
 import { MenuBody } from "./subtitle-menu/menu-body";
 import type { SubtitleMenuProps } from "./subtitle-menu/types";
@@ -44,6 +45,11 @@ export function SubtitleMenu(props: Props) {
     offs.push(
       listen<{ id: string | null }>("modal://subtitle/select", (e) => {
         propsRef.current.onSelect(e.payload.id);
+      }),
+    );
+    offs.push(
+      listen<{ id: string | null }>("modal://subtitle/secondary", (e) => {
+        setSecondarySub(e.payload.id);
       }),
     );
     offs.push(

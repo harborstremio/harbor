@@ -53,8 +53,13 @@ export const StageOverlays = memo(function StageOverlays({
   const topVolumeShowing = showVolumeIndicator && volumeHudPosition === "top";
   return (
     <>
-      {(!pipMode || subShowInPip) && !subAssNative && (
-        <SubtitleOverlay text={snap.subText} startSec={snap.subStartSec} scale={pipMode ? 0.45 : 1} />
+      {(!pipMode || subShowInPip) && (!subAssNative || snap.secondarySubText) && (
+        <SubtitleOverlay
+          text={subAssNative ? "" : snap.subText}
+          startSec={snap.subStartSec}
+          scale={pipMode ? 0.45 : 1}
+          secondaryText={snap.secondarySubText}
+        />
       )}
       {showStats && !pipMode && <StatsOverlay snap={snap} engine={engine} />}
       {!pipMode && <Anime4kIndicator engine={engine} chromeVisible={chromeVisible} suppressed={topVolumeShowing} />}

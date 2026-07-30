@@ -155,6 +155,13 @@ export function LocalEngineSection() {
         onChange={(v) => update({ keepStreamDownloadsInBackground: v })}
       />
 
+      <ToggleRow
+        label={t("Only start the torrent engine when needed")}
+        sub={t("Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.")}
+        value={settings.deferTorrentEngine}
+        onChange={(v) => update({ deferTorrentEngine: v })}
+      />
+
       <div className="flex items-center gap-2">
         <button
           type="button"

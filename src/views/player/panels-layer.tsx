@@ -8,6 +8,7 @@ import { useT } from "@/lib/i18n";
 import { HeaderWarning, NoAudioWarning } from "./header-warning";
 
 export const PanelsLayer = memo(function PanelsLayer({
+  engine,
   isSeriesPlayback,
   meta,
   currentEpisode,
@@ -33,6 +34,7 @@ export const PanelsLayer = memo(function PanelsLayer({
   onDismissNoAudio,
   onPickAnother,
 }: {
+  engine: "html5" | "mpv";
   isSeriesPlayback: boolean;
   meta: Meta;
   currentEpisode: PlayEpisode | undefined;
@@ -91,6 +93,7 @@ export const PanelsLayer = memo(function PanelsLayer({
 
       {isSeriesPlayback && (
         <EpisodePanel
+          engine={engine}
           open={episodePanelOpen && !episodesHidden}
           onClose={onCloseEpisodePanel}
           meta={meta}

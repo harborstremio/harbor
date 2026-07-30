@@ -380,6 +380,10 @@ async fn ensure_session(app: &AppHandle) -> Result<Arc<Session>, String> {
 }
 
 pub fn ensure_started_on_setup(app: &AppHandle) {
+    if crate::settings_store::read_defer_torrent_engine(app) {
+        eprintln!("[torrent-engine] deferred: starting on first use instead of at launch");
+        return;
+    }
     if crate::settings_store::read_torrents_disabled(app) {
         eprintln!("[torrent-engine] torrents disabled in settings: skipping engine init");
         let mut st = engine().lock().unwrap();
