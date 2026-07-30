@@ -3,7 +3,7 @@ export type AvatarGroup = { group: string; items: AvatarItem[]; transparent?: bo
 
 export const avatarUrl = (id: string): string => `/avatars/${id}.webp`;
 
-export function isRemovedBuiltinAvatar(id: string): boolean {
+export function isRemovedBuiltinAvatar(_id: string | null): boolean {
   return false;
 }
 
