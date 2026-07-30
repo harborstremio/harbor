@@ -64,3 +64,39 @@ export function validateComment(text: string, lastSentAt: number, now: number): 
   if (now - lastSentAt < COMMENT_COOLDOWN_MS) return "cooldown";
   return null;
 }
+
+export const MENTION_RE = /@([a-zA-Z0-9_.-]{2,32})/g;
+
+export function extractMentions(text: string): string[] {
+  const out = new Set<string>();
+  MENTION_RE.lastIndex = 0;
+  for (let m = MENTION_RE.exec(text); m; m = MENTION_RE.exec(text)) {
+    out.add(m[1].toLowerCase());
+  }
+  return [...out];
+}
+
+export type MentionSegment = { text: string; handle?: string };
+
+export function segmentMentions(text: string): MentionSegment[] {
+  const out: MentionSegment[] = [];
+  let last = 0;
+  MENTION_RE.lastIndex = 0;
+  for (let m = MENTION_RE.exec(text); m; m = MENTION_RE.exec(text)) {
+    if (m.index > last) out.push({ text: text.slice(last, m.index) });
+    out.push({ text: m[0], handle: m[1] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push({ text: text.slice(last) });
+  return out.length ? out : [{ text }];
+}
+
+export function activeMentionQuery(
+  value: string,
+  caret: number,
+): { query: string; start: number } | null {
+  const upto = value.slice(0, caret);
+  const m = /(?:^|\s)@([a-zA-Z0-9_.-]{0,32})$/.exec(upto);
+  if (!m) return null;
+  return { query: m[1], start: caret - m[1].length - 1 };
+}

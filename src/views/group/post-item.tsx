@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Heart, Loader2, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
+import { Heart, Loader2, Pencil, Pin, PinOff, Reply, Trash2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useAutosize } from "@/lib/use-autosize";
 import { renderBbcode } from "@/lib/social/bbcode";
@@ -25,6 +25,7 @@ export function PostItem({
   onChanged,
   onRemoved,
   onOpenProfile,
+  onReply,
 }: {
   post: GroupPost;
   groupId: string;
@@ -32,6 +33,7 @@ export function PostItem({
   onChanged: (p: GroupPost) => void;
   onRemoved: (id: string) => void;
   onOpenProfile?: (handle: string) => void;
+  onReply?: (p: GroupPost) => void;
 }) {
   const t = useT();
   const { openMeta, openManga } = useView();
@@ -161,6 +163,13 @@ export function PostItem({
             className="max-w-none break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
             onClick={(e) => {
               const el = e.target as HTMLElement;
+              const mention = el.closest?.("[data-harbor-mention]");
+              const mHandle = mention?.getAttribute("data-harbor-mention");
+              if (mHandle) {
+                e.preventDefault();
+                onOpenProfile?.(mHandle);
+                return;
+              }
               const card = el.closest?.("[data-harbor-media]");
               const mediaId = card?.getAttribute("data-harbor-media");
               if (mediaId) {
@@ -195,6 +204,16 @@ export function PostItem({
             <Heart size={14} strokeWidth={2.2} fill={post.liked ? "currentColor" : "none"} />
             {post.likeCount > 0 && <span className="tabular-nums">{post.likeCount}</span>}
           </button>
+
+          {onReply && !editing && (
+            <button
+              type="button"
+              onClick={() => onReply(post)}
+              className="flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[12px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink active:scale-[0.95]"
+            >
+              <Reply size={14} strokeWidth={2.2} /> {t("Reply")}
+            </button>
+          )}
 
           <div className="flex items-center gap-1 opacity-0 transition-opacity duration-150 focus-within:opacity-100 group-hover/post:opacity-100">
             {post.canEdit && !editing && (

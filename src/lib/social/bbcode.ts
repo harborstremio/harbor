@@ -237,30 +237,64 @@ const CODE_STYLE =
   "border-radius:6px;padding:1px 5px";
 const LIST_STYLE = "margin:8px 0;padding-inline-start:22px;list-style:disc";
 const LINK_STYLE = "color:var(--color-accent);text-decoration:underline";
+const MENTION_STYLE = "color:var(--color-accent);font-weight:600;cursor:pointer";
 
 function trimBr(s: string): string {
   return s.replace(/^(?:<br\/>)+/, "").replace(/(?:<br\/>)+$/, "").trim();
 }
 
-const BARE_URL_RE = /https?:\/\/[^\s<>"']+/gi;
+const HANDLE_RE = /^[a-z0-9_][a-z0-9_.-]{1,31}$/i;
+const INLINE_RE = /(https?:\/\/[^\s<>"']+)|@([a-z0-9_][a-z0-9_.-]{1,31})/gi;
+
+function mentionHtml(handle: string): string {
+  return (
+    `<span data-harbor-mention="${esc(handle)}" role="button" tabindex="0" style="${MENTION_STYLE}">` +
+    `@${esc(handle)}</span>`
+  );
+}
+
+export function extractMentions(body: string): string[] {
+  const out = new Set<string>();
+  const re = new RegExp(INLINE_RE.source, "gi");
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(body))) {
+    if (m[1] || !m[2]) continue;
+    const h = m[2].replace(/[.-]+$/, "").toLowerCase();
+    if (HANDLE_RE.test(h)) out.add(h);
+  }
+  return [...out].slice(0, 20);
+}
 
 function linkifyEscaped(s: string): string {
   let out = "";
   let last = 0;
-  BARE_URL_RE.lastIndex = 0;
+  INLINE_RE.lastIndex = 0;
   let m: RegExpExecArray | null;
-  while ((m = BARE_URL_RE.exec(s))) {
+  while ((m = INLINE_RE.exec(s))) {
     out += esc(s.slice(last, m.index));
-    let raw = m[0];
-    let trail = "";
-    while (/[.,;:!?)\]}'"]$/.test(raw)) {
-      trail = raw.slice(-1) + trail;
-      raw = raw.slice(0, -1);
+    if (m[1]) {
+      let raw = m[1];
+      let trail = "";
+      while (/[.,;:!?)\]}'"]$/.test(raw)) {
+        trail = raw.slice(-1) + trail;
+        raw = raw.slice(0, -1);
+      }
+      const href = linkUrl(raw);
+      out += href
+        ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer nofollow" style="${LINK_STYLE}">${esc(raw)}</a>${esc(trail)}`
+        : esc(m[0]);
+    } else {
+      const prev = m.index > 0 ? s[m.index - 1] : "";
+      let h = m[2];
+      let trail = "";
+      while (/[.-]$/.test(h)) {
+        trail = h.slice(-1) + trail;
+        h = h.slice(0, -1);
+      }
+      out += /[a-z0-9_@/]/i.test(prev) || !HANDLE_RE.test(h)
+        ? esc(m[0])
+        : mentionHtml(h) + esc(trail);
     }
-    const href = linkUrl(raw);
-    out += href
-      ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer nofollow" style="${LINK_STYLE}">${esc(raw)}</a>${esc(trail)}`
-      : esc(m[0]);
     last = m.index + m[0].length;
   }
   out += esc(s.slice(last));

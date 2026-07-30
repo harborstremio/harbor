@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bold, Clapperboard, Eye, Image as ImageIcon, Link2, Loader2, Pencil, Send, Youtube } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useAutosize } from "@/lib/use-autosize";
@@ -25,12 +25,14 @@ export function PostCompose({
   meAvatar,
   meAlias,
   onPosted,
+  quote,
 }: {
   groupId: string;
   groupName: string;
   meAvatar?: string;
   meAlias?: string;
   onPosted: (p: GroupPost) => void;
+  quote?: { n: number; text: string };
 }) {
   const t = useT();
   const [body, setBody] = useState("");
@@ -46,7 +48,18 @@ export function PostCompose({
   const left = MAX - body.length;
   useAutosize(boxRef, body);
   const active = focused || !!trimmed || busy || !!embed || picking;
-
+  useEffect(() => {
+    if (!quote?.n) return;
+    setBody((b) => (b ? `${quote.text}${b}` : quote.text).slice(0, MAX));
+    setPreview(false);
+    requestAnimationFrame(() => {
+      const el = boxRef.current;
+      el?.focus();
+      const pos = el?.value.length ?? 0;
+      el?.setSelectionRange(pos, pos);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quote?.n]);
   const splice = (start: number, end: number, text: string) => {
     setBody((b) => (b.slice(0, start) + text + b.slice(end)).slice(0, MAX));
     requestAnimationFrame(() => {
@@ -55,13 +68,11 @@ export function PostCompose({
       boxRef.current?.setSelectionRange(pos, pos);
     });
   };
-
   const insertEmbed = (bbcode: string) => {
     const at = Math.min(caret.current, body.length);
     const pad = at > 0 && body[at - 1] !== "\n" ? "\n" : "";
     splice(at, at, `${pad}${bbcode}\n`);
   };
-
   const send = async () => {
     if (!trimmed || busy) return;
     setBusy(true);
@@ -75,7 +86,6 @@ export function PostCompose({
       setBusy(false);
     }
   };
-
   return (
     <div className="flex gap-3 rounded-[14px] bg-surface p-3.5 ring-1 ring-edge-soft transition-shadow focus-within:ring-edge">
       <Avatar src={meAvatar} size={38} alias={meAlias} />

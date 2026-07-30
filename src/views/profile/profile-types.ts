@@ -141,6 +141,18 @@ export type Comment = {
   liked?: boolean;
   flagged?: boolean;
   edited?: boolean;
+  replyToId?: string;
+  replyToHandle?: string;
+  replyToAlias?: string;
+  replyToExcerpt?: string;
+  mentions?: string[];
+};
+
+export type ReplyTarget = {
+  id: string;
+  handle: string;
+  alias: string;
+  excerpt: string;
 };
 
 export type CommentPage = {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { deleteComment, fetchComments, postComment, ProfileApiError, setCommentLike } from "./profile-api";
 import type { Comment, LoadState } from "./profile-types";
-import { stripUrls, validateComment, type ComposeIssue } from "./text-safety";
+import { extractMentions, stripUrls, validateComment, type ComposeIssue } from "./text-safety";
 
 export type CommentsController = {
   state: LoadState;
@@ -11,7 +11,7 @@ export type CommentsController = {
   cursor?: string;
   hasMore: boolean;
   loadMore: () => void;
-  submit: (raw: string) => Promise<ComposeIssue>;
+  submit: (raw: string, replyToId?: string) => Promise<ComposeIssue>;
   remove: (id: string) => void;
   toggleLike: (id: string) => void;
   sending: boolean;
@@ -57,14 +57,15 @@ export function useComments(handle: string): CommentsController {
   }, [handle, cursor, authKey]);
 
   const submit = useCallback(
-    async (raw: string): Promise<ComposeIssue> => {
+    async (raw: string, replyToId?: string): Promise<ComposeIssue> => {
       const issue = validateComment(raw, lastSentAt.current, Date.now());
       if (issue) return issue;
       if (!authKey) return "spam";
       const clean = stripUrls(raw.trim());
+      const mentions = extractMentions(clean);
       setSending(true);
       try {
-        const created = await postComment(handle, clean);
+        const created = await postComment(handle, clean, { replyToId, mentions });
         lastSentAt.current = Date.now();
         setComments((cur) => [created, ...cur]);
         setState("ready");

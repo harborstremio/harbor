@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import { CommentCompose } from "./comment-compose";
 import { CommentItem } from "./comment-item";
 import { useComments } from "./use-comments";
+import type { Comment, Friend, ReplyTarget } from "./profile-types";
 
 const COMMENTS_PAGE = 5;
 const COMMENTS_STEP = 12;
@@ -13,19 +14,31 @@ export function CommentsSection({
   isOwner,
   signedIn,
   onOpenAuthor,
+  friends = [],
 }: {
   handle: string;
   isOwner: boolean;
   signedIn: boolean;
   onOpenAuthor?: (h: string) => void;
+  friends?: Friend[];
 }) {
   const t = useT();
   const { state, comments, total, hasMore, loadMore, submit, remove, toggleLike, sending } = useComments(handle);
   const [shown, setShown] = useState(COMMENTS_PAGE);
+  const [replyTo, setReplyTo] = useState<ReplyTarget | null>(null);
 
   useEffect(() => {
     setShown(COMMENTS_PAGE);
+    setReplyTo(null);
   }, [handle]);
+
+  const startReply = (c: Comment) =>
+    setReplyTo({
+      id: c.id,
+      handle: c.authorHandle,
+      alias: c.authorAlias,
+      excerpt: c.body.length > 80 ? `${c.body.slice(0, 80)}…` : c.body,
+    });
 
   const visible = comments.slice(0, shown);
   const hiddenLocal = Math.max(0, comments.length - shown);
@@ -45,7 +58,14 @@ export function CommentsSection({
       </div>
 
       <div className="mb-4">
-        <CommentCompose onSubmit={submit} sending={sending} disabled={!signedIn} />
+        <CommentCompose
+          onSubmit={(raw) => submit(raw, replyTo?.id)}
+          sending={sending}
+          disabled={!signedIn}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
+          friends={friends}
+        />
       </div>
 
       {state === "loading" && (
@@ -83,6 +103,7 @@ export function CommentsSection({
               onDelete={remove}
               onToggleLike={toggleLike}
               onOpenAuthor={onOpenAuthor}
+              onReply={startReply}
             />
           ))}
           {canShowMore && (

@@ -1,13 +1,13 @@
-import { Heart, Trash2 } from "lucide-react";
+import { Heart, Reply, Trash2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { Avatar, timeAgo } from "./profile-bits";
-import { segmentProfanity } from "./text-safety";
+import { segmentMentions, segmentProfanity } from "./text-safety";
 import { UserHoverCard } from "./user-hover-card";
 import { useSelfAvatar } from "./use-self-avatar";
 import type { Comment } from "./profile-types";
 import { VerifiedBadge } from "@/views/account/verified-badge";
 
-function SafeBody({ body }: { body: string }) {
+function SafeBody({ body, onOpenAuthor }: { body: string; onOpenAuthor?: (h: string) => void }) {
   const t = useT();
   const segments = segmentProfanity(body);
   return (
@@ -22,7 +22,19 @@ function SafeBody({ body }: { body: string }) {
             {s.text}
           </span>
         ) : (
-          <span key={i}>{s.text}</span>
+          segmentMentions(s.text).map((m, j) =>
+            m.handle ? (
+              <button
+                key={`${i}-${j}`}
+                onClick={() => onOpenAuthor?.(m.handle as string)}
+                className="rounded-[4px] font-medium text-accent transition-colors hover:underline"
+              >
+                {m.text}
+              </button>
+            ) : (
+              <span key={`${i}-${j}`}>{m.text}</span>
+            ),
+          )
         ),
       )}
     </p>
@@ -43,6 +55,7 @@ export function CommentItem({
   onDelete: (id: string) => void;
   onToggleLike?: (id: string) => void;
   onOpenAuthor?: (handle: string) => void;
+  onReply?: (c: Comment) => void;
 }) {
   const t = useT();
   const self = useSelfAvatar();
@@ -80,8 +93,20 @@ export function CommentItem({
             </span>
           )}
         </div>
-        <SafeBody body={c.body} />
-        <div className="mt-1.5">
+          {c.replyToId && (
+            <button
+              onClick={() => c.replyToHandle && onOpenAuthor?.(c.replyToHandle)}
+              className="mt-1 flex w-full items-center gap-1.5 rounded-[6px] border-s-2 border-edge bg-elevated/40 px-2 py-1 text-left"
+            >
+              <Reply size={12} className="shrink-0 text-ink-subtle" />
+              <span className="shrink-0 text-[12px] font-medium text-ink-subtle">
+                @{c.replyToHandle}
+              </span>
+              <span className="min-w-0 truncate text-[12px] text-ink-subtle">{c.replyToExcerpt}</span>
+            </button>
+          )}
+          <SafeBody body={c.body} onOpenAuthor={onOpenAuthor} />
+          <div className="mt-1.5 flex items-center gap-1">
           <button
             onClick={() => onToggleLike?.(c.id)}
             disabled={!signedIn}

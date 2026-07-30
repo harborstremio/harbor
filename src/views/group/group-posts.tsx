@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, MessagesSquare } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { fetchGroupPosts, type GroupPost } from "@/lib/social/group-posts";
@@ -23,6 +23,20 @@ export function GroupPosts({
   const [canPost, setCanPost] = useState(false);
   const [phase, setPhase] = useState<"loading" | "ready" | "error">("loading");
   const [more, setMore] = useState(false);
+  const [quote, setQuote] = useState({ n: 0, text: "" });
+  const composeRef = useRef<HTMLDivElement>(null);
+
+  const startReply = (p: GroupPost) => {
+  const handle = p.author?.handle;
+  const plain = p.body
+    .replace(/\[[^\]\n]{1,40}\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const short = plain.length > 120 ? `${plain.slice(0, 120)}…` : plain;
+  const head = handle ? `@${handle}: ` : "";
+  setQuote((q) => ({ n: q.n + 1, text: `[quote]${head}${short}[/quote]\n` }));
+  composeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+};
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -63,14 +77,17 @@ export function GroupPosts({
   return (
     <div className="flex flex-col gap-3">
       {canPost && (
+      <div ref={composeRef}>
         <PostCompose
           groupId={detail.id}
           groupName={detail.name}
           meAvatar={meAvatar}
           meAlias={meAlias}
           onPosted={(p) => setPosts((cur) => sort([p, ...cur]))}
+          quote={quote}
         />
-      )}
+      </div>
+    )}
 
       {phase === "loading" ? (
         <div className="flex flex-col gap-3">
@@ -107,6 +124,7 @@ export function GroupPosts({
               onChanged={(next) => setPosts((cur) => sort(cur.map((x) => (x.id === next.id ? next : x))))}
               onRemoved={(id) => setPosts((cur) => cur.filter((x) => x.id !== id))}
               onOpenProfile={onOpenProfile}
+              onReply={canPost ? startReply : undefined}
             />
           ))}
           {cursor && (
