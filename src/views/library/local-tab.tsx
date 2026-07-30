@@ -1,5 +1,12 @@
-import { AlertTriangle, CheckSquare, FolderOpen, FolderPlus, HardDrive, Loader2 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  AlertTriangle,
+  CheckSquare,
+  FolderOpen,
+  FolderPlus,
+  HardDrive,
+  Loader2,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import {
   localEntryToMeta,
   removeLocalEntry,
@@ -11,19 +18,33 @@ import { confirmDialog } from "@/lib/dialog";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { FilterBar, Grid, type TypeKey } from "./shared";
+import { VirtualGrid } from "@/components/virtual-grid";
 import { groupLocal, ShowGroupCard } from "./local-tab/show-group";
 import { ScanModeModal } from "./local-tab/scan-mode-modal";
 import { IdentifyModal, type IdentifyResolution } from "./local-tab/identify-modal";
 import { type LocalCardProps } from "./local-tab/card-actions";
 import { OwnedCard } from "./local-tab/movie-card";
-import { BulkBar, SortMenu, sortGroups, type LocalSortKey, type SortDir } from "./local-tab/toolbar";
+import {
+  BulkBar,
+  GenreMenu,
+  SortMenu,
+  sortGroups,
+  type GenreOption,
+  type LocalSortKey,
+  type SortDir,
+} from "./local-tab/toolbar";
+import { useSettings } from "@/lib/settings";
 import { FoldersModal } from "./local-tab/folders-modal";
 import { useLocalExport } from "./local-tab/use-local-export";
 import { useLocalScan } from "./local-tab/use-local-scan";
+import { LocalCwRow } from "./local-tab/cw-row";
+import { useReportFeatured } from "./featured-context";
 
 type Tr = (key: string, vars?: Record<string, string | number>) => string;
 
-export function LocalTab() {
+/** `scrollRef` is the scroll container the grid virtualizes against. The cast
+ *  modal has no scroller of its own, so it renders the plain grid instead. */
+export function LocalTab({ scrollRef }: { scrollRef?: RefObject<HTMLElement | null> }) {
   const t = useT();
   const { openMeta } = useView();
   const items = useLocalLibrary();
@@ -82,6 +103,8 @@ export function LocalTab() {
     exitSelect();
   }, [selected, exitSelect, t]);
 
+  const { settings } = useSettings();
+
   const bulkExport = useCallback(async () => {
     const list = items.filter((i) => selected.has(i.id) && i.tmdbId != null);
     if (list.length === 0) {
@@ -99,15 +122,41 @@ export function LocalTab() {
     exitSelect();
   }, [items, selected, runExport, exitSelect, t]);
 
+  // Matches the column width Grid derives in ./shared, so the virtualized rows
+  // keep the same density as the rest of the library tabs.
+  const posterWidth = Math.round(150 * settings.posterScale);
   const [type, setType] = useState<TypeKey>("all");
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<LocalSortKey>("added");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [genres, setGenres] = useState<Set<string>>(() => new Set());
+  const genreOptions = useMemo<GenreOption[]>(() => {
+    const counts = new Map<string, number>();
+    for (const it of items) {
+      for (const g of it.genres ?? []) counts.set(g, (counts.get(g) ?? 0) + 1);
+    }
+    return Array.from(counts, ([name, count]) => ({ name, count })).sort(
+      (a, b) => b.count - a.count || a.name.localeCompare(b.name),
+    );
+  }, [items]);
+  const toggleGenre = useCallback((genre: string) => {
+    setGenres((prev) => {
+      const next = new Set(prev);
+      if (next.has(genre)) next.delete(genre);
+      else next.add(genre);
+      return next;
+    });
+  }, []);
+  const clearGenres = useCallback(() => setGenres(new Set()), []);
   const reviewGroups = useMemo(
     () =>
       groupLocal(items)
-        .filter((g) => (g.kind === "movie" ? g.entry.needsReview : g.episodes.some((e) => e.needsReview)))
-        .map((g) => (g.kind === "movie" ? [g.entry] : g.episodes)),
+        .filter((g) =>
+          g.kind === "movie"
+            ? g.versions.some((e) => e.needsReview)
+            : g.episodes.some((e) => e.needsReview),
+        )
+        .map((g) => (g.kind === "movie" ? g.versions : g.episodes)),
     [items],
   );
   const reviewCount = reviewGroups.length;
@@ -125,9 +174,12 @@ export function LocalTab() {
       if (type === "movie" && it.type !== "movie") return false;
       if (type === "series" && it.type !== "show") return false;
       if (q && !(it.title ?? "").toLowerCase().includes(q)) return false;
+      // OR across selected genres; entries scanned before genres were captured
+      // have none and drop out while a genre filter is active.
+      if (genres.size > 0 && !(it.genres ?? []).some((g) => genres.has(g))) return false;
       return true;
     });
-  }, [items, type, query]);
+  }, [items, type, query, genres]);
   const groups = useMemo(
     () => sortGroups(groupLocal(visible), sortKey, sortDir),
     [visible, sortKey, sortDir],
@@ -156,6 +208,18 @@ export function LocalTab() {
       toggleSelect(ids);
     },
     [groups, toggleSelect],
+  );
+
+  // localEntryToMeta returns null without a tmdb/imdb id, and the hero needs a
+  // resolvable id to fetch a backdrop, so unidentified files are left out.
+  useReportFeatured(
+    useMemo(
+      () =>
+        groups
+          .map((g) => localEntryToMeta(g.kind === "movie" ? g.entry : g.head))
+          .filter((m): m is NonNullable<typeof m> => m != null),
+      [groups],
+    ),
   );
 
   const openFirstReview = useCallback(() => {
@@ -189,6 +253,29 @@ export function LocalTab() {
     void scan.onAddFolder();
   }, [scan]);
 
+  const onFixMatchCb = useCallback((e: LocalEntry | LocalEntry[]) => {
+    setIdentify(Array.isArray(e) ? e : [e]);
+  }, []);
+  const onOpenDetailCb = useCallback(
+    (e: LocalEntry) => {
+      const m = localEntryToMeta(e);
+      if (m) openMeta(m);
+    },
+    [openMeta],
+  );
+  // Stable identity keeps the memoized cards from re-rendering on every toast,
+  // scan-progress tick or selection change.
+  const cardProps: LocalCardProps = useMemo(
+    () => ({
+      selectMode,
+      onToggleSelect: selectItems,
+      onFixMatch: onFixMatchCb,
+      onExport: onExportOne,
+      onOpenDetail: onOpenDetailCb,
+    }),
+    [selectMode, selectItems, onFixMatchCb, onExportOne, onOpenDetailCb],
+  );
+
   const modals = (
     <>
       <ScanModeModal
@@ -197,7 +284,11 @@ export function LocalTab() {
         onPick={scan.onPickMode}
         onClose={() => scan.setPending(null)}
       />
-      <IdentifyModal target={identify} onClose={() => setIdentify(null)} onResolved={onResolveIdentify} />
+      <IdentifyModal
+        target={identify}
+        onClose={() => setIdentify(null)}
+        onResolved={onResolveIdentify}
+      />
       <FoldersModal
         isOpen={showFolders}
         folders={scan.folders}
@@ -222,22 +313,15 @@ export function LocalTab() {
     return (
       <>
         {modals}
-        <EmptyOwned onAddFolder={scan.onAddFolder} busy={scan.busy} error={scan.error} progress={scan.progress} />
+        <EmptyOwned
+          onAddFolder={scan.onAddFolder}
+          busy={scan.busy}
+          error={scan.error}
+          progress={scan.progress}
+        />
       </>
     );
   }
-
-  const cardProps: LocalCardProps = {
-    selectMode,
-    selected,
-    onToggleSelect: selectItems,
-    onFixMatch: (e) => setIdentify(Array.isArray(e) ? e : [e]),
-    onExport: onExportOne,
-    onOpenDetail: (e) => {
-      const m = localEntryToMeta(e);
-      if (m) openMeta(m);
-    },
-  };
 
   return (
     <section className="flex flex-col gap-4">
@@ -250,6 +334,12 @@ export function LocalTab() {
         counts={counts}
         trailing={
           <div className="ms-auto flex items-center gap-2">
+            <GenreMenu
+              options={genreOptions}
+              selected={genres}
+              onToggle={toggleGenre}
+              onClear={clearGenres}
+            />
             <SortMenu
               sortKey={sortKey}
               setSortKey={setSortKey}
@@ -294,6 +384,7 @@ export function LocalTab() {
           </div>
         }
       />
+      {!selectMode && <LocalCwRow />}
       {selectMode ? (
         <BulkBar
           count={selected.size}
@@ -323,8 +414,14 @@ export function LocalTab() {
       ) : null}
       <span className="text-[12px] text-ink-muted">
         {items.length === 1
-          ? t("{shown} of {total} file from your computer", { shown: visible.length, total: items.length })
-          : t("{shown} of {total} files from your computer", { shown: visible.length, total: items.length })}
+          ? t("{shown} of {total} file from your computer", {
+              shown: visible.length,
+              total: items.length,
+            })
+          : t("{shown} of {total} files from your computer", {
+              shown: visible.length,
+              total: items.length,
+            })}
       </span>
       {scan.error && (
         <p className="rounded-lg bg-danger/15 px-3 py-2 text-[12px] text-danger ring-1 ring-danger/30">
@@ -332,16 +429,62 @@ export function LocalTab() {
         </p>
       )}
       {groups.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-6 py-10 text-center text-[13px] text-ink-muted">
-          {t("No matches for these filters.")}
-        </p>
+        <div className="flex flex-col gap-1.5 rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-6 py-10 text-center">
+          <p className="text-[13px] text-ink-muted">{t("No matches for these filters.")}</p>
+          {genres.size > 0 && (
+            <p className="text-[12px] text-ink-subtle">
+              {t(
+                "Genres are only recorded for files scanned after this feature was added — re-add a folder to pick them up.",
+              )}
+            </p>
+          )}
+        </div>
+      ) : scrollRef ? (
+        <VirtualGrid
+          items={groups}
+          scrollRef={scrollRef}
+          minColumnWidth={posterWidth}
+          gapX={16}
+          gapY={32}
+          estimateRowHeight={Math.round(posterWidth * 1.5) + 46}
+          getKey={(g) => g.key}
+          renderItem={(g) =>
+            g.kind === "movie" ? (
+              <OwnedCard
+                entry={g.entry}
+                versions={g.versions}
+                isSelected={g.versions.every((v) => selected.has(v.id))}
+                {...cardProps}
+              />
+            ) : (
+              <ShowGroupCard
+                head={g.head}
+                episodes={g.episodes}
+                isSelected={g.episodes.every((e) => selected.has(e.id))}
+                {...cardProps}
+              />
+            )
+          }
+        />
       ) : (
         <Grid>
           {groups.map((g) =>
             g.kind === "movie" ? (
-              <OwnedCard key={g.entry.id} entry={g.entry} {...cardProps} />
+              <OwnedCard
+                key={g.key}
+                entry={g.entry}
+                versions={g.versions}
+                isSelected={g.versions.every((v) => selected.has(v.id))}
+                {...cardProps}
+              />
             ) : (
-              <ShowGroupCard key={g.key} head={g.head} episodes={g.episodes} {...cardProps} />
+              <ShowGroupCard
+                key={g.key}
+                head={g.head}
+                episodes={g.episodes}
+                isSelected={g.episodes.every((e) => selected.has(e.id))}
+                {...cardProps}
+              />
             ),
           )}
         </Grid>
@@ -373,7 +516,9 @@ function EmptyOwned({
       <div className="flex flex-col gap-1.5">
         <h2 className="text-[18px] font-semibold text-ink">{t("Add files from your computer")}</h2>
         <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-          {t("Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.")}
+          {t(
+            "Point Harbor at a folder. We scan it for movies and shows, parse titles from filenames, and enrich them with TMDB so they look the same as everything else here. We just remember the path; nothing is copied or moved.",
+          )}
         </p>
       </div>
       <button
@@ -382,7 +527,11 @@ function EmptyOwned({
         disabled={busy}
         className="flex h-11 items-center gap-2 rounded-full bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-colors hover:bg-ink/90 disabled:cursor-wait disabled:opacity-60"
       >
-        {busy ? <Loader2 size={15} className="animate-spin" /> : <FolderPlus size={15} strokeWidth={2.2} />}
+        {busy ? (
+          <Loader2 size={15} className="animate-spin" />
+        ) : (
+          <FolderPlus size={15} strokeWidth={2.2} />
+        )}
         {busy ? scanLabel(progress, t) : t("Choose folder")}
       </button>
       {error && (

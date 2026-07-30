@@ -8,7 +8,12 @@ import { tmdbIdFromImdb } from "@/lib/providers/tmdb";
 import { useContextMenu } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
 import { readSnapshot, useSnapshotVersion } from "@/lib/snapshots";
-import { episodeFromVideoId, isAnimeCwItem, libraryMetaType, type LibraryItem } from "@/lib/stremio";
+import {
+  episodeFromVideoId,
+  isAnimeCwItem,
+  libraryMetaType,
+  type LibraryItem,
+} from "@/lib/stremio";
 import { useHasNewEpisode } from "@/lib/new-episodes";
 import { Tooltip } from "@/views/detail/tooltip";
 import { useProfiles } from "@/lib/profiles";
@@ -28,9 +33,20 @@ type Props = {
   item: LibraryItem;
   watched?: boolean;
   onDismiss?: (item: LibraryItem) => void;
+  /**
+   * Overrides the default play behaviour. The local library row passes this
+   * because it already knows the file on disk, whereas the default path
+   * re-resolves through playLocalAware and cannot handle a `local:` id.
+   */
+  onPlayOverride?: (episode: PlayEpisode | undefined) => void;
 };
 
-export const ContinueCard = memo(function ContinueCard({ item, watched = false, onDismiss }: Props) {
+export const ContinueCard = memo(function ContinueCard({
+  item,
+  watched = false,
+  onDismiss,
+  onPlayOverride,
+}: Props) {
   const { openMeta, openPicker, openPlayer } = useView();
   const t = useT();
   const { settings, update } = useSettings();
@@ -51,7 +67,9 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
   const remaining = dur > 0 && !isExternal ? formatRemaining(t, dur - off) : "";
   const upNext = item.upNext === true;
   const waitingForAir = (item as Record<string, unknown>).waitingForAir === true;
-  const nextAirDate = waitingForAir ? ((item as Record<string, unknown>).nextAirDate as string | undefined) : undefined;
+  const nextAirDate = waitingForAir
+    ? ((item as Record<string, unknown>).nextAirDate as string | undefined)
+    : undefined;
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     if (!waitingForAir || !nextAirDate) return;
@@ -65,8 +83,10 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
     const days = Math.floor(diff / 86400000);
     const hours = Math.floor((diff % 86400000) / 3600000);
     const minutes = Math.floor((diff % 3600000) / 60000);
-    if (days > 0) return t("Next in {days}d {hours}h", { days: String(days), hours: String(hours) });
-    if (hours > 0) return t("Next in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
+    if (days > 0)
+      return t("Next in {days}d {hours}h", { days: String(days), hours: String(hours) });
+    if (hours > 0)
+      return t("Next in {hours}h {minutes}m", { hours: String(hours), minutes: String(minutes) });
     return t("Next in {minutes}m", { minutes: String(Math.max(1, minutes)) });
   }, [nextAirDate, now, t]);
   const kitsuThreeSeg =
@@ -243,7 +263,10 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
   const episodeTitle = epTitle ?? kitsuVideo?.title ?? null;
 
   const animeSeasonMapped =
-    kitsuVideo && kitsuVideo.imdbSeason != null && kitsuVideo.imdbSeason >= 2 && kitsuVideo.imdbEpisode != null
+    kitsuVideo &&
+    kitsuVideo.imdbSeason != null &&
+    kitsuVideo.imdbSeason >= 2 &&
+    kitsuVideo.imdbEpisode != null
       ? { season: kitsuVideo.imdbSeason, episode: kitsuVideo.imdbEpisode }
       : null;
   const sub = animeSeasonMapped
@@ -321,6 +344,10 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
       const animeId = getAnimeCwId(item._id);
       if (animeId) episode = { ...episode, sourceMetaId: animeId };
     }
+    if (onPlayOverride) {
+      onPlayOverride(episode);
+      return;
+    }
     playLocalAware({
       meta,
       episode: episode ?? null,
@@ -353,109 +380,119 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
         onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
         className="flex w-full min-w-0 flex-col gap-2.5 text-start"
       >
-      <div className="harbor-poster relative aspect-[16/9] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] will-change-transform [transform:translate3d(0,0,0)] transition-transform duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:scale-[1.02]">
-        <div className="absolute inset-0 bg-gradient-to-br from-raised via-elevated to-surface" />
-        {src && (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            decoding="async"
-            onError={() => setImgIdx((i) => i + 1)}
-            className="absolute inset-0 h-full w-full object-cover brightness-95"
-          />
-        )}
-        <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.45)]" />
-        {watched && (
-          <span
-            className="absolute start-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/22 text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm"
-            title={t("Watched on Trakt")}
-          >
-            <Check size={12} strokeWidth={3} />
-          </span>
-        )}
-        {newEpisode > 0 && (
-          <span className={`absolute top-2 ${watched ? "start-10" : "start-2"}`}>
-            <Tooltip
-              label={
-                newEpisode === 1
-                  ? t("1 new episode since you last watched")
-                  : t("{n} new episodes since you last watched", { n: newEpisode })
-              }
-              side="bottom"
-            >
-              <span className="flex h-6 items-center rounded-full bg-accent/90 px-2 text-[10px] font-bold tracking-[0.1em] text-canvas">
-                +{newEpisode}
-              </span>
-            </Tooltip>
-          </span>
-        )}
-        {logo && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+        <div className="harbor-poster relative aspect-[16/9] overflow-hidden rounded-xl bg-elevated shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] will-change-transform [transform:translate3d(0,0,0)] transition-transform duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:scale-[1.02]">
+          <div className="absolute inset-0 bg-gradient-to-br from-raised via-elevated to-surface" />
+          {src && (
             <img
-              src={logo}
+              key={src}
+              src={src}
               alt=""
-              loading="lazy"
               decoding="async"
-              className="max-h-[55%] w-auto max-w-[78%] object-contain opacity-80 transition-opacity duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:opacity-25"
+              onError={() => setImgIdx((i) => i + 1)}
+              className="absolute inset-0 h-full w-full object-cover brightness-95"
             />
-          </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-canvas/80 to-transparent" />
-        {(sub || remaining || isExternal || upNext || episodeTitle) && (
-          <div className="absolute bottom-2 start-2 flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-md bg-canvas/95 px-2 py-1 text-[11px]">
-            {isExternal ? (
-              <img src={simklLogo} alt="" className="h-3.5 w-3.5 shrink-0 rounded-sm" title={t("Paused on Simkl")} />
-            ) : (
-              <Play size={11} fill="currentColor" className="shrink-0 text-ink" />
-            )}
-            {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
-            {waitingForAir && countdown ? (
-              <span className="shrink-0 font-medium text-amber">{countdown}</span>
-            ) : upNext ? (
-              <>
-                {sub && <span className="shrink-0 text-ink-subtle">·</span>}
-                <span className="shrink-0 font-medium text-accent">{t("Up Next")}</span>
-              </>
-            ) : episodeTitle ? (
-              <>
-                {sub && <span className="shrink-0 text-ink-subtle">·</span>}
-                <span className="min-w-0 truncate text-ink-muted">{episodeTitle}</span>
-              </>
-            ) : (
-              remaining && (
+          )}
+          <div className="absolute inset-0 shadow-[inset_0_0_100px_rgba(0,0,0,0.45)]" />
+          {watched && (
+            <span
+              className="absolute start-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/22 text-emerald-200 ring-1 ring-emerald-400/40 backdrop-blur-sm"
+              title={t("Watched on Trakt")}
+            >
+              <Check size={12} strokeWidth={3} />
+            </span>
+          )}
+          {newEpisode > 0 && (
+            <span className={`absolute top-2 ${watched ? "start-10" : "start-2"}`}>
+              <Tooltip
+                label={
+                  newEpisode === 1
+                    ? t("1 new episode since you last watched")
+                    : t("{n} new episodes since you last watched", { n: newEpisode })
+                }
+                side="bottom"
+              >
+                <span className="flex h-6 items-center rounded-full bg-accent/90 px-2 text-[10px] font-bold tracking-[0.1em] text-canvas">
+                  +{newEpisode}
+                </span>
+              </Tooltip>
+            </span>
+          )}
+          {logo && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6">
+              <img
+                src={logo}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="max-h-[55%] w-auto max-w-[78%] object-contain opacity-80 transition-opacity duration-[220ms] ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:opacity-25"
+              />
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-canvas/80 to-transparent" />
+          {(sub || remaining || isExternal || upNext || episodeTitle) && (
+            <div className="absolute bottom-2 start-2 flex max-w-[calc(100%-16px)] items-center gap-1.5 rounded-md bg-canvas/95 px-2 py-1 text-[11px]">
+              {isExternal ? (
+                <img
+                  src={simklLogo}
+                  alt=""
+                  className="h-3.5 w-3.5 shrink-0 rounded-sm"
+                  title={t("Paused on Simkl")}
+                />
+              ) : (
+                <Play size={11} fill="currentColor" className="shrink-0 text-ink" />
+              )}
+              {sub && <span className="shrink-0 font-medium text-ink">{sub}</span>}
+              {waitingForAir && countdown ? (
+                <span className="shrink-0 font-medium text-amber">{countdown}</span>
+              ) : upNext ? (
                 <>
                   {sub && <span className="shrink-0 text-ink-subtle">·</span>}
-                  <span className="shrink-0 text-ink-muted">{remaining}</span>
+                  <span className="shrink-0 font-medium text-accent">{t("Up Next")}</span>
                 </>
-              )
-            )}
-          </div>
-        )}
-        {showWatcher && watcher && (
-          <div
-            className="absolute bottom-2.5 end-2 z-[1]"
-            title={t("Watched by {name}", { name: watcher.name })}
-          >
-            <span
-              className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-elevated text-[11px] font-bold text-white"
-              style={{ boxShadow: `0 0 0 2px ${watcher.color}, 0 2px 8px rgba(0,0,0,0.5)` }}
-            >
-              {watcher.avatar ? (
-                <img src={watcher.avatar} alt="" className="h-full w-full object-cover" draggable={false} />
+              ) : episodeTitle ? (
+                <>
+                  {sub && <span className="shrink-0 text-ink-subtle">·</span>}
+                  <span className="min-w-0 truncate text-ink-muted">{episodeTitle}</span>
+                </>
               ) : (
-                (watcher.name.trim()[0]?.toUpperCase() ?? "?")
+                remaining && (
+                  <>
+                    {sub && <span className="shrink-0 text-ink-subtle">·</span>}
+                    <span className="shrink-0 text-ink-muted">{remaining}</span>
+                  </>
+                )
               )}
-            </span>
+            </div>
+          )}
+          {showWatcher && watcher && (
+            <div
+              className="absolute bottom-2.5 end-2 z-[1]"
+              title={t("Watched by {name}", { name: watcher.name })}
+            >
+              <span
+                className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-elevated text-[11px] font-bold text-white"
+                style={{ boxShadow: `0 0 0 2px ${watcher.color}, 0 2px 8px rgba(0,0,0,0.5)` }}
+              >
+                {watcher.avatar ? (
+                  <img
+                    src={watcher.avatar}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    draggable={false}
+                  />
+                ) : (
+                  (watcher.name.trim()[0]?.toUpperCase() ?? "?")
+                )}
+              </span>
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
+            <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
           </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 h-[3px] bg-canvas/40">
-          <div className="h-full bg-accent" style={{ width: `${progress * 100}%` }} />
         </div>
-      </div>
-      <p className="truncate text-[13px] font-medium text-ink">
-        {translatedTitle || hydratedMeta?.name?.trim() || item.name}
-      </p>
+        <p className="truncate text-[13px] font-medium text-ink">
+          {translatedTitle || hydratedMeta?.name?.trim() || item.name}
+        </p>
       </button>
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center">
         <ThreeLiquidGlassSurface
@@ -466,7 +503,9 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
             background:
               "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
           }}
-          style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+          style={{
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+          }}
           className="pointer-events-none h-14 w-14 scale-95 rounded-full border border-white/[0.10] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
           contentClassName="flex h-full w-full"
         >
@@ -491,7 +530,9 @@ export const ContinueCard = memo(function ContinueCard({ item, watched = false, 
               background:
                 "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
             }}
-            style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+            style={{
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+            }}
             className="pointer-events-none h-9 w-9 scale-95 rounded-full border border-white/[0.09] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
             contentClassName="flex h-full w-full"
           >
@@ -532,7 +573,10 @@ async function resolveTmdbBackdrop(
   return lite?.background ?? undefined;
 }
 
-function formatRemaining(t: (key: string, vars?: Record<string, string | number>) => string, ms: number) {
+function formatRemaining(
+  t: (key: string, vars?: Record<string, string | number>) => string,
+  ms: number,
+) {
   const minutes = Math.max(0, Math.round(ms / 60000));
   if (minutes < 60) return t("{m}m left", { m: minutes });
   const h = Math.floor(minutes / 60);

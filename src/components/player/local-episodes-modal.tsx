@@ -4,6 +4,8 @@ import { ArrowDownWideNarrow, ArrowUpNarrowWide, Play, Wifi, X } from "lucide-re
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { useLocalLibrary, type LocalEntry } from "@/lib/local-library";
+import { sortVersions } from "@/lib/local-library/versions";
+import { LocalVersionBadges } from "@/components/local-version-badges";
 import { meta as fetchCinemetaMeta, type Meta } from "@/lib/cinemeta";
 import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
 import { formatRelativeWatched } from "@/lib/episode-progress";
@@ -17,10 +19,16 @@ import {
 export function LocalEpisodesModal() {
   const state = useSyncExternalStore(subscribeLocalEpisodes, getLocalEpisodes);
   if (!state.open || !state.payload) return null;
-  return <GridModal key={state.payload.tmdbId ?? state.payload.imdbId ?? state.payload.title} payload={state.payload} />;
+  return (
+    <GridModal
+      key={state.payload.tmdbId ?? state.payload.imdbId ?? state.payload.title}
+      payload={state.payload}
+    />
+  );
 }
 
-type SeasonMap = Map<number, Map<number, LocalEntry>>;
+/** Episode -> every file on disk for it, best version first. */
+type SeasonMap = Map<number, Map<number, LocalEntry[]>>;
 
 function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
   const t = useT();
@@ -61,7 +69,15 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
     for (const e of localEps) {
       if (e.season == null || e.episode == null) continue;
       if (!m.has(e.season)) m.set(e.season, new Map());
-      m.get(e.season)!.set(e.episode, e);
+      const byEp = m.get(e.season)!;
+      const arr = byEp.get(e.episode);
+      if (arr) arr.push(e);
+      else byEp.set(e.episode, [e]);
+    }
+    for (const byEp of m.values()) {
+      for (const [ep, arr] of byEp) {
+        if (arr.length > 1) byEp.set(ep, sortVersions(arr));
+      }
     }
     return m;
   }, [localEps]);
@@ -94,7 +110,10 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
   }, [videos]);
 
   const gridSeasons = useMemo(
-    () => Array.from(seasonEpisodeCount.keys()).filter((s) => s > 0).sort((a, b) => a - b),
+    () =>
+      Array.from(seasonEpisodeCount.keys())
+        .filter((s) => s > 0)
+        .sort((a, b) => a - b),
     [seasonEpisodeCount],
   );
   const globalMax = useMemo(
@@ -103,7 +122,10 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
   );
 
   const localSeasons = useMemo(
-    () => Array.from(localBySeason.keys()).filter((s) => s > 0).sort((a, b) => a - b),
+    () =>
+      Array.from(localBySeason.keys())
+        .filter((s) => s > 0)
+        .sort((a, b) => a - b),
     [localBySeason],
   );
   const hasSpecials = localBySeason.has(0);
@@ -134,7 +156,9 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
   }, [resumeIds.join("|"), all]);
 
   const hlSeason =
-    payload.highlightEpisode != null ? payload.initialSeason ?? null : lastWatched?.season ?? null;
+    payload.highlightEpisode != null
+      ? (payload.initialSeason ?? null)
+      : (lastWatched?.season ?? null);
   const hlEpisode = payload.highlightEpisode ?? lastWatched?.episode ?? null;
 
   const initialSeason =
@@ -142,7 +166,7 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
       ? payload.initialSeason
       : hlSeason != null && localBySeason.has(hlSeason)
         ? hlSeason
-        : localSeasons[0] ?? (hasSpecials ? 0 : 1);
+        : (localSeasons[0] ?? (hasSpecials ? 0 : 1));
   const [selected, setSelected] = useState<number>(initialSeason);
   useEffect(() => {
     const valid = selected === 0 ? hasSpecials : localSeasons.includes(selected);
@@ -150,11 +174,21 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
   }, [localSeasons, hasSpecials, selected]);
 
   const listEps = useMemo(() => {
-    const eps = Array.from(localBySeason.get(selected)?.values() ?? []).sort(
-      (a, b) => (a.episode ?? 0) - (b.episode ?? 0),
+    // Flatten versions so a second file for the same episode stays reachable.
+    const byEp = Array.from(localBySeason.get(selected)?.entries() ?? []).sort(
+      (a, b) => a[0] - b[0],
     );
-    return sortDesc ? eps.reverse() : eps;
+    if (sortDesc) byEp.reverse();
+    return byEp.flatMap(([, versions]) => versions);
   }, [localBySeason, selected, sortDesc]);
+
+  const multiVersionEpisodes = useMemo(() => {
+    const out = new Set<number>();
+    for (const [ep, versions] of localBySeason.get(selected) ?? []) {
+      if (versions.length > 1) out.add(ep);
+    }
+    return out;
+  }, [localBySeason, selected]);
 
   const epLabel = (n: number | null | undefined) => `E${String(n ?? 0).padStart(2, "0")}`;
   const sortLabel =
@@ -206,11 +240,16 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
             />
           )}
           <div className="flex min-w-0 flex-1 flex-col">
-            <h2 className="truncate font-display text-[18px] font-medium text-ink" title={payload.title}>
+            <h2
+              className="truncate font-display text-[18px] font-medium text-ink"
+              title={payload.title}
+            >
               {payload.title}
             </h2>
             <span className="text-[12px] text-ink-subtle">
-              {localEps.length === 1 ? t("1 episode on disk") : t("{n} episodes on disk", { n: localEps.length })}
+              {localEps.length === 1
+                ? t("1 episode on disk")
+                : t("{n} episodes on disk", { n: localEps.length })}
             </span>
           </div>
           <button
@@ -324,57 +363,63 @@ function GridModal({ payload }: { payload: LocalEpisodesPayload }) {
                 pr && ep.runtime && ep.runtime > 0 ? Math.min(1, pr.ms / (ep.runtime * 60_000)) : 0;
               const watchedAgo = pr ? formatRelativeWatched(pr.t) : "";
               return (
-              <button
-                key={ep.id}
-                type="button"
-                onClick={() => play(ep)}
-                className={`group/ep relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-raised ${
-                  isHighlight ? "bg-accent/10 ring-1 ring-accent" : ""
-                }`}
-              >
-                <span className="flex h-8 w-11 shrink-0 items-center justify-center rounded-md bg-canvas/60 font-mono text-[12px] font-bold tabular-nums text-ink-muted ring-1 ring-edge-soft">
-                  {`E${String(ep.episode ?? 0).padStart(2, "0")}`}
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-[13px] text-ink" title={ep.filename}>
-                    {episodeNames.get(`${ep.season}x${ep.episode}`) ?? ep.filename}
+                <button
+                  key={ep.id}
+                  type="button"
+                  onClick={() => play(ep)}
+                  autoFocus={isHighlight}
+                  data-tv-initial-focus={isHighlight || undefined}
+                  className={`group/ep relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-raised ${
+                    isHighlight ? "bg-accent/10 ring-1 ring-accent" : ""
+                  }`}
+                >
+                  <span className="flex h-8 w-11 shrink-0 items-center justify-center rounded-md bg-canvas/60 font-mono text-[12px] font-bold tabular-nums text-ink-muted ring-1 ring-edge-soft">
+                    {`E${String(ep.episode ?? 0).padStart(2, "0")}`}
                   </span>
-                  {episodeNames.has(`${ep.season}x${ep.episode}`) && (
-                    <span className="truncate text-[11px] text-ink-subtle" title={ep.filename}>
-                      {ep.filename}
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-[13px] text-ink" title={ep.filename}>
+                      {episodeNames.get(`${ep.season}x${ep.episode}`) ?? ep.filename}
+                    </span>
+                    {episodeNames.has(`${ep.season}x${ep.episode}`) && (
+                      <span className="truncate text-[11px] text-ink-subtle" title={ep.filename}>
+                        {ep.filename}
+                      </span>
+                    )}
+                    {pr &&
+                      (ratio > 0.01 ? (
+                        <span className="text-[11px] text-accent/85">
+                          {t("{pct}% watched", { pct: Math.round(ratio * 100) })}
+                          {watchedAgo ? ` · ${watchedAgo}` : ""}
+                        </span>
+                      ) : (
+                        watchedAgo && (
+                          <span className="text-[11px] text-emerald-300/85">
+                            {t("Watched {ago}", { ago: watchedAgo })}
+                          </span>
+                        )
+                      ))}
+                  </span>
+                  {ep.episode != null && multiVersionEpisodes.has(ep.episode) ? (
+                    <LocalVersionBadges entry={ep} className="shrink-0 justify-end" />
+                  ) : (
+                    ep.resolution && (
+                      <span className="shrink-0 rounded-md bg-raised px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+                        {ep.resolution}
+                      </span>
+                    )
+                  )}
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors group-hover/ep:bg-ink group-hover/ep:text-canvas">
+                    <Play size={13} strokeWidth={2.4} fill="currentColor" className="ml-0.5" />
+                  </span>
+                  {ratio > 0.01 && (
+                    <span className="absolute inset-x-0 bottom-0 h-[2px] bg-edge">
+                      <span
+                        className="block h-full bg-accent"
+                        style={{ width: `${Math.max(2, ratio * 100)}%` }}
+                      />
                     </span>
                   )}
-                  {pr &&
-                    (ratio > 0.01 ? (
-                      <span className="text-[11px] text-accent/85">
-                        {t("{pct}% watched", { pct: Math.round(ratio * 100) })}
-                        {watchedAgo ? ` · ${watchedAgo}` : ""}
-                      </span>
-                    ) : (
-                      watchedAgo && (
-                        <span className="text-[11px] text-emerald-300/85">
-                          {t("Watched {ago}", { ago: watchedAgo })}
-                        </span>
-                      )
-                    ))}
-                </span>
-                {ep.resolution && (
-                  <span className="shrink-0 rounded-md bg-raised px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
-                    {ep.resolution}
-                  </span>
-                )}
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors group-hover/ep:bg-ink group-hover/ep:text-canvas">
-                  <Play size={13} strokeWidth={2.4} fill="currentColor" className="ml-0.5" />
-                </span>
-                {ratio > 0.01 && (
-                  <span className="absolute inset-x-0 bottom-0 h-[2px] bg-edge">
-                    <span
-                      className="block h-full bg-accent"
-                      style={{ width: `${Math.max(2, ratio * 100)}%` }}
-                    />
-                  </span>
-                )}
-              </button>
+                </button>
               );
             })}
             {listEps.length === 0 && (
@@ -417,7 +462,9 @@ function SeasonPill({
       type="button"
       onClick={onClick}
       className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-        active ? "bg-ink text-canvas" : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-raised hover:text-ink"
+        active
+          ? "bg-ink text-canvas"
+          : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-raised hover:text-ink"
       }`}
     >
       {children}

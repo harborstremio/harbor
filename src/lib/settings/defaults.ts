@@ -363,6 +363,7 @@ export const DEFAULT: Settings = {
   libraryBookmarkedOnly: true,
   librarySort: "recent",
   preferCustomMetaAddon: false,
+  cinemetaEnabled: true,
   animeOnlyInAnimeRoom: true,
   animeCwEnd: "hide",
   cwAdvanceNext: true,

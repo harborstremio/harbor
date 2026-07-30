@@ -3,13 +3,14 @@ import {
   CheckSquare,
   Download,
   Info,
+  Layers,
   Play,
   RefreshCw,
   Square,
   Trash2,
   Wand2,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Poster } from "@/components/poster";
 import { removeLocalEntry, type LocalEntry } from "@/lib/local-library";
 import { useView } from "@/lib/view";
@@ -18,35 +19,50 @@ import { LocalBadge } from "@/components/local-badge";
 import { CardIconButton, type LocalCardProps } from "./card-actions";
 import { episodeLabel, localPlayerSrc } from "./show-group";
 import { useLocalPoster } from "./use-local-poster";
+import { openLocalVersions } from "@/lib/player/local-versions-modal";
 
-export function OwnedCard({
+function OwnedCardImpl({
   entry,
+  versions,
   selectMode,
-  selected,
+  isSelected,
   onToggleSelect,
   onFixMatch,
   onExport,
   onOpenDetail,
-}: { entry: LocalEntry } & LocalCardProps) {
+}: { entry: LocalEntry; versions: LocalEntry[]; isSelected: boolean } & LocalCardProps) {
   const t = useT();
   const [confirm, setConfirm] = useState(false);
   const { openPlayer } = useView();
-  const isSelected = selected.has(entry.id);
   const poster = useLocalPoster(entry);
 
   const epLabel = episodeLabel(entry);
+  const versionCount = versions.length;
+  const ids = useMemo(() => versions.map((v) => v.id), [versions]);
   const onActivate = useCallback(
     (range = false) => {
-      if (selectMode) onToggleSelect([entry.id], range);
-      else openPlayer(localPlayerSrc(entry));
+      if (selectMode) {
+        onToggleSelect(ids, range);
+        return;
+      }
+      if (versionCount > 1) {
+        openLocalVersions({
+          title: entry.title,
+          poster: poster.src,
+          entries: versions,
+          onPlayLocal: (v) => openPlayer(localPlayerSrc(v)),
+        });
+        return;
+      }
+      openPlayer(localPlayerSrc(entry));
     },
-    [selectMode, entry, openPlayer, onToggleSelect],
+    [selectMode, entry, versions, versionCount, ids, poster.src, openPlayer, onToggleSelect],
   );
 
   return (
     <div
       className="group relative flex flex-col gap-2 text-start"
-      onMouseLeave={() => setConfirm(false)}
+      onMouseLeave={() => confirm && setConfirm(false)}
     >
       <div
         role="button"
@@ -67,9 +83,15 @@ export function OwnedCard({
           onError={poster.onError}
           seed={entry.id}
           lazy
-          className="h-full w-full transition-transform duration-200 group-hover:scale-[1.02]"
+          className="h-full w-full transition-transform duration-200 will-change-transform [transform:translate3d(0,0,0)] group-hover:scale-[1.02]"
         />
         <LocalBadge label={entry.resolution ?? t("local")} className="absolute start-2 top-2" />
+        {versionCount > 1 && (
+          <span className="absolute bottom-2 end-2 inline-flex items-center gap-1 rounded-md bg-canvas/85 px-2 py-0.5 text-[10.5px] font-semibold text-ink">
+            <Layers size={11} strokeWidth={2.2} />
+            {versionCount}
+          </span>
+        )}
         {entry.needsReview && !selectMode && (
           <span className="absolute bottom-2 start-2 inline-flex items-center gap-1 rounded-md bg-amber-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-black">
             <AlertTriangle size={9} strokeWidth={2.6} />
@@ -79,10 +101,16 @@ export function OwnedCard({
         {selectMode && (
           <span
             className={`absolute end-2 top-2 flex h-6 w-6 items-center justify-center rounded-md ${
-              isSelected ? "bg-accent text-white" : "bg-canvas/80 text-ink-subtle ring-1 ring-edge-soft"
+              isSelected
+                ? "bg-accent text-white"
+                : "bg-canvas/80 text-ink-subtle ring-1 ring-edge-soft"
             }`}
           >
-            {isSelected ? <CheckSquare size={14} strokeWidth={2.4} /> : <Square size={14} strokeWidth={2.2} />}
+            {isSelected ? (
+              <CheckSquare size={14} strokeWidth={2.4} />
+            ) : (
+              <Square size={14} strokeWidth={2.2} />
+            )}
           </span>
         )}
         {!selectMode && (
@@ -98,11 +126,14 @@ export function OwnedCard({
                   <Info size={11} strokeWidth={2.2} />
                 </CardIconButton>
               )}
-              <CardIconButton title={t("Fix match")} onClick={() => onFixMatch([entry])}>
+              <CardIconButton title={t("Fix match")} onClick={() => onFixMatch(versions)}>
                 <Wand2 size={11} strokeWidth={2.2} />
               </CardIconButton>
               {entry.tmdbId != null && (
-                <CardIconButton title={t("Export .nfo and artwork")} onClick={() => onExport(entry)}>
+                <CardIconButton
+                  title={t("Export .nfo and artwork")}
+                  onClick={() => onExport(versions)}
+                >
                   <Download size={11} strokeWidth={2.2} />
                 </CardIconButton>
               )}
@@ -111,41 +142,59 @@ export function OwnedCard({
                 onClick={(e) => {
                   e.stopPropagation();
                   if (confirm) {
-                    removeLocalEntry(entry.id);
+                    for (const v of versions) removeLocalEntry(v.id);
                     setConfirm(false);
                   } else {
                     setConfirm(true);
                   }
                 }}
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-all duration-200 ${
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-white shadow-[0_2px_8px_rgba(0,0,0,0.4)] transition-[opacity,background-color] duration-200 ${
                   confirm
                     ? "bg-danger"
-                    : "bg-canvas/70 opacity-0 backdrop-blur-sm hover:bg-canvas/90 group-hover:opacity-100"
+                    : "bg-canvas/80 opacity-0 hover:bg-canvas/95 group-hover:opacity-100"
                 }`}
-                aria-label={confirm ? t("Confirm remove") : t("Remove from library")}
+                aria-label={
+                  confirm
+                    ? versionCount > 1
+                      ? t("Confirm removing {n} files", { n: versionCount })
+                      : t("Confirm remove")
+                    : t("Remove from library")
+                }
               >
-                {confirm ? <RefreshCw size={11} strokeWidth={2.4} /> : <Trash2 size={11} strokeWidth={2.2} />}
+                {confirm ? (
+                  <RefreshCw size={11} strokeWidth={2.4} />
+                ) : (
+                  <Trash2 size={11} strokeWidth={2.2} />
+                )}
               </button>
             </div>
           </>
         )}
       </div>
       <button type="button" onClick={(e) => onActivate(e.shiftKey)} className="text-start">
-        <p className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent" title={entry.filename}>
+        <p
+          className="truncate text-[13px] font-medium text-ink transition-colors hover:text-accent"
+          title={entry.filename}
+        >
           {entry.title}
         </p>
         {epLabel ? (
           <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">
             {epLabel}
             {entry.year ? ` · ${entry.year}` : ""}
+            {versionCount > 1 && ` · ${t("{n} versions", { n: versionCount })}`}
           </p>
-        ) : entry.year != null ? (
+        ) : entry.year != null || versionCount > 1 ? (
           <p className="-mt-1.5 truncate text-[11.5px] text-ink-subtle">
-            {entry.year}
+            {entry.year ?? ""}
             {entry.type === "show" && t(" · Series")}
+            {versionCount > 1 &&
+              `${entry.year != null ? " · " : ""}${t("{n} versions", { n: versionCount })}`}
           </p>
         ) : null}
       </button>
     </div>
   );
 }
+
+export const OwnedCard = memo(OwnedCardImpl);

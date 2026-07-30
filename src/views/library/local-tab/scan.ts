@@ -22,6 +22,7 @@ export type TmdbLookup = {
   rating?: number;
   runtime?: number;
   isAnime?: boolean;
+  genres?: string[];
 };
 
 const ANIMATION_GENRE_ID = 16;
@@ -40,7 +41,8 @@ export async function buildTmdbEntry(
   tmdbKey: string | null,
 ): Promise<LocalEntry> {
   let tmdb: TmdbLookup = {};
-  if (tmdbKey) tmdb = await tmdbLookup(tmdbKey, parsed.title, parsed.year, parsed.type).catch(() => ({}));
+  if (tmdbKey)
+    tmdb = await tmdbLookup(tmdbKey, parsed.title, parsed.year, parsed.type).catch(() => ({}));
   const needsReview = tmdbKey ? lowConfidence(parsed, tmdb) : false;
   const identified = tmdb.tmdbId != null && !needsReview;
   return {
@@ -51,8 +53,10 @@ export async function buildTmdbEntry(
     year: (identified ? tmdb.matchedYear : null) ?? parsed.year,
     type: parsed.type,
     resolution: parsed.resolution,
+    size: f.size ?? null,
     rating: tmdb.rating ?? null,
     runtime: tmdb.runtime ?? null,
+    genres: tmdb.genres ?? null,
     poster: tmdb.poster ?? null,
     tmdbId: tmdb.tmdbId ?? null,
     imdbId: tmdb.imdbId ?? null,
@@ -99,15 +103,20 @@ export async function buildNfoEntry(
   let rating = meta?.rating ?? null;
   let runtime = meta?.runtime ?? null;
   let isAnime = false;
+  // The .nfo wins; TMDB only fills the gap when the file carries no <genre>.
+  let genres = meta?.genres ?? nfo?.genres ?? null;
 
   if (tmdbKey && !tmdbId) {
-    const look = await tmdbLookup(tmdbKey, title, year, parsed.type).catch(() => ({} as TmdbLookup));
+    const look = await tmdbLookup(tmdbKey, title, year, parsed.type).catch(
+      () => ({}) as TmdbLookup,
+    );
     if (look.tmdbId) tmdbId = look.tmdbId;
     if (!imdbId && look.imdbId) imdbId = look.imdbId;
     if (!art.poster && look.poster) poster = look.poster;
     if (rating == null && look.rating != null) rating = look.rating;
     if (runtime == null && look.runtime != null) runtime = look.runtime;
     if (look.isAnime) isAnime = true;
+    if (genres == null && look.genres != null) genres = look.genres;
     const hadNfoTitle = isShow ? !!(meta?.title || nfo?.showTitle) : !!nfo?.title;
     if (!hadNfoTitle && look.matchedTitle) title = look.matchedTitle.trim();
   }
@@ -123,8 +132,10 @@ export async function buildNfoEntry(
     year,
     type: parsed.type,
     resolution: parsed.resolution,
+    size: f.size ?? null,
     rating,
     runtime,
+    genres,
     poster,
     tmdbId,
     imdbId,
@@ -184,6 +195,7 @@ async function tmdbLookup(
   let rating: number | undefined;
   let runtime: number | undefined;
   let isAnime = Array.isArray(top.genre_ids) && top.genre_ids.includes(ANIMATION_GENRE_ID);
+  let genres: string[] | undefined;
   try {
     const dparams = new URLSearchParams({ api_key: key, append_to_response: "external_ids" });
     if (lang) dparams.set("language", lang);
@@ -193,13 +205,18 @@ async function tmdbLookup(
       const imdb = dj.imdb_id ?? dj.external_ids?.imdb_id;
       if (typeof imdb === "string" && imdb.startsWith("tt")) imdbId = imdb;
       if (typeof dj.vote_average === "number" && dj.vote_average > 0) rating = dj.vote_average;
-      if (type === "movie" && typeof dj.runtime === "number" && dj.runtime > 0) runtime = dj.runtime;
+      if (type === "movie" && typeof dj.runtime === "number" && dj.runtime > 0)
+        runtime = dj.runtime;
       if (type === "show" && Array.isArray(dj.episode_run_time) && dj.episode_run_time[0] > 0) {
         runtime = dj.episode_run_time[0];
       }
+      // Already in the response we fetch for imdb_id/runtime — no extra request.
       if (Array.isArray(dj.genres)) {
-        isAnime =
-          isAnime || dj.genres.some((g: { id?: number }) => g.id === ANIMATION_GENRE_ID);
+        isAnime = isAnime || dj.genres.some((g: { id?: number }) => g.id === ANIMATION_GENRE_ID);
+        const names = dj.genres
+          .map((g: { name?: unknown }) => (typeof g?.name === "string" ? g.name.trim() : ""))
+          .filter((n: string) => n.length > 0);
+        if (names.length > 0) genres = names;
       }
     }
   } catch {
@@ -218,5 +235,6 @@ async function tmdbLookup(
     rating,
     runtime,
     isAnime,
+    genres,
   };
 }

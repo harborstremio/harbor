@@ -7,9 +7,11 @@ import { Hero } from "./hero";
 import { NavChevron } from "@/components/nav-arrow";
 import type { Meta } from "@/lib/cinemeta";
 
+/** `rank` renders a "#N in … Today" trending pill; omit it where that framing
+ * doesn't apply, such as the library hero. */
 export type Slide = {
   meta: Meta;
-  rank: { label: string; position: number; sources?: Array<{ label: string; rank: number }> };
+  rank?: { label: string; position: number; sources?: Array<{ label: string; rank: number }> };
 };
 
 const EASE_OUT = "cubic-bezier(0.32, 0.72, 0.24, 1)";
@@ -94,7 +96,9 @@ export function HeroCarousel({
 
   if (slides.length === 0) {
     return (
-      <div className={`harbor-hero-stage animate-pulse border border-edge-soft bg-elevated/30 ${full ? "min-h-[max(78vh,640px)] rounded-none" : "min-h-[560px] rounded-[28px]"}`} />
+      <div
+        className={`harbor-hero-stage animate-pulse border border-edge-soft bg-elevated/30 ${full ? "min-h-[max(78vh,640px)] rounded-none" : "min-h-[560px] rounded-[28px]"}`}
+      />
     );
   }
 
@@ -254,7 +258,9 @@ export function HeroCarousel({
                     playTrailer={playTrailers && isActive && !dragging}
                   />
                 ) : (
-                  <div className={`harbor-hero-stage w-full bg-elevated/30 ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-[28px]"}`} />
+                  <div
+                    className={`harbor-hero-stage w-full bg-elevated/30 ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-[28px]"}`}
+                  />
                 )}
               </div>
             );
@@ -291,9 +297,7 @@ export function HeroCarousel({
       </div>
       {slides.length > 1 && (
         <div
-          className={`flex justify-center gap-2.5 ${
-            full ? "absolute bottom-4 inset-x-0" : "pt-1"
-          }`}
+          className={`flex justify-center gap-2.5 ${full ? "absolute bottom-4 inset-x-0" : "pt-1"}`}
         >
           {slides.map((_, i) => (
             <button

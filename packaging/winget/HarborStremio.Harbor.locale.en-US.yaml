@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: HarborStremio.Harbor
+PackageVersion: 0.9.21
+PackageLocale: en-US
+Publisher: Harbor
+PublisherUrl: https://harbor.site/
+PublisherSupportUrl: https://github.com/harborstremio/harbor/issues
+PackageName: Harbor
+PackageUrl: https://harbor.site/
+License: MIT
+LicenseUrl: https://github.com/harborstremio/harbor/blob/main/LICENSE
+Copyright: Copyright (c) Harbor contributors
+ShortDescription: A Stremio client built for adventure
+Description: Harbor is a desktop media client for browsing and playing content from Stremio addons.
+Moniker: harbor
+Tags:
+  - media
+  - mpv
+  - player
+  - stremio
+  - video
+ReleaseNotesUrl: https://github.com/harborstremio/harbor/releases/tag/V0.9.21
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

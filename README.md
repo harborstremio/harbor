@@ -103,6 +103,7 @@ HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR 
 - **Casts across the room.** DLNA/UPnP, Chromecast, AirPlay, and Roku via a bundled Rust cast server and a web cast receiver.
 - **Integrations.** Feature rich discord rich presence integration, webhooks for Discord and Telegram, Trakt Sync, and native integrations to TMDB, OMDB, Fanart.Tv, RPDB and more! Customize the location and what badges are shown.
 - **And much more! (seriously this would be very long)**
+
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
 ## Feature Tour
@@ -384,7 +385,7 @@ Download the latest build for macOS or Windows from the [Releases page][releases
 | Platform    | Format                                                                                                   |
 | ----------- | -------------------------------------------------------------------------------------------------------- |
 | **macOS**   | `.dmg` (macOS 11.0 or newer)                                                                             |
-| **Windows** | `.exe` NSIS installer (current user install)                                                             |
+| **Windows** | `.exe` NSIS installer (current user install), or `winget install HarborStremio.Harbor`                   |
 | **Web**     | Open in any modern browser, nothing to install                                                           |
 | **Linux**   | [Unofficial `.deb`, `.rpm`, and Flatpak packages](https://github.com/AdityaHebballe/harbor-linux-builds) |
 

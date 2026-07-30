@@ -84,7 +84,17 @@ export const topMovies = (genre?: string, skip = 0) =>
 export const topSeries = (genre?: string, skip = 0) =>
   catalog(cinemetaTopPath("series", genre, skip));
 
+export function cinemetaEnabled(): boolean {
+  try {
+    const raw = localStorage.getItem("harbor.settings");
+    return raw ? JSON.parse(raw).cinemetaEnabled !== false : true;
+  } catch {
+    return true;
+  }
+}
+
 export async function meta(type: "movie" | "series", id: string): Promise<Meta | null> {
+  if (!cinemetaEnabled()) return null;
   const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
   if (!res.ok) return null;
   const json = await res.json();

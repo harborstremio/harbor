@@ -611,6 +611,12 @@ export function LibraryPanel({
           value={settings.preferCustomMetaAddon}
           onChange={(v) => update({ preferCustomMetaAddon: v })}
         />
+        <ToggleRow
+          label={t("Use Cinemeta for title metadata")}
+          sub={t("Turn this off to take Cinemeta out entirely and use only your own metadata addons, such as AIOMetadata or AIOStreams. Cinemeta can go stale and show already released episodes as TBA. Leave it on unless you have a metadata addon installed, or titles will have no details.")}
+          value={settings.cinemetaEnabled}
+          onChange={(v) => update({ cinemetaEnabled: v })}
+        />
         <KeyField
           label={t("Fanart.tv · logos and backdrops")}
           placeholder={t("personal key")}

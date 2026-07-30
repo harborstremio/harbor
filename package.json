@@ -1,10 +1,9 @@
 {
   "name": "harbor",
-  "private": true,
   "version": "0.9.115",
-  "type": "module",
+  "private": true,
   "license": "MIT",
-  "packageManager": "pnpm@11.9.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -21,6 +20,7 @@
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "0.10.35",
+    "@tanstack/react-virtual": "^3.14.6",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-deep-link": "^2.4.9",
     "@tauri-apps/plugin-dialog": "^2.7.1",
@@ -56,6 +56,7 @@
     "vite": "^7.0.4",
     "vite-plugin-static-copy": "^2.0.0"
   },
+  "packageManager": "pnpm@11.9.0",
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"

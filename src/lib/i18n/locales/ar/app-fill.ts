@@ -1110,6 +1110,8 @@ const appFill: Record<string, string> = {
   "Loading your library…": "جارٍ تحميل مكتبتك…",
   "Keep controlling Harbor in the background": "مواصلة التحكم في هاربر في الخلفية",
   "Off by default, so your controller only drives Harbor while it is the focused window. Leave it off if you play games with the same controller.": "معطّل افتراضيًا، ليتحكم ذراع التحكم في هاربر فقط عندما تكون نافذته نشطة. اتركه معطّلًا إذا كنت تلعب بنفس ذراع التحكم.",
+  "Use Cinemeta for title metadata": "استخدام Cinemeta لبيانات العناوين",
+  "Turn this off to take Cinemeta out entirely and use only your own metadata addons, such as AIOMetadata or AIOStreams. Cinemeta can go stale and show already released episodes as TBA. Leave it on unless you have a metadata addon installed, or titles will have no details.": "عطّل هذا لإزالة Cinemeta تمامًا واستخدام إضافات البيانات الخاصة بك فقط، مثل AIOMetadata أو AIOStreams. قد تصبح بيانات Cinemeta قديمة وتعرض حلقات صدرت بالفعل على أنها قريبًا. اتركه مفعّلًا ما لم تكن لديك إضافة بيانات مثبتة، وإلا فلن تظهر تفاصيل العناوين.",
 };
 
 export default appFill;

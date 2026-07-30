@@ -1,4 +1,4 @@
-import { meta as cinemetaMeta, type Meta } from "./cinemeta";
+import { cinemetaEnabled, meta as cinemetaMeta, type Meta } from "./cinemeta";
 import { safeFetch as fetch } from "./safe-fetch";
 import { addonAccepts, userAddons, type Addon } from "./addons";
 import { loadInstalled } from "./addon-store";
@@ -42,6 +42,23 @@ export async function resolveMeta(
   }
 
   const addonRaces = candidates.map((a) => ({ a, p: fetchAddonMeta(a, type, id) }));
+
+  const cinemetaOff = !cinemetaEnabled();
+
+  if (cinemetaOff) {
+    let firstAny: Meta | null = null;
+    let firstAddon: Addon | null = null;
+    for (const { a, p } of addonRaces) {
+      const result = await p;
+      if (!result) continue;
+      if (result.poster) return withOrigin(result, a);
+      if (!firstAny) {
+        firstAny = result;
+        firstAddon = a;
+      }
+    }
+    return firstAny && firstAddon ? withOrigin(firstAny, firstAddon) : null;
+  }
 
   if (preferCustomMeta()) {
     for (const { a, p } of addonRaces) {

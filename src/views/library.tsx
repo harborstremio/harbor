@@ -1,5 +1,5 @@
 import { BarChart3, Bookmark, Clock, HardDrive, Layers, Library, Star } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import anilistLogo from "@/assets/anilist.png";
 import simklLogo from "@/assets/simkl.png";
@@ -27,6 +27,9 @@ import { TraktTab } from "./library/trakt-tab";
 import { WatchlistTab } from "./library/watchlist-tab";
 import { LetterboxdTab } from "./library/letterboxd-tab";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
+import { HeroCarousel } from "@/components/hero-carousel";
+import { LibraryFeaturedProvider, useLibraryFeatured } from "./library/featured-context";
+import { pickFeatured } from "./library/featured-picks";
 
 const LIBRARY_TAB_KEY = "harbor.library.tab";
 
@@ -106,14 +109,14 @@ export function LibraryView({ active }: { active: boolean }) {
           : tab === "lists"
             ? "Browsing their lists"
             : tab === "trakt"
-            ? "Browsing their Trakt library"
-            : tab === "simkl"
-              ? "Browsing their Simkl library"
-              : tab === "letterboxd"
-                ? "Browsing their Letterboxd library"
-              : tab === "mal"
-                ? "Browsing their MyAnimeList library"
-                : "Browsing their Stremio library";
+              ? "Browsing their Trakt library"
+              : tab === "simkl"
+                ? "Browsing their Simkl library"
+                : tab === "letterboxd"
+                  ? "Browsing their Letterboxd library"
+                  : tab === "mal"
+                    ? "Browsing their MyAnimeList library"
+                    : "Browsing their Stremio library";
     return pushActivityHint({ details: label, state: "Library" });
   }, [active, tab]);
 
@@ -122,30 +125,48 @@ export function LibraryView({ active }: { active: boolean }) {
       ref={scrollRef}
       className="flex-1 overflow-y-auto px-5 pt-24 pb-14 sm:px-8 lg:px-12 lg:pt-28"
     >
-      <div {...contentDrag} className="flex flex-col gap-7">
-        <Header
-          tab={tab}
-          onTab={setTab}
-          traktConnected={traktConnected}
-          anilistConnected={anilistConnected}
-          malConnected={malConnected}
-          simklConnected={simklConnected}
-          lbConnected={lb.isActive}
-        />
-        {tab === "library" && <WatchlistTab mode="library" />}
-        {tab === "watchlist" && <WatchlistTab mode="watchlist" />}
-        {tab === "history" && <HistoryTab />}
-        {tab === "local" && <LocalTab />}
-        {tab === "lists" && <MyListsTab />}
-        {tab === "favorites" && <FavoritesTab />}
-        {tab === "trakt" && traktConnected && <TraktTab />}
-        {tab === "anilist" && anilistConnected && <AnilistTab />}
-        {tab === "simkl" && simklConnected && <SimklTab />}
-        {tab === "letterboxd" && lb.isActive && <LetterboxdTab />}
-        {tab === "mal" && malConnected && <MalTab />}
-      </div>
+      <LibraryFeaturedProvider>
+        <div {...contentDrag} className="flex flex-col gap-7">
+          <LibraryHero tabKey={tab} />
+          <Header
+            tab={tab}
+            onTab={setTab}
+            traktConnected={traktConnected}
+            anilistConnected={anilistConnected}
+            malConnected={malConnected}
+            simklConnected={simklConnected}
+            lbConnected={lb.isActive}
+          />
+          {tab === "library" && <WatchlistTab mode="library" />}
+          {tab === "watchlist" && <WatchlistTab mode="watchlist" />}
+          {tab === "history" && <HistoryTab />}
+          {tab === "local" && <LocalTab scrollRef={scrollRef} />}
+          {tab === "lists" && <MyListsTab />}
+          {tab === "favorites" && <FavoritesTab />}
+          {tab === "trakt" && traktConnected && <TraktTab />}
+          {tab === "anilist" && anilistConnected && <AnilistTab />}
+          {tab === "simkl" && simklConnected && <SimklTab />}
+          {tab === "letterboxd" && lb.isActive && <LetterboxdTab />}
+          {tab === "mal" && malConnected && <MalTab />}
+        </div>
+      </LibraryFeaturedProvider>
     </main>
   );
+}
+
+/**
+ * Featured carousel above the tab bar, drawn from whatever the open tab is
+ * showing. Hidden below two slides so a small or unhydrated tab doesn't render
+ * a dead carousel.
+ */
+function LibraryHero({ tabKey }: { tabKey: Tab }) {
+  const metas = useLibraryFeatured();
+  const slides = useMemo(
+    () => pickFeatured(metas, tabKey).map((meta) => ({ meta })),
+    [metas, tabKey],
+  );
+  if (slides.length < 2) return null;
+  return <HeroCarousel slides={slides} />;
 }
 
 function Header({
@@ -179,7 +200,9 @@ function Header({
             {t("Your collection.")}
           </h1>
           <p className="text-[14px] leading-snug text-ink-muted">
-            {t("Library is everything from Stremio, Trakt, and this device. Watchlist is only titles you haven't watched yet. History is what you've watched. Local is files on your computer.")}
+            {t(
+              "Library is everything from Stremio, Trakt, and this device. Watchlist is only titles you haven't watched yet. History is what you've watched. Local is files on your computer.",
+            )}
           </p>
         </div>
         {settings.wrappedButton && (

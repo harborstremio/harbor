@@ -20,14 +20,20 @@ import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { omdbPrefetch, useOmdbScores } from "@/lib/providers/omdb";
 import { useImdbRating } from "@/lib/imdb-rating";
-import { tmdbImdbId, tmdbLogo, tmdbMovieImages, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
+import { tmdbImdbId, tmdbMovieImages, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
+import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { useSettings } from "@/lib/settings";
 import { useTitleLogo } from "@/lib/title-logo";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
 import { useView } from "@/lib/view";
 import { useProfiles } from "@/lib/profiles";
-import { getHeroMuted, setHeroMuted, subscribeHeroMuted, syncHeroMutedFromSetting } from "@/lib/hero-mute";
+import {
+  getHeroMuted,
+  setHeroMuted,
+  subscribeHeroMuted,
+  syncHeroMutedFromSetting,
+} from "@/lib/hero-mute";
 import { getHeroEnded, setHeroEnded } from "@/lib/hero-ended";
 import { usePageVisible } from "@/lib/visibility";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
@@ -117,46 +123,51 @@ export const Hero = memo(function Hero({
   }, [meta.id, meta.type, settings.tmdbKey, playTrailer, trailerCandidates.length]);
 
   useEffect(() => {
-    setLogo(meta.logo);
+    // peekCachedLogo, not meta.logo: when the image language is not English the
+    // meta's own (English) logo is not final, and must be re-resolved below.
+    const seed = peekCachedLogo(settings.tmdbKey, meta);
+    setLogo(seed);
     setLogoLoaded(false);
-    setLogoResolved(!!meta.logo);
+    setLogoResolved(!!seed);
     setBgUrl(meta.background);
     setBgResolved(!!meta.background);
-  }, [meta.id, meta.logo, meta.background]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [meta.id, meta.logo, meta.background, settings.tmdbKey]);
 
   useEffect(() => {
     if (logoResolved && bgResolved) return;
     let cancelled = false;
-    const isTmdb = meta.id.startsWith("tmdb:");
-    const resolve: Promise<{ logo?: string; background?: string }> = isTmdb
-      ? Promise.all([
-          tmdbLogo(settings.tmdbKey, meta.id, meta.originalLanguage),
-          tmdbMovieImages(settings.tmdbKey, meta.id, meta.originalLanguage).then((urls) => urls[0]),
-        ]).then(([logo, background]) => ({ logo, background }))
-      : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) => ({
-          logo: full?.logo,
-          background: full?.background,
-        }));
-    resolve
-      .then(({ logo: l, background: b }) => {
-        if (cancelled) return;
-        if (!logoResolved) {
+    if (!logoResolved) {
+      // resolveLogo honours the configured image languages for tt ids too, by
+      // mapping them to a TMDB id first. Resolving it here rather than inline
+      // is what keeps Cinemeta's English logo from winning on those.
+      resolveLogo(settings.tmdbKey, meta)
+        .then((l) => {
+          if (cancelled) return;
           setLogo(l);
           setLogoResolved(true);
-        }
-        if (!bgResolved) {
-          if (b) setBgUrl(b);
-          setBgResolved(true);
-        }
-      })
-      .catch(() => {
+        })
+        .catch(() => {
+          if (!cancelled) setLogoResolved(true);
+        });
+    }
+    if (!bgResolved) {
+      const isTmdb = meta.id.startsWith("tmdb:");
+      const bg: Promise<string | undefined> = isTmdb
+        ? tmdbMovieImages(settings.tmdbKey, meta.id, meta.originalLanguage).then((urls) => urls[0])
+        : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) => full?.background);
+      bg.then((b) => {
         if (cancelled) return;
-        setLogoResolved(true);
+        if (b) setBgUrl(b);
         setBgResolved(true);
+      }).catch(() => {
+        if (!cancelled) setBgResolved(true);
       });
+    }
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logoResolved, bgResolved, meta.id, meta.type, settings.tmdbKey]);
 
   useEffect(() => {
@@ -332,14 +343,19 @@ export const Hero = memo(function Hero({
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-canvas via-canvas/70 via-50% to-transparent" />
       <MetaAwardsCorner meta={meta} imdbId={resolvedImdb} />
 
-      <div className={`harbor-hero-content relative flex h-full flex-col justify-center p-14 ${full ? "pt-28 lg:pt-32" : ""}`}>
+      <div
+        className={`harbor-hero-content relative flex h-full flex-col justify-center p-14 ${full ? "pt-28 lg:pt-32" : ""}`}
+      >
         <div className="max-w-2xl">
           {rank && (
             <div className="group/rank relative mb-5 inline-flex self-start">
               <div className="inline-flex cursor-help items-center gap-1.5 rounded-md bg-canvas/85 px-2.5 py-1 text-[12px] font-semibold text-ink">
                 <TrendingUp size={12} className="text-accent" />
                 <span>
-                  {t("#{position} in {label} Today", { position: rank.position, label: t(rank.label) })}
+                  {t("#{position} in {label} Today", {
+                    position: rank.position,
+                    label: t(rank.label),
+                  })}
                 </span>
               </div>
               {rank.sources && rank.sources.length > 0 && (
@@ -349,14 +365,19 @@ export const Hero = memo(function Hero({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     {rank.sources.map((s) => (
-                      <div key={s.label} className="flex items-center justify-between gap-8 text-[12.5px]">
+                      <div
+                        key={s.label}
+                        className="flex items-center justify-between gap-8 text-[12.5px]"
+                      >
                         <span className="inline-flex items-center gap-2 text-ink-muted">
                           {SOURCE_ICON[s.label] && (
                             <img
                               src={SOURCE_ICON[s.label]}
                               alt=""
                               className={`h-5 w-5 shrink-0 ${
-                                ROUNDED_ICON.has(s.label) ? "rounded-full object-cover" : "object-contain"
+                                ROUNDED_ICON.has(s.label)
+                                  ? "rounded-full object-cover"
+                                  : "object-contain"
                               }`}
                             />
                           )}
@@ -373,7 +394,17 @@ export const Hero = memo(function Hero({
               )}
             </div>
           )}
-          <HeroTitlePlate name={meta.name} logo={logo} loaded={logoLoaded} resolved={logoResolved} onLoad={() => setLogoLoaded(true)} onError={() => { setLogo(undefined); setLogoResolved(true); }} />
+          <HeroTitlePlate
+            name={meta.name}
+            logo={logo}
+            loaded={logoLoaded}
+            resolved={logoResolved}
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => {
+              setLogo(undefined);
+              setLogoResolved(true);
+            }}
+          />
           {description && (
             <p className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted">
               {description}
@@ -423,7 +454,11 @@ export const Hero = memo(function Hero({
               }}
               className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75"
             >
-              {inWatchlist ? <Check size={18} strokeWidth={2.4} /> : <Plus size={18} strokeWidth={2} />}
+              {inWatchlist ? (
+                <Check size={18} strokeWidth={2.4} />
+              ) : (
+                <Plus size={18} strokeWidth={2} />
+              )}
               {inWatchlist ? t("In Watchlist") : t("Add to Watchlist")}
             </button>
           </div>

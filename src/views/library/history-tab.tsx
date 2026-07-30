@@ -27,6 +27,7 @@ import {
   type WatchlistMerged,
 } from "./shared";
 import { HistoryEpisodeCard } from "./history-episode-card";
+import { useReportFeatured } from "./featured-context";
 
 export type HistoryEntry = WatchlistMerged & {
   season?: number;
@@ -124,8 +125,8 @@ export function HistoryTab() {
   const toggleFlat = useCallback(() => {
     setFlat((v) => !v);
   }, []);
-  const [view, setView] = useState<HistoryView>(
-    () => (localStorage.getItem("harbor.history.view") === "episodes" ? "episodes" : "posters"),
+  const [view, setView] = useState<HistoryView>(() =>
+    localStorage.getItem("harbor.history.view") === "episodes" ? "episodes" : "posters",
   );
   const setViewPersist = useCallback((next: HistoryView) => {
     setView(next);
@@ -135,6 +136,7 @@ export function HistoryTab() {
   }, []);
   const counts = useMemo(() => countByType(merged), [merged]);
   const visible = useMemo(() => applyFilter(merged, type, query), [merged, type, query]);
+  useReportFeatured(useMemo(() => visible.map((v) => v.meta), [visible]));
   const groups = useMemo(() => {
     if (settings.librarySort !== "recent") return sortedGroups(visible, settings.librarySort);
     if (flat) {
@@ -257,7 +259,9 @@ function HistoryViewToggle({
       <button
         onClick={() => view !== "posters" && onChange("posters")}
         className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-          view === "posters" ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
+          view === "posters"
+            ? "bg-ink text-canvas"
+            : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         {t("Posters")}
@@ -265,7 +269,9 @@ function HistoryViewToggle({
       <button
         onClick={() => view !== "episodes" && onChange("episodes")}
         className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-          view === "episodes" ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
+          view === "episodes"
+            ? "bg-ink text-canvas"
+            : "text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         {t("Episodes")}
@@ -335,8 +341,7 @@ function filterHistory(items: LibraryItem[]): LibraryItem[] {
     )
     .sort(
       (a, b) =>
-        Date.parse(b.state?.lastWatched ?? b._mtime) -
-        Date.parse(a.state?.lastWatched ?? a._mtime),
+        Date.parse(b.state?.lastWatched ?? b._mtime) - Date.parse(a.state?.lastWatched ?? a._mtime),
     );
 }
 
@@ -392,7 +397,7 @@ function mergeHistory(stremio: LibraryItem[], trakt: HistoryItem[]): HistoryEntr
       meta: {
         id,
         type: h.type === "movie" ? "movie" : "series",
-        name: h.type === "movie" ? h.title : (h.showImdb ? "" : h.title),
+        name: h.type === "movie" ? h.title : h.showImdb ? "" : h.title,
       },
       date: parseTs(h.watchedAt),
       progress: 0,

@@ -667,6 +667,8 @@ const appFill: Record<string, string> = {
   "Loading your library…": "Carregando sua biblioteca…",
   "Keep controlling Harbor in the background": "Continuar controlando o Harbor em segundo plano",
   "Off by default, so your controller only drives Harbor while it is the focused window. Leave it off if you play games with the same controller.": "Desativado por padrão, para que o controle só comande o Harbor enquanto ele for a janela em foco. Deixe desativado se você joga com o mesmo controle.",
+  "Use Cinemeta for title metadata": "Usar o Cinemeta para metadados de títulos",
+  "Turn this off to take Cinemeta out entirely and use only your own metadata addons, such as AIOMetadata or AIOStreams. Cinemeta can go stale and show already released episodes as TBA. Leave it on unless you have a metadata addon installed, or titles will have no details.": "Desative para remover o Cinemeta por completo e usar apenas seus próprios addons de metadados, como AIOMetadata ou AIOStreams. O Cinemeta pode ficar desatualizado e mostrar episódios já lançados como TBA. Deixe ativado a menos que você tenha um addon de metadados instalado, ou os títulos ficarão sem detalhes.",
 };
 
 export default appFill;

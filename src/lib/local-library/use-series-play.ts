@@ -2,7 +2,8 @@ import { useCallback } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useView, type PlayEpisode } from "@/lib/view";
 import { useSettings } from "@/lib/settings";
-import { findLocalEpisodeByIds } from "@/lib/local-library";
+import { findLocalEpisodeVersions } from "@/lib/local-library/versions";
+import { openLocalVersions } from "@/lib/player/local-versions-modal";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { metaIsAnime } from "@/lib/player/anime-src";
 import { openLocalEpisodes } from "@/lib/player/local-episodes-modal";
@@ -30,12 +31,27 @@ export function useLocalAwareSeriesPlay() {
       const m = meta.id.match(/^tmdb:tv:(\d+)$/);
       const tmdbId = m ? parseInt(m[1], 10) : null;
       const seriesImdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
-      const thisLocal = findLocalEpisodeByIds(episode.season, episode.episode, tmdbId, seriesImdb);
+      const versions = findLocalEpisodeVersions(
+        episode.season,
+        episode.episode,
+        tmdbId,
+        seriesImdb,
+      );
+      const thisLocal = versions[0];
       if (!thisLocal) {
         stream();
         return;
       }
       if (settings.localPlaybackMode === "local") {
+        if (versions.length > 1) {
+          openLocalVersions({
+            title: meta.name,
+            poster: meta.poster,
+            entries: versions,
+            onPlayLocal: (e) => openPlayer(localPlayerSrc(e, srcIsAnime)),
+          });
+          return;
+        }
         openPlayer(localPlayerSrc(thisLocal, srcIsAnime));
         return;
       }
