@@ -85,6 +85,7 @@ export type Settings = {
   preferredLanguages: string[];
   requirePreferredLanguage: boolean;
   showImdbBadge: boolean;
+  showSubtitleIndicator: boolean;
   showTmdbBadge: boolean;
   showRtBadge: boolean;
   showMalBadge: boolean;
@@ -535,7 +536,7 @@ export type Settings = {
   wrappedButton: boolean;
   mangaEnabled: boolean;
   feedLocaleBias: boolean;
-  uiLanguage: "en" | "ar" | "pt";
+  uiLanguage: "en" | "ar" | "pt" | "ru";
   arabicWelcomeSeen: boolean;
   cropMode: string;
   customLists: CustomList[];

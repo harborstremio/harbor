@@ -101,7 +101,14 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
         snap.durationSec >= STUB_MAX_SEC &&
         (lastActionRef.current === "start" || lastActionRef.current === "pause")
       ) {
-        void simklScrobble("stop", metaId, src.episode, 100, infoRef.current);
+        const endPct =
+          snap.durationSec > 0
+            ? Math.min(
+                100,
+                Math.max(0, progressRef.current, (getPlaybackPosition() / snap.durationSec) * 100),
+              )
+            : 100;
+        void simklScrobble("stop", metaId, src.episode, endPct, infoRef.current);
         lastActionRef.current = "stop";
       }
       return;

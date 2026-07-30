@@ -56,6 +56,12 @@ export function LanguagePanel() {
         onChange={(v) => update({ subtitlesOffByDefault: v })}
       />
       <ToggleRow
+        label={t("Subtitle indicator dot")}
+        sub={t("Shows a small green dot on the player's subtitle button while a subtitle track is active. Turn it off if you would rather keep the controls clean.")}
+        value={settings.showSubtitleIndicator}
+        onChange={(v) => update({ showSubtitleIndicator: v })}
+      />
+      <ToggleRow
         label={t("Prefer embedded subtitles")}
         sub={t("When the file ships its own subtitle track, keep it selected instead of switching to a downloaded one. Embedded tracks are usually the best synced.")}
         value={settings.preferEmbeddedSubs}

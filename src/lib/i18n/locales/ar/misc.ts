@@ -533,6 +533,7 @@ const misc: Record<string, string> = {
   "update.of": "{downloaded} من {total}",
   "Hide password": "إخفاء كلمة المرور",
   "Show password": "عرض كلمة المرور",
+  "Watch Time": "وقت المشاهدة",
   "Episodes": "الحلقات",
   "Movie": "فيلم",
   "{n} episode": "{n} حلقة",

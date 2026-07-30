@@ -33,6 +33,7 @@ export type PlayerControlId =
   | "rtx-hdr-toggle"
   | "rtx-vsr-toggle"
   | "draw-toggle"
+  | "picture"
   | "screenshot"
   | "song-id"
   | "pip"
@@ -270,6 +271,7 @@ export const CONTROL_META: Record<
   "rtx-hdr-toggle": { label: "RTX Video HDR toggle", group: "menus", defaultSlot: "bottom-right" },
   "rtx-vsr-toggle": { label: "RTX Super Resolution toggle", group: "menus", defaultSlot: "bottom-right" },
   "draw-toggle": { label: "Draw on video", group: "actions", defaultSlot: "bottom-right" },
+  picture: { label: "Picture adjustments", group: "actions", defaultSlot: "bottom-right" },
   screenshot: { label: "Screenshot", group: "actions", defaultSlot: "bottom-right" },
   "song-id": { label: "Identify song", group: "actions", defaultSlot: "bottom-right" },
   pip: { label: "Picture-in-picture", group: "actions", defaultSlot: "bottom-right" },

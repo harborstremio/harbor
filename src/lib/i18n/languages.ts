@@ -1,18 +1,20 @@
-export type UiLanguage = "en" | "ar" | "pt";
+export type UiLanguage = "en" | "ar" | "pt" | "ru";
 
 export type LanguageOption = {
   code: UiLanguage;
   label: string;
   nativeLabel: string;
+  greeting: string;
   rtl: boolean;
 };
 
 export const DEFAULT_LANGUAGE: UiLanguage = "en";
 
 export const LANGUAGES: LanguageOption[] = [
-  { code: "en", label: "English", nativeLabel: "English", rtl: false },
-  { code: "ar", label: "Arabic", nativeLabel: "العربية", rtl: true },
-  { code: "pt", label: "Portuguese", nativeLabel: "Português", rtl: false },
+  { code: "en", label: "English", nativeLabel: "English", greeting: "Hello", rtl: false },
+  { code: "ar", label: "Arabic", nativeLabel: "العربية", greeting: "مرحبا", rtl: true },
+  { code: "pt", label: "Portuguese", nativeLabel: "Português", greeting: "Olá", rtl: false },
+  { code: "ru", label: "Russian", nativeLabel: "Русский", greeting: "Привет", rtl: false },
 ];
 
 const BY_CODE = new Map<string, LanguageOption>(LANGUAGES.map((l) => [l.code, l]));

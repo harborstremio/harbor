@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { Check, Loader2, Trash2, X } from "lucide-react";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
+import { authToken } from "@/lib/theme-auth";
+import { useView } from "@/lib/view";
 import { useRating } from "@/lib/ratings/store";
 import { rate, unrate } from "@/lib/ratings/actions";
 import type { RatingTarget } from "@/lib/ratings/types";
@@ -24,6 +26,8 @@ function errorText(e: unknown, t: (s: string) => string, action: "save" | "remov
 
 export function RatingModal({ target, onClose }: { target: RatingTarget; onClose: () => void }) {
   const t = useT();
+  const { openSettings } = useView();
+  const signedIn = !!authToken();
   const existing = useRating(target.itemKey);
   const [selected, setSelected] = useState(existing?.score ?? 0);
   const [hover, setHover] = useState(0);
@@ -107,88 +111,140 @@ export function RatingModal({ target, onClose }: { target: RatingTarget; onClose
         <div className="flex flex-col items-center gap-4 px-6 pb-6 pt-8">
           <div className="flex w-full items-center gap-3">
             <div className="w-12 shrink-0">
-              <Poster src={target.poster} seed={target.title} ratio="portrait" lazy className="rounded-lg ring-1 ring-edge-soft" />
+              <Poster
+                src={target.poster}
+                seed={target.title}
+                ratio="portrait"
+                lazy
+                className="rounded-lg ring-1 ring-edge-soft"
+              />
             </div>
             <div className="min-w-0">
               <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
                 {t("Your rating")}
               </div>
-              <div className="line-clamp-2 text-[15px] font-semibold leading-tight text-ink">{target.title}</div>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center gap-2 py-1">
-            <div className="flex h-12 items-end gap-1.5" onMouseLeave={() => setHover(0)}>
-              <span key={display} className="harbor-pop text-[40px] font-bold leading-none tabular-nums text-ink">
-                {display || "–"}
-              </span>
-              <span className="pb-1 text-[15px] font-medium text-ink-subtle">/10</span>
-            </div>
-            <RatingStars value={selected} size={30} onChange={setSelected} onHover={setHover} ariaLabel={t("Your rating")} />
-            <div className="h-4 text-[12px] text-ink-subtle">
-              {selected ? t("Tap a star to change, then save") : t("Tap a star to rate")}
-            </div>
-          </div>
-
-          {!reviewing ? (
-            <button
-              type="button"
-              onClick={() => setReviewing(true)}
-              className="text-[13px] font-medium text-ink-muted underline-offset-4 transition-colors hover:text-ink hover:underline"
-            >
-              {existing?.review ? t("Edit your review") : t("Add a review")}
-            </button>
-          ) : (
-            <div className="flex w-full flex-col gap-2.5">
-              <textarea
-                ref={areaRef}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value.slice(0, REVIEW_MAX))}
-                placeholder={t("Share your thoughts (optional)")}
-                rows={4}
-                className="w-full resize-y rounded-xl bg-canvas/60 p-3 text-[14px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/30"
-              />
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSpoiler((v) => !v)}
-                  aria-pressed={spoiler}
-                  className={`inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] font-medium ring-1 transition-colors ${
-                    spoiler ? "bg-ink/10 text-ink ring-ink/25" : "text-ink-muted ring-edge-soft hover:bg-canvas/60"
-                  }`}
-                >
-                  <span className={`grid h-3.5 w-3.5 place-items-center rounded-[4px] ring-1 ${spoiler ? "bg-ink ring-ink" : "ring-edge"}`}>
-                    {spoiler && <Check size={10} className="text-canvas" />}
-                  </span>
-                  {t("Contains spoilers")}
-                </button>
-                <span className="text-[11px] tabular-nums text-ink-subtle">{draft.length}/{REVIEW_MAX}</span>
+              <div className="line-clamp-2 text-[15px] font-semibold leading-tight text-ink">
+                {target.title}
               </div>
             </div>
-          )}
+          </div>
 
-          <div className="mt-1 flex w-full items-center gap-2">
-            {existing && (
+          {!signedIn && (
+            <>
+              <div className="flex flex-col items-center gap-1.5 py-2 text-center">
+                <div className="text-[15px] font-semibold text-ink">
+                  {t("Ratings need a Harbor account")}
+                </div>
+                <div className="max-w-[300px] text-[13px] leading-relaxed text-ink-subtle">
+                  {t(
+                    "Your Harbor account is separate from your Stremio sign in. Create one free or sign in from Settings.",
+                  )}
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={remove}
-                disabled={busy}
-                aria-label={t("Remove rating")}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-subtle ring-1 ring-edge-soft transition-colors hover:bg-elevated hover:text-danger disabled:opacity-40"
+                onClick={() => {
+                  onClose();
+                  openSettings("account");
+                }}
+                className="flex h-11 w-full items-center justify-center rounded-xl bg-ink text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.01] active:scale-[0.98]"
               >
-                <Trash2 size={16} />
+                {t("Open account settings")}
               </button>
-            )}
-            <button
-              type="button"
-              onClick={save}
-              disabled={busy || !selected || !dirty}
-              className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.01] active:scale-[0.98] disabled:opacity-40"
-            >
-              {busy && <Loader2 size={15} className="animate-spin" />}
-              {existing ? t("Save changes") : t("Save rating")}
-            </button>
-          </div>
+            </>
+          )}
+
+          {signedIn && (
+            <>
+              <div className="flex flex-col items-center gap-2 py-1">
+                <div className="flex h-12 items-end gap-1.5" onMouseLeave={() => setHover(0)}>
+                  <span
+                    key={display}
+                    className="harbor-pop text-[40px] font-bold leading-none tabular-nums text-ink"
+                  >
+                    {display || "–"}
+                  </span>
+                  <span className="pb-1 text-[15px] font-medium text-ink-subtle">/10</span>
+                </div>
+                <RatingStars
+                  value={selected}
+                  size={30}
+                  onChange={setSelected}
+                  onHover={setHover}
+                  ariaLabel={t("Your rating")}
+                />
+                <div className="h-4 text-[12px] text-ink-subtle">
+                  {selected ? t("Tap a star to change, then save") : t("Tap a star to rate")}
+                </div>
+              </div>
+
+              {!reviewing ? (
+                <button
+                  type="button"
+                  onClick={() => setReviewing(true)}
+                  className="text-[13px] font-medium text-ink-muted underline-offset-4 transition-colors hover:text-ink hover:underline"
+                >
+                  {existing?.review ? t("Edit your review") : t("Add a review")}
+                </button>
+              ) : (
+                <div className="flex w-full flex-col gap-2.5">
+                  <textarea
+                    ref={areaRef}
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value.slice(0, REVIEW_MAX))}
+                    placeholder={t("Share your thoughts (optional)")}
+                    rows={4}
+                    className="w-full resize-y rounded-xl bg-canvas/60 p-3 text-[14px] leading-relaxed text-ink outline-none ring-1 ring-edge-soft placeholder:text-ink-subtle focus-visible:ring-2 focus-visible:ring-ink/30"
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSpoiler((v) => !v)}
+                      aria-pressed={spoiler}
+                      className={`inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[13px] font-medium ring-1 transition-colors ${
+                        spoiler
+                          ? "bg-ink/10 text-ink ring-ink/25"
+                          : "text-ink-muted ring-edge-soft hover:bg-canvas/60"
+                      }`}
+                    >
+                      <span
+                        className={`grid h-3.5 w-3.5 place-items-center rounded-[4px] ring-1 ${spoiler ? "bg-ink ring-ink" : "ring-edge"}`}
+                      >
+                        {spoiler && <Check size={10} className="text-canvas" />}
+                      </span>
+                      {t("Contains spoilers")}
+                    </button>
+                    <span className="text-[11px] tabular-nums text-ink-subtle">
+                      {draft.length}/{REVIEW_MAX}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-1 flex w-full items-center gap-2">
+                {existing && (
+                  <button
+                    type="button"
+                    onClick={remove}
+                    disabled={busy}
+                    aria-label={t("Remove rating")}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-subtle ring-1 ring-edge-soft transition-colors hover:bg-elevated hover:text-danger disabled:opacity-40"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={save}
+                  disabled={busy || !selected || !dirty}
+                  className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink text-[14px] font-semibold text-canvas transition-transform hover:scale-[1.01] active:scale-[0.98] disabled:opacity-40"
+                >
+                  {busy && <Loader2 size={15} className="animate-spin" />}
+                  {existing ? t("Save changes") : t("Save rating")}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>,

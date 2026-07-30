@@ -1,5 +1,5 @@
 export type LocaleProfile = {
-  uiLanguage: "en" | "ar" | "es";
+  uiLanguage: "en" | "ar" | "es" | "pt" | "ru";
   tmdbLanguage: string;
   contentLanguage: string;
   subtitleLanguage: string;
@@ -17,6 +17,10 @@ const LATAM_REGIONS = new Set([
   "MX", "AR", "CO", "CL", "PE", "VE", "EC", "GT", "CU", "BO", "DO", "HN", "PY",
   "SV", "NI", "CR", "PA", "UY", "PR",
 ]);
+
+const RUSSOPHONE_REGIONS = new Set(["RU", "BY", "KZ", "KG", "TJ"]);
+
+const LUSOPHONE_REGIONS = new Set(["BR", "PT"]);
 
 const EN: LocaleProfile = {
   uiLanguage: "en",
@@ -52,6 +56,28 @@ export function localeForRegion(region: string): LocaleProfile {
       greetingKey: null,
     };
   }
+  if (RUSSOPHONE_REGIONS.has(r)) {
+    return {
+      uiLanguage: "ru",
+      tmdbLanguage: "ru-RU",
+      contentLanguage: "ru",
+      subtitleLanguage: "Russian",
+      audioLanguage: "Russian",
+      rtl: false,
+      greetingKey: null,
+    };
+  }
+  if (LUSOPHONE_REGIONS.has(r)) {
+    return {
+      uiLanguage: "pt",
+      tmdbLanguage: r === "BR" ? "pt-BR" : "pt-PT",
+      contentLanguage: "pt",
+      subtitleLanguage: r === "BR" ? "Portuguese (Brazil)" : "Portuguese",
+      audioLanguage: "Portuguese",
+      rtl: false,
+      greetingKey: null,
+    };
+  }
   if (r === "ES") {
     return {
       uiLanguage: "es",
@@ -73,5 +99,7 @@ export function isLocalizedRegion(region: string): boolean {
 export function localeLabel(profile: LocaleProfile): string {
   if (profile.uiLanguage === "ar") return "العربية (Arabic)";
   if (profile.uiLanguage === "es") return "Español (Spanish)";
+  if (profile.uiLanguage === "pt") return "Português (Portuguese)";
+  if (profile.uiLanguage === "ru") return "Русский (Russian)";
   return "English";
 }

@@ -1,3 +1,5 @@
+import { escapeHtml as esc, escapeWithMentions } from "./bbcode-mentions";
+
 const MAX_DEPTH = 12;
 const MAX_EMBEDS = 8;
 const MAX_INPUT = 20000;
@@ -28,14 +30,6 @@ type Tok =
   | { k: "li" };
 
 type Frame = { tag: string; arg?: string; html: string[]; raw: string[] };
-
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
 
 function isSpamHost(host: string): boolean {
   return SPAM_HOSTS.has(host.toLowerCase().replace(/^www\./, ""));
@@ -244,13 +238,13 @@ function trimBr(s: string): string {
 
 const BARE_URL_RE = /https?:\/\/[^\s<>"']+/gi;
 
-function linkifyEscaped(s: string): string {
+function linkifyEscaped(s: string, mentions?: ReadonlySet<string>): string {
   let out = "";
   let last = 0;
   BARE_URL_RE.lastIndex = 0;
   let m: RegExpExecArray | null;
   while ((m = BARE_URL_RE.exec(s))) {
-    out += esc(s.slice(last, m.index));
+    out += escapeWithMentions(s.slice(last, m.index), mentions);
     let raw = m[0];
     let trail = "";
     while (/[.,;:!?)\]}'"]$/.test(raw)) {
@@ -263,7 +257,7 @@ function linkifyEscaped(s: string): string {
       : esc(m[0]);
     last = m.index + m[0].length;
   }
-  out += esc(s.slice(last));
+  out += escapeWithMentions(s.slice(last), mentions);
   return out;
 }
 
@@ -326,20 +320,20 @@ function finalize(f: Frame, addEmbed: () => boolean): { html: string; raw: strin
   return wrap(inner);
 }
 
-function pushText(top: Frame, v: string, linkify = false): void {
+function pushText(top: Frame, v: string, linkify = false, mentions?: ReadonlySet<string>): void {
   const norm = v.replace(/\r\n?/g, "\n").replace(/\n{3,}/g, "\n\n");
   const parts = norm.split("\n");
   parts.forEach((p, i) => {
     if (i > 0) top.html.push("<br/>");
     top.raw.push(i > 0 ? "\n" : "");
     if (p) {
-      top.html.push(linkify ? linkifyEscaped(p) : esc(p));
+      top.html.push(linkify ? linkifyEscaped(p, mentions) : esc(p));
       top.raw.push(p);
     }
   });
 }
 
-export function renderBbcode(input: string): string {
+export function renderBbcode(input: string, mentions?: ReadonlySet<string>): string {
   const src = (input || "").replace(INVISIBLE_RE, "").slice(0, MAX_INPUT);
   if (!src) return "";
   const root: Frame = { tag: "", html: [], raw: [] };
@@ -352,7 +346,7 @@ export function renderBbcode(input: string): string {
 
   for (const tk of tokenize(src)) {
     if (tk.k === "text") {
-      pushText(top(), tk.v, !stack.some((f) => f.tag === "url" || f.tag === "code"));
+      pushText(top(), tk.v, !stack.some((f) => f.tag === "url" || f.tag === "code"), mentions);
     } else if (tk.k === "li") {
       if (inList()) {
         top().html.push(LI);

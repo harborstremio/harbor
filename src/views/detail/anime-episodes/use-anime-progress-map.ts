@@ -3,6 +3,7 @@ import { getEpisodeProgress, type EpisodeProgress } from "@/lib/episode-progress
 import { manualWatchedState } from "@/lib/manual-watched";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { spoilerMaskFor, type SpoilerMask } from "@/lib/spoilers";
+import { airedOnly } from "../helpers";
 import { animeSeasonKey } from "./anime-season-key";
 
 const NO_PROGRESS: EpisodeProgress = { ratio: 0, watched: false, startedAt: 0 };
@@ -116,8 +117,9 @@ export function useAnimeProgressMap({
       isNextUp: ep.id === nextUpId,
     });
 
+  const airedDisplay = airedOnly(displayEpisodes, (ep) => ep.airdate);
   const allWatched =
-    displayEpisodes.length > 0 && displayEpisodes.every((ep) => progressById.get(ep.id)?.watched);
+    airedDisplay.length > 0 && airedDisplay.every((ep) => progressById.get(ep.id)?.watched);
 
   return { progressFor, nextUpNum, nextUpId, spoilerFor, allWatched };
 }

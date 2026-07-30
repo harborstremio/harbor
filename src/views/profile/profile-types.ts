@@ -28,9 +28,12 @@ export type ShowcaseItem = {
 
 export type ProfileCounts = {
   watched: number;
+  moviesWatched?: number;
+  episodesWatched?: number;
   friends: number;
   badges: number;
   hoursWatched: number;
+  minutesWatched?: number;
   mangaRead?: number;
 };
 
@@ -71,6 +74,7 @@ export type ProfileSummary = {
   showcase?: ShowcaseItem;
   ratings?: RatingsSummary;
   cardLayout?: { order?: string[]; hidden?: string[] };
+  statLayout?: { hidden?: string[] };
   featuredLists?: FeaturedList[];
   socials?: ResolvedSocial[];
   audioUrl?: string;

@@ -498,16 +498,35 @@ function IdleAwayRunner() {
   return null;
 }
 
+const STATS_SYNC_FIRST_MS = 4000;
+const STATS_SYNC_EVERY_MS = 600000;
+const STATS_SYNC_MIN_GAP_MS = 120000;
+
 function StatsSyncRunner() {
   const { authKey } = useAuth();
   const { activeId } = useProfiles();
   useEffect(() => {
     if (!authToken()) return;
     const pid = activeId ?? "default";
-    const t = window.setTimeout(() => {
+    let last = 0;
+    let alive = true;
+    const run = (force: boolean) => {
+      if (!alive || !authToken()) return;
+      const now = performance.now();
+      if (!force && now - last < STATS_SYNC_MIN_GAP_MS) return;
+      last = now;
       syncProfileStats(authKey, listMangaProgress(pid).length).catch(() => {});
-    }, 4000);
-    return () => window.clearTimeout(t);
+    };
+    const first = window.setTimeout(() => run(true), STATS_SYNC_FIRST_MS);
+    const every = window.setInterval(() => run(false), STATS_SYNC_EVERY_MS);
+    const onFocus = () => run(false);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      alive = false;
+      window.clearTimeout(first);
+      window.clearInterval(every);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [authKey, activeId]);
   return null;
 }

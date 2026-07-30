@@ -24,6 +24,7 @@ export const DEFAULT: Settings = {
   preferredLanguages: ["English"],
   requirePreferredLanguage: false,
   showImdbBadge: true,
+  showSubtitleIndicator: true,
   showTmdbBadge: false,
   showRtBadge: true,
   showMalBadge: true,

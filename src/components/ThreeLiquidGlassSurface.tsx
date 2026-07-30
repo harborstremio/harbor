@@ -86,6 +86,47 @@ export function LiquidGlassSurface({
   );
 }
 
+function PlainSurface({
+  children,
+  className = "",
+  contentClassName = "",
+  surfaceClassName = "",
+  style,
+  radius = "999999px",
+  shaderRadius: _shaderRadius,
+  interactive: _interactive,
+  alwaysActive: _alwaysActive,
+  intensity: _intensity,
+  refractionStrength: _refractionStrength,
+  lensStrength: _lensStrength,
+  causticsStrength: _causticsStrength,
+  motionSpeed: _motionSpeed,
+  variant: _variant,
+  backdropBlur: _backdropBlur,
+  ...wrapperProps
+}: LiquidGlassSurfaceProps & { blurRadius?: number; tintOpacity?: number }) {
+  const plain: CSSProperties = {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: radius,
+    ...style,
+    backgroundImage: "none",
+    backdropFilter: "none",
+    border: "none",
+    backgroundColor: variantBg(_variant),
+    boxShadow: "0 10px 28px -8px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.15)",
+  };
+  return (
+    <div {...wrapperProps} style={plain} className={`${className} ${surfaceClassName}`}>
+      <div className={`relative z-10 h-full w-full ${contentClassName}`}>{children}</div>
+    </div>
+  );
+}
+
+function variantBg(variant: LiquidGlassSurfaceProps["variant"]): string {
+  return variant === "overlay" ? "rgba(8,12,20,0.92)" : "var(--color-canvas)";
+}
+
 export function ThreeLiquidGlassSurface({
   defaultStyle,
   experimentalStyle,
@@ -93,6 +134,10 @@ export function ThreeLiquidGlassSurface({
   ...props
 }: LiquidGlassSurfaceProps) {
   const { settings } = useSettings();
+
+  if (!settings.liquidGlass) {
+    return <PlainSurface {...props} style={style} />;
+  }
 
   if (settings.experimentalLiquidGlassEnabled) {
     return (

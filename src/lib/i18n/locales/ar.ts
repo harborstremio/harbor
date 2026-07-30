@@ -23,6 +23,8 @@ import sync from "./ar/sync";
 import together from "./ar/together";
 import controllers from "./ar/controllers";
 
+import used from "./ar/used";
+
 const ar: Record<string, string> = {
   ...chrome,
   ...common,
@@ -48,6 +50,7 @@ const ar: Record<string, string> = {
   ...awards,
   ...addons,
   ...controllers,
+  ...used,
 };
 
 export default ar;

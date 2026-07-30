@@ -89,6 +89,33 @@ export function compactNumber(n: number): string {
   return String(n);
 }
 
+/** Returns exactly 3 fixed time units for the WATCH TIME pill.
+ *  < 12 months  → { a: "M", aVal, b: "D", bVal, c: "H", cVal }
+ *  >= 12 months → { a: "Y", aVal, b: "M", bVal, c: "D", cVal }
+ */
+export function formatWatchTime(totalMinutes: number): {
+  a: string; aVal: number;
+  b: string; bVal: number;
+  c: string; cVal: number;
+} {
+  const totalHours = Math.floor(totalMinutes / 60);
+  const hours = totalHours % 24;
+  const totalDays = Math.floor(totalHours / 24);
+  const totalMonths = Math.floor(totalDays / 30);
+
+  if (totalMonths < 12) {
+    // M D H
+    const months = totalMonths;
+    const days = totalDays % 30;
+    return { a: "M", aVal: months, b: "D", bVal: days, c: "H", cVal: hours };
+  }
+  // Y M D
+  const years = Math.floor(totalMonths / 12);
+  const months = totalMonths % 12;
+  const days = totalDays % 30;
+  return { a: "Y", aVal: years, b: "M", bVal: months, c: "D", cVal: days };
+}
+
 export function timeAgo(iso: string): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";

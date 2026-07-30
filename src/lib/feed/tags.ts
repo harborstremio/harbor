@@ -92,6 +92,7 @@ export const LANGUAGES: Array<{ code: string; label: string }> = [
   { code: "zh", label: "Chinese Cinema" },
   { code: "hi", label: "Indian Cinema" },
   { code: "pt", label: "Portuguese-Language" },
+  { code: "ru", label: "Russian Cinema" },
 ];
 
 export function pickRandom<T>(arr: readonly T[], n: number, seed?: number): T[] {
@@ -148,4 +149,5 @@ export const LANG_TO_COUNTRY: Record<string, string> = {
   da: "DK",
   zh: "CN",
   hi: "IN",
+  ru: "RU",
 };

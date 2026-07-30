@@ -63,3 +63,55 @@ export function moveCard(order: CardKey[], key: CardKey, dir: -1 | 1): CardKey[]
   [next[i], next[j]] = [next[j], next[i]];
   return next;
 }
+
+export type StatKey =
+  | "watchTime"
+  | "episodes"
+  | "movies"
+  | "read"
+  | "friends"
+  | "badges";
+
+export const STAT_ORDER: StatKey[] = [
+  "watchTime",
+  "episodes",
+  "movies",
+  "read",
+  "friends",
+  "badges",
+];
+
+export const STAT_LABELS: Record<StatKey, string> = {
+  watchTime: "Watch Time",
+  episodes: "Episodes",
+  movies: "Movies",
+  read: "Read",
+  friends: "Friends",
+  badges: "Badges",
+};
+
+export type StatLayout = { hidden: string[] };
+
+const KNOWN_STATS = new Set<string>(STAT_ORDER);
+
+export const DEFAULT_STAT_HIDDEN: StatKey[] = ["friends", "badges"];
+
+export function sanitizeStatLayout(raw: unknown): StatLayout {
+  const l = raw as { hidden?: unknown } | null | undefined;
+  if (!l || !Array.isArray(l.hidden)) return { hidden: [...DEFAULT_STAT_HIDDEN] };
+  const hidden = l.hidden.filter((k): k is string => typeof k === "string" && KNOWN_STATS.has(k));
+  const uniq = [...new Set(hidden)];
+  if (uniq.length >= STAT_ORDER.length) return { hidden: uniq.filter((k) => k !== "watchTime") };
+  return { hidden: uniq };
+}
+
+export function watchMinutes(c: {
+  minutesWatched?: number;
+  hoursWatched?: number;
+  moviesWatched?: number;
+  episodesWatched?: number;
+}): number {
+  const tracked = Math.max(c.minutesWatched ?? 0, (c.hoursWatched ?? 0) * 60);
+  const estimated = (c.moviesWatched ?? 0) * 120 + (c.episodesWatched ?? 0) * 45;
+  return Math.max(tracked, estimated);
+}

@@ -2,6 +2,7 @@ import { ArrowRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DoneStep } from "@/components/onboarding/done-step";
 import { Dots } from "@/components/onboarding/dots";
+import { LanguageStep } from "@/components/onboarding/language-step";
 import { LayoutStep } from "@/components/onboarding/layout-step";
 import { SplashStep } from "@/components/onboarding/splash-step";
 import { StreamingStep } from "@/components/onboarding/streaming-step";
@@ -17,6 +18,7 @@ import { useOnboarding } from "@/lib/onboarding";
 
 type StepId =
   | "splash"
+  | "language"
   | "welcome"
   | "layout"
   | "tmdb"
@@ -27,6 +29,7 @@ type StepId =
   | "done";
 const STEPS: StepId[] = [
   "splash",
+  "language",
   "welcome",
   "layout",
   "tmdb",
@@ -104,6 +107,7 @@ export function OnboardingModal() {
               className={`flex min-h-[440px] flex-col ${isTaste ? "px-8 pt-9 pb-3" : "justify-center px-12 py-10"}`}
             >
               <div key={step} className="animate-step-in">
+                {step === "language" && <LanguageStep />}
                 {step === "welcome" && <WelcomeStep />}
                 {step === "layout" && <LayoutStep />}
                 {step === "tmdb" && <TmdbStep />}

@@ -1,28 +1,35 @@
 import { Heart, Trash2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { segmentMentions } from "@/lib/social/mentions";
 import { Avatar, timeAgo } from "./profile-bits";
+import { MentionLink } from "./mention-link";
 import { segmentProfanity } from "./text-safety";
 import { UserHoverCard } from "./user-hover-card";
 import { useSelfAvatar } from "./use-self-avatar";
 import type { Comment } from "./profile-types";
 import { VerifiedBadge } from "@/views/account/verified-badge";
 
-function SafeBody({ body }: { body: string }) {
+function SafeBody({ body, onOpenAuthor }: { body: string; onOpenAuthor?: (handle: string) => void }) {
   const t = useT();
-  const segments = segmentProfanity(body);
   return (
     <p className="mt-1 whitespace-pre-wrap break-words text-[14px] leading-relaxed text-ink-muted">
-      {segments.map((s, i) =>
-        s.masked ? (
-          <span
-            key={i}
-            title={t("Hidden language")}
-            className="cursor-default rounded-[4px] bg-elevated px-1 blur-[5px] transition-[filter] duration-150 hover:blur-0"
-          >
-            {s.text}
-          </span>
+      {segmentMentions(body).map((seg, i) =>
+        seg.handle ? (
+          <MentionLink key={i} handle={seg.handle} label={seg.text} onOpen={onOpenAuthor} />
         ) : (
-          <span key={i}>{s.text}</span>
+          segmentProfanity(seg.text).map((s, j) =>
+            s.masked ? (
+              <span
+                key={`${i}.${j}`}
+                title={t("Hidden language")}
+                className="cursor-default rounded-[4px] bg-elevated px-1 blur-[5px] transition-[filter] duration-150 hover:blur-0"
+              >
+                {s.text}
+              </span>
+            ) : (
+              <span key={`${i}.${j}`}>{s.text}</span>
+            ),
+          )
         ),
       )}
     </p>
@@ -80,7 +87,7 @@ export function CommentItem({
             </span>
           )}
         </div>
-        <SafeBody body={c.body} />
+        <SafeBody body={c.body} onOpenAuthor={onOpenAuthor} />
         <div className="mt-1.5">
           <button
             onClick={() => onToggleLike?.(c.id)}

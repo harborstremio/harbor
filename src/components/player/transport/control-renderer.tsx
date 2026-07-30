@@ -1,6 +1,7 @@
+import { togglePictureBar } from "@/lib/player/picture-bar";
 import { t as translate } from "@/lib/i18n";
 import { StremioVolume } from "./stremio-volume";
-import { Camera, ChevronLeft, Info, Maximize, Minimize, PauseCircle, PictureInPicture2, PlayCircle, Replace, Tv } from "lucide-react";
+import { Camera, ChevronLeft, Info, Maximize, Minimize, PauseCircle, PictureInPicture2, PlayCircle, Replace, SlidersHorizontal, Tv } from "lucide-react";
 import type { ReactNode } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
@@ -510,6 +511,18 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           onToggleHideOthers={ctx.onToggleHideOthers}
           onClear={ctx.onClearDraw}
         />
+      );
+    }
+    case "picture": {
+      if (ctx.tight) return null;
+      return (
+        <BigButton
+          onClick={togglePictureBar}
+          ariaLabel={t("Picture adjustments")}
+          tooltip={t("Picture adjustments")}
+        >
+          <SlidersHorizontal size={22} strokeWidth={1.9} />
+        </BigButton>
       );
     }
     case "screenshot": {

@@ -25,6 +25,7 @@ import { fetchHeroFeed } from "@/lib/feed/hero-pool";
 import { hasTmdbProviderAddon, loadAddonRows, userAddons, type AddonRow } from "@/lib/addons";
 import { isAnimeRow } from "@/views/anime";
 import { buildArabicHomeRows } from "@/lib/arabic/home-rows";
+import { buildRussianHomeRows } from "@/lib/russian/home-rows";
 import { useAuth } from "@/lib/auth";
 import { type Meta } from "@/lib/cinemeta";
 import { t, useT, useUiLanguage } from "@/lib/i18n";
@@ -96,6 +97,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
   const [rows, setRows] = useState<HomeRow[]>([]);
   const [animeRows, setAnimeRows] = useState<HomeRow[]>([]);
   const [arabicRows, setArabicRows] = useState<HomeRow[]>([]);
+  const [russianRows, setRussianRows] = useState<HomeRow[]>([]);
   const [traktRows, setTraktRows] = useState<HomeRow[]>([]);
   const [simklRows, setSimklRows] = useState<HomeRow[]>([]);
   const [letterboxdRows, setLetterboxdRows] = useState<HomeRow[]>([]);
@@ -256,6 +258,22 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
   }, [uiLang, settings.homeMode, settings.tmdbKey, settings.tmdbLanguage]);
 
   useEffect(() => {
+    if (uiLang !== "ru" || settings.homeMode === "classic" || !settings.tmdbKey) {
+      setRussianRows([]);
+      return;
+    }
+    let cancelled = false;
+    buildRussianHomeRows(settings.tmdbKey)
+      .then((rs) => {
+        if (!cancelled) setRussianRows(rs);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [uiLang, settings.homeMode, settings.tmdbKey, settings.tmdbLanguage]);
+
+  useEffect(() => {
     if (!traktConnected) {
       setTraktRows([]);
       setTraktWatched(new Set());
@@ -343,7 +361,6 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       setLetterboxdRows([]);
       return;
     }
-    // Full mode needs session; public mode needs configSegment
     if (letterboxd.mode === "full" && !letterboxd.session) {
       setLetterboxdRows([]);
       return;
@@ -799,8 +816,8 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
 
   const pinnedRows = usePinnedRows();
   const filterableRows = useMemo(
-    () => [...listHomeRows, ...pinnedRows, ...arabicRows, ...personalRows, ...traktRows, ...simklRows, ...letterboxdRows, ...restRows, ...animeRows],
-    [listHomeRows, pinnedRows, arabicRows, personalRows, traktRows, simklRows, letterboxdRows, restRows, animeRows],
+    () => [...listHomeRows, ...pinnedRows, ...arabicRows, ...russianRows, ...personalRows, ...traktRows, ...simklRows, ...letterboxdRows, ...restRows, ...animeRows],
+    [listHomeRows, pinnedRows, arabicRows, russianRows, personalRows, traktRows, simklRows, letterboxdRows, restRows, animeRows],
   );
   const shownFilterableRows = useHideAnimeRows(filterableRows);
   const allCustomizableRows = useMemo(
@@ -1034,7 +1051,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
               onToggleHidden={() => handleToggleHidden("collections")}
             />
           )}
-          {rows.length === 0 && traktRows.length === 0 && simklRows.length === 0 && animeRows.length === 0 && arabicRows.length === 0 ? (
+          {rows.length === 0 && traktRows.length === 0 && simklRows.length === 0 && animeRows.length === 0 && arabicRows.length === 0 && russianRows.length === 0 ? (
             Array.from({ length: 4 }).map((_, i) => <RowSkeleton key={`skel-${i}`} />)
           ) : (
             <CustomizableRows

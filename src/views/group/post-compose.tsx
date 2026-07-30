@@ -2,11 +2,10 @@ import { useRef, useState } from "react";
 import { Bold, Clapperboard, Eye, Image as ImageIcon, Link2, Loader2, Pencil, Send, Youtube } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useAutosize } from "@/lib/use-autosize";
-import { renderBbcode } from "@/lib/social/bbcode";
-import { openLinkOut } from "@/lib/social/link-out";
 import { createGroupPost, type GroupPost } from "@/lib/social/group-posts";
 import { EmbedPrompt, type EmbedKind } from "@/components/embed-prompt";
 import { MediaPicker } from "./media-picker";
+import { PostBody } from "./post-body";
 import { Avatar } from "@/views/profile/profile-bits";
 
 const MAX = 2000;
@@ -97,18 +96,7 @@ export function PostCompose({
         {preview && (
           <div className="min-h-[38px] py-1.5">
             {trimmed ? (
-              <div
-                className="max-w-none break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
-                onClick={(e) => {
-                  const a = (e.target as HTMLElement).closest?.("a");
-                  const href = a?.getAttribute("href");
-                  if (a && href) {
-                    e.preventDefault();
-                    openLinkOut(href);
-                  }
-                }}
-                dangerouslySetInnerHTML={{ __html: renderBbcode(body) }}
-              />
+              <PostBody body={body} />
             ) : (
               <span className="text-[13px] text-ink-subtle">{t("Nothing to preview yet.")}</span>
             )}

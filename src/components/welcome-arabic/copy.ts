@@ -1,4 +1,6 @@
-export type WelcomeLang = "en" | "ar" | "pt";
+import type { UiLanguage } from "@/lib/i18n";
+
+export type WelcomeLang = UiLanguage;
 
 export const HEADLINE_AR = "السلام عليكم";
 export const TRANSLITERATION = "Assalamu alaikum";

@@ -1,20 +1,23 @@
-import { ArrowDownToLine, Award, Check, LifeBuoy, MessageSquare, Star, UserPlus, Users, X } from "lucide-react";
+import { ArrowDownToLine, AtSign, Award, Check, LifeBuoy, MessageSquare, Star, UserPlus, Users, X } from "lucide-react";
 import { CoverImg } from "@/components/cover-img";
 import { useState } from "react";
+import { useT } from "@/lib/i18n";
 import type { CenterNotif } from "@/lib/social/notifications";
 import type { PendingRequest } from "@/lib/social/friends";
 
-function timeAgo(ms: number): string {
+type Translate = (key: string, vars?: Record<string, string | number>) => string;
+
+function timeAgo(ms: number, t: Translate): string {
   if (!ms) return "";
   const s = Math.max(1, Math.round((Date.now() - ms) / 1000));
-  if (s < 60) return "just now";
+  if (s < 60) return t("just now");
   const m = Math.round(s / 60);
-  if (m < 60) return `${m}m ago`;
+  if (m < 60) return t("{n}m ago", { n: m });
   const h = Math.round(m / 60);
-  if (h < 24) return `${h}h ago`;
+  if (h < 24) return t("{n}h ago", { n: h });
   const d = Math.round(h / 24);
-  if (d < 7) return `${d}d ago`;
-  return `${Math.round(d / 7)}w ago`;
+  if (d < 7) return t("{n}d ago", { n: d });
+  return t("{n}w ago", { n: Math.round(d / 7) });
 }
 
 function fullDate(ms: number): string {
@@ -25,6 +28,7 @@ function fullDate(ms: number): string {
 function iconFor(kind: string) {
   if (kind === "downloads") return ArrowDownToLine;
   if (kind === "stars") return Star;
+  if (kind === "mention") return AtSign;
   if (kind === "friend-request") return UserPlus;
   if (kind === "group-added" || kind === "group-post") return Users;
   if (kind === "badge-received") return Award;
@@ -33,7 +37,8 @@ function iconFor(kind: string) {
 }
 
 function iconTint(kind: string): string {
-  if (kind === "badge-received" || kind === "stars" || kind === "downloads") return "text-accent";
+  if (kind === "badge-received" || kind === "stars" || kind === "downloads" || kind === "mention")
+    return "text-accent";
   return "text-ink-muted";
 }
 
@@ -52,15 +57,29 @@ function badgeName(notif: CenterNotif): string {
   return titleCase(raw);
 }
 
-export function notifTitle(notif: CenterNotif): string {
+const TITLE_BY_KIND: Record<string, string> = {
+  "friend-request": "Friend request",
+  comment: "New comment",
+  "group-added": "Group invite",
+  "group-post": "New group post",
+  mention: "You were mentioned",
+  downloads: "Downloads milestone",
+  stars: "Ratings milestone",
+  "diagnostics-request": "Diagnostics requested",
+  system: "Message from Harbor",
+};
+
+export function notifTitle(notif: CenterNotif, t: Translate): string {
   if (notif.kind === "badge-received") {
     const name = badgeName(notif);
-    if (name) return `You earned the ${name} badge`;
+    if (name) return t("You earned the {name} badge", { name });
     if (notif.title && !GENERIC_TITLES.has(notif.title)) return notif.title;
-    return "You earned a new badge";
+    return t("You earned a new badge");
   }
+  const known = TITLE_BY_KIND[notif.kind];
+  if (known) return t(known);
   if (notif.title && !GENERIC_TITLES.has(notif.title)) return notif.title;
-  return notif.title || "Notification";
+  return t("Notification");
 }
 
 type DetailAction = { label: string; run: () => void };
@@ -69,13 +88,14 @@ function detailAction(
   notif: CenterNotif,
   onBack: () => void,
   onOpenProfile: (handle: string) => void,
-  ownHandle?: string | null,
+  ownHandle: string | null | undefined,
+  t: Translate,
 ): DetailAction | null {
   if (notif.kind === "badge-received" && ownHandle)
-    return { label: "View badges", run: () => onOpenProfile(ownHandle) };
+    return { label: t("View badges"), run: () => onOpenProfile(ownHandle) };
   if (notif.kind === "comment" && notif.source === "social" && ownHandle)
-    return { label: "View profile", run: () => onOpenProfile(ownHandle) };
-  if (notif.kind === "friend-request") return { label: "Review request", run: onBack };
+    return { label: t("View profile"), run: () => onOpenProfile(ownHandle) };
+  if (notif.kind === "friend-request") return { label: t("Review request"), run: onBack };
   return null;
 }
 
@@ -93,6 +113,7 @@ export function RequestRow({
   onOpen: (handle: string) => void;
 }) {
   const from = request.from;
+  const t = useT();
   return (
     <div className="flex items-center gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-2.5">
       <button type="button" onClick={() => onOpen(from.handle)} className="shrink-0">
@@ -108,7 +129,7 @@ export function RequestRow({
         <button type="button" onClick={() => onOpen(from.handle)} className="truncate text-start text-[13px] font-semibold text-ink hover:underline">
           {from.alias || `@${from.handle}`}
         </button>
-        <span className="truncate text-[11.5px] text-ink-subtle">{request.slogan || "wants to connect"}</span>
+        <span className="truncate text-[11.5px] text-ink-subtle">{request.slogan || t("wants to connect")}</span>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
         <button
@@ -117,14 +138,14 @@ export function RequestRow({
           disabled={busy}
           className="flex h-8 items-center gap-1 rounded-full bg-ink px-3 text-[12px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
         >
-          <Check size={13} strokeWidth={2.6} /> Accept
+          <Check size={13} strokeWidth={2.6} /> {t("Accept")}
         </button>
         <button
           type="button"
           onClick={onDecline}
           disabled={busy}
           className="grid h-8 w-8 place-items-center rounded-full border border-edge-soft text-ink-muted transition-colors hover:border-danger/40 hover:text-danger disabled:opacity-40"
-          aria-label="Decline"
+          aria-label={t("Decline")}
         >
           <X size={14} strokeWidth={2.4} />
         </button>
@@ -145,6 +166,7 @@ export function FeedRow({
   onOpen: (notif: CenterNotif) => void;
 }) {
   const [removing, setRemoving] = useState(false);
+  const t = useT();
   const Icon = iconFor(notif.kind);
   const dismiss = () => {
     if (removing) return;
@@ -180,9 +202,9 @@ export function FeedRow({
             )}
           </span>
           <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13px] leading-snug text-ink group-hover:underline">{notifTitle(notif)}</span>
+            <span className="truncate text-[13px] leading-snug text-ink group-hover:underline">{notifTitle(notif, t)}</span>
             {notif.body && <span className="truncate text-[11.5px] text-ink-subtle">{notif.body}</span>}
-            <span className="mt-0.5 text-[10.5px] text-ink-subtle">{timeAgo(notif.createdAt)}</span>
+            <span className="mt-0.5 text-[10.5px] text-ink-subtle">{timeAgo(notif.createdAt, t)}</span>
           </span>
         </button>
         <div className="relative mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
@@ -192,7 +214,7 @@ export function FeedRow({
           <button
             type="button"
             onClick={dismiss}
-            aria-label="Dismiss notification"
+            aria-label={t("Dismiss notification")}
             className="absolute inset-0 grid place-items-center rounded-full text-ink-subtle opacity-0 outline-none transition-all duration-150 hover:bg-elevated hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
           >
             <X size={14} strokeWidth={2.4} />
@@ -214,8 +236,9 @@ export function NotificationDetail({
   onOpenProfile: (handle: string) => void;
   ownHandle?: string | null;
 }) {
+  const t = useT();
   const Icon = iconFor(notif.kind);
-  const action = detailAction(notif, onBack, onOpenProfile, ownHandle);
+  const action = detailAction(notif, onBack, onOpenProfile, ownHandle, t);
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5 p-5">
       <div className="flex flex-col items-center gap-3.5 pt-3 text-center">
@@ -227,7 +250,7 @@ export function NotificationDetail({
           )}
         </span>
         <div className="flex flex-col gap-1.5">
-          <span className="font-display text-[18px] font-medium leading-snug text-ink">{notifTitle(notif)}</span>
+          <span className="font-display text-[18px] font-medium leading-snug text-ink">{notifTitle(notif, t)}</span>
           {notif.body && <span className="text-[13px] leading-relaxed text-ink-muted">{notif.body}</span>}
         </div>
         <span className="text-[11.5px] text-ink-subtle">{fullDate(notif.createdAt)}</span>

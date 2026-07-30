@@ -10,7 +10,7 @@ import {
 import { syncAnimeProgress } from "@/lib/anilist/sync";
 import { syncMalProgress } from "@/lib/mal/sync";
 import { useSettings } from "@/lib/settings";
-import { isUpcomingDate } from "../helpers";
+import { airedOnly } from "../helpers";
 import { animeSeasonKey } from "./anime-season-key";
 
 const ANIME_TRACK_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -29,14 +29,12 @@ export function useAnimeWatchedRouting(meta: Meta, franchise: FranchiseEntry[], 
   };
 
   const manualMetaFor = (metaId: string): ManualWatchedMeta => {
-    const m = metaId === meta.id ? meta : byId.get(metaId) ?? meta;
+    const m = metaId === meta.id ? meta : (byId.get(metaId) ?? meta);
     return { type: "series", name: m.name, poster: m.poster, background: m.background };
   };
 
   const markMany = (displayEpisodes: KitsuEpisode[], watched: boolean) => {
-    const eligible = watched
-      ? displayEpisodes.filter((ep) => !isUpcomingDate(ep.airdate))
-      : displayEpisodes;
+    const eligible = watched ? airedOnly(displayEpisodes, (ep) => ep.airdate) : displayEpisodes;
     if (eligible.length === 0) return;
     const groups = new Map<string, Array<{ season: number; episode: number }>>();
     for (const ep of eligible) {

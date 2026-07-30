@@ -4,6 +4,7 @@ import { recordManualWatchedMeta, setManualWatchedMany } from "@/lib/manual-watc
 import type { Episode } from "@/lib/providers/tmdb";
 import { markEpisodesWatched, unmarkEpisodesWatched } from "@/lib/simkl/history";
 import { stremioIdToSimklTarget } from "@/lib/simkl/ids";
+import { airedOnly } from "../helpers";
 
 export function useMarkSeason({
   meta,
@@ -18,13 +19,8 @@ export function useMarkSeason({
 }): (watched: boolean) => void {
   return useCallback(
     (watched: boolean) => {
-      const now = Date.now();
       const airedEpisodes = watched
-        ? enrichedEpisodes.filter((ep) => {
-            if (!ep.airDate) return true;
-            const t = Date.parse(ep.airDate);
-            return !Number.isFinite(t) || t <= now;
-          })
+        ? airedOnly(enrichedEpisodes, (ep) => ep.airDate)
         : enrichedEpisodes;
       if (airedEpisodes.length === 0) return;
       if (watched)
@@ -50,9 +46,17 @@ export function useMarkSeason({
             : null);
       if (!showIds) return;
       if (watched) {
-        void markEpisodesWatched(showIds, active, airedEpisodes.map((e) => e.episodeNumber));
+        void markEpisodesWatched(
+          showIds,
+          active,
+          airedEpisodes.map((e) => e.episodeNumber),
+        );
       } else {
-        void unmarkEpisodesWatched(showIds, active, airedEpisodes.map((e) => e.episodeNumber));
+        void unmarkEpisodesWatched(
+          showIds,
+          active,
+          airedEpisodes.map((e) => e.episodeNumber),
+        );
       }
     },
     [meta, active, enrichedEpisodes, simklConnected],

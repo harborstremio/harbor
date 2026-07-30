@@ -1,10 +1,4 @@
 import { Check, ShieldCheck } from "lucide-react";
-import cometLogo from "@/assets/addon-logos/comet.png";
-import eztvLogo from "@/assets/addon-logos/eztv.png";
-import mediafusionLogo from "@/assets/addon-logos/mediafusion.png";
-import tpbLogo from "@/assets/addon-logos/thepiratebay.png";
-import torrentioLogo from "@/assets/addon-logos/torrentio.png";
-import ytsLogo from "@/assets/addon-logos/yts.png";
 import { useT } from "@/lib/i18n";
 
 type Level = "strict" | "balanced" | "off";
@@ -25,13 +19,13 @@ const REASON_LABEL: Record<Exclude<Reason, "clean">, string> = {
   malware: "Suspicious file",
 };
 
-const STREAMS: Array<{ logo: string; badges: string[]; name: string; reason: Reason }> = [
-  { logo: torrentioLogo, badges: ["2160p", "HDR", "Atmos"], name: "Dune.Part.Two.2024.2160p.WEB-DL.x265-NTb", reason: "clean" },
-  { logo: ytsLogo, badges: ["1080p"], name: "Dune.Part.Two.2024.1080p.BluRay.x264-PiGNUS", reason: "clean" },
-  { logo: tpbLogo, badges: ["CAM"], name: "Dune.Part.Two.2024.HDCAM.c1nem4", reason: "cam" },
-  { logo: cometLogo, badges: ["1080p"], name: "Dune.Part.One.2021.1080p.WEBRip-OUTDATED", reason: "mismatch" },
-  { logo: mediafusionLogo, badges: ["2160p", "REMUX"], name: "Dune.Part.Two.2024.REMUX.2160p.94GB", reason: "oversized" },
-  { logo: eztvLogo, badges: ["EXE"], name: "Dune2_HD_Player_setup.exe", reason: "malware" },
+const STREAMS: Array<{ badges: string[]; name: string; reason: Reason }> = [
+  { badges: ["2160p", "HDR", "Atmos"], name: "Example.Movie.2024.2160p.WEB-DL", reason: "clean" },
+  { badges: ["1080p"], name: "Example.Movie.2024.1080p.BluRay", reason: "clean" },
+  { badges: ["CAM"], name: "Example.Movie.2024.CAM", reason: "cam" },
+  { badges: ["1080p"], name: "Example.Movie.2021.1080p", reason: "mismatch" },
+  { badges: ["2160p", "REMUX"], name: "Example.Movie.2024.REMUX.94GB", reason: "oversized" },
+  { badges: ["EXE"], name: "Example.Movie.setup.exe", reason: "malware" },
 ];
 
 function isBlocked(reason: Reason, level: Level): boolean {
@@ -85,11 +79,9 @@ export function StreamFilterPreview({ level }: { level: Level }) {
               key={s.name}
               className={`flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors ${off ? "bg-canvas/40" : ""}`}
             >
-              <img
-                src={s.logo}
-                alt=""
-                draggable={false}
-                className={`h-[18px] w-[18px] shrink-0 rounded-[4px] object-contain ${off ? "opacity-50" : ""}`}
+              <span
+                aria-hidden
+                className={`h-[18px] w-[18px] shrink-0 rounded-[4px] bg-elevated ring-1 ring-inset ring-white/10 ${off ? "opacity-50" : ""}`}
               />
               <span className={`flex shrink-0 items-center gap-1 ${off ? "opacity-55" : ""}`}>
                 {s.badges.map((b) => (

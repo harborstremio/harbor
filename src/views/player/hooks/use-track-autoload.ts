@@ -220,8 +220,10 @@ export function useTrackAutoload(params: {
   const autoTrackKeyRef = useRef<string | null>(null);
   const prefsAppliedRef = useRef<string | null>(null);
   const autoSubIdRef = useRef<string | null>(null);
+  const autoAudioIdRef = useRef<string | null>(null);
   useEffect(() => {
     autoSubIdRef.current = null;
+    autoAudioIdRef.current = null;
   }, [src.url]);
 
   const preselectAppliedRef = useRef<string | null>(null);
@@ -252,7 +254,6 @@ export function useTrackAutoload(params: {
     autoTrackKeyRef.current = key;
     bridgeRef.current?.setAudioNormalize(settings.audioNormalize);
     bridgeRef.current?.setAudioProfile?.(settings.audioProfile);
-    bridgeRef.current?.setAudioDevice?.(settings.audioDevice);
 
     const prefs = readPlayerPrefs(src.meta.id);
     const isAnime =
@@ -286,10 +287,19 @@ export function useTrackAutoload(params: {
 
     let effAudio: (typeof snap.audioTracks)[number] | null = null;
     if (snap.audioTracks.length > 0) {
-      const want = pickBestTrack(allow(snap.audioTracks), audioLangs);
       const cur = snap.audioTracks.find((t) => t.selected) ?? null;
-      effAudio = want ?? cur;
-      if (want && (!cur || cur.id !== want.id)) bridgeRef.current?.setAudioTrack(want.id);
+      const userPicked =
+        cur != null && autoAudioIdRef.current != null && cur.id !== autoAudioIdRef.current;
+      if (userPicked) {
+        effAudio = cur;
+      } else {
+        const want = pickBestTrack(allow(snap.audioTracks), audioLangs);
+        effAudio = want ?? cur;
+        if (want && (!cur || cur.id !== want.id)) {
+          bridgeRef.current?.setAudioTrack(want.id);
+          autoAudioIdRef.current = want.id;
+        }
+      }
     }
     const subsOff = subsOffFor(prefs, settings);
     if (subsOff) {

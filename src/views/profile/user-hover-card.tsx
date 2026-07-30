@@ -70,7 +70,7 @@ export function UserHoverCard({ handle, children }: { handle: string; children: 
     openTimer.current = window.setTimeout(() => {
       openTimer.current = null;
       if (ref.current) setAnchor(ref.current.getBoundingClientRect());
-    }, 250);
+    }, HOVER_CARD_OPEN_MS);
   };
   const scheduleClose = () => {
     clearOpen();
@@ -78,7 +78,7 @@ export function UserHoverCard({ handle, children }: { handle: string; children: 
     closeTimer.current = window.setTimeout(() => {
       closeTimer.current = null;
       setAnchor(null);
-    }, 180);
+    }, HOVER_CARD_CLOSE_MS);
   };
 
   useEffect(() => {
@@ -131,13 +131,16 @@ export function UserHoverCard({ handle, children }: { handle: string; children: 
     <>
       {trigger}
       {anchor && (
-        <HoverCard handle={handle} anchor={anchor} onEnter={clearClose} onLeave={scheduleClose} />
+        <ProfileHoverCard handle={handle} anchor={anchor} onEnter={clearClose} onLeave={scheduleClose} />
       )}
     </>
   );
 }
 
-function HoverCard({
+export const HOVER_CARD_OPEN_MS = 250;
+export const HOVER_CARD_CLOSE_MS = 180;
+
+export function ProfileHoverCard({
   handle,
   anchor,
   onEnter,

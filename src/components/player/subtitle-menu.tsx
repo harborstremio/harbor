@@ -5,6 +5,7 @@ import { modalOverlayClose, modalOverlayEmitState, modalOverlayOpen } from "@/li
 import { openStyleBar } from "@/lib/player/sub-presets";
 import { setSecondarySub } from "@/lib/player/secondary-sub";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { MenuBody } from "./subtitle-menu/menu-body";
 import type { SubtitleMenuProps } from "./subtitle-menu/types";
 import { buildOverlayState } from "./subtitle-menu/utils";
@@ -17,6 +18,7 @@ type Props = SubtitleMenuProps;
 
 export function SubtitleMenu(props: Props) {
   const t = useT();
+  const { settings } = useSettings();
   const [open, setOpen] = useState(false);
   const [forceInline, setForceInline] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
@@ -124,7 +126,7 @@ export function SubtitleMenu(props: Props) {
     }
   };
 
-  const subSelected = props.selectedId != null;
+  const subSelected = props.selectedId != null && settings.showSubtitleIndicator;
 
   return (
     <div ref={wrap} className="relative">

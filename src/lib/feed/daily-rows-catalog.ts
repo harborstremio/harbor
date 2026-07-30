@@ -1,4 +1,5 @@
 import type { Affinity } from "@/lib/discover/types";
+import { t } from "@/lib/i18n";
 import { providerIdsFor, SERVICES } from "@/lib/providers/streaming";
 import type { StreamingService } from "@/lib/settings";
 import { genreToTmdbId } from "./sections";
@@ -185,8 +186,8 @@ const PARAMETERIZED: CatalogEntry[] = [
         };
         return {
           key: `language:${l.code}`,
-          title: l.label,
-          kicker: "Top rated abroad",
+          title: t(l.label),
+          kicker: t("Top rated abroad"),
           mediaType: "movie",
           endpoint: "discover",
           floorPrimary,
@@ -211,8 +212,8 @@ const PARAMETERIZED: CatalogEntry[] = [
           };
           return {
             key: `country:${iso}`,
-            title: `${l.label.replace(/ Cinema$/, "")} Films`,
-            kicker: "From the region",
+            title: t(`${l.label.replace(/ Cinema$/, "")} Films`),
+            kicker: t("From the region"),
             mediaType: "movie",
             endpoint: "discover",
             floorPrimary,

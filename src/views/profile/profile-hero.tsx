@@ -7,22 +7,31 @@ import { acceptFriend, removeFriend, sendFriendRequest } from "@/lib/social/frie
 import { PRESENCE_META, useMyPresence } from "@/lib/social/presence";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
+import { sanitizeStatLayout, STAT_ORDER, watchMinutes, type StatKey } from "@/lib/profile-card-layout";
 import { countryName } from "./flags";
 import { saveSlogan } from "./profile-api";
 import { orderShownBadges } from "./badge-catalog";
 import { EditProfileHint } from "./edit-profile-hint";
-import { Avatar, compactNumber, FeaturedBadge, StatPill, VerifiedCheck } from "./profile-bits";
+import { Avatar, compactNumber, FeaturedBadge, formatWatchTime, StatPill, VerifiedCheck } from "./profile-bits";
 import { StatusBubble } from "./status-bubble";
 import type { ProfileSummary } from "./profile-types";
 
 type HeroBadge = { id: string; name: string; iconUrl?: string };
+
+const STAT_GRID: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+  4: "grid-cols-2 sm:grid-cols-4",
+  5: "grid-cols-3 sm:grid-cols-5",
+  6: "grid-cols-3 sm:grid-cols-6",
+};
 
 export function ProfileHero({
   p,
   avatar,
   avatarFallback,
   mangaReadOverride,
-  watchedOverride,
   badges,
   userFont,
   hideBanner,
@@ -33,7 +42,6 @@ export function ProfileHero({
   avatar?: string;
   avatarFallback?: string;
   mangaReadOverride?: number;
-  watchedOverride?: number;
   badges?: HeroBadge[];
   userFont?: string;
   hideBanner?: boolean;
@@ -57,6 +65,10 @@ export function ProfileHero({
       ? t("Online now")
       : t("Offline");
   const presenceText = p.isOwner ? meta.text : p.online ? "text-success" : "";
+  const hiddenStats = new Set(sanitizeStatLayout(p.statLayout).hidden);
+  const showStat = (k: StatKey) => !hiddenStats.has(k);
+  const shownCount = STAT_ORDER.filter(showStat).length;
+  const statCols = STAT_GRID[shownCount] || "grid-cols-3 sm:grid-cols-6";
   return (
     <header className="relative w-full overflow-hidden">
       <div className="relative h-48 w-full sm:h-60">
@@ -179,11 +191,15 @@ export function ProfileHero({
           />
         )}
 
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatPill value={compactNumber(watchedOverride ?? p.counts.watched)} label={t("Watched")} />
-          <StatPill value={compactNumber(mangaReadOverride ?? (p.counts as { mangaRead?: number }).mangaRead ?? 0)} label={t("Read")} />
-          <StatPill value={compactNumber(p.counts.friends)} label={t("Friends")} />
-          <StatPill value={compactNumber(p.counts.badges)} label={t("Badges")} />
+        <div className={`mt-5 grid gap-2 sm:gap-3 ${statCols}`}>
+          {showStat("watchTime") && <WatchTimePill totalMinutes={watchMinutes(p.counts)} />}
+          {showStat("episodes") && <StatPill value={compactNumber(p.counts.episodesWatched ?? 0)} label={t("Episodes")} />}
+          {showStat("movies") && <StatPill value={compactNumber(p.counts.moviesWatched ?? 0)} label={t("Movies")} />}
+          {showStat("read") && (
+            <StatPill value={compactNumber(mangaReadOverride ?? (p.counts as { mangaRead?: number }).mangaRead ?? 0)} label={t("Read")} />
+          )}
+          {showStat("friends") && <StatPill value={compactNumber(p.counts.friends)} label={t("Friends")} />}
+          {showStat("badges") && <StatPill value={compactNumber(p.counts.badges)} label={t("Badges")} />}
         </div>
       </div>
     </header>
@@ -198,6 +214,25 @@ function HeroBadge({ badge }: { badge: HeroBadge }) {
         {badge.name}
       </span>
     </span>
+  );
+}
+
+function WatchTimePill({ totalMinutes }: { totalMinutes: number }) {
+  const t = useT();
+  const { a, aVal, b, bVal, c, cVal } = formatWatchTime(totalMinutes);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    <div className="flex flex-col items-center rounded-[10px] bg-surface px-2 py-2.5 ring-1 ring-edge-soft">
+      <span className="flex items-baseline tabular-nums">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">{a}</span>
+        <span className="ml-1 text-[17px] font-semibold text-ink">{pad(aVal)}</span>
+        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">{b}</span>
+        <span className="ml-1 text-[17px] font-semibold text-ink">{pad(bVal)}</span>
+        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">{c}</span>
+        <span className="ml-1 text-[17px] font-semibold text-ink">{pad(cVal)}</span>
+      </span>
+      <span className="text-[11px] uppercase tracking-[0.1em] text-ink-subtle">{t("Watch Time")}</span>
+    </div>
   );
 }
 

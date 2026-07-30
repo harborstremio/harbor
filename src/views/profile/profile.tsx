@@ -13,7 +13,7 @@ import { ProfileCardControls } from "./profile-card-controls";
 import { useT } from "@/lib/i18n";
 import { useMangaProgressList } from "@/lib/manga-progress";
 import { useWatchedCount } from "@/lib/playback-history";
-import { pushStats, useLibraryWatchedCount } from "@/lib/social/stats-sync";
+import { pushStats, useLibraryWatchedBreakdown, useLibraryWatchedCount } from "@/lib/social/stats-sync";
 import { useProfiles } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { currentAuthor } from "@/lib/theme-auth";
@@ -74,6 +74,7 @@ export function ProfileView({
   const isOwner = summary?.isOwner ?? false;
   const viewerSignedIn = !!currentAuthor();
   const libWatched = useLibraryWatchedCount(authKey, isOwner);
+  const watchedBreakdown = useLibraryWatchedBreakdown(authKey, isOwner);
   const custom = summary ? resolveCustomization(summary) : null;
   useFontLink(custom?.fontHref ?? "");
 
@@ -81,14 +82,34 @@ export function ProfileView({
 
   const cloudWatched = summary?.counts.watched ?? 0;
   const cloudManga = summary?.counts.mangaRead ?? 0;
+  const cloudMovies = summary?.counts.moviesWatched ?? 0;
+  const cloudEpisodes = summary?.counts.episodesWatched ?? 0;
+  const cloudMinutes = summary?.counts.minutesWatched ?? 0;
 
   useEffect(() => {
     if (!isOwner) return;
     const w = Math.max(watchedCount, libWatched, cloudWatched);
     const m = Math.max(mangaProgress.length, cloudManga);
-    if (w <= cloudWatched && m <= cloudManga) return;
-    pushStats(w > 0 ? w : null, m > 0 ? m : null);
-  }, [isOwner, libWatched, watchedCount, mangaProgress.length, cloudWatched, cloudManga]);
+    const movies = Math.max(watchedBreakdown.moviesWatched, cloudMovies);
+    const episodes = Math.max(watchedBreakdown.episodesWatched, cloudEpisodes);
+    const minutes = Math.max(watchedBreakdown.minutesWatched, cloudMinutes);
+
+    if (
+      w <= cloudWatched &&
+      m <= cloudManga &&
+      movies <= cloudMovies &&
+      episodes <= cloudEpisodes &&
+      minutes <= cloudMinutes
+    )
+      return;
+    pushStats(
+      w > 0 ? w : null,
+      m > 0 ? m : null,
+      movies > 0 ? movies : null,
+      episodes > 0 ? episodes : null,
+      minutes > 0 ? minutes : null,
+    );
+  }, [isOwner, libWatched, watchedCount, mangaProgress.length, cloudWatched, cloudManga, cloudMovies, cloudEpisodes, cloudMinutes, watchedBreakdown]);
 
   useEffect(() => {
     if (isOwner && consumeProfileEditIntent(handle)) setEditing(true);
@@ -116,7 +137,6 @@ export function ProfileView({
   const heroAvatar = summary.isOwner ? ownerAvatar || summary.avatarUrl : summary.avatarUrl || undefined;
   const heroAvatarFallback = summary.isOwner ? summary.avatarUrl || undefined : undefined;
   const mangaReadCount = summary.isOwner ? mangaProgress.length : undefined;
-  const watchedOverride = summary.isOwner ? Math.max(watchedCount, libWatched, summary.counts.watched) : undefined;
 
   if (editing && summary.isOwner) {
     return (
@@ -196,6 +216,19 @@ export function ProfileView({
   const presentCards = CARD_ORDER_DEFAULT.filter((k) => cardNodes[k] != null);
   const orderedCards = effectiveOrder(layout, presentCards);
 
+  const heroSummary = summary.isOwner
+    ? {
+        ...summary,
+        counts: {
+          ...summary.counts,
+          watched: Math.max(summary.counts.watched ?? 0, watchedBreakdown.watched),
+          moviesWatched: Math.max(summary.counts.moviesWatched ?? 0, watchedBreakdown.moviesWatched),
+          episodesWatched: Math.max(summary.counts.episodesWatched ?? 0, watchedBreakdown.episodesWatched),
+          minutesWatched: Math.max(summary.counts.minutesWatched ?? 0, watchedBreakdown.minutesWatched, (summary.counts.hoursWatched ?? 0) * 60),
+        },
+      }
+    : summary;
+
   return (
     <div
       ref={scrollRef}
@@ -204,11 +237,10 @@ export function ProfileView({
       style={c.background ? { background: c.background } : undefined}
     >
       <ProfileHero
-        p={summary}
+        p={heroSummary}
         avatar={heroAvatar}
         avatarFallback={heroAvatarFallback}
         mangaReadOverride={mangaReadCount}
-        watchedOverride={watchedOverride}
         badges={badges}
         userFont={c.font}
         hideBanner={c.hideTopBanner}

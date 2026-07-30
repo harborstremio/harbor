@@ -87,6 +87,32 @@ const AUDIO_PROFILE_AF: Record<string, string> = {
 
 const DEFAULT_UA = "VLC/3.0.20 LibVLC/3.0.20";
 
+let appliedAudioDevice: string | null = null;
+
+async function applyAudioDevice(want: string): Promise<void> {
+  let target = want;
+  if (target !== "auto") {
+    try {
+      const devices = await invoke<Array<{ name: string }>>("mpv_audio_devices");
+      if (devices.length > 0 && !devices.some((d) => d.name === target)) {
+        console.warn(`[audio] device "${target}" is no longer present, falling back to auto`);
+        target = "auto";
+        appliedAudioDevice = "auto";
+      }
+    } catch {
+      /* device list unavailable, try the stored value anyway */
+    }
+  }
+  try {
+    await invoke("mpv_set_property", { name: "audio-device", value: target });
+  } catch (e) {
+    if (target === "auto") return;
+    console.warn(`[audio] could not select "${target}", falling back to auto`, e);
+    appliedAudioDevice = "auto";
+    await invoke("mpv_set_property", { name: "audio-device", value: "auto" }).catch(() => {});
+  }
+}
+
 async function applyHeaderProps(headers?: Record<string, string>): Promise<void> {
   let ua = DEFAULT_UA;
   const fields: string[] = [];
@@ -637,10 +663,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
     },
     setAudioDevice(name) {
-      invoke("mpv_set_property", {
-        name: "audio-device",
-        value: name && name !== "auto" ? name : "auto",
-      }).catch(() => {});
+      const want = name && name !== "auto" ? name : "auto";
+      if (want === appliedAudioDevice) return;
+      appliedAudioDevice = want;
+      void applyAudioDevice(want);
     },
     setMediaInfo(info) {
       invoke("mpv_set_property", { name: "force-media-title", value: info.title }).catch(() => {});

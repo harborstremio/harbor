@@ -38,6 +38,8 @@ export function regionFromNavigator(): string | null {
   const lang = parts[0]?.toLowerCase();
   if (lang === "ar") return "SA";
   if (lang === "es") return "ES";
+  if (lang === "ru") return "RU";
+  if (lang === "pt") return "PT";
   return null;
 }
 

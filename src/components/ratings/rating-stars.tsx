@@ -92,9 +92,16 @@ export function RatingStars({
           aria-label={`${n} / 10`}
           className="flex items-center justify-center rounded-md p-1 outline-none transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:scale-[1.28] focus-visible:scale-[1.28] active:scale-90 motion-reduce:transition-none motion-reduce:hover:scale-100"
           onMouseMove={(e) => set(valueAt(n, e))}
-          onFocus={() => set(n)}
+          onFocus={(e) => {
+            if (e.currentTarget.matches(":focus-visible")) set(n);
+          }}
           onBlur={() => set(0)}
-          onClick={(e) => onChange?.(valueAt(n, e))}
+          onPointerDown={(e) => {
+            if (e.button === 0) onChange?.(valueAt(n, e));
+          }}
+          onClick={(e) => {
+            if (e.detail === 0) onChange?.(n);
+          }}
         >
           <StarGlyph size={size} fill={fillLevel(n, active)} />
         </button>

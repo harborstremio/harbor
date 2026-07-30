@@ -131,6 +131,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _scrapersV2?: boolean;
       _animeRowsV1?: boolean;
       _tennisWtaV1?: boolean;
+      _liquidGlassOptIn?: boolean;
     };
     if (!parsed._animeRowsV1) {
       const prev = (parsed.animeRows ?? {}) as Partial<Settings["animeRows"]>;
@@ -205,6 +206,11 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     delete parsed.scrapers;
     delete parsed.scrapersAcknowledged;
     delete parsed._scrapersV2;
+    if (!parsed._liquidGlassOptIn) {
+      parsed.liquidGlass = false;
+      parsed.experimentalLiquidGlassEnabled = false;
+      parsed._liquidGlassOptIn = true;
+    }
     return {
       ...DEFAULT,
       ...parsed,

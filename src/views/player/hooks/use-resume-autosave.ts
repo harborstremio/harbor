@@ -17,6 +17,7 @@ import { useSettings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
 import { ANIME_CLOUD_ID, CLOUD_OK } from "@/lib/stremio";
 import { syncSeriesWatchedToStremio } from "@/lib/stremio-episode-watched";
+import { isNaturalEnd } from "@/lib/player/playback-end";
 
 const TICK_MS = 4000;
 const MIN_POSITION_SEC = 5;
@@ -78,7 +79,7 @@ export function useResumeAutosave(params: {
     if (pos < MIN_POSITION_SEC) return;
     const cs = canonSeason(s, se);
     const finished =
-      (sn.durationSec > 0 && pos / sn.durationSec >= WATCHED_RATIO) || sn.status === "ended";
+      (sn.durationSec > 0 && pos / sn.durationSec >= WATCHED_RATIO) || isNaturalEnd(sn, pos);
     lastSavedRef.current = pos * 1000;
     if (finished) clearResume(id, se, ep);
     else saveResumeMs(id, pos * 1000, se, ep, cs);

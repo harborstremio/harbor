@@ -24,6 +24,7 @@ export type CenterNotif = {
   cover?: string;
   count?: number;
   edgeId?: string;
+  entityType?: string;
   targetId?: string;
   data?: Record<string, unknown>;
   createdAt: number;
@@ -89,6 +90,7 @@ function socialToCenter(n: SocialNotif): CenterNotif {
     title: n.title || (n.type === "comment" ? "New profile comment" : "Notification"),
     body: n.body || undefined,
     edgeId: isRequest ? n.entityId : undefined,
+    entityType: n.entityType,
     targetId: n.entityId,
     data: n.data,
     createdAt: ms(n.createdAt),

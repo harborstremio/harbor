@@ -8,10 +8,12 @@ import { subscribeNotificationOpen } from "@/lib/social/notification-open";
 import { requestOpenGroup } from "@/lib/social/open-group";
 import { openDiagnosticsConsent } from "@/lib/social/diagnostics-open";
 import { useNotificationCenter } from "@/lib/social/use-notification-center";
+import { useT } from "@/lib/i18n";
 import { FeedRow, NotificationDetail, RequestRow } from "./notification-rows";
 
 export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {}) {
   const nc = useNotificationCenter();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<CenterNotif | null>(null);
   const wasOpen = useRef(false);
@@ -53,7 +55,9 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
       if (requestId) openDiagnosticsConsent(requestId);
       return;
     }
-    if ((notif.kind === "group-added" || notif.kind === "group-post") && notif.targetId) {
+    const groupKind = notif.kind === "group-added" || notif.kind === "group-post";
+    const groupMention = notif.kind === "mention" && notif.entityType === "group";
+    if ((groupKind || groupMention) && notif.targetId) {
       setOpen(false);
       requestOpenGroup(notif.targetId);
       return;
@@ -69,7 +73,7 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          aria-label="Notifications"
+          aria-label={t("Notifications")}
           className="harbor-navbtn relative grid h-9 w-9 place-items-center rounded-full text-ink-muted transition-colors hover:bg-elevated/60 hover:text-ink"
         >
           <Bell size={17} strokeWidth={2} />
@@ -102,10 +106,10 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                     onClick={() => setDetail(null)}
                     className="-ms-1.5 flex h-8 items-center gap-1.5 rounded-full px-2.5 text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
                   >
-                    <ArrowLeft size={16} strokeWidth={2.2} /> Back
+                    <ArrowLeft size={16} strokeWidth={2.2} /> {t("Back")}
                   </button>
                 ) : (
-                  <span className="text-[14px] font-semibold tracking-tight text-ink">Notifications</span>
+                  <span className="text-[14px] font-semibold tracking-tight text-ink">{t("Notifications")}</span>
                 )}
                 <div className="flex items-center gap-1">
                   {nc.loading && !detail && <Loader2 size={14} className="animate-spin text-ink-subtle" />}
@@ -113,7 +117,7 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                     type="button"
                     onClick={() => setOpen(false)}
                     className="grid h-7 w-7 place-items-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
-                    aria-label="Close"
+                    aria-label={t("Close")}
                   >
                     <X size={15} />
                   </button>
@@ -137,14 +141,14 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                     disabled={nc.unread === 0}
                     className="rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-muted transition-colors hover:text-ink disabled:cursor-default disabled:opacity-40"
                   >
-                    Mark all read
+                    {t("Mark all read")}
                   </button>
                   <button
                     type="button"
                     onClick={() => void nc.clearAll()}
                     className="ms-auto rounded-md px-1.5 py-0.5 text-[12px] font-medium text-ink-subtle transition-colors hover:text-danger"
                   >
-                    Clear all
+                    {t("Clear all")}
                   </button>
                 </div>
               )}
@@ -153,7 +157,7 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                 {nc.pending.length > 0 && (
                   <div className="flex flex-col gap-2">
                     <span className="px-1 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-                      Friend requests
+                      {t("Friend requests")}
                     </span>
                     {nc.pending.map((r) => (
                       <RequestRow
@@ -172,7 +176,7 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                   <div className="flex flex-col gap-1.5">
                     {nc.pending.length > 0 && (
                       <span className="px-1 pb-0.5 text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-                        Earlier
+                        {t("Earlier")}
                       </span>
                     )}
                     {nc.items.map((n, i) => (
@@ -185,7 +189,7 @@ export function NotificationCenter({ trigger = true }: { trigger?: boolean } = {
                       <span className="grid h-12 w-12 place-items-center rounded-2xl bg-elevated/60 text-ink-subtle">
                         <Bell size={20} strokeWidth={1.8} />
                       </span>
-                      <span className="text-[13px] text-ink-muted">You are all caught up.</span>
+                      <span className="text-[13px] text-ink-muted">{t("You are all caught up.")}</span>
                     </div>
                   )
                 )}

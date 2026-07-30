@@ -3,6 +3,7 @@ import { Anime4kIndicator } from "@/components/player/anime4k-indicator";
 import { SvpIndicator } from "@/components/player/svp-indicator";
 import { StatsOverlay } from "@/components/player/stats-overlay";
 import { SubStyleBar } from "@/components/player/sub-style-bar";
+import { PictureBar } from "@/components/player/picture-bar";
 import { SubSyncBar } from "@/components/player/sub-sync-bar";
 import { SubtitleOverlay } from "@/components/player/subtitle-overlay";
 import {
@@ -94,6 +95,7 @@ export const StageOverlays = memo(function StageOverlays({
         />
       )}
       {!pipMode && <SubStyleBar />}
+      {!pipMode && <PictureBar />}
       {!pipMode && (
         <SubSyncBar
           delaySec={snap.subDelaySec}

@@ -38,7 +38,7 @@ function CondensedMock() {
                 Audio not labeled
               </span>
               <p className="line-clamp-2 break-all font-mono text-[12px] leading-relaxed text-ink">
-                Dune.Part.Two.2024.2160p.WEB-DL.x265-NTb
+                Example.Movie.2024.2160p.WEB-DL
               </p>
               <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
                 <span>WEB-DL</span>
@@ -55,7 +55,7 @@ function CondensedMock() {
                 <Play size={18} fill="currentColor" strokeWidth={0} />
                 Play
               </span>
-              <AddonLogo addonId="torrentio" addonName="Torrentio" size="lg" />
+              <AddonLogo addonId="example-a" addonName="Source A" size="lg" />
             </div>
           </div>
         </div>
@@ -117,27 +117,27 @@ function GridIcon() {
 
 const SOURCES: Array<{ addonId: string; addonName: string; headline: string; desc: string; file: string; badges: BadgeKind[] }> = [
   {
-    addonId: "torrentio",
-    addonName: "Torrentio",
-    headline: "Dune: Part Two 2024 2160p WEB-DL",
+    addonId: "example-a",
+    addonName: "Source A",
+    headline: "Example Movie 2024 2160p WEB-DL",
     desc: "👤 24 💾 18.4 GB ⚙️ RD",
-    file: "Dune.Part.Two.2024.2160p.MAX.WEB-DL.DDP5.1.Atmos.HDR.HEVC-NTb.mkv",
+    file: "Example.Movie.2024.2160p.WEB-DL.Atmos.HDR.mkv",
     badges: ["4k-uhd", "webdl", "hevc", "hdr", "atmos"],
   },
   {
-    addonId: "yts",
-    addonName: "YTS",
-    headline: "Dune: Part Two (2024) 1080p BluRay",
+    addonId: "example-b",
+    addonName: "Source B",
+    headline: "Example Movie (2024) 1080p BluRay",
     desc: "👤 11 💾 2.6 GB",
-    file: "Dune.Part.Two.2024.1080p.BluRay.x264.AAC5.1-[YTS.MX].mp4",
+    file: "Example.Movie.2024.1080p.BluRay.mp4",
     badges: ["1080p", "bluray"],
   },
   {
-    addonId: "comet",
-    addonName: "Comet",
-    headline: "Dune: Part Two 2024 1080p WEB-DL DDP5.1",
+    addonId: "example-c",
+    addonName: "Source C",
+    headline: "Example Movie 2024 1080p WEB-DL DDP5.1",
     desc: "👤 8 💾 4.1 GB",
-    file: "Dune.Part.Two.2024.1080p.WEB-DL.DDP5.1.H.264-FLUX.mkv",
+    file: "Example.Movie.2024.1080p.WEB-DL.DDP5.1.mkv",
     badges: ["1080p", "webdl", "ddp"],
   },
 ];
@@ -197,11 +197,11 @@ export function TorrentNamePreview({ on }: { on: boolean }) {
 }
 
 const DESC = [
-  "Dune.Part.Two.2024.2160p.MAX.WEB-DL.DDP5.1.Atmos.HDR.HEVC-NTb.mkv",
+  "Example.Movie.2024.2160p.WEB-DL.Atmos.HDR.mkv",
   "👤 142 💾 18.4 GB ⚙️ RealDebrid · Instant",
   "🌐 English · Spanish · French · German",
   "🎞️ HDR10 · Dolby Atmos 7.1 · HEVC",
-  "📁 Dune Part Two (2024) [2160p WEB-DL]",
+  "📁 Example Movie (2024) [2160p WEB-DL]",
 ].join("\n");
 
 export function StreamDescriptionPreview({ full }: { full: boolean }) {
@@ -209,11 +209,11 @@ export function StreamDescriptionPreview({ full }: { full: boolean }) {
     <Shell>
       <div className="flex items-stretch gap-3.5 rounded-2xl bg-elevated/40 p-3.5 ring-1 ring-edge-soft/50">
         <div className="flex w-[44px] shrink-0 items-center justify-center">
-          <AddonLogo addonId="aiostreams" addonName="AIOStreams" size="xl" />
+          <AddonLogo addonId="example-a" addonName="Source A" size="xl" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1.5">
           <p className="truncate text-[14px] font-semibold leading-snug text-ink">
-            Dune: Part Two 2024 2160p WEB-DL
+            Example Movie 2024 2160p WEB-DL
           </p>
           <p className={`whitespace-pre-line text-[12.5px] leading-snug text-ink-muted ${full ? "" : "line-clamp-3"}`}>
             {DESC}

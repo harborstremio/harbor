@@ -145,7 +145,7 @@ function settingsHash(settings: Settings): string {
     .join(",");
   const langs = (settings.preferredLanguages ?? []).join(",");
   const bias = settings.feedLocaleBias ? "1" : "0";
-  return `${settings.region}|${enabled}|${langs}|${settings.tmdbLanguage}|${bias}`;
+  return `${settings.region}|${enabled}|${langs}|${settings.tmdbLanguage}|${bias}|${settings.uiLanguage}`;
 }
 
 export function selectDailyRows(

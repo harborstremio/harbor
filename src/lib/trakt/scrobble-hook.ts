@@ -83,7 +83,14 @@ export function useTraktScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
         snap.durationSec >= STUB_MAX_SEC &&
         (lastActionRef.current === "start" || lastActionRef.current === "pause")
       ) {
-        scrobble("stop", { metaId, episode: src.episode, progress: 100 });
+        const endPct =
+          snap.durationSec > 0
+            ? Math.min(
+                100,
+                Math.max(0, progressRef.current, (getPlaybackPosition() / snap.durationSec) * 100),
+              )
+            : 100;
+        scrobble("stop", { metaId, episode: src.episode, progress: endPct });
         lastActionRef.current = "stop";
       }
       return;

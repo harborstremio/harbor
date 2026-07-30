@@ -1,10 +1,8 @@
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Heart, Loader2, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useAutosize } from "@/lib/use-autosize";
-import { renderBbcode } from "@/lib/social/bbcode";
-import { openLinkOut } from "@/lib/social/link-out";
-import { useView } from "@/lib/view";
+import { PostBody } from "./post-body";
 import {
   deleteGroupPost,
   editGroupPost,
@@ -34,14 +32,12 @@ export function PostItem({
   onOpenProfile?: (handle: string) => void;
 }) {
   const t = useT();
-  const { openMeta, openManga } = useView();
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(post.body);
   const [editError, setEditError] = useState<string | null>(null);
   const editRef = useRef<HTMLTextAreaElement>(null);
-  const html = useMemo(() => renderBbcode(post.body), [post.body]);
   useAutosize(editRef, draft);
 
   const beginEdit = () => {
@@ -157,30 +153,7 @@ export function PostItem({
             </div>
           </div>
         ) : (
-          <div
-            className="max-w-none break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
-            onClick={(e) => {
-              const el = e.target as HTMLElement;
-              const card = el.closest?.("[data-harbor-media]");
-              const mediaId = card?.getAttribute("data-harbor-media");
-              if (mediaId) {
-                e.preventDefault();
-                const kind = card?.getAttribute("data-harbor-media-kind") ?? "movie";
-                const name = card?.getAttribute("data-harbor-media-title") ?? "";
-                const poster = card?.getAttribute("data-harbor-media-poster") || undefined;
-                if (kind === "manga") openManga(mediaId);
-                else openMeta({ id: mediaId, type: kind === "series" || kind === "anime" ? "series" : "movie", name, poster });
-                return;
-              }
-              const a = el.closest?.("a");
-              const href = a?.getAttribute("href");
-              if (a && href) {
-                e.preventDefault();
-                openLinkOut(href);
-              }
-            }}
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
+          <PostBody body={post.body} onOpenProfile={onOpenProfile} />
         )}
 
         <div className="mt-1 flex items-center gap-1">

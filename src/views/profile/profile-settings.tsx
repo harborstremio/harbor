@@ -5,9 +5,12 @@ import { useProfiles } from "@/lib/profiles";
 import { nameEquals } from "@/lib/account/name-sync";
 import { setPrivate } from "@/lib/social/privacy";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 import { saveSettings } from "./profile-api";
 import { MyListsPicker } from "./my-lists-picker";
 import { ShownBadgesPicker, pickableBadges } from "./shown-badges-picker";
+import { HeroStatsPicker } from "./hero-stats-picker";
+import { ProfileCardsPicker } from "./profile-cards-picker";
 import { ProfileMedia } from "./profile-media";
 import { LocationSelect } from "./location-select";
 import { CustomizationPanel } from "./customization/customization-panel";
@@ -62,6 +65,7 @@ export function ProfileSettings({
   onSaved: (next: ProfileSummary) => void;
   onArrange?: () => void;
 }) {
+  const t = useT();
   const { displayName, setDisplayName } = useTogether();
   const { activeProfile, updateProfile } = useProfiles();
   const { settings, update: updateSettings } = useSettings();
@@ -82,6 +86,8 @@ export function ProfileSettings({
   const [error, setError] = useState<string | null>(null);
   const [pickingLists, setPickingLists] = useState(false);
   const [pickingBadges, setPickingBadges] = useState(false);
+  const [pickingStats, setPickingStats] = useState(false);
+  const [pickingCards, setPickingCards] = useState(false);
   const [customizing, setCustomizing] = useState(false);
   const badgeOptions = pickableBadges(badges ?? []);
   const canPickBadges = badgeOptions.length > 0 || summary.verified || summary.hideVerified === true;
@@ -275,6 +281,38 @@ export function ProfileSettings({
 
             <div className="flex items-center justify-between gap-3 pt-1">
               <div className="min-w-0">
+                <div className="text-[13px] font-medium text-ink">{t("Hero stats")}</div>
+                <div className="text-[12px] text-ink-subtle">
+                  {t("Choose which stats show in the row at the top of your profile")}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPickingStats(true)}
+                className="inline-flex min-h-11 shrink-0 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink ring-1 ring-edge-soft hover:bg-elevated"
+              >
+                {t("Choose")}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="min-w-0">
+                <div className="text-[13px] font-medium text-ink">{t("Profile cards")}</div>
+                <div className="text-[12px] text-ink-subtle">
+                  {t("Pick which cards show on your profile, and the order they appear in")}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPickingCards(true)}
+                className="inline-flex min-h-11 shrink-0 items-center rounded-[10px] px-4 text-[14px] font-medium text-ink ring-1 ring-edge-soft hover:bg-elevated"
+              >
+                {t("Choose")}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-1">
+              <div className="min-w-0">
                 <div className="text-[13px] font-medium text-ink">Customize profile</div>
                 <div className="text-[12px] text-ink-subtle">Custom font, page background, and a freeform HTML/CSS canvas</div>
               </div>
@@ -377,6 +415,12 @@ export function ProfileSettings({
           onClose={() => setPickingBadges(false)}
           onSaved={onSaved}
         />
+      )}
+      {pickingStats && (
+        <HeroStatsPicker summary={summary} onClose={() => setPickingStats(false)} onSaved={onSaved} />
+      )}
+      {pickingCards && (
+        <ProfileCardsPicker summary={summary} onClose={() => setPickingCards(false)} onSaved={onSaved} />
       )}
     </>
   );

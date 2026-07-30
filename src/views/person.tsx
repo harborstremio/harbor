@@ -5,6 +5,7 @@ import {
   creditToMeta,
   tmdbPerson,
   tmdbPersonCached,
+  type PersonCredit,
   type PersonDetail,
 } from "@/lib/providers/tmdb";
 import { AwardDetailModal } from "@/components/award-detail-modal";
@@ -17,7 +18,19 @@ import { useScrollMemory, useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { AwardLaurelStrip } from "./person/award-laurel-strip";
 import { Bio } from "./person/bio";
+import { CollaboratorRail } from "./person/collaborator-rail";
 import { FilmRow } from "./person/film-row";
+import { FilmographyBar } from "./person/filmography-bar";
+import { useCollaborators } from "./person/use-collaborators";
+import {
+  applyMinRating,
+  rankByRating,
+  sortFilmography,
+  TOP_PERFORMANCE_COUNT,
+  TOP_PERFORMANCE_MIN,
+  type FilmographySort,
+} from "./person/filmography-rank";
+import { TopPerformancesRow } from "./person/top-performances-row";
 import { BirthdayLink, PlaceLink } from "./person/person-meta-links";
 import {
   calcAge,
@@ -49,6 +62,8 @@ export function PersonView({ personId }: { personId: number }) {
   );
   const awardChips = useMemo(() => awardSummary(awardEntries), [awardEntries]);
   const [openAward, setOpenAward] = useState<{ type: AwardType; anchor: DOMRect } | null>(null);
+  const [sort, setSort] = useState<FilmographySort>("popularity");
+  const [minRating, setMinRating] = useState(0);
   const openAwardEntries = useMemo(
     () => (openAward && awardEntries ? awardEntries.filter((e) => e.type === openAward.type) : []),
     [openAward, awardEntries],
@@ -93,19 +108,46 @@ export function PersonView({ personId }: { personId: number }) {
       .sort((a, b) => notableScore(b) - notableScore(a))
       .slice(0, 12);
   }, [sortedCast, sortedCrew, person]);
-  const movies = sortedCast.filter((c) => c.mediaType === "movie");
-  const shows = sortedCast.filter((c) => c.mediaType === "tv");
-  const directing = dedupe(sortedCrew.filter((c) => DIRECTOR_JOBS.has(c.job ?? "")));
-  const writing = dedupe(sortedCrew.filter((c) => WRITER_JOBS.has(c.job ?? "")));
-  const producing = dedupe(sortedCrew.filter((c) => PRODUCER_JOBS.has(c.job ?? "")));
-  const otherCrew = dedupe(
-    sortedCrew.filter(
-      (c) =>
-        !DIRECTOR_JOBS.has(c.job ?? "") &&
-        !WRITER_JOBS.has(c.job ?? "") &&
-        !PRODUCER_JOBS.has(c.job ?? ""),
-    ),
+  const topPerformances = useMemo(
+    () => rankByRating(sortedCast.filter((c) => !isCameoOrGuest(c)), TOP_PERFORMANCE_COUNT),
+    [sortedCast],
   );
+  const collaborators = useCollaborators(person);
+
+  const film = useMemo(() => {
+    const crewIn = (jobs: Set<string>) => dedupe(sortedCrew.filter((c) => jobs.has(c.job ?? "")));
+    const otherAll = dedupe(
+      sortedCrew.filter(
+        (c) =>
+          !DIRECTOR_JOBS.has(c.job ?? "") &&
+          !WRITER_JOBS.has(c.job ?? "") &&
+          !PRODUCER_JOBS.has(c.job ?? ""),
+      ),
+    );
+    const raw = {
+      movies: sortedCast.filter((c) => c.mediaType === "movie"),
+      shows: sortedCast.filter((c) => c.mediaType === "tv"),
+      directing: crewIn(DIRECTOR_JOBS),
+      writing: crewIn(WRITER_JOBS),
+      producing: crewIn(PRODUCER_JOBS),
+      otherCrew: otherAll.length > 4 ? otherAll.slice(0, 24) : [],
+    };
+    const shape = (list: PersonCredit[]) => sortFilmography(applyMinRating(list, minRating), sort);
+    const shown = {
+      movies: shape(raw.movies),
+      shows: shape(raw.shows),
+      directing: shape(raw.directing),
+      writing: shape(raw.writing),
+      producing: shape(raw.producing),
+      otherCrew: shape(raw.otherCrew),
+    };
+    const count = (lists: PersonCredit[][]) => lists.reduce((n, l) => n + l.length, 0);
+    return {
+      ...shown,
+      total: count(Object.values(raw)),
+      shownTotal: count(Object.values(shown)),
+    };
+  }, [sortedCast, sortedCrew, sort, minRating]);
 
   const photo = person?.profilePath
     ? `https://image.tmdb.org/t/p/h632${person.profilePath}`
@@ -200,16 +242,45 @@ export function PersonView({ personId }: { personId: number }) {
         {knownFor.length > 0 && (
           <FilmRow title={t("Known For")} credits={knownFor} showRole={false} />
         )}
-        {movies.length > 0 && <FilmRow title={t("Movies · {n}", { n: movies.length })} credits={movies} showRole />}
-        {shows.length > 0 && <FilmRow title={t("TV Shows · {n}", { n: shows.length })} credits={shows} showRole />}
-        {directing.length > 0 && <FilmRow title={t("Directing")} credits={directing} showRole />}
-        {writing.length > 0 && <FilmRow title={t("Writing")} credits={writing} showRole />}
-        {producing.length > 0 && <FilmRow title={t("Producing")} credits={producing} showRole />}
-        {otherCrew.length > 0 && otherCrew.length > 4 && (
-          <FilmRow title={t("Other Work")} credits={otherCrew.slice(0, 24)} showRole />
+        {topPerformances.length >= TOP_PERFORMANCE_MIN && (
+          <TopPerformancesRow credits={topPerformances} />
+        )}
+        <CollaboratorRail people={collaborators} />
+
+        {film.total > 0 && (
+          <div className="flex flex-col gap-14">
+            <FilmographyBar
+              sort={sort}
+              onSort={setSort}
+              minRating={minRating}
+              onMinRating={setMinRating}
+              resultCount={{ shown: film.shownTotal, total: film.total }}
+            />
+            {film.movies.length > 0 && (
+              <FilmRow title={t("Movies · {n}", { n: film.movies.length })} credits={film.movies} showRole />
+            )}
+            {film.shows.length > 0 && (
+              <FilmRow title={t("TV Shows · {n}", { n: film.shows.length })} credits={film.shows} showRole />
+            )}
+            {film.directing.length > 0 && (
+              <FilmRow title={t("Directing")} credits={film.directing} showRole />
+            )}
+            {film.writing.length > 0 && <FilmRow title={t("Writing")} credits={film.writing} showRole />}
+            {film.producing.length > 0 && (
+              <FilmRow title={t("Producing")} credits={film.producing} showRole />
+            )}
+            {film.otherCrew.length > 0 && (
+              <FilmRow title={t("Other Work")} credits={film.otherCrew} showRole />
+            )}
+            {film.shownTotal === 0 && (
+              <div className="rounded-2xl border border-dashed border-edge px-6 py-12 text-center text-[14px] text-ink-muted">
+                {t("No titles clear that rating.")}
+              </div>
+            )}
+          </div>
         )}
 
-        {!loading && person && sortedCast.length === 0 && sortedCrew.length === 0 && (
+        {!loading && person && film.total === 0 && knownFor.length === 0 && (
           <div className="rounded-2xl border border-dashed border-edge px-6 py-12 text-center text-[14px] text-ink-muted">
             {t("No filmography on record.")}
           </div>
