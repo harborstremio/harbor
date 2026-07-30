@@ -272,7 +272,7 @@ export function HeroCarousel({
               type="button"
               onClick={() => setActive((a) => (a - 1 + slides.length) % slides.length)}
               aria-label={t("Previous")}
-              className="group/hl absolute inset-y-0 start-0 z-30 flex w-[14%] max-w-[120px] items-center justify-start ps-4"
+              className="group/hl absolute inset-y-0 start-0 z-30 my-auto flex h-2/3 w-[14%] max-w-[120px] items-center justify-start ps-4"
             >
               <NavChevron
                 dir="left"
@@ -284,7 +284,7 @@ export function HeroCarousel({
               type="button"
               onClick={() => setActive((a) => (a + 1) % slides.length)}
               aria-label={t("Next")}
-              className="group/hr absolute inset-y-0 end-0 z-30 flex w-[14%] max-w-[120px] items-center justify-end pe-4"
+              className="group/hr absolute inset-y-0 end-0 z-30 my-auto flex h-2/3 w-[14%] max-w-[120px] items-center justify-end pe-4"
             >
               <NavChevron
                 dir="right"
