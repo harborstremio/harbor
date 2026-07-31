@@ -9,6 +9,7 @@ import { ColorThemeBody } from "./theme-panel/color-theme-body";
 import { CustomThemesSection } from "./theme-panel/custom-themes-section";
 import { DisplaySection } from "./theme-panel/display-section";
 import { FontGrid } from "./theme-panel/font-grid";
+import { FullscreenClockSettings } from "./theme-panel/fullscreen-clock-settings";
 import { LogoPicker } from "./theme-panel/logo-picker";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -64,7 +65,9 @@ export function ThemePanel() {
 
       <Section
         title={t("Typography")}
-        subtitle={t("Pick a display and body pairing, or upload your own font to use across Harbor.")}
+        subtitle={t(
+          "Pick a display and body pairing, or upload your own font to use across Harbor.",
+        )}
       >
         <FontGrid
           pairValue={theme.fontPair}
@@ -85,7 +88,9 @@ export function ThemePanel() {
 
       <Section
         title={t("Seek bar")}
-        subtitle={t("Style the timeline at the bottom of the player. Swap the dot for a sticker, change the bar height, recolor it. Settings live-preview right here.")}
+        subtitle={t(
+          "Style the timeline at the bottom of the player. Swap the dot for a sticker, change the bar height, recolor it. Settings live-preview right here.",
+        )}
       >
         <SeekBarPanel />
       </Section>
@@ -93,11 +98,22 @@ export function ThemePanel() {
       {isTauri && (
         <Section
           title={t("Window title bar")}
-          subtitle={t("Use your operating system's native title bar and window buttons instead of Harbor's built-in ones. Handy if the in-app buttons ever feel out of reach, like during playback.")}
+          subtitle={t(
+            "Use your operating system's native title bar and window buttons instead of Harbor's built-in ones. Handy if the in-app buttons ever feel out of reach, like during playback.",
+          )}
         >
           <NativeTitleBarRow />
         </Section>
       )}
+
+      <Section
+        title={t("Fullscreen clock")}
+        subtitle={t(
+          "Keep your local time visible during fullscreen playback and choose how it looks.",
+        )}
+      >
+        <FullscreenClockSettings />
+      </Section>
     </>
   );
 }
@@ -116,9 +132,13 @@ function NativeTitleBarRow() {
         <PanelTop size={15} strokeWidth={2.2} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="text-[14px] font-medium text-ink">{t("Use the native window title bar")}</span>
+        <span className="text-[14px] font-medium text-ink">
+          {t("Use the native window title bar")}
+        </span>
         <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Show your operating system's own title bar with its minimize, maximize, and close buttons. They stay reachable everywhere, including while a video is playing. Turn this off to use Harbor's built-in window buttons.")}
+          {t(
+            "Show your operating system's own title bar with its minimize, maximize, and close buttons. They stay reachable everywhere, including while a video is playing. Turn this off to use Harbor's built-in window buttons.",
+          )}
         </p>
       </div>
       <button

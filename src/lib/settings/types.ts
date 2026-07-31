@@ -3,6 +3,7 @@ import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import type { UiLanguage } from "@/lib/i18n";
+import type { FullscreenClockFormat, FullscreenClockStyle } from "@/lib/local-time";
 
 export type StreamingService =
   | "netflix"
@@ -338,6 +339,10 @@ export type Settings = {
   animeOnlyInAnimeRoom: boolean;
   cwAdvanceNext: boolean;
   useNativeTitleBar: boolean;
+  fullscreenClockEnabled: boolean;
+  fullscreenClockFormat: FullscreenClockFormat;
+  fullscreenClockStyle: FullscreenClockStyle;
+  fullscreenClockShowSeconds: boolean;
   closeToTray: boolean;
   trayAlwaysOnTop: boolean;
   pauseMinimized: boolean;

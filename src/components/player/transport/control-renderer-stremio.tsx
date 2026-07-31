@@ -44,6 +44,7 @@ import { StremioVolume } from "./stremio-volume";
 import { renderCustomIconControlStremio } from "./custom-icon-renderer";
 import { WindowControlButtons } from "./window-control-buttons";
 import { IdentifySongButton } from "@/components/identify-song-button";
+import { FullscreenClock } from "@/components/player/fullscreen-clock";
 
 function qualityInfoOn(): boolean {
   try {
@@ -241,6 +242,8 @@ export function RenderedStremioControl({
         </div>
       );
     }
+    case "local-time":
+      return ctx.fullscreen ? <FullscreenClock /> : null;
     case "play-pause":
       return (
         <Tooltip label={ctx.playing ? tr("Pause") : tr("Play")}>

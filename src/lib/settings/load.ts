@@ -9,6 +9,7 @@ import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
 import { resolveUiLanguage } from "@/lib/i18n";
+import { sanitizeFullscreenClockFormat, sanitizeFullscreenClockStyle } from "@/lib/local-time";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -161,6 +162,16 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       ...DEFAULT,
       ...parsed,
       posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
+      fullscreenClockEnabled:
+        typeof parsed.fullscreenClockEnabled === "boolean"
+          ? parsed.fullscreenClockEnabled
+          : DEFAULT.fullscreenClockEnabled,
+      fullscreenClockFormat: sanitizeFullscreenClockFormat(parsed.fullscreenClockFormat),
+      fullscreenClockStyle: sanitizeFullscreenClockStyle(parsed.fullscreenClockStyle),
+      fullscreenClockShowSeconds:
+        typeof parsed.fullscreenClockShowSeconds === "boolean"
+          ? parsed.fullscreenClockShowSeconds
+          : DEFAULT.fullscreenClockShowSeconds,
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
       subProvidersEnabled: {

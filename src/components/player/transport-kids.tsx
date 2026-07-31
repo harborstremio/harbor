@@ -15,6 +15,7 @@ import { useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
 import { fmtTime } from "./transport/transport-utils";
+import { FullscreenClock } from "./fullscreen-clock";
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -83,7 +84,9 @@ export function TransportKids({
             </span>
           )}
         </div>
-        <div className="w-14 shrink-0" />
+        <div className="flex min-w-[7rem] shrink-0 justify-end">
+          {fullscreen && <FullscreenClock variant="kids" />}
+        </div>
       </div>
 
       <div

@@ -16,6 +16,7 @@ export type PlayerSlot =
 export type PlayerControlId =
   | "back"
   | "title-info"
+  | "local-time"
   | "time-start"
   | "time-end"
   | "volume"
@@ -171,6 +172,7 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
   controls: [
     { id: "back", slot: "top-left", order: 0 },
     { id: "title-info", slot: "top-left", order: 10 },
+    { id: "local-time", slot: "top-right", order: 90 },
     { id: "window-controls", slot: "top-right", order: 100 },
     { id: "time-start", slot: "seek-leading", order: 0 },
     { id: "time-end", slot: "seek-trailing", order: 0 },
@@ -208,6 +210,7 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "back", slot: "top-left", order: 0 },
     { id: "title-info", slot: "top-left", order: 10 },
     { id: "fullscreen", slot: "top-right", order: 0 },
+    { id: "local-time", slot: "top-right", order: 90 },
     { id: "window-controls", slot: "top-right", order: 100 },
     { id: "play-pause", slot: "bottom-left", order: 0 },
     { id: "volume", slot: "bottom-left", order: 10 },
@@ -244,6 +247,7 @@ export const CONTROL_META: Record<
 > = {
   back: { label: "Back", group: "actions", defaultSlot: "top-left" },
   "title-info": { label: "Title & info", group: "info", defaultSlot: "top-left" },
+  "local-time": { label: "Local time", group: "info", defaultSlot: "top-right" },
   "time-start": { label: "Time elapsed", group: "info", defaultSlot: "seek-leading" },
   "time-end": { label: "Time remaining or duration", group: "info", defaultSlot: "seek-trailing" },
   volume: { label: "Volume", group: "transport", defaultSlot: "bottom-left" },

@@ -1523,6 +1523,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["window title bar", "native title bar", "system title bar", "decorations"],
   },
   {
+    label: "Fullscreen clock",
+    section: "theme",
+    anchorTitle: "Fullscreen clock",
+    keywords: ["fullscreen clock", "local time", "player clock", "clock format", "clock style"],
+  },
+  {
     label: "Home hero shadow",
     section: "theme",
     anchorTitle: "Home hero shadow",
@@ -4847,6 +4853,24 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "system title bar",
       "window buttons reachable",
     ],
+  },
+  {
+    label: "Show fullscreen clock",
+    section: "theme",
+    anchorTitle: "Fullscreen clock",
+    keywords: ["local time", "player clock", "fullscreen time", "show clock", "hide clock"],
+  },
+  {
+    label: "Clock format",
+    section: "theme",
+    anchorTitle: "Fullscreen clock",
+    keywords: ["12 hour", "24 hour", "am pm", "system time", "seconds"],
+  },
+  {
+    label: "Clock style",
+    section: "theme",
+    anchorTitle: "Fullscreen clock",
+    keywords: ["glass", "minimal", "solid", "accent", "clock design"],
   },
   {
     label: "Where alerts go",
