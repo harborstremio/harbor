@@ -41,7 +41,7 @@ export function ClockDisplay({
   return (
     <time
       dateTime={date.toISOString()}
-      className={`pointer-events-none inline-flex shrink-0 items-center justify-center tabular-nums ${STYLE_CLASSES[style]} ${SIZE_CLASSES[variant]}`}
+      className={`pointer-events-none inline-flex shrink-0 items-center justify-center font-sans tabular-nums ${STYLE_CLASSES[style]} ${SIZE_CLASSES[variant]}`}
     >
       {formatLocalTime(date, format, showSeconds)}
     </time>
