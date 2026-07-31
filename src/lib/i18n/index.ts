@@ -2,11 +2,13 @@ import { useSyncExternalStore } from "react";
 import en from "./locales/en.json";
 import ar from "./locales/ar.json";
 import pt from "./locales/pt.json";
+import ru from "./locales/ru.json";
 
 export const LANGUAGES = [
   { code: "en", label: "English", nativeLabel: "English" },
   { code: "ar", label: "Arabic", nativeLabel: "العربية" },
   { code: "pt", label: "Portuguese", nativeLabel: "Português" },
+  { code: "ru", label: "Russian", nativeLabel: "Русский" },
 ] as const;
 
 export type UiLanguage = (typeof LANGUAGES)[number]["code"];
@@ -19,7 +21,7 @@ type Catalog = Record<string, string>;
 export const DEFAULT_LANGUAGE: UiLanguage = "en";
 
 const supportedLanguages = new Set<string>(LANGUAGES.map(({ code }) => code));
-const catalogs: Record<UiLanguage, Catalog> = { en, ar, pt };
+const catalogs: Record<UiLanguage, Catalog> = { en, ar, pt, ru };
 const sourceKeysByTranslation = Object.fromEntries(
   (Object.keys(catalogs) as UiLanguage[]).map((language) => {
     const reverse = new Map<string, string>();

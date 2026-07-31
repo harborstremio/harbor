@@ -42,7 +42,7 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 > <br/>
 
 > [!NOTE]
-> Unofficial Linux `.deb`, `.rpm`, and Flatpak packages are maintained at [AdityaHebballe/harbor-linux-builds](https://github.com/AdityaHebballe/harbor-linux-builds). Official Linux packages are coming soon.
+> Official Linux `.deb`, `.rpm`, Flatpak, and AppImage builds are maintained at [harborstremio-linux/harbor-linux-builds](https://github.com/harborstremio-linux/harbor-linux-builds).
 
 ATTENTION: HARBOR DOES NOT AND WILL NOT ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations, IT IS NOT US. Have an issue? Open it on github so you and everyone else can know and see exactly how we messed up, and how we will fix it! Yes we do see your emails to bugs@harbor.site and Bug reports to the bug endpoint FYI the fastest way to get our attention is through github, we will still handle unique reports that have not been already sorted. Want to donate to a good cause visit: National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/) or St.Jude's (https://www.stjude.org/) email us with a receipt of your donation and we will implement your features in a priority manner. Include NPCF , EFF or SaintJude in title so we can track you! If you have a preferred cause visit https://www.charitynavigator.org/ and donate to a top rated charity of your choice and include CHARITY in email title
 <br/>
@@ -379,17 +379,14 @@ Harbor is built to keep your data on your machine.
 
 ## Install
 
-Download the latest build for macOS or Windows from the [Releases page][releases], use the [unofficial Linux packages](https://github.com/AdityaHebballe/harbor-linux-builds), or open Harbor in your browser.
+Download the latest build for macOS or Windows from the [Releases page][releases], use the [official Linux builds](https://github.com/harborstremio-linux/harbor-linux-builds), or open Harbor in your browser.
 
-| Platform    | Format                                                                                                   |
-| ----------- | -------------------------------------------------------------------------------------------------------- |
-| **macOS**   | `.dmg` (macOS 11.0 or newer)                                                                             |
-| **Windows** | `.exe` NSIS installer (current user install)                                                             |
-| **Web**     | Open in any modern browser, nothing to install                                                           |
-| **Linux**   | [Unofficial `.deb`, `.rpm`, and Flatpak packages](https://github.com/AdityaHebballe/harbor-linux-builds) |
-
-> [!NOTE]
-> Linux packages above are community-maintained. Official Harbor Linux packages are coming soon.
+| Platform    | Format                                                                                                              |
+| ----------- | ------------------------------------------------------------------------------------------------------------------- |
+| **macOS**   | `.dmg` (macOS 11.0 or newer)                                                                                        |
+| **Windows** | `.exe` NSIS installer (current user install)                                                                        |
+| **Web**     | Open in any modern browser, nothing to install                                                                      |
+| **Linux**   | [Official `.deb`, `.rpm`, Flatpak, and AppImage builds](https://github.com/harborstremio-linux/harbor-linux-builds) |
 
 **Out of the box, Harbor works on Cinemeta.** You can browse, play, and cast immediately. Adding a free **TMDB key** in Settings is optional and unlocks the richer trending, theaters, per service, and Watch on experiences described above. Your installed Stremio addons merge in automatically when you sign in, deduplicated against the built in rails.
 
@@ -635,10 +632,17 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 <sub>Built with care for the people who love good cinema and an open web. <a href="#readme-top">&#9650; back to top</a></sub>
 </div>
 
+<br/>
+
+Package repository hosting for Linux is graciously provided by [Cloudsmith](https://cloudsmith.com).
+<br/>
+
+<a href="https://cloudsmith.com"><img alt="OSS hosting by Cloudsmith" src="https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&amp;style=flat-square" /></a>
+
 <!-- reference links -->
 
 [releases]: https://github.com/harborstremio/harbor/releases
-[linux-packages]: https://github.com/AdityaHebballe/harbor-linux-builds
+[linux-packages]: https://github.com/harborstremio-linux/harbor-linux-builds
 [issues]: https://github.com/harborstremio/harbor/issues
 [discussions]: https://github.com/harborstremio/harbor/discussions
 [license]: ./LICENSE

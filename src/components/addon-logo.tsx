@@ -2,49 +2,75 @@ import { useState } from "react";
 import aioStreamsLogo from "@/assets/addon-logos/aiostreams.png";
 import allDebridLogo from "@/assets/addon-logos/alldebrid.webp";
 import animeKitsuLogo from "@/assets/addon-logos/anime-kitsu.png";
-import bitsearchLogo from "@/assets/addon-logos/bitsearch.png";
 import cometLogo from "@/assets/addon-logos/comet.png";
 import debridLinkLogo from "@/assets/addon-logos/debridlink.png";
 import easynewsLogo from "@/assets/addon-logos/easynews.png";
-import eztvLogo from "@/assets/addon-logos/eztv.png";
-import knabenLogo from "@/assets/addon-logos/knaben.ico";
 import localFilesLogo from "@/assets/addon-logos/local-files.png";
 import mediafusionLogo from "@/assets/addon-logos/mediafusion.png";
-import nyaaLogo from "@/assets/addon-logos/nyaa.png";
 import opensubtitlesLogo from "@/assets/addon-logos/opensubtitles.png";
 import premiumizeLogo from "@/assets/addon-logos/premiumize.png";
 import realDebridLogo from "@/assets/addon-logos/realdebrid.png";
-import rutorLogo from "@/assets/addon-logos/rutor.ico";
 import streamingCatalogsLogo from "@/assets/addon-logos/streaming-catalogs.png";
-import thepiratebayLogo from "@/assets/addon-logos/thepiratebay.png";
 import torboxLogo from "@/assets/addon-logos/torbox.png";
 import torrentioLogo from "@/assets/addon-logos/torrentio.png";
-import x1337Logo from "@/assets/addon-logos/x1337.jpg";
-import ytsLogo from "@/assets/addon-logos/yts.png";
 
 const BUNDLED: Array<{ match: (id: string, name: string) => boolean; src: string }> = [
   { match: (id, n) => id.includes("torrentio") || /torrentio/i.test(n), src: torrentioLogo },
-  { match: (id, n) => id === "tb-library" || id.startsWith("tb-") || /torbox/i.test(id) || /\btorbox\b/i.test(n), src: torboxLogo },
-  { match: (id, n) => id === "rd-library" || id.startsWith("rd-") || /real.?debrid/i.test(id) || /real.?debrid/i.test(n), src: realDebridLogo },
-  { match: (id, n) => id === "ad-library" || id.startsWith("ad-") || /alldebrid/i.test(id) || /all.?debrid/i.test(n), src: allDebridLogo },
-  { match: (id, n) => id === "pm-library" || id.startsWith("pm-") || /premiumize/i.test(id) || /premiumize/i.test(n), src: premiumizeLogo },
-  { match: (id, n) => id === "dl-library" || id.startsWith("dl-") || /debrid.?link/i.test(id) || /debrid.?link/i.test(n), src: debridLinkLogo },
-  { match: (id, n) => id === "knaben" || /knaben/i.test(n), src: knabenLogo },
-  { match: (id, n) => id === "tpb" || id.includes("piratebay") || /pirate.?bay/i.test(n), src: thepiratebayLogo },
-  { match: (id, n) => id === "x1337" || /1337/.test(id) || /1337x/i.test(n), src: x1337Logo },
-  { match: (id, n) => id === "yts" || /^yts/i.test(n), src: ytsLogo },
-  { match: (id, n) => id === "eztv" || /^eztv/i.test(n), src: eztvLogo },
-  { match: (id, n) => id === "bitsearch" || /bitsearch/i.test(n), src: bitsearchLogo },
-  { match: (id, n) => id === "rutor" || /rutor/i.test(n), src: rutorLogo },
-  { match: (id, n) => id === "nyaa" || /nyaa/i.test(n), src: nyaaLogo },
+  {
+    match: (id, n) =>
+      id === "tb-library" || id.startsWith("tb-") || /torbox/i.test(id) || /\btorbox\b/i.test(n),
+    src: torboxLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "rd-library" ||
+      id.startsWith("rd-") ||
+      /real.?debrid/i.test(id) ||
+      /real.?debrid/i.test(n),
+    src: realDebridLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "ad-library" ||
+      id.startsWith("ad-") ||
+      /alldebrid/i.test(id) ||
+      /all.?debrid/i.test(n),
+    src: allDebridLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "pm-library" ||
+      id.startsWith("pm-") ||
+      /premiumize/i.test(id) ||
+      /premiumize/i.test(n),
+    src: premiumizeLogo,
+  },
+  {
+    match: (id, n) =>
+      id === "dl-library" ||
+      id.startsWith("dl-") ||
+      /debrid.?link/i.test(id) ||
+      /debrid.?link/i.test(n),
+    src: debridLinkLogo,
+  },
   { match: (id, n) => id.includes("comet") || /^comet\b/i.test(n), src: cometLogo },
   { match: (id, n) => id.includes("mediafusion") || /mediafusion/i.test(n), src: mediafusionLogo },
   { match: (id, n) => id.includes("aiostreams") || /aio.?streams/i.test(n), src: aioStreamsLogo },
-  { match: (id, n) => id.includes("opensubtitles") || /opensubtitles/i.test(n), src: opensubtitlesLogo },
+  {
+    match: (id, n) => id.includes("opensubtitles") || /opensubtitles/i.test(n),
+    src: opensubtitlesLogo,
+  },
   { match: (id, n) => id.includes("anime-kitsu") || /anime.?kitsu/i.test(n), src: animeKitsuLogo },
-  { match: (id, n) => id.includes("streaming-catalogs") || /streaming.catalog/i.test(n), src: streamingCatalogsLogo },
+  {
+    match: (id, n) => id.includes("streaming-catalogs") || /streaming.catalog/i.test(n),
+    src: streamingCatalogsLogo,
+  },
   { match: (id, n) => id.includes("easynews") || /easy.?news/i.test(n), src: easynewsLogo },
-  { match: (id, n) => id === "org.stremio.local" || /^local files\b/i.test(n) || /local.?files/i.test(id), src: localFilesLogo },
+  {
+    match: (id, n) =>
+      id === "org.stremio.local" || /^local files\b/i.test(n) || /local.?files/i.test(id),
+    src: localFilesLogo,
+  },
 ];
 
 export const BOAT_ADDON_LOGOS: string[] = [
@@ -61,14 +87,6 @@ export const BOAT_ADDON_LOGOS: string[] = [
   allDebridLogo,
   premiumizeLogo,
   debridLinkLogo,
-  thepiratebayLogo,
-  eztvLogo,
-  ytsLogo,
-  nyaaLogo,
-  bitsearchLogo,
-  knabenLogo,
-  rutorLogo,
-  x1337Logo,
 ];
 
 const PALETTE = [
@@ -109,7 +127,10 @@ export function addonLogoSrc(addonId: string, addonName: string): string | null 
   return null;
 }
 
-export function resolveAddonLogo(logo: string | null | undefined, transportUrl: string | null | undefined): string | null {
+export function resolveAddonLogo(
+  logo: string | null | undefined,
+  transportUrl: string | null | undefined,
+): string | null {
   if (!logo) return null;
   const trimmed = logo.trim();
   if (!trimmed) return null;
