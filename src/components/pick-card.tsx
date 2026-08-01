@@ -46,6 +46,7 @@ import {
   type CardHoverStyle,
 } from "./pick-card/card-hover";
 import { CustomHoverOverlay, customHoverPosterProps } from "./pick-card/custom-hover";
+import { ExpandingCardArtwork, useExpandingCard } from "./pick-card/use-expanding-card";
 import { getCustomHover } from "@/lib/custom-hover";
 import { RtBadge } from "./rt-badge";
 import mdblistLogo from "@/assets/addon-logos/mdblist.png";
@@ -94,6 +95,13 @@ export const PickCard = memo(function PickCard({
   const { openMeta, openPicker } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
+  const ref = useRef<HTMLButtonElement>(null);
+  const expandingCard = useExpandingCard({
+    cardRef: ref,
+    meta,
+    tmdbKey: settings.tmdbKey,
+    focusEnabled: settings.posterFocusedCard,
+  });
   const cardStyle: CardHoverStyle =
     kids || !settings.hoverPreviewEnabled ? "none" : settings.cardHoverStyle;
   const activeCustom = cardStyle === "custom" ? getCustomHover(settings.customHoverId) : null;
@@ -196,7 +204,6 @@ export const PickCard = memo(function PickCard({
     cardBadges.push({ kind: "mdblist", value: cardScores.score });
   if (settings.showTraktBadge && cardScores?.trakt != null)
     cardBadges.push({ kind: "trakt", value: cardScores.trakt });
-  const ref = useRef<HTMLButtonElement>(null);
   const altIds = useMemo(() => [imdbId], [imdbId]);
   const inWatchlist = useInWatchlist(meta.id, altIds);
   const watched = useMetaWatched(meta.id, meta.type);
@@ -494,17 +501,33 @@ export const PickCard = memo(function PickCard({
       ref={ref}
       onClick={() => openMeta(meta)}
       onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
-      onFocus={(e) => hoverPreviewFocus(meta, e.currentTarget)}
-      onBlur={(e) => hoverPreviewBlur(e.currentTarget)}
+      onFocus={(e) => {
+        expandingCard.onFocus();
+        if (!expandingCard.enabled) hoverPreviewFocus(meta, e.currentTarget);
+      }}
+      onBlur={(e) => {
+        expandingCard.onBlur();
+        hoverPreviewBlur(e.currentTarget);
+      }}
+      data-media-card
+      data-expanding-card={expandingCard.enabled ? "" : undefined}
+      data-row-card-expanded={expandingCard.expanded ? "true" : undefined}
+      data-focused-card={expandingCard.focusEnabled ? "" : undefined}
       data-no-card-ring={inCardHover !== "none" || activeCustom ? "" : undefined}
-      className="group flex w-full min-w-0 flex-col gap-2.5 text-start"
+      className="group relative z-0 flex w-full min-w-0 flex-col gap-2.5 text-start"
     >
       <div
         data-preview-anchor
         onPointerEnter={(e) => hoverPreviewEnter(meta, e.currentTarget, e.buttons)}
         onPointerLeave={(e) => hoverPreviewLeave(e.currentTarget)}
         style={customProps?.style}
-        className="relative w-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] will-change-transform group-hover:[-webkit-transform:translate3d(0,-0.5rem,0)] group-hover:[transform:translate3d(0,-0.5rem,0)]"
+        className={`relative w-full transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] will-change-transform group-hover:[-webkit-transform:translate3d(0,-0.5rem,0)] group-hover:[transform:translate3d(0,-0.5rem,0)] ${
+          expandingCard.enabled ? "expanding-card-poster-frame" : ""
+        } ${
+          expandingCard.focusEnabled
+            ? "group-focus:[-webkit-transform:translate3d(0,-0.5rem,0)] group-focus:[transform:translate3d(0,-0.5rem,0)]"
+            : ""
+        }`}
       >
         <Poster
           src={posterSrc}
@@ -516,7 +539,13 @@ export const PickCard = memo(function PickCard({
           className={`harbor-card-ring rounded-[var(--poster-radius,12px)] shadow-[0_2px_8px_-2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] transition-[box-shadow] duration-300 group-hover:shadow-[0_24px_48px_-14px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)] ${
             customProps ? customProps.className : cardHoverPosterClass(inCardHover)
           }`}
-        />
+        >
+          <ExpandingCardArtwork
+            src={expandingCard.artwork}
+            onReady={expandingCard.onArtworkReady}
+            onError={expandingCard.onArtworkError}
+          />
+        </Poster>
         {activeCustom ? (
           <CustomHoverOverlay
             config={activeCustom}

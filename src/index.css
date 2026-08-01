@@ -1584,6 +1584,81 @@ button.group:not([data-no-card-ring]):hover .harbor-card-ring::after {
   pointer-events: none;
 }
 
+.harbor-expanding-card-scope [data-expanding-card] {
+  isolation: isolate;
+}
+
+.harbor-expanding-card-scope [data-poster-card-cell] > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.harbor-expanding-card-scope .expanding-card-poster-frame {
+  height: var(--row-poster-height);
+}
+
+.harbor-expanding-card-scope .expanding-card-poster-frame > .harbor-poster {
+  height: 100%;
+}
+
+.harbor-expanding-card-scope
+  .expanding-card-poster-frame
+  > .harbor-poster
+  > div[aria-hidden]:first-child {
+  display: none;
+}
+
+.expanding-card-artwork {
+  opacity: 0;
+  transform: scale(1.025);
+  transition:
+    opacity 0ms linear 480ms,
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-expanding-card][data-row-card-expanded="true"] .expanding-card-artwork {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 0ms;
+}
+
+html:not([data-input-modality="pointer"])
+  [data-focused-card]:is(:focus-visible, [data-tv-focused="true"])
+  .harbor-poster {
+  box-shadow:
+    0 24px 48px -14px rgb(0 0 0 / 0.65),
+    inset 0 0 0 2px var(--color-accent),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+html:not([data-input-modality="pointer"]) #root [data-media-card] {
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease;
+}
+
+html:not([data-input-modality="pointer"])
+  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
+  [data-media-card]:not([data-focused-card]:is(:focus, [data-tv-focused="true"])) {
+  opacity: 0.34;
+  filter: brightness(0.68) saturate(0.78) blur(0.7px);
+}
+
+html:not([data-input-modality="pointer"])
+  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
+  [data-media-card]:is([data-focused-card]:focus, [data-focused-card][data-tv-focused="true"]) {
+  opacity: 1;
+  filter: none;
+}
+
+html:not([data-input-modality="pointer"])
+  [data-focused-card]:is(:focus-visible, [data-tv-focused="true"]) {
+  outline: none;
+  z-index: 0;
+  box-shadow: none !important;
+  transform: none;
+}
+
 html[data-theme-card="stremio"] button.group:not([data-no-card-ring]):hover > .relative {
   transform: none;
 }
