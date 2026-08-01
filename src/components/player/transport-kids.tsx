@@ -85,7 +85,14 @@ export function TransportKids({
           )}
         </div>
         <div className="flex min-w-[7rem] shrink-0 justify-end">
-          {fullscreen && <FullscreenClock variant="kids" />}
+          {fullscreen && (
+            <FullscreenClock
+              variant="kids"
+              durationSec={snap.durationSec}
+              playbackRate={snap.rate}
+              active={visible}
+            />
+          )}
         </div>
       </div>
 

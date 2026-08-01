@@ -2,7 +2,13 @@ import { Check, Clock3 } from "lucide-react";
 import { useState } from "react";
 import { ClockDisplay, FullscreenClock } from "@/components/player/fullscreen-clock";
 import { useT } from "@/lib/i18n";
-import type { FullscreenClockFormat, FullscreenClockStyle } from "@/lib/local-time";
+import {
+  DEFAULT_FULLSCREEN_CLOCK_SIZE_PX,
+  FULLSCREEN_CLOCK_SIZE_MAX_PX,
+  FULLSCREEN_CLOCK_SIZE_MIN_PX,
+  type FullscreenClockFormat,
+  type FullscreenClockStyle,
+} from "@/lib/local-time";
 import { useSettings } from "@/lib/settings";
 import { Segmented, ToggleRow } from "../shared";
 
@@ -83,6 +89,45 @@ export function FullscreenClockSettings() {
             }
           />
 
+          <ToggleRow
+            label={t("Show estimated finish time")}
+            sub={t("Display the local time when the current video is expected to end.")}
+            value={settings.fullscreenClockShowEndTime}
+            onChange={(fullscreenClockShowEndTime) => update({ fullscreenClockShowEndTime })}
+            leading={
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted">
+                <Clock3 size={15} strokeWidth={2.2} />
+              </span>
+            }
+          />
+
+          <label className="flex items-center gap-4 px-1 py-1.5">
+            <span className="w-32 shrink-0 text-[13.5px] font-medium text-ink">
+              {t("Clock size")}
+            </span>
+            <input
+              type="range"
+              min={FULLSCREEN_CLOCK_SIZE_MIN_PX}
+              max={FULLSCREEN_CLOCK_SIZE_MAX_PX}
+              step={1}
+              value={settings.fullscreenClockSizePx}
+              onChange={(event) => update({ fullscreenClockSizePx: Number(event.target.value) })}
+              className="h-1.5 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-raised accent-accent"
+            />
+            <span className="w-12 shrink-0 text-end text-[13px] tabular-nums text-ink-muted">
+              {settings.fullscreenClockSizePx} px
+            </span>
+            {settings.fullscreenClockSizePx !== DEFAULT_FULLSCREEN_CLOCK_SIZE_PX && (
+              <button
+                type="button"
+                onClick={() => update({ fullscreenClockSizePx: DEFAULT_FULLSCREEN_CLOCK_SIZE_PX })}
+                className="shrink-0 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
+              >
+                {t("Reset")}
+              </button>
+            )}
+          </label>
+
           <fieldset>
             <legend className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
               {t("Clock style")}
@@ -110,6 +155,7 @@ export function FullscreenClockSettings() {
                           format={settings.fullscreenClockFormat}
                           showSeconds={settings.fullscreenClockShowSeconds}
                           style={option.value}
+                          sizePx={settings.fullscreenClockSizePx}
                           variant="preview"
                         />
                       </span>

@@ -4867,6 +4867,18 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["12 hour", "24 hour", "am pm", "system time", "seconds"],
   },
   {
+    label: "Clock size",
+    section: "theme",
+    anchorTitle: "Fullscreen clock",
+    keywords: ["clock pixels", "larger clock", "smaller clock", "resize time", "font size"],
+  },
+  {
+    label: "Show estimated finish time",
+    section: "theme",
+    anchorTitle: "Fullscreen clock",
+    keywords: ["ends at", "finish time", "movie end", "episode end", "estimated end"],
+  },
+  {
     label: "Clock style",
     section: "theme",
     anchorTitle: "Fullscreen clock",

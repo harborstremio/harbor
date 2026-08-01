@@ -9,7 +9,11 @@ import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
 import { resolveUiLanguage } from "@/lib/i18n";
-import { sanitizeFullscreenClockFormat, sanitizeFullscreenClockStyle } from "@/lib/local-time";
+import {
+  sanitizeFullscreenClockFormat,
+  sanitizeFullscreenClockSize,
+  sanitizeFullscreenClockStyle,
+} from "@/lib/local-time";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -172,6 +176,11 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         typeof parsed.fullscreenClockShowSeconds === "boolean"
           ? parsed.fullscreenClockShowSeconds
           : DEFAULT.fullscreenClockShowSeconds,
+      fullscreenClockShowEndTime:
+        typeof parsed.fullscreenClockShowEndTime === "boolean"
+          ? parsed.fullscreenClockShowEndTime
+          : DEFAULT.fullscreenClockShowEndTime,
+      fullscreenClockSizePx: sanitizeFullscreenClockSize(parsed.fullscreenClockSizePx),
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
       subProvidersEnabled: {

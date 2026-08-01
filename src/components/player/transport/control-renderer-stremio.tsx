@@ -243,7 +243,13 @@ export function RenderedStremioControl({
       );
     }
     case "local-time":
-      return ctx.fullscreen ? <FullscreenClock /> : null;
+      return ctx.fullscreen ? (
+        <FullscreenClock
+          durationSec={ctx.snap.durationSec}
+          playbackRate={ctx.snap.rate}
+          active={ctx.active}
+        />
+      ) : null;
     case "play-pause":
       return (
         <Tooltip label={ctx.playing ? tr("Pause") : tr("Play")}>

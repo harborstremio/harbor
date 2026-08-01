@@ -343,6 +343,8 @@ export type Settings = {
   fullscreenClockFormat: FullscreenClockFormat;
   fullscreenClockStyle: FullscreenClockStyle;
   fullscreenClockShowSeconds: boolean;
+  fullscreenClockShowEndTime: boolean;
+  fullscreenClockSizePx: number;
   closeToTray: boolean;
   trayAlwaysOnTop: boolean;
   pauseMinimized: boolean;

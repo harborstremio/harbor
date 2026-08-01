@@ -29,7 +29,11 @@ export function MinimalShell({
             visible ? "opacity-100" : "opacity-0"
           }`}
         >
-          <FullscreenClock />
+          <FullscreenClock
+            durationSec={snap.durationSec}
+            playbackRate={snap.rate}
+            active={visible}
+          />
         </div>
       )}
       <div

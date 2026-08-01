@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n";
+import { usePlaybackPositionGated } from "@/lib/player/playback-clock";
 import { useSettings } from "@/lib/settings";
 import {
+  DEFAULT_FULLSCREEN_CLOCK_SIZE_PX,
+  estimatePlaybackEndTime,
   formatLocalTime,
   msUntilNextClockTick,
   type FullscreenClockFormat,
@@ -20,9 +24,15 @@ const STYLE_CLASSES: Record<FullscreenClockStyle, string> = {
 };
 
 const SIZE_CLASSES: Record<ClockVariant, string> = {
-  default: "h-9 min-w-[5.25rem] px-3.5 text-[13px] font-semibold",
-  kids: "h-12 min-w-[6.5rem] px-4 text-[16px] font-extrabold",
-  preview: "h-9 min-w-[5.75rem] px-3.5 text-[13px] font-semibold",
+  default: "min-w-[5.25rem] px-3.5 font-semibold",
+  kids: "min-w-[6.5rem] px-4 font-extrabold",
+  preview: "min-w-[5.75rem] px-3.5 font-semibold",
+};
+
+const END_TIME_CLASSES: Record<ClockVariant, string> = {
+  default: "font-medium",
+  kids: "font-bold",
+  preview: "font-medium",
 };
 
 export function ClockDisplay({
@@ -30,33 +40,77 @@ export function ClockDisplay({
   format,
   showSeconds,
   style,
+  endDate,
+  sizePx = DEFAULT_FULLSCREEN_CLOCK_SIZE_PX,
   variant = "default",
 }: {
   date: Date;
   format: FullscreenClockFormat;
   showSeconds: boolean;
   style: FullscreenClockStyle;
+  endDate?: Date | null;
+  sizePx?: number;
   variant?: ClockVariant;
 }) {
+  const t = useT();
+  const displaySizePx = variant === "kids" ? Math.max(sizePx, 16) : sizePx;
+  const endTimeSizePx = Math.max(10, Math.round(displaySizePx * 0.8));
+  const verticalSpacePx = variant === "kids" ? 32 : 23;
+
   return (
-    <time
-      dateTime={date.toISOString()}
-      className={`pointer-events-none inline-flex shrink-0 items-center justify-center font-sans tabular-nums ${STYLE_CLASSES[style]} ${SIZE_CLASSES[variant]}`}
-    >
-      {formatLocalTime(date, format, showSeconds)}
-    </time>
+    <span className="pointer-events-none inline-flex shrink-0 flex-col items-center gap-1.5 font-sans">
+      <time
+        dateTime={date.toISOString()}
+        className={`inline-flex shrink-0 items-center justify-center leading-none tabular-nums ${STYLE_CLASSES[style]} ${SIZE_CLASSES[variant]}`}
+        style={{ fontSize: displaySizePx, minHeight: displaySizePx + verticalSpacePx }}
+      >
+        {formatLocalTime(date, format, showSeconds)}
+      </time>
+      {endDate && (
+        <span
+          className={`whitespace-nowrap text-white/70 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] ${END_TIME_CLASSES[variant]}`}
+          style={{ fontSize: endTimeSizePx }}
+        >
+          {t("Ends at")}{" "}
+          <time dateTime={endDate.toISOString()} className="tabular-nums text-white/90">
+            {formatLocalTime(endDate, format)}
+          </time>
+        </span>
+      )}
+    </span>
   );
 }
 
-export function FullscreenClock({ variant = "default" }: { variant?: ClockVariant }) {
+export function FullscreenClock({
+  variant = "default",
+  durationSec,
+  playbackRate = 1,
+  active = true,
+}: {
+  variant?: ClockVariant;
+  durationSec?: number;
+  playbackRate?: number;
+  active?: boolean;
+}) {
   const { settings } = useSettings();
   const {
     fullscreenClockEnabled: enabled,
     fullscreenClockFormat: format,
     fullscreenClockShowSeconds: showSeconds,
+    fullscreenClockShowEndTime: showEndTime,
+    fullscreenClockSizePx: sizePx,
     fullscreenClockStyle: style,
   } = settings;
   const [now, setNow] = useState(() => new Date());
+  const trackEndTime =
+    enabled &&
+    showEndTime &&
+    active &&
+    variant !== "preview" &&
+    typeof durationSec === "number" &&
+    Number.isFinite(durationSec) &&
+    durationSec > 0;
+  const positionSec = usePlaybackPositionGated(trackEndTime);
 
   useEffect(() => {
     if (!enabled) return;
@@ -85,12 +139,22 @@ export function FullscreenClock({ variant = "default" }: { variant?: ClockVarian
 
   if (!enabled) return null;
 
+  const endDate = showEndTime
+    ? variant === "preview"
+      ? new Date(now.getTime() + 47 * 60_000)
+      : typeof durationSec === "number"
+        ? estimatePlaybackEndTime(new Date(), durationSec, positionSec, playbackRate)
+        : null
+    : null;
+
   return (
     <ClockDisplay
       date={now}
       format={format}
       showSeconds={showSeconds}
       style={style}
+      endDate={endDate}
+      sizePx={sizePx}
       variant={variant}
     />
   );

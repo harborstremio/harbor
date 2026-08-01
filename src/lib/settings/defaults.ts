@@ -1,4 +1,5 @@
 import { DEFAULT_THEME } from "@/lib/theme";
+import { DEFAULT_FULLSCREEN_CLOCK_SIZE_PX } from "@/lib/local-time";
 import type { Settings } from "./types";
 
 export const STORAGE_KEY = "harbor.settings";
@@ -309,6 +310,8 @@ export const DEFAULT: Settings = {
   fullscreenClockFormat: "system",
   fullscreenClockStyle: "glass",
   fullscreenClockShowSeconds: false,
+  fullscreenClockShowEndTime: true,
+  fullscreenClockSizePx: DEFAULT_FULLSCREEN_CLOCK_SIZE_PX,
   closeToTray: false,
   trayAlwaysOnTop: false,
   pauseMinimized: true,

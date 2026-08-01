@@ -263,7 +263,13 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       );
     }
     case "local-time":
-      return ctx.fullscreen ? <FullscreenClock /> : null;
+      return ctx.fullscreen ? (
+        <FullscreenClock
+          durationSec={ctx.snap.durationSec}
+          playbackRate={ctx.snap.rate}
+          active={ctx.active}
+        />
+      ) : null;
     case "time-start": {
       return (
         <TimeStart
