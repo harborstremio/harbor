@@ -29,6 +29,7 @@ import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import { aniZipLookupKey, applyAniZipEpisode, needsAniZipSyncIds } from "@/lib/cw-anime-episode";
+import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 
 type Props = {
   item: LibraryItem;
@@ -499,17 +500,44 @@ export const ContinueCard = memo(function ContinueCard({
           </div>
         </div>
       </button>
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
-        <button
-          type="button"
-          onClick={onPlay}
-          aria-label={t("Play {name}", { name: displayTitle })}
-          title={t("Play")}
-          className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-canvas ring-1 ring-white/15 shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] transition-transform duration-150 hover:scale-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
-          <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
-        </button>
-      </div>
+      {settings.liquidGlass ? (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center">
+          <ThreeLiquidGlassSurface
+            radius="9999px"
+            shaderRadius={0.58}
+            intensity={0.9}
+            experimentalStyle={{
+              background:
+                "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
+            }}
+            style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+            className="pointer-events-none h-14 w-14 scale-95 rounded-full border border-white/[0.10] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
+            contentClassName="flex h-full w-full"
+          >
+            <button
+              type="button"
+              onClick={onPlay}
+              aria-label={t("Play {name}", { name: displayTitle })}
+              title={t("Play")}
+              className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink outline-none transition-transform duration-150 active:scale-95 focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
+            </button>
+          </ThreeLiquidGlassSurface>
+        </div>
+      ) : (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex aspect-[16/9] items-center justify-center opacity-0 transition-opacity duration-[220ms] group-hover:opacity-100 group-focus-within:opacity-100">
+          <button
+            type="button"
+            onClick={onPlay}
+            aria-label={t("Play {name}", { name: displayTitle })}
+            title={t("Play")}
+            className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-canvas ring-1 ring-white/15 shadow-[0_10px_28px_-8px_rgba(0,0,0,0.6)] transition-transform duration-150 hover:scale-[1.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <Play size={22} fill="currentColor" className="ml-0.5 text-ink" />
+          </button>
+        </div>
+      )}
       <button
         type="button"
         onClick={onOpenDetails}
@@ -519,19 +547,48 @@ export const ContinueCard = memo(function ContinueCard({
         {displayTitle}
       </button>
       {onDismiss && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDismiss(item);
-          }}
-          aria-label={t("Remove from Continue Watching")}
-          className="group/x absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
-        >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-canvas/85 text-ink-muted ring-1 ring-white/12 backdrop-blur-sm transition-colors group-hover/x:bg-canvas group-hover/x:text-ink">
-            <X size={20} strokeWidth={2.4} />
-          </span>
-        </button>
+        settings.liquidGlass ? (
+          <div className="absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center">
+            <ThreeLiquidGlassSurface
+              radius="9999px"
+              shaderRadius={0.58}
+              intensity={0.9}
+              experimentalStyle={{
+                background:
+                  "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
+              }}
+              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+              className="pointer-events-none h-9 w-9 scale-95 rounded-full border border-white/[0.09] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
+              contentClassName="flex h-full w-full"
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDismiss(item);
+                }}
+                aria-label={t("Remove from Continue Watching")}
+                className="flex h-full w-full items-center justify-center rounded-full bg-transparent text-ink-muted outline-none transition-colors duration-150 hover:text-ink active:scale-95"
+              >
+                <X size={20} strokeWidth={2.4} />
+              </button>
+            </ThreeLiquidGlassSurface>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss(item);
+            }}
+            aria-label={t("Remove from Continue Watching")}
+            className="group/x absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-canvas/85 text-ink-muted ring-1 ring-white/12 backdrop-blur-sm transition-colors group-hover/x:bg-canvas group-hover/x:text-ink">
+              <X size={20} strokeWidth={2.4} />
+            </span>
+          </button>
+        )
       )}
     </div>
   );
