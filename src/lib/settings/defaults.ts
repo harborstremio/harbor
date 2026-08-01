@@ -336,6 +336,7 @@ export const DEFAULT: Settings = {
   pickerShowFilename: false,
   pickerRefreshNextToBack: false,
   customStreamFilters: [],
+  activeStreamFilterId: null,
   seekBarStyle: "flat",
   seekBarHeight: 6,
   seekBarColor: "",

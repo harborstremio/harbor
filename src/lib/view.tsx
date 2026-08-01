@@ -207,6 +207,7 @@ export type SettingsSection =
   | "parental"
   | "relay"
   | "streaming"
+  | "streamFilters"
   | "language"
   | "player"
   | "advanced";

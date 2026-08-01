@@ -373,6 +373,7 @@ export type Settings = {
   pickerShowFilename: boolean;
   pickerRefreshNextToBack: boolean;
   customStreamFilters: CustomStreamFilter[];
+  activeStreamFilterId: string | null;
   seekBarStyle: "flat" | "glass" | "pinstripe" | "rainbow" | "image";
   seekBarHeight: number;
   seekBarColor: string;

@@ -9,6 +9,7 @@ import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
 import { resolveUiLanguage } from "@/lib/i18n";
+import { resolveActiveStreamFilter } from "@/lib/streams/filter-preference";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -157,6 +158,14 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     delete parsed.scrapers;
     delete parsed.scrapersAcknowledged;
     delete parsed._scrapersV2;
+    const customStreamFilters = Array.isArray(parsed.customStreamFilters)
+      ? parsed.customStreamFilters
+      : DEFAULT.customStreamFilters;
+    const activeStreamFilterId =
+      resolveActiveStreamFilter(
+        customStreamFilters,
+        typeof parsed.activeStreamFilterId === "string" ? parsed.activeStreamFilterId : null,
+      )?.id ?? null;
     return {
       ...DEFAULT,
       ...parsed,
@@ -242,9 +251,8 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         },
       },
       webhookRules: Array.isArray(parsed.webhookRules) ? parsed.webhookRules : [],
-      customStreamFilters: Array.isArray(parsed.customStreamFilters)
-        ? parsed.customStreamFilters
-        : DEFAULT.customStreamFilters,
+      customStreamFilters,
+      activeStreamFilterId,
       animeFavoriteGenres: Array.isArray(parsed.animeFavoriteGenres)
         ? parsed.animeFavoriteGenres.filter((g): g is number => typeof g === "number")
         : DEFAULT.animeFavoriteGenres,

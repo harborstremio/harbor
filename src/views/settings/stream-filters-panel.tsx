@@ -1,8 +1,12 @@
-import { Filter, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, Filter, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+import {
+  isFilterEmpty,
+  summarizeFilter,
+  type CustomStreamFilter,
+} from "@/lib/streams/custom-filters";
 import { FilterBuilder } from "../play-picker/filter-builder";
 import { Section } from "./shared";
 
@@ -10,6 +14,7 @@ export function StreamFiltersPanel() {
   const t = useT();
   const { settings, update } = useSettings();
   const filters = settings.customStreamFilters ?? [];
+  const activeId = settings.activeStreamFilterId;
   const [editing, setEditing] = useState<CustomStreamFilter | null>(null);
   const [building, setBuilding] = useState(false);
 
@@ -17,7 +22,16 @@ export function StreamFiltersPanel() {
 
   const upsert = (filter: CustomStreamFilter) => {
     const exists = filters.some((f) => f.id === filter.id);
-    persist(exists ? filters.map((f) => (f.id === filter.id ? filter : f)) : [...filters, filter]);
+    update({
+      customStreamFilters: exists
+        ? filters.map((f) => (f.id === filter.id ? filter : f))
+        : [...filters, filter],
+      activeStreamFilterId: isFilterEmpty(filter)
+        ? activeId === filter.id
+          ? null
+          : activeId
+        : filter.id,
+    });
     setEditing(null);
     setBuilding(false);
   };
@@ -25,7 +39,17 @@ export function StreamFiltersPanel() {
   const rename = (id: string, name: string) =>
     persist(filters.map((f) => (f.id === id ? { ...f, name } : f)));
 
-  const remove = (id: string) => persist(filters.filter((f) => f.id !== id));
+  const toggleActive = (filter: CustomStreamFilter) => {
+    if (isFilterEmpty(filter)) return;
+    update({ activeStreamFilterId: activeId === filter.id ? null : filter.id });
+  };
+
+  const remove = (id: string) => {
+    update({
+      customStreamFilters: filters.filter((f) => f.id !== id),
+      activeStreamFilterId: activeId === id ? null : activeId,
+    });
+  };
 
   const closeBuilder = () => {
     setEditing(null);
@@ -35,7 +59,9 @@ export function StreamFiltersPanel() {
   return (
     <Section
       title={t("Saved stream filters")}
-      subtitle={t("Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.")}
+      subtitle={t(
+        "Build a named quality preference once and set it active. Harbor prefers matching streams for manual and automatic picks, then safely falls back when nothing matches.",
+      )}
     >
       <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-5">
         <div className="flex items-center justify-between gap-3">
@@ -81,6 +107,20 @@ export function StreamFiltersPanel() {
                     {summarizeFilter(f)}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => toggleActive(f)}
+                  aria-pressed={activeId === f.id}
+                  disabled={isFilterEmpty(f)}
+                  className={`flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-semibold transition-colors disabled:cursor-default disabled:opacity-40 ${
+                    activeId === f.id
+                      ? "bg-accent/15 text-accent ring-1 ring-accent/35"
+                      : "text-ink-muted ring-1 ring-edge-soft hover:bg-canvas/60 hover:text-ink"
+                  }`}
+                >
+                  {activeId === f.id && <Check size={12} strokeWidth={2.6} />}
+                  {activeId === f.id ? t("Active") : t("Set active")}
+                </button>
                 <button
                   type="button"
                   onClick={() => {

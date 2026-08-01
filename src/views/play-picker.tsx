@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, Loader2 } from "lucide-react";
+import { ArrowUp, Filter, Loader2, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { torrentEngineStatus } from "@/lib/torrent/local-engine";
@@ -21,6 +21,10 @@ import { readSeasonLock } from "@/lib/season-lock";
 import { useSettings } from "@/lib/settings";
 import type { ScoredStream, Tier } from "@/lib/streams/types";
 import { isAddonRanked } from "@/lib/streams/addon-detect";
+import {
+  applyActiveStreamFilterPreference,
+  resolveActiveStreamFilter,
+} from "@/lib/streams/filter-preference";
 
 import { useScrollMemory, useView, type PlayEpisode, type PlayerSrc } from "@/lib/view";
 import { torrentsDisabled } from "@/lib/torrent/stremio-stream";
@@ -83,6 +87,7 @@ export function PlayPicker({
   intent?: "play" | "download";
   resume?: boolean;
 }) {
+  const t = useT();
   const isDownload = intent === "download";
   const { openPlayer, openSettings, exitPickerToDetail, setView } = useView();
   const backToDetail = () => {
@@ -243,6 +248,10 @@ export function PlayPicker({
     (s: ScoredStream) => /torrentio/i.test(s.addonName ?? ""),
     [],
   );
+  const activeStreamFilter = useMemo(
+    () => resolveActiveStreamFilter(settings.customStreamFilters, settings.activeStreamFilterId),
+    [settings.customStreamFilters, settings.activeStreamFilterId],
+  );
 
   const filteredPicker = useMemo(() => {
     if (!result) return null;
@@ -255,6 +264,8 @@ export function PlayPicker({
       const cached = all.filter(isCached);
       if (cached.length > 0) all = cached;
     }
+    const preferred = applyActiveStreamFilterPreference(all, activeStreamFilter, !!hostMatch);
+    all = preferred.all;
     const cachedFirst = all.slice().sort((a, b) => (isCached(b) ? 1 : 0) - (isCached(a) ? 1 : 0));
     const ranked = hostMatch
       ? cachedFirst.slice().sort((a, b) => (hostMatch.get(b) ?? 0) - (hostMatch.get(a) ?? 0))
@@ -269,8 +280,23 @@ export function PlayPicker({
       (s): s is ScoredStream => s != null && all.includes(s),
     );
     const primary = primaryCandidates[0] ?? null;
-    return { primary, byTier, all };
-  }, [result, langFilter, preferredLangs, cachedOnly, debrids.length, isCached, hostMatch]);
+    return {
+      primary,
+      byTier,
+      all,
+      allRaw: preferred.allRaw,
+      fellBack: preferred.fellBack,
+    };
+  }, [
+    result,
+    langFilter,
+    preferredLangs,
+    cachedOnly,
+    debrids.length,
+    isCached,
+    hostMatch,
+    activeStreamFilter,
+  ]);
 
   const anyAddonRanked = useMemo(() => (addons ?? []).some((a) => isAddonRanked(a)), [addons]);
   const addonOrderMode = settings.streamSort === "addon" || anyAddonRanked;
@@ -361,7 +387,7 @@ export function PlayPicker({
 
   const previousMatch: ScoredStream | null = useMemo(() => {
     if (!filteredPicker || !previousPlayback) return null;
-    const m = filteredPicker.all.find((s) => streamMatchesEntry(s, previousPlayback)) ?? null;
+    const m = filteredPicker.allRaw.find((s) => streamMatchesEntry(s, previousPlayback)) ?? null;
     if (!m || isAnimeMetaId || !episode) return m;
     if (m.episode != null && m.episode !== episode.episode) return null;
     if (
@@ -376,7 +402,7 @@ export function PlayPicker({
 
   const sameSourceMatch: ScoredStream | null = useMemo(() => {
     if (!filteredPicker || !lastSeriesSource || previousMatch) return null;
-    return filteredPicker.all.find((s) => streamMatchesSource(s, lastSeriesSource)) ?? null;
+    return filteredPicker.allRaw.find((s) => streamMatchesSource(s, lastSeriesSource)) ?? null;
   }, [filteredPicker, lastSeriesSource, previousMatch]);
 
   const currentPick: ScoredStream | null = useMemo(() => {
@@ -765,6 +791,15 @@ export function PlayPicker({
 
         {debrids.length > 0 && filteredPicker && filteredPicker.all.length > 0 && <CachedTip />}
 
+        {activeStreamFilter && filteredPicker && filteredPicker.all.length > 0 && (
+          <ActiveFilterHint
+            name={activeStreamFilter.name.trim() || t("filter")}
+            fellBack={filteredPicker.fellBack}
+            onClear={() => update({ activeStreamFilterId: null })}
+            onManage={() => openSettings("streamFilters")}
+          />
+        )}
+
         {(settings.pickerLayout === "stremio" || isDownload) &&
         filteredPicker &&
         filteredPicker.all.length > 0 ? (
@@ -867,6 +902,51 @@ export function PlayPicker({
         filteredPicker &&
         filteredPicker.all.length > 0 && <PickerScrollTop scrollRef={mainRef} />}
     </main>
+  );
+}
+
+function ActiveFilterHint({
+  name,
+  fellBack,
+  onClear,
+  onManage,
+}: {
+  name: string;
+  fellBack: boolean;
+  onClear: () => void;
+  onManage: () => void;
+}) {
+  const t = useT();
+  return (
+    <div
+      className={`flex items-center gap-2.5 rounded-2xl px-4 py-2.5 text-[13px] ring-1 ${
+        fellBack
+          ? "bg-accent/10 text-ink ring-accent/30"
+          : "bg-elevated/50 text-ink-muted ring-edge-soft"
+      }`}
+    >
+      <Filter size={14} strokeWidth={2.2} className="shrink-0 text-ink-subtle" />
+      <span className={`min-w-0 flex-1 truncate ${fellBack ? "font-semibold" : ""}`}>
+        {fellBack
+          ? `${t("No streams match")} ${name}. ${t("Showing all sources.")}`
+          : `${t("Preferring")} ${name}`}
+      </span>
+      <button
+        type="button"
+        onClick={onManage}
+        className="shrink-0 rounded-full px-2 py-1 text-[12px] font-medium text-ink-muted transition-colors hover:bg-canvas/60 hover:text-ink"
+      >
+        {t("Manage")}
+      </button>
+      <button
+        type="button"
+        onClick={onClear}
+        aria-label={t("Clear filter")}
+        className="shrink-0 rounded-full p-1 text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
+      >
+        <X size={14} strokeWidth={2.2} />
+      </button>
+    </div>
   );
 }
 

@@ -1,5 +1,5 @@
 import type { ParsedStream } from "@/lib/streams/types";
-import { randomUuid } from "@/lib/uuid";
+import { randomUuid } from "../uuid.ts";
 
 export type CustomFilterResolution = "4K" | "1080p" | "720p" | "480p" | "SD";
 
