@@ -3,6 +3,7 @@ import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import type { UiLanguage } from "@/lib/i18n";
+import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/subtitle-offset";
 
 export type StreamingService =
   | "netflix"
@@ -244,6 +245,9 @@ export type Settings = {
   subLineSpacing: number;
   subProvidersEnabled: { wyzie: boolean; opensubtitles: boolean; jimaku: boolean; addons: boolean };
   subShowInPip: boolean;
+  subOffsetIndicatorEnabled: boolean;
+  subOffsetIndicatorPosition: SubtitleOffsetPosition;
+  subOffsetIndicatorSize: SubtitleOffsetSize;
   subtitleAutoSync: boolean;
   subtitlesOffByDefault: boolean;
   preferEmbeddedSubs: boolean;

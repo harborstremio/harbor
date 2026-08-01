@@ -612,7 +612,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const videoFill = useVideoFill(bridgeRef, src.url, playing);
   useLivePictureEq(bridgeRef, src.url);
   const anime4k = useAnime4k(bridgeRef, src.url, src, snap.videoWidth);
-  const { holdSpeedActive, showStats } = usePlayerHotkeys({
+  const { holdSpeedActive, showStats, subtitleOffsetSec } = usePlayerHotkeys({
     bridgeRef,
     snap,
     metaId: src.meta.id,
@@ -857,6 +857,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     subAssNative,
     showStats,
     holdSpeedActive,
+    subtitleOffsetSec,
     volumeIndicator,
     volumeHudPosition: settings.playerVolumeHudPosition,
     videoFillPill: videoFill.pill,

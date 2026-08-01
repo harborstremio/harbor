@@ -43,6 +43,7 @@ export type PlayerOverlayLayersProps = {
   subAssNative: boolean;
   showStats: boolean;
   holdSpeedActive: boolean;
+  subtitleOffsetSec: number | null;
   volumeIndicator: VolumeIndicatorState;
   volumeHudPosition: VolumeHudPosition;
   videoFillPill: string | null;
@@ -193,6 +194,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         subAssNative={p.subAssNative}
         showStats={p.showStats}
         holdSpeedActive={p.holdSpeedActive}
+        subtitleOffsetSec={p.subtitleOffsetSec}
         volumeIndicator={p.volumeIndicator}
         volumeHudPosition={p.volumeHudPosition}
         videoFillPill={p.videoFillPill}

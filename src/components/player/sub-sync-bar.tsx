@@ -4,9 +4,9 @@
  * يتيح التحكم بتأخير/تقديم الترجمة أثناء تشغيل الفيديو مباشرة
  */
 import { Check, RotateCcw, Type, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useT } from "@/lib/i18n";
-import { closeSyncBar, useSyncBarOpen } from "@/lib/player/sub-sync";
+import { closeSyncBar, useSyncBarState } from "@/lib/player/sub-sync";
 
 const IDLE_MS = 12000;
 const round = (v: number) => Math.round(v * 100) / 100;
@@ -19,19 +19,8 @@ type Props = {
 };
 
 export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Props) {
-
   const t = useT();
-  const open = useSyncBarOpen();
-  const [localDelay, setLocalDelay] = useState(delaySec);
-  const savedRef = useRef(delaySec);
-
-  // Sync external delay into local state when bar opens
-  useEffect(() => {
-    if (open) {
-      setLocalDelay(delaySec);
-      savedRef.current = delaySec;
-    }
-  }, [open]);
+  const { open, initialDelaySec } = useSyncBarState();
 
   // Auto-close after idle
   useEffect(() => {
@@ -65,24 +54,20 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
   // Apply delay to player live
   const applyDelay = (sec: number) => {
     const v = round(sec);
-    setLocalDelay(v);
     onDelay(v);
   };
 
   // Save = just close (delay is already applied live)
-  const handleSave = () => {
-    savedRef.current = localDelay;
-    closeSyncBar();
-  };
+  const handleSave = closeSyncBar;
 
   // Discard = restore saved value
   const handleDiscard = () => {
-    applyDelay(savedRef.current);
+    applyDelay(initialDelaySec);
     closeSyncBar();
   };
 
-  const isDirty = round(localDelay) !== round(savedRef.current);
-  const isNonZero = localDelay !== 0;
+  const isDirty = round(delaySec) !== round(initialDelaySec);
+  const isNonZero = delaySec !== 0;
 
   if (!open) return null;
 
@@ -103,7 +88,9 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
                 onEnterSync();
               }}
               disabled={!syncAvailable}
-              title={syncAvailable ? t("Sync subtitles via text") : t("Select a subtitle track to sync")}
+              title={
+                syncAvailable ? t("Sync subtitles via text") : t("Select a subtitle track to sync")
+              }
               aria-label={t("Sync via text")}
               className={`flex h-10 items-center gap-2 rounded-xl px-3.5 text-[13px] font-semibold transition-all ${
                 syncAvailable
@@ -119,29 +106,15 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
 
         {/* Center Side: Sync Controls */}
         <div className="flex items-center gap-[2px] rounded-xl bg-raised p-[2px] shadow-inner">
-          <StepBtn
-            label="−0.5s"
-            onClick={() => applyDelay(localDelay - 0.5)}
-            wide
-          />
-          <StepBtn
-            label="−0.1s"
-            onClick={() => applyDelay(localDelay - 0.1)}
-          />
-          
+          <StepBtn label="−0.5s" onClick={() => applyDelay(delaySec - 0.5)} wide />
+          <StepBtn label="−0.1s" onClick={() => applyDelay(delaySec - 0.1)} />
+
           <div className="mx-1.5 flex h-10 w-[96px] items-center justify-center rounded-lg bg-elevated">
-            <DelayDisplay value={localDelay} nonZero={isNonZero} onReset={() => applyDelay(0)} />
+            <DelayDisplay value={delaySec} nonZero={isNonZero} onReset={() => applyDelay(0)} />
           </div>
 
-          <StepBtn
-            label="+0.1s"
-            onClick={() => applyDelay(localDelay + 0.1)}
-          />
-          <StepBtn
-            label="+0.5s"
-            onClick={() => applyDelay(localDelay + 0.5)}
-            wide
-          />
+          <StepBtn label="+0.1s" onClick={() => applyDelay(delaySec + 0.1)} />
+          <StepBtn label="+0.5s" onClick={() => applyDelay(delaySec + 0.5)} wide />
         </div>
 
         {/* Right Side: Save & Discard (Fixed width to match left side) */}
@@ -184,15 +157,7 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function StepBtn({
-  label,
-  onClick,
-  wide,
-}: {
-  label: string;
-  onClick: () => void;
-  wide?: boolean;
-}) {
+function StepBtn({ label, onClick, wide }: { label: string; onClick: () => void; wide?: boolean }) {
   return (
     <button
       type="button"

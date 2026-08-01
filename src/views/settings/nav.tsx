@@ -3302,6 +3302,20 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Subtitle sync indicator",
+    section: "language",
+    anchorTitle: "Subtitle sync indicator",
+    keywords: [
+      "subtitle offset",
+      "subtitle delay",
+      "sync feedback",
+      "z key",
+      "x key",
+      "indicator position",
+      "indicator size",
+    ],
+  },
+  {
     label: "Alignment",
     section: "language",
     anchorTitle: "Subtitle style",
@@ -3343,6 +3357,24 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
       "undo changes",
       "factory subtitles",
     ],
+  },
+  {
+    label: "Show subtitle sync indicator",
+    section: "language",
+    anchorTitle: "Subtitle sync indicator",
+    keywords: ["subtitle offset", "subtitle delay", "sync feedback", "show offset", "hide offset"],
+  },
+  {
+    label: "Subtitle sync indicator position",
+    section: "language",
+    anchorTitle: "Subtitle sync indicator",
+    keywords: ["top", "bottom", "left", "right", "center", "offset position"],
+  },
+  {
+    label: "Subtitle sync indicator size",
+    section: "language",
+    anchorTitle: "Subtitle sync indicator",
+    keywords: ["smaller", "default", "larger", "offset size"],
   },
   {
     label: "Translate titles",

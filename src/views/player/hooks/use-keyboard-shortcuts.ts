@@ -96,6 +96,28 @@ export function useKeyboardShortcuts(params: {
     baseRate: number;
   }>({ key: null, timer: null, engaged: false, baseRate: 1 });
   const [holdSpeedActive, setHoldSpeedActive] = useState(false);
+  const [subtitleOffsetSec, setSubtitleOffsetSec] = useState<number | null>(null);
+  const subtitleOffsetTimerRef = useRef<number | null>(null);
+
+  const showSubtitleOffset = (delaySec: number) => {
+    setSubtitleOffsetSec(delaySec);
+    if (subtitleOffsetTimerRef.current != null) {
+      window.clearTimeout(subtitleOffsetTimerRef.current);
+    }
+    subtitleOffsetTimerRef.current = window.setTimeout(() => {
+      setSubtitleOffsetSec(null);
+      subtitleOffsetTimerRef.current = null;
+    }, 1800);
+  };
+
+  useEffect(
+    () => () => {
+      if (subtitleOffsetTimerRef.current != null) {
+        window.clearTimeout(subtitleOffsetTimerRef.current);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -313,6 +335,7 @@ export function useKeyboardShortcuts(params: {
         const delay = round2(snap.subDelaySec - step);
         bridgeRef.current?.setSubDelay(delay);
         writePlayerPrefs(metaId, { subDelaySec: delay });
+        showSubtitleOffset(delay);
         return;
       }
       if (match("playerSubDelayUp")) {
@@ -321,6 +344,7 @@ export function useKeyboardShortcuts(params: {
         const delay = round2(snap.subDelaySec + step);
         bridgeRef.current?.setSubDelay(delay);
         writePlayerPrefs(metaId, { subDelaySec: delay });
+        showSubtitleOffset(delay);
         return;
       }
       if (match("playerStreamSwitcher") && toggleSwitcher) {
@@ -453,5 +477,5 @@ export function useKeyboardShortcuts(params: {
     update,
   ]);
 
-  return { holdSpeedActive };
+  return { holdSpeedActive, subtitleOffsetSec };
 }

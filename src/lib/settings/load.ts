@@ -9,6 +9,10 @@ import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
 import { resolveUiLanguage } from "@/lib/i18n";
+import {
+  sanitizeSubtitleOffsetPosition,
+  sanitizeSubtitleOffsetSize,
+} from "@/lib/player/subtitle-offset";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -161,6 +165,12 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       ...DEFAULT,
       ...parsed,
       posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
+      subOffsetIndicatorEnabled:
+        typeof parsed.subOffsetIndicatorEnabled === "boolean"
+          ? parsed.subOffsetIndicatorEnabled
+          : DEFAULT.subOffsetIndicatorEnabled,
+      subOffsetIndicatorPosition: sanitizeSubtitleOffsetPosition(parsed.subOffsetIndicatorPosition),
+      subOffsetIndicatorSize: sanitizeSubtitleOffsetSize(parsed.subOffsetIndicatorSize),
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
       subProvidersEnabled: {

@@ -2,33 +2,43 @@ import { useSyncExternalStore } from "react";
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
-let barOpen = false;
+export type SyncBarState = {
+  open: boolean;
+  initialDelaySec: number;
+};
+
+const SERVER_STATE: SyncBarState = { open: false, initialDelaySec: 0 };
+let state: SyncBarState = SERVER_STATE;
 const listeners = new Set<() => void>();
 
-export function openSyncBar(): void {
-  if (barOpen) return;
-  barOpen = true;
+export function openSyncBar(initialDelaySec = 0): void {
+  if (state.open) return;
+  state = { open: true, initialDelaySec };
   listeners.forEach((l) => l());
 }
 
 export function closeSyncBar(): void {
-  if (!barOpen) return;
-  barOpen = false;
+  if (!state.open) return;
+  state = { ...state, open: false };
   listeners.forEach((l) => l());
 }
 
-export function toggleSyncBar(): void {
-  if (barOpen) closeSyncBar();
-  else openSyncBar();
+export function toggleSyncBar(initialDelaySec = 0): void {
+  if (state.open) closeSyncBar();
+  else openSyncBar(initialDelaySec);
 }
 
-export function useSyncBarOpen(): boolean {
+export function useSyncBarState(): SyncBarState {
   return useSyncExternalStore(
     (cb) => {
       listeners.add(cb);
       return () => listeners.delete(cb);
     },
-    () => barOpen,
-    () => false,
+    () => state,
+    () => SERVER_STATE,
   );
+}
+
+export function useSyncBarOpen(): boolean {
+  return useSyncBarState().open;
 }

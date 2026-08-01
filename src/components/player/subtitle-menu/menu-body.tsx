@@ -1,4 +1,14 @@
-import { Check, FolderOpen, Languages, Loader2, Search as SearchIcon, SlidersHorizontal, Sparkles, Timer, X } from "lucide-react";
+import {
+  Check,
+  FolderOpen,
+  Languages,
+  Loader2,
+  Search as SearchIcon,
+  SlidersHorizontal,
+  Sparkles,
+  Timer,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Flag } from "@/components/flag";
 import { markImportedSub } from "@/lib/player/imported-subs";
@@ -15,7 +25,8 @@ const ALL_LANGS = "__all__";
 
 export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   const tr = useT();
-  const { tracks, selectedId, onSelect, onClose, delaySec, metaReleaseDate, onOpenStyleBar } = props;
+  const { tracks, selectedId, onSelect, onClose, delaySec, metaReleaseDate, onOpenStyleBar } =
+    props;
   const groups = useMemo(() => groupByLang(tracks), [tracks]);
   const [searchSettled, setSearchSettled] = useState(false);
   const [activeLang, setActiveLang] = useState<string | null>(null);
@@ -100,9 +111,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
         <div className="flex items-center gap-2.5">
           <span className="text-[13.5px] font-semibold text-ink">{tr("Subtitles")}</span>
           {tracks.length > 0 && (
-            <span className="text-[11.5px] tabular-nums text-ink-subtle">
-              {tracks.length}
-            </span>
+            <span className="text-[11.5px] tabular-nums text-ink-subtle">{tracks.length}</span>
           )}
         </div>
 
@@ -112,7 +121,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             <button
               type="button"
               onClick={() => {
-                openSyncBar();
+                openSyncBar(delaySec);
                 onClose();
               }}
               aria-label={tr("Subtitle sync")}
@@ -213,9 +222,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
               >
                 <Flag language={g.langDisplay} size="sm" showLabel={false} />
                 <span className="flex-1 truncate font-medium">{g.langDisplay}</span>
-                {hasSelected && (
-                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
-                )}
+                {hasSelected && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />}
                 <span className="text-[10.5px] tabular-nums text-ink-subtle">
                   {g.variants.length}
                 </span>
@@ -397,14 +404,22 @@ function ImportBanner({ name }: { name: string }) {
       </span>
       <div className="flex min-w-0 flex-col">
         <span className="truncate text-[13px] font-semibold text-ink">{name}</span>
-        <span className="text-[11px] font-medium text-accent">{tr("Imported and now playing")}</span>
+        <span className="text-[11px] font-medium text-accent">
+          {tr("Imported and now playing")}
+        </span>
       </div>
       <Sparkles size={15} className="ms-auto shrink-0 text-accent" />
     </div>
   );
 }
 
-function EmptyState({ searchSettled, veryNewMovie }: { searchSettled: boolean; veryNewMovie: boolean }) {
+function EmptyState({
+  searchSettled,
+  veryNewMovie,
+}: {
+  searchSettled: boolean;
+  veryNewMovie: boolean;
+}) {
   const tr = useT();
   if (!searchSettled) {
     return (
@@ -418,7 +433,11 @@ function EmptyState({ searchSettled, veryNewMovie }: { searchSettled: boolean; v
     return (
       <div className="flex flex-col gap-1.5 px-5 py-6 text-[13.5px] leading-snug text-ink-muted">
         <span className="text-[14px] font-semibold text-ink">{tr("Movie's too new")}</span>
-        <span>{tr("Subtitles haven't been published yet. Try search below or check back in a few days.")}</span>
+        <span>
+          {tr(
+            "Subtitles haven't been published yet. Try search below or check back in a few days.",
+          )}
+        </span>
       </div>
     );
   }

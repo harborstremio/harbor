@@ -9,6 +9,7 @@ import { SubtitleStylePanel } from "./player-panel";
 import { LanguagesPicker } from "./streaming-panel";
 import { DisplayLanguageSection } from "./language-panel/display-language-section";
 import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
+import { SubtitleOffsetSettings } from "./player-panel/subtitle-offset-settings";
 
 const IMAGE_LANG_OPTIONS = ["Original", ...ALL_LANGUAGE_NAMES];
 
@@ -121,6 +122,13 @@ export function LanguagePanel() {
         subtitle={t("How subtitles look during playback. Live preview below.")}
       >
         <SubtitleStylePanel />
+      </Section>
+
+      <Section
+        title={t("Subtitle sync indicator")}
+        subtitle={t("Choose where subtitle timing feedback appears and how large it is.")}
+      >
+        <SubtitleOffsetSettings />
       </Section>
 
       <Section

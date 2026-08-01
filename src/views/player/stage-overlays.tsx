@@ -5,6 +5,7 @@ import { StatsOverlay } from "@/components/player/stats-overlay";
 import { SubStyleBar } from "@/components/player/sub-style-bar";
 import { SubSyncBar } from "@/components/player/sub-sync-bar";
 import { SubtitleOverlay } from "@/components/player/subtitle-overlay";
+import { SubtitleOffsetIndicator } from "@/components/player/subtitle-offset-indicator";
 import {
   VolumeIndicator,
   type VolumeHudPosition,
@@ -23,6 +24,7 @@ export const StageOverlays = memo(function StageOverlays({
   subAssNative,
   showStats,
   holdSpeedActive,
+  subtitleOffsetSec,
   volumeIndicator,
   volumeHudPosition,
   videoFillPill,
@@ -39,6 +41,7 @@ export const StageOverlays = memo(function StageOverlays({
   subAssNative: boolean;
   showStats: boolean;
   holdSpeedActive: boolean;
+  subtitleOffsetSec: number | null;
   volumeIndicator: VolumeIndicatorState;
   volumeHudPosition: VolumeHudPosition;
   videoFillPill: string | null;
@@ -76,6 +79,7 @@ export const StageOverlays = memo(function StageOverlays({
           {snap.rate}x<span className="font-normal text-ink-muted">{t("speed")}</span>
         </div>
       )}
+      {!pipMode && <SubtitleOffsetIndicator delaySec={subtitleOffsetSec} />}
       {!holdSpeedActive && !pipMode && (
         <VolumeIndicator
           state={{ ...volumeIndicator, visible: showVolumeIndicator }}
