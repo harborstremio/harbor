@@ -1,39 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { AccountStub } from "./settings/account";
-import { AdvancedPanel } from "./settings/advanced-panel";
-import { RemotesPanel } from "./settings/remotes-panel";
-import { StoragePanel } from "./settings/storage-panel";
-import { BasicsPanel } from "./settings/basics-panel";
-import { BugReportPanel } from "./settings/bug-report-panel";
-import { SupportPanel } from "./settings/support-panel";
-import { LibraryPanel, type LibraryKey } from "./settings/library-panel";
-import { LanguagePanel } from "./settings/language-panel";
-import { SubSourcesPanel } from "./settings/sub-sources-panel";
-import { AutoSyncPanel } from "./settings/autosync-panel";
+import { lazy, startTransition, Suspense, useEffect, useRef, useState } from "react";
+import type { LibraryKey } from "./settings/library-panel";
+import type { RelayMode } from "./settings/relay-section";
+import type { DebridKey } from "./settings/streaming-sources-panel";
 import { SettingsNav } from "./settings/nav";
 import { SettingsJumpBar } from "./settings/jump-bar";
-import { HotkeysPanel } from "./settings/hotkeys-panel";
-import { ControllersPanel } from "./settings/controllers-panel";
-import { PlayerLayoutPanel } from "./settings/player-layout-panel";
-import { QualityPanel } from "./settings/quality-panel";
-import { MpvPanel } from "./settings/mpv-panel";
-import { P2PPanel } from "./settings/p2p-panel";
-import { AnimePanel } from "./settings/anime-panel";
-import { ShadersPanel } from "./settings/shaders-panel";
-import { TraktPanel } from "./settings/trakt-panel";
-import { AnilistPanel } from "./settings/anilist-panel";
-import { MalPanel } from "./settings/mal-panel";
-import { SimklPanel } from "./settings/simkl-panel";
-import { LetterboxdPanel } from "./settings/letterboxd-panel";
-import { RelaySection, type RelayMode } from "./settings/relay-section";
 import { SettingsActiveContext, type SectionId } from "./settings/shared";
-import { StreamingSourcesPanel, type DebridKey } from "./settings/streaming-sources-panel";
-import { StreamBadgesPanel } from "./settings/stream-badges-panel";
-import { AwardIconsPanel } from "./settings/award-icons-panel";
-import { StreamFiltersPanel } from "./settings/stream-filters-panel";
-import { ThemePanel } from "./settings/theme-panel";
 import { useThemeLibraryOpen } from "./settings/theme-panel/library-open-store";
-import { WebhooksPanel } from "./settings/webhooks-panel";
 import { BackToTop } from "@/components/back-to-top";
 import { resetOmdbBudget } from "@/lib/providers/omdb";
 import { useSettings } from "@/lib/settings";
@@ -41,6 +13,38 @@ import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 
 const IS_WEB = typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
+
+const BasicsPanel = lazy(() => import("./settings/basics-panel").then((m) => ({ default: m.BasicsPanel })));
+const AccountStub = lazy(() => import("./settings/account").then((m) => ({ default: m.AccountStub })));
+const LibraryPanel = lazy(() => import("./settings/library-panel").then((m) => ({ default: m.LibraryPanel })));
+const RelaySection = lazy(() => import("./settings/relay-section").then((m) => ({ default: m.RelaySection })));
+const StreamingSourcesPanel = lazy(() => import("./settings/streaming-sources-panel").then((m) => ({ default: m.StreamingSourcesPanel })));
+const StreamFiltersPanel = lazy(() => import("./settings/stream-filters-panel").then((m) => ({ default: m.StreamFiltersPanel })));
+const P2PPanel = lazy(() => import("./settings/p2p-panel").then((m) => ({ default: m.P2PPanel })));
+const LanguagePanel = lazy(() => import("./settings/language-panel").then((m) => ({ default: m.LanguagePanel })));
+const SubSourcesPanel = lazy(() => import("./settings/sub-sources-panel").then((m) => ({ default: m.SubSourcesPanel })));
+const AutoSyncPanel = lazy(() => import("./settings/autosync-panel").then((m) => ({ default: m.AutoSyncPanel })));
+const QualityPanel = lazy(() => import("./settings/quality-panel").then((m) => ({ default: m.QualityPanel })));
+const MpvPanel = lazy(() => import("./settings/mpv-panel").then((m) => ({ default: m.MpvPanel })));
+const AnimePanel = lazy(() => import("./settings/anime-panel").then((m) => ({ default: m.AnimePanel })));
+const ShadersPanel = lazy(() => import("./settings/shaders-panel").then((m) => ({ default: m.ShadersPanel })));
+const PlayerLayoutPanel = lazy(() => import("./settings/player-layout-panel").then((m) => ({ default: m.PlayerLayoutPanel })));
+const HotkeysPanel = lazy(() => import("./settings/hotkeys-panel").then((m) => ({ default: m.HotkeysPanel })));
+const ControllersPanel = lazy(() => import("./settings/controllers-panel").then((m) => ({ default: m.ControllersPanel })));
+const TraktPanel = lazy(() => import("./settings/trakt-panel").then((m) => ({ default: m.TraktPanel })));
+const AnilistPanel = lazy(() => import("./settings/anilist-panel").then((m) => ({ default: m.AnilistPanel })));
+const MalPanel = lazy(() => import("./settings/mal-panel").then((m) => ({ default: m.MalPanel })));
+const SimklPanel = lazy(() => import("./settings/simkl-panel").then((m) => ({ default: m.SimklPanel })));
+const LetterboxdPanel = lazy(() => import("./settings/letterboxd-panel").then((m) => ({ default: m.LetterboxdPanel })));
+const ThemePanel = lazy(() => import("./settings/theme-panel").then((m) => ({ default: m.ThemePanel })));
+const StreamBadgesPanel = lazy(() => import("./settings/stream-badges-panel").then((m) => ({ default: m.StreamBadgesPanel })));
+const AwardIconsPanel = lazy(() => import("./settings/award-icons-panel").then((m) => ({ default: m.AwardIconsPanel })));
+const WebhooksPanel = lazy(() => import("./settings/webhooks-panel").then((m) => ({ default: m.WebhooksPanel })));
+const BugReportPanel = lazy(() => import("./settings/bug-report-panel").then((m) => ({ default: m.BugReportPanel })));
+const SupportPanel = lazy(() => import("./settings/support-panel").then((m) => ({ default: m.SupportPanel })));
+const RemotesPanel = lazy(() => import("./settings/remotes-panel").then((m) => ({ default: m.RemotesPanel })));
+const StoragePanel = lazy(() => import("./settings/storage-panel").then((m) => ({ default: m.StoragePanel })));
+const AdvancedPanel = lazy(() => import("./settings/advanced-panel").then((m) => ({ default: m.AdvancedPanel })));
 
 const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   basics: {
@@ -196,8 +200,10 @@ export function Settings() {
   const scrollRef = useRef<HTMLElement>(null);
 
   const handleNav = (id: SectionId, anchor?: string) => {
-    setActive(id);
-    setPendingAnchor(anchor ?? null);
+    startTransition(() => {
+      setActive(id);
+      setPendingAnchor(anchor ?? null);
+    });
   };
 
   useEffect(() => {
@@ -308,6 +314,14 @@ export function Settings() {
             </header>
           )}
 
+          <Suspense
+            fallback={
+              <div
+                className="h-64 rounded-2xl border border-edge-soft bg-elevated/40"
+                aria-label={t("Loading settings")}
+              />
+            }
+          >
           {active === "basics" && <BasicsPanel />}
 
           {active === "account" && <AccountStub />}
@@ -399,6 +413,7 @@ export function Settings() {
           {active === "storage" && <StoragePanel />}
 
           {active === "advanced" && <AdvancedPanel />}
+          </Suspense>
         </div>
       </main>
       <BackToTop scrollRef={scrollRef} />
