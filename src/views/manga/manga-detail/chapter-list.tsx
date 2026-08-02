@@ -8,6 +8,8 @@ import {
   LayoutGrid,
   List,
   Loader2,
+  Pause,
+  Play,
   Search,
   Server,
   Tv,
@@ -19,7 +21,10 @@ import { useMangaProgressEntry, type MangaProgressEntry } from "@/lib/manga-prog
 import {
   downloadAllChapters,
   downloadChapter,
+  pauseMangaDownloadBatch,
+  resumeMangaDownloadBatch,
   useMangaDownload,
+  useMangaDownloadBatch,
   type MangaDownloadInfo,
 } from "@/lib/manga-downloads";
 import { listMangaSources, sourceIconUrl } from "@/lib/manga/sources";
@@ -150,7 +155,11 @@ function ChapterMeta({ chapter }: { chapter: MangaChapter }) {
   return (
     <span className="flex min-w-0 items-center gap-1.5 text-[12.5px] text-ink-subtle">
       {chapter.group && <span className="truncate">{chapter.group}</span>}
-      {chapter.group && rel && <span aria-hidden className="text-ink-subtle/50">·</span>}
+      {chapter.group && rel && (
+        <span aria-hidden className="text-ink-subtle/50">
+          ·
+        </span>
+      )}
       {rel && <span className="shrink-0">{rel}</span>}
     </span>
   );
@@ -178,7 +187,9 @@ function chapterSourceId(id: string): string {
 function isCurrentChapter(progress: MangaProgressEntry | undefined, c: MangaChapter): boolean {
   if (!progress) return false;
   if (progress.chapterId === c.id) return true;
-  return progress.chapterNumber != null && c.chapter != null && progress.chapterNumber === c.chapter;
+  return (
+    progress.chapterNumber != null && c.chapter != null && progress.chapterNumber === c.chapter
+  );
 }
 
 function ChapterDownloadButton({
@@ -201,6 +212,14 @@ function ChapterDownloadButton({
     return (
       <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold tabular-nums text-ink-subtle">
         <Loader2 size={14} className="animate-spin" />
+        {rec.total ? `${rec.done}/${rec.total}` : null}
+      </span>
+    );
+  }
+  if (rec.status === "paused") {
+    return (
+      <span className="flex shrink-0 items-center gap-1 text-[11px] font-semibold tabular-nums text-ink-subtle">
+        <Pause size={14} />
         {rec.total ? `${rec.done}/${rec.total}` : null}
       </span>
     );
@@ -302,13 +321,22 @@ function SourceFilterDropdown({
       >
         <SourceIcon iconUrl={active?.iconUrl} />
         <span>{active ? active.name : t("All sources")}</span>
-        <ChevronDown size={16} className={`text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={16}
+          className={`text-ink-subtle transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {open && (
         <div className="absolute right-0 z-30 mt-2 max-h-80 w-56 overflow-y-auto rounded-xl border border-edge-soft bg-elevated py-1.5 shadow-[0_18px_44px_rgba(0,0,0,0.45)]">
           <SourceRow label={t("All sources")} active={!selected} onClick={() => onSelect("")} />
           {options.map((o) => (
-            <SourceRow key={o.id} label={o.name} iconUrl={o.iconUrl} active={o.id === selected} onClick={() => onSelect(o.id)} />
+            <SourceRow
+              key={o.id}
+              label={o.name}
+              iconUrl={o.iconUrl}
+              active={o.id === selected}
+              onClick={() => onSelect(o.id)}
+            />
           ))}
         </div>
       )}
@@ -358,7 +386,7 @@ export function ChapterList({
   const [view, setView] = useState<ChapterView>(readView);
   const [range, setRange] = useState<number | null>(null);
   const [sourceFilter, setSourceFilter] = useState("");
-  const [dlAll, setDlAll] = useState(false);
+  const batch = useMangaDownloadBatch(mangaId ?? "");
 
   useEffect(() => {
     localStorage.setItem(VIEW_KEY, view);
@@ -385,7 +413,8 @@ export function ChapterList({
   }, [sourceOptions, sourceFilter]);
 
   const scoped = useMemo(
-    () => (sourceFilter ? chapters.filter((c) => chapterSourceId(c.id) === sourceFilter) : chapters),
+    () =>
+      sourceFilter ? chapters.filter((c) => chapterSourceId(c.id) === sourceFilter) : chapters,
     [chapters, sourceFilter],
   );
 
@@ -459,7 +488,9 @@ export function ChapterList({
             </p>
           ) : (
             <p className="text-[15px] text-ink-muted">
-              {t("No chapters available in {lang} from this source.", { lang: languageName(selectedLang) })}
+              {t("No chapters available in {lang} from this source.", {
+                lang: languageName(selectedLang),
+              })}
             </p>
           )}
         </div>
@@ -482,7 +513,12 @@ export function ChapterList({
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex h-11 items-center gap-1 rounded-xl border border-edge-soft bg-surface/60 p-1">
-            {([["list", List], ["grid", LayoutGrid]] as const).map(([v, Icon]) => (
+            {(
+              [
+                ["list", List],
+                ["grid", LayoutGrid],
+              ] as const
+            ).map(([v, Icon]) => (
               <button
                 key={v}
                 type="button"
@@ -513,29 +549,51 @@ export function ChapterList({
           {mangaId && ascending.length > 0 && (
             <button
               type="button"
-              disabled={dlAll}
-              onClick={async () => {
-                setDlAll(true);
-                try {
-                  await downloadAllChapters(
-                    mangaId,
-                    ascending.map((c) => ({
-                      chapterId: c.id,
-                      info: { title: mangaTitle, cover: mangaCover, chapter: c.chapter },
-                    })),
-                  );
-                } finally {
-                  setDlAll(false);
+              onClick={() => {
+                if (batch.status === "downloading") {
+                  pauseMangaDownloadBatch(mangaId);
+                  return;
                 }
+                if (batch.status === "paused") {
+                  resumeMangaDownloadBatch(mangaId);
+                  return;
+                }
+                void downloadAllChapters(
+                  mangaId,
+                  ascending.map((c) => ({
+                    chapterId: c.id,
+                    info: { title: mangaTitle, cover: mangaCover, chapter: c.chapter },
+                  })),
+                );
               }}
-              className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft bg-surface/60 px-3.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink disabled:opacity-60"
+              aria-label={
+                batch.status === "downloading"
+                  ? t("Pause downloads")
+                  : batch.status === "paused"
+                    ? t("Resume downloads")
+                    : t("Download all")
+              }
+              className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft bg-surface/60 px-3.5 text-[13px] font-medium text-ink-muted transition-[color,background-color,transform] hover:bg-elevated/60 hover:text-ink active:scale-[0.96] motion-reduce:active:scale-100"
             >
-              {dlAll ? (
-                <Loader2 size={16} className="animate-spin motion-reduce:animate-none" />
+              {batch.status === "downloading" ? (
+                <Pause size={16} />
+              ) : batch.status === "paused" ? (
+                <Play size={16} />
               ) : (
                 <Download size={16} />
               )}
-              {dlAll ? t("Downloading...") : t("Download all")}
+              {batch.status === "downloading"
+                ? t("Pause downloads")
+                : batch.status === "paused"
+                  ? t("Resume downloads")
+                  : batch.status === "error"
+                    ? t("Retry downloads")
+                    : t("Download all")}
+              {(batch.status === "downloading" || batch.status === "paused") && batch.total > 0 && (
+                <span className="tabular-nums text-ink-subtle">
+                  {batch.done}/{batch.total}
+                </span>
+              )}
             </button>
           )}
           {sourceOptions.length > 1 && (
@@ -571,7 +629,9 @@ export function ChapterList({
             type="button"
             onClick={() => setRange(null)}
             className={`h-9 rounded-lg px-3.5 text-[13px] font-medium tabular-nums transition-colors ${
-              range == null ? "bg-accent text-canvas" : "bg-elevated/50 text-ink-muted hover:text-ink"
+              range == null
+                ? "bg-accent text-canvas"
+                : "bg-elevated/50 text-ink-muted hover:text-ink"
             }`}
           >
             {t("All")}
@@ -582,7 +642,9 @@ export function ChapterList({
               type="button"
               onClick={() => setRange(r.b)}
               className={`h-9 rounded-lg px-3.5 text-[13px] font-medium tabular-nums transition-colors ${
-                range === r.b ? "bg-accent text-canvas" : "bg-elevated/50 text-ink-muted hover:text-ink"
+                range === r.b
+                  ? "bg-accent text-canvas"
+                  : "bg-elevated/50 text-ink-muted hover:text-ink"
               }`}
             >
               {r.hi}-{r.lo}
@@ -603,7 +665,12 @@ export function ChapterList({
               <button
                 key={c.id}
                 type="button"
-                onClick={() => onRead(ascending, ascending.findIndex((x) => x.id === c.id))}
+                onClick={() =>
+                  onRead(
+                    ascending,
+                    ascending.findIndex((x) => x.id === c.id),
+                  )
+                }
                 className={`group flex min-h-[64px] w-full items-center justify-between gap-4 border-b border-edge-soft/60 px-5 py-3.5 text-start transition-colors last:border-b-0 hover:bg-elevated/40 ${
                   cur ? "bg-accent/5" : ""
                 }`}
@@ -652,7 +719,12 @@ export function ChapterList({
               <button
                 key={c.id}
                 type="button"
-                onClick={() => onRead(ascending, ascending.findIndex((x) => x.id === c.id))}
+                onClick={() =>
+                  onRead(
+                    ascending,
+                    ascending.findIndex((x) => x.id === c.id),
+                  )
+                }
                 className={`group flex min-h-[64px] flex-col justify-between gap-2 rounded-xl border bg-surface/60 px-4 py-3.5 text-start transition-colors hover:bg-elevated/60 ${
                   cur ? "border-accent/70" : "border-edge-soft hover:border-edge"
                 }`}

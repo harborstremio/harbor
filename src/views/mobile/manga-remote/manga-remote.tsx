@@ -1,5 +1,15 @@
 import { lazy, Suspense, useRef, useState } from "react";
-import { Bookmark, BookOpen, ChevronDown, ChevronsLeft, ChevronsRight, Minus, Monitor, Plus, X } from "lucide-react";
+import {
+  Bookmark,
+  BookOpen,
+  ChevronDown,
+  ChevronsLeft,
+  ChevronsRight,
+  Minus,
+  Monitor,
+  Plus,
+  X,
+} from "lucide-react";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { useMobileRemote } from "../mobile-remote";
 import { RendererSheet } from "../renderer-sheet";
@@ -10,11 +20,23 @@ import { useOptimisticPage } from "./use-optimistic-page";
 import { useHistoryBackGuard } from "./use-history-guard";
 import { clampZoom, ZOOM_MAX, ZOOM_MIN, type TurnDir } from "./gesture-math";
 
-const ChapterNavigator = lazy(() => import("./chapter-navigator").then((m) => ({ default: m.ChapterNavigator })));
-const PageJumpSheet = lazy(() => import("./page-jump-sheet").then((m) => ({ default: m.PageJumpSheet })));
-const BookmarksSheet = lazy(() => import("./bookmarks-sheet").then((m) => ({ default: m.BookmarksSheet })));
+const ChapterNavigator = lazy(() =>
+  import("./chapter-navigator").then((m) => ({ default: m.ChapterNavigator })),
+);
+const PageJumpSheet = lazy(() =>
+  import("./page-jump-sheet").then((m) => ({ default: m.PageJumpSheet })),
+);
+const BookmarksSheet = lazy(() =>
+  import("./bookmarks-sheet").then((m) => ({ default: m.BookmarksSheet })),
+);
 
-export function MangaRemote({ standalone = false, onReadHere }: { standalone?: boolean; onReadHere?: () => void }) {
+export function MangaRemote({
+  standalone = false,
+  onReadHere,
+}: {
+  standalone?: boolean;
+  onReadHere?: () => void;
+}) {
   const { connected, snapshot, sendCommand } = useMobileRemote();
   const reduce = useReducedMotion();
   const m = snapshot.manga;
@@ -31,7 +53,12 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
   useHistoryBackGuard(true);
 
   const count = m?.pageCount ?? 0;
-  const { displayPage, advance } = useOptimisticPage(m?.pageIndex ?? 0, count, m?.chapterId ?? "", m?.seq ?? 0);
+  const { displayPage, advance } = useOptimisticPage(
+    m?.pageIndex ?? 0,
+    count,
+    m?.chapterId ?? "",
+    m?.seq ?? 0,
+  );
 
   if (!m || !m.open) return <MangaRemoteEmpty variant="closed" />;
 
@@ -55,7 +82,8 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
     else if (!sent) flash("Reconnecting to your computer");
   };
   const zoomAbs = (z: number) => sendCommand({ action: "mangaSetZoom", zoom: clampZoom(z) });
-  const zoomStep = (dir: "in" | "out") => sendCommand({ action: dir === "in" ? "mangaZoomIn" : "mangaZoomOut" });
+  const zoomStep = (dir: "in" | "out") =>
+    sendCommand({ action: dir === "in" ? "mangaZoomIn" : "mangaZoomOut" });
   const pan = (dx: number, dy: number) => sendCommand({ action: "mangaPan", dx, dy });
 
   const chromeCls = `${reduce ? "" : "transition-opacity duration-200 "}${chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"}`;
@@ -89,7 +117,11 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
             onClick={() => setDeviceOpen(true)}
             className="flex min-w-0 items-center gap-1.5 rounded-full px-2 py-1 transition-opacity active:opacity-60"
           >
-            <Monitor size={15} strokeWidth={2.2} className={connected ? "text-ink" : "text-ink-subtle"} />
+            <Monitor
+              size={15}
+              strokeWidth={2.2}
+              className={connected ? "text-ink" : "text-ink-subtle"}
+            />
             <span className="truncate text-[13px] font-semibold text-ink">
               {connected ? snapshot.target.label || "Your computer" : "Reconnecting"}
             </span>
@@ -139,8 +171,14 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
           }}
         />
 
-        <div className={`flex items-center justify-center gap-2 px-4 ${chromeCls} ${zoomEngaged ? "pointer-events-none opacity-0" : ""}`}>
-          <DockButton label="Previous chapter" disabled={!m.hasPrev} onPress={() => sendCommand({ action: "mangaJumpChapter", index: m.chapterIndex - 1 })}>
+        <div
+          className={`flex items-center justify-center gap-2 px-4 ${chromeCls} ${zoomEngaged ? "pointer-events-none opacity-0" : ""}`}
+        >
+          <DockButton
+            label="Previous chapter"
+            disabled={!m.hasPrev}
+            onPress={() => sendCommand({ action: "mangaJumpChapter", index: m.chapterIndex - 1 })}
+          >
             <ChevronsLeft size={24} strokeWidth={2.2} />
           </DockButton>
           {m.canZoom && (
@@ -166,7 +204,11 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
               <Plus size={22} strokeWidth={2.4} />
             </DockButton>
           )}
-          <DockButton label="Next chapter" disabled={!m.hasNext} onPress={() => sendCommand({ action: "mangaJumpChapter", index: m.chapterIndex + 1 })}>
+          <DockButton
+            label="Next chapter"
+            disabled={!m.hasNext}
+            onPress={() => sendCommand({ action: "mangaJumpChapter", index: m.chapterIndex + 1 })}
+          >
             <ChevronsRight size={24} strokeWidth={2.2} />
           </DockButton>
         </div>
@@ -175,7 +217,6 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
           zoom={m.zoom}
           min={ZOOM_MIN}
           max={ZOOM_MAX}
-          rtl={m.rtl}
           canZoom={m.canZoom}
           onZoom={zoomAbs}
           onPan={pan}
@@ -199,7 +240,9 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
           className="pointer-events-none fixed inset-x-0 z-[60] flex justify-center px-4"
           style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 12px)" }}
         >
-          <span className="rounded-full bg-danger/90 px-4 py-2 text-[13px] font-semibold text-white backdrop-blur-xl">{hint}</span>
+          <span className="rounded-full bg-danger/90 px-4 py-2 text-[13px] font-semibold text-white backdrop-blur-xl">
+            {hint}
+          </span>
         </div>
       )}
 
@@ -215,8 +258,12 @@ export function MangaRemote({ standalone = false, onReadHere }: { standalone?: b
             }}
           />
         )}
-        {pageJumpOpen && <PageJumpSheet open={pageJumpOpen} onClose={() => setPageJumpOpen(false)} />}
-        {bookmarksOpen && <BookmarksSheet open={bookmarksOpen} onClose={() => setBookmarksOpen(false)} />}
+        {pageJumpOpen && (
+          <PageJumpSheet open={pageJumpOpen} onClose={() => setPageJumpOpen(false)} />
+        )}
+        {bookmarksOpen && (
+          <BookmarksSheet open={bookmarksOpen} onClose={() => setBookmarksOpen(false)} />
+        )}
       </Suspense>
     </>
   );

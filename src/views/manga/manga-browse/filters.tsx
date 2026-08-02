@@ -11,6 +11,7 @@ import {
   subscribeMangaSources,
   type MangaSource,
 } from "@/lib/manga/sources";
+import { subscribeSuwayomiSourcesChanged } from "@/lib/manga/sources/suwayomi/source-events";
 
 export const FAVORITES = "__favorites__";
 
@@ -128,13 +129,18 @@ export function TagDropdown({
 
   useEffect(() => {
     let alive = true;
-    mangaTags()
-      .then((list) => {
-        if (alive) setTags(list);
-      })
-      .catch(() => {});
+    const load = () => {
+      mangaTags()
+        .then((list) => {
+          if (alive) setTags(list);
+        })
+        .catch(() => {});
+    };
+    load();
+    const unsubscribe = subscribeSuwayomiSourcesChanged(load);
     return () => {
       alive = false;
+      unsubscribe();
     };
   }, []);
 
@@ -178,7 +184,11 @@ export function TagDropdown({
               {tagId === FAVORITES && <Check size={14} className="text-accent" />}
             </button>
             <div className="my-1 border-t border-edge-soft/60" />
-            <TagRow label={t("All tags")} active={!tagId} onClick={() => (onSelect(""), setOpen(false))} />
+            <TagRow
+              label={t("All tags")}
+              active={!tagId}
+              onClick={() => (onSelect(""), setOpen(false))}
+            />
             {shown.map((t) => (
               <TagRow
                 key={t.id}

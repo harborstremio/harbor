@@ -18,11 +18,34 @@ import {
   restMangaFull,
   restPageUrls,
   restSearch,
+  restSetMangaInLibrary,
   type RestChapter,
 } from "./rest";
-import { gqlBrowse, gqlChapters, gqlLibrary, gqlManga, gqlPageUrls } from "./graphql";
+import {
+  gqlBrowse,
+  gqlChapters,
+  gqlLibrary,
+  gqlManga,
+  gqlPageUrls,
+  gqlSetMangaInLibrary,
+} from "./graphql";
 import { loadSources, pickTransport, sourceLang, withTransportFallback } from "./transport";
 import { registerServerPageHeaders } from "@/lib/manga/plugins/adapter";
+
+const SEARCH_ALL_CONCURRENCY = 4;
+
+function normalizedTitle(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function isStrongSearchMatch(item: MangaSummary, query: string): boolean {
+  const key = normalizedTitle(query);
+  if (!key) return false;
+  return [item.title, item.altTitle]
+    .filter((title): title is string => !!title)
+    .map(normalizedTitle)
+    .some((title) => title === key || title.startsWith(key) || key.startsWith(title));
+}
 
 function mapChapters(
   sourceId: string,
@@ -57,19 +80,22 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
     kind: BrowseKind,
     offset: number,
     query: string,
+    requestClient = client,
   ): Promise<MangaSummary[]> {
     const key = cursorKey(server.base, sourceId, kind, query);
     const page = nextPage(key, offset);
     if (page < 0) return [];
-    const res = await withTransportFallback(client, (t) =>
+    const res = await withTransportFallback(requestClient, (t) =>
       t === "rest"
         ? kind === "search"
-          ? restSearch(client, sourceId, query, page)
-          : restBrowse(client, sourceId, kind, page)
-        : gqlBrowse(client, sourceId, kind, page, kind === "search" ? query : undefined),
+          ? restSearch(requestClient, sourceId, query, page)
+          : restBrowse(requestClient, sourceId, kind, page)
+        : gqlBrowse(requestClient, sourceId, kind, page, kind === "search" ? query : undefined),
     );
     recordPage(key, res.items.length, res.hasNextPage, page);
-    return res.items.map((m) => mapManga(server, sourceId, m)).filter((m): m is MangaSummary => !!m);
+    return res.items
+      .map((m) => mapManga(server, sourceId, m))
+      .filter((m): m is MangaSummary => !!m);
   }
 
   async function library(): Promise<MangaSummary[]> {
@@ -93,6 +119,42 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
     if (offset > 0) return [];
     const lower = q.toLowerCase();
     return (await library()).filter((m) => m.title.toLowerCase().includes(lower));
+  }
+
+  async function searchAll(query: string): Promise<MangaSummary[]> {
+    const q = query.trim();
+    if (!q) return [];
+    const sources = await loadSources(client, await pickTransport(client));
+    if (!sources.length) return [];
+
+    const unique = new Map<string, MangaSummary>();
+    let nextSource = 0;
+    let exactFound = false;
+    let releaseExact: () => void = () => {};
+    const exact = new Promise<void>((resolve) => {
+      releaseExact = resolve;
+    });
+
+    const worker = async () => {
+      while (!exactFound) {
+        const source = sources[nextSource++];
+        if (!source) return;
+        const requestClient = makeClient(server, 0);
+        const items = await browse(source.id, "search", 0, q, requestClient).catch(() => []);
+        for (const item of items) unique.set(item.id, item);
+        if (items.some((item) => isStrongSearchMatch(item, q))) {
+          exactFound = true;
+          releaseExact();
+        }
+      }
+    };
+
+    const workers = Array.from({ length: Math.min(SEARCH_ALL_CONCURRENCY, sources.length) }, () =>
+      worker(),
+    );
+    const all = Promise.all(workers).then(() => undefined);
+    await Promise.race([all, exact]);
+    return [...unique.values()];
   }
 
   async function detail(id: string): Promise<MangaSummary | null> {
@@ -156,7 +218,30 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
     }));
   }
 
-  return { id: "suwayomi", name: "My Server", popular, search, detail, chapters, pageUrls, tags };
+  async function setLibrary(id: string, inLibrary: boolean): Promise<void> {
+    const parsed = decodeMangaId(id);
+    if (!parsed) return;
+    await withTransportFallback(client, async (t) => {
+      const ok =
+        t === "rest"
+          ? await restSetMangaInLibrary(client, parsed.mangaId, inLibrary)
+          : await gqlSetMangaInLibrary(client, parsed.mangaId, inLibrary);
+      if (!ok) throw new Error("suwayomi_library_update_failed");
+    });
+  }
+
+  return {
+    id: "suwayomi",
+    name: "My Server",
+    popular,
+    search,
+    searchAll,
+    detail,
+    chapters,
+    pageUrls,
+    tags,
+    setLibrary,
+  };
 }
 
 export * from "./api";

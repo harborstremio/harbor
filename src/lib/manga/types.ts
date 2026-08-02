@@ -20,6 +20,8 @@ export type MangaProvider = {
   chapters(id: string): Promise<MangaChapter[]>;
   pageUrls(chapterId: string): Promise<string[]>;
   tags?(): Promise<MangaTag[]>;
+  searchAll?(query: string): Promise<MangaSummary[]>;
+  setLibrary?(id: string, inLibrary: boolean): Promise<void>;
 };
 
 export function mangaThrottle(gapMs: number): <T>(task: () => Promise<T>) => Promise<T> {

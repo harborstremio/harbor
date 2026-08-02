@@ -39,6 +39,7 @@ export type SuwayomiClient = {
   server: SuwayomiServer;
   getJson(path: string): Promise<any | null>;
   getOk(path: string): Promise<boolean>;
+  deleteOk(path: string): Promise<boolean>;
   postJson(path: string, body: unknown): Promise<any | null>;
   probeStatus(path: string): Promise<number | null>;
 };
@@ -110,12 +111,25 @@ export function makeClient(server: SuwayomiServer, gapMs = 150): SuwayomiClient 
         }
       });
     },
+    deleteOk(path) {
+      return throttle(async () => {
+        try {
+          const res = await safeFetch(server.base + path, {
+            method: "DELETE",
+            headers,
+          });
+          return res.ok;
+        } catch {
+          return false;
+        }
+      });
+    },
     postJson(path, body) {
       return throttle(async () => {
         try {
           const res = await safeFetch(server.base + path, {
             method: "POST",
-            headers: { ...(headers ?? {}), "content-type": "application/json" },
+            headers: { ...headers, "content-type": "application/json" },
             body: JSON.stringify(body),
           });
           if (!res.ok) return null;

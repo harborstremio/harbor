@@ -10,7 +10,11 @@ import type { RestChapter, RestPage } from "./rest";
 
 const GQL = "/api/graphql";
 
-async function gql(client: SuwayomiClient, query: string, variables?: Record<string, unknown>): Promise<any | null> {
+async function gql(
+  client: SuwayomiClient,
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<any | null> {
   const res = await client.postJson(GQL, { query, variables: variables ?? {} });
   if (!res) return null;
   return res.data ?? null;
@@ -37,7 +41,10 @@ export async function gqlAbout(
   const data = await gql(client, "query { aboutServer { name version } }");
   const v = data?.aboutServer;
   if (!v) return null;
-  return { name: v.name ? String(v.name) : undefined, version: v.version ? String(v.version) : undefined };
+  return {
+    name: v.name ? String(v.name) : undefined,
+    version: v.version ? String(v.version) : undefined,
+  };
 }
 
 export async function gqlSources(client: SuwayomiClient): Promise<SuwayomiSource[]> {
@@ -126,7 +133,9 @@ function mapGqlChapters(chapters: any[]): RestChapter[] {
         pageCount: Number.isFinite(pc) && pc >= 0 ? pc : 0,
         downloaded: !!ch.isDownloaded,
         isRead: ch.isRead === true,
-        lastPageRead: Number.isFinite(Number(ch.lastPageRead)) ? Number(ch.lastPageRead) : undefined,
+        lastPageRead: Number.isFinite(Number(ch.lastPageRead))
+          ? Number(ch.lastPageRead)
+          : undefined,
       };
     });
 }
@@ -179,6 +188,21 @@ export async function gqlLibrary(client: SuwayomiClient): Promise<any[]> {
   return Array.isArray(nodes) ? nodes : [];
 }
 
+export async function gqlSetMangaInLibrary(
+  client: SuwayomiClient,
+  mangaId: string,
+  inLibrary: boolean,
+): Promise<boolean> {
+  if (!isDigits(mangaId)) return false;
+  const q = `mutation($id: Int!, $inLibrary: Boolean!) {
+    updateManga(input: { id: $id, patch: { inLibrary: $inLibrary } }) {
+      manga { id }
+    }
+  }`;
+  const data = await gql(client, q, { id: Number(mangaId), inLibrary });
+  return data?.updateManga?.manga?.id != null;
+}
+
 export async function gqlExtensions(client: SuwayomiClient): Promise<SuwayomiExtension[]> {
   const data = await gql(
     client,
@@ -186,6 +210,7 @@ export async function gqlExtensions(client: SuwayomiClient): Promise<SuwayomiExt
       pkgName apkName name lang iconUrl versionName isInstalled hasUpdate isObsolete isNsfw repo
     } } }`,
   );
+  if (data == null) throw new Error("suwayomi_graphql_error");
   const nodes = data?.extensions?.nodes;
   if (!Array.isArray(nodes)) return [];
   return nodes
@@ -221,7 +246,9 @@ async function updateExtension(
     }
   }`;
   const data = await gql(client, q, { id: pkgName });
-  return !!data?.updateExtension?.extension;
+  const extension = data?.updateExtension?.extension;
+  if (!extension) return false;
+  return patch === "uninstall" ? extension.isInstalled === false : extension.isInstalled === true;
 }
 
 export function gqlInstallExtension(client: SuwayomiClient, pkgName: string): Promise<boolean> {
@@ -251,7 +278,10 @@ export async function gqlListExtensionRepos(client: SuwayomiClient): Promise<Ext
     }));
 }
 
-export async function gqlAddExtensionRepo(client: SuwayomiClient, indexUrl: string): Promise<boolean> {
+export async function gqlAddExtensionRepo(
+  client: SuwayomiClient,
+  indexUrl: string,
+): Promise<boolean> {
   const q = `mutation($url: String!) {
     addExtensionStore(input: { indexUrl: $url }) { extensionStore { indexUrl } }
   }`;
@@ -259,7 +289,10 @@ export async function gqlAddExtensionRepo(client: SuwayomiClient, indexUrl: stri
   return !!data?.addExtensionStore?.extensionStore;
 }
 
-export async function gqlRemoveExtensionRepo(client: SuwayomiClient, indexUrl: string): Promise<boolean> {
+export async function gqlRemoveExtensionRepo(
+  client: SuwayomiClient,
+  indexUrl: string,
+): Promise<boolean> {
   const q = `mutation($url: String!) {
     removeExtensionStore(input: { indexUrl: $url }) { clientMutationId }
   }`;
