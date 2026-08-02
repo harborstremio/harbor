@@ -30,6 +30,25 @@ function mpvFontFor(id: string): string {
   }
 }
 
+/** Hand the second subtitle over to mpv's own renderer, for the one surface our
+ *  overlay cannot draw on (HDR passthrough). `secondary-sub-pos` is measured from
+ *  the top, matching how `sub-pos` positions the primary. */
+export async function applySecondarySubNative(
+  on: boolean,
+  placement: Settings["subSecondaryPlacement"],
+  marginY: number,
+): Promise<void> {
+  await invoke("mpv_set_property", {
+    name: "secondary-sub-visibility",
+    value: on,
+  }).catch(() => {});
+  if (!on) return;
+  // "bottom" means "just above the primary line". mpv exposes no line-height
+  // metric, so offset by a fixed slice of the frame rather than guessing exactly.
+  const pos = placement === "top" ? 0 : clamp(100 - (Number(marginY) || 0) - 8, 0, 100);
+  await invoke("mpv_set_property", { name: "secondary-sub-pos", value: pos }).catch(() => {});
+}
+
 export type SubRenderContext = {
   assNativeActive: boolean;
   imageNativeActive: boolean;
@@ -42,7 +61,9 @@ export async function applySubStyle(
 ): Promise<void> {
   const override = s.subAssOverride;
   const normScale =
-    typeof context.assScale === "number" && Number.isFinite(context.assScale) ? context.assScale : null;
+    typeof context.assScale === "number" && Number.isFinite(context.assScale)
+      ? context.assScale
+      : null;
   const effOverride = normScale != null ? "scale" : override;
   const assMargins = context.assNativeActive && override !== "no" ? "yes" : "no";
   const marginY = clamp(Number(s.subMarginY) || 0, 0, 100);
@@ -54,7 +75,12 @@ export async function applySubStyle(
   const props: Array<[string, unknown]> = [
     ["sub-font-size", 32],
     ["sub-font", mpvFontFor(s.subFontFamily)],
-    ["sub-scale", normScale != null ? clamp(normScale, 0.2, 6) : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32))],
+    [
+      "sub-scale",
+      normScale != null
+        ? clamp(normScale, 0.2, 6)
+        : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32)),
+    ],
     ["sub-color", mpvColor(s.subFontColor, opacity)],
     ["sub-border-color", mpvColor(s.subBorderColor, opacity)],
     ["sub-border-size", s.subBorderSize],
@@ -71,8 +97,6 @@ export async function applySubStyle(
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
   await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
+    props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
   );
 }

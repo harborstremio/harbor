@@ -13,7 +13,11 @@ import { useSettings } from "@/lib/settings";
 import { isLocalEngineUrl } from "@/lib/stremio-server";
 import { useSimklScrobble } from "@/lib/simkl/scrobble-hook";
 import { useTraktScrobble } from "@/lib/trakt/scrobble-hook";
-import { cancelTorrentRemoval, scheduleTorrentRemoval, torrentEngineRemove } from "@/lib/torrent/local-engine";
+import {
+  cancelTorrentRemoval,
+  scheduleTorrentRemoval,
+  torrentEngineRemove,
+} from "@/lib/torrent/local-engine";
 import { stopAllFullDownloads, stopFullDownload } from "@/lib/torrent/full-download";
 import type { PlayerSrc } from "@/lib/view";
 import { useExitSnapshot } from "./use-exit-snapshot";
@@ -73,7 +77,7 @@ export function usePlayerMedia(params: {
 
   const prevEngineHashRef = useRef<string | null>(null);
   useEffect(() => {
-    const hash = isLocalEngineUrl(src.url) ? src.streamRef?.infoHash ?? null : null;
+    const hash = isLocalEngineUrl(src.url) ? (src.streamRef?.infoHash ?? null) : null;
     const fullDlHash = src.streamRef?.infoHash?.toLowerCase() ?? null;
     const prev = prevEngineHashRef.current;
     const keepBg = settings.keepStreamDownloadsInBackground;
@@ -120,9 +124,27 @@ export function usePlayerMedia(params: {
   });
 
   const autoSync = useAutoSync({ bridgeRef, src, snap, engine, settings });
-  const { status: asStatus, offer: asOffer, applyOffer: asApply, revert: asRevert, retry: asRetry, run: asRun, stop: asStop, feedback: asFeedback } = autoSync;
+  const {
+    status: asStatus,
+    offer: asOffer,
+    applyOffer: asApply,
+    revert: asRevert,
+    retry: asRetry,
+    run: asRun,
+    stop: asStop,
+    feedback: asFeedback,
+  } = autoSync;
   useEffect(() => {
-    publishAutoSync({ status: asStatus, offer: asOffer, applyOffer: asApply, revert: asRevert, retry: asRetry, run: asRun, stop: asStop, feedback: asFeedback });
+    publishAutoSync({
+      status: asStatus,
+      offer: asOffer,
+      applyOffer: asApply,
+      revert: asRevert,
+      retry: asRetry,
+      run: asRun,
+      stop: asStop,
+      feedback: asFeedback,
+    });
     return () => publishAutoSync(null);
   }, [asStatus, asOffer, asApply, asRevert, asRetry, asRun, asStop, asFeedback]);
 
@@ -132,19 +154,20 @@ export function usePlayerMedia(params: {
     isWindowsDesktop() &&
     !settings.playerHdrToSdr &&
     HDR_NATIVE_GAMMAS.has(snap.hdrGamma) &&
-    (settings.playerHdrOpaqueWindow || (settings.playerMpvEmbed && settings.playerHdrStage !== "off"));
+    (settings.playerHdrOpaqueWindow ||
+      (settings.playerMpvEmbed && settings.playerHdrStage !== "off"));
   const selectedSubTrack = snap.subtitleTracks.find((t) => t.selected) ?? null;
   const subAssOverridden = settings.subAssOverride !== "no" && settings.subAssOverride !== "scale";
   const selectedAssSub = isAssTrack(selectedSubTrack);
   const selectedImageSub = isImageSubTrack(selectedSubTrack);
   const subAssNative =
     subEmbed && selectedAssSub && (!subAssOverridden || !selectedSubTrack?.external);
-  const subNativeRender =
-    hdrNativeSurface || subAssNative || (subEmbed && selectedImageSub);
+  const subNativeRender = hdrNativeSurface || subAssNative || (subEmbed && selectedImageSub);
   const assNativeActive = selectedAssSub && (subNativeRender || !subEmbed);
   const imageNativeActive = selectedImageSub && (subNativeRender || !subEmbed);
   const assNormalizeScale = useAssNormalize({
-    enabled: engine === "mpv" && settings.subAssNormalizeSize && assNativeActive && !subAssOverridden,
+    enabled:
+      engine === "mpv" && settings.subAssNormalizeSize && assNativeActive && !subAssOverridden,
     sourceUrl: src.url ?? null,
     headers: src.headers,
     track: selectedSubTrack,
@@ -182,6 +205,9 @@ export function usePlayerMedia(params: {
     snap,
     sourceUrl: src.url,
     lang: settings.secondarySubLang,
+    nativeRender: hdrNativeSurface,
+    placement: settings.subSecondaryPlacement,
+    marginY: settings.subMarginY,
   });
   useEffect(() => {
     clearImportedSubs();
@@ -207,7 +233,7 @@ export function usePlayerMedia(params: {
     if (!b) return;
     const base = src.episode
       ? `${src.meta.name ?? "Subtitle"} S${src.episode.season}E${src.episode.episode}`
-      : src.meta.name ?? "Subtitle";
+      : (src.meta.name ?? "Subtitle");
     const fileName = `${base.replace(/[\\/:*?"<>|]+/g, " ").trim() || "Subtitle"}.srt`;
     const res = await getCuesAnySource(b, src.url, src.headers);
     if (res.ok && res.source.cues.length > 0) {
@@ -227,10 +253,25 @@ export function usePlayerMedia(params: {
       infoHash: src.streamRef?.infoHash ?? null,
     });
     return () => setPlayerActions(null);
-  }, [download.start, toggleFullscreen, src.url, src.streamRef?.infoHash, doDownloadSubtitle, canDownloadSub]);
+  }, [
+    download.start,
+    toggleFullscreen,
+    src.url,
+    src.streamRef?.infoHash,
+    doDownloadSubtitle,
+    canDownloadSub,
+  ]);
 
   useResumeAutosave({ src, snap, season, episode, resolvedImdbId, resolvedImdbVerified });
-  useStremioSync({ src, snap, authKey, resolvedImdbId, resolvedImdbVerified, resolutionSettled, castActiveRef });
+  useStremioSync({
+    src,
+    snap,
+    authKey,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    resolutionSettled,
+    castActiveRef,
+  });
   usePowerInhibit(snap);
   const subDropToast = useSubDrop(bridgeRef, src.meta.id);
 
@@ -246,5 +287,11 @@ export function usePlayerMedia(params: {
     });
   }, [engine, src.url, src.meta.name, src.meta.poster, src.episode, snap.durationSec]);
 
-  return { resolvedImdbId, subAssNative: suppressHtmlSubs, captureExitSnapshot, download, subDropToast };
+  return {
+    resolvedImdbId,
+    subAssNative: suppressHtmlSubs,
+    captureExitSnapshot,
+    download,
+    subDropToast,
+  };
 }
