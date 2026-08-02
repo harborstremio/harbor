@@ -41,6 +41,7 @@ pnpm-debug.log*
 /src-tauri/fonts/*.ttf
 local_docs/
 .diag/
+/src-tauri/tauri.dev.local.json
 
 # This repo is pnpm (see packageManager + CI). npm lockfiles must not be committed.
 package-lock.json
