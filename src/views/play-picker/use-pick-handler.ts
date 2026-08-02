@@ -19,6 +19,9 @@ import { buildPlayInvite } from "@/lib/together/build-invite";
 import { type PlayEpisode, type PlayerSrc } from "@/lib/view";
 import { openInAppBrowser, openUrl } from "@/lib/window";
 import { enqueueDownload } from "@/lib/download/downloads-store";
+import { downloadSeasonFromPack } from "@/lib/download/season-download";
+import { isDownloadableSeasonPack } from "@/lib/download/season-pack";
+import { useT } from "@/lib/i18n";
 import { formatStreamQuality, humanError, isDebridFailure, streamIdentity } from "./picker-utils";
 
 export function usePickHandler({
@@ -40,6 +43,7 @@ export function usePickHandler({
   claimHost,
   openPlayer,
   intent,
+  seasonEpisodes,
   autoActive,
   autoAttemptIdx,
   autoCandidatesLength,
@@ -68,6 +72,7 @@ export function usePickHandler({
   claimHost: (fresh: boolean) => void;
   openPlayer: (src: PlayerSrc) => void;
   intent?: "play" | "download";
+  seasonEpisodes?: PlayEpisode[];
   autoActive: boolean;
   autoAttemptIdx: number;
   autoCandidatesLength: number;
@@ -78,6 +83,7 @@ export function usePickHandler({
   setResolveError: (msg: string | null) => void;
   setResolving: Dispatch<SetStateAction<{ stream: ScoredStream } | null>>;
 }) {
+  const t = useT();
   const [queuedHash, setQueuedHash] = useState<string | null>(null);
   const [queuedDownloadKeys, setQueuedDownloadKeys] = useState<Set<string>>(() => new Set());
   const [debridDown, setDebridDown] = useState(false);
@@ -124,6 +130,58 @@ export function usePickHandler({
     resolveAcRef.current = ac;
     let opened = false;
     try {
+      if (intent === "download" && seasonEpisodes && seasonEpisodes.length > 0) {
+        if (!isDownloadableSeasonPack(stream)) {
+          setFailedStreams((prev) => new Set(prev).add(stream));
+          setResolveError(
+            t("This source is not a downloadable season package. Pick another package."),
+          );
+          return;
+        }
+        const label =
+          [stream.resolution, stream.source].filter(Boolean).join(" ") ||
+          stream.parsedTitle ||
+          stream.title ||
+          stream.name ||
+          stream.addonName ||
+          null;
+        const batch = await downloadSeasonFromPack({
+          meta,
+          episodes: seasonEpisodes,
+          stream,
+          streamLabel: label,
+          debrids,
+          signal: ac.signal,
+        });
+        if (ac.signal.aborted) return;
+        if (batch.total === 0) {
+          opened = true;
+          setQueuedDownloadKeys((prev) => new Set(prev).add(streamIdentity(stream)));
+          setResolving(null);
+          return;
+        }
+        if (batch.queued === 0) {
+          setFailedStreams((prev) => new Set(prev).add(stream));
+          setResolveError(
+            t(
+              "No downloadable episode files were found in this season package. Pick another package.",
+            ),
+          );
+          return;
+        }
+        opened = true;
+        setQueuedDownloadKeys((prev) => new Set(prev).add(streamIdentity(stream)));
+        setResolving(null);
+        if (batch.failed > 0) {
+          setResolveError(
+            t(
+              "Queued {queued} of {total} episodes. Harbor could not match every episode in this package.",
+              { queued: batch.queued, total: batch.total },
+            ),
+          );
+        }
+        return;
+      }
       const hint = episode
         ? { season: episode.season ?? null, episode: episode.episode ?? null }
         : undefined;

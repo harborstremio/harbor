@@ -1,8 +1,10 @@
 import type { Meta } from "@/lib/cinemeta";
+import type { DebridStore } from "@/lib/debrid/types";
+import { resolveStream } from "@/lib/streams/resolve";
+import type { ScoredStream } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
-import { gatherContext } from "@/lib/auto-download/context";
-import { resolveBestDownload } from "@/lib/auto-download/resolve";
 import { activeDownloadFor, enqueueDownload } from "@/lib/download/downloads-store";
+import { seasonPackFileMatchesEpisode, streamForSeasonPackEpisode } from "./season-pack";
 
 const MAX_CONCURRENT = 2;
 
@@ -31,34 +33,67 @@ export function pendingSeasonEpisodes(metaId: string, episodes: PlayEpisode[]): 
   });
 }
 
-export async function downloadSeason(meta: Meta, episodes: PlayEpisode[]): Promise<number> {
+export type SeasonDownloadResult = {
+  total: number;
+  queued: number;
+  failed: number;
+};
+
+export async function downloadSeasonFromPack({
+  meta,
+  episodes,
+  stream,
+  streamLabel,
+  debrids,
+  signal,
+}: {
+  meta: Meta;
+  episodes: PlayEpisode[];
+  stream: ScoredStream;
+  streamLabel: string | null;
+  debrids: DebridStore[];
+  signal: AbortSignal;
+}): Promise<SeasonDownloadResult> {
   const targets = pendingSeasonEpisodes(meta.id, episodes);
-  if (targets.length === 0) return 0;
-  const ctx = await gatherContext();
-  const controller = new AbortController();
+  const result: SeasonDownloadResult = { total: targets.length, queued: 0, failed: 0 };
+  if (targets.length === 0 || signal.aborted) return result;
+  const packStream = streamForSeasonPackEpisode(stream);
   const limit = limiter(MAX_CONCURRENT);
-  let queued = 0;
   await Promise.all(
     targets.map((ep) =>
       limit(async () => {
-        const hit = await resolveBestDownload(meta, ep, {
-          allowP2p: true,
-          maxHeight: null,
-          debrids: ctx.debrids,
-          addons: ctx.addons,
-          signal: controller.signal,
-        }).catch(() => null);
-        if (!hit) return;
-        await enqueueDownload({
-          meta,
-          episode: ep,
-          streamLabel: hit.label,
-          url: hit.url,
-          headers: hit.headers ?? null,
-        }).catch(() => {});
-        queued += 1;
+        if (signal.aborted) return;
+        const resolved = await resolveStream(
+          packStream,
+          debrids,
+          signal,
+          true,
+          false,
+          { season: ep.season ?? null, episode: ep.episode ?? null },
+          true,
+        ).catch(() => null);
+        if (!resolved?.ok || signal.aborted) {
+          if (!signal.aborted) result.failed += 1;
+          return;
+        }
+        if (resolved.data.filename && !seasonPackFileMatchesEpisode(resolved.data.filename, ep)) {
+          result.failed += 1;
+          return;
+        }
+        try {
+          await enqueueDownload({
+            meta,
+            episode: ep,
+            streamLabel,
+            url: resolved.data.url,
+            headers: resolved.data.headers ?? null,
+          });
+          result.queued += 1;
+        } catch {
+          result.failed += 1;
+        }
       }),
     ),
   );
-  return queued;
+  return result;
 }

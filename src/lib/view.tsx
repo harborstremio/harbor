@@ -165,6 +165,7 @@ export type Frame =
       autoPlay?: boolean;
       attempt?: number;
       intent?: "play" | "download";
+      seasonEpisodes?: PlayEpisode[];
       resume?: boolean;
     }
   | { kind: "player"; src: PlayerSrc }
@@ -260,12 +261,19 @@ type ViewValue = {
     autoPlay?: boolean;
     attempt?: number;
     intent?: "play" | "download";
+    seasonEpisodes?: PlayEpisode[];
     resume?: boolean;
   } | null;
   openPicker: (
     meta: Meta,
     episode?: PlayEpisode,
-    opts?: { autoPlay?: boolean; attempt?: number; intent?: "play" | "download"; resume?: boolean },
+    opts?: {
+      autoPlay?: boolean;
+      attempt?: number;
+      intent?: "play" | "download";
+      seasonEpisodes?: PlayEpisode[];
+      resume?: boolean;
+    },
   ) => void;
   player: PlayerSrc | null;
   openPlayer: (src: PlayerSrc) => void;
@@ -552,6 +560,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           autoPlay: top.autoPlay,
           attempt: top.attempt,
           intent: top.intent,
+          seasonEpisodes: top.seasonEpisodes,
           resume: top.resume,
         }
       : null;
@@ -1051,6 +1060,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         autoPlay?: boolean;
         attempt?: number;
         intent?: "play" | "download";
+        seasonEpisodes?: PlayEpisode[];
         resume?: boolean;
       },
     ) => {
@@ -1069,7 +1079,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           t.kind === "picker" &&
           t.meta.id === m.id &&
           (t.attempt ?? 0) === (opts?.attempt ?? 0) &&
-          (t.intent ?? "play") === (opts?.intent ?? "play")
+          (t.intent ?? "play") === (opts?.intent ?? "play") &&
+          Boolean(t.seasonEpisodes?.length) === Boolean(opts?.seasonEpisodes?.length)
         ) {
           return cur;
         }
@@ -1080,6 +1091,7 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           autoPlay: opts?.autoPlay,
           attempt: opts?.attempt,
           intent: opts?.intent,
+          seasonEpisodes: opts?.seasonEpisodes,
           resume: opts?.resume,
         });
       });
