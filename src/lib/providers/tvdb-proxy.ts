@@ -1,8 +1,9 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { kitsuToTvdb } from "./anime-mapping";
+import { HARBOR_TVDB_BASE } from "@/lib/config/endpoints";
 
-const PROXY = "https://harbor.site/api/tvdb/images";
-const ART_PROXY = "https://harbor.site/api/tvdb/artwork";
+const PROXY = `${HARBOR_TVDB_BASE}/api/tvdb/images`;
+const ART_PROXY = `${HARBOR_TVDB_BASE}/api/tvdb/artwork`;
 
 export type TvdbImageMap = Record<string, string>;
 
@@ -11,10 +12,13 @@ export type TvdbArtwork = { backgrounds: string[]; clearLogos: string[]; posters
 export async function fetchTvdbArtwork(opts: {
   imdb?: string | null;
   kitsuId?: number | null;
+  series?: number | null;
 }): Promise<TvdbArtwork> {
   const empty: TvdbArtwork = { backgrounds: [], clearLogos: [], posters: [] };
-  let series: number | null = null;
-  if (opts.kitsuId != null) series = await kitsuToTvdb(opts.kitsuId).catch(() => null);
+  let series: number | null = opts.series ?? null;
+  if (series == null && opts.kitsuId != null) {
+    series = await kitsuToTvdb(opts.kitsuId).catch(() => null);
+  }
   const q = new URLSearchParams();
   if (series) q.set("series", String(series));
   else if (opts.imdb && opts.imdb.startsWith("tt")) q.set("imdb", opts.imdb);
@@ -40,7 +44,8 @@ export async function fetchTvdbProxyImages(opts: {
   type?: string;
 }): Promise<TvdbImageMap> {
   let series: number | null = opts.series ?? null;
-  if (series == null && opts.kitsuId != null) series = await kitsuToTvdb(opts.kitsuId).catch(() => null);
+  if (series == null && opts.kitsuId != null)
+    series = await kitsuToTvdb(opts.kitsuId).catch(() => null);
   const q = new URLSearchParams();
   if (series) q.set("series", String(series));
   else if (opts.imdb && opts.imdb.startsWith("tt")) q.set("imdb", opts.imdb);

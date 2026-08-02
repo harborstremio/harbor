@@ -48,13 +48,15 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev \
             libasound2-dev \
+            libudev-dev \
             libmpv-dev \
             libgtk-3-dev \
             gstreamer1.0-plugins-base \
             gstreamer1.0-plugins-good \
             gstreamer1.0-plugins-bad \
             gstreamer1.0-libav \
-            patchelf
+            patchelf \
+            xdg-utils
 
       - name: Install Mac deps
         if: contains(matrix.platform.runner, 'macos')
@@ -74,12 +76,10 @@ jobs:
             src-tauri
 
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: pnpm
 
       - name: Install JS deps
@@ -104,27 +104,27 @@ jobs:
           
           echo "Downloading yt-dlp..."
           if [[ "$TARGET" == *"windows"* ]]; then
-            curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"
+            curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"
           elif [[ "$TARGET" == *"apple"* ]]; then
-            curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos" -o "yt-dlp-${TARGET}${EXT}"
+            curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos" -o "yt-dlp-${TARGET}${EXT}"
           else
-            curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "yt-dlp-${TARGET}${EXT}"
+            curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "yt-dlp-${TARGET}${EXT}"
           fi
           chmod +x "yt-dlp-${TARGET}${EXT}" || true
 
           echo "Fetching ffmpeg and ffprobe..."
           if [[ "$TARGET" == *"windows"* ]]; then
-            curl -L "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -o ffmpeg.zip
+            curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -o ffmpeg.zip
             unzip -j ffmpeg.zip "*/bin/ffmpeg.exe" "*/bin/ffprobe.exe"
             mv ffmpeg.exe "ffmpeg-${TARGET}${EXT}"
             mv ffprobe.exe "ffprobe-${TARGET}${EXT}"
           elif [[ "$TARGET" == *"apple"* ]]; then
             if [[ "$TARGET" == *"aarch64"* ]]; then
-              curl -L "https://www.osxexperts.net/ffmpeg6arm.zip" -o ffmpeg.zip
-              curl -L "https://www.osxexperts.net/ffprobe6arm.zip" -o ffprobe.zip
+              curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://www.osxexperts.net/ffmpeg6arm.zip" -o ffmpeg.zip
+              curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://www.osxexperts.net/ffprobe6arm.zip" -o ffprobe.zip
             else
-              curl -L "https://www.osxexperts.net/ffmpeg6intel.zip" -o ffmpeg.zip
-              curl -L "https://www.osxexperts.net/ffprobe6intel.zip" -o ffprobe.zip
+              curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://www.osxexperts.net/ffmpeg6intel.zip" -o ffmpeg.zip
+              curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://www.osxexperts.net/ffprobe6intel.zip" -o ffprobe.zip
             fi
             unzip ffmpeg.zip
             unzip ffprobe.zip
@@ -133,11 +133,11 @@ jobs:
             chmod +x "ffmpeg-${TARGET}${EXT}" "ffprobe-${TARGET}${EXT}" || true
           else
             if [[ "$TARGET" == *"aarch64"* ]]; then
-              curl -L "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.tar.xz" -o ffmpeg.tar.xz
+              curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz" -o ffmpeg.tar.xz
             else
-              curl -L "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz" -o ffmpeg.tar.xz
+              curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz" -o ffmpeg.tar.xz
             fi
-            tar -xf ffmpeg.tar.xz --strip-components=1 --wildcards '*/ffmpeg' '*/ffprobe'
+            tar -xf ffmpeg.tar.xz --strip-components=2 --wildcards '*/bin/ffmpeg' '*/bin/ffprobe'
             mv ffmpeg "ffmpeg-${TARGET}${EXT}"
             mv ffprobe "ffprobe-${TARGET}${EXT}"
           fi

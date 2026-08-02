@@ -3,6 +3,7 @@ import { ArrowUpRight, Check, Loader2, Plus, Star, TrendingUp } from "lucide-rea
 import { addonSiteUrl, isAdultAddon, listAddons, listRising, type SAAddon } from "@/lib/providers/stremio-addons";
 import { useSettings } from "@/lib/settings";
 import { fetchManifestAt, installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
+import { rememberPendingAddon } from "@/lib/addons-store/pending-detail";
 import { openInstallerViewport } from "@/components/installer-viewport";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
@@ -179,7 +180,12 @@ function SpotlightCard({
           )}
           <button
             type="button"
-            onClick={() => (m?.id && onOpen ? onOpen(m.id) : openUrl(addonSiteUrl(addon.slug)))}
+            onClick={() => {
+              if (m?.id && onOpen) {
+                rememberPendingAddon(m.id, addon.manifestUrl, addon.manifest);
+                onOpen(m.id);
+              } else openUrl(addonSiteUrl(addon.slug));
+            }}
             className="flex h-11 items-center gap-2 rounded-full bg-white/12 px-5 text-[13.5px] font-semibold text-white ring-1 ring-white/15 backdrop-blur-md transition-colors hover:bg-white/20"
           >
             {t("Details")}

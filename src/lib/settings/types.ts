@@ -3,6 +3,7 @@ import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import type { SyncIndicatorPosition } from "@/lib/sync-toast-position";
+import type { FullscreenClockFormat, FullscreenClockStyle } from "@/lib/local-time";
 
 export type StreamingService =
   | "netflix"
@@ -124,6 +125,8 @@ export type Settings = {
   defaultLiquidGlassTint: number;
   experimentalLiquidGlassEnabled: boolean;
   experimentalLiquidGlassOpacity: number;
+  posterBackdropExpansion: boolean;
+  posterFocusedCard: boolean;
   posterDockMagnification: boolean;
   posterDockTransitionMs: number;
   top10Ribbon: boolean;
@@ -177,7 +180,15 @@ export type Settings = {
   hdEpisodeImages: boolean;
   episodeArcGroups: boolean;
   episodeOrderProvider: "default" | "tmdb" | "tvdb";
-  tvdbSeasonType: "aired" | "official" | "dvd" | "absolute" | "tvdbabsolute" | "alternate" | "regional" | "tmdb";
+  tvdbSeasonType:
+    | "aired"
+    | "official"
+    | "dvd"
+    | "absolute"
+    | "tvdbabsolute"
+    | "alternate"
+    | "regional"
+    | "tmdb";
   tvdbOrderPanel: boolean;
   tvdbPin: string;
   harborAvatar: string | null;
@@ -275,7 +286,14 @@ export type Settings = {
   subBoxColor: string;
   subOpacity: number;
   subLineSpacing: number;
-  subProvidersEnabled: { wyzie: boolean; opensubtitles: boolean; jimaku: boolean; addons: boolean; subdl?: boolean; subsource?: boolean };
+  subProvidersEnabled: {
+    wyzie: boolean;
+    opensubtitles: boolean;
+    jimaku: boolean;
+    addons: boolean;
+    subdl?: boolean;
+    subsource?: boolean;
+  };
   subShowInPip: boolean;
   secondarySubLang: string;
   subSecondaryPlacement: "top" | "bottom";
@@ -315,7 +333,15 @@ export type Settings = {
   hidePosterTitles: boolean;
   hoverPreviewEnabled: boolean;
   hoverPreviewPlacement: "over" | "side";
-  cardHoverStyle: "none" | "default" | "marquee" | "elegant" | "frosted" | "cinema" | "spotlight" | "custom";
+  cardHoverStyle:
+    | "none"
+    | "default"
+    | "marquee"
+    | "elegant"
+    | "frosted"
+    | "cinema"
+    | "spotlight"
+    | "custom";
   rowCardStyle: "poster" | "tv";
   tvCardLogoPos: "center" | "bottomStart" | "bottomEnd";
   scrollUpTrailer: boolean;
@@ -369,6 +395,8 @@ export type Settings = {
   hideWatchedInCatalogs: boolean;
   hideUnreleased: boolean;
   localEpisodeSortDesc: boolean;
+  smoothScroll: boolean;
+  showSimklCard: boolean;
   showPlaylistsTab: boolean;
   skipProfileScreen: boolean;
   profilePromptInterval: "launch" | "15m" | "30m" | "never";
@@ -400,6 +428,12 @@ export type Settings = {
   cwAdvanceNext: boolean;
   cwHideCaughtUp: boolean;
   useNativeTitleBar: boolean;
+  fullscreenClockEnabled: boolean;
+  fullscreenClockFormat: FullscreenClockFormat;
+  fullscreenClockStyle: FullscreenClockStyle;
+  fullscreenClockShowSeconds: boolean;
+  fullscreenClockShowEndTime: boolean;
+  fullscreenClockSizePx: number;
   hybridTitleBar: boolean;
   topbarScrollBlur: boolean;
   transparentTopBar: boolean;
@@ -429,6 +463,11 @@ export type Settings = {
     hidden: string[];
     renamed: Record<string, string>;
   };
+  navCustomizationOwn: {
+    order: string[];
+    hidden: string[];
+    renamed: Record<string, string>;
+  } | null;
   animeRows: {
     order: string[];
     hidden: string[];
@@ -534,6 +573,7 @@ export type Settings = {
   iptvEpgOffsetHours: number;
   sidebarCollapsed: boolean;
   wrappedButton: boolean;
+  libraryHero: boolean;
   mangaEnabled: boolean;
   feedLocaleBias: boolean;
   uiLanguage: "en" | "ar" | "pt" | "ru";

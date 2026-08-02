@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import { tmdbDiscover } from "@/lib/providers/tmdb";
 import { rpdbPoster } from "@/lib/providers/rpdb";
 import { useSettings } from "@/lib/settings";
+import { claimUniqueArt, releaseUniqueArt } from "@/lib/unique-art";
 import { useView } from "@/lib/view";
 import { Row } from "./row";
 import { Poster } from "./poster";
@@ -53,6 +54,7 @@ function LanguageTile({ lang }: { lang: Lang }) {
 
   useEffect(() => {
     let cancelled = false;
+    const key = `lang:${lang.iso}`;
     tmdbDiscover(settings.tmdbKey, "tv", {
       with_original_language: lang.iso,
       sort_by: "popularity.desc",
@@ -60,11 +62,13 @@ function LanguageTile({ lang }: { lang: Lang }) {
     })
       .then((list) => {
         if (cancelled) return;
-        setBackdrops(list.filter((m) => m.background).slice(0, 3));
+        const pool = list.filter((m) => m.background);
+        setBackdrops(claimUniqueArt(key, pool, (m) => m.id, 3));
       })
       .catch(() => {});
     return () => {
       cancelled = true;
+      releaseUniqueArt(key);
     };
   }, [lang.iso, settings.tmdbKey]);
 
@@ -131,7 +135,7 @@ function Collage({ backdrops, rpdbKey }: { backdrops: Meta[]; rpdbKey: string })
             src={rpdbPoster(rpdbKey, m.id, m.background ?? m.poster)}
             seed={m.id}
             ratio="landscape"
-            className="absolute inset-0 rounded-none [transform:skewX(8deg)_scale(1.4)]"
+            className="h-full rounded-none [transform:skewX(8deg)_scale(1.4)]"
           />
         </div>
       ))}

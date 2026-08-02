@@ -1,12 +1,43 @@
 import { useMemo } from "react";
 import { openUrl } from "@/lib/window";
+import { useT } from "@/lib/i18n";
+import { segmentMentions } from "@/lib/social/mentions";
+import { MentionLink } from "@/views/profile/mention-link";
+import { segmentProfanity } from "@/views/profile/text-safety";
 import { parseComment, type CNode } from "./bbcode";
+
+function TextRun({ v }: { v: string }) {
+  const t = useT();
+  return (
+    <>
+      {segmentMentions(v).map((seg, i) =>
+        seg.handle ? (
+          <MentionLink key={i} handle={seg.handle} label={seg.text} />
+        ) : (
+          segmentProfanity(seg.text).map((s, j) =>
+            s.masked ? (
+              <span
+                key={`${i}.${j}`}
+                title={t("Hidden language")}
+                className="cursor-default rounded-[4px] bg-elevated px-1 blur-[5px] transition-[filter] duration-150 hover:blur-0"
+              >
+                {s.text}
+              </span>
+            ) : (
+              <span key={`${i}.${j}`}>{s.text}</span>
+            ),
+          )
+        ),
+      )}
+    </>
+  );
+}
 
 function render(nodes: CNode[]): React.ReactNode {
   return nodes.map((n, i) => {
     switch (n.t) {
       case "text":
-        return <span key={i}>{n.v}</span>;
+        return <TextRun key={i} v={n.v} />;
       case "br":
         return <br key={i} />;
       case "b":

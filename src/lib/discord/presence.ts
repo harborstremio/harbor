@@ -1,6 +1,8 @@
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
-const HARBOR_LOGO = "https://harbor.site/discord/harbordiscord.png";
+const HARBOR_LOGO = `${HARBOR_API_BASE}/discord/harbordiscord.png`;
 
 type DiscordConfig = {
   enabled: boolean;
@@ -94,7 +96,8 @@ function computeBase(): Base {
         posterUrl: (config.showPoster && playback.posterUrl) || HARBOR_LOGO,
         smallImageUrl: (config.showPoster && playback.smallImageUrl) || undefined,
         largeText: playback.year != null ? `${playback.title} (${playback.year})` : playback.title,
-        startTs: live && config.showTimestamp ? nowSec - Math.floor(playback.positionSec) : undefined,
+        startTs:
+          live && config.showTimestamp ? nowSec - Math.floor(playback.positionSec) : undefined,
         endTs: live && config.showTimestamp ? nowSec + Math.floor(remaining) : undefined,
         paused: playback.paused,
       },
@@ -103,7 +106,10 @@ function computeBase(): Base {
   }
   if (browse && config.showWhenBrowsing) {
     if (config.hideTitle)
-      return { payload: { details: "Browsing Harbor", posterUrl: HARBOR_LOGO }, key: "browse:hide" };
+      return {
+        payload: { details: "Browsing Harbor", posterUrl: HARBOR_LOGO },
+        key: "browse:hide",
+      };
     return {
       payload: {
         details: browse.details ?? "Browsing Harbor",

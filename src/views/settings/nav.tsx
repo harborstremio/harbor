@@ -288,6 +288,14 @@ function IconBug(p: IconProps) {
   );
 }
 
+function IconSupport(p: IconProps) {
+  return (
+    <IconBase {...p}>
+      <path d="M12 20.5s-7.5-4.3-7.5-9.4A4.1 4.1 0 0 1 12 8.4a4.1 4.1 0 0 1 7.5 2.7c0 5.1-7.5 9.4-7.5 9.4z" />
+    </IconBase>
+  );
+}
+
 function IconTheme(p: IconProps) {
   return (
     <IconBase {...p}>
@@ -642,6 +650,7 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
     heading: "Help",
     items: [
       { id: "bug", label: "Report a bug", Icon: IconBug, keywords: ["report", "feedback", "issue", "crash"] },
+      { id: "support", label: "Support Harbor", Icon: IconSupport, keywords: ["donate", "donation", "support", "elfhosted", "sponsor", "charity", "give", "contribute", "money", "pay"] },
     ],
   },
   {
@@ -764,6 +773,7 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   { label: "Theme Studio / your themes", section: "theme", anchorTitle: "Your themes", keywords: ["theme studio", "custom theme", "editor", "browse theme library", "import theme", "your themes", "card css"] },
   { label: "Window title bar", section: "theme", anchorTitle: "Window title bar", keywords: ["window title bar", "native title bar", "system title bar", "decorations"] },
   { label: "Moving the window", section: "theme", anchorTitle: "Moving the window", keywords: ["move window", "drag window", "window drag", "drag from anywhere", "grab window", "reposition window", "click and drag"] },
+  { label: "Fullscreen clock", section: "theme", anchorTitle: "Fullscreen clock", keywords: ["fullscreen clock", "local time", "player clock", "clock format", "clock style"] },
   { label: "Home hero shadow", section: "theme", anchorTitle: "Home hero shadow", keywords: ["hero shadow", "home hero", "hero gradient", "featured title", "darken hero", "backdrop shadow", "gradient overlay", "show artwork"] },
 
   { label: "Updates & rollback", section: "advanced", anchorTitle: "Updates", keywords: ["updates", "version", "check for updates", "beta updates", "roll back", "rollback", "downgrade", "previous version", "build feedback"] },
@@ -1174,6 +1184,11 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
   { label: "Dot image", section: "playerLayout", anchorTitle: "Seek bar", keywords: ["nyan cat", "sticker dot", "custom knob", "gif dot", "png sticker", "animated dot"] },
   { label: "Use the native window title bar", section: "theme", anchorTitle: "Window title bar", keywords: ["os titlebar", "minimize maximize close", "native window controls", "system title bar", "window buttons reachable"] },
   { label: "Drag the window from anywhere", section: "theme", anchorTitle: "Moving the window", keywords: ["drag anywhere", "move window", "grab empty space", "full app drag", "window dragging", "move from content", "drag body"] },
+  { label: "Show fullscreen clock", section: "theme", anchorTitle: "Fullscreen clock", keywords: ["local time", "player clock", "fullscreen time", "show clock", "hide clock"] },
+  { label: "Clock format", section: "theme", anchorTitle: "Fullscreen clock", keywords: ["12 hour", "24 hour", "am pm", "system time", "seconds"] },
+  { label: "Clock size", section: "theme", anchorTitle: "Fullscreen clock", keywords: ["clock pixels", "larger clock", "smaller clock", "resize time", "font size"] },
+  { label: "Show estimated finish time", section: "theme", anchorTitle: "Fullscreen clock", keywords: ["ends at", "finish time", "movie end", "episode end", "estimated end"] },
+  { label: "Clock style", section: "theme", anchorTitle: "Fullscreen clock", keywords: ["glass", "minimal", "solid", "accent", "clock design"] },
   { label: "Where alerts go", section: "webhooks", anchorTitle: "Where alerts go", keywords: ["discord telegram", "notifications destination", "alerts channel", "webhook setup"] },
   { label: "Discord webhook URL", section: "webhooks", anchorTitle: "Where alerts go", keywords: ["discord webhook", "discord alerts", "channel ping", "webhook url", "send test", "discord notifications"] },
   { label: "Telegram bot", section: "webhooks", anchorTitle: "Where alerts go", keywords: ["telegram alerts", "telegram webhook", "botfather", "send test", "telegram notifications"] },
@@ -1475,6 +1490,7 @@ export function SettingsNav({
     webhooks: webhookActive ? "live" : null,
     hotkeys: null,
     bug: null,
+    support: null,
     remotes: settings.serveWebUi || settings.remoteControlEnabled ? "live" : null,
     storage: null,
     advanced: null,

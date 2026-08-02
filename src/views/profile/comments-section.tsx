@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { CommentCompose } from "./comment-compose";
 import { CommentItem } from "./comment-item";
+import type { Comment } from "./profile-types";
 import { useComments } from "./use-comments";
 
 const COMMENTS_PAGE = 5;
@@ -27,15 +28,28 @@ export function CommentsSection({
     setShown(COMMENTS_PAGE);
   }, [handle]);
 
-  const visible = comments.slice(0, shown);
-  const hiddenLocal = Math.max(0, comments.length - shown);
+  const ids = new Set(comments.map((c) => c.id));
+  const roots = comments.filter((c) => !c.parentId || !ids.has(c.parentId));
+  const repliesByParent = new Map<string, Comment[]>();
+  for (const c of comments) {
+    if (!c.parentId || !ids.has(c.parentId)) continue;
+    const list = repliesByParent.get(c.parentId) ?? [];
+    list.push(c);
+    repliesByParent.set(c.parentId, list);
+  }
+  for (const list of repliesByParent.values()) {
+    list.sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0));
+  }
+
+  const visible = roots.slice(0, shown);
+  const hiddenLocal = Math.max(0, roots.length - shown);
   const canShowMore = hiddenLocal > 0 || hasMore;
   const nextCount = hiddenLocal > 0 ? Math.min(hiddenLocal, COMMENTS_STEP) : COMMENTS_STEP;
 
   const showMore = () => {
     const next = shown + COMMENTS_STEP;
     setShown(next);
-    if (next >= comments.length && hasMore) loadMore();
+    if (next >= roots.length && hasMore) loadMore();
   };
   return (
     <section aria-label={t("Comments")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
@@ -78,10 +92,14 @@ export function CommentsSection({
             <CommentItem
               key={c.id}
               c={c}
+              replyToId={c.id}
+              replies={repliesByParent.get(c.id)}
               canDelete={isOwner}
               signedIn={signedIn}
               onDelete={remove}
               onToggleLike={toggleLike}
+              onReply={submit}
+              sending={sending}
               onOpenAuthor={onOpenAuthor}
             />
           ))}

@@ -5,6 +5,7 @@ import { RemotesPanel } from "./settings/remotes-panel";
 import { StoragePanel } from "./settings/storage-panel";
 import { BasicsPanel } from "./settings/basics-panel";
 import { BugReportPanel } from "./settings/bug-report-panel";
+import { SupportPanel } from "./settings/support-panel";
 import { LibraryPanel, type LibraryKey } from "./settings/library-panel";
 import { LanguagePanel } from "./settings/language-panel";
 import { SubSourcesPanel } from "./settings/sub-sources-panel";
@@ -151,6 +152,10 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   bug: {
     label: "Report a bug",
     sub: "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.",
+  },
+  support: {
+    label: "Support Harbor",
+    sub: "Who keeps the lights on, what Harbor is built on, and where to put money if you want to.",
   },
   remotes: {
     label: "Remotes",
@@ -387,6 +392,7 @@ export function Settings() {
           {active === "webhooks" && <WebhooksPanel />}
 
           {active === "bug" && <BugReportPanel />}
+          {active === "support" && <SupportPanel />}
 
           {active === "remotes" && <RemotesPanel />}
 

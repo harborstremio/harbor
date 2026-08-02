@@ -5,6 +5,8 @@ import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import type { PlayEpisode } from "@/lib/view";
 
+const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
 export function PickerNav({
   onBack,
   onRefresh,
@@ -16,11 +18,13 @@ export function PickerNav({
 }) {
   const t = useT();
   const { settings } = useSettings();
+  const controlsInBar = IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar;
+  const groupLeft = controlsInBar || settings.pickerRefreshNextToBack;
   return (
     <div className="-mb-9">
       <div
         className={`flex items-center gap-3 ${
-          settings.pickerRefreshNextToBack ? "justify-start" : "justify-between"
+          groupLeft ? "justify-start" : "justify-between"
         }`}
       >
         <button

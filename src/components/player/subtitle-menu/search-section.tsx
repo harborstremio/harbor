@@ -15,6 +15,7 @@ import {
 } from "@/lib/subtitles/title-search";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { useSubtitleContext } from "./subtitle-context-store";
 import type { SubtitleMenuProps } from "./types";
 import { isVeryNewRelease } from "./utils";
 import { FilterChip, LangGroup } from "./search-results";
@@ -33,11 +34,21 @@ function labelOf(t: TitleTarget): string {
   return t.year ? `${t.title} (${t.year})` : t.title;
 }
 
+function isPlayingTarget(a: TitleTarget, b: TitleTarget): boolean {
+  return (
+    a.imdbId === b.imdbId &&
+    a.title === b.title &&
+    a.season === b.season &&
+    a.episode === b.episode
+  );
+}
+
 export function SearchSection(props: SubtitleMenuProps) {
   const t = useT();
   const { metaImdbId, metaTitle, season, episode, onAddSubtitle } = props;
   const { settings } = useSettings();
   const { authKey } = useAuth();
+  const playbackContext = useSubtitleContext();
 
   const playingTarget = useMemo<TitleTarget>(
     () => ({
@@ -97,6 +108,7 @@ export function SearchSection(props: SubtitleMenuProps) {
     try {
       const enabled = settings.subProvidersEnabled ?? {};
       const titleOnly = !tgt.imdbId && !!tgt.title;
+      const playing = isPlayingTarget(tgt, playingTarget) ? playbackContext : null;
       const searchQuery = {
         imdbId: tgt.imdbId || undefined,
         title: tgt.imdbId ? undefined : tgt.title || undefined,
@@ -104,6 +116,8 @@ export function SearchSection(props: SubtitleMenuProps) {
         season: tgt.season ?? undefined,
         episode: tgt.episode ?? undefined,
         langs: settings.preferredSubLangs ?? [],
+        candidateIds: playing?.candidateIds,
+        stremioId: playing?.stremioId ?? undefined,
       };
       const searchOpts: SearchOptions = {
         providers: {

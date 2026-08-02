@@ -30,6 +30,7 @@ import { useCwAdvance } from "./home/hooks/use-cw-advance";
 import { useScrollMemory, useView } from "@/lib/view";
 import { buildShowHero, bucketCopy } from "./shows/hero-curation";
 import { showSpecs } from "./shows/show-specs";
+import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
 
 const HERO_POOL_TARGET = 12;
 const MAX_PER_ROW = 30;
@@ -251,6 +252,30 @@ export function Shows({ active = true }: { active?: boolean }) {
       .filter((r) => r.metas.length >= 4);
   }, [rows, hero, top10.length]);
 
+  const showCollections = useCollectionRowsForPage("shows");
+  const collectionRows = useMemo<ShowRow[]>(
+    () =>
+      showCollections
+        .filter((c) => c.items.length > 0)
+        .map((c) => ({
+          key: `collection-${c.id}`,
+          title: c.name,
+          metas: c.items.map((it) => ({
+            id: it.id,
+            type: it.type,
+            name: it.name,
+            poster: it.poster,
+          })),
+          page: 1,
+          hasMore: false,
+        })),
+    [showCollections],
+  );
+  const allRestRows = useMemo(
+    () => [...collectionRows, ...restRows],
+    [collectionRows, restRows],
+  );
+
   return (
     <main ref={scrollCb} className="relative h-full overflow-y-auto overflow-x-hidden bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
@@ -309,7 +334,7 @@ export function Shows({ active = true }: { active?: boolean }) {
             </Row>
           )}
           <CatalogRows
-            rows={restRows}
+            rows={allRestRows}
             editMode={pageRows.editMode}
             custom={pageRows.custom}
             onPersist={pageRows.persist}

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
@@ -27,6 +28,17 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __IS_BETA_BUILD__: JSON.stringify(process.env.HARBOR_CHANNEL !== "stable"),
+    __BUILD_ID__: JSON.stringify(
+      process.env.HARBOR_BUILD_ID ||
+        (() => {
+          try {
+            return execSync("git rev-parse --short HEAD").toString().trim();
+          } catch {
+            return "local";
+          }
+        })(),
+    ),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
   },
   server: {
     host: "127.0.0.1",

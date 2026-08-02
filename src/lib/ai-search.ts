@@ -1,8 +1,9 @@
 import { searchCinemeta } from "./search";
 import { DEFAULT_AI_MODEL, migrateModelId } from "./ai-models";
 import type { Meta } from "./cinemeta";
-
+
 import { releaseText } from "@/lib/release-info";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MAX_SUGGESTIONS = 12;
@@ -24,7 +25,7 @@ export type AiResult = {
 };
 
 const SYSTEM_PROMPT =
-  "You are a film and TV discovery engine for a media app. The user describes what they want to watch in natural language. Reply with ONLY a JSON array (no prose, no markdown code fences) of up to 12 specific, real movies or TV shows that best match, most relevant first. Each element is an object: {\"title\": string, \"year\": number, \"type\": \"movie\" or \"series\"}. If the user is clearly asking about a SPECIFIC EPISODE (by plot, scene, character, quote, or meme, for example 'the south park episode with kanye west'), return that show as the first result and add its \"season\" and \"episode\" numbers plus \"episodeTitle\", like {\"title\": \"South Park\", \"type\": \"series\", \"season\": 13, \"episode\": 5, \"episodeTitle\": \"Fishsticks\"}. Use your own knowledge of the show to pick the exact episode. Use the original or most internationally recognized title. Never repeat a title. When live web context is provided below, treat it as authoritative ground truth for fact-grounded queries (people's filmographies, box office, recency, regional titles, memes, current seasons/episodes): use it as your primary source and cite the exact title/year it mentions rather than guessing from training data.";
+  'You are a film and TV discovery engine for a media app. The user describes what they want to watch in natural language. Reply with ONLY a JSON array (no prose, no markdown code fences) of up to 12 specific, real movies or TV shows that best match, most relevant first. Each element is an object: {"title": string, "year": number, "type": "movie" or "series"}. If the user is clearly asking about a SPECIFIC EPISODE (by plot, scene, character, quote, or meme, for example \'the south park episode with kanye west\'), return that show as the first result and add its "season" and "episode" numbers plus "episodeTitle", like {"title": "South Park", "type": "series", "season": 13, "episode": 5, "episodeTitle": "Fishsticks"}. Use your own knowledge of the show to pick the exact episode. Use the original or most internationally recognized title. Never repeat a title. When live web context is provided below, treat it as authoritative ground truth for fact-grounded queries (people\'s filmographies, box office, recency, regional titles, memes, current seasons/episodes): use it as your primary source and cite the exact title/year it mentions rather than guessing from training data.';
 
 export async function aiSuggest(
   key: string,
@@ -41,7 +42,7 @@ export async function aiSuggest(
     "Content-Type": "application/json",
   };
   if (!isGroq) {
-    headers["HTTP-Referer"] = "https://harbor.site";
+    headers["HTTP-Referer"] = HARBOR_API_BASE;
     headers["X-Title"] = "Harbor";
   }
   const systemPrompt = webContext?.trim()
@@ -151,9 +152,13 @@ function parseSuggestions(content: string): AiSuggestion[] {
     const season =
       typeof o.season === "number" && Number.isFinite(o.season) ? Math.round(o.season) : undefined;
     const episode =
-      typeof o.episode === "number" && Number.isFinite(o.episode) ? Math.round(o.episode) : undefined;
+      typeof o.episode === "number" && Number.isFinite(o.episode)
+        ? Math.round(o.episode)
+        : undefined;
     const episodeTitle =
-      typeof o.episodeTitle === "string" && o.episodeTitle.trim() ? o.episodeTitle.trim() : undefined;
+      typeof o.episodeTitle === "string" && o.episodeTitle.trim()
+        ? o.episodeTitle.trim()
+        : undefined;
     out.push({ title, year, type, season, episode, episodeTitle });
     if (out.length >= MAX_SUGGESTIONS) break;
   }
@@ -178,8 +183,7 @@ function pickBest(pool: Meta[], suggestion: AiSuggestion): Meta | null {
     if (nameScore === 0) continue;
     let score = nameScore;
     if (suggestion.type && m.type === suggestion.type) score += 1;
-    if (suggestion.year && releaseText(m.releaseInfo).includes(String(suggestion.year)))
-      score += 1;
+    if (suggestion.year && releaseText(m.releaseInfo).includes(String(suggestion.year))) score += 1;
     if (score > bestScore) {
       bestScore = score;
       best = m;

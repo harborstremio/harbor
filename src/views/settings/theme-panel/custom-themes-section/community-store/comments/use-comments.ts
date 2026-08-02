@@ -20,8 +20,8 @@ export function useComments(themeId: string) {
   }, [themeId]);
 
   const add = useCallback(
-    async (body: string) => {
-      const c = await postComment(themeId, body);
+    async (body: string, parentId?: string) => {
+      const c = await postComment(themeId, body, parentId);
       setComments((prev) => [c, ...prev.filter((x) => x.id !== c.id)]);
     },
     [themeId],

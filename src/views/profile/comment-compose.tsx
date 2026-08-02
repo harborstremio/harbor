@@ -13,6 +13,8 @@ const ISSUE_TEXT: Record<Exclude<ComposeIssue, null>, string> = {
   spam: "That looks like spam, try rephrasing",
   "too-long": `Keep it under ${COMMENT_MAX} characters`,
   cooldown: "Slow down a moment before posting again",
+  failed: "Couldn't post right now, try again",
+  signin: "Sign in to comment",
 };
 
 export function CommentCompose({

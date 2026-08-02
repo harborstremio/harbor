@@ -21,6 +21,7 @@ export function StremioLayout({
   matchFor,
   onPlay,
   download = false,
+  downloadStateFor,
   isAnime = false,
 }: {
   streams: ScoredStream[];
@@ -32,6 +33,7 @@ export function StremioLayout({
   matchFor?: (s: ScoredStream) => "same" | "close" | null;
   onPlay: (stream: ScoredStream) => void;
   download?: boolean;
+  downloadStateFor?: (stream: ScoredStream) => "idle" | "preparing" | "queued";
   isAnime?: boolean;
 }) {
   const [filter, setFilter] = useState<string>("all");
@@ -197,6 +199,7 @@ export function StremioLayout({
             match={matchFor ? matchFor(s) : null}
             onPlay={() => onPlay(s)}
             download={download}
+            downloadState={downloadStateFor?.(s)}
             isAnime={isAnime}
           />
         ))}

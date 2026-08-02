@@ -710,6 +710,123 @@ main[data-kids="on"]::-webkit-scrollbar-thumb:hover {
   animation: harbor-gear-spin 1.6s var(--ease-out) both;
 }
 
+.download-pause-resume-icon {
+  display: inline-grid;
+  place-items: center;
+}
+
+.download-pause-resume-glyph {
+  grid-area: 1 / 1;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+
+.download-pause-resume-icon[data-state="downloading"] [data-icon="pause"],
+.download-pause-resume-icon[data-state="paused"] [data-icon="resume"] {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.download-pause-resume-icon[data-state="downloading"] [data-icon="resume"] {
+  opacity: 0;
+  transform: scale(0.62) rotate(-18deg);
+}
+
+.download-pause-resume-icon[data-state="paused"] [data-icon="pause"] {
+  opacity: 0;
+  transform: scale(0.62) rotate(18deg);
+}
+
+.download-cancel-icon {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 140ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .download-cancel-trigger:hover .download-cancel-icon {
+    transform: rotate(8deg);
+  }
+}
+
+.download-cancel-trigger:active .download-cancel-icon {
+  transform: rotate(90deg) scale(0.78);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-pause-resume-glyph,
+  .download-cancel-icon {
+    transition: none;
+  }
+}
+
+.source-download-morph-icon {
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+
+.source-download-morph-icon-check {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .source-download-button:hover .source-download-morph-icon-default {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  .source-download-button:hover .source-download-morph-icon-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes harbor-source-download-trail {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.source-download-trailing-dot {
+  animation: harbor-source-download-trail 1.5s var(--ease-in-out) infinite;
+  transform-origin: center;
+}
+
+@keyframes harbor-download-delete-shake {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-2px) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(0) rotate(10deg);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-10deg);
+  }
+}
+
+.download-delete-icon {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .download-delete-trigger:hover .download-delete-icon {
+    animation: harbor-download-delete-shake 400ms var(--ease-out);
+  }
+}
+
 .harbor-key {
   display: inline-flex;
   transform-origin: 31% 65%;
@@ -1121,6 +1238,82 @@ button.group:not([data-no-card-ring]):hover .harbor-card-ring::after {
 html[data-theme-card="stremio"] button.group:not([data-no-card-ring]):hover > .relative {
   transform: none;
 }
+
+.harbor-expanding-card-scope [data-expanding-card] {
+  isolation: isolate;
+}
+
+.harbor-expanding-card-scope [data-poster-card-cell] > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.harbor-expanding-card-scope .expanding-card-poster-frame {
+  height: var(--row-poster-height);
+}
+
+.harbor-expanding-card-scope .expanding-card-poster-frame > .harbor-poster {
+  height: 100%;
+}
+
+.harbor-expanding-card-scope
+  .expanding-card-poster-frame
+  > .harbor-poster
+  > div[aria-hidden]:first-child {
+  display: none;
+}
+
+.expanding-card-artwork {
+  opacity: 0;
+  transform: scale(1.025);
+  transition:
+    opacity 0ms linear 480ms,
+    transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-expanding-card][data-row-card-expanded="true"] .expanding-card-artwork {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 0ms;
+}
+
+html:not([data-input-modality="pointer"])
+  [data-focused-card]:is(:focus-visible, [data-tv-focused="true"])
+  .harbor-poster {
+  box-shadow:
+    0 24px 48px -14px rgb(0 0 0 / 0.65),
+    inset 0 0 0 2px var(--color-accent),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+html:not([data-input-modality="pointer"]) #root [data-media-card] {
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease;
+}
+
+html:not([data-input-modality="pointer"])
+  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
+  [data-media-card]:not([data-focused-card]:is(:focus, [data-tv-focused="true"])) {
+  opacity: 0.34;
+  filter: brightness(0.68) saturate(0.78) blur(0.7px);
+}
+
+html:not([data-input-modality="pointer"])
+  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
+  [data-media-card]:is([data-focused-card]:focus, [data-focused-card][data-tv-focused="true"]) {
+  opacity: 1;
+  filter: none;
+}
+
+html:not([data-input-modality="pointer"])
+  [data-focused-card]:is(:focus-visible, [data-tv-focused="true"]) {
+  outline: none;
+  z-index: 0;
+  box-shadow: none !important;
+  transform: none;
+}
+
 
 .harbor-lazy-cull {
   contain-intrinsic-size: auto var(--harbor-cull-min, 240px);

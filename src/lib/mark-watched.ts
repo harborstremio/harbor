@@ -5,6 +5,7 @@ import { addToHistory as simklAddToHistory } from "@/lib/simkl/history";
 import { setMovieWatchedLocal } from "@/lib/movie-watched";
 import { recordManualWatchedMeta, setManualWatchedMany } from "@/lib/manual-watched";
 import { setWatchedFlag } from "@/lib/watched-flag";
+import { recordWatchEvent } from "@/lib/watch-events";
 import { readActiveStremioAuthKey } from "@/lib/auth";
 import { cloudWriteId } from "@/lib/stremio";
 import { markMovieWatchedStremio } from "@/lib/stremio-watched-sync";
@@ -18,6 +19,7 @@ export async function markMovieWatched(
 ): Promise<void> {
   setMovieWatchedLocal(meta.id, true);
   savePlayback(meta.id, { title: meta.name, parsedTitle: meta.name });
+  recordWatchEvent({ id: meta.id, type: "movie", name: meta.name, poster: meta.poster, at: Date.now() });
   const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
   const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : tmdbId ?? undefined;
   const authKey = readActiveStremioAuthKey();
@@ -86,6 +88,7 @@ export async function markMetaWatched(
     background: meta.background,
     markedAt: new Date().toISOString(),
   });
+  recordWatchEvent({ id: meta.id, type: "series", name: meta.name, poster: meta.poster, at: Date.now() });
   const resolvedImdb = resolveSeriesImdb(meta, imdbId);
   const eps = await releasedEpisodes(meta, resolvedImdb);
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, true);

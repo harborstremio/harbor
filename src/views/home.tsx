@@ -17,6 +17,7 @@ import {
   type HomeRowCustomization,
 } from "@/lib/home-customization";
 import { useCustomLists } from "@/lib/custom-lists";
+import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
 import { useHideAnimeRows, useHideAnimeSlides } from "@/lib/anime-hide";
 import { StreamingRail } from "@/components/streaming-rail";
 import { TopRankCard } from "@/components/top-rank-card";
@@ -814,10 +815,32 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     [customLists, homeRowsCustom.listRows],
   );
 
+  const homeCollections = useCollectionRowsForPage("home");
+  const collectionHomeRows = useMemo<HomeRow[]>(
+    () =>
+      homeCollections
+        .filter((c) => c.items.length > 0)
+        .map((c) => ({
+          key: `collection-${c.id}`,
+          type: "movie" as const,
+          name: c.name,
+          metas: c.items.map((it) => ({
+            id: it.id,
+            type: it.type,
+            name: it.name,
+            poster: it.poster,
+          })),
+          page: 1,
+          hasMore: false,
+          noDedup: true,
+        })),
+    [homeCollections],
+  );
+
   const pinnedRows = usePinnedRows();
   const filterableRows = useMemo(
-    () => [...listHomeRows, ...pinnedRows, ...arabicRows, ...russianRows, ...personalRows, ...traktRows, ...simklRows, ...letterboxdRows, ...restRows, ...animeRows],
-    [listHomeRows, pinnedRows, arabicRows, russianRows, personalRows, traktRows, simklRows, letterboxdRows, restRows, animeRows],
+    () => [...listHomeRows, ...collectionHomeRows, ...pinnedRows, ...arabicRows, ...russianRows, ...personalRows, ...traktRows, ...simklRows, ...letterboxdRows, ...restRows, ...animeRows],
+    [listHomeRows, collectionHomeRows, pinnedRows, arabicRows, russianRows, personalRows, traktRows, simklRows, letterboxdRows, restRows, animeRows],
   );
   const shownFilterableRows = useHideAnimeRows(filterableRows);
   const allCustomizableRows = useMemo(

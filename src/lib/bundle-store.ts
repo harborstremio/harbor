@@ -2,8 +2,9 @@ import { authToken } from "./theme-auth";
 import { clientId, type MyUpload } from "./theme-store";
 import { installAwardPack, type AwardPack } from "./award-icons";
 import { installStreamBadgePack } from "./community-badge-packs";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const ORIGIN = "https://harbor.site";
+const ORIGIN = HARBOR_API_BASE;
 const API = `${ORIGIN}/themes/api`;
 const UPLOADS_KEY = "harbor.bundle-uploads.v1";
 
@@ -33,7 +34,12 @@ export type StoreBundle = {
 
 export type BundleIconBlob = { key: string; blob: Blob };
 
-export type BundleUploadResult = { id: string; kind: BundleKind; ownerToken: string; share: string };
+export type BundleUploadResult = {
+  id: string;
+  kind: BundleKind;
+  ownerToken: string;
+  share: string;
+};
 
 function abs(u: string | null | undefined): string | null {
   if (!u) return null;
@@ -63,7 +69,11 @@ function normalize(b: Record<string, unknown>): StoreBundle {
   };
 }
 
-export async function browseBundles(kind: BundleKind, sort = "top", q = ""): Promise<StoreBundle[]> {
+export async function browseBundles(
+  kind: BundleKind,
+  sort = "top",
+  q = "",
+): Promise<StoreBundle[]> {
   const params = new URLSearchParams({ kind, sort });
   if (q) params.set("q", q);
   const r = await fetch(`${API}/bundles?${params.toString()}`);
@@ -113,8 +123,10 @@ export function forgetBundleUpload(id: string): void {
   saveMyBundleUploads(getMyBundleUploads().filter((x) => x.id !== id));
 }
 
-const BUNDLE_TOO_LARGE = "This bundle is too large to publish. Use fewer badges or smaller art, then try again.";
-const BUNDLE_UNREACHABLE = "Couldn't reach the bundle library. Check your connection, or if the bundle is very large try fewer or smaller icons.";
+const BUNDLE_TOO_LARGE =
+  "This bundle is too large to publish. Use fewer badges or smaller art, then try again.";
+const BUNDLE_UNREACHABLE =
+  "Couldn't reach the bundle library. Check your connection, or if the bundle is very large try fewer or smaller icons.";
 
 async function postBundleForm(url: string, fd: FormData): Promise<Record<string, unknown>> {
   let r: Response;
@@ -152,7 +164,8 @@ export async function updateBundle(
   changelog: string,
 ): Promise<StoreBundle> {
   const fd = new FormData();
-  if (manifestJson) fd.append("manifest", new Blob([manifestJson], { type: "application/json" }), "manifest.json");
+  if (manifestJson)
+    fd.append("manifest", new Blob([manifestJson], { type: "application/json" }), "manifest.json");
   if (cover) fd.append("cover", cover, "cover.png");
   for (const icon of icons) fd.append("icons", icon.blob, `${icon.key}.png`);
   if (changelog) fd.append("changelog", changelog);

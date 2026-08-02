@@ -9,10 +9,7 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 // works) — proxying them through the VPS gets 403'd. EVERYTHING ELSE routes through the
 // VPS /api-proxy: it's required for addons that send no CORS header at all (OpenSubtitles)
 // and for the CORS-less debrid REST APIs, and it's fine for the rest (Cinemeta, Comet).
-const DIRECT_HOSTS = new Set([
-  "torrentio.strem.fun",
-  "stremio.torbox.app",
-]);
+const DIRECT_HOSTS = new Set(["torrentio.strem.fun", "stremio.torbox.app"]);
 
 const PROXY_HOSTS = new Set([
   "v3-cinemeta.strem.io",
@@ -24,6 +21,13 @@ const PROXY_HOSTS = new Set([
   "api.alldebrid.com",
   "debrid-link.com",
   "www.premiumize.me",
+  "openlibrary.org",
+  "covers.openlibrary.org",
+  "api.deezer.com",
+  "api.igdb.com",
+  "images.igdb.com",
+  "store.steampowered.com",
+  "cdn.cloudflare.steamstatic.com",
 ]);
 
 const PROXY_SUFFIXES = [
@@ -41,6 +45,7 @@ const PROXY_SUFFIXES = [
   ".netlify.app",
   ".railway.app",
   ".deno.dev",
+  ".dzcdn.net",
 ];
 
 let proxyOriginCache: boolean | null = null;
@@ -148,7 +153,8 @@ function withDeadline(p: Promise<Response>, signal?: AbortSignal | null): Promis
       run();
     };
     const timer = setTimeout(
-      () => finish(() => reject(new DOMException("harbor_fetch exceeded deadline", "TimeoutError"))),
+      () =>
+        finish(() => reject(new DOMException("harbor_fetch exceeded deadline", "TimeoutError"))),
       HARBOR_FETCH_DEADLINE_MS,
     );
     cleanups.push(() => clearTimeout(timer));
@@ -177,13 +183,17 @@ export const safeFetch: typeof fetch = (input, init) => {
   if (isTauri) {
     if (typeof input === "string") {
       const exec = isIdempotent(init?.method)
-        ? tauriHarborFetch(input, init).catch(
-            () => normalizeAbort(tauriFetchImpl(input as string, init as RequestInit) as Promise<Response>),
+        ? tauriHarborFetch(input, init).catch(() =>
+            normalizeAbort(
+              tauriFetchImpl(input as string, init as RequestInit) as Promise<Response>,
+            ),
           )
         : tauriHarborFetch(input, init);
       return withDeadline(exec, init?.signal);
     }
-    return normalizeAbort(tauriFetchImpl(input as unknown as string, init as RequestInit) as Promise<Response>);
+    return normalizeAbort(
+      tauriFetchImpl(input as unknown as string, init as RequestInit) as Promise<Response>,
+    );
   }
   if (typeof input === "string") {
     const r = rewriteForWeb(input, init);

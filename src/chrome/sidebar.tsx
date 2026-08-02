@@ -1,4 +1,4 @@
-import { ChevronDown, Lock } from "lucide-react";
+import { ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { ProfileChip } from "@/chrome/sidebar/profile-chip";
@@ -226,6 +226,12 @@ function ScrollableNav({
     el.scrollBy({ top: 112, behavior: "smooth" });
   };
 
+  const scrollToTop = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">
       <div
@@ -278,7 +284,18 @@ function ScrollableNav({
         <div data-tauri-drag-region className="flex-1 min-h-2" />
       </div>
       {overflow.top && (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-canvas to-transparent" />
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-canvas via-canvas/85 to-transparent" />
+          <button
+            type="button"
+            onClick={scrollToTop}
+            aria-label={t("chrome.backToTop")}
+            data-tv-skip=""
+            className="absolute top-1 left-1/2 flex h-4 w-7 -translate-x-1/2 items-center justify-center text-ink-subtle/55 transition-colors hover:text-ink-muted"
+          >
+            <ChevronUp size={11} strokeWidth={2} />
+          </button>
+        </>
       )}
       {overflow.bottom && (
         <>

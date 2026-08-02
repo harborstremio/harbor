@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { BookOpen, Popcorn } from "lucide-react";
+import { BookOpen, GalleryVerticalEnd, Popcorn } from "lucide-react";
 import { useUnseenReminderCount } from "@/lib/reminders";
 import { AddonsIcon } from "@/components/icons/addons-icon";
 import { CatalogsIcon } from "@/components/icons/catalogs-icon";
@@ -44,6 +44,7 @@ export type NavItemId =
   | "vod"
   | "calendar"
   | "library"
+  | "collections"
   | "downloads"
   | "addons"
   | "settings";
@@ -77,6 +78,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "vod", label: "nav.playlists", render: (active) => <PlaylistVodIcon active={active} />, view: "vod" },
   { id: "calendar", label: "nav.calendar", render: (active) => <CalendarNavIcon active={active} />, view: "calendar", parentalKey: "calendar" },
   { id: "library", label: "nav.library", render: (active) => <LibraryIcon active={active} />, view: "library", parentalKey: "library" },
+  { id: "collections", label: "Collections", render: (active) => <GalleryVerticalEnd size={24} strokeWidth={2.2} className={active ? "" : "opacity-70"} />, view: "collections-hub" },
   { id: "downloads", label: "nav.downloads", render: (active) => <DownloadsNavIcon active={active} />, view: "downloads" },
   { id: "addons", label: "nav.addons", render: (active) => <AddonsIcon active={active} />, view: "addons", parentalKey: "addons" },
   { id: "settings", label: "nav.settings", render: (active) => <SettingsIcon active={active} />, view: "settings", pinGated: true },

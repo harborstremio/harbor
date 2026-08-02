@@ -42,6 +42,7 @@ const en: Record<string, string> = {
   "chrome.restore": "Restore",
   "chrome.watchTogether": "Watch together",
   "chrome.scrollForMore": "Scroll for more",
+  "chrome.backToTop": "Back to top",
   "chrome.locked": "Locked",
   "chrome.parentalOn": "Parental controls on",
   "chrome.lockedRequiresPin": "{label} (locked, requires PIN)",

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, MessageSquare } from "lucide-react";
 import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
+import type { ThemeComment } from "@/lib/theme-store";
 import { useComments } from "./use-comments";
 import { CommentComposer } from "./comment-composer";
 import { CommentItem } from "./comment-item";
@@ -9,6 +10,19 @@ export function CommentsSection({ themeId }: { themeId: string }) {
   const { comments, loading, error, add, remove } = useComments(themeId);
   const [author, setAuthor] = useState(currentAuthor());
   useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
+
+  const ids = new Set(comments.map((c) => c.id));
+  const roots = comments.filter((c) => !c.parentId || !ids.has(c.parentId));
+  const repliesByParent = new Map<string, ThemeComment[]>();
+  for (const c of comments) {
+    if (!c.parentId || !ids.has(c.parentId)) continue;
+    const list = repliesByParent.get(c.parentId) ?? [];
+    list.push(c);
+    repliesByParent.set(c.parentId, list);
+  }
+  for (const list of repliesByParent.values()) {
+    list.sort((a, b) => (a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0));
+  }
 
   return (
     <section className="flex flex-col gap-4">
@@ -36,8 +50,16 @@ export function CommentsSection({ themeId }: { themeId: string }) {
         <p className="py-4 text-center text-[13px] text-ink-subtle">No comments yet. Start the conversation.</p>
       ) : (
         <div className="flex flex-col gap-4">
-          {comments.map((c) => (
-            <CommentItem key={c.id} comment={c} onDelete={remove} />
+          {roots.map((c) => (
+            <CommentItem
+              key={c.id}
+              comment={c}
+              onDelete={remove}
+              onReply={add}
+              replyToId={c.id}
+              replies={repliesByParent.get(c.id)}
+              signedIn={!!author}
+            />
           ))}
         </div>
       )}

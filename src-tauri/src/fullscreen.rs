@@ -24,12 +24,17 @@ pub async fn window_fullscreen_enter(
 
     let already_fs = main.is_fullscreen().unwrap_or(false);
     if !already_fs {
-        if let (Ok(pos), Ok(sz)) = (main.outer_position(), main.inner_size()) {
-            *state.saved.lock().unwrap() = Some((pos.x, pos.y, sz.width, sz.height));
-        }
         if main.is_maximized().unwrap_or(false) {
             let _ = main.unmaximize();
         }
+        let saved = if main.is_maximized().unwrap_or(false) {
+            None
+        } else if let (Ok(pos), Ok(sz)) = (main.outer_position(), main.inner_size()) {
+            Some((pos.x, pos.y, sz.width, sz.height))
+        } else {
+            None
+        };
+        *state.saved.lock().unwrap() = saved;
         main.set_fullscreen(true)
             .map_err(|e| format!("set_fullscreen(true): {}", e))?;
         let _ = main.set_focus();

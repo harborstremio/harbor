@@ -1,7 +1,8 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { authToken } from "@/lib/theme-auth";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const BASE = "https://harbor.site/themes/api/social";
+const BASE = `${HARBOR_API_BASE}/themes/api/social`;
 
 export type ListLike = { likeCount: number; liked: boolean };
 
@@ -21,7 +22,10 @@ export async function likeList(handle: string, listId: string): Promise<ListLike
 }
 
 export async function unlikeList(handle: string, listId: string): Promise<ListLike> {
-  const res = await safeFetch(likeUrl(handle, listId), { method: "DELETE", headers: authHeaders() });
+  const res = await safeFetch(likeUrl(handle, listId), {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
   if (!res.ok) throw new Error(`unlike list ${res.status}`);
   return (await res.json()) as ListLike;
 }

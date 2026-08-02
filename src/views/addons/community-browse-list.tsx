@@ -2,6 +2,7 @@ import { ChevronRight, Loader2, Plus, Sparkles, Star, TrendingUp } from "lucide-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
+import { rememberPendingAddon } from "@/lib/addons-store/pending-detail";
 import { openInstallerViewport } from "@/components/installer-viewport";
 import { listAddons, risingEntryFor, useRising, type SAAddon } from "@/lib/providers/stremio-addons";
 import { useTopMovers } from "@/lib/providers/stremio-addons-velocity";
@@ -286,8 +287,10 @@ function CommunityRow({
   const logo = resolveAddonLogo(m?.logo, addon.manifestUrl);
 
   const open = () => {
-    if (m?.id) onOpen(m.id);
-    else openUrl(addon.url);
+    if (m?.id) {
+      rememberPendingAddon(m.id, addon.manifestUrl, addon.manifest);
+      onOpen(m.id);
+    } else openUrl(addon.url);
   };
   const install = async (e: React.MouseEvent) => {
     e.stopPropagation();

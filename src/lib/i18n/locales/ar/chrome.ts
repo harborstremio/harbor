@@ -38,6 +38,7 @@ const chrome: Record<string, string> = {
   "chrome.restore": "استعادة",
   "chrome.watchTogether": "المشاهدة معًا",
   "chrome.scrollForMore": "مرّر لرؤية المزيد",
+  "chrome.backToTop": "العودة إلى الأعلى",
   "chrome.locked": "مقفل",
   "chrome.parentalOn": "الرقابة الأبوية مفعّلة",
   "chrome.lockedRequiresPin": "{label} (مقفل، يتطلب رمز PIN)",

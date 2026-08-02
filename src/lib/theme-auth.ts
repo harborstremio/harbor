@@ -1,10 +1,16 @@
-const API = "https://harbor.site/themes/api";
-const ORIGIN = "https://harbor.site";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+
+const API = `${HARBOR_API_BASE}/themes/api`;
+const ORIGIN = HARBOR_API_BASE;
 const LEGACY_SESSION_KEY = "harbor.theme-session";
 const SESSION_PREFIX = "harbor.theme-session.";
 const PROFILES_KEY = "harbor.profiles.v1";
+const REPAIR_FLAG = "harbor.theme-session.repaired.v2";
 
-function readProfilesRaw(): { profiles?: Array<{ id?: string; isPrimary?: boolean }>; activeId?: string } | null {
+function readProfilesRaw(): {
+  profiles?: Array<{ id?: string; isPrimary?: boolean }>;
+  activeId?: string;
+} | null {
   try {
     const raw = localStorage.getItem(PROFILES_KEY);
     return raw ? JSON.parse(raw) : null;
@@ -41,7 +47,13 @@ function migrateLegacyGlobal(): void {
   }
 }
 
-export type AuthorBadge = { id: string; name: string; icon?: string | null; description?: string | null; order?: number };
+export type AuthorBadge = {
+  id: string;
+  name: string;
+  icon?: string | null;
+  description?: string | null;
+  order?: number;
+};
 
 export type Author = {
   id: string;
@@ -73,7 +85,8 @@ function toAuthor(u: RawUser): Author {
     avatar: absAvatar(u.avatar),
     handle: typeof u.handle === "string" ? u.handle : null,
     handleAuto: u.handleAuto === true,
-    handleChangeAvailableAt: typeof u.handleChangeAvailableAt === "string" ? u.handleChangeAvailableAt : null,
+    handleChangeAvailableAt:
+      typeof u.handleChangeAvailableAt === "string" ? u.handleChangeAvailableAt : null,
     verified: u.verified === true,
     stremioLinked: u.stremioLinked === true,
     badges: Array.isArray(u.badges) ? u.badges : [],
@@ -84,51 +97,52 @@ function parseSession(raw: string | null): Session | null {
   if (!raw) return null;
   try {
     const s = JSON.parse(raw);
-    if (typeof s?.token !== "string" || typeof s?.user?.id !== "string" || typeof s?.user?.username !== "string") return null;
-    return { token: s.token, refresh: typeof s.refresh === "string" ? s.refresh : null, user: toAuthor(s.user) };
+    if (
+      typeof s?.token !== "string" ||
+      typeof s?.user?.id !== "string" ||
+      typeof s?.user?.username !== "string"
+    )
+      return null;
+    return {
+      token: s.token,
+      refresh: typeof s.refresh === "string" ? s.refresh : null,
+      user: toAuthor(s.user),
+    };
   } catch {
     return null;
   }
-}
-
-function candidateKeys(): string[] {
-  const keys: string[] = [sessionKey()];
-  const primary = primaryProfileId();
-  if (primary) keys.push(SESSION_PREFIX + primary);
-  keys.push(LEGACY_SESSION_KEY);
-  try {
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const k = localStorage.key(i);
-      if (k && k.startsWith(SESSION_PREFIX) && !keys.includes(k)) keys.push(k);
-    }
-  } catch {
-    /* ignore */
-  }
-  return keys;
 }
 
 function readSession(): Session | null {
   try {
-    for (const key of candidateKeys()) {
-      const found = parseSession(localStorage.getItem(key));
-      if (!found) continue;
-      const want = sessionKey();
-      if (key !== want) {
-        try {
-          localStorage.setItem(want, JSON.stringify(found));
-        } catch {
-          /* ignore */
-        }
-      }
-      return found;
-    }
-    return null;
+    return parseSession(localStorage.getItem(sessionKey()));
   } catch {
     return null;
   }
 }
 
+function repairCopiedSessions(): void {
+  try {
+    if (localStorage.getItem(REPAIR_FLAG)) return;
+    localStorage.setItem(REPAIR_FLAG, "1");
+    const primary = primaryProfileId();
+    if (!primary) return;
+    const mine = parseSession(localStorage.getItem(SESSION_PREFIX + primary));
+    if (!mine) return;
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const k = localStorage.key(i);
+      if (!k || !k.startsWith(SESSION_PREFIX)) continue;
+      if (k === SESSION_PREFIX + primary) continue;
+      const other = parseSession(localStorage.getItem(k));
+      if (other && other.user?.id && other.user.id === mine.user?.id) localStorage.removeItem(k);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 migrateLegacyGlobal();
+repairCopiedSessions();
 let loadedProfile = activeProfileId();
 let session: Session | null = readSession();
 
@@ -168,11 +182,19 @@ export function authToken(): string | null {
 }
 
 export function refreshTokenValue(): string | null {
-  return session ? session.refresh ?? null : null;
+  return session ? (session.refresh ?? null) : null;
 }
 
-export function applyAuthResult(d: { token: string; refresh?: string | null; user: RawUser }): void {
-  setSession({ token: d.token, refresh: d.refresh ?? (session ? session.refresh : null), user: toAuthor(d.user) });
+export function applyAuthResult(d: {
+  token: string;
+  refresh?: string | null;
+  user: RawUser;
+}): void {
+  setSession({
+    token: d.token,
+    refresh: d.refresh ?? (session ? session.refresh : null),
+    user: toAuthor(d.user),
+  });
 }
 
 export function applyServerUser(user: RawUser): void {
@@ -228,13 +250,20 @@ export function subscribeAuthor(fn: () => void): () => void {
 async function postAuth(path: string, body: Record<string, unknown>, bearer?: string) {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (bearer) headers.Authorization = `Bearer ${bearer}`;
-  const r = await fetch(`${API}/auth/${path}`, { method: "POST", headers, body: JSON.stringify(body) });
+  const r = await fetch(`${API}/auth/${path}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+  });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d.error || "Request failed.");
   return d;
 }
 
-export async function registerAuthor(username: string, password: string): Promise<{ recoveryCode: string }> {
+export async function registerAuthor(
+  username: string,
+  password: string,
+): Promise<{ recoveryCode: string }> {
   const d = await postAuth("register", { username, password });
   setSession({ token: d.token, user: toAuthor(d.user) });
   return { recoveryCode: d.recoveryCode };
@@ -251,22 +280,33 @@ export async function logoutAuthor(): Promise<void> {
   setSession(null);
 }
 
-export async function recoverAuthor(username: string, recoveryCode: string, newPassword: string): Promise<{ recoveryCode: string }> {
+export async function recoverAuthor(
+  username: string,
+  recoveryCode: string,
+  newPassword: string,
+): Promise<{ recoveryCode: string }> {
   const d = await postAuth("recover", { username, recoveryCode, newPassword });
   setSession({ token: d.token, user: toAuthor(d.user) });
   return { recoveryCode: d.recoveryCode };
 }
 
-export async function changeAuthorPassword(oldPassword: string, newPassword: string): Promise<void> {
+export async function changeAuthorPassword(
+  oldPassword: string,
+  newPassword: string,
+): Promise<void> {
   const token = authToken();
   if (!token) throw new Error("Sign in first.");
   await postAuth("change-password", { oldPassword, newPassword }, token);
 }
 
-export async function checkUsernameAvailable(username: string, signal?: AbortSignal): Promise<boolean> {
-  const r = await fetch(`${API}/auth/username-available?u=${encodeURIComponent(username)}`, { signal });
+export async function checkUsernameAvailable(
+  username: string,
+  signal?: AbortSignal,
+): Promise<boolean> {
+  const r = await fetch(`${API}/auth/username-available?u=${encodeURIComponent(username)}`, {
+    signal,
+  });
   if (!r.ok) throw new Error("check failed");
   const d = await r.json();
   return d.available === true;
 }
-

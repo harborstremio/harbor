@@ -1,4 +1,14 @@
-import { Activity, Check, ImagePlus, Loader2, MapPin, Settings2, Share2, UserMinus, UserPlus } from "lucide-react";
+import {
+  Activity,
+  Check,
+  ImagePlus,
+  Loader2,
+  MapPin,
+  Settings2,
+  Share2,
+  UserMinus,
+  UserPlus,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ShareModal } from "./share-modal";
@@ -7,14 +17,27 @@ import { acceptFriend, removeFriend, sendFriendRequest } from "@/lib/social/frie
 import { PRESENCE_META, useMyPresence } from "@/lib/social/presence";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
-import { sanitizeStatLayout, STAT_ORDER, watchMinutes, type StatKey } from "@/lib/profile-card-layout";
+import {
+  sanitizeStatLayout,
+  STAT_ORDER,
+  watchMinutes,
+  type StatKey,
+} from "@/lib/profile-card-layout";
 import { countryName } from "./flags";
 import { saveSlogan } from "./profile-api";
 import { orderShownBadges } from "./badge-catalog";
 import { EditProfileHint } from "./edit-profile-hint";
-import { Avatar, compactNumber, FeaturedBadge, formatWatchTime, StatPill, VerifiedCheck } from "./profile-bits";
+import {
+  Avatar,
+  compactNumber,
+  FeaturedBadge,
+  formatWatchTime,
+  StatPill,
+  VerifiedCheck,
+} from "./profile-bits";
 import { StatusBubble } from "./status-bubble";
 import type { ProfileSummary } from "./profile-types";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
 type HeroBadge = { id: string; name: string; iconUrl?: string };
 
@@ -51,9 +74,11 @@ export function ProfileHero({
   const t = useT();
   const { openFeed } = useView();
   const nameFont = userFont ? { fontFamily: `"${userFont}", var(--font-display)` } : undefined;
-  const nameBadges = orderShownBadges(badges ?? [], p.shownBadges).filter((b) => b.iconUrl).slice(0, 6);
+  const nameBadges = orderShownBadges(badges ?? [], p.shownBadges)
+    .filter((b) => b.iconUrl)
+    .slice(0, 6);
   const [sharing, setSharing] = useState(false);
-  const shareUrl = `https://harbor.site/u/${p.customUrl || p.handle}`;
+  const shareUrl = `${HARBOR_API_BASE}/u/${p.customUrl || p.handle}`;
   const myStatus = useMyPresence();
   const meta = PRESENCE_META[myStatus];
   const dotClass = p.isOwner ? meta.dot : p.online ? "bg-success" : "bg-ink-subtle";
@@ -74,18 +99,28 @@ export function ProfileHero({
       <div className="relative h-48 w-full sm:h-60">
         {!hideBanner &&
           (p.bannerUrl ? (
-            <img src={p.bannerUrl} alt="" className="h-full w-full object-cover" draggable={false} />
+            <img
+              src={p.bannerUrl}
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           ) : (
             <div
               className="h-full w-full"
-              style={{ background: "linear-gradient(135deg, var(--color-elevated), var(--color-surface) 55%, var(--color-canvas))" }}
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--color-elevated), var(--color-surface) 55%, var(--color-canvas))",
+              }}
             />
           ))}
         {!hideBanner && (
           <div
             aria-hidden
             className="absolute inset-0"
-            style={{ background: "linear-gradient(to bottom, transparent 28%, var(--color-canvas))" }}
+            style={{
+              background: "linear-gradient(to bottom, transparent 28%, var(--color-canvas))",
+            }}
           />
         )}
         {p.isOwner && !p.bannerUrl && !hideBanner && onEdit && (
@@ -101,7 +136,13 @@ export function ProfileHero({
       <div className="relative mx-auto -mt-20 w-full max-w-6xl px-6 pb-6 lg:px-10">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-6">
           <div className="relative flex h-[124px] w-[124px] shrink-0">
-            <Avatar src={avatar} fallbackSrc={avatarFallback} size={124} dotClass={dotClass} alias={p.alias} />
+            <Avatar
+              src={avatar}
+              fallbackSrc={avatarFallback}
+              size={124}
+              dotClass={dotClass}
+              alias={p.alias}
+            />
             <StatusBubble
               slogan={p.slogan}
               isOwner={p.isOwner}
@@ -113,7 +154,9 @@ export function ProfileHero({
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-[30px] leading-tight text-ink" style={nameFont}>{p.alias}</h1>
+              <h1 className="font-display text-[30px] leading-tight text-ink" style={nameFont}>
+                {p.alias}
+              </h1>
               {p.verified && <VerifiedCheck size={22} />}
               {nameBadges.map((b) => (
                 <HeroBadge key={b.id} badge={b} />
@@ -193,13 +236,26 @@ export function ProfileHero({
 
         <div className={`mt-5 grid gap-2 sm:gap-3 ${statCols}`}>
           {showStat("watchTime") && <WatchTimePill totalMinutes={watchMinutes(p.counts)} />}
-          {showStat("episodes") && <StatPill value={compactNumber(p.counts.episodesWatched ?? 0)} label={t("Episodes")} />}
-          {showStat("movies") && <StatPill value={compactNumber(p.counts.moviesWatched ?? 0)} label={t("Movies")} />}
-          {showStat("read") && (
-            <StatPill value={compactNumber(mangaReadOverride ?? (p.counts as { mangaRead?: number }).mangaRead ?? 0)} label={t("Read")} />
+          {showStat("episodes") && (
+            <StatPill value={compactNumber(p.counts.episodesWatched ?? 0)} label={t("Episodes")} />
           )}
-          {showStat("friends") && <StatPill value={compactNumber(p.counts.friends)} label={t("Friends")} />}
-          {showStat("badges") && <StatPill value={compactNumber(p.counts.badges)} label={t("Badges")} />}
+          {showStat("movies") && (
+            <StatPill value={compactNumber(p.counts.moviesWatched ?? 0)} label={t("Movies")} />
+          )}
+          {showStat("read") && (
+            <StatPill
+              value={compactNumber(
+                mangaReadOverride ?? (p.counts as { mangaRead?: number }).mangaRead ?? 0,
+              )}
+              label={t("Read")}
+            />
+          )}
+          {showStat("friends") && (
+            <StatPill value={compactNumber(p.counts.friends)} label={t("Friends")} />
+          )}
+          {showStat("badges") && (
+            <StatPill value={compactNumber(p.counts.badges)} label={t("Badges")} />
+          )}
         </div>
       </div>
     </header>
@@ -209,7 +265,14 @@ export function ProfileHero({
 function HeroBadge({ badge }: { badge: HeroBadge }) {
   return (
     <span className="group/badge relative inline-flex">
-      <img src={badge.iconUrl} width={22} height={22} alt={badge.name} draggable={false} className="inline-block" />
+      <img
+        src={badge.iconUrl}
+        width={22}
+        height={22}
+        alt={badge.name}
+        draggable={false}
+        className="inline-block"
+      />
       <span className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-[10px] bg-elevated px-2 py-1 text-[11px] font-medium text-ink opacity-0 shadow-lg ring-1 ring-edge-soft transition-opacity duration-150 group-hover/badge:opacity-100">
         {badge.name}
       </span>
@@ -224,14 +287,22 @@ function WatchTimePill({ totalMinutes }: { totalMinutes: number }) {
   return (
     <div className="flex flex-col items-center rounded-[10px] bg-surface px-2 py-2.5 ring-1 ring-edge-soft">
       <span className="flex items-baseline tabular-nums">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">{a}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+          {a}
+        </span>
         <span className="ml-1 text-[17px] font-semibold text-ink">{pad(aVal)}</span>
-        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">{b}</span>
+        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+          {b}
+        </span>
         <span className="ml-1 text-[17px] font-semibold text-ink">{pad(bVal)}</span>
-        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">{c}</span>
+        <span className="ml-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-muted">
+          {c}
+        </span>
         <span className="ml-1 text-[17px] font-semibold text-ink">{pad(cVal)}</span>
       </span>
-      <span className="text-[11px] uppercase tracking-[0.1em] text-ink-subtle">{t("Watch Time")}</span>
+      <span className="text-[11px] uppercase tracking-[0.1em] text-ink-subtle">
+        {t("Watch Time")}
+      </span>
     </div>
   );
 }
@@ -277,22 +348,22 @@ function FriendButton({
   if (rel === "friends") {
     return (
       <>
-      <button
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-        onClick={() => setConfirming(true)}
-        disabled={busy}
-        className={`${FRIEND_BTN} ${hover ? "bg-danger/12 text-danger ring-1 ring-danger/30" : "bg-surface text-ink ring-1 ring-edge"}`}
-      >
-        {busy ? (
-          <Loader2 size={18} className="animate-spin" />
-        ) : hover ? (
-          <UserMinus size={18} />
-        ) : (
-          <Check size={18} strokeWidth={2.6} />
-        )}
-        {busy ? t("Removing...") : hover ? t("Remove friend") : t("Friends")}
-      </button>
+        <button
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          onClick={() => setConfirming(true)}
+          disabled={busy}
+          className={`${FRIEND_BTN} ${hover ? "bg-danger/12 text-danger ring-1 ring-danger/30" : "bg-surface text-ink ring-1 ring-edge"}`}
+        >
+          {busy ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : hover ? (
+            <UserMinus size={18} />
+          ) : (
+            <Check size={18} strokeWidth={2.6} />
+          )}
+          {busy ? t("Removing...") : hover ? t("Remove friend") : t("Friends")}
+        </button>
         {confirming && (
           <ConfirmRemoveFriend
             handle={handle}
@@ -315,7 +386,11 @@ function FriendButton({
         disabled={busy || !edgeId}
         className={`${FRIEND_BTN} bg-ink text-canvas hover:opacity-90`}
       >
-        {busy ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} strokeWidth={2.6} />}
+        {busy ? (
+          <Loader2 size={18} className="animate-spin" />
+        ) : (
+          <Check size={18} strokeWidth={2.6} />
+        )}
         {busy ? t("Accepting...") : t("Accept request")}
       </button>
     );
@@ -386,7 +461,9 @@ function ConfirmRemoveFriend({
       >
         <h2 className="text-[15px] font-semibold text-ink">{t("Remove friend?")}</h2>
         <p className="mt-1.5 text-[13px] leading-relaxed text-ink-subtle">
-          {t("@{handle} will be removed from your friends. You can add them again later.", { handle })}
+          {t("@{handle} will be removed from your friends. You can add them again later.", {
+            handle,
+          })}
         </p>
         <div className="mt-4 flex items-center justify-end gap-2">
           <button

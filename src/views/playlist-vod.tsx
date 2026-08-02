@@ -2,6 +2,7 @@ import { Film, Search, Tv } from "lucide-react";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
+import { normalizeArabic } from "@/lib/iptv/rtl";
 import { getCachedPlaylist } from "@/lib/iptv/store";
 import type { IptvPlaylistSource } from "@/lib/iptv/types";
 import { buildVodLibrary, type VodEpisode, type VodMovie, type VodSeries } from "@/lib/iptv/vod";
@@ -97,14 +98,22 @@ export function PlaylistVodView({ active }: { active: boolean }) {
   );
 
   const deferredQuery = useDeferredValue(query);
-  const q = deferredQuery.trim().toLowerCase();
+  const q = useMemo(() => normalizeArabic(deferredQuery), [deferredQuery]);
+  const movieIndex = useMemo(
+    () => library.movies.map((m) => normalizeArabic(m.title)),
+    [library.movies],
+  );
+  const seriesIndex = useMemo(
+    () => library.series.map((s) => normalizeArabic(s.title)),
+    [library.series],
+  );
   const movies = useMemo(
-    () => (q ? library.movies.filter((m) => m.title.toLowerCase().includes(q)) : library.movies),
-    [library.movies, q],
+    () => (q ? library.movies.filter((_, i) => movieIndex[i].includes(q)) : library.movies),
+    [library.movies, movieIndex, q],
   );
   const series = useMemo(
-    () => (q ? library.series.filter((s) => s.title.toLowerCase().includes(q)) : library.series),
-    [library.series, q],
+    () => (q ? library.series.filter((_, i) => seriesIndex[i].includes(q)) : library.series),
+    [library.series, seriesIndex, q],
   );
   const visibleMovies = movies.slice(0, visibleCount);
   const visibleSeries = series.slice(0, visibleCount);

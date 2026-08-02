@@ -12,3 +12,16 @@ export function stallWaitSec(value: number | undefined): number {
 export function stallWaitMs(value: number | undefined): number {
   return stallWaitSec(value) * 1000;
 }
+
+export function hasPlaybackStartedForStallCheck(params: {
+  status: string;
+  positionSec: number;
+  videoWidth: number;
+  videoHeight: number;
+}): boolean {
+  return (
+    params.status === "paused" ||
+    params.positionSec > 0 ||
+    (params.videoWidth > 0 && params.videoHeight > 0)
+  );
+}

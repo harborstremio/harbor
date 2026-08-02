@@ -26,8 +26,7 @@ import { activeLayout } from "@/lib/theme";
 import { useThemePreview } from "@/lib/theme-preview";
 import { useView } from "@/lib/view";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
-import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
-import { close, minimize } from "@/lib/window";
+import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -39,6 +38,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   const [closeConfirm, setCloseConfirm] = useState(false);
   const preview = useThemePreview();
   const fullscreen = useWindowFullscreen();
+  const maxed = useMaximized();
   const [scrolled, setScrolled] = useState(false);
   const scrolledRef = useRef(false);
   useEffect(() => {
@@ -74,7 +74,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
   return (
     <header
       data-cleannav={settings.topbarAppearance === "transparent" ? "on" : undefined}
-      className={`fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-20`}
+      className={`pointer-events-none fixed inset-x-0 top-0 ${topKind === "picker" || connecting ? "z-[130]" : "z-[55]"} h-20`}
     >
       {settings.topbarScrollBlur && settings.topbarAppearance !== "transparent" && (
         <div
@@ -100,8 +100,8 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
             {...dragProps}
             className={
               sidebarHidden
-                ? "flex h-full min-w-0 items-center justify-start gap-3"
-                : `flex h-full min-w-0 items-center justify-start ${sidebarOffset}`
+                ? "pointer-events-auto flex h-full min-w-0 items-center justify-start gap-3"
+                : `pointer-events-auto flex h-full min-w-0 items-center justify-start ${sidebarOffset}`
             }
           >
           {onLiveRoot && (
@@ -126,30 +126,32 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
           </div>
           <div
             {...dragProps}
-            className={`min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}
+            className={`pointer-events-auto min-w-0 max-w-full transition-[width] duration-200 ease-out ${searchWidth}`}
           >
             {!hideSearch && !kid && !hybridBar && <SearchPill />}
           </div>
           <div
             {...dragProps}
-            className="flex h-full min-w-0 items-center justify-end gap-2"
+            className="pointer-events-auto flex h-full items-center justify-end gap-2"
           >
+          <div className="hidden items-center gap-2 min-[900px]:flex">
           <RecordingPill />
           {settings.navbarSleepTimer && <SleepTimerButton />}
           <DownloadsButton />
           {!kid && <NotificationCenter />}
           {!kid && <BookmarksButton />}
           {!onLiveRoot && !kid && <TogetherButton />}
+          </div>
             {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
-            <div className="ms-1 flex items-center gap-2">
+            <div className="ms-1 flex shrink-0 items-center gap-2">
               <Control label={t("chrome.minimize")} onClick={minimize}>
                 <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
                   <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
                 </svg>
               </Control>
-              <Control label={fullscreen ? t("chrome.restore") : t("chrome.maximize")} onClick={() => void toggleWindowFullscreen()}>
+              <Control label={maxed ? t("chrome.restore") : t("chrome.maximize")} onClick={() => void toggleMaximize()}>
                 <svg width="18" height="18" viewBox="0 0 13 13" fill="none">
-                  {fullscreen ? (
+                  {maxed ? (
                     <>
                       <rect x="2.5" y="4.5" width="6" height="6" stroke="currentColor" strokeWidth="1.4" rx="1" />
                       <path d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9" stroke="currentColor" strokeWidth="1.4" fill="none" />

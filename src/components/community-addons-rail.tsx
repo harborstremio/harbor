@@ -5,6 +5,7 @@ import { ArrowedScrollRow } from "@/components/arrowed-scroll-row";
 import { addonSiteUrl, isAdultAddon, listAddons, listRising, type SAAddon } from "@/lib/providers/stremio-addons";
 import { useSettings } from "@/lib/settings";
 import { fetchManifestAt, installAddon, manifestToConfigureUrl } from "@/lib/addon-store";
+import { rememberPendingAddon } from "@/lib/addons-store/pending-detail";
 import { openInstallerViewport } from "@/components/installer-viewport";
 import { openUrl } from "@/lib/window";
 
@@ -32,6 +33,10 @@ export function CommunityAddonsRail({
   const showAdult = settings.showAdultAddons;
   const [sortMode, setSortMode] = useState<SortMode>("trending");
   const [items, setItems] = useState<SAAddon[] | null>(null);
+  const notInstalled = useMemo(
+    () => (items ?? []).filter((a) => !isInstalled(a, installedIds)),
+    [items, installedIds],
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -117,11 +122,11 @@ export function CommunityAddonsRail({
         <ErrorState message={error} />
       ) : items === null ? (
         <SkeletonRow />
-      ) : items.length === 0 ? (
+      ) : notInstalled.length === 0 ? (
         <EmptyState />
       ) : (
         <RailScroller
-          items={items}
+          items={notInstalled}
           installedIds={installedIds}
           onChange={onChange}
           onOpen={onOpen}
@@ -238,8 +243,10 @@ function CommunityCard({
   };
 
   const openDetail = () => {
-    if (m?.id && onOpen) onOpen(m.id);
-    else openUrl(addonSiteUrl(addon.slug));
+    if (m?.id && onOpen) {
+      rememberPendingAddon(m.id, addon.manifestUrl, addon.manifest);
+      onOpen(m.id);
+    } else openUrl(addonSiteUrl(addon.slug));
   };
   return (
     <article

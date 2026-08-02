@@ -35,6 +35,7 @@ const chrome: Record<string, string> = {
   "chrome.restore": "Restaurar",
   "chrome.watchTogether": "Assistir junto",
   "chrome.scrollForMore": "Role para ver mais",
+  "chrome.backToTop": "Voltar ao topo",
   "chrome.locked": "Bloqueado",
   "chrome.parentalOn": "Controle parental ativado",
   "chrome.lockedRequiresPin": "{label} (bloqueado, requer PIN)",

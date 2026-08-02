@@ -19,7 +19,7 @@ export type DownloadItem = {
   streamLabel: string | null;
   url: string;
   path: string;
-  status: "downloading" | "done" | "error" | "canceled" | "interrupted";
+  status: "downloading" | "paused" | "done" | "error" | "canceled" | "interrupted";
   receivedBytes: number;
   totalBytes: number | null;
   ratio: number;
@@ -38,6 +38,8 @@ type EnqueueArgs = {
 
 const items = new Map<string, DownloadItem>();
 const handles = new Map<string, DownloadHandle>();
+const completions = new Map<string, Promise<void>>();
+const requestHeaders = new Map<string, Record<string, string>>();
 const speed = new Map<string, { bytes: number; at: number }>();
 const listeners = new Set<() => void>();
 
@@ -68,7 +70,8 @@ function hydrate() {
     if (!Array.isArray(arr)) return;
     for (const d of arr) {
       if (!d || typeof d.id !== "string" || typeof d.path !== "string") continue;
-      const status = d.status === "downloading" ? "interrupted" : d.status;
+      const status =
+        d.status === "downloading" || d.status === "paused" ? "interrupted" : d.status;
       items.set(d.id, { ...d, status, bytesPerSec: 0 });
     }
     snapshot = [...items.values()].sort((a, b) => b.startedAt - a.startedAt);
@@ -93,7 +96,9 @@ function sep(): string {
 async function resolveDir(): Promise<string> {
   try {
     const raw = localStorage.getItem("harbor.settings");
-    const fromSettings = raw ? (JSON.parse(raw) as { downloadDir?: string }).downloadDir?.trim() : "";
+    const fromSettings = raw
+      ? (JSON.parse(raw) as { downloadDir?: string }).downloadDir?.trim()
+      : "";
     if (fromSettings) return fromSettings;
   } catch {
     /* fall through to system default */
@@ -187,49 +192,92 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     startedAt: Date.now(),
   };
   items.set(id, item);
-  speed.set(id, { bytes: 0, at: Date.now() });
+  if (headers && Object.keys(headers).length > 0) requestHeaders.set(id, headers);
   rebuild();
 
-  const handle = startDownload(id, url, path, (p) => {
-    const now = Date.now();
-    const s = speed.get(id);
-    let bps = 0;
-    if (s && now - s.at >= 500) {
-      bps = ((p.receivedBytes - s.bytes) / (now - s.at)) * 1000;
-      speed.set(id, { bytes: p.receivedBytes, at: now });
-    }
-    patch(id, {
-      receivedBytes: p.receivedBytes,
-      totalBytes: p.totalBytes,
-      ratio: p.ratio,
-      ...(bps > 0 ? { bytesPerSec: bps } : {}),
-    });
-  }, headers ?? undefined);
-  handles.set(id, handle);
-  handle.promise
-    .then(() => patch(id, { status: "done", ratio: 1, bytesPerSec: 0 }))
-    .catch((e: unknown) => {
-      if (e instanceof Error && e.name === "AbortError") {
-        patch(id, { status: "canceled", bytesPerSec: 0 });
-        return;
-      }
-      patch(id, { status: "error", error: e instanceof Error ? e.message : "Download failed", bytesPerSec: 0 });
-    })
-    .finally(() => {
-      handles.delete(id);
-      speed.delete(id);
-    });
+  beginDownload(id);
   return id;
 }
 
+function beginDownload(id: string): void {
+  const item = items.get(id);
+  if (!item || handles.has(id)) return;
+  speed.set(id, { bytes: item.receivedBytes, at: Date.now() });
+  const handle = startDownload(
+    id,
+    item.url,
+    item.path,
+    (p) => {
+      const now = Date.now();
+      const s = speed.get(id);
+      let bps = 0;
+      if (s && now - s.at >= 500) {
+        bps = ((p.receivedBytes - s.bytes) / (now - s.at)) * 1000;
+        speed.set(id, { bytes: p.receivedBytes, at: now });
+      }
+      patch(id, {
+        receivedBytes: p.receivedBytes,
+        totalBytes: p.totalBytes,
+        ratio: p.ratio,
+        ...(bps > 0 ? { bytesPerSec: bps } : {}),
+      });
+    },
+    requestHeaders.get(id),
+  );
+  handles.set(id, handle);
+  const completion = handle.promise
+    .then(() => patch(id, { status: "done", ratio: 1, bytesPerSec: 0 }))
+    .catch((e: unknown) => {
+      if (e instanceof Error && e.name === "AbortError") {
+        if (items.get(id)?.status === "paused") return;
+        patch(id, { status: "canceled", bytesPerSec: 0 });
+        return;
+      }
+      patch(id, {
+        status: "error",
+        error: e instanceof Error ? e.message : "Download failed",
+        bytesPerSec: 0,
+      });
+    })
+    .finally(() => {
+      if (handles.get(id) === handle) handles.delete(id);
+      if (completions.get(id) === completion) completions.delete(id);
+      speed.delete(id);
+      if (items.get(id)?.status !== "paused") requestHeaders.delete(id);
+    });
+  completions.set(id, completion);
+}
+
 export function cancelDownload(id: string): void {
+  const item = items.get(id);
+  if (!item || (item.status !== "downloading" && item.status !== "paused")) return;
+  patch(id, { status: "canceled", bytesPerSec: 0 });
+  requestHeaders.delete(id);
   handles.get(id)?.abort();
+}
+
+export function pauseDownload(id: string): void {
+  const item = items.get(id);
+  const handle = handles.get(id);
+  if (!item || item.status !== "downloading" || !handle) return;
+  patch(id, { status: "paused", bytesPerSec: 0 });
+  handle.abort();
+}
+
+export async function resumeDownload(id: string): Promise<void> {
+  if (items.get(id)?.status !== "paused") return;
+  await completions.get(id);
+  if (items.get(id)?.status !== "paused" || handles.has(id)) return;
+  patch(id, { status: "downloading", error: null, bytesPerSec: 0 });
+  beginDownload(id);
 }
 
 export function removeDownload(id: string): void {
   const item = items.get(id);
   handles.get(id)?.abort();
   handles.delete(id);
+  completions.delete(id);
+  requestHeaders.delete(id);
   speed.delete(id);
   if (items.delete(id)) rebuild();
   if (item) {
@@ -254,10 +302,14 @@ function subscribe(listener: () => void): () => void {
 }
 
 export function useDownloads(): DownloadItem[] {
-  return useSyncExternalStore(subscribe, () => snapshot, () => snapshot);
+  return useSyncExternalStore(
+    subscribe,
+    () => snapshot,
+    () => snapshot,
+  );
 }
 
 export function useActiveDownloadCount(): number {
   const all = useDownloads();
-  return all.filter((d) => d.status === "downloading").length;
+  return all.filter((d) => d.status === "downloading" || d.status === "paused").length;
 }

@@ -47,7 +47,7 @@ function extractFilenameLine(s: ParsedStream): string | null {
   return null;
 }
 
-const RESOLUTION_RX = /\b(2160p?|1080p?|720p?|480p?|4k)\b/i;
+const RESOLUTION_RX = /\b(2160p|1080p|720p|480p|4k|uhd)\b/i;
 const HASH_RX = /\[([0-9A-Fa-f]{8})\]/;
 const SEASON_EP_RX = /\b[Ss](\d{1,2})[\s._-]?[Ee](\d{1,4})\b/;
 const SEASON_ONLY_RX = /\b(?:Season|S)[\s._-]?(\d{1,2})\b/i;
@@ -163,7 +163,7 @@ function extractEpisodeTitle(stripped: string, fields: AnitomyFields): string | 
 
 function mapResolution(v: string): Resolution {
   const x = v.toLowerCase();
-  if (x.startsWith("2160") || x === "4k") return "4K";
+  if (x.startsWith("2160") || x === "4k" || x === "uhd") return "4K";
   if (x.startsWith("1080")) return "1080p";
   if (x.startsWith("720")) return "720p";
   if (x.startsWith("480")) return "480p";

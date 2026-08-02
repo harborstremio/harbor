@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Eye, Key, Lock } from "lucide-react";
+import { AlertTriangle, Check, ExternalLink, Eye, Key, Lock } from "lucide-react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { openUrl } from "@/lib/window";
 import { sourceTranslationKey, useT } from "@/lib/i18n";
@@ -33,11 +33,14 @@ export type SectionId =
   | "awardIcons"
   | "webhooks"
   | "bug"
+  | "support"
   | "remotes"
   | "storage"
   | "advanced";
 
-export const SettingsActiveContext = createContext<{ setActive: (s: SectionId) => void } | null>(null);
+export const SettingsActiveContext = createContext<{ setActive: (s: SectionId) => void } | null>(
+  null,
+);
 
 export function useSettingsActiveContext() {
   const v = useContext(SettingsActiveContext);
@@ -57,7 +60,13 @@ export function ExtLink({ href, children }: { href: string; children: React.Reac
 }
 
 export function settingsAnchor(title: string): string {
-  return "set-" + sourceTranslationKey(title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-+|-+$)/g, "");
+  return (
+    "set-" +
+    sourceTranslationKey(title)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-+|-+$)/g, "")
+  );
 }
 
 export function Section({
@@ -76,7 +85,11 @@ export function Section({
   return (
     <section
       id={settingsAnchor(title)}
-      className={bare ? "scroll-mt-28" : "scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"}
+      className={
+        bare
+          ? "scroll-mt-28"
+          : "scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+      }
     >
       {!bare && (
         <div className="flex flex-col gap-1">
@@ -182,7 +195,12 @@ export function KeyField({
               className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md p-1"
               style={{ backgroundColor: iconBg }}
             >
-              <img src={iconSrc} alt="" draggable={false} className="h-full w-full object-contain" />
+              <img
+                src={iconSrc}
+                alt=""
+                draggable={false}
+                className="h-full w-full object-contain"
+              />
             </span>
           ) : (
             <img
@@ -234,7 +252,12 @@ export function KeyField({
                   strokeLinejoin="round"
                 />
                 <circle cx="12" cy="12" r="2.7" stroke="currentColor" strokeWidth="1.6" />
-                <path d="M4 4l16 16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                <path
+                  d="M4 4l16 16"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
               </svg>
             ) : (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -298,6 +321,7 @@ export function ToggleRow({
   note,
   preview,
   newId,
+  warn,
 }: {
   label: string;
   sub?: React.ReactNode;
@@ -308,6 +332,7 @@ export function ToggleRow({
   note?: string;
   preview?: React.ReactNode;
   newId?: string;
+  warn?: string;
 }) {
   const locked = !!lockReason;
   const effective = value && !locked;
@@ -324,9 +349,12 @@ export function ToggleRow({
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
     setHover(false);
   };
-  useEffect(() => () => {
-    if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
+    },
+    [],
+  );
   return (
     <button
       ref={btnRef}
@@ -342,7 +370,11 @@ export function ToggleRow({
           : "border-edge-soft hover:border-edge"
       }`}
     >
-      {preview && <HoverPreviewCard open={hover} anchorRef={btnRef}>{preview}</HoverPreviewCard>}
+      {preview && (
+        <HoverPreviewCard open={hover} anchorRef={btnRef}>
+          {preview}
+        </HoverPreviewCard>
+      )}
       <div className="flex min-w-0 flex-1 items-center gap-3.5">
         <span className={`relative ${locked ? "saturate-50 opacity-70" : ""}`}>
           {leading}
@@ -364,6 +396,12 @@ export function ToggleRow({
               }`}
             >
               {subText}
+            </span>
+          )}
+          {warn && (
+            <span className="mt-1 flex items-start gap-1.5 text-[12.5px] text-danger">
+              <AlertTriangle size={13} strokeWidth={2.4} className="mt-[2px] shrink-0" />
+              {warn}
             </span>
           )}
         </div>

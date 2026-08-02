@@ -8,13 +8,23 @@ import { awardTypeLabel } from "@/lib/providers/wikidata";
 import { awardSourceMeta } from "@/lib/anime-awards";
 import { tmdbPerson, tmdbPersonCached } from "@/lib/providers/tmdb/tmdb-people";
 import type { Meta } from "@/lib/cinemeta";
-import { getMangaReading, subscribeMangaReading, type MangaReadingState } from "@/lib/manga-reading-state";
-import { configureDiscord, setBrowsePresence, setPartyPresence, type BrowsePresence } from "./presence";
+import {
+  getMangaReading,
+  subscribeMangaReading,
+  type MangaReadingState,
+} from "@/lib/manga-reading-state";
+import {
+  configureDiscord,
+  setBrowsePresence,
+  setPartyPresence,
+  type BrowsePresence,
+} from "./presence";
 import { useActivityHint } from "./activity-hint";
+import { HARBOR_API_BASE, HARBOR_RELAY_BASE } from "@/lib/config/endpoints";
 
-const JOIN_BASE = "https://app.harbor.site";
+const JOIN_BASE = HARBOR_RELAY_BASE;
 
-const AWARD_IMG = "https://harbor.site/discord/awards";
+const AWARD_IMG = `${HARBOR_API_BASE}/discord/awards`;
 const NORMAL_AWARD_IMG: Record<string, string> = {
   oscar: "oscar.png",
   emmy: "emmy.png",
@@ -66,7 +76,8 @@ function filterBrowse(f: MetaFilter): BrowsePresence {
   const media = f.mediaType === "movie" ? "movies" : "shows";
   if (f.kind === "year") return { details: `Browsing ${f.value} ${media}` };
   if (f.kind === "runtime") return { details: `Browsing ${media} around ${f.value} min` };
-  if (f.kind === "country") return { details: `Browsing ${media} from ${f.name}`, largeText: f.name };
+  if (f.kind === "country")
+    return { details: `Browsing ${media} from ${f.name}`, largeText: f.name };
   return { details: `Browsing ${f.name} ${media}`, largeText: f.name };
 }
 

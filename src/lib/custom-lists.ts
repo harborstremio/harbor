@@ -41,12 +41,17 @@ export type ListItem = {
 
 export type ListItemInput = { id: string; type?: string; name?: string; poster?: string };
 
+export type ListBgMode = "auto" | "custom";
+
 export type CustomList = {
   id: string;
   name: string;
   createdAt: number;
   updatedAt: number;
   order?: number;
+  coverImage?: string;
+  bgImage?: string;
+  bgMode?: ListBgMode;
   items: ListItem[];
 };
 
@@ -111,6 +116,9 @@ function read(): CustomList[] {
         createdAt: typeof e.createdAt === "number" ? e.createdAt : 0,
         updatedAt: typeof e.updatedAt === "number" ? e.updatedAt : 0,
         order: typeof e.order === "number" ? e.order : undefined,
+        coverImage: typeof e.coverImage === "string" ? e.coverImage : undefined,
+        bgImage: typeof e.bgImage === "string" ? e.bgImage : undefined,
+        bgMode: e.bgMode === "custom" ? "custom" : e.bgMode === "auto" ? "auto" : undefined,
         items,
       });
     }

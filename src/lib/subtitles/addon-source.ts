@@ -41,16 +41,17 @@ export async function gatherSubtitleAddons(authKey: string | null): Promise<Addo
   const localOnly = localInstalled.filter((l) => !seen.has(l.transportUrl));
   dlog(`[addon-source] Local addons (not in cloud): ${localOnly.length}`);
   
-  const localFull = await withSubtitleTimeout(
-    Promise.all(
-      localOnly.map(async (l): Promise<Addon | null> => {
-        if (l.manifest) return { manifest: l.manifest, transportUrl: l.transportUrl };
-        const manifest = await fetchManifestAt(l.transportUrl).catch(() => null);
-        return manifest ? { manifest, transportUrl: l.transportUrl } : null;
-      }),
-    ),
-    SUBTITLE_PROVIDER_TIMEOUT_MS,
-    [] as Array<Addon | null>,
+  const localFull = await Promise.all(
+    localOnly.map((l): Promise<Addon | null> => {
+      if (l.manifest) return Promise.resolve({ manifest: l.manifest, transportUrl: l.transportUrl });
+      return withSubtitleTimeout(
+        fetchManifestAt(l.transportUrl)
+          .then((manifest) => (manifest ? { manifest, transportUrl: l.transportUrl } : null))
+          .catch(() => null),
+        SUBTITLE_PROVIDER_TIMEOUT_MS,
+        null,
+      );
+    }),
   );
   
   const merged = [...cloud, ...localFull.filter((a): a is Addon => a != null)];

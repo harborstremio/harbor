@@ -1,7 +1,8 @@
 import type { Meta } from "@/lib/cinemeta";
 import { safeFetch } from "@/lib/safe-fetch";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const HOSTED_URL = "https://harbor.site/api/hero/anime.json";
+const HOSTED_URL = `${HARBOR_API_BASE}/api/hero/anime.json`;
 const CACHE_KEY = "harbor.anime.hero.hosted.v5";
 const TTL_MS = 3 * 60 * 60 * 1000;
 

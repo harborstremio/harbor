@@ -1,6 +1,7 @@
 import { UserPlus, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { PRESENCE_META } from "@/lib/social/presence";
 import { AddFriendsModal } from "./add-friends-modal";
 import { Avatar } from "./profile-bits";
 import { UserHoverCard } from "./user-hover-card";
@@ -9,6 +10,12 @@ import type { Friend } from "./profile-types";
 const FRIENDS_PAGE = 6;
 const FRIENDS_STEP = 12;
 
+function friendDotClass(f: Friend): string {
+  const s = f.presence ?? f.status;
+  if (s === "online" || s === "away" || s === "dnd" || s === "offline") return PRESENCE_META[s].dot;
+  return f.online ? "bg-success" : "bg-ink-subtle";
+}
+
 function FriendRow({ f, onOpen }: { f: Friend; onOpen?: (h: string) => void }) {
   return (
     <UserHoverCard handle={f.handle}>
@@ -16,7 +23,7 @@ function FriendRow({ f, onOpen }: { f: Friend; onOpen?: (h: string) => void }) {
         onClick={() => onOpen?.(f.handle)}
         className="flex w-full min-h-11 items-center gap-3 rounded-[10px] px-2 py-1.5 text-start transition-colors hover:bg-elevated"
       >
-        <Avatar src={f.avatarUrl} size={40} online={f.online} alias={f.alias} />
+        <Avatar src={f.avatarUrl} size={40} dotClass={friendDotClass(f)} alias={f.alias} />
         <div className="min-w-0 flex-1">
           <div className="truncate text-[14px] font-medium text-ink">{f.alias}</div>
           <div className="truncate text-[12px] text-ink-subtle">{f.slogan || `@${f.handle}`}</div>
@@ -31,11 +38,13 @@ export function FriendsPanel({
   onOpen,
   isOwner = false,
   total,
+  visibilityPrivate = false,
 }: {
   friends: Friend[];
   onOpen?: (h: string) => void;
   isOwner?: boolean;
   total?: number;
+  visibilityPrivate?: boolean;
 }) {
   const t = useT();
   const [addOpen, setAddOpen] = useState(false);
@@ -57,7 +66,10 @@ export function FriendsPanel({
   }, [lockH, paginated, friends.length]);
   const mutual = friends.filter((f) => f.mutual);
   return (
-    <section aria-label={t("Friends")} className="rounded-[14px] bg-surface p-4 ring-1 ring-edge-soft">
+    <section
+      aria-label={t("Friends")}
+      className="rounded-[14px] bg-surface p-4 ring-1 ring-edge-soft"
+    >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
           <Users size={20} /> {t("Friends")}
@@ -72,7 +84,13 @@ export function FriendsPanel({
             </button>
           )}
           <span className="text-[12px] tabular-nums text-ink-subtle">
-            <span className="text-success">{online.length}</span> / {total ?? friends.length}
+            {visibilityPrivate ? (
+              total ?? 0
+            ) : (
+              <>
+                <span className="text-success">{online.length}</span> / {total ?? friends.length}
+              </>
+            )}
           </span>
         </div>
       </div>
@@ -92,15 +110,21 @@ export function FriendsPanel({
           </span>
         </div>
       )}
-      {friends.length === 0 ? (
+      {visibilityPrivate ? (
+        <p className="py-6 text-center text-[13px] text-ink-subtle">
+          {t("This user keeps their friends private")}
+        </p>
+      ) : friends.length === 0 ? (
         <p className="py-6 text-center text-[13px] text-ink-subtle">
           {isOwner ? t("Add friends to see them here.") : t("No friends to show yet")}
         </p>
       ) : (
         <div className="flex flex-col gap-1.5">
-          <div ref={listRef}
+          <div
+            ref={listRef}
             style={lockH != null ? { height: lockH } : undefined}
-            className="harbor-scroll flex max-h-[440px] flex-col gap-0.5 overflow-y-auto pe-0.5">
+            className="harbor-scroll flex max-h-[440px] flex-col gap-0.5 overflow-y-auto pe-0.5"
+          >
             {vOnline.length > 0 && (
               <div className="px-2 pb-1 pt-0.5 text-[11px] uppercase tracking-[0.1em] text-success">
                 {t("Online now")}

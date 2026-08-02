@@ -45,7 +45,7 @@ export function looksLikeSpam(text: string): boolean {
   if (/(.)\1{6,}/.test(trimmed)) return true;
   const letters = trimmed.replace(/[^a-z]/gi, "");
   if (letters.length > 12 && letters === letters.toUpperCase()) return true;
-  const symbols = trimmed.replace(/[a-z0-9\s]/gi, "").length;
+  const symbols = trimmed.replace(/[\p{L}\p{N}\s]/gu, "").length;
   if (symbols > trimmed.length * 0.5) return true;
   return false;
 }
@@ -53,7 +53,15 @@ export function looksLikeSpam(text: string): boolean {
 export const COMMENT_MAX = 280;
 export const COMMENT_COOLDOWN_MS = 15000;
 
-export type ComposeIssue = "empty" | "url" | "spam" | "too-long" | "cooldown" | null;
+export type ComposeIssue =
+  | "empty"
+  | "url"
+  | "spam"
+  | "too-long"
+  | "cooldown"
+  | "failed"
+  | "signin"
+  | null;
 
 export function validateComment(text: string, lastSentAt: number, now: number): ComposeIssue {
   const trimmed = text.trim();

@@ -1,4 +1,6 @@
 const settings: Record<string, string> = {
+  "Smooth scrolling": "Deslocamento suave",
+  "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.": "Suaviza o deslocamento com a roda do rato em vez de saltar linha a linha. Desative se preferir uma resposta instantânea ou notar lentidão.",
 "Sign in to Harbor": "Iniciar sessão no Harbor",
   "Create Harbor account": "Criar conta Harbor",
   "Claim your handle": "Reivindicar o seu identificador (@handle)",

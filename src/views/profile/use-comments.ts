@@ -11,7 +11,7 @@ export type CommentsController = {
   cursor?: string;
   hasMore: boolean;
   loadMore: () => void;
-  submit: (raw: string) => Promise<ComposeIssue>;
+  submit: (raw: string, parentId?: string) => Promise<ComposeIssue>;
   remove: (id: string) => void;
   toggleLike: (id: string) => void;
   sending: boolean;
@@ -57,20 +57,20 @@ export function useComments(handle: string): CommentsController {
   }, [handle, cursor, authKey]);
 
   const submit = useCallback(
-    async (raw: string): Promise<ComposeIssue> => {
+    async (raw: string, parentId?: string): Promise<ComposeIssue> => {
       const issue = validateComment(raw, lastSentAt.current, Date.now());
       if (issue) return issue;
-      if (!authKey) return "spam";
+      if (!authKey) return "signin";
       const clean = stripUrls(raw.trim());
       setSending(true);
       try {
-        const created = await postComment(handle, clean);
+        const created = await postComment(handle, clean, parentId);
         lastSentAt.current = Date.now();
-        setComments((cur) => [created, ...cur]);
+        setComments((cur) => [{ ...created, parentId: created.parentId ?? parentId }, ...cur]);
         setState("ready");
         return null;
       } catch (e) {
-        return e instanceof ProfileApiError && e.status === 429 ? "cooldown" : "spam";
+        return e instanceof ProfileApiError && e.status === 429 ? "cooldown" : "failed";
       } finally {
         setSending(false);
       }

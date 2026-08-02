@@ -1,6 +1,7 @@
 import { authToken, refreshToken } from "@/lib/theme-auth";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const API = "https://harbor.site/themes/api";
+const API = `${HARBOR_API_BASE}/themes/api`;
 
 function url(path: string): string {
   return `${API}${path}`;
@@ -29,7 +30,10 @@ async function unwrap<T>(r: Response): Promise<T> {
   return d as T;
 }
 
-export async function getJson<T>(path: string, opts?: { bearer?: boolean; signal?: AbortSignal }): Promise<T> {
+export async function getJson<T>(
+  path: string,
+  opts?: { bearer?: boolean; signal?: AbortSignal },
+): Promise<T> {
   const bearer = opts?.bearer ?? false;
   let r = await fetch(url(path), { headers: headers(bearer, false), signal: opts?.signal });
   if (r.status === 401 && bearer && (await refreshToken())) {
@@ -38,10 +42,18 @@ export async function getJson<T>(path: string, opts?: { bearer?: boolean; signal
   return unwrap<T>(r);
 }
 
-export async function postJson<T>(path: string, body: Record<string, unknown>, opts?: { bearer?: boolean }): Promise<T> {
+export async function postJson<T>(
+  path: string,
+  body: Record<string, unknown>,
+  opts?: { bearer?: boolean },
+): Promise<T> {
   const bearer = opts?.bearer ?? false;
   const send = () =>
-    fetch(url(path), { method: "POST", headers: headers(bearer, true), body: JSON.stringify(body) });
+    fetch(url(path), {
+      method: "POST",
+      headers: headers(bearer, true),
+      body: JSON.stringify(body),
+    });
   let r = await send();
   if (r.status === 401 && bearer && (await refreshToken())) r = await send();
   return unwrap<T>(r);

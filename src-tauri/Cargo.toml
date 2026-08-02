@@ -1,6 +1,6 @@
 [package]
 name = "harbor"
-version = "0.9.115"
+version = "0.9.116"
 description = "A Stremio client built for adventure"
 edition = "2021"
 

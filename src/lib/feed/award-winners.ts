@@ -3,6 +3,7 @@ import type { AwardCategory } from "@/lib/awards-catalog";
 import { readAwardHistory } from "@/lib/awards-history";
 import { tmdbSearchMovie } from "@/lib/providers/tmdb";
 import type { AwardType } from "@/lib/providers/wikidata";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
 const CACHE_KEY = "harbor.discover.awards.v1";
 const MAX_TITLES = 150;
@@ -24,7 +25,10 @@ const SOURCES: Array<[AwardType, AwardCategory]> = [
 ];
 
 function normTitle(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function winnerTitles(): Array<{ title: string; year: number }> {
@@ -97,7 +101,7 @@ async function resolveAll(tmdbKey: string): Promise<Meta[]> {
   }
 }
 
-const HOSTED_URL = "https://harbor.site/feed/award-winners.json";
+const HOSTED_URL = `${HARBOR_API_BASE}/feed/award-winners.json`;
 let hostedMemo: Meta[] | null = null;
 let hostedTried = false;
 

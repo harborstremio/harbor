@@ -4,6 +4,7 @@ import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { langScore, pickBestTrack } from "@/lib/subtitles/language";
 import { fetchSubtitlesIntoPlayer, streamHintsOf } from "@/lib/subtitles/fetch-into-player";
 import { publishSubtitleSearch } from "@/components/player/subtitle-menu/subtitle-search-store";
+import { publishSubtitleContext } from "@/components/player/subtitle-menu/subtitle-context-store";
 import { readPlayerPrefs, type PerShowPrefs } from "@/lib/player-prefs";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
 import type { Addon } from "@/lib/addons";
@@ -142,6 +143,7 @@ export function useTrackAutoload(params: {
       searchImdbId ?? null,
       src.meta.behaviorHints?.defaultVideoId ?? null,
     );
+    publishSubtitleContext({ candidateIds, stremioId: src.meta.id ?? null });
     const animeIds = candidateIds.some((i) => i.startsWith("kitsu:") || i.startsWith("mal:"));
     const imdbEpAligned =
       !animeIds || src.episode?.imdbEpisode == null || src.episode.episode === src.episode.imdbEpisode;

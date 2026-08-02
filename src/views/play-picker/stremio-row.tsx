@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Play } from "lucide-react";
+import { Check, Download, Play } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
 import { CopyLinkButton, resolveStreamLink } from "@/components/player/copy-link-button";
 import { DubSubPill, streamDubSub } from "@/components/dub-sub-pill";
@@ -15,6 +15,7 @@ export function StremioRow({
   match = null,
   onPlay,
   download = false,
+  downloadState = "idle",
   isAnime = false,
 }: {
   stream: ScoredStream;
@@ -23,6 +24,7 @@ export function StremioRow({
   match?: "same" | "close" | null;
   onPlay: () => void;
   download?: boolean;
+  downloadState?: "idle" | "preparing" | "queued";
   isAnime?: boolean;
 }) {
   const { settings } = useSettings();
@@ -34,6 +36,13 @@ export function StremioRow({
   const badges = settings.showQualityBadge ? streamBadges(stream) : [];
   const dubSub = settings.showDubBadge ? streamDubSub(stream.audioLanguages, isAnime) : null;
   const link = resolveStreamLink(stream);
+  const preparing = download && downloadState === "preparing";
+  const queued = download && downloadState === "queued";
+  const downloadLabel = preparing
+    ? "Preparing download"
+    : queued
+      ? "Added to downloads"
+      : "Download";
   return (
     <div
       className={`flex items-stretch gap-5 rounded-2xl bg-elevated/40 p-5 ring-1 transition-colors ${
@@ -68,25 +77,88 @@ export function StremioRow({
             <EditionChip stream={stream} />
           </div>
         )}
-        {failed && (
-          <p className="text-[13px] font-medium text-danger">Unavailable, try another.</p>
-        )}
+        {failed && <p className="text-[13px] font-medium text-danger">Unavailable, try another.</p>}
       </div>
       <div className="flex shrink-0 items-center gap-2 self-center">
         {link && <CopyLinkButton url={link} size={16} className="h-9 w-9" />}
         <button
-          onClick={onPlay}
-          aria-label={download ? "Download" : "Play"}
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-accent text-canvas shadow-[0_2px_6px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.18)] transition-[transform,box-shadow] duration-150 ease-out hover:shadow-[0_5px_14px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.18)] active:scale-[0.96] active:duration-100"
+          type="button"
+          onClick={() => {
+            if (!preparing && !queued) onPlay();
+          }}
+          aria-disabled={preparing || queued}
+          aria-label={download ? downloadLabel : "Play"}
+          className={
+            download
+              ? `source-download-button flex h-9 min-w-[116px] shrink-0 items-center justify-center gap-2.5 rounded-full border px-5 text-[13px] font-medium tracking-tight transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.96] active:duration-100 aria-disabled:cursor-default aria-disabled:active:scale-100 motion-reduce:transition-none ${
+                  queued
+                    ? "border-accent/25 bg-accent-soft text-accent"
+                    : "border-ink/[0.06] bg-ink/[0.04] text-ink hover:scale-[1.02] hover:bg-ink/[0.07] aria-disabled:hover:scale-100"
+                }`
+              : "flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-accent text-canvas shadow-[0_2px_6px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.18)] transition-[transform,box-shadow,background-color,color] duration-150 ease-out hover:shadow-[0_5px_14px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.18)] active:scale-[0.96] active:duration-100"
+          }
         >
-          {download ? (
-            <ArrowDownToLine size={25} strokeWidth={2.4} />
+          {preparing ? (
+            <>
+              <TrailingDots />
+              <span>Preparing</span>
+            </>
+          ) : queued ? (
+            <>
+              <Check size={16} strokeWidth={2.5} aria-hidden="true" />
+              <span>Added</span>
+            </>
+          ) : download ? (
+            <>
+              <span className="relative h-4 w-4 shrink-0" aria-hidden="true">
+                <Download
+                  size={16}
+                  strokeWidth={2.2}
+                  className="source-download-morph-icon source-download-morph-icon-default absolute inset-0"
+                />
+                <Check
+                  size={16}
+                  strokeWidth={2.5}
+                  className="source-download-morph-icon source-download-morph-icon-check absolute inset-0"
+                />
+              </span>
+              <span>Download</span>
+            </>
           ) : (
             <Play size={26} fill="currentColor" className="ml-0.5" />
           )}
         </button>
+        {download && (
+          <span className="sr-only" aria-live="polite">
+            {downloadState === "idle" ? "" : downloadLabel}
+          </span>
+        )}
       </div>
     </div>
+  );
+}
+
+const TRAILING_DOTS = [0, 1, 2, 3, 4] as const;
+
+function TrailingDots() {
+  return (
+    <span className="relative h-5 w-5 shrink-0" aria-hidden="true">
+      {TRAILING_DOTS.map((i) => (
+        <span
+          key={i}
+          className="source-download-trailing-dot absolute inset-0"
+          style={{
+            animationDelay: `${i * -0.1}s`,
+            transform: `rotate(${i * 72}deg)`,
+          }}
+        >
+          <span
+            className="absolute left-1/2 top-0 h-1.5 w-1.5 -ml-[3px] rounded-full bg-current"
+            style={{ opacity: 1 - i * 0.16 }}
+          />
+        </span>
+      ))}
+    </span>
   );
 }
 

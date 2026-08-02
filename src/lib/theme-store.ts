@@ -1,9 +1,15 @@
-import { getCustomThemes, parseThemeJson, saveCustomTheme, type CustomTheme } from "@/lib/custom-themes";
+import {
+  getCustomThemes,
+  parseThemeJson,
+  saveCustomTheme,
+  type CustomTheme,
+} from "@/lib/custom-themes";
 import { scanTheme } from "@/lib/theme-scan";
 import { authToken } from "./theme-auth";
 import { getDownloadRecords, recordDownloadedTheme } from "@/lib/theme-updates";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const ORIGIN = "https://harbor.site";
+const ORIGIN = HARBOR_API_BASE;
 const API = `${ORIGIN}/themes/api`;
 const UPLOADS_KEY = "harbor.theme-uploads.v1";
 const CLIENT_KEY = "harbor.theme-client-id";
@@ -48,14 +54,18 @@ function normalize(t: Record<string, unknown>): StoreTheme {
     ...(t as unknown as StoreTheme),
     authorAvatar: abs(t.authorAvatar as string | null),
     cover: bust(abs(t.cover as string | null), rev),
-    screenshots: ((t.screenshots as string[]) || []).map((s) => bust(abs(s), rev) as string).filter(Boolean),
+    screenshots: ((t.screenshots as string[]) || [])
+      .map((s) => bust(abs(s), rev) as string)
+      .filter(Boolean),
   };
 }
 
 export function clientId(): string {
   let id = localStorage.getItem(CLIENT_KEY);
   if (!id) {
-    id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`).replace(/-/g, "").slice(0, 24);
+    id = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`)
+      .replace(/-/g, "")
+      .slice(0, 24);
     localStorage.setItem(CLIENT_KEY, id);
   }
   return id;
@@ -74,7 +84,11 @@ export async function browseThemes(sort = "top", q = ""): Promise<StoreTheme[]> 
   return (d.themes || []).map(normalize);
 }
 
-export async function downloadTheme(id: string, preview?: string | null, versionsCount?: number): Promise<CustomTheme> {
+export async function downloadTheme(
+  id: string,
+  preview?: string | null,
+  versionsCount?: number,
+): Promise<CustomTheme> {
   const r = await fetch(`${API}/themes/${id}/file?clientId=${encodeURIComponent(clientId())}`);
   if (!r.ok) throw new Error("Download failed.");
   const parsed = parseThemeJson(await r.text());
@@ -155,6 +169,7 @@ export async function rateTheme(id: string, value: number): Promise<StoreTheme> 
 export type ThemeComment = {
   id: string;
   themeId: string;
+  parentId?: string | null;
   author: string;
   authorId: string;
   authorHandle?: string | null;
@@ -167,6 +182,7 @@ export type ThemeComment = {
 function normalizeComment(c: Record<string, unknown>): ThemeComment {
   return {
     ...(c as unknown as ThemeComment),
+    parentId: typeof c.parentId === "string" ? c.parentId : null,
     authorHandle: typeof c.authorHandle === "string" ? c.authorHandle : null,
     authorAvatar: abs(c.authorAvatar as string | null),
   };
@@ -179,11 +195,15 @@ export async function listComments(themeId: string): Promise<ThemeComment[]> {
   return ((d.comments as Record<string, unknown>[]) || []).map(normalizeComment);
 }
 
-export async function postComment(themeId: string, body: string): Promise<ThemeComment> {
+export async function postComment(
+  themeId: string,
+  body: string,
+  parentId?: string,
+): Promise<ThemeComment> {
   const r = await fetch(`${API}/themes/${themeId}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
-    body: JSON.stringify({ body }),
+    body: JSON.stringify(parentId ? { body, parentId } : { body }),
   });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d.error || "Could not post your comment.");
@@ -216,11 +236,17 @@ export type ThemeNotification = {
   read: boolean;
 };
 
-export async function listNotifications(): Promise<{ notifications: ThemeNotification[]; unread: number }> {
+export async function listNotifications(): Promise<{
+  notifications: ThemeNotification[];
+  unread: number;
+}> {
   const r = await fetch(`${API}/me/notifications`, { headers: authHeaders() });
   if (!r.ok) throw new Error("Could not load notifications.");
   const d = await r.json();
-  const notifications = ((d.notifications || []) as ThemeNotification[]).map((n) => ({ ...n, cover: abs(n.cover) }));
+  const notifications = ((d.notifications || []) as ThemeNotification[]).map((n) => ({
+    ...n,
+    cover: abs(n.cover),
+  }));
   return { notifications, unread: d.unread || 0 };
 }
 
@@ -279,7 +305,11 @@ export async function uploadTheme(
   return d;
 }
 
-export async function setVisibility(id: string, ownerToken: string, visibility: "public" | "unlisted"): Promise<void> {
+export async function setVisibility(
+  id: string,
+  ownerToken: string,
+  visibility: "public" | "unlisted",
+): Promise<void> {
   const r = await fetch(`${API}/themes/${id}/visibility`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${ownerToken}` },
@@ -316,13 +346,19 @@ export async function updateTheme(
   if (cover) fd.append("cover", cover, "cover.png");
   for (const s of screenshots.slice(0, 6)) fd.append("screenshots", s, "shot.png");
   if (changelog) fd.append("changelog", changelog);
-  const r = await fetch(`${API}/themes/${id}/update`, { method: "POST", headers: authHeaders(), body: fd });
+  const r = await fetch(`${API}/themes/${id}/update`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: fd,
+  });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d.error || "Update failed.");
   return normalize(d);
 }
 
-export async function themeVersions(id: string): Promise<{ v: number; changelog: string; createdAt: string }[]> {
+export async function themeVersions(
+  id: string,
+): Promise<{ v: number; changelog: string; createdAt: string }[]> {
   const r = await fetch(`${API}/themes/${id}/versions`, { headers: authHeaders() });
   if (!r.ok) throw new Error("Could not load version history.");
   const d = await r.json();

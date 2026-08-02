@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { queueItemAfter, queueItemBefore, useQueue } from "@/lib/queue";
+import { queueIndexOf, useQueue } from "@/lib/queue";
 import type { PlayEpisode, PlayerSrc } from "@/lib/view";
 
 export function useQueueNav(params: {
@@ -18,10 +18,16 @@ export function useQueueNav(params: {
 }) {
   const { src, adjacent, canChangeEpisode, isLiveLike, queueDrivesNav, goToEpisode, openPicker } =
     params;
-  useQueue();
-  const queueNav = queueDrivesNav && !isLiveLike;
-  const queueNextItem = queueNav ? queueItemAfter(src.meta, src.episode) : null;
-  const queuePrevItem = queueNav ? queueItemBefore(src.meta, src.episode) : null;
+  const queue = useQueue();
+  const queueNav = queueDrivesNav && !isLiveLike && queue.length > 0;
+  const currentQueueIdx = queueNav ? queueIndexOf(src.meta, src.episode) : -1;
+  const queueNextItem = !queueNav
+    ? null
+    : currentQueueIdx >= 0
+      ? (queue[currentQueueIdx + 1] ?? null)
+      : (queue[0] ?? null);
+  const queuePrevItem =
+    queueNav && currentQueueIdx > 0 ? (queue[currentQueueIdx - 1] ?? null) : null;
   const hasNextEpisodeNow = (canChangeEpisode && !!adjacent.next) || !!queueNextItem;
   const hasPrevEpisodeNow = (canChangeEpisode && !!adjacent.prev) || !!queuePrevItem;
   const playNext = () => {

@@ -1,8 +1,9 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { fingerprint } from "@/lib/skip-intro/fingerprint";
 import type { PlayerStreamRef } from "@/lib/view";
+import { HARBOR_BUGS_BASE } from "@/lib/config/endpoints";
 
-const REPORT_URL = "https://bugs.harbor.site/v1/adreport";
+const REPORT_URL = `${HARBOR_BUGS_BASE}/v1/adreport`;
 
 export type AdRange = { startSec: number; endSec: number };
 

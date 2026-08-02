@@ -19,7 +19,7 @@ import { buildPlayInvite } from "@/lib/together/build-invite";
 import { type PlayEpisode, type PlayerSrc } from "@/lib/view";
 import { openInAppBrowser, openUrl } from "@/lib/window";
 import { enqueueDownload } from "@/lib/download/downloads-store";
-import { formatStreamQuality, humanError, isDebridFailure } from "./picker-utils";
+import { formatStreamQuality, humanError, isDebridFailure, streamIdentity } from "./picker-utils";
 
 export function usePickHandler({
   meta,
@@ -40,7 +40,6 @@ export function usePickHandler({
   claimHost,
   openPlayer,
   intent,
-  onDownloadStarted,
   autoActive,
   autoAttemptIdx,
   autoCandidatesLength,
@@ -69,7 +68,6 @@ export function usePickHandler({
   claimHost: (fresh: boolean) => void;
   openPlayer: (src: PlayerSrc) => void;
   intent?: "play" | "download";
-  onDownloadStarted?: (label?: string | null) => void;
   autoActive: boolean;
   autoAttemptIdx: number;
   autoCandidatesLength: number;
@@ -81,8 +79,11 @@ export function usePickHandler({
   setResolving: Dispatch<SetStateAction<{ stream: ScoredStream } | null>>;
 }) {
   const [queuedHash, setQueuedHash] = useState<string | null>(null);
+  const [queuedDownloadKeys, setQueuedDownloadKeys] = useState<Set<string>>(() => new Set());
   const [debridDown, setDebridDown] = useState(false);
-  const [p2pConfirm, setP2pConfirm] = useState<{ stream: ScoredStream; forceP2p?: boolean } | null>(null);
+  const [p2pConfirm, setP2pConfirm] = useState<{ stream: ScoredStream; forceP2p?: boolean } | null>(
+    null,
+  );
   const debridFailStreakRef = useRef(0);
   const resolveAcRef = useRef<AbortController | null>(null);
   const autoPickRef = useRef(false);
@@ -123,9 +124,19 @@ export function usePickHandler({
     resolveAcRef.current = ac;
     let opened = false;
     try {
-      const hint = episode ? { season: episode.season ?? null, episode: episode.episode ?? null } : undefined;
+      const hint = episode
+        ? { season: episode.season ?? null, episode: episode.episode ?? null }
+        : undefined;
       const allowP2pFallback = streamMode !== "addons";
-      const r = await resolveStream(stream, debrids, ac.signal, userCommitted, forceP2p, hint, allowP2pFallback);
+      const r = await resolveStream(
+        stream,
+        debrids,
+        ac.signal,
+        userCommitted,
+        forceP2p,
+        hint,
+        allowP2pFallback,
+      );
       if (ac.signal.aborted) return;
       if (!r.ok) {
         if (r.code === "web-page" && r.webUrl) {
@@ -161,7 +172,8 @@ export function usePickHandler({
         } catch (e) {
           setFailedStreams((prev) => new Set(prev).add(stream));
           const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
-          if (!willRetry) setResolveError("Could not start the local stream proxy. Pick another stream.");
+          if (!willRetry)
+            setResolveError("Could not start the local stream proxy. Pick another stream.");
           advanceAuto();
           return;
         }
@@ -188,7 +200,9 @@ export function usePickHandler({
         const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
         advanceAuto();
         if (!willRetry && !autoActive) {
-          setResolveError("This source isn't ready on your debrid yet. Try it again in a moment or pick another.");
+          setResolveError(
+            "This source isn't ready on your debrid yet. Try it again in a moment or pick another.",
+          );
         }
         return;
       }
@@ -200,10 +214,20 @@ export function usePickHandler({
           stream.name ||
           stream.addonName ||
           null;
-        void enqueueDownload({ meta, episode, streamLabel: label, url: r.data.url, headers: r.data.headers });
+        await enqueueDownload({
+          meta,
+          episode,
+          streamLabel: label,
+          url: r.data.url,
+          headers: r.data.headers,
+        });
         opened = true;
+        setQueuedDownloadKeys((prev) => {
+          const next = new Set(prev);
+          next.add(streamIdentity(stream));
+          return next;
+        });
         setResolving(null);
-        onDownloadStarted?.(label);
         return;
       }
       if (inSession && canInvite && inviteSentRef.current == null) {
@@ -264,7 +288,7 @@ export function usePickHandler({
         savePlayback(meta.id, entry, episode?.season, episode?.episode);
         if (seasonLock && episode) {
           const animeId = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
-          saveSeasonLock(meta.id, entry, animeId ? null : episode.season ?? null, animeId);
+          saveSeasonLock(meta.id, entry, animeId ? null : (episode.season ?? null), animeId);
         }
       }
     } finally {
@@ -310,7 +334,7 @@ export function usePickHandler({
       engineP2pEligible(stream) &&
       (hasUncachedMarker(stream) || (!stream.url && debrids.length === 0))
     ) {
-      setP2pConfirm({ stream });
+      setP2pConfirm({ stream, forceP2p: true });
       return;
     }
     startResolve(stream, committed);
@@ -339,14 +363,19 @@ export function usePickHandler({
     const ac = new AbortController();
     resolveAcRef.current?.abort();
     resolveAcRef.current = ac;
-    const r = await target.queueCache(stream.infoHash, ac.signal);
-    if (ac.signal.aborted) return;
-    setResolving(null);
-    if (!r.ok) {
-      setResolveError(humanError(r.code));
-      return;
+    try {
+      const r = await target.queueCache(stream.infoHash, ac.signal);
+      if (ac.signal.aborted) return;
+      if (!r.ok) {
+        setResolveError(humanError(r.code));
+        return;
+      }
+      setQueuedHash(stream.infoHash);
+    } catch {
+      if (!ac.signal.aborted) setResolveError(humanError("error"));
+    } finally {
+      if (!ac.signal.aborted) setResolving(null);
     }
-    setQueuedHash(stream.infoHash);
   };
 
   useEffect(
@@ -372,5 +401,16 @@ export function usePickHandler({
     sameSourceRetryRef.current = 0;
   };
 
-  return { onPlay, onCache, queuedHash, debridDown, resetDebridDown, abortResolve, p2pConfirm, confirmP2p, cancelP2p };
+  return {
+    onPlay,
+    onCache,
+    queuedHash,
+    queuedDownloadKeys,
+    debridDown,
+    resetDebridDown,
+    abortResolve,
+    p2pConfirm,
+    confirmP2p,
+    cancelP2p,
+  };
 }

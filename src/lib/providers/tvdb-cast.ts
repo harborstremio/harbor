@@ -1,8 +1,9 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { kitsuToTvdb } from "./anime-mapping";
 import type { CastEntry } from "./tmdb/tmdb-details";
+import { HARBOR_TVDB_BASE } from "@/lib/config/endpoints";
 
-const V4 = "https://harbor.site/api/tvdb/v4";
+const V4 = `${HARBOR_TVDB_BASE}/api/tvdb/v4`;
 
 type TvdbCharacter = {
   name?: string | null;
@@ -19,7 +20,9 @@ const inflight = new Map<string, Promise<CastEntry[]>>();
 
 function img(v: string | null | undefined): string | null {
   if (!v) return null;
-  return v.startsWith("http") ? v : `https://artworks.thetvdb.com${v.startsWith("/") ? "" : "/"}${v}`;
+  return v.startsWith("http")
+    ? v
+    : `https://artworks.thetvdb.com${v.startsWith("/") ? "" : "/"}${v}`;
 }
 
 async function v4<T>(rel: string): Promise<T | null> {

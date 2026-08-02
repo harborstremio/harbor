@@ -3,6 +3,7 @@ import type { MyRating } from "@/lib/ratings/types";
 import type { CwCard } from "@/lib/continue-watching";
 import type { MediaEntry } from "@/lib/media-list-store";
 import type { MangaFavEntry } from "@/lib/manga-favorites";
+import type { WatchEvent } from "@/lib/watch-events";
 
 import { wasImported, type ImportReceipt } from "@/lib/ratings/import/receipts";
 
@@ -31,9 +32,23 @@ export function buildActivityFeed(input: {
   favorites: MediaEntry[];
   mangaFavorites: MangaFavEntry[];
   imports?: ImportReceipt[];
+  watchEvents?: WatchEvent[];
 }): ActivityFeedItem[] {
   const items: ActivityFeedItem[] = [];
   const receipts = input.imports ?? [];
+
+  for (const w of input.watchEvents ?? []) {
+    items.push({
+      kind: "finished",
+      metaId: w.id,
+      mediaType: withAnime(w.id, w.type),
+      title: w.name,
+      poster: w.poster,
+      subtitle:
+        w.type === "series" && w.season && w.episode ? `S${w.season} E${w.episode}` : undefined,
+      at: w.at,
+    });
+  }
 
   for (const c of input.cw) {
     if (!(c.progress > 0)) continue;

@@ -1,9 +1,10 @@
 import type { Meta } from "@/lib/cinemeta";
 import { safeFetch } from "@/lib/safe-fetch";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
 export type HeroFeed = "trending" | "trakt" | "simkl" | "classic";
 
-const HOSTED_URL = "https://harbor.site/feed/hero-pool.json";
+const HOSTED_URL = `${HARBOR_API_BASE}/feed/hero-pool.json`;
 const CACHE_KEY = "harbor.heroPool.v1";
 const TTL = 3 * 60 * 60 * 1000;
 

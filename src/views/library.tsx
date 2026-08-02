@@ -1,4 +1,4 @@
-import { BarChart3, Bookmark, Clock, HardDrive, Layers, Library, Star } from "lucide-react";
+import { BarChart3, Bookmark, Clock, Eye, EyeOff, HardDrive, Layers, Library, Star } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import anilistLogo from "@/assets/anilist.png";
@@ -64,6 +64,7 @@ function readSavedTab(): Tab {
 
 export function LibraryView({ active }: { active: boolean }) {
   const [tab, setTab] = useState<Tab>(readSavedTab);
+  const { settings } = useSettings();
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: anilistConnected } = useAnilist();
   const { isConnected: malConnected } = useMal();
@@ -127,7 +128,7 @@ export function LibraryView({ active }: { active: boolean }) {
     >
       <LibraryFeaturedProvider>
         <div {...contentDrag} className="flex flex-col gap-7">
-          <LibraryHero tabKey={tab} />
+          {settings.libraryHero && <LibraryHero tabKey={tab} />}
           <Header
             tab={tab}
             onTab={setTab}
@@ -188,7 +189,7 @@ function Header({
 }) {
   const t = useT();
   const { setView } = useView();
-  const { settings } = useSettings();
+  const { settings, update } = useSettings();
   return (
     <header className="flex flex-col gap-5">
       <div className="flex items-end justify-between gap-6">
@@ -205,15 +206,33 @@ function Header({
             )}
           </p>
         </div>
-        {settings.wrappedButton && (
+        <div className="flex shrink-0 items-center gap-4 self-center">
           <button
-            onClick={() => setView("wrapped")}
-            className="flex shrink-0 items-center gap-1.5 self-center text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
+            type="button"
+            onClick={() => update({ libraryHero: !settings.libraryHero })}
+            title={t("Show a featured banner at the top of your library")}
+            className={`flex items-center gap-1.5 text-[13px] font-medium transition-colors ${
+              settings.libraryHero ? "text-ink" : "text-ink-muted hover:text-ink"
+            }`}
           >
-            <BarChart3 size={15} strokeWidth={2} />
-            {t("Stats")}
+            {settings.libraryHero ? (
+              <Eye size={15} strokeWidth={2} />
+            ) : (
+              <EyeOff size={15} strokeWidth={2} />
+            )}
+            {t("Featured")}
           </button>
-        )}
+          {settings.wrappedButton && (
+            <button
+              type="button"
+              onClick={() => setView("wrapped")}
+              className="flex items-center gap-1.5 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
+            >
+              <BarChart3 size={15} strokeWidth={2} />
+              {t("Stats")}
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-1 border-b border-edge-soft">
         <TabBtn active={tab === "library"} onClick={() => onTab("library")}>

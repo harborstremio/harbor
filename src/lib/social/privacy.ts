@@ -1,8 +1,9 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { authToken } from "@/lib/theme-auth";
 import type { ProfileSummary } from "@/views/profile/profile-types";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const ENDPOINT = "https://harbor.site/themes/api/social/me/profile";
+const ENDPOINT = `${HARBOR_API_BASE}/themes/api/social/me/profile`;
 
 export async function setPrivate(next: boolean): Promise<ProfileSummary> {
   const token = authToken();

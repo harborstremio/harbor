@@ -1,9 +1,10 @@
 import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
 import { safeFetch as tauriFetch } from "@/lib/safe-fetch";
+import { HARBOR_TVDB_BASE } from "@/lib/config/endpoints";
 
 const BASE = "https://api4.thetvdb.com/v4";
-const PROXY_V4 = "https://harbor.site/api/tvdb/v4";
+const PROXY_V4 = `${HARBOR_TVDB_BASE}/api/tvdb/v4`;
 const TOKEN_KEY = "harbor.tvdb.token.v1";
 const TOKEN_TTL_MS = 23 * 60 * 60 * 1000;
 
@@ -16,7 +17,11 @@ function tvdbImg(v: unknown): string | undefined {
 function isDisplayableName(s: string): boolean {
   for (let i = 0; i < s.length; i += 1) {
     const c = s.charCodeAt(i);
-    if ((c >= 0x3040 && c <= 0x30ff) || (c >= 0x3400 && c <= 0x9fff) || (c >= 0xac00 && c <= 0xd7af))
+    if (
+      (c >= 0x3040 && c <= 0x30ff) ||
+      (c >= 0x3400 && c <= 0x9fff) ||
+      (c >= 0xac00 && c <= 0xd7af)
+    )
       return false;
   }
   return true;
@@ -34,9 +39,7 @@ type SearchHit = {
 
 function seriesIdFromRemote(data: SearchHit[]): number | null {
   const hit =
-    data.find((h) => h.series?.id != null) ??
-    data.find((h) => h.type === "series") ??
-    data[0];
+    data.find((h) => h.series?.id != null) ?? data.find((h) => h.type === "series") ?? data[0];
   const raw = hit?.series?.id ?? hit?.tvdb_id;
   const id = Number(raw);
   return Number.isFinite(id) && id > 0 ? id : null;
@@ -203,7 +206,10 @@ export async function tvdbSeriesByRemote(apiKey: string, remoteId: string): Prom
 
 export async function tvdbSeries(apiKey: string, seriesId: number): Promise<TvdbSeries | null> {
   if (!seriesId) return null;
-  const data = await getJson<any>(apiKey, `/series/${seriesId}/extended?meta=translations&short=false`);
+  const data = await getJson<any>(
+    apiKey,
+    `/series/${seriesId}/extended?meta=translations&short=false`,
+  );
   if (!data) return null;
   const aliases: string[] = Array.from(
     new Set((data.aliases ?? []).map((a: any) => a?.name).filter(Boolean) as string[]),
@@ -224,10 +230,23 @@ export async function tvdbSeries(apiKey: string, seriesId: number): Promise<Tvdb
   };
 }
 
-export type TvdbOrderType = "aired" | "dvd" | "absolute" | "tvdbabsolute" | "alternate" | "regional";
+export type TvdbOrderType =
+  | "aired"
+  | "dvd"
+  | "absolute"
+  | "tvdbabsolute"
+  | "alternate"
+  | "regional";
 export type TvdbSeasonTypeOption = { value: TvdbOrderType; label: string };
 
-const ORDER_PRIORITY: TvdbOrderType[] = ["aired", "dvd", "absolute", "tvdbabsolute", "alternate", "regional"];
+const ORDER_PRIORITY: TvdbOrderType[] = [
+  "aired",
+  "dvd",
+  "absolute",
+  "tvdbabsolute",
+  "alternate",
+  "regional",
+];
 
 function defaultOrderLabel(value: TvdbOrderType): string {
   const map: Record<TvdbOrderType, string> = {
@@ -254,10 +273,14 @@ export async function tvdbSeasonTypes(
     if (!slug) continue;
     const value = (slug === "official" ? "aired" : slug) as TvdbOrderType;
     if (!ORDER_PRIORITY.includes(value)) continue;
-    if (!labels.has(value)) labels.set(value, (s?.type?.name as string) || defaultOrderLabel(value));
+    if (!labels.has(value))
+      labels.set(value, (s?.type?.name as string) || defaultOrderLabel(value));
   }
   if (labels.has("absolute")) labels.set("tvdbabsolute", defaultOrderLabel("tvdbabsolute"));
-  return ORDER_PRIORITY.filter((v) => labels.has(v)).map((v) => ({ value: v, label: labels.get(v)! }));
+  return ORDER_PRIORITY.filter((v) => labels.has(v)).map((v) => ({
+    value: v,
+    label: labels.get(v)!,
+  }));
 }
 
 export async function tvdbSeasonNames(
@@ -302,10 +325,34 @@ export async function tvdbEpisodes(
 }
 
 const ISO1_TO_TVDB: Record<string, string> = {
-  en: "eng", es: "spa", fr: "fra", de: "deu", it: "ita", ja: "jpn", ko: "kor",
-  ru: "rus", pt: "por", zh: "zho", ar: "ara", nl: "nld", pl: "pol", tr: "tur",
-  sv: "swe", da: "dan", fi: "fin", no: "nor", cs: "ces", hu: "hun", el: "ell",
-  he: "heb", th: "tha", vi: "vie", id: "ind", uk: "ukr", ro: "ron", hi: "hin",
+  en: "eng",
+  es: "spa",
+  fr: "fra",
+  de: "deu",
+  it: "ita",
+  ja: "jpn",
+  ko: "kor",
+  ru: "rus",
+  pt: "por",
+  zh: "zho",
+  ar: "ara",
+  nl: "nld",
+  pl: "pol",
+  tr: "tur",
+  sv: "swe",
+  da: "dan",
+  fi: "fin",
+  no: "nor",
+  cs: "ces",
+  hu: "hun",
+  el: "ell",
+  he: "heb",
+  th: "tha",
+  vi: "vie",
+  id: "ind",
+  uk: "ukr",
+  ro: "ron",
+  hi: "hin",
 };
 
 export function tvdbLangFromIso1(iso1: string | null | undefined): string {
@@ -371,10 +418,7 @@ export async function tvdbEpisodesAbsolute(
   if (!seriesId) return [];
   const out: TvdbEpisode[] = [];
   for (let page = 0; page < 12; page++) {
-    const data = await getJson<any>(
-      apiKey,
-      `/series/${seriesId}/episodes/absolute?page=${page}`,
-    );
+    const data = await getJson<any>(apiKey, `/series/${seriesId}/episodes/absolute?page=${page}`);
     const arr = (data?.episodes ?? []) as any[];
     if (arr.length === 0) break;
     for (const e of arr) {

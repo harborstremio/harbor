@@ -67,6 +67,7 @@ import { useAnnouncement } from "@/lib/announcements";
 import { AnnouncementHero } from "@/components/announcement-hero";
 import { fetchAnilistTrendingAnime } from "@/lib/anilist/browse";
 import { useSettings } from "@/lib/settings";
+import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
 import { useContentDrag } from "@/lib/window-drag";
 import { isAdultAnime } from "@/lib/addons-store/adult-filter";
 import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
@@ -737,6 +738,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     setScrollEl(el);
   }, []);
   useScrollMemory("anime", scrollRef, active);
+  const animeCollections = useCollectionRowsForPage("anime");
 
   const prevActiveRef = useRef(active);
   useEffect(() => {
@@ -992,6 +994,25 @@ export function AnimeView({ active = true }: { active?: boolean }) {
                   >
                     {row.metas.map((m, i) => (
                       <PickCard key={`${m.id}-${i}`} meta={cleanMeta(m)} />
+                    ))}
+                  </Row>
+                ),
+              });
+            }
+            for (const c of animeCollections) {
+              if (c.items.length === 0) continue;
+              const key = `collection-${c.id}`;
+              const nm = nameOf(key, c.name);
+              rd.push({
+                key,
+                name: nm,
+                node: (
+                  <Row title={nm}>
+                    {c.items.map((it, i) => (
+                      <PickCard
+                        key={`${it.id}-${i}`}
+                        meta={{ id: it.id, type: it.type, name: it.name, poster: it.poster }}
+                      />
                     ))}
                   </Row>
                 ),

@@ -150,6 +150,7 @@ const importService = () => import("@/views/service");
 const importSettings = () => import("@/views/settings");
 const importShows = () => import("@/views/shows");
 const importLibrary = () => import("@/views/library");
+const importCommunityCollections = () => import("@/views/collections/community-hub");
 const importLive = () => import("@/views/live");
 const importVod = () => import("@/views/playlist-vod");
 const importDownloads = () => import("@/views/downloads");
@@ -187,6 +188,9 @@ const EpisodeDetailView = lazy(() =>
 );
 const CollectionsView = lazy(() =>
   import("@/views/collections").then((m) => ({ default: m.CollectionsView })),
+);
+const CommunityCollectionsView = lazy(() =>
+  importCommunityCollections().then((m) => ({ default: m.CommunityCollectionsView })),
 );
 const PlayPicker = lazy(() => importPlayPicker().then((m) => ({ default: m.PlayPicker })));
 const PlayerView = lazy(() => importPlayer().then((m) => ({ default: m.PlayerView })));
@@ -248,6 +252,7 @@ function useViewPreloader(tmdbKey: string) {
       void importOnboarding();
       void importCatalogs();
       void importLibrary();
+      void importCommunityCollections();
       void importDownloads();
       void importGrid();
       void importWrapped();
@@ -1131,6 +1136,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const kidsTop = topKind === "kids";
   const showsTop = topKind === "shows";
   const libraryTop = topKind === "library";
+  const collectionsHubTop = topKind === "collections-hub";
   const liveTop = topKind === "live";
   const vodTop = topKind === "vod";
   const downloadsTop = topKind === "downloads";
@@ -1210,6 +1216,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const kidsAlive = useIdleEvict(kidsTop);
   const showsAlive = useIdleEvict(showsTop);
   const libraryAlive = useIdleEvict(libraryTop);
+  const collectionsHubAlive = useIdleEvict(collectionsHubTop);
   const liveAlive = useIdleEvict(liveTop);
   const vodAlive = useIdleEvict(vodTop);
   const downloadsAlive = useIdleEvict(downloadsTop);
@@ -1336,6 +1343,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
           <div className={layer(libraryTop)}>
             <Suspense fallback={null}>
               <LibraryView active={libraryTop} />
+            </Suspense>
+          </div>
+        )}
+        {collectionsHubAlive && (
+          <div className={layer(collectionsHubTop)}>
+            <Suspense fallback={null}>
+              <CommunityCollectionsView active={collectionsHubTop} />
             </Suspense>
           </div>
         )}

@@ -5,6 +5,7 @@ import { profileFromMeta } from "@/lib/discover/profile";
 import { trackEvent } from "@/lib/discover/store";
 import { isExternalPlaylistId } from "@/lib/iptv/vod";
 import { saveLocalCw } from "@/lib/local-cw";
+import { recordWatchEvent } from "@/lib/watch-events";
 import { isLocalUrl } from "@/lib/player/local-url";
 import { isManuallyWatched, recordManualWatchedMeta, setManualWatched } from "@/lib/manual-watched";
 import { savePlayback } from "@/lib/playback-history";
@@ -108,6 +109,17 @@ export function useResumeAutosave(params: {
       void syncSeriesWatchedToStremio(s.meta, rv ? rid : null);
     }
     if (s.meta.type === "movie" && finished) setMovieWatchedLocal(id, true);
+    if (finished) {
+      recordWatchEvent({
+        id,
+        type: s.meta.type === "movie" ? "movie" : "series",
+        name: s.meta.name,
+        poster: s.meta.poster,
+        season: cs,
+        episode: ep,
+        at: Date.now(),
+      });
+    }
     const animeLocal = ANIME_CLOUD_ID.test(id);
     const ttAnimeUnmapped =
       id.startsWith("tt") &&

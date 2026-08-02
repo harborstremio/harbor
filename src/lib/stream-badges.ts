@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
 import type { BadgeKind } from "@/components/format-badge";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
 const KEY = "harbor.streamBadges.v1";
 
@@ -61,7 +62,11 @@ export function badgeState(): StreamBadgeState {
 }
 
 export function useBadgeState(): StreamBadgeState {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  return useSyncExternalStore(
+    subscribe,
+    () => state,
+    () => state,
+  );
 }
 
 export function useBadgeOverride(kind: BadgeKind): BadgeOverride | undefined {
@@ -204,7 +209,7 @@ const KIND_ALIASES: Record<string, BadgeKind> = {
   hdr: "hdr",
   hdr10: "hdr10",
   "hdr10+": "hdr10-plus",
-  "hdr10plus": "hdr10-plus",
+  hdr10plus: "hdr10-plus",
   dv: "dv",
   "dolby vision": "dv",
   hlg: "hlg",
@@ -267,7 +272,11 @@ const KIND_ALIASES: Record<string, BadgeKind> = {
 };
 
 export function aliasFor(name: string): BadgeKind | null {
-  const norm = name.trim().toLowerCase().replace(/[^\w+.:\s-]/g, "").trim();
+  const norm = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w+.:\s-]/g, "")
+    .trim();
   return KIND_ALIASES[norm] ?? null;
 }
 
@@ -463,12 +472,13 @@ export type CommunityPack = {
 } & ({ kind: "nuvio"; url: string } | { kind: "art"; art: Partial<Record<BadgeKind, string>> });
 
 const ELITE = "https://raw.githubusercontent.com/leonevz/Elite-Badges/main/Badges";
-const NSVG = "https://raw.githubusercontent.com/dwivedisankalp97/nuvio-svg-badges/main/dist/v17/svg";
+const NSVG =
+  "https://raw.githubusercontent.com/dwivedisankalp97/nuvio-svg-badges/main/dist/v17/svg";
 const NARD = "https://raw.githubusercontent.com/vowl313/NardBadges/refs/heads/main";
-const MINIMAL = "https://harbor.site/badges/minimal";
-const ABSTRACT = "https://harbor.site/badges/abstract";
-const HARBORLIGHT = "https://harbor.site/badges/harbor-light";
-const HARBORCOLOR = "https://harbor.site/badges/harbor-color";
+const MINIMAL = `${HARBOR_API_BASE}/badges/minimal`;
+const ABSTRACT = `${HARBOR_API_BASE}/badges/abstract`;
+const HARBORLIGHT = `${HARBOR_API_BASE}/badges/harbor-light`;
+const HARBORCOLOR = `${HARBOR_API_BASE}/badges/harbor-color`;
 
 export const COMMUNITY_PACKS: CommunityPack[] = [
   {
@@ -478,7 +488,11 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     author: "Harbor",
     description: "Clean minimal icons for common tags",
     count: "101 badges",
-    previews: [`${MINIMAL}/res-4k.webp`, `${MINIMAL}/aud-atmos.webp`, `${MINIMAL}/vis-hdr10plus.webp`],
+    previews: [
+      `${MINIMAL}/res-4k.webp`,
+      `${MINIMAL}/aud-atmos.webp`,
+      `${MINIMAL}/vis-hdr10plus.webp`,
+    ],
     url: `${MINIMAL}.json`,
   },
   {
@@ -488,7 +502,11 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     author: "Harbor",
     description: "Sleek abstract icons for common tags",
     count: "67 badges",
-    previews: [`${ABSTRACT}/4k-ultra-hd.webp`, `${ABSTRACT}/dolby-atmos.webp`, `${ABSTRACT}/hdr10-plus.webp`],
+    previews: [
+      `${ABSTRACT}/4k-ultra-hd.webp`,
+      `${ABSTRACT}/dolby-atmos.webp`,
+      `${ABSTRACT}/hdr10-plus.webp`,
+    ],
     url: `${ABSTRACT}.json`,
   },
   {
@@ -496,9 +514,14 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "nuvio",
     name: "Harbor Light",
     author: "Harbor",
-    description: "Premium light set spanning resolutions, audio, HDR, release tiers, torrent groups, quality ranks and languages.",
+    description:
+      "Premium light set spanning resolutions, audio, HDR, release tiers, torrent groups, quality ranks and languages.",
     count: "206 badges",
-    previews: [`${HARBORLIGHT}/res-4k.webp`, `${HARBORLIGHT}/aud-atmos.webp`, `${HARBORLIGHT}/vis-dv.webp`],
+    previews: [
+      `${HARBORLIGHT}/res-4k.webp`,
+      `${HARBORLIGHT}/aud-atmos.webp`,
+      `${HARBORLIGHT}/vis-dv.webp`,
+    ],
     url: `${HARBORLIGHT}.json`,
   },
   {
@@ -506,9 +529,14 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "nuvio",
     name: "Harbor Color",
     author: "Harbor",
-    description: "Full-color edition of the premium set: vivid resolution, audio, HDR, release tier and streaming marks.",
+    description:
+      "Full-color edition of the premium set: vivid resolution, audio, HDR, release tier and streaming marks.",
     count: "206 badges",
-    previews: [`${HARBORCOLOR}/res-4k.webp`, `${HARBORCOLOR}/aud-atmos.webp`, `${HARBORCOLOR}/stream-netflix.webp`],
+    previews: [
+      `${HARBORCOLOR}/res-4k.webp`,
+      `${HARBORCOLOR}/aud-atmos.webp`,
+      `${HARBORCOLOR}/stream-netflix.webp`,
+    ],
     url: `${HARBORCOLOR}.json`,
   },
   {
@@ -516,7 +544,8 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "nuvio",
     name: "NardBadges",
     author: "vowl313",
-    description: "Comprehensive set covering resolutions, HDR and Dolby Vision combos, audio, streaming providers, ranked release tiers, SeaDex and languages.",
+    description:
+      "Comprehensive set covering resolutions, HDR and Dolby Vision combos, audio, streaming providers, ranked release tiers, SeaDex and languages.",
     count: "106 badges",
     previews: [`${NARD}/res-4k.png`, `${NARD}/aud-atmos.png`, `${NARD}/vis-hdr10plus.png`],
     url: `${NARD}/NardBadges.json`,
@@ -526,7 +555,8 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "nuvio",
     name: "Nuvio Badges",
     author: "dustincos",
-    description: "The flagship Nuvio ruleset. Glow badges for 4K, Dolby Vision, HDR10+, IMAX, full audio coverage, and provider tags.",
+    description:
+      "The flagship Nuvio ruleset. Glow badges for 4K, Dolby Vision, HDR10+, IMAX, full audio coverage, and provider tags.",
     count: "~60 rules",
     previews: [
       "https://raw.githubusercontent.com/9mousaa/BetterFormatter/main/images/colored-remux.png",
@@ -540,7 +570,8 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "nuvio",
     name: "Elite Badges",
     author: "LeoneVZ",
-    description: "Clean high-contrast PNG badges for sources, resolutions, codecs, audio and channels.",
+    description:
+      "Clean high-contrast PNG badges for sources, resolutions, codecs, audio and channels.",
     count: "~40 rules",
     previews: [`${ELITE}/remux.png`, `${ELITE}/4k.png`, `${ELITE}/atmos.png`],
     url: "https://raw.githubusercontent.com/leonevz/Elite-Badges/main/badges.json",
@@ -550,7 +581,8 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "nuvio",
     name: "Nuvio SVG Badges",
     author: "dwivedisankalp97",
-    description: "Crisp vector badges that stay sharp at any size. Quality, resolution, visual, audio and channel groups.",
+    description:
+      "Crisp vector badges that stay sharp at any size. Quality, resolution, visual, audio and channel groups.",
     count: "~45 rules",
     previews: [`${NSVG}/remux.svg`, `${NSVG}/4k.svg`, `${NSVG}/atmos.svg`],
     url: "https://raw.githubusercontent.com/dwivedisankalp97/nuvio-svg-badges/main/dist/badges.json",
@@ -560,7 +592,8 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "nuvio",
     name: "Anupam's Badges",
     author: "anupamparida",
-    description: "Deep ruleset with tier tags, SeaDex releases, languages, bit depth and streaming groups.",
+    description:
+      "Deep ruleset with tier tags, SeaDex releases, languages, bit depth and streaming groups.",
     count: "~108 rules",
     previews: [
       "https://i.postimg.cc/rwh87wwK/SEADEX.png",
@@ -574,7 +607,8 @@ export const COMMUNITY_PACKS: CommunityPack[] = [
     kind: "art",
     name: "BetterFormatter Colored",
     author: "9mousaa",
-    description: "Swaps Harbor's built-in badge art for BetterFormatter's colored set. No rules, pure art remap.",
+    description:
+      "Swaps Harbor's built-in badge art for BetterFormatter's colored set. No rules, pure art remap.",
     count: "21 remaps",
     previews: [`${BF}/colored-remux.png`, `${BF}/4k.png`, `${BF}/vision.png`],
     art: {

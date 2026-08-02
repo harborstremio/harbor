@@ -205,7 +205,7 @@ export function ProfileHoverCard({
         top: placed?.top ?? anchor.bottom + 8,
         visibility: placed ? "visible" : "hidden",
       }}
-      className={`fixed z-[200] cursor-pointer overflow-hidden rounded-[20px] border border-edge bg-elevated/95 shadow-[0_28px_70px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl ${
+      className={`fixed z-[260] cursor-pointer overflow-hidden rounded-[20px] border border-edge bg-elevated/95 shadow-[0_28px_70px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl ${
         reduced ? "" : "animate-popover-in"
       }`}
     >

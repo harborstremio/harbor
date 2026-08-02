@@ -37,13 +37,13 @@ export async function resolveMeta(
     if (addonAccepts(a, "meta", type, id) && !isCinemeta(a)) candidates.push(a);
   }
 
+  const cinemetaOff = !cinemetaEnabled();
+
   if (candidates.length === 0) {
-    return cinemetaPromise;
+    return cinemetaOff ? cinemetaMeta(type, id, true).catch(() => null) : cinemetaPromise;
   }
 
   const addonRaces = candidates.map((a) => ({ a, p: fetchAddonMeta(a, type, id) }));
-
-  const cinemetaOff = !cinemetaEnabled();
 
   if (cinemetaOff) {
     let firstAny: Meta | null = null;
@@ -57,7 +57,8 @@ export async function resolveMeta(
         firstAddon = a;
       }
     }
-    return firstAny && firstAddon ? withOrigin(firstAny, firstAddon) : null;
+    if (firstAny && firstAddon) return withOrigin(firstAny, firstAddon);
+    return cinemetaMeta(type, id, true).catch(() => null);
   }
 
   if (preferCustomMeta()) {
@@ -91,6 +92,15 @@ function withOrigin(meta: Meta, addon: Addon): Meta {
       base,
     },
   };
+}
+
+export function hasCustomMetaAddon(): boolean {
+  return localAddons().some(
+    (a) =>
+      !isCinemeta(a) &&
+      (addonAccepts(a, "meta", "movie", "tt0000000") ||
+        addonAccepts(a, "meta", "series", "tt0000000")),
+  );
 }
 
 function isCinemeta(addon: Addon): boolean {

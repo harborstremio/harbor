@@ -1,5 +1,6 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { SkipKind, SkipSegment } from "./types";
+import { warnProviderFailure } from "./provider-log";
 
 type RawSeg = {
   start_ms?: number | null;
@@ -40,7 +41,8 @@ export function fetchIntroDbAppSegments(
   const p = (async () => {
     const res = await fetch(`https://api.introdb.app/segments?${key}`);
     if (!res.ok) {
-      cache.set(key, []);
+      if (res.status === 404) cache.set(key, []);
+      else warnProviderFailure("introdb-app", res.status, key);
       return [];
     }
     const json = (await res.json()) as RawResponse;

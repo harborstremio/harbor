@@ -11,7 +11,13 @@ import { useCategories } from "@/lib/providers/stremio-addons";
 import { prefetchTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
 import { relatedAddons, recommendedAddons } from "@/lib/addons-store/recommend";
 import { loadDisplayOrder } from "@/lib/addons-store/reorder";
-import { fetchManifestAt, installAddon, installFromUrl, loadInstalled, uninstallAddon } from "@/lib/addon-store";
+import {
+  fetchManifestAt,
+  installAddon,
+  installFromUrl,
+  loadInstalled,
+  uninstallAddon,
+} from "@/lib/addon-store";
 import { useAuth } from "@/lib/auth";
 import streamsIcon from "@/assets/category/streams.svg";
 import catalogsIcon from "@/assets/category/catalogs.svg";
@@ -98,24 +104,29 @@ export function AddonsView() {
   const toastTimerRef = useRef<number | null>(null);
   const [installModal, setInstallModal] = useState<
     | { kind: "install"; url: string }
-    | { kind: "manage"; existing: { id: string; name: string; logo?: string | null; transportUrl: string } }
+    | {
+        kind: "manage";
+        existing: { id: string; name: string; logo?: string | null; transportUrl: string };
+      }
     | null
   >(null);
   const [reorderOpen, setReorderOpen] = useState(false);
 
   useEffect(() => {
     let unlisten: (() => void) | null = null;
-    void import("@/lib/deep-link").then(({ onDeepLinkInstall, consumePendingDeepLink, clearPendingDeepLink }) => {
-      const pending = consumePendingDeepLink();
-      if (pending && !window.__harborInstallerOpen) {
-        setInstallModal({ kind: "install", url: pending });
-      }
-      unlisten = onDeepLinkInstall((rawUrl) => {
-        if (window.__harborInstallerOpen) return;
-        clearPendingDeepLink();
-        setInstallModal({ kind: "install", url: rawUrl });
-      });
-    });
+    void import("@/lib/deep-link").then(
+      ({ onDeepLinkInstall, consumePendingDeepLink, clearPendingDeepLink }) => {
+        const pending = consumePendingDeepLink();
+        if (pending && !window.__harborInstallerOpen) {
+          setInstallModal({ kind: "install", url: pending });
+        }
+        unlisten = onDeepLinkInstall((rawUrl) => {
+          if (window.__harborInstallerOpen) return;
+          clearPendingDeepLink();
+          setInstallModal({ kind: "install", url: rawUrl });
+        });
+      },
+    );
     return () => {
       unlisten?.();
     };
@@ -136,9 +147,12 @@ export function AddonsView() {
     setToast({ kind, text, addon });
     toastTimerRef.current = window.setTimeout(() => setToast(null), kind === "error" ? 5000 : 3000);
   };
-  useEffect(() => () => {
-    if (toastTimerRef.current != null) window.clearTimeout(toastTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (toastTimerRef.current != null) window.clearTimeout(toastTimerRef.current);
+    },
+    [],
+  );
 
   const allAddons = useMemo(() => [...byId.values()], [byId]);
 
@@ -172,7 +186,10 @@ export function AddonsView() {
         openAddonDetail(manifest?.id ?? r.manifest?.id ?? r.curated?.id ?? r.transportUrl);
         return;
       }
-      const addon = await installAddon(manifest?.id ?? r.manifest?.id ?? r.curated?.id ?? "", r.transportUrl);
+      const addon = await installAddon(
+        manifest?.id ?? r.manifest?.id ?? r.curated?.id ?? "",
+        r.transportUrl,
+      );
       window.dispatchEvent(
         new CustomEvent("harbor:addons-changed", {
           detail: { id: addon.manifest.id, installed: true },
@@ -317,7 +334,9 @@ export function AddonsView() {
                   <div key={tabId} className="group relative">
                     {btn}
                     <div className="pointer-events-none invisible absolute start-0 top-full z-50 mt-2 w-80 rounded-xl border border-edge-soft bg-elevated/95 px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted opacity-0 shadow-xl backdrop-blur-md transition duration-150 group-hover:visible group-hover:opacity-100">
-                      {t("Popular community addons ranked by the public directory's stars. Install anything else by URL on the Browse tab.")}
+                      {t(
+                        "Popular community addons ranked by the public directory's stars. Install anything else by URL on the Browse tab.",
+                      )}
                     </div>
                   </div>
                 );
@@ -330,7 +349,12 @@ export function AddonsView() {
               <SearchBar value={query} onChange={setQuery} />
             </div>
             <div className="min-w-0 flex-[1.4]">
-              <AddByUrlBar onSubmit={async (raw) => { setInstallModal({ kind: "install", url: raw }); }} compact />
+              <AddByUrlBar
+                onSubmit={async (raw) => {
+                  setInstallModal({ kind: "install", url: raw });
+                }}
+                compact
+              />
             </div>
             <button
               onClick={() => {
@@ -353,7 +377,16 @@ export function AddonsView() {
                 }`}
               >
                 {settings.showAdultAddons && (
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" className="text-canvas">
+                  <svg
+                    width="8"
+                    height="8"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    className="text-canvas"
+                  >
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
@@ -393,22 +426,24 @@ export function AddonsView() {
                 >
                   {t("All")}
                 </button>
-                {saCategories.filter((c) => settings.showAdultAddons || c.slug !== "nsfw").map((c) => {
-                  const active = categoryFilter === c.slug;
-                  return (
-                    <button
-                      key={c.slug}
-                      onClick={() => setCategoryFilter(c.slug)}
-                      className={`flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${
-                        active
-                          ? "bg-ink text-canvas"
-                          : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated/70 hover:text-ink"
-                      }`}
-                    >
-                      <span>{c.name}</span>
-                    </button>
-                  );
-                })}
+                {saCategories
+                  .filter((c) => settings.showAdultAddons || c.slug !== "nsfw")
+                  .map((c) => {
+                    const active = categoryFilter === c.slug;
+                    return (
+                      <button
+                        key={c.slug}
+                        onClick={() => setCategoryFilter(c.slug)}
+                        className={`flex h-10 items-center gap-2 rounded-full px-4 text-[13.5px] font-semibold transition-colors ${
+                          active
+                            ? "bg-ink text-canvas"
+                            : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated/70 hover:text-ink"
+                        }`}
+                      >
+                        <span>{c.name}</span>
+                      </button>
+                    );
+                  })}
                 <span aria-hidden className="mx-1 h-6 w-px shrink-0 bg-edge-soft" />
                 {BROWSE_MODES.map((m) => {
                   const active = browseMode === m.id;
@@ -494,7 +529,11 @@ export function AddonsView() {
               refetch();
               showToast(
                 "ok",
-                result.replaced ? t("Updated") : result.syncedToStremio ? t("Installed") : t("Installed locally"),
+                result.replaced
+                  ? t("Updated")
+                  : result.syncedToStremio
+                    ? t("Installed")
+                    : t("Installed locally"),
                 {
                   id: result.addon.manifest.id,
                   name: result.addon.manifest.name,
@@ -566,11 +605,29 @@ function RemoteOrLocalDetail({
     setRemote(null);
     setFailed(false);
     (async () => {
-      const { communityFor, ensureCommunityIndex } = await import(
-        "@/lib/providers/stremio-addons-index"
-      );
+      const { recallPendingAddon } = await import("@/lib/addons-store/pending-detail");
+      const carried = recallPendingAddon(addonDetailId);
+      if (carried) {
+        const manifest =
+          (carried.manifest as ResolvedAddon["manifest"] | null) ??
+          ((await fetchManifestAt(carried.manifestUrl).catch(
+            () => null,
+          )) as ResolvedAddon["manifest"] | null);
+        if (cancelled) return;
+        if (manifest) {
+          setRemote({
+            manifest,
+            transportUrl: carried.manifestUrl,
+            source: "community",
+            installed: installedIds.has(addonDetailId),
+          });
+          return;
+        }
+      }
+      const { communityForLoose, ensureCommunityIndex } =
+        await import("@/lib/providers/stremio-addons-index");
       await ensureCommunityIndex().catch(() => undefined);
-      const community = communityFor(addonDetailId);
+      const community = communityForLoose(addonDetailId);
       if (!community) {
         if (!cancelled) setFailed(true);
         return;
@@ -603,9 +660,7 @@ function RemoteOrLocalDetail({
   const recs = useMemo(() => {
     if (!resolved) return { related: [] as ResolvedAddon[], recommended: [] as ResolvedAddon[] };
     const related = relatedAddons(resolved, allAddons, 8);
-    const exclude = new Set(
-      related.map((r) => r.manifest?.id ?? r.curated?.id ?? r.transportUrl),
-    );
+    const exclude = new Set(related.map((r) => r.manifest?.id ?? r.curated?.id ?? r.transportUrl));
     exclude.add(addonDetailId);
     const recommended = recommendedAddons(resolved, allAddons, installedIds, exclude, 8);
     return { related, recommended };

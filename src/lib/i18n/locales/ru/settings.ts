@@ -1,4 +1,6 @@
 const settings: Record<string, string> = {
+  "Smooth scrolling": "Плавная прокрутка",
+  "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.": "Плавная прокрутка колёсиком мыши вместо рывков по строкам. Отключите, если предпочитаете мгновенный отклик или заметили задержки.",
   "Sign in to Harbor": "Вход в Harbor",
   "Create Harbor account": "Создать аккаунт Harbor",
   "Claim your handle": "Занять свой ник",

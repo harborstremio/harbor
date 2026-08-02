@@ -1,5 +1,6 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { SkipKind, SkipSegment } from "./types";
+import { warnProviderFailure } from "./provider-log";
 
 type RawSpan = { start_ms: number | null; end_ms: number | null };
 
@@ -22,11 +23,7 @@ function pickId(metaId: string): { tmdb?: string; imdb?: string } | null {
   return null;
 }
 
-function spanToSegment(
-  span: RawSpan,
-  kind: SkipKind,
-  durationSec: number,
-): SkipSegment | null {
+function spanToSegment(span: RawSpan, kind: SkipKind, durationSec: number): SkipSegment | null {
   const startMs = span.start_ms ?? 0;
   const endMs = span.end_ms ?? (durationSec > 0 ? Math.round(durationSec * 1000) : null);
   if (endMs == null) return null;
@@ -48,7 +45,8 @@ async function fetchRaw(cacheKey: string): Promise<RawResponse | null> {
   const p = (async () => {
     const res = await fetch(`https://api.theintrodb.org/v2/media?${cacheKey}`);
     if (!res.ok) {
-      cache.set(cacheKey, null);
+      if (res.status === 404) cache.set(cacheKey, null);
+      else warnProviderFailure("theintrodb", res.status, cacheKey);
       return null;
     }
     const json = (await res.json()) as RawResponse;

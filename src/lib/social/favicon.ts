@@ -1,7 +1,8 @@
 import { authToken } from "@/lib/theme-auth";
 import type { ProfileSummary } from "@/views/profile/profile-types";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const API = "https://harbor.site/themes/api";
+const API = `${HARBOR_API_BASE}/themes/api`;
 const SIZE = 64;
 
 export async function fileToFaviconWebp(file: File): Promise<Blob> {
@@ -22,7 +23,9 @@ export async function fileToFaviconWebp(file: File): Promise<Blob> {
     const w = img.width * scale;
     const h = img.height * scale;
     ctx.drawImage(img, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/webp", 0.9));
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/webp", 0.9),
+    );
     if (!blob) throw new Error("Could not process image.");
     return blob;
   } finally {

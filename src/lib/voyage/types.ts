@@ -8,6 +8,7 @@ export type VoyageTheme = {
   genre?: string;
   accent: string;
   backdrop?: string;
+  seeds?: string[];
 };
 
 export type VoyagePhase = "building" | "sailing";

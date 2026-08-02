@@ -20,6 +20,7 @@ import { useLetterboxd } from "@/lib/stremboxd/provider";
 import { buildLetterboxdHomeRows } from "@/lib/stremboxd/home-rails";
 import { LetterboxdRowMenu } from "@/components/letterboxd/letterboxd-row-menu";
 import type { HomeRow } from "./home/home-types";
+import { useCollectionRowsForPage } from "@/lib/page-collection-rows";
 import { buildMovieHero, HERO_POOL_TARGET, movieSpecs, rotateDaily } from "./movies/movie-specs";
 
 const MAX_PER_ROW = 30;
@@ -242,6 +243,30 @@ export function Movies({ active = true }: { active?: boolean }) {
       .filter((r) => r.metas.length >= 4);
   }, [rows, hero, top10]);
 
+  const movieCollections = useCollectionRowsForPage("movies");
+  const collectionRows = useMemo<MovieRow[]>(
+    () =>
+      movieCollections
+        .filter((c) => c.items.length > 0)
+        .map((c) => ({
+          key: `collection-${c.id}`,
+          title: c.name,
+          metas: c.items.map((it) => ({
+            id: it.id,
+            type: it.type,
+            name: it.name,
+            poster: it.poster,
+          })),
+          page: 1,
+          hasMore: false,
+        })),
+    [movieCollections],
+  );
+  const allRestRows = useMemo(
+    () => [...collectionRows, ...restRows],
+    [collectionRows, restRows],
+  );
+
   return (
     <main ref={scrollCb} className="relative h-full overflow-y-auto overflow-x-hidden bg-canvas">
       <ScrollRootContext.Provider value={scrollEl}>
@@ -316,7 +341,7 @@ export function Movies({ active = true }: { active?: boolean }) {
             </Row>
           )}
           <CatalogRows
-            rows={restRows}
+            rows={allRestRows}
             editMode={pageRows.editMode}
             custom={pageRows.custom}
             onPersist={pageRows.persist}

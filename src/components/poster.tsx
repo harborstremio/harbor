@@ -160,6 +160,12 @@ const ASPECT_PAD: Record<Ratio, string> = {
   wide: "43.75%", // 7 / 16
 };
 
+const RATIO_AR: Record<Ratio, number> = {
+  portrait: 2 / 3,
+  landscape: 16 / 9,
+  wide: 16 / 7,
+};
+
 export function Poster({
   src,
   seed,
@@ -225,11 +231,12 @@ export function Poster({
     if (!inView || qMult === 0) return;
     const el = rootRef.current;
     if (!el) return;
-    const w = el.clientWidth;
-    if (w <= 0) return;
-    const t = Math.ceil(w * (window.devicePixelRatio || 1) * qMult);
+    const box = el.getBoundingClientRect();
+    if (box.width <= 0) return;
+    const need = Math.max(box.width, box.height * RATIO_AR[ratio]);
+    const t = Math.ceil(need * (window.devicePixelRatio || 1) * qMult);
     setTargetPx((prev) => (t > prev ? t : prev));
-  }, [inView, qMult]);
+  }, [inView, qMult, ratio]);
   const rawCandidates = [src, ...(fallbacks ?? [])].filter((u): u is string => !!u);
   const candidates =
     qMult === 0 || targetPx <= 0 ? rawCandidates : rawCandidates.map((u) => sizeImageUrl(u, targetPx));
@@ -431,7 +438,8 @@ function gradient(hue: number) {
 }
 
 function hash(s: string) {
+  const str = typeof s === "string" ? s : "";
   let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i);
+  for (let i = 0; i < str.length; i++) h = (h << 5) - h + str.charCodeAt(i);
   return Math.abs(h);
 }

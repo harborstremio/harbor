@@ -14,7 +14,7 @@ import { useCategoryFeed } from "./collections/use-category-feed";
 const FEED_QUERY = "collection";
 
 function stripSuffix(name: string): string {
-  return name.replace(/\s*[-:]?\s*(?:the\s+)?collection$/i, "").trim() || name;
+  return name.replace(/\s*(?:-|:)?\s*(?:the\s+)?collection$/i, "").trim() || name;
 }
 
 export function CollectionsView() {

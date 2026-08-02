@@ -1,5 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import { safeFetch } from "@/lib/safe-fetch";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
 export type StaticHeroArt = {
   bg?: string;
@@ -12,7 +13,7 @@ export type StaticHeroArt = {
   format?: string;
 };
 
-const URL = "https://harbor.site/anime-hero-art.json";
+const URL = `${HARBOR_API_BASE}/anime-hero-art.json`;
 
 let map: Record<string, StaticHeroArt> | null = null;
 let loading: Promise<void> | null = null;

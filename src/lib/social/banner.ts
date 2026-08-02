@@ -1,7 +1,8 @@
 import { authToken } from "@/lib/theme-auth";
 import type { ProfileSummary } from "@/views/profile/profile-types";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const API = "https://harbor.site/themes/api";
+const API = `${HARBOR_API_BASE}/themes/api`;
 const WIDTH = 1500;
 const HEIGHT = 500;
 
@@ -23,7 +24,9 @@ export async function fileToBannerWebp(file: File): Promise<Blob> {
     const w = img.width * scale;
     const h = img.height * scale;
     ctx.drawImage(img, (WIDTH - w) / 2, (HEIGHT - h) / 2, w, h);
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/webp", 0.9));
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/webp", 0.9),
+    );
     if (!blob) throw new Error("Could not process image.");
     return blob;
   } finally {

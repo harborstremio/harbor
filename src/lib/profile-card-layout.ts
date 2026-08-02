@@ -4,6 +4,9 @@ export type CardKey =
   | "canvas"
   | "showcase"
   | "lists"
+  | "favgames"
+  | "favbooks"
+  | "favmusic"
   | "badges"
   | "activity"
   | "comments";
@@ -14,6 +17,9 @@ export const CARD_ORDER_DEFAULT: CardKey[] = [
   "canvas",
   "showcase",
   "lists",
+  "favgames",
+  "favbooks",
+  "favmusic",
   "badges",
   "activity",
   "comments",
@@ -25,6 +31,9 @@ export const CARD_LABELS: Record<CardKey, string> = {
   canvas: "Custom",
   showcase: "Showcase",
   lists: "Lists",
+  favgames: "Games",
+  favbooks: "Books",
+  favmusic: "Music",
   badges: "Badges",
   activity: "Recent activity",
   comments: "Comments",
@@ -36,8 +45,12 @@ const KNOWN = new Set<string>(CARD_ORDER_DEFAULT);
 
 export function sanitizeLayout(raw: unknown): CardLayout {
   const l = (raw ?? {}) as { order?: unknown; hidden?: unknown };
-  const order = Array.isArray(l.order) ? l.order.filter((k): k is string => typeof k === "string" && KNOWN.has(k)) : [];
-  const hidden = Array.isArray(l.hidden) ? l.hidden.filter((k): k is string => typeof k === "string" && KNOWN.has(k)) : [];
+  const order = Array.isArray(l.order)
+    ? l.order.filter((k): k is string => typeof k === "string" && KNOWN.has(k))
+    : [];
+  const hidden = Array.isArray(l.hidden)
+    ? l.hidden.filter((k): k is string => typeof k === "string" && KNOWN.has(k))
+    : [];
   return { order: [...new Set(order)], hidden: [...new Set(hidden)] };
 }
 
@@ -52,6 +65,18 @@ export function effectiveOrder(layout: CardLayout | undefined, present: CardKey[
     }
   }
   for (const k of present) if (!seen.has(k)) out.push(k);
+  return pinCommentsLast(out);
+}
+
+const ABOVE_COMMENTS: CardKey[] = ["favgames", "favbooks", "favmusic"];
+
+function pinCommentsLast(order: CardKey[]): CardKey[] {
+  const ci = order.indexOf("comments");
+  if (ci < 0) return order;
+  const lastFav = ABOVE_COMMENTS.reduce((acc, k) => Math.max(acc, order.indexOf(k)), -1);
+  if (lastFav < 0 || ci > lastFav) return order;
+  const out: CardKey[] = order.filter((k) => k !== "comments");
+  out.splice(lastFav, 0, "comments");
   return out;
 }
 
@@ -64,13 +89,7 @@ export function moveCard(order: CardKey[], key: CardKey, dir: -1 | 1): CardKey[]
   return next;
 }
 
-export type StatKey =
-  | "watchTime"
-  | "episodes"
-  | "movies"
-  | "read"
-  | "friends"
-  | "badges";
+export type StatKey = "watchTime" | "episodes" | "movies" | "read" | "friends" | "badges";
 
 export const STAT_ORDER: StatKey[] = [
   "watchTime",

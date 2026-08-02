@@ -5,9 +5,10 @@ import darkBoat from "@/assets/lottie/addons-boat-dark.json";
 import harborBoat from "@/assets/lottie/harbor-loader.json";
 import { prefetchTopAddonLogos, prefetchedTopAddonLogos } from "@/lib/providers/addon-logo-prefetch";
 
-type Size = "sm" | "md" | "lg" | "xl";
+type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
 const SIZE_CLASS: Record<Size, string> = {
+  xs: "h-7 w-7",
   sm: "h-20 w-20",
   md: "h-32 w-32",
   lg: "h-44 w-44",

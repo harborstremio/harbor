@@ -1,3 +1,5 @@
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+
 export type ShaderStage = "prescale" | "restore" | "chroma" | "sharpen" | "tonemap";
 export type ShaderContent = "all" | "anime" | "hdr" | "live";
 
@@ -22,8 +24,8 @@ export type ShaderCatalogEntry = {
 
 function demoFor(id: string, credit: string) {
   return {
-    before: `https://harbor.site/shaders/${id}/before.webp`,
-    after: `https://harbor.site/shaders/${id}/after.webp`,
+    before: `${HARBOR_API_BASE}/shaders/${id}/before.webp`,
+    after: `${HARBOR_API_BASE}/shaders/${id}/after.webp`,
     credit,
   };
 }
@@ -49,8 +51,18 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     source: { label: "igv/FSRCNN-TensorFlow", url: "https://github.com/igv/FSRCNN-TensorFlow" },
     files: ["FSRCNNX_x2_16-0-4-1.glsl"],
     variants: [
-      { id: "hq", label: "High quality", sub: "16-0-4-1. The reference variant, heaviest on the GPU.", files: ["FSRCNNX_x2_16-0-4-1.glsl"] },
-      { id: "light", label: "Light", sub: "8-0-4-1. Half the passes, kinder to weaker cards.", files: ["FSRCNNX_x2_8-0-4-1.glsl"] },
+      {
+        id: "hq",
+        label: "High quality",
+        sub: "16-0-4-1. The reference variant, heaviest on the GPU.",
+        files: ["FSRCNNX_x2_16-0-4-1.glsl"],
+      },
+      {
+        id: "light",
+        label: "Light",
+        sub: "8-0-4-1. Half the passes, kinder to weaker cards.",
+        files: ["FSRCNNX_x2_8-0-4-1.glsl"],
+      },
     ],
   },
   {
@@ -62,7 +74,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "AMD FidelityFX Super Resolution. A fast spatial upscaler that fires when the video is smaller than the window. A great default for live action where Anime4K is the wrong tool.",
     stage: "prescale",
-    source: { label: "agyild (gist)", url: "https://gist.github.com/agyild/82219c545228d70c5604f865ce0b0ce5" },
+    source: {
+      label: "agyild (gist)",
+      url: "https://gist.github.com/agyild/82219c545228d70c5604f865ce0b0ce5",
+    },
     files: ["FSR.glsl"],
   },
   {
@@ -74,7 +89,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "NVIDIA Image Scaling. A light spatial upscaler and sharpener, an alternative to FSR that runs well on any GPU.",
     stage: "prescale",
-    source: { label: "agyild (gist)", url: "https://gist.github.com/agyild/7e8951915b2bf24526a9343d951db214" },
+    source: {
+      label: "agyild (gist)",
+      url: "https://gist.github.com/agyild/7e8951915b2bf24526a9343d951db214",
+    },
     files: ["NVScaler.glsl"],
   },
   {
@@ -86,7 +104,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "Qualcomm Snapdragon Game Super Resolution. A very cheap single-pass spatial upscaler, a lighter alternative to FSR on low-power hardware.",
     stage: "prescale",
-    source: { label: "agyild (gist)", url: "https://gist.github.com/agyild/7715b6b1f38427839d58f80884902cab" },
+    source: {
+      label: "agyild (gist)",
+      url: "https://gist.github.com/agyild/7715b6b1f38427839d58f80884902cab",
+    },
     files: ["SGSR.glsl"],
   },
   {
@@ -103,7 +124,12 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     variants: [
       { id: "r3", label: "Radius 3", sub: "The balanced default.", files: ["ravu-lite-r3.hook"] },
       { id: "r4", label: "Radius 4", sub: "Sharpest, heaviest.", files: ["ravu-lite-r4.hook"] },
-      { id: "r2", label: "Radius 2", sub: "Lightest, for weaker cards.", files: ["ravu-lite-r2.hook"] },
+      {
+        id: "r2",
+        label: "Radius 2",
+        sub: "Lightest, for weaker cards.",
+        files: ["ravu-lite-r2.hook"],
+      },
     ],
   },
   {
@@ -118,9 +144,24 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     source: { label: "bjin/mpv-prescalers", url: "https://github.com/bjin/mpv-prescalers" },
     files: ["nnedi3-nns32-win8x4.hook"],
     variants: [
-      { id: "nns32", label: "32 neurons", sub: "The practical default.", files: ["nnedi3-nns32-win8x4.hook"] },
-      { id: "nns64", label: "64 neurons", sub: "Sharper, heavier.", files: ["nnedi3-nns64-win8x4.hook"] },
-      { id: "nns128", label: "128 neurons", sub: "Reference quality, very heavy.", files: ["nnedi3-nns128-win8x4.hook"] },
+      {
+        id: "nns32",
+        label: "32 neurons",
+        sub: "The practical default.",
+        files: ["nnedi3-nns32-win8x4.hook"],
+      },
+      {
+        id: "nns64",
+        label: "64 neurons",
+        sub: "Sharper, heavier.",
+        files: ["nnedi3-nns64-win8x4.hook"],
+      },
+      {
+        id: "nns128",
+        label: "128 neurons",
+        sub: "Reference quality, very heavy.",
+        files: ["nnedi3-nns128-win8x4.hook"],
+      },
     ],
   },
   {
@@ -132,7 +173,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "Runs after an upscaler to recover the detail and sharpness a doubler softens. Best paired with FSRCNNX or RAVU, not used alone.",
     stage: "restore",
-    source: { label: "igv (gist)", url: "https://gist.github.com/igv/2364ffa6e81540f29cb7ab4c9bc05b6b" },
+    source: {
+      label: "igv (gist)",
+      url: "https://gist.github.com/igv/2364ffa6e81540f29cb7ab4c9bc05b6b",
+    },
     files: ["SSimSuperRes.glsl"],
   },
   {
@@ -144,7 +188,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "A high quality chroma upscaler. Fixes the color blur and bleeding of default chroma scaling, most visible on saturated edges and subtitles.",
     stage: "chroma",
-    source: { label: "igv (gist)", url: "https://gist.github.com/igv/a015fc885d5c22e6891820ad89555637" },
+    source: {
+      label: "igv (gist)",
+      url: "https://gist.github.com/igv/a015fc885d5c22e6891820ad89555637",
+    },
     files: ["KrigBilateral.glsl"],
   },
   {
@@ -156,7 +203,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "Edge-aware sharpening that lifts soft detail without the halos of a naive sharpen. An alternative to CAS, run one or the other, not both.",
     stage: "sharpen",
-    source: { label: "igv (gist)", url: "https://gist.github.com/igv/8a77e4eb8276753b54bb94c1c50c317e" },
+    source: {
+      label: "igv (gist)",
+      url: "https://gist.github.com/igv/8a77e4eb8276753b54bb94c1c50c317e",
+    },
     files: ["adaptive-sharpen.glsl"],
   },
   {
@@ -168,7 +218,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "AMD's cheap, natural sharpener. Runs last in the chain and lifts detail on soft sources without the halos of a naive sharpen.",
     stage: "sharpen",
-    source: { label: "agyild (gist)", url: "https://gist.github.com/agyild/bbb4e58298b2f86aa24da3032a0d2ee6" },
+    source: {
+      label: "agyild (gist)",
+      url: "https://gist.github.com/agyild/bbb4e58298b2f86aa24da3032a0d2ee6",
+    },
     files: ["CAS.glsl"],
   },
   {
@@ -180,7 +233,10 @@ export const SHADER_CATALOG: ShaderCatalogEntry[] = [
     description:
       "High quality HDR to SDR tone and gamut mapping as a shader pipeline, for PQ (HDR10) sources. Use this instead of Harbor's built-in tone-mapping. Turn off the built-in HDR to SDR conversion first, it cannot run alongside this. Needs the gpu-next renderer, so it is reliable on Windows and unverified on macOS.",
     stage: "tonemap",
-    source: { label: "natural-harmonia-gropius/hdr-toys", url: "https://github.com/natural-harmonia-gropius/hdr-toys" },
+    source: {
+      label: "natural-harmonia-gropius/hdr-toys",
+      url: "https://github.com/natural-harmonia-gropius/hdr-toys",
+    },
     files: ["clip_both.glsl", "pq_inv.glsl", "astra.glsl", "bottosson.glsl", "bt1886.glsl"],
     companionProps: {
       "tone-mapping": "clip",

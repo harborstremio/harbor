@@ -13,7 +13,7 @@ import { useQueue, useSleepAtEnd, queueIndexOf, setQueuePlaying } from "@/lib/qu
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
 import { isLocalUrl } from "@/lib/player/local-url";
-import { stallWaitMs } from "@/lib/player/stall-wait";
+import { hasPlaybackStartedForStallCheck, stallWaitMs } from "@/lib/player/stall-wait";
 import { useAuth } from "@/lib/auth";
 import { embedFlags } from "./player/player-utils";
 import { useFullscreen } from "./player/hooks/use-fullscreen";
@@ -28,7 +28,7 @@ import { useAutoRetry } from "./player/hooks/use-auto-retry";
 import { useWakeReconnect } from "./player/hooks/use-wake-reconnect";
 import { useEngineStats } from "./player/hooks/use-engine-stats";
 import { useContentAdvisory } from "./player/hooks/use-content-advisory";
-import { setPlaybackDownloaded } from "@/lib/player/playback-clock";
+import { getPlaybackPosition, setPlaybackDownloaded } from "@/lib/player/playback-clock";
 import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
 import { usePauseOnInactive } from "./player/hooks/use-pause-on-inactive";
 import { spoilerMaskFor } from "@/lib/spoilers";
@@ -468,12 +468,24 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   });
 
   const autoAdvancedRef = useRef(false);
+  const playbackStartedRef = useRef(false);
   useEffect(() => {
     autoAdvancedRef.current = false;
+    playbackStartedRef.current = false;
   }, [src.url]);
+  if (
+    hasPlaybackStartedForStallCheck({
+      status: snap.status,
+      positionSec: getPlaybackPosition(),
+      videoWidth: snap.videoWidth,
+      videoHeight: snap.videoHeight,
+    })
+  ) {
+    playbackStartedRef.current = true;
+  }
   useEffect(() => {
     if (snap.status !== "error" || autoAdvancedRef.current) return;
-    if (!src.autoFired || hasStarted || src.isLive || inRoom) return;
+    if (!src.autoFired || playbackStartedRef.current || src.isLive || inRoom) return;
     autoAdvancedRef.current = true;
     if (src.streamRef) markStreamDead(src.streamRef, "load-failed", STUB_TTL_MS);
     exitPlayback();
@@ -482,19 +494,29 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       attempt: (src.attempt ?? 0) + 1,
       resume: src.resume,
     });
-  }, [snap.status, src, hasStarted, inRoom, exitPlayback, openPicker]);
+  }, [snap.status, src, inRoom, exitPlayback, openPicker]);
 
   // Opt-in: advance to the next stream if this pick hasn't started playing within
   // 10s (dead addon / stalled source). First-load only — a hard error is already
   // handled above, and mid-playback buffering is left untouched.
-  const hasStartedRef = useRef(hasStarted);
-  hasStartedRef.current = hasStarted;
   const stallSrcRef = useRef(src);
   stallSrcRef.current = src;
   useEffect(() => {
     if (!settings.autoNextStreamOnStall || src.isLive || inRoom) return;
     const timer = window.setTimeout(() => {
-      if (autoAdvancedRef.current || hasStartedRef.current) return;
+      const currentSnap = snapRef.current;
+      if (
+        autoAdvancedRef.current ||
+        playbackStartedRef.current ||
+        hasPlaybackStartedForStallCheck({
+          status: currentSnap.status,
+          positionSec: getPlaybackPosition(),
+          videoWidth: currentSnap.videoWidth,
+          videoHeight: currentSnap.videoHeight,
+        })
+      ) {
+        return;
+      }
       const s = stallSrcRef.current;
       autoAdvancedRef.current = true;
       if (s.streamRef) markStreamDead(s.streamRef, "load-failed", STUB_TTL_MS);

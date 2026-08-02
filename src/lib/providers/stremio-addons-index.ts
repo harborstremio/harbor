@@ -49,6 +49,27 @@ export function communityFor(manifestId: string | undefined | null): SACommunity
   return cached.byManifestId.get(manifestId) ?? null;
 }
 
+export function communityForLoose(manifestId: string | undefined | null): SACommunity | null {
+  if (!manifestId || !cached) return null;
+  const exact = cached.byManifestId.get(manifestId);
+  if (exact) return exact;
+  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const base = manifestId.replace(/\.[A-Za-z0-9]{2,8}$/, "");
+  const want = norm(base);
+  if (want.length < 4) return null;
+  let best: SACommunity | null = null;
+  let bestLen = 0;
+  for (const [key, entry] of cached.byManifestId) {
+    const k = norm(key);
+    const hit = k === want || k.startsWith(want) || want.startsWith(k);
+    if (hit && k.length > bestLen) {
+      best = entry;
+      bestLen = k.length;
+    }
+  }
+  return best;
+}
+
 export function communityBySlug(slug: string): SACommunity | null {
   if (!cached) return null;
   return cached.bySlug.get(slug) ?? null;
@@ -93,14 +114,13 @@ async function fetchIndex(): Promise<IndexState> {
       order: "desc",
     });
     for (const a of res.addons) {
-      if (!a.createdAt) continue;
       const entry = buildEntry(a);
       const mid = a.manifest?.id;
       if (mid) byManifestId.set(mid, entry);
-      bySlug.set(a.slug, entry);
+      if (a.slug) bySlug.set(a.slug, entry);
     }
-    total = res.pagination.total;
-    if (!res.pagination.hasNextPage) break;
+    if (res.addons.length === 0) break;
+    total = Math.max(total, res.pagination?.total ?? 0);
   }
   return { byManifestId, bySlug, fetchedAt: Date.now(), totalAddons: total };
 }

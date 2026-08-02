@@ -22,6 +22,10 @@ const GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME: u32 = 0x8CD1;
 const GL_RENDERBUFFER: u32 = 0x8D41;
 const GL_RENDERBUFFER_WIDTH: u32 = 0x8D42;
 const GL_RENDERBUFFER_HEIGHT: u32 = 0x8D43;
+const GL_SCISSOR_TEST: u32 = 0x0C11;
+const GL_DEPTH_TEST: u32 = 0x0B71;
+const GL_ONE: u32 = 1;
+const GL_ONE_MINUS_SRC_ALPHA: u32 = 0x0303;
 const RTLD_DEFAULT: *mut c_void = std::ptr::null_mut();
 
 extern "C" {
@@ -206,7 +210,19 @@ fn native_display(backend: Backend) -> u64 {
     native as u64
 }
 
-pub fn configure_nvidia_graphics() {
+pub fn configure_linux_graphics() {
+    // WebKit only implements transparent backgrounds inside the accelerated
+    // compositor (WebKit bug 192305), and with compositing off every layer the
+    // player promotes via transform/opacity/position:fixed collapses into
+    // document order, which is what puts the subtitle modal behind the seek
+    // bar. Harbor must therefore NOT disable compositing. WebKit checks these
+    // variables for presence and ignores the value, so "=0" cannot undo it;
+    // only never setting it works. HARBOR_LINUX_LEGACY_GFX=1 restores the old
+    // behaviour for A/B testing without a rebuild.
+    if std::env::var("HARBOR_LINUX_LEGACY_GFX").as_deref() == Ok("1") {
+        eprintln!("[harbor::mpv_linux] HARBOR_LINUX_LEGACY_GFX=1: disabling WebKit accelerated compositing (legacy behaviour)");
+        std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+    }
     if !std::path::Path::new("/proc/driver/nvidia/version").exists() {
         return;
     }
@@ -219,13 +235,6 @@ pub fn configure_nvidia_graphics() {
     if wayland && std::env::var("__NV_DISABLE_EXPLICIT_SYNC").is_err() {
         eprintln!("[harbor::mpv_linux] NVIDIA + Wayland detected; setting __NV_DISABLE_EXPLICIT_SYNC=1");
         std::env::set_var("__NV_DISABLE_EXPLICIT_SYNC", "1");
-    }
-    if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
-        eprintln!(
-            "[harbor::mpv_linux] NVIDIA + {} detected; setting WEBKIT_DISABLE_DMABUF_RENDERER=1 to stop WebKit crashing in nvidia-eglcore while releasing Skia GL contexts",
-            if wayland { "Wayland" } else { "X11" }
-        );
-        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
     }
 }
 
@@ -278,7 +287,12 @@ pub fn install(gtk_window: &gtk::ApplicationWindow, vbox: &gtk::Box) -> Result<(
     overlay.set_overlay_pass_through(&web_view, false);
     gtk_window.add(&overlay);
 
-    set_webview_transparent(&web_view);
+    if probe("HARBOR_LINUX_OPAQUE_WEBVIEW") {
+        eprintln!("[harbor::mpv_linux] probe: webview left opaque; video will be hidden, ghosting result is what matters");
+        set_webview_opaque(&web_view);
+    } else {
+        set_webview_transparent(&web_view);
+    }
     overlay.show_all();
 
     let render_cell: Rc<RefCell<Option<RenderContext>>> = Rc::new(RefCell::new(None));
@@ -387,6 +401,35 @@ fn do_render(rc: &RenderContext, area: &gtk::GLArea) {
         eprintln!("[harbor::mpv_linux] WARNING: GtkGLArea FBO query returned 0; mpv will render to the default framebuffer and the video region will stay BLACK. glGetIntegerv or the GL proc loader likely failed to resolve.");
     }
     let _ = rc.render::<()>(fbo, w, h, true);
+    restore_gdk_gl_state(w, h);
+}
+
+// mpv/render_gl.h:49-57 documents that mpv expects OpenGL standard defaults on
+// entry and does NOT restore glViewport, glScissor, glBlendFuncSeparate or
+// glClearColor when it returns. GDK sets those once in begin_paint and then
+// relies on them to composite the overlay children (the WebView) on top of the
+// GLArea in the same context, so leaving mpv's values behind corrupts every
+// widget drawn after the video. Driver agnostic: this is a contract, not a
+// vendor quirk.
+fn restore_gdk_gl_state(w: i32, h: i32) {
+    if let Some(f) = resolve_gl::<unsafe extern "C" fn(c_int, c_int, c_int, c_int)>(b"glViewport\0") {
+        unsafe { f(0, 0, w.max(1), h.max(1)) };
+    }
+    if let Some(f) = resolve_gl::<unsafe extern "C" fn(c_int, c_int, c_int, c_int)>(b"glScissor\0") {
+        unsafe { f(0, 0, w.max(1), h.max(1)) };
+    }
+    if let Some(f) = resolve_gl::<unsafe extern "C" fn(u32)>(b"glDisable\0") {
+        unsafe {
+            f(GL_SCISSOR_TEST);
+            f(GL_DEPTH_TEST);
+        }
+    }
+    if let Some(f) = resolve_gl::<unsafe extern "C" fn(u32, u32)>(b"glBlendFunc\0") {
+        unsafe { f(GL_ONE, GL_ONE_MINUS_SRC_ALPHA) };
+    }
+    if let Some(f) = resolve_gl::<unsafe extern "C" fn(f32, f32, f32, f32)>(b"glClearColor\0") {
+        unsafe { f(0.0, 0.0, 0.0, 0.0) };
+    }
 }
 
 // On Wayland, the GLArea fills the full window via GTK expand flags,
@@ -443,17 +486,40 @@ fn schedule_redraw() {
         EMBED.with(|slot| {
             if let Some(embed) = slot.borrow().as_ref() {
                 embed.area.queue_render();
+                // GTK3 only adds a GdkWindow to the update area when its
+                // user_data matches the widget being invalidated, and the
+                // WebView owns its own child GdkWindow, so an mpv frame never
+                // damages the UI layer. HARBOR_LINUX_DAMAGE_UI=1 forces it, at
+                // the cost of a full WebKit repaint per frame.
+                if probe("HARBOR_LINUX_DAMAGE_UI") {
+                    embed.web_view.queue_draw();
+                }
             }
         });
         glib::ControlFlow::Break
     });
 }
 
+fn probe(name: &str) -> bool {
+    std::env::var(name).as_deref() == Ok("1")
+}
+
 fn apply_rgba_visual(window: &gtk::ApplicationWindow) {
     if let Some(screen) = GtkWindowExt::screen(window) {
         if let Some(visual) = screen.rgba_visual() {
             window.set_visual(Some(&visual));
-            window.set_app_paintable(true);
+            // GTK3 ignores set_visual after the widget is realized, and install()
+            // runs at first playback, so the call above is a no-op on an already
+            // mapped Tauri window. set_app_paintable DOES apply, and it removes
+            // GtkWindow's background painter. WebKitGTK documents app-paintable
+            // as a precondition for a transparent webview background, so this
+            // stays on by default; HARBOR_LINUX_NO_APP_PAINTABLE=1 turns it off
+            // to test whether the missing per-frame clear is the ghosting cause.
+            if probe("HARBOR_LINUX_NO_APP_PAINTABLE") {
+                eprintln!("[harbor::mpv_linux] probe: leaving GtkWindow background painter enabled");
+            } else {
+                window.set_app_paintable(true);
+            }
         }
     }
 }

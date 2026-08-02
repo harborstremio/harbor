@@ -1,9 +1,11 @@
-import { Heart, Trash2 } from "lucide-react";
+import { ChevronDown, Heart, Reply, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { segmentMentions } from "@/lib/social/mentions";
 import { Avatar, timeAgo } from "./profile-bits";
+import { CommentCompose } from "./comment-compose";
 import { MentionLink } from "./mention-link";
-import { segmentProfanity } from "./text-safety";
+import { segmentProfanity, type ComposeIssue } from "./text-safety";
 import { UserHoverCard } from "./user-hover-card";
 import { useSelfAvatar } from "./use-self-avatar";
 import type { Comment } from "./profile-types";
@@ -43,6 +45,10 @@ export function CommentItem({
   onDelete,
   onToggleLike,
   onOpenAuthor,
+  onReply,
+  replyToId,
+  replies,
+  sending,
 }: {
   c: Comment;
   canDelete: boolean;
@@ -50,67 +56,136 @@ export function CommentItem({
   onDelete: (id: string) => void;
   onToggleLike?: (id: string) => void;
   onOpenAuthor?: (handle: string) => void;
+  onReply?: (raw: string, parentId: string) => Promise<ComposeIssue>;
+  replyToId?: string;
+  replies?: Comment[];
+  sending?: boolean;
 }) {
   const t = useT();
   const self = useSelfAvatar();
+  const [replying, setReplying] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   const mine = !!self.handle && self.handle.toLowerCase() === c.authorHandle.toLowerCase();
   const avatarSrc = mine ? self.avatar ?? c.authorAvatarUrl : c.authorAvatarUrl;
   const avatarFallback = mine ? c.authorAvatarUrl : undefined;
+  const canReply = !!onReply && !!signedIn && !!replyToId;
   return (
-    <div className="group flex gap-3 rounded-[10px] p-2 transition-colors hover:bg-elevated/60">
-      <UserHoverCard handle={c.authorHandle}>
-        <button
-          onClick={() => onOpenAuthor?.(c.authorHandle)}
-          aria-label={t("Open {alias} profile", { alias: c.authorAlias })}
-          className="shrink-0"
-        >
-          <Avatar src={avatarSrc} fallbackSrc={avatarFallback} size={36} alias={c.authorAlias} />
-        </button>
-      </UserHoverCard>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <UserHoverCard handle={c.authorHandle}>
+    <div className="flex flex-col">
+      <div className="group flex gap-3 rounded-[10px] p-2 transition-colors hover:bg-elevated/60">
+        <UserHoverCard handle={c.authorHandle}>
+          <button
+            onClick={() => onOpenAuthor?.(c.authorHandle)}
+            aria-label={t("Open {alias} profile", { alias: c.authorAlias })}
+            className="shrink-0"
+          >
+            <Avatar src={avatarSrc} fallbackSrc={avatarFallback} size={36} alias={c.authorAlias} />
+          </button>
+        </UserHoverCard>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <UserHoverCard handle={c.authorHandle}>
+              <button
+                onClick={() => onOpenAuthor?.(c.authorHandle)}
+                className="min-w-0 truncate text-[13px] font-semibold text-ink hover:text-accent"
+              >
+                {c.authorAlias}
+              </button>
+            </UserHoverCard>
+            {c.authorVerified && <VerifiedBadge size="sm" />}
+            <span className="shrink-0 text-[12px] text-ink-subtle">@{c.authorHandle}</span>
+            <span className="shrink-0 text-[12px] text-ink-subtle">·</span>
+            <span className="shrink-0 text-[12px] text-ink-subtle">{timeAgo(c.at)}</span>
+            {c.flagged && (
+              <span className="rounded-[4px] bg-surface px-1.5 text-[10px] uppercase tracking-[0.08em] text-ink-subtle">
+                {t("Filtered")}
+              </span>
+            )}
+          </div>
+          <SafeBody body={c.body} onOpenAuthor={onOpenAuthor} />
+          <div className="mt-1.5 flex items-center gap-1">
             <button
-              onClick={() => onOpenAuthor?.(c.authorHandle)}
-              className="min-w-0 truncate text-[13px] font-semibold text-ink hover:text-accent"
+              onClick={() => onToggleLike?.(c.id)}
+              disabled={!signedIn}
+              aria-pressed={!!c.liked}
+              aria-label={c.liked ? t("Unlike comment") : t("Like comment")}
+              className={`-ml-2 inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2 text-[12px] tabular-nums transition-colors disabled:cursor-default ${
+                c.liked ? "text-danger" : `text-ink-subtle ${signedIn ? "hover:text-ink-muted" : ""}`
+              } ${signedIn ? "hover:bg-elevated/70" : ""}`}
             >
-              {c.authorAlias}
+              <Heart size={15} className={c.liked ? "fill-current" : ""} />
+              {(c.likeCount ?? 0) > 0 && <span>{c.likeCount}</span>}
             </button>
-          </UserHoverCard>
-          {c.authorVerified && <VerifiedBadge size="sm" />}
-          <span className="shrink-0 text-[12px] text-ink-subtle">@{c.authorHandle}</span>
-          <span className="shrink-0 text-[12px] text-ink-subtle">·</span>
-          <span className="shrink-0 text-[12px] text-ink-subtle">{timeAgo(c.at)}</span>
-          {c.flagged && (
-            <span className="rounded-[4px] bg-surface px-1.5 text-[10px] uppercase tracking-[0.08em] text-ink-subtle">
-              {t("Filtered")}
-            </span>
+            {canReply && (
+              <button
+                onClick={() => setReplying((v) => !v)}
+                aria-expanded={replying}
+                className="inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2 text-[12px] text-ink-subtle transition-colors hover:bg-elevated/70 hover:text-ink-muted"
+              >
+                <Reply size={15} /> {replying ? t("Cancel") : t("Reply")}
+              </button>
+            )}
+          </div>
+          {canReply && replying && (
+            <div className="mt-2">
+              <CommentCompose
+                onSubmit={async (raw) => {
+                  const res = await onReply!(raw, replyToId!);
+                  if (!res) setReplying(false);
+                  return res;
+                }}
+                sending={!!sending}
+                disabled={!signedIn}
+              />
+            </div>
           )}
         </div>
-        <SafeBody body={c.body} onOpenAuthor={onOpenAuthor} />
-        <div className="mt-1.5">
+        {canDelete && (
           <button
-            onClick={() => onToggleLike?.(c.id)}
-            disabled={!signedIn}
-            aria-pressed={!!c.liked}
-            aria-label={c.liked ? t("Unlike comment") : t("Like comment")}
-            className={`-ml-2 inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2 text-[12px] tabular-nums transition-colors disabled:cursor-default ${
-              c.liked ? "text-danger" : `text-ink-subtle ${signedIn ? "hover:text-ink-muted" : ""}`
-            } ${signedIn ? "hover:bg-elevated/70" : ""}`}
+            onClick={() => onDelete(c.id)}
+            aria-label={t("Delete comment")}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-ink-subtle opacity-0 transition-all hover:bg-surface hover:text-danger focus-visible:opacity-100 group-hover:opacity-100"
           >
-            <Heart size={15} className={c.liked ? "fill-current" : ""} />
-            {(c.likeCount ?? 0) > 0 && <span>{c.likeCount}</span>}
+            <Trash2 size={20} />
           </button>
-        </div>
+        )}
       </div>
-      {canDelete && (
-        <button
-          onClick={() => onDelete(c.id)}
-          aria-label={t("Delete comment")}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-ink-subtle opacity-0 transition-all hover:bg-surface hover:text-danger focus-visible:opacity-100 group-hover:opacity-100"
-        >
-          <Trash2 size={20} />
-        </button>
+      {replies && replies.length > 0 && (
+        <div className="ml-12 flex flex-col">
+          <button
+            type="button"
+            onClick={() => setShowReplies((v) => !v)}
+            aria-expanded={showReplies}
+            className="inline-flex h-8 w-fit items-center gap-1.5 rounded-[8px] px-2 text-[12px] font-medium text-ink-subtle transition-colors hover:bg-elevated/70 hover:text-ink-muted"
+          >
+            <ChevronDown
+              size={14}
+              className={`transition-transform duration-200 ${showReplies ? "rotate-180" : ""}`}
+            />
+            {showReplies
+              ? t("Hide replies")
+              : replies.length === 1
+                ? t("Show 1 reply")
+                : t("Show {count} replies", { count: replies.length })}
+          </button>
+          {showReplies && (
+            <div className="flex flex-col border-l border-edge-soft pl-2">
+              {replies.map((r) => (
+                <CommentItem
+                  key={r.id}
+                  c={r}
+                  replyToId={replyToId}
+                  canDelete={canDelete}
+                  signedIn={signedIn}
+                  onDelete={onDelete}
+                  onToggleLike={onToggleLike}
+                  onReply={onReply}
+                  sending={sending}
+                  onOpenAuthor={onOpenAuthor}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

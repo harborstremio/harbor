@@ -492,7 +492,7 @@ export function humanError(code: string): string {
   }
 }
 
-function streamIdentity(s: {
+export function streamIdentity(s: {
   addonId: string;
   infoHash?: string;
   fileIdx?: number;

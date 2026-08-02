@@ -1,3 +1,5 @@
+import { stableCardNavigationRect } from "@/lib/poster-backdrop-expansion";
+
 export type Dir = "up" | "down" | "left" | "right";
 
 const SELECTOR = [
@@ -76,6 +78,36 @@ export function isVisible(el: HTMLElement) {
   return true;
 }
 
+const ONSCREEN_MARGIN = 320;
+
+export function isOnScreen(el: HTMLElement, margin = ONSCREEN_MARGIN): boolean {
+  const r = el.getBoundingClientRect();
+  if (r.width <= 0 || r.height <= 0) return false;
+  const vw = window.innerWidth || document.documentElement.clientWidth;
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  if (r.right <= -margin || r.bottom <= -margin || r.left >= vw + margin || r.top >= vh + margin) {
+    return false;
+  }
+  let node = el.parentElement;
+  const clips = /(auto|scroll|hidden|clip)/;
+  while (node && node !== document.body) {
+    const s = window.getComputedStyle(node);
+    if (clips.test(s.overflowX) || clips.test(s.overflowY)) {
+      const cr = node.getBoundingClientRect();
+      if (
+        r.right <= cr.left - margin ||
+        r.left >= cr.right + margin ||
+        r.bottom <= cr.top - margin ||
+        r.top >= cr.bottom + margin
+      ) {
+        return false;
+      }
+    }
+    node = node.parentElement;
+  }
+  return true;
+}
+
 export function isInNav(el: HTMLElement): boolean {
   return !!el.closest("[data-harbor-nav]");
 }
@@ -100,7 +132,7 @@ export function getSoundType(el: HTMLElement): "light" | "movie" {
 
 export function getFocusable(root: ParentNode = document): HTMLElement[] {
   const all = Array.from(root.querySelectorAll<HTMLElement>(SELECTOR)).filter(
-    (el) => isVisible(el) && !el.closest("[data-tv-skip]"),
+    (el) => isVisible(el) && !el.closest("[data-tv-skip]") && (zoneOf(el) === "nav" || isOnScreen(el)),
   );
   return all.filter((el) => !all.some((other) => other !== el && other.contains(el)));
 }
@@ -184,12 +216,11 @@ export function isLocallyManaged(target: HTMLElement | null): boolean {
 }
 
 function getRect(el: HTMLElement) {
-  const r = el.getBoundingClientRect();
-  return {
-    left: r.left, right: r.right, top: r.top, bottom: r.bottom,
-    width: r.width, height: r.height,
-    cx: r.left + r.width / 2, cy: r.top + r.height / 2,
-  };
+  const cell = el.closest<HTMLElement>("[data-tv-nav-base-width]");
+  const r = cell?.getBoundingClientRect() ?? el.getBoundingClientRect();
+  const baseWidth = cell ? Number(cell.dataset.tvNavBaseWidth) : undefined;
+  const rtl = cell ? window.getComputedStyle(cell).direction === "rtl" : false;
+  return stableCardNavigationRect(r, baseWidth, rtl);
 }
 
 function overlap(aStart: number, aEnd: number, bStart: number, bEnd: number) {

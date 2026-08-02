@@ -1,4 +1,23 @@
-import { ArrowDownToLine, Bookmark, BookmarkCheck, CheckCheck, ClipboardPaste, Copy, Download, ExternalLink, EyeOff, Heart, Info, Link2, Magnet, Maximize, Navigation, RotateCcw, UserPlus, Wallpaper } from "lucide-react";
+import {
+  ArrowDownToLine,
+  Bookmark,
+  BookmarkCheck,
+  CheckCheck,
+  ClipboardPaste,
+  Copy,
+  Download,
+  ExternalLink,
+  EyeOff,
+  Heart,
+  Info,
+  Link2,
+  Magnet,
+  Maximize,
+  Navigation,
+  RotateCcw,
+  UserPlus,
+  Wallpaper,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useActiveAddon } from "@/lib/active-addon";
 import { copyText } from "@/components/player/copy-link-button";
@@ -168,7 +187,13 @@ export function ContextMenu() {
       close();
     };
     const handleWatchlist = () => {
-      toggleWatchlist({ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster, imdbId: targetImdb });
+      toggleWatchlist({
+        id: meta.id,
+        type: meta.type,
+        name: meta.name,
+        poster: meta.poster,
+        imdbId: targetImdb,
+      });
       close();
     };
     const handleBring = () => {
@@ -185,13 +210,24 @@ export function ContextMenu() {
     };
     if (!playerActions) {
       items.push(
-        <Item key="details" icon={<Info size={14} strokeWidth={2} />} label="View details" onClick={handleDetails} />,
+        <Item
+          key="details"
+          icon={<Info size={14} strokeWidth={2} />}
+          label="View details"
+          onClick={handleDetails}
+        />,
       );
     }
     items.push(
       <Item
         key="watchlist"
-        icon={isWatchlisted ? <BookmarkCheck size={14} strokeWidth={2} /> : <Bookmark size={14} strokeWidth={2} />}
+        icon={
+          isWatchlisted ? (
+            <BookmarkCheck size={14} strokeWidth={2} />
+          ) : (
+            <Bookmark size={14} strokeWidth={2} />
+          )
+        }
         label={isWatchlisted ? "In watchlist" : "Add to watchlist"}
         onClick={handleWatchlist}
         accent={isWatchlisted}
@@ -234,7 +270,13 @@ export function ContextMenu() {
       items.push(
         <Item
           key="watched"
-          icon={isWatched ? <EyeOff size={14} strokeWidth={2} /> : <CheckCheck size={14} strokeWidth={2} />}
+          icon={
+            isWatched ? (
+              <EyeOff size={14} strokeWidth={2} />
+            ) : (
+              <CheckCheck size={14} strokeWidth={2} />
+            )
+          }
           label={
             isWatched
               ? "Mark as unwatched"
@@ -438,7 +480,8 @@ export function ContextMenu() {
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           const start = element.selectionStart ?? element.value.length;
           const end = element.selectionEnd ?? element.value.length;
-          element.value = element.value.slice(0, start) + text + element.value.slice(end);
+          const next = element.value.slice(0, start) + text + element.value.slice(end);
+          setNativeInputValue(element, next);
           element.dispatchEvent(new Event("input", { bubbles: true }));
           element.dispatchEvent(new Event("change", { bubbles: true }));
           element.focus();
@@ -473,12 +516,7 @@ export function ContextMenu() {
 
   return (
     <>
-      <div
-        aria-hidden
-        className="fixed inset-0 z-[144]"
-        onClick={close}
-        onWheel={close}
-      />
+      <div aria-hidden className="fixed inset-0 z-[144]" onClick={close} onWheel={close} />
       <div
         ref={ref}
         role="menu"
@@ -489,6 +527,13 @@ export function ContextMenu() {
       </div>
     </>
   );
+}
+
+function setNativeInputValue(el: HTMLInputElement | HTMLTextAreaElement, value: string) {
+  const proto =
+    el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+  const desc = Object.getOwnPropertyDescriptor(proto, "value");
+  desc?.set?.call(el, value);
 }
 
 function topKindToView(topKind: string): ViewSummonable | null {
@@ -569,15 +614,7 @@ function Item({
             : "text-ink hover:bg-raised"
       }`}
     >
-      <span
-        className={
-          disabled
-            ? "text-ink-subtle/40"
-            : accent
-              ? "text-accent"
-              : "text-ink-muted"
-        }
-      >
+      <span className={disabled ? "text-ink-subtle/40" : accent ? "text-accent" : "text-ink-muted"}>
         {icon}
       </span>
       {label}

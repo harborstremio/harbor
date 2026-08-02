@@ -1,7 +1,8 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import type { Meta } from "@/lib/cinemeta";
+import { HARBOR_TVDB_BASE } from "@/lib/config/endpoints";
 
-const V4 = "https://harbor.site/api/tvdb/v4";
+const V4 = `${HARBOR_TVDB_BASE}/api/tvdb/v4`;
 
 export type TvdbCollectionHit = {
   id: number;
@@ -31,7 +32,9 @@ export type TvdbEntityCard = {
 
 function img(v: string | null | undefined): string | null {
   if (!v) return null;
-  return v.startsWith("http") ? v : `https://artworks.thetvdb.com${v.startsWith("/") ? "" : "/"}${v}`;
+  return v.startsWith("http")
+    ? v
+    : `https://artworks.thetvdb.com${v.startsWith("/") ? "" : "/"}${v}`;
 }
 
 async function v4<T>(rel: string): Promise<T | null> {
@@ -88,7 +91,11 @@ export function fetchTvdbCollection(id: number): Promise<TvdbCollection | null> 
       name?: string;
       overview?: string;
       image?: string | null;
-      entities?: Array<{ movieId?: number | null; seriesId?: number | null; order?: number | null }>;
+      entities?: Array<{
+        movieId?: number | null;
+        seriesId?: number | null;
+        order?: number | null;
+      }>;
     }>(`/lists/${id}/extended`);
     if (!data?.name) {
       collCache.set(id, null);
@@ -141,8 +148,7 @@ export function fetchTvdbEntity(
       entityCache.set(key, null);
       return null;
     }
-    const imdb =
-      data.remoteIds?.map((r) => r.id ?? "").find((v) => /^tt\d+$/.test(v)) ?? null;
+    const imdb = data.remoteIds?.map((r) => r.id ?? "").find((v) => /^tt\d+$/.test(v)) ?? null;
     const out: TvdbEntityCard = {
       kind,
       tvdbId,

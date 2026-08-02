@@ -11,7 +11,11 @@ type StoredPlaylist = Settings["iptvPlaylists"][number];
 
 export function materializePlaylistEntry(id: string, entry: PlaylistFormValue): StoredPlaylist {
   if (entry.kind === "xtream") {
-    const { m3u, epg } = buildXtreamUrls(entry.xtream.server, entry.xtream.username, entry.xtream.password);
+    const { m3u, epg } = buildXtreamUrls(
+      entry.xtream.server,
+      entry.xtream.username,
+      entry.xtream.password,
+    );
     return {
       id,
       name: entry.name,
@@ -45,10 +49,14 @@ export function usePlaylistMutations(params: {
     (entry: PlaylistFormValue) => {
       const id = `pl-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
       const built = materializePlaylistEntry(id, entry);
-      update({ iptvPlaylists: [...playlists, built] });
+      const carriesVod = entry.kind === "xtream" || entry.kind === "m3u";
+      update({
+        iptvPlaylists: [...playlists, built],
+        ...(carriesVod && !settings.showPlaylistsTab ? { showPlaylistsTab: true } : {}),
+      });
       if (entry.kind !== "epg") setActiveId(id);
     },
-    [playlists, update, setActiveId],
+    [playlists, update, setActiveId, settings.showPlaylistsTab],
   );
 
   const removePlaylist = useCallback(

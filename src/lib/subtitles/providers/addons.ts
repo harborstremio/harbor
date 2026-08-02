@@ -37,6 +37,11 @@ function idPriority(id: string): number {
   return 999;
 }
 
+function declaresSubtitles(addon: Addon): boolean {
+  const resources = addon.manifest?.resources ?? [];
+  return resources.some((r) => (typeof r === "string" ? r === "subtitles" : r.name === "subtitles"));
+}
+
 function pickAddonId(
   addon: Addon,
   type: string,
@@ -48,7 +53,15 @@ function pickAddonId(
     if (addonAccepts(addon, "subtitles", type, id)) return id;
   }
   if (fallback && addonAccepts(addon, "subtitles", type, fallback)) return fallback;
-  return null;
+  if (!declaresSubtitles(addon)) return null;
+  const best =
+    candidates.find((id) => id.startsWith("tt")) ?? fallback ?? candidates[0] ?? null;
+  if (best) {
+    dlog(
+      `[addons] ${addon.manifest.name} manifest does not advertise ${type}/${best}, asking anyway`,
+    );
+  }
+  return best;
 }
 
 function extraSegment(q: SubSearchQuery): string {

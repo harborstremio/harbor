@@ -56,7 +56,16 @@ mod tray;
 mod web_server;
 mod webview_helpers;
 
+pub(crate) fn release_stremio_scheme(app: &tauri::AppHandle) {
+    use tauri_plugin_deep_link::DeepLinkExt;
+    match app.deep_link().unregister("stremio") {
+        Ok(()) => eprintln!("[harbor::deeplink] released stremio:// on shutdown"),
+        Err(e) => eprintln!("[harbor::deeplink] could not release stremio://: {}", e),
+    }
+}
+
 pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
+    release_stremio_scheme(app);
     thumbs::shutdown(app);
     multiview::shutdown(app);
     dvr::shutdown(app);
@@ -457,7 +466,7 @@ pub fn run() {
     #[cfg(any(windows, target_os = "linux"))]
     svp::prime_svp_env();
     #[cfg(target_os = "linux")]
-    mpv_render_linux::configure_nvidia_graphics();
+    mpv_render_linux::configure_linux_graphics();
     let _ = rustls::crypto::ring::default_provider().install_default();
     trailer::sweep_cache();
     std::thread::spawn(temp_prune::sweep_temp);

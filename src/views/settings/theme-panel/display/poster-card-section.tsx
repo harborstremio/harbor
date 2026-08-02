@@ -113,6 +113,22 @@ export function PosterCardSection({ previewPoster }: { previewPoster: string }) 
 
       <div className="flex flex-col gap-4 rounded-2xl border border-edge-soft bg-canvas/35 p-5">
         <ToggleRow
+          label={t("Focused Card")}
+          sub={t(
+            "Emphasize the selected card across the page while gently darkening and blurring the other cards.",
+          )}
+          value={settings.posterFocusedCard}
+          onChange={(posterFocusedCard) => update({ posterFocusedCard })}
+        />
+        <ToggleRow
+          label={t("Expanding Cards")}
+          sub={t(
+            "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.",
+          )}
+          value={settings.posterBackdropExpansion}
+          onChange={(posterBackdropExpansion) => update({ posterBackdropExpansion })}
+        />
+        <ToggleRow
           label={t("Poster dock magnification")}
           newId="theme:poster-dock"
           sub={t("Gently magnify nearby posters as you move across a poster row.")}

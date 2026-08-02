@@ -11,6 +11,7 @@ import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
 import { CustomIcon, renderCustomIconControl } from "./custom-icon-renderer";
 import { hdrFormatLabel, realQualityLabel } from "@/lib/player/resolution-label";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { FullscreenClock } from "@/components/player/fullscreen-clock";
 
 function getControlState(id: PlayerControlId, ctx: ControlContext): string | undefined {
   const preview = ctx.previewStates?.[id];
@@ -245,6 +246,14 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
         <div className="pointer-events-none flex flex-col items-start gap-0.5 text-start">{lines}</div>
       );
     }
+    case "local-time":
+      return ctx.fullscreen ? (
+        <FullscreenClock
+          durationSec={ctx.snap.durationSec}
+          playbackRate={ctx.snap.rate}
+          active={ctx.active}
+        />
+      ) : null;
     case "time-start": {
       return (
         <TimeStart

@@ -1,4 +1,6 @@
 const settings: Record<string, string> = {
+  "Smooth scrolling": "تمرير سلس",
+  "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.": "تمرير سلس بعجلة الفأرة بدلا من القفز سطرا بسطر. عطله إذا كنت تفضل استجابة فورية أو لاحظت بطئا.",
 "Sign in to Harbor": "تسجيل الدخول إلى Harbor",
   "Create Harbor account": "إنشاء حساب Harbor",
   "Claim your handle": "المطالبة بمعرّفك (@handle)",

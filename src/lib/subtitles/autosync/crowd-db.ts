@@ -2,6 +2,7 @@ import type { CrowdResult, PipelineContext, TierPorts } from "./pipeline";
 import type { PiecewiseSegment, SyncTransform } from "./fp-gate";
 import { safeFetch } from "@/lib/safe-fetch";
 import { dwarn, dinfo } from "@/lib/debug";
+import { HARBOR_SYNC_BASE } from "@/lib/config/endpoints";
 
 export type CrowdConfig = {
   baseUrl: string;
@@ -15,7 +16,7 @@ export type CrowdConfig = {
 
 export type CrowdReportExtra = { chromaprint?: string | null; subFileHash?: string | null };
 
-export const DEFAULT_COMMUNITY_SYNC_URL = "https://sync.harbor.site";
+export const DEFAULT_COMMUNITY_SYNC_URL = HARBOR_SYNC_BASE;
 
 type LookupResponse = {
   offsetMs?: number;
@@ -55,7 +56,11 @@ function jsonHeaders(cfg: CrowdConfig, hasBody: boolean): Record<string, string>
   return h;
 }
 
-async function timedFetch(url: string, init: RequestInit, timeoutMs: number): Promise<Response | null> {
+async function timedFetch(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response | null> {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), Math.max(1, timeoutMs));
   try {
@@ -70,7 +75,9 @@ async function timedFetch(url: string, init: RequestInit, timeoutMs: number): Pr
 
 export async function subTimelineHash(cues: Array<[number, number]>): Promise<string | null> {
   if (!Array.isArray(cues)) return null;
-  const usable = cues.filter((c) => Array.isArray(c) && Number.isFinite(c[0]) && Number.isFinite(c[1]));
+  const usable = cues.filter(
+    (c) => Array.isArray(c) && Number.isFinite(c[0]) && Number.isFinite(c[1]),
+  );
   if (usable.length < MIN_CUES) return null;
   if (typeof crypto === "undefined" || !crypto.subtle) return null;
   const norm = usable
@@ -105,7 +112,8 @@ function anchorsToTransform(
   if (pts.length < 2) return affine;
   const segments: PiecewiseSegment[] = [];
   const first = pts[0];
-  if (first[0] > 0) segments.push({ fromSec: 0, toSec: first[0] / 1000, offsetSec: first[1] / 1000, ratio: 1 });
+  if (first[0] > 0)
+    segments.push({ fromSec: 0, toSec: first[0] / 1000, offsetSec: first[1] / 1000, ratio: 1 });
   for (let i = 0; i < pts.length - 1; i += 1) {
     const [ai, oi] = pts[i];
     const [aj, oj] = pts[i + 1];
@@ -136,7 +144,10 @@ function toCrowdResult(b: LookupResponse | null): CrowdResult | null {
   return { transform, rawScore: confidence, votes, verified: true, tier };
 }
 
-export async function lookupCrowdSync(ctx: PipelineContext, cfg: CrowdConfig): Promise<CrowdResult | null> {
+export async function lookupCrowdSync(
+  ctx: PipelineContext,
+  cfg: CrowdConfig,
+): Promise<CrowdResult | null> {
   if (cfg.optOut || !cfg.baseUrl || cfg.netAllowed === false) return null;
   const sub = await subTimelineHash(ctx.cues);
   if (!sub) return null;
@@ -221,7 +232,8 @@ export async function reportVerifiedSync(
   const imdb = ctx.meta?.imdbId && /^tt\d{6,9}$/.test(ctx.meta.imdbId) ? ctx.meta.imdbId : null;
   if (imdb) body.imdbId = imdb;
   if (extra.chromaprint) body.chromaprint = extra.chromaprint;
-  if (extra.subFileHash && /^[0-9a-f]{16,128}$/.test(extra.subFileHash)) body.subFileHash = extra.subFileHash;
+  if (extra.subFileHash && /^[0-9a-f]{16,128}$/.test(extra.subFileHash))
+    body.subFileHash = extra.subFileHash;
   if (cfg.clientId) body.clientId = cfg.clientId;
   if (cfg.appVersion) body.appVersion = cfg.appVersion;
   const res = await timedFetch(

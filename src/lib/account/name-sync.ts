@@ -1,7 +1,8 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { authToken } from "@/lib/theme-auth";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const SOCIAL_BASE = "https://harbor.site/themes/api/social";
+const SOCIAL_BASE = `${HARBOR_API_BASE}/themes/api/social`;
 const PROFILE_ENDPOINT = `${SOCIAL_BASE}/me/profile`;
 
 export function nameEquals(a: string | null | undefined, b: string | null | undefined): boolean {

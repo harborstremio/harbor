@@ -1,6 +1,7 @@
 import type { FeaturedList } from "@/lib/social/featured-lists";
 import type { SocialKey } from "@/lib/social/socials";
 import type { RatingsSummary } from "@/lib/ratings/types";
+import type { FavoriteMedia } from "@/lib/providers/favorites-types";
 
 export type SocialEntry = { service: SocialKey; value: string };
 
@@ -52,6 +53,8 @@ export type ProfileWatching = {
   durationSec?: number;
 };
 
+export type FriendsVisibility = "everyone" | "friends" | "only_me";
+
 export type ProfileSummary = {
   handle: string;
   alias: string;
@@ -76,6 +79,12 @@ export type ProfileSummary = {
   cardLayout?: { order?: string[]; hidden?: string[] };
   statLayout?: { hidden?: string[] };
   featuredLists?: FeaturedList[];
+  favorites?: {
+    game?: FavoriteMedia[];
+    book?: FavoriteMedia[];
+    music?: FavoriteMedia[];
+  };
+  simkl?: SimklPublished | null;
   socials?: ResolvedSocial[];
   audioUrl?: string;
   minecraftName?: string;
@@ -87,6 +96,8 @@ export type ProfileSummary = {
   friendEdgeId?: string;
   activityPublic?: boolean;
   shareActivity?: boolean;
+  friendsPublic?: boolean;
+  friendsVisibility?: FriendsVisibility;
   private?: boolean;
   customEnabled?: boolean;
   profileFont?: string;
@@ -100,12 +111,27 @@ export type ProfileSummary = {
   hideCardTitles?: boolean;
 };
 
+export type SimklPublished = {
+  username: string | null;
+  displayName: string | null;
+  avatar: string | null;
+  profileUrl: string | null;
+  accountType: string | null;
+  stats: {
+    moviesCompleted: number;
+    showsCompleted: number;
+    totalCompleted: number;
+    lastWatchedAt: string | null;
+  } | null;
+};
+
 export type Friend = {
   handle: string;
   alias: string;
   avatarUrl?: string;
   slogan?: string;
   online: boolean;
+  presence?: string;
   status?: string;
   mutual?: boolean;
 };
@@ -135,6 +161,7 @@ export type ActivityItem = {
 
 export type Comment = {
   id: string;
+  parentId?: string;
   authorHandle: string;
   authorAlias: string;
   authorVerified?: boolean;
@@ -164,6 +191,7 @@ export type ProfileSettingsInput = {
   customUrl: string;
   slogan: string;
   shareActivity: boolean;
+  friendsVisibility: FriendsVisibility;
   private: boolean;
 };
 

@@ -3,10 +3,11 @@ import { safeFetch } from "@/lib/safe-fetch";
 import { simklRequest } from "./client";
 import type { SimklIds, SimklTarget } from "./types";
 import { updateCachedRatingByTarget, getCachedRatingByTarget } from "./activities";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
 export { getCachedRatingByTarget };
 
-const RATINGS_PROXY = "https://harbor.site/api/simkl/ratings";
+const RATINGS_PROXY = `${HARBOR_API_BASE}/api/simkl/ratings`;
 const MAX_BATCH = 120;
 
 const ratingCache = new Map<string, number | null>();
@@ -86,9 +87,10 @@ function useProxyRating(spec: string | null): { rating: number | null; loading: 
   return { rating, loading };
 }
 
-export function useSimklCommunityRating(
-  imdbId: string | null,
-): { rating: number | null; loading: boolean } {
+export function useSimklCommunityRating(imdbId: string | null): {
+  rating: number | null;
+  loading: boolean;
+} {
   return useProxyRating(imdbId ? `imdb:${imdbId}` : null);
 }
 

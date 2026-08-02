@@ -57,10 +57,7 @@ export function isAddonNativeMeta(meta: Meta): boolean {
   if (!meta.addonOrigin) return false;
   const id = meta.id || "";
   const resolvable =
-    /^tt\d/.test(id) ||
-    id.startsWith("tmdb:") ||
-    id.startsWith("kitsu:") ||
-    id.startsWith("mal:");
+    /^tt\d/.test(id) || id.startsWith("tmdb:") || id.startsWith("kitsu:") || id.startsWith("mal:");
   return !resolvable;
 }
 
@@ -93,8 +90,12 @@ export function cinemetaEnabled(): boolean {
   }
 }
 
-export async function meta(type: "movie" | "series", id: string): Promise<Meta | null> {
-  if (!cinemetaEnabled()) return null;
+export async function meta(
+  type: "movie" | "series",
+  id: string,
+  force = false,
+): Promise<Meta | null> {
+  if (!force && !cinemetaEnabled()) return null;
   const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
   if (!res.ok) return null;
   const json = await res.json();
