@@ -42,7 +42,7 @@ export function CustomizationEditors({
           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${form.customEnabled ? "bg-accent" : "bg-edge"}`}
         >
           <span
-            className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${form.customEnabled ? "translate-x-5" : "translate-x-0"}`}
+            className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${form.customEnabled ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"}`}
           />
         </button>
       </div>
@@ -121,7 +121,7 @@ export function CustomizationEditors({
           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${form.hideTopBanner ? "bg-accent" : "bg-edge"}`}
         >
           <span
-            className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${form.hideTopBanner ? "translate-x-5" : "translate-x-0"}`}
+            className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${form.hideTopBanner ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"}`}
           />
         </button>
       </div>
@@ -140,7 +140,7 @@ export function CustomizationEditors({
           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition-colors ${form.hideCardTitles ? "bg-accent" : "bg-edge"}`}
         >
           <span
-            className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${form.hideCardTitles ? "translate-x-5" : "translate-x-0"}`}
+            className={`block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${form.hideCardTitles ? "translate-x-5 rtl:-translate-x-5" : "translate-x-0"}`}
           />
         </button>
       </div>
