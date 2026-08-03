@@ -9,7 +9,7 @@ import {
   collectionShareUrl,
   publishCollections,
 } from "@/lib/social/collections-sync";
-import { useCurrentHandle } from "./community-share-button";
+import { useCurrentHandle } from "./use-current-handle";
 
 function CopyField({
   label,
