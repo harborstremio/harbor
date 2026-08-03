@@ -10,7 +10,6 @@ import {
   type CardKey,
 } from "@/lib/profile-card-layout";
 import { ProfileCardControls } from "./profile-card-controls";
-import type { ProfileSummary } from "./profile-types";
 import { useT } from "@/lib/i18n";
 import { useMangaProgressList } from "@/lib/manga-progress";
 import { useWatchedCount } from "@/lib/playback-history";
@@ -55,20 +54,6 @@ import { Showcase } from "./showcase";
 import { useProfile } from "./use-profile";
 import { CanvasCard } from "./customization/canvas-frame";
 import { resolveCustomization, useFontLink } from "./customization/apply";
-
-function friendsListVisible(summary: ProfileSummary): boolean {
-  if (summary.isOwner) return true;
-  switch (summary.friendsVisibility) {
-    case "only_me":
-      return false;
-    case "friends":
-      return summary.friendStatus === "friends";
-    case "everyone":
-      return true;
-    default:
-      return !!summary.friendsPublic;
-  }
-}
 
 export function ProfileView({
   handle,
@@ -403,11 +388,11 @@ export function ProfileView({
                 <SimklCard isOwner={false} hideTitle={c.hideCardTitles} published={summary.simkl} />
               ) : null}
               <FriendsPanel
-                friends={friendsListVisible(summary) ? friends : []}
+                friends={summary.isOwner || summary.friendsPublic ? friends : []}
                 onOpen={onOpenProfile}
                 isOwner={summary.isOwner}
                 total={summary.counts.friends}
-                visibilityPrivate={!friendsListVisible(summary)}
+                visibilityPrivate={!summary.isOwner && !summary.friendsPublic}
               />
               <GroupsPanel isOwner={summary.isOwner} handle={handle} />
               <SocialsPanel

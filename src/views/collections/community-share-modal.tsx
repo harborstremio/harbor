@@ -9,7 +9,7 @@ import {
   collectionShareUrl,
   publishCollections,
 } from "@/lib/social/collections-sync";
-import { useCurrentHandle } from "./use-current-handle";
+import { useCurrentHandle } from "./community-share-button";
 
 function CopyField({
   label,
@@ -126,9 +126,7 @@ export function CommunityShareModal({
             <CopyField
               label={t("Link")}
               value={collectionShareUrl(handle, collectionId)}
-              helper={t(
-                "Anyone with the link can open this collection once your Harbor server is live.",
-              )}
+              helper={t("Anyone with the link can open this collection once your Harbor server is live.")}
               icon={<Link size={12} strokeWidth={2} />}
             />
 
@@ -149,11 +147,7 @@ export function CommunityShareModal({
                     : "border-edge bg-raised text-ink hover:bg-elevated"
                 }`}
               >
-                {shared ? (
-                  <Check size={16} strokeWidth={2.6} />
-                ) : (
-                  <Users size={16} strokeWidth={2} />
-                )}
+                {shared ? <Check size={16} strokeWidth={2.6} /> : <Users size={16} strokeWidth={2} />}
                 {shared ? t("Shared to the community") : t("Share to the community")}
               </button>
               <p className="text-[12.5px] leading-snug text-ink-muted">

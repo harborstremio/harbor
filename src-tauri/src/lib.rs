@@ -57,15 +57,10 @@ mod web_server;
 mod webview_helpers;
 
 pub(crate) fn release_stremio_scheme(app: &tauri::AppHandle) {
-    use std::io::Write;
     use tauri_plugin_deep_link::DeepLinkExt;
     match app.deep_link().unregister("stremio") {
-        Ok(()) => {
-            let _ = writeln!(std::io::stderr(), "[harbor::deeplink] released stremio:// on shutdown");
-        }
-        Err(e) => {
-            let _ = writeln!(std::io::stderr(), "[harbor::deeplink] could not release stremio://: {}", e);
-        }
+        Ok(()) => eprintln!("[harbor::deeplink] released stremio:// on shutdown"),
+        Err(e) => eprintln!("[harbor::deeplink] could not release stremio://: {}", e),
     }
 }
 

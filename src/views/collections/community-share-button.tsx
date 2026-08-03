@@ -1,7 +1,14 @@
 import { Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { currentAuthor, subscribeAuthor } from "@/lib/theme-auth";
 import { CommunityShareModal } from "./community-share-modal";
+
+export function useCurrentHandle(): string | null {
+  const [handle, setHandle] = useState<string | null>(() => currentAuthor()?.handle ?? null);
+  useEffect(() => subscribeAuthor(() => setHandle(currentAuthor()?.handle ?? null)), []);
+  return handle;
+}
 
 export function CommunityShareButton({
   collectionId,
