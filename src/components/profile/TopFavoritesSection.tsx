@@ -1,11 +1,11 @@
 import React from 'react';
 
 export const TopFavoritesSection: React.FC = () => {
-    return (
-          <div className="top-favorites">
-                <h2>Top Favorites</h2>h2>
-          </div>div>
-        );
+        return React.createElement(
+                    'div',
+            { className: 'top-favorites' },
+                    React.createElement('h2', null, 'Top Favorites')
+                );
 };
 
-export default TopFavoritesSection;</div>
+export default TopFavoritesSection;
