@@ -10,7 +10,9 @@ import { getThemeById } from "@/lib/theme";
 import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
-import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
+import { close, minimize } from "@/lib/window";
+import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
+import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
 import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 import { ProfileChipCompact } from "@/chrome/cinematic-overlay/profile-chip-compact";
@@ -25,7 +27,7 @@ export function CinematicOverlay() {
   const { setOpen: setSearchOpen } = useSearch();
   const t = useT();
   const [pinFor, setPinFor] = useState<View | null>(null);
-  const maxed = useMaximized();
+  const fullscreen = useWindowFullscreen();
 
   const themePreset =
     settings.theme.preset !== "custom"
@@ -155,10 +157,10 @@ export function CinematicOverlay() {
                   />
                 </WinBtn>
                 <WinBtn
-                  onClick={toggleMaximize}
-                  label={maxed ? t("chrome.restore") : t("chrome.maximize")}
+                  onClick={() => void toggleWindowFullscreen()}
+                  label={fullscreen ? t("chrome.restore") : t("chrome.maximize")}
                 >
-                  {maxed ? (
+                  {fullscreen ? (
                     <>
                       <rect
                         x="2.5"

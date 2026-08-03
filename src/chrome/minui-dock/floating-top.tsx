@@ -13,7 +13,9 @@ import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useView } from "@/lib/view";
-import { close, minimize, toggleMaximize } from "@/lib/window";
+import { close, minimize } from "@/lib/window";
+import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
+import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -22,6 +24,7 @@ export function FloatingTop() {
   const { settings } = useSettings();
   const { setOpen: setSearchOpen } = useSearch();
   const t = useT();
+  const fullscreen = useWindowFullscreen();
 
   const themePreset =
     settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
@@ -73,8 +76,39 @@ export function FloatingTop() {
             <WinBtn onClick={minimize} label={t("chrome.minimize")}>
               <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </WinBtn>
-            <WinBtn onClick={toggleMaximize} label={t("chrome.maximize")}>
-              <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.5" rx="1.5" />
+            <WinBtn
+              onClick={() => void toggleWindowFullscreen()}
+              label={fullscreen ? t("chrome.restore") : t("chrome.maximize")}
+            >
+              {fullscreen ? (
+                <>
+                  <rect
+                    x="2.5"
+                    y="4.5"
+                    width="6"
+                    height="6"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    rx="1"
+                  />
+                  <path
+                    d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    fill="none"
+                  />
+                </>
+              ) : (
+                <rect
+                  x="3"
+                  y="3"
+                  width="7"
+                  height="7"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  rx="1.5"
+                />
+              )}
             </WinBtn>
             <WinBtn onClick={close} label={t("common.close")} danger>
               <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
