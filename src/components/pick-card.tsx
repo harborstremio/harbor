@@ -512,6 +512,8 @@ export const PickCard = memo(function PickCard({
       data-media-card
       data-expanding-card={expandingCard.enabled ? "" : undefined}
       data-row-card-expanded={expandingCard.expanded ? "true" : undefined}
+      data-row-card-collapsing={expandingCard.collapsing ? "" : undefined}
+      data-row-card-title-collapsing={expandingCard.titleCollapsing ? "" : undefined}
       data-focused-card={expandingCard.focusEnabled ? "" : undefined}
       data-no-card-ring={inCardHover !== "none" || activeCustom ? "" : undefined}
       className="group relative z-0 flex w-full min-w-0 flex-col gap-2.5 text-start"
@@ -631,13 +633,15 @@ export const PickCard = memo(function PickCard({
       </div>
       {!settings.hidePosterTitles && (
         <p
+          data-expanding-card-title
           className={
             kids
               ? "line-clamp-2 min-h-9 text-[15px] font-bold leading-snug text-[#0e3a43]"
               : "line-clamp-2 min-h-9 text-[13px] font-medium leading-snug text-ink"
           }
         >
-          {translatedTitle || meta.name}
+          <span data-expanding-card-title-name>{translatedTitle || meta.name}</span>
+          {meta.releaseInfo && <span data-expanding-card-title-meta>{meta.releaseInfo}</span>}
         </p>
       )}
     </button>

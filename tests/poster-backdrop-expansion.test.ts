@@ -254,3 +254,15 @@ test("wide artwork is prepared before the row is allowed to expand", () => {
   assert.match(artworkSource, /\|simkl\)/);
   assert.doesNotMatch(hookSource, /meta\.background/);
 });
+
+test("passive artwork loading stays local, while focus enables provider lookups", () => {
+  const artworkSource = readFileSync(
+    new URL("../src/lib/expanding-card-artwork.ts", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(artworkSource, /if \(priority === "auto"\) return undefined/);
+  assert.match(artworkSource, /tmdbId && tmdbKey \? await tmdbMovieImages/);
+  assert.match(artworkSource, /url \?\? prepareExpandingCardArtwork\(meta, tmdbKey, "high"\)/);
+  assert.match(artworkSource, /const decoded = new Map<string, number>\(\)/);
+});

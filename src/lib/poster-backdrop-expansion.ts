@@ -4,6 +4,13 @@ const MIN_WIDE_ARTWORK_HEIGHT = 360;
 const MIN_WIDE_ARTWORK_RATIO = 1.45;
 const MAX_WIDE_ARTWORK_RATIO = 2.2;
 
+export const POSTER_CARD_ANIMATION = {
+  expansionMs: 760,
+  wideFadeMs: 500,
+  titleRestoreMs: 120,
+  settleMs: 60,
+} as const;
+
 export type CardNavigationRect = {
   left: number;
   right: number;

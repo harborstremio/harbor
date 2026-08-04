@@ -5,7 +5,7 @@ import {
   invalidateExpandingCardArtwork,
   prepareExpandingCardArtwork,
 } from "@/lib/expanding-card-artwork";
-import { expandedCardWidth } from "@/lib/poster-backdrop-expansion";
+import { POSTER_CARD_ANIMATION, expandedCardWidth } from "@/lib/poster-backdrop-expansion";
 import { observe } from "@/lib/visibility";
 import { useRowCardExpansion } from "../row-card-expansion";
 
@@ -34,12 +34,20 @@ export function useExpandingCard({
   const artworkKeyRef = useRef(artworkKey);
   const previousArtworkKeyRef = useRef(artworkKey);
   const [artworkState, setArtworkState] = useState<ArtworkState>({ key: artworkKey });
+  const [collapsing, setCollapsing] = useState(false);
+  const [titleCollapsing, setTitleCollapsing] = useState(false);
   const artwork = artworkState.key === artworkKey ? artworkState.url : undefined;
   const artworkReady = artworkState.key === artworkKey && artworkState.ready === true;
   const artworkRef = useRef(artwork);
   const artworkReadyRef = useRef(artworkReady);
-  const requestRef = useRef<{ key: string; promise: Promise<string | undefined> } | null>(null);
+  const requestRef = useRef<{
+    key: string;
+    priority: "auto" | "high";
+    promise: Promise<string | undefined>;
+  } | null>(null);
   const focusIntentRef = useRef(false);
+  const collapseTimerRef = useRef<number | null>(null);
+  const titleCollapseTimerRef = useRef<number | null>(null);
 
   useLayoutEffect(() => {
     if (previousArtworkKeyRef.current !== artworkKey) {
@@ -48,6 +56,8 @@ export function useExpandingCard({
       artworkReadyRef.current = false;
       focusIntentRef.current = false;
       collapseRowCard?.();
+      setCollapsing(false);
+      setTitleCollapsing(false);
     }
     artworkKeyRef.current = artworkKey;
   }, [artworkKey, collapseRowCard]);
@@ -56,8 +66,15 @@ export function useExpandingCard({
     (priority: "auto" | "high"): Promise<string | undefined> => {
       if (!enabled) return Promise.resolve(undefined);
       if (artworkRef.current) return Promise.resolve(artworkRef.current);
+      const activeRequest = requestRef.current;
+      if (
+        activeRequest?.key === artworkKey &&
+        (priority === "auto" || activeRequest.priority === "high")
+      ) {
+        return activeRequest.promise;
+      }
+
       const prepared = prepareExpandingCardArtwork(meta, tmdbKey, priority);
-      if (requestRef.current?.key === artworkKey) return requestRef.current.promise;
 
       const promise = prepared
         .then((url) => {
@@ -69,9 +86,9 @@ export function useExpandingCard({
           return url;
         })
         .finally(() => {
-          if (requestRef.current?.key === artworkKey) requestRef.current = null;
+          if (requestRef.current?.promise === promise) requestRef.current = null;
         });
-      requestRef.current = { key: artworkKey, promise };
+      requestRef.current = { key: artworkKey, priority, promise };
       return promise;
     },
     [artworkKey, enabled, meta, tmdbKey],
@@ -90,6 +107,16 @@ export function useExpandingCard({
 
   const armFocus = useCallback(() => {
     if (!enabled) return;
+    if (collapseTimerRef.current !== null) {
+      window.clearTimeout(collapseTimerRef.current);
+      collapseTimerRef.current = null;
+    }
+    if (titleCollapseTimerRef.current !== null) {
+      window.clearTimeout(titleCollapseTimerRef.current);
+      titleCollapseTimerRef.current = null;
+    }
+    setCollapsing(false);
+    setTitleCollapsing(false);
     focusIntentRef.current = true;
     const currentArtwork = artworkRef.current;
     if (currentArtwork && artworkReadyRef.current) {
@@ -136,8 +163,21 @@ export function useExpandingCard({
   }, [armFocus]);
   const onBlur = useCallback(() => {
     focusIntentRef.current = false;
+    if (!enabled) return;
+    setCollapsing(true);
+    setTitleCollapsing(true);
+    if (collapseTimerRef.current !== null) window.clearTimeout(collapseTimerRef.current);
+    if (titleCollapseTimerRef.current !== null) window.clearTimeout(titleCollapseTimerRef.current);
+    titleCollapseTimerRef.current = window.setTimeout(() => {
+      titleCollapseTimerRef.current = null;
+      setTitleCollapsing(false);
+    }, POSTER_CARD_ANIMATION.wideFadeMs);
+    collapseTimerRef.current = window.setTimeout(() => {
+      collapseTimerRef.current = null;
+      setCollapsing(false);
+    }, POSTER_CARD_ANIMATION.expansionMs + POSTER_CARD_ANIMATION.settleMs);
     row?.collapse();
-  }, [row]);
+  }, [enabled, row]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -165,6 +205,8 @@ export function useExpandingCard({
   useEffect(
     () => () => {
       focusIntentRef.current = false;
+      if (collapseTimerRef.current !== null) window.clearTimeout(collapseTimerRef.current);
+      if (titleCollapseTimerRef.current !== null) window.clearTimeout(titleCollapseTimerRef.current);
       collapseRowCard?.();
     },
     [collapseRowCard],
@@ -174,6 +216,8 @@ export function useExpandingCard({
     artwork,
     enabled,
     expanded: row?.expanded === true,
+    collapsing,
+    titleCollapsing,
     focusEnabled: focusedCardEffectEnabled,
     onBlur,
     onFocus,
