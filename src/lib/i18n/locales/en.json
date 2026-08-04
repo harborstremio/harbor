@@ -886,6 +886,8 @@
   "chrome.minimize": "Minimize",
   "chrome.parentalOn": "Parental controls on",
   "chrome.restore": "Restore",
+  "chrome.safetyNetHeading": "Navigation",
+  "chrome.safetyNetLabel": "Menu",
   "chrome.scrollForMore": "Scroll for more",
   "chrome.sectionLibrary": "Library",
   "chrome.watchTogether": "Watch together",

@@ -99,8 +99,7 @@ export function PinEntry({
     focus();
   };
 
-  const displayTitle =
-    mode === "set" && stage === "confirm" ? t("Confirm your PIN") : title;
+  const displayTitle = mode === "set" && stage === "confirm" ? t("Confirm your PIN") : title;
   const displaySub =
     mode === "set" && stage === "confirm" ? t("Type the same 4-digit PIN again.") : subtitle;
 
@@ -118,7 +117,7 @@ export function PinEntry({
         </button>
       </div>
       <div className="flex flex-col items-center gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle">
+        <span className="text-[11px] font-bold uppercase tracking-[0.32em] text-ink-subtle rtl:tracking-normal">
           {t("Profile PIN")}
         </span>
         <h1 className="font-display text-[28px] font-medium tracking-tight text-ink">
@@ -136,6 +135,7 @@ export function PinEntry({
           type="button"
           onClick={focus}
           aria-label={t("Focus PIN entry")}
+          dir="ltr"
           className="relative flex cursor-text items-center gap-3 rounded-full px-3 py-2"
         >
           <input
@@ -165,7 +165,7 @@ export function PinEntry({
           ))}
         </button>
         {error && <p className="text-[12.5px] font-medium text-red-300">{error}</p>}
-        <div className="grid grid-cols-3 gap-2.5 pt-1">
+        <div dir="ltr" className="grid grid-cols-3 gap-2.5 pt-1">
           {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
             <PinKey key={d} onClick={() => tap(d)} disabled={busy}>
               {d}
