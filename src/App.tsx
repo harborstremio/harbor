@@ -1,4 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CustomLayoutSafetyNet } from "@/chrome/custom-layout-safety-net";
 import { FloatingBack } from "@/chrome/floating-back";
 import { WindowControls } from "@/chrome/window-controls";
 import { WindowResizeEdges } from "@/chrome/window-resize-edges";
@@ -1026,6 +1027,9 @@ function Shell({ onReady }: { onReady?: () => void }) {
         <div className="fixed end-3 top-3 z-[120]">
           <WindowControls />
         </div>
+      )}
+      {!settingsTop && !playerActive && !pickerTop && layout === "custom" && (
+        <CustomLayoutSafetyNet />
       )}
       {!playerActive && <WindowResizeEdges />}
       <div
