@@ -91,7 +91,7 @@ export const PickCard = memo(function PickCard({
   awardLookupName?: string;
   kids?: boolean;
 }) {
-  const { openMeta, openPicker } = useView();
+  const { openMeta, openPicker, openManga } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
   const cardStyle: CardHoverStyle =
@@ -492,7 +492,11 @@ export const PickCard = memo(function PickCard({
   return (
     <button
       ref={ref}
-      onClick={() => openMeta(meta)}
+      onClick={() =>
+        meta.type === "manga"
+          ? openManga(meta.id)
+          : openMeta(meta, isAnimeCardId ? { exact: true } : undefined)
+      }
       onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
       onFocus={(e) => hoverPreviewFocus(meta, e.currentTarget)}
       onBlur={(e) => hoverPreviewBlur(e.currentTarget)}
@@ -522,7 +526,8 @@ export const PickCard = memo(function PickCard({
             config={activeCustom}
             meta={meta}
             onPlay={() => {
-              if (meta.type === "movie")
+              if (meta.type === "manga") openManga(meta.id);
+              else if (meta.type === "movie")
                 openPicker(meta, undefined, { autoPlay: true, resume: true });
               else openMeta(meta);
             }}
@@ -532,7 +537,8 @@ export const PickCard = memo(function PickCard({
             meta={meta}
             style={inCardHover}
             onPlay={() => {
-              if (meta.type === "movie")
+              if (meta.type === "manga") openManga(meta.id);
+              else if (meta.type === "movie")
                 openPicker(meta, undefined, { autoPlay: true, resume: true });
               else openMeta(meta);
             }}

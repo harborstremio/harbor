@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BookOpen } from "lucide-react";
 import { AddonsIcon } from "@/components/icons/addons-icon";
 import { CatalogsIcon } from "@/components/icons/catalogs-icon";
 import { AnimeIcon } from "@/components/icons/anime-icon";
@@ -24,6 +25,7 @@ export type NavItemId =
   | "shows"
   | "kids"
   | "anime"
+  | "manga"
   | "live"
   | "vod"
   | "calendar"
@@ -37,7 +39,7 @@ export type NavItem = {
   label: string;
   render: (active: boolean) => ReactNode;
   view: View;
-  hideKey?: "anime" | "liveTv" | "sports";
+  hideKey?: "anime" | "liveTv" | "sports" | "manga";
   parentalKey?: LockableTab;
   pinGated?: boolean;
 };
@@ -86,6 +88,16 @@ export const NAV_ITEMS: NavItem[] = [
     view: "anime",
     hideKey: "anime",
     parentalKey: "anime",
+  },
+  {
+    id: "manga",
+    label: "nav.manga",
+    render: (active) => (
+      <BookOpen size={24} strokeWidth={2.2} className={active ? "" : "opacity-70"} />
+    ),
+    view: "manga",
+    hideKey: "manga",
+    parentalKey: "manga",
   },
   {
     id: "live",

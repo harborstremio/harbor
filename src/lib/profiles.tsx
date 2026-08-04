@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
+import { isRemovedBuiltinAvatar } from "./avatars/catalog";
 
 export const PROFILE_COLORS = [
   "#7dd3fc",
@@ -81,6 +82,7 @@ type ProfilesValue = {
     patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>,
   ) => void;
   deleteProfile: (id: string) => void;
+  setPrimary: (id: string) => void;
 };
 
 const STORAGE_KEY = "harbor.profiles.v1";
@@ -223,6 +225,45 @@ function markLaunchPickerShown(): void {
   }
 }
 
+export function readActiveProfileIdentity(): {
+  id: string;
+  name: string;
+  avatar: string | null;
+  color: string;
+} | null {
+  try {
+    const { profiles, activeId } = readState();
+    if (!profiles.length) return null;
+    const active =
+      profiles.find((p) => p.id === activeId) ?? profiles.find((p) => p.isPrimary) ?? profiles[0];
+    return active
+      ? { id: active.id, name: active.name, avatar: active.avatar, color: `${active.color}` }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export function readAllProfilesIdentity(): Array<{
+  id: string;
+  name: string;
+  avatar: string | null;
+  color: string;
+}> {
+  try {
+    return readState()
+      .profiles.filter((p) => !p.passwordHash)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        avatar: p.avatar,
+        color: `${p.color}`,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function readState(): ProfilesState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -262,7 +303,11 @@ function readState(): ProfilesState {
       if (p.isPrimary) {
         if (isPlaceholderName(p.name)) next.name = fallbackName;
         if (identity.color) next.color = identity.color;
-        if (identity.avatar != null && !identity.avatar.startsWith("/kids/avatars/")) {
+        if (
+          p.avatar == null &&
+          identity.avatar != null &&
+          !identity.avatar.startsWith("/kids/avatars/")
+        ) {
           next.avatar = identity.avatar;
         }
       }
@@ -271,6 +316,9 @@ function readState(): ProfilesState {
         typeof next.avatar === "string" &&
         next.avatar.startsWith("/kids/avatars/")
       ) {
+        next.avatar = null;
+      }
+      if (isRemovedBuiltinAvatar(next.avatar)) {
         next.avatar = null;
       }
       return next;
@@ -299,6 +347,27 @@ function newId(): string {
   return `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function migrateLegacyStremioAuth(profiles: Profile[]): void {
+  try {
+    if (localStorage.getItem("harbor.auth.migrated.v1")) return;
+    const primary = profiles.find((p) => p.isPrimary) ?? profiles[0];
+    const legacy = localStorage.getItem("harbor.auth");
+    if (primary && legacy && !localStorage.getItem(`harbor.auth.${primary.id}`)) {
+      let valid = false;
+      try {
+        const parsed = JSON.parse(legacy) as { authKey?: unknown; user?: unknown };
+        valid = typeof parsed?.authKey === "string" && parsed.authKey.length > 0 && !!parsed.user;
+      } catch {
+        valid = false;
+      }
+      if (valid) localStorage.setItem(`harbor.auth.${primary.id}`, legacy);
+    }
+    localStorage.setItem("harbor.auth.migrated.v1", "1");
+  } catch {
+    /* ignore */
+  }
+}
+
 const Ctx = createContext<ProfilesValue | null>(null);
 
 export function ProfilesProvider({ children }: { children: ReactNode }) {
@@ -322,8 +391,10 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       };
       const initial: ProfilesState = { profiles: [primary], activeId: primary.id };
       writeState(initial);
+      migrateLegacyStremioAuth(initial.profiles);
       return initial;
     }
+    migrateLegacyStremioAuth(loaded.profiles);
     const def = launchDefault(loaded.profiles);
     return def ? { ...loaded, activeId: def.id } : loaded;
   });
@@ -344,6 +415,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     writeState(state);
+    window.dispatchEvent(new CustomEvent("harbor:profiles-updated"));
   }, [state]);
 
   const activeProfile = useMemo(
@@ -365,6 +437,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
       }
     } catch {}
+    window.dispatchEvent(new CustomEvent("harbor:active-profile-changed", { detail: { id } }));
     setState((s) => ({ ...s, activeId: id }));
     setPickerOpen(false);
     setPickerViewState({ kind: "list" });
@@ -372,6 +445,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onFocus = () => {
+      if (pickerOpen) return;
       const mins = intervalMinutes(readProfilePromptInterval());
       if (mins <= 0 || state.activeId == null || state.profiles.length <= 1) return;
       if (Date.now() - readLastProfileSelectAt() >= mins * 60000) {
@@ -381,7 +455,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [state.activeId, state.profiles.length]);
+  }, [state.activeId, state.profiles.length, pickerOpen]);
 
   const openPicker = useCallback((view: PickerView = { kind: "list" }) => {
     setPickerViewState(view);
@@ -437,7 +511,12 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       if (!target || target.isPrimary) return;
       try {
         localStorage.removeItem(`harbor.auth.${id}`);
+        localStorage.removeItem(`harbor.theme-session.${id}`);
+        localStorage.removeItem(`harbor.localcw.v1.${id}`);
         localStorage.removeItem(`harbor.favorites.v1.${id}`);
+        localStorage.removeItem(`harbor.charfavorites.v1.${id}`);
+        localStorage.removeItem(`harbor.mangafav.v1.${id}`);
+        localStorage.removeItem(`harbor.mangaread.v1.${id}`);
         localStorage.removeItem(`harbor.localwatchlist.v1.${id}`);
         localStorage.removeItem(`harbor.settings.${id}`);
         localStorage.removeItem(`harbor.trakt.session.v1.${id}`);
@@ -461,6 +540,22 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     [state.profiles],
   );
 
+  const setPrimary = useCallback<ProfilesValue["setPrimary"]>((id) => {
+    setState((s) => {
+      if (!s.profiles.some((p) => p.id === id && !p.isPrimary)) return s;
+      return {
+        ...s,
+        profiles: s.profiles.map((p) =>
+          p.id === id
+            ? { ...p, isPrimary: true, shareStremioWith: null }
+            : p.isPrimary
+              ? { ...p, isPrimary: false }
+              : p,
+        ),
+      };
+    });
+  }, []);
+
   const value = useMemo<ProfilesValue>(
     () => ({
       profiles: state.profiles,
@@ -476,6 +571,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       createProfile,
       updateProfile,
       deleteProfile,
+      setPrimary,
     }),
     [
       state.profiles,
@@ -491,6 +587,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       createProfile,
       updateProfile,
       deleteProfile,
+      setPrimary,
     ],
   );
 

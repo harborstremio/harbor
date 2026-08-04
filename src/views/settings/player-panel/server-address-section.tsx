@@ -23,7 +23,10 @@ async function probeBundled(): Promise<boolean> {
   try {
     const ctrl = new AbortController();
     const timer = window.setTimeout(() => ctrl.abort(), 1500);
-    const res = await fetch(`${BUNDLED_SERVER_URL}/settings`, { method: "GET", signal: ctrl.signal });
+    const res = await fetch(`${BUNDLED_SERVER_URL}/settings`, {
+      method: "GET",
+      signal: ctrl.signal,
+    });
     window.clearTimeout(timer);
     return res.ok;
   } catch {
@@ -38,7 +41,15 @@ async function readEngineState(): Promise<EngineState> {
   return (await probeBundled()) ? "running" : "stopped";
 }
 
-function AddressRow({ label, url, openable }: { label: string; url: string; openable?: boolean }) {
+export function AddressRow({
+  label,
+  url,
+  openable,
+}: {
+  label: string;
+  url: string;
+  openable?: boolean;
+}) {
   const t = useT();
   const [copied, setCopied] = useState(false);
   const copy = () => {
@@ -49,7 +60,9 @@ function AddressRow({ label, url, openable }: { label: string; url: string; open
   };
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[11.5px] font-semibold uppercase tracking-wider text-ink-subtle">{label}</span>
+      <span className="text-[11.5px] font-semibold uppercase tracking-wider text-ink-subtle">
+        {label}
+      </span>
       <div className="flex items-center gap-2">
         <span className="h-10 flex-1 truncate rounded-xl border border-edge-soft bg-canvas px-3.5 font-mono text-[13px] leading-10 text-ink">
           {url}
@@ -120,7 +133,7 @@ export function ServerAddressSection() {
     const s = await getCastServerStatus();
     if (aliveRef.current) {
       setEngine(next);
-      setLastError(next === "stopped" ? s?.last_error ?? null : null);
+      setLastError(next === "stopped" ? (s?.last_error ?? null) : null);
     }
   };
 
@@ -160,7 +173,14 @@ export function ServerAddressSection() {
   const pill = PILL[engine];
   const running = engine === "running" || engine === "starting";
 
-  const pillLabel = pill.label === "Checking" ? t("Checking") : pill.label === "Running" ? t("Running") : pill.label === "Starting" ? t("Starting") : t("Not running");
+  const pillLabel =
+    pill.label === "Checking"
+      ? t("Checking")
+      : pill.label === "Running"
+        ? t("Running")
+        : pill.label === "Starting"
+          ? t("Starting")
+          : t("Not running");
 
   const start = async () => {
     setActing(true);
@@ -180,28 +200,41 @@ export function ServerAddressSection() {
   };
 
   return (
-    <section id={settingsAnchor("Your streaming server address")} className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
+    <section
+      id={settingsAnchor("Your streaming server address")}
+      className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Your streaming server address")}</h2>
+          <h2 className="text-[19px] font-medium tracking-tight text-ink">
+            {t("Your streaming server address")}
+          </h2>
           <p className="text-[13.5px] leading-relaxed text-ink-muted">
-            {t("Harbor runs a small streaming server right on this computer. This is where it lives. To stream from this machine on another device, copy the Wi-Fi address and paste it into Remote streaming server in Harbor over there.")}
+            {t(
+              "Harbor runs a small streaming server right on this computer. This is where it lives. To stream from this machine on another device, copy the Wi-Fi address and paste it into Remote streaming server in Harbor over there.",
+            )}
           </p>
         </div>
-        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${pill.chip}`}>
+        <span
+          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${pill.chip}`}
+        >
           <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
           {pillLabel}
         </span>
       </div>
 
       <AddressRow label={t("On this computer")} url={BUNDLED_SERVER_URL} openable={running} />
-      {lanIp && <AddressRow label={t("From other devices on your Wi-Fi")} url={`http://${lanIp}:11470`} />}
+      {lanIp && (
+        <AddressRow label={t("From other devices on your Wi-Fi")} url={`http://${lanIp}:11470`} />
+      )}
       {engine === "stopped" && lastError && (
         <div className="rounded-xl border border-danger/30 bg-danger/8 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-danger">
           <span className="font-semibold">{t("Server couldn't start:")}</span> {lastError}
           {/not bundled/i.test(lastError) && (
             <span className="mt-1.5 block text-ink-muted">
-              {t("This usually means antivirus removed the server file (stremio-server.exe). Add Harbor's install folder to your antivirus exclusions, then reinstall.")}
+              {t(
+                "This usually means antivirus removed the server file (stremio-server.exe). Add Harbor's install folder to your antivirus exclusions, then reinstall.",
+              )}
             </span>
           )}
         </div>
@@ -237,21 +270,53 @@ export function ServerAddressSection() {
 
       <ToggleRow
         label={t("Harbor in your browser")}
-        sub={t("Serves this exact install of Harbor as a web app on your network. Open it on a phone, laptop, or TV browser, sign in there, and it streams through this computer. You can also use the phone remote to control playback and cast to another device on this machine.")}
+        sub={t(
+          "Serves this exact install of Harbor as a web app on your network. Open it on a phone, laptop, or TV browser, sign in there, and it streams through this computer. You can also use the phone remote to control playback and cast to another device on this machine.",
+        )}
         value={settings.serveWebUi || settings.remoteControlEnabled}
         onChange={(v) => update({ serveWebUi: v, remoteControlEnabled: v })}
       />
       {(settings.serveWebUi || settings.remoteControlEnabled) && (
         <>
-          <AddressRow label={t("Harbor in your browser (this computer)")} url={`http://127.0.0.1:${WEB_PORT}`} openable />
-          {lanIp && <AddressRow label={t("Harbor in your browser (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}`} />}
-          <AddressRow label={t("Phone remote (this computer)")} url={`http://127.0.0.1:${WEB_PORT}/remote`} openable />
+          <AddressRow
+            label={t("Harbor in your browser (this computer)")}
+            url={`http://127.0.0.1:${WEB_PORT}`}
+            openable
+          />
           {lanIp && (
-            <AddressRow label={t("Phone remote (Wi-Fi)")} url={`http://${lanIp}:${WEB_PORT}/remote`} />
+            <AddressRow
+              label={t("Harbor in your browser (Wi-Fi)")}
+              url={`http://${lanIp}:${WEB_PORT}`}
+            />
+          )}
+          <AddressRow
+            label={t("Phone remote (this computer)")}
+            url={`http://127.0.0.1:${WEB_PORT}/remote`}
+            openable
+          />
+          {lanIp && (
+            <AddressRow
+              label={t("Phone remote (Wi-Fi)")}
+              url={`http://${lanIp}:${WEB_PORT}/remote`}
+            />
+          )}
+          <AddressRow
+            label={t("Manga remote (this computer)")}
+            url={`http://127.0.0.1:${WEB_PORT}/reader`}
+            openable
+          />
+          {lanIp && (
+            <AddressRow
+              label={t("Manga remote (Wi-Fi)")}
+              url={`http://${lanIp}:${WEB_PORT}/reader`}
+            />
           )}
           {webError && (
             <span className="text-[12px] text-danger">
-              {t("Couldn't start on port {WEB_PORT}. Another app may be using it; toggle off and on to retry.", { WEB_PORT: String(WEB_PORT) })}
+              {t(
+                "Couldn't start on port {WEB_PORT}. Another app may be using it; toggle off and on to retry.",
+                { WEB_PORT: String(WEB_PORT) },
+              )}
             </span>
           )}
         </>

@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/lib/auth";
+import { useSettings } from "@/lib/settings";
 import { listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
 import {
+  ANIME_CLOUD_ID,
   cwSortKey,
   episodeFromVideoId,
   isCwMember,
@@ -20,6 +22,8 @@ export type CwCard = {
   videoId?: string;
   progress: number;
 };
+
+const EMPTY_LOCAL_CW: ReturnType<typeof listLocalCw> = [];
 
 function localToLibraryItem(e: ReturnType<typeof listLocalCw>[number]): LibraryItem {
   return {
@@ -77,8 +81,10 @@ function toCard(i: LibraryItem): CwCard {
 
 export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
   const { authKey } = useAuth();
+  const { settings } = useSettings();
+  const cwPerProfile = settings.cwPerProfile;
   const [items, setItems] = useState<LibraryItem[]>([]);
-  const [localVersion, setLocalVersion] = useState(0);
+  const localItems = useSyncExternalStore(subscribeLocalCw, listLocalCw, () => EMPTY_LOCAL_CW);
 
   useEffect(() => {
     if (!authKey) {
@@ -96,11 +102,9 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
     };
   }, [authKey]);
 
-  useEffect(() => subscribeLocalCw(() => setLocalVersion((v) => v + 1)), []);
-
   return useMemo(() => {
-    void localVersion;
-    const merged = [...items, ...listLocalCw().map(localToLibraryItem)]
+    const cloudItems = cwPerProfile ? [] : items.filter((item) => !ANIME_CLOUD_ID.test(item._id));
+    const merged = [...cloudItems, ...localItems.map(localToLibraryItem)]
       .filter((i) => (i.type as string) !== "other" && !i._id.startsWith("iptv:") && isCwMember(i))
       .map((i) => ({ i, k: cwSortKey(i) }))
       .sort((a, b) => b.k - a.k)
@@ -114,5 +118,5 @@ export function useContinueWatching(excludeId?: string, limit = 12): CwCard[] {
       if (out.length >= limit) break;
     }
     return out;
-  }, [items, localVersion, excludeId, limit]);
+  }, [items, localItems, excludeId, limit, cwPerProfile]);
 }

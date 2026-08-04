@@ -7,7 +7,7 @@ const subs = new Set<() => void>();
 
 export type ListItem = {
   id: string;
-  type: "movie" | "series";
+  type: "movie" | "series" | "manga";
   name: string;
   poster?: string;
   addedAt: number;
@@ -29,12 +29,14 @@ export const MAX_ITEMS = 100;
 
 let memoryFallback: CustomList[] | null = null;
 
-function inferType(id: string): "movie" | "series" {
+function inferType(id: string): "movie" | "series" | "manga" {
+  if (id.startsWith("manga:") || id.startsWith("anilist:") || id.startsWith("md:")) return "manga";
   return id.includes(":tv:") || id.includes(":series:") ? "series" : "movie";
 }
 
-function normalizeType(type: string | undefined, id: string): "movie" | "series" {
+function normalizeType(type: string | undefined, id: string): "movie" | "series" | "manga" {
   if (type === "series" || type === "tv") return "series";
+  if (type === "manga") return "manga";
   if (type === "movie") return "movie";
   return inferType(id);
 }
@@ -69,7 +71,7 @@ function read(): CustomList[] {
           if (typeof it.id !== "string") continue;
           items.push({
             id: it.id,
-            type: it.type === "series" ? "series" : "movie",
+            type: it.type === "series" ? "series" : it.type === "manga" ? "manga" : "movie",
             name: typeof it.name === "string" ? it.name : "",
             poster: typeof it.poster === "string" ? it.poster : undefined,
             addedAt: typeof it.addedAt === "number" ? it.addedAt : 0,
@@ -223,7 +225,7 @@ export function useCustomLists(): CustomList[] {
 
 export function useList(id: string | null): CustomList | null {
   const lists = useCustomLists();
-  return useMemo(() => (id ? lists.find((l) => l.id === id) ?? null : null), [lists, id]);
+  return useMemo(() => (id ? (lists.find((l) => l.id === id) ?? null) : null), [lists, id]);
 }
 
 export function useListsContaining(itemId: string | undefined): Set<string> {

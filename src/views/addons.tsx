@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Library, Sparkles, Star, TrendingUp } from "lucide-react";
+import { Check, ChevronDown, Library, Sparkles, Star, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AgeGateModal } from "@/components/age-gate-modal";
 import { HarborLoader } from "@/components/harbor-loader";
@@ -410,10 +410,10 @@ export function AddonsView() {
                 onClick={() => setFiltersOpen((v) => !v)}
                 className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle transition-colors hover:border-edge hover:text-ink-muted"
               >
-                <ChevronRight
+                <ChevronDown
                   size={13}
                   strokeWidth={2.4}
-                  className={`transition-transform duration-300 ${filtersOpen ? "rotate-90" : "-rotate-90"}`}
+                  className={`transition-transform duration-300 ${filtersOpen ? "rotate-180" : ""}`}
                 />
                 {filtersOpen ? t("Hide") : t("Filters")}
               </button>

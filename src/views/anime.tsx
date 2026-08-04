@@ -57,8 +57,15 @@ import { fetchHostedHero, peekHostedHero, type HostedHeroItem } from "@/lib/anim
 import { fetchAnilistTrendingAnime } from "@/lib/anilist/browse";
 import { useSettings } from "@/lib/settings";
 import { isAdultAnime } from "@/lib/addons-store/adult-filter";
-import { isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
-import { clearLocalCw } from "@/lib/local-cw";
+import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
+import {
+  ANIME_CLOUD_ID,
+  isAnimeCwItem,
+  isCwMember,
+  library,
+  type LibraryItem,
+} from "@/lib/stremio";
+import { clearLocalCw, listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -74,6 +81,8 @@ import {
 import { loadAnilistWatchedMap } from "@/lib/anilist/watched-map";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useScrollMemory, useView } from "@/lib/view";
+
+const EMPTY_LOCAL_CW: ReturnType<typeof listLocalCw> = [];
 
 function cleanMeta(m: Meta): Meta {
   const cleaned = stripFranchiseSuffix(m.name);
@@ -241,7 +250,10 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     }
     const load = () => {
       library(authKey)
-        .then(setLibItems)
+        .then((items) => {
+          setLibItems(items);
+          if (!settings.cwPerProfile) absorbCloudAnimeCw(items);
+        })
         .catch(() => setLibItems([]));
     };
     load();
@@ -253,7 +265,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     };
     window.addEventListener("focus", refresh);
     return () => window.removeEventListener("focus", refresh);
-  }, [authKey]);
+  }, [authKey, settings.cwPerProfile]);
 
   useEffect(() => {
     if (!simklConnected) {
@@ -273,14 +285,47 @@ export function AnimeView({ active = true }: { active?: boolean }) {
 
   const animeDetectVer = useDetectedAnimeVersion();
   const [cwRootVersion, setCwRootVersion] = useState(0);
+  const localCwItems = useSyncExternalStore(subscribeLocalCw, listLocalCw, () => EMPTY_LOCAL_CW);
+  const localCwIds = useMemo(() => new Set(localCwItems.map((entry) => entry.id)), [localCwItems]);
+  const localAnimeCw = useMemo<LibraryItem[]>(() => {
+    return localCwItems
+      .filter((entry) => ANIME_CLOUD_ID.test(entry.id))
+      .map((entry) => ({
+        _id: entry.id,
+        type: entry.type,
+        name: entry.name,
+        poster: entry.poster,
+        background: entry.background,
+        state: {
+          timeOffset: entry.positionMs,
+          duration: entry.durationMs,
+          season: entry.season,
+          episode: entry.episode,
+          video_id: entry.videoId,
+          flaggedWatched:
+            entry.durationMs > 0 && entry.positionMs / entry.durationMs >= 0.9 ? 1 : 0,
+          lastWatched: new Date(entry.t).toISOString(),
+        },
+        removed: false,
+        temp: false,
+        _ctime: new Date(entry.t).toISOString(),
+        _mtime: new Date(entry.t).toISOString(),
+        local: true,
+      }));
+  }, [localCwItems]);
   const continueWatching = useMemo(() => {
     const seen = new Set<string>();
     const seenRoot = new Set<string>();
-    return [...libItems, ...simklCw]
+    return [
+      ...localAnimeCw,
+      ...libItems.filter((item) => !ANIME_CLOUD_ID.test(item._id)),
+      ...simklCw,
+    ]
       .filter((i) => {
         if (!isCwMember(i)) return false;
-        if (!isAnimeCwItem(i)) return false;
+        if (!i.local && !isAnimeCwItem(i)) return false;
         if (isCwDismissed(i)) return false;
+        if (settings.cwPerProfile && !localCwIds.has(i._id) && !i.local) return false;
         if (seen.has(i._id)) return false;
         seen.add(i._id);
         return true;
@@ -298,11 +343,24 @@ export function AnimeView({ active = true }: { active?: boolean }) {
         return true;
       })
       .slice(0, 20);
-  }, [libItems, simklCw, cwVersion, animeDetectVer, cwRootVersion]);
+  }, [
+    localAnimeCw,
+    libItems,
+    simklCw,
+    cwVersion,
+    animeDetectVer,
+    cwRootVersion,
+    settings.cwPerProfile,
+    localCwIds,
+  ]);
 
   useEffect(() => {
-    const ids = [...libItems, ...simklCw]
-      .filter((i) => isCwMember(i) && isAnimeCwItem(i))
+    const ids = [
+      ...localAnimeCw,
+      ...libItems.filter((item) => !ANIME_CLOUD_ID.test(item._id)),
+      ...simklCw,
+    ]
+      .filter((i) => isCwMember(i) && (i.local || isAnimeCwItem(i)))
       .map((i) => i._id);
     if (ids.length === 0) return;
     if (ids.every((id) => franchiseRootSync(id))) return;
@@ -313,7 +371,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [libItems, simklCw]);
+  }, [localAnimeCw, libItems, simklCw]);
 
   useEffect(() => {
     publishResumeStates(continueWatching);

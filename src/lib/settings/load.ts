@@ -7,7 +7,7 @@ import {
 } from "@/lib/theme";
 import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
-import { migrateModelId } from "@/lib/ai-models";
+import { migrateModelId, providerTabFor } from "@/lib/ai-models";
 import { resolveUiLanguage } from "@/lib/i18n";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
@@ -136,6 +136,11 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       parsed._streamSortAddonV1 = true;
     }
     if (parsed.aiSearchModel) parsed.aiSearchModel = migrateModelId(parsed.aiSearchModel);
+    if (parsed.aiSearchProvider !== "groq" && parsed.aiSearchProvider !== "openrouter") {
+      parsed.aiSearchProvider = parsed.aiSearchModel
+        ? providerTabFor(parsed.aiSearchModel)
+        : "openrouter";
+    }
     if (!parsed._mpvEmbedV3) {
       parsed.playerMpvEmbed = true;
       parsed._mpvEmbedV3 = true;

@@ -17,6 +17,15 @@ const TYPE_TITLE: Record<AwardType, string> = {
   cannes: "Cannes Film Festival",
   venice: "Venice Film Festival",
   berlin: "Berlin Film Festival",
+  bafta_tv: "BAFTA Television Awards",
+  annie: "Annie Awards",
+  spirit: "Independent Spirit Awards",
+  saturn: "Saturn Awards",
+  cesar: "César Awards",
+  goya: "Goya Awards",
+  blue_dragon: "Blue Dragon Film Awards",
+  baeksang: "Baeksang Arts Awards",
+  bifa: "British Independent Film Awards",
   other: "Awards",
 };
 
@@ -37,7 +46,9 @@ export function AwardDetailModal({
 }) {
   const { openMeta } = useView();
   const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ top: number; left: number; place: "below" | "above" } | null>(null);
+  const [pos, setPos] = useState<{ top: number; left: number; place: "below" | "above" } | null>(
+    null,
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -71,7 +82,10 @@ export function AwardDetailModal({
     const spaceAbove = anchor.top;
     const place: "below" | "above" =
       spaceBelow >= 220 || spaceBelow >= spaceAbove ? "below" : "above";
-    const desiredHeight = Math.min(TOOLTIP_MAX_HEIGHT, place === "below" ? spaceBelow - GAP - 12 : spaceAbove - GAP - 12);
+    const desiredHeight = Math.min(
+      TOOLTIP_MAX_HEIGHT,
+      place === "below" ? spaceBelow - GAP - 12 : spaceAbove - GAP - 12,
+    );
     const top = place === "below" ? anchor.bottom + GAP : anchor.top - GAP - desiredHeight;
     let left = anchor.left + anchor.width / 2 - TOOLTIP_WIDTH / 2;
     left = Math.max(12, Math.min(left, vw - TOOLTIP_WIDTH - 12));
@@ -209,7 +223,12 @@ function AwardRow({
     >
       <span className="relative h-[48px] w-[34px] shrink-0 overflow-hidden rounded-md bg-canvas/60 ring-1 ring-edge-soft/60">
         {poster ? (
-          <img src={poster} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={poster}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         ) : (
           <span
             className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-canvas to-elevated text-ink-muted"
@@ -224,7 +243,9 @@ function AwardRow({
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex items-center gap-1.5">
-          {group.year && <span className="font-mono text-[10px] tabular-nums text-ink-subtle">{group.year}</span>}
+          {group.year && (
+            <span className="font-mono text-[10px] tabular-nums text-ink-subtle">{group.year}</span>
+          )}
           <span
             className={`rounded-full px-1.5 py-0.5 text-[8.5px] font-bold uppercase tracking-[0.16em] ${
               won ? "bg-accent/15 text-accent" : "bg-canvas/60 text-ink-muted"
@@ -236,9 +257,7 @@ function AwardRow({
         <span className="truncate text-[12px] font-semibold text-ink">
           {title ?? (cats || group.awardName)}
         </span>
-        {title && cats && (
-          <span className="truncate text-[10.5px] text-ink-muted">{cats}</span>
-        )}
+        {title && cats && <span className="truncate text-[10.5px] text-ink-muted">{cats}</span>}
       </div>
 
       {interactive && (
@@ -252,7 +271,7 @@ const CINEMETA = "https://v3-cinemeta.strem.io";
 const workCache = new Map<string, Meta | null>();
 const workInflight = new Map<string, Promise<Meta | null>>();
 
-function workKey(entry: WorkLike):string {
+function workKey(entry: WorkLike): string {
   return entry.workImdb ?? `t:${(entry.workTitle ?? "").toLowerCase()}:${entry.year ?? ""}`;
 }
 
@@ -273,15 +292,24 @@ function pickByYear(metas: Meta[], year?: number): Meta | null {
 }
 
 function normMatch(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
-async function cinemetaSearch(title: string, year: number | undefined, preferSeries: boolean): Promise<Meta | null> {
+async function cinemetaSearch(
+  title: string,
+  year: number | undefined,
+  preferSeries: boolean,
+): Promise<Meta | null> {
   const order = preferSeries ? (["series", "movie"] as const) : (["movie", "series"] as const);
   const want = normMatch(title);
   for (const type of order) {
     try {
-      const res = await fetch(`${CINEMETA}/catalog/${type}/top/search=${encodeURIComponent(title)}.json`);
+      const res = await fetch(
+        `${CINEMETA}/catalog/${type}/top/search=${encodeURIComponent(title)}.json`,
+      );
       if (!res.ok) continue;
       const json = await res.json();
       const metas: Meta[] = json?.metas ?? [];

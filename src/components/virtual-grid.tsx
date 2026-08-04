@@ -1,5 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 
 /**
  * Multi-column CSS-grid style virtualizer for large poster grids.
@@ -32,21 +32,37 @@ export function VirtualGrid<T>({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [cols, setCols] = useState(1);
+  const [scrollMargin, setScrollMargin] = useState(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const measure = () => {
       const w = el.clientWidth;
-      if (w <= 0) return;
-      const next = Math.max(1, Math.floor((w + gapX) / (minColumnWidth + gapX)));
-      setCols(next);
+      if (w > 0) {
+        const next = Math.max(1, Math.floor((w + gapX) / (minColumnWidth + gapX)));
+        setCols(next);
+      }
+      const scroll = scrollRef.current;
+      if (!scroll) return;
+      const nextMargin =
+        el.getBoundingClientRect().top - scroll.getBoundingClientRect().top + scroll.scrollTop;
+      setScrollMargin((previous) => (Math.abs(previous - nextMargin) > 1 ? nextMargin : previous));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
-    return () => ro.disconnect();
-  }, [gapX, minColumnWidth]);
+    if (scrollRef.current) ro.observe(scrollRef.current);
+    const io = new IntersectionObserver(measure, {
+      root: scrollRef.current,
+      rootMargin: "1000px 0px",
+    });
+    io.observe(el);
+    return () => {
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, [gapX, items.length, minColumnWidth, scrollRef]);
 
   const rowCount = Math.max(1, Math.ceil(items.length / cols));
   const rowVirtualizer = useVirtualizer({
@@ -58,6 +74,7 @@ export function VirtualGrid<T>({
     // as well as the estimate, otherwise measured rows stack flush together.
     measureElement: (element) => element.getBoundingClientRect().height + gapY,
     overscan,
+    scrollMargin,
   });
 
   if (items.length === 0) return null;
@@ -75,7 +92,7 @@ export function VirtualGrid<T>({
               ref={rowVirtualizer.measureElement}
               className="absolute start-0 grid w-full"
               style={{
-                transform: `translateY(${row.start}px)`,
+                transform: `translateY(${row.start - scrollMargin}px)`,
                 gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
                 columnGap: gapX,
               }}

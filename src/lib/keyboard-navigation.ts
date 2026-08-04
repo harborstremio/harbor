@@ -597,6 +597,10 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
   });
 }
 
+export function tvFocus(el: HTMLElement): void {
+  focusElement(el);
+}
+
 function clearTvFocusRing(except?: HTMLElement) {
   document.querySelectorAll<HTMLElement>('[data-tv-focused="true"]').forEach((focused) => {
     if (focused !== except) focused.removeAttribute("data-tv-focused");

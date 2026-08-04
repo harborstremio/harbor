@@ -26,6 +26,8 @@ export type SectionId =
   | "theme"
   | "webhooks"
   | "bug"
+  | "remotes"
+  | "storage"
   | "advanced";
 
 export const SettingsActiveContext = createContext<{ setActive: (s: SectionId) => void } | null>(

@@ -1,10 +1,12 @@
 import type { LibraryItem } from "@/lib/stremio";
-import { setItemWithRecovery } from "@/lib/storage-recovery";
+import { persistCritical } from "@/lib/storage-recovery";
 
 const KEY = "harbor.manualwatched.v1";
 const UNKEY = "harbor.manualunwatched.v1";
 const METAKEY = "harbor.manualwatched.meta.v1";
 const DISMISSKEY = "harbor.manualwatched.dismissed.v1";
+const UNWATCHED_AT_KEY = "harbor.manualunwatched.at.v1";
+const REMOTE_KEY = "harbor.manualwatched.fromremote.v1";
 
 export type ManualWatchedMeta = {
   type: "series";
@@ -20,6 +22,33 @@ let watchedCache: Set<string> | null = null;
 let unwatchedCache: Set<string> | null = null;
 let metaCache: Record<string, ManualWatchedMeta> | null = null;
 let dismissedCache: Set<string> | null = null;
+let unwatchedAtCache: Record<string, number> | null = null;
+let remoteCache: Set<string> | null = null;
+
+function unwatchedAtMap(): Record<string, number> {
+  if (!unwatchedAtCache) {
+    try {
+      const raw = JSON.parse(localStorage.getItem(UNWATCHED_AT_KEY) ?? "{}");
+      unwatchedAtCache = raw && typeof raw === "object" ? (raw as Record<string, number>) : {};
+    } catch {
+      unwatchedAtCache = {};
+    }
+  }
+  return unwatchedAtCache;
+}
+
+function remoteSet(): Set<string> {
+  if (!remoteCache) remoteCache = loadSet(REMOTE_KEY);
+  return remoteCache;
+}
+
+function persistUnwatchedAt(): void {
+  persistCritical(UNWATCHED_AT_KEY, JSON.stringify(unwatchedAtCache ?? {}));
+}
+
+function persistRemote(): void {
+  persistCritical(REMOTE_KEY, JSON.stringify([...(remoteCache ?? [])]));
+}
 
 function loadMeta(): Record<string, ManualWatchedMeta> {
   if (metaCache) return metaCache;
@@ -91,8 +120,8 @@ function unwatchedSet(): Set<string> {
 function persist(on: Set<string>, off: Set<string>): void {
   watchedCache = on;
   unwatchedCache = off;
-  setItemWithRecovery(KEY, JSON.stringify([...on]));
-  setItemWithRecovery(UNKEY, JSON.stringify([...off]));
+  persistCritical(KEY, JSON.stringify([...on]));
+  persistCritical(UNKEY, JSON.stringify([...off]));
   version += 1;
   for (const fn of subs) fn();
 }
@@ -116,6 +145,23 @@ export function manualWatchedState(
   return undefined;
 }
 
+export function manualEpisodeKeys(metaId: string): {
+  watched: Set<string>;
+  unwatched: Set<string>;
+} {
+  const prefix = `${metaId}|`;
+  const collect = (src: Set<string>): Set<string> => {
+    const out = new Set<string>();
+    for (const k of src) {
+      if (!k.startsWith(prefix)) continue;
+      const parts = k.split("|");
+      if (parts.length === 3) out.add(`${parts[1]}:${parts[2]}`);
+    }
+    return out;
+  };
+  return { watched: collect(watchedSet()), unwatched: collect(unwatchedSet()) };
+}
+
 export function setManualWatched(
   metaId: string,
   season: number,
@@ -125,13 +171,19 @@ export function setManualWatched(
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
   const k = key(metaId, season, episode);
+  const at = unwatchedAtMap();
+  const rem = remoteSet();
   if (watched) {
     on.add(k);
     off.delete(k);
+    delete at[k];
   } else {
     on.delete(k);
     off.add(k);
+    at[k] = Date.now();
   }
+  if (rem.delete(k)) persistRemote();
+  persistUnwatchedAt();
   persist(on, off);
 }
 
@@ -143,16 +195,25 @@ export function setManualWatchedUpTo(
 ): void {
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
+  const at = unwatchedAtMap();
+  const rem = remoteSet();
+  const now = Date.now();
+  let remChanged = false;
   for (let e = 1; e <= episode; e++) {
     const k = key(metaId, season, e);
     if (watched) {
       on.add(k);
       off.delete(k);
+      delete at[k];
     } else {
       on.delete(k);
       off.add(k);
+      at[k] = now;
     }
+    if (rem.delete(k)) remChanged = true;
   }
+  if (remChanged) persistRemote();
+  persistUnwatchedAt();
   persist(on, off);
 }
 
@@ -163,16 +224,69 @@ export function setManualWatchedMany(
 ): void {
   const on = new Set(watchedSet());
   const off = new Set(unwatchedSet());
+  const at = unwatchedAtMap();
+  const rem = remoteSet();
+  const now = Date.now();
+  let remChanged = false;
   for (const { season, episode } of episodes) {
     const k = key(metaId, season, episode);
     if (watched) {
       on.add(k);
       off.delete(k);
+      delete at[k];
     } else {
       on.delete(k);
       off.add(k);
+      at[k] = now;
     }
+    if (rem.delete(k)) remChanged = true;
   }
+  if (remChanged) persistRemote();
+  persistUnwatchedAt();
+  persist(on, off);
+}
+
+export function unwatchedAt(metaId: string, season: number, episode: number): number | undefined {
+  return unwatchedAtMap()[key(metaId, season, episode)];
+}
+
+export function remoteWatchedKeys(metaId: string): Set<string> {
+  const prefix = `${metaId}|`;
+  const out = new Set<string>();
+  for (const k of remoteSet()) {
+    if (!k.startsWith(prefix)) continue;
+    const parts = k.split("|");
+    if (parts.length === 3) out.add(`${parts[1]}:${parts[2]}`);
+  }
+  return out;
+}
+
+export function applyRemoteWatched(
+  metaId: string,
+  add: Array<{ season: number; episode: number }>,
+  unset: Array<{ season: number; episode: number }>,
+): void {
+  if (add.length === 0 && unset.length === 0) return;
+  const on = new Set(watchedSet());
+  const off = new Set(unwatchedSet());
+  const at = unwatchedAtMap();
+  const rem = remoteSet();
+  for (const { season, episode } of add) {
+    const k = key(metaId, season, episode);
+    on.add(k);
+    off.delete(k);
+    delete at[k];
+    rem.add(k);
+  }
+  for (const { season, episode } of unset) {
+    const k = key(metaId, season, episode);
+    on.delete(k);
+    off.delete(k);
+    delete at[k];
+    rem.delete(k);
+  }
+  persistUnwatchedAt();
+  persistRemote();
   persist(on, off);
 }
 

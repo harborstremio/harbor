@@ -71,7 +71,7 @@ export function TogetherSummonToast() {
           className="inline-flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-transform hover:scale-[1.04]"
         >
           Sure
-          <ArrowRight size={13} strokeWidth={2.4} />
+          <ArrowRight size={13} strokeWidth={2.4} className="dir-icon" />
         </button>
 
         <button

@@ -7,6 +7,7 @@ export function HoverTooltip({
   align = "start",
   delayMs = 260,
   className,
+  large: _large = false,
   children,
 }: {
   label: string;
@@ -15,8 +16,11 @@ export function HoverTooltip({
   align?: "start" | "center";
   delayMs?: number;
   className?: string;
+  /** Accepted for manga collection badges; sizing stays compact on main. */
+  large?: boolean;
   children: ReactNode;
 }) {
+  void _large;
   const [open, setOpen] = useState(false);
   const timer = useRef<number | null>(null);
 

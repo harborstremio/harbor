@@ -1,4 +1,13 @@
-import { ChevronRight, Eye, EyeOff, Languages, LogIn, MonitorPlay, Palette, Zap } from "lucide-react";
+import {
+  ChevronRight,
+  Eye,
+  EyeOff,
+  Languages,
+  LogIn,
+  MonitorPlay,
+  Palette,
+  Zap,
+} from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
@@ -18,17 +27,29 @@ export function BasicsPanel() {
   const { settings } = useSettings();
   const { setActive } = useSettingsActiveContext();
 
-  const debridCount = [settings.rdKey, settings.tbKey, settings.adKey, settings.pmKey, settings.dlKey].filter(
-    Boolean,
-  ).length;
+  const debridCount = [
+    settings.rdKey,
+    settings.tbKey,
+    settings.adKey,
+    settings.pmKey,
+    settings.dlKey,
+  ].filter(Boolean).length;
   const langs = settings.preferredLanguages;
   const langLabel =
-    langs.length === 0 ? t("Any") : langs.length === 1 ? langs[0] : t("{n} languages", { n: langs.length });
+    langs.length === 0
+      ? t("Any")
+      : langs.length === 1
+        ? langs[0]
+        : t("{n} languages", { n: langs.length });
 
   return (
     <>
       <div className="flex flex-col gap-2.5">
-        <SignInRow email={user?.email ?? null} signedIn={!!user} onManage={() => setActive("account")} />
+        <SignInRow
+          email={user?.email ?? null}
+          signedIn={!!user}
+          onManage={() => setActive("account")}
+        />
 
         <LaunchRow
           icon={<Zap size={19} strokeWidth={2} />}
@@ -36,7 +57,9 @@ export function BasicsPanel() {
           sub={
             debridCount > 0
               ? t("A debrid service is connected. You'll get instant, high-quality streams.")
-              : t("Connect a debrid service (Real-Debrid, TorBox, AllDebrid) for instant HD without the wait.")
+              : t(
+                  "Connect a debrid service (Real-Debrid, TorBox, AllDebrid) for instant HD without the wait.",
+                )
           }
           status={debridCount > 0 ? t("{n} connected", { n: debridCount }) : t("Set up")}
           highlight={debridCount === 0}
@@ -46,7 +69,9 @@ export function BasicsPanel() {
 
       <Section
         title={t("How Play works")}
-        subtitle={t("What happens when you hit Play on a title. Instant just starts; Manual lets you pick the source.")}
+        subtitle={t(
+          "What happens when you hit Play on a title. Instant just starts; Manual lets you pick the source.",
+        )}
       >
         <PlayModePanel />
       </Section>
@@ -55,7 +80,9 @@ export function BasicsPanel() {
         <LaunchRow
           icon={<MonitorPlay size={19} strokeWidth={2} />}
           title={t("Player engine")}
-          sub={t("Auto is best for most people. mpv handles the trickiest 4K, HDR, and audio formats.")}
+          sub={t(
+            "Auto is best for most people. mpv handles the trickiest 4K, HDR, and audio formats.",
+          )}
           status={ENGINE_LABEL[settings.playerEngine] ?? settings.playerEngine}
           onClick={() => setActive("player")}
         />
@@ -121,7 +148,7 @@ function SignInRow({
         </span>
         <ChevronRight
           size={18}
-          className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
+          className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
         />
       </button>
     );
@@ -136,7 +163,11 @@ function SignInRow({
         <span className="text-[15px] font-semibold text-ink">{t("Stremio account")}</span>
         <span className="flex items-center gap-2 text-[12.5px] leading-snug text-ink-muted">
           <span className="truncate tracking-wide">
-            {email ? (reveal ? email : maskEmail(email)) : t("Your library and watch progress sync here.")}
+            {email
+              ? reveal
+                ? email
+                : maskEmail(email)
+              : t("Your library and watch progress sync here.")}
           </span>
           {email && (
             <button
@@ -156,7 +187,10 @@ function SignInRow({
         className="group flex shrink-0 items-center gap-1 rounded-full bg-canvas/70 px-3 py-1.5 text-[12px] font-semibold text-ink-muted transition-colors hover:text-ink"
       >
         {t("Manage")}
-        <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+        <ChevronRight
+          size={15}
+          className="dir-icon transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+        />
       </button>
     </div>
   );
@@ -205,7 +239,7 @@ function LaunchRow({
       )}
       <ChevronRight
         size={18}
-        className="shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5"
+        className="dir-icon shrink-0 text-ink-subtle transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
       />
     </button>
   );

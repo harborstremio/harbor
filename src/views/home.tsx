@@ -32,7 +32,7 @@ import { trackEvent } from "@/lib/discover";
 import { publishResumeStates } from "@/lib/hover-preview/store";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import { dismissCw, isCwDismissed, useCwDismissVersion } from "@/lib/cw-dismiss";
-import { clearLocalCw, listLocalCw, localCwVersion, subscribeLocalCw } from "@/lib/local-cw";
+import { clearLocalCw, listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -40,7 +40,9 @@ import {
   subscribeManualWatched,
 } from "@/lib/manual-watched";
 import { repairLibraryNames } from "@/lib/stremio-repair";
+import { absorbCloudAnimeCw } from "@/lib/anime-cw-absorb";
 import {
+  ANIME_CLOUD_ID,
   cwSortKey,
   episodeFromVideoId,
   isAnimeCwItem,
@@ -85,6 +87,8 @@ import type { HomeRow } from "./home/home-types";
 import { RowSkeleton } from "./home/row-skeleton";
 import { AddSourceModal } from "@/components/add-source-modal";
 import type { SourceRow } from "@/lib/custom-sources";
+
+const EMPTY_LOCAL_CW: ReturnType<typeof listLocalCw> = [];
 
 export function Home({ active = true, onReady }: { active?: boolean; onReady?: () => void }) {
   const { authKey, user } = useAuth();
@@ -397,6 +401,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
         .then((libItems) => {
           if (cancelled) return;
           setItems(libItems);
+          if (!settings.cwPerProfile) absorbCloudAnimeCw(libItems);
           const importKey = `harbor.discover.libImported.${user?._id ?? "anon"}`;
           let importedSince = 0;
           try {
@@ -470,9 +475,9 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     return () => {
       cancelled = true;
     };
-  }, [authKey, active]);
+  }, [authKey, active, settings.cwPerProfile]);
 
-  const localCwVer = useSyncExternalStore(subscribeLocalCw, localCwVersion);
+  const localCwEntries = useSyncExternalStore(subscribeLocalCw, listLocalCw, () => EMPTY_LOCAL_CW);
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const animeDetectVer = useDetectedAnimeVersion();
   const stremioWatchedIds = useMemo(() => {
@@ -481,7 +486,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     return s;
   }, [items]);
   const continueWatching = useMemo(() => {
-    const localCwItems: LibraryItem[] = listLocalCw().map((e) => ({
+    const localCwItems: LibraryItem[] = localCwEntries.map((e) => ({
       _id: e.id,
       type: e.type,
       name: e.name,
@@ -504,7 +509,10 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       _mtime: new Date(e.t).toISOString(),
       local: true,
     }));
-    const eligible = [...items, ...simklCw, ...localCwItems]
+    const cloudItems = settings.cwPerProfile
+      ? []
+      : [...items.filter((item) => !ANIME_CLOUD_ID.test(item._id)), ...simklCw];
+    const eligible = [...cloudItems, ...localCwItems]
       .filter(
         (i) =>
           (i.type as string) !== "other" &&
@@ -535,7 +543,15 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       if (out.length >= 100) break;
     }
     return out;
-  }, [items, simklCw, localCwVer, cwVersion, settings.animeOnlyInAnimeRoom, animeDetectVer]);
+  }, [
+    items,
+    simklCw,
+    localCwEntries,
+    cwVersion,
+    settings.animeOnlyInAnimeRoom,
+    settings.cwPerProfile,
+    animeDetectVer,
+  ]);
   const resurfaceLibrary = useMemo(() => {
     const manual = manualWatchedLibraryItems();
     if (manual.length === 0) return items;

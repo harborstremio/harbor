@@ -8,6 +8,8 @@ import { setWatchedFlag } from "@/lib/watched-flag";
 import { readActiveStremioAuthKey } from "@/lib/auth";
 import { cloudWriteId } from "@/lib/stremio";
 import { markMovieWatchedStremio } from "@/lib/stremio-watched-sync";
+import { syncSeriesWatchedToStremio } from "@/lib/stremio-episode-watched";
+import { tmdbImdbCached } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 
 export async function markMovieWatched(
   meta: Meta,
@@ -17,7 +19,7 @@ export async function markMovieWatched(
   setMovieWatchedLocal(meta.id, true);
   savePlayback(meta.id, { title: meta.name, parsedTitle: meta.name });
   const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
-  const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : tmdbId ?? undefined;
+  const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : (tmdbId ?? undefined);
   const authKey = readActiveStremioAuthKey();
   const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
   const writes: Promise<unknown>[] = [];
@@ -29,8 +31,30 @@ export async function markMovieWatched(
   await Promise.allSettled(writes);
 }
 
-async function releasedEpisodes(meta: Meta): Promise<Array<{ season: number; episode: number }>> {
-  const source = meta.videos?.length ? meta : (await fetchMeta("series", meta.id).catch(() => null)) ?? meta;
+export async function unmarkMovieWatched(meta: Meta, imdbId?: string | null): Promise<void> {
+  setMovieWatchedLocal(meta.id, false);
+  setWatchedFlag(meta.id, false);
+  const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
+  const authKey = readActiveStremioAuthKey();
+  const cid = authKey ? cloudWriteId(meta.id, imdb ?? null, !!imdb) : null;
+  if (authKey && cid) await markMovieWatchedStremio(authKey, meta, cid, false);
+}
+
+function resolveSeriesImdb(meta: Meta, imdbId?: string | null): string | null {
+  if (imdbId?.startsWith("tt")) return imdbId;
+  if (meta.id.startsWith("tt")) return meta.id;
+  const cached = tmdbImdbCached(meta.id);
+  return cached?.startsWith("tt") ? cached : null;
+}
+
+async function releasedEpisodes(
+  meta: Meta,
+  imdbId?: string | null,
+): Promise<Array<{ season: number; episode: number }>> {
+  const fetchId = resolveSeriesImdb(meta, imdbId) ?? meta.id;
+  const source = meta.videos?.length
+    ? meta
+    : ((await fetchMeta("series", fetchId).catch(() => null)) ?? meta);
   const now = Date.now();
   const out: Array<{ season: number; episode: number }> = [];
   for (const v of source.videos ?? []) {
@@ -64,11 +88,13 @@ export async function markMetaWatched(
     background: meta.background,
     markedAt: new Date().toISOString(),
   });
-  const eps = await releasedEpisodes(meta);
+  const resolvedImdb = resolveSeriesImdb(meta, imdbId);
+  const eps = await releasedEpisodes(meta, resolvedImdb);
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, true);
+  void syncSeriesWatchedToStremio(meta, resolvedImdb);
   const isAnime = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
-  const imdb = imdbId ?? (meta.id.startsWith("tt") ? meta.id : undefined);
-  const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : tmdbId ?? undefined;
+  const imdb = resolvedImdb ?? (meta.id.startsWith("tt") ? meta.id : undefined);
+  const tmdb = typeof tmdbId === "string" ? Number(tmdbId) || undefined : (tmdbId ?? undefined);
   if (!isAnime && (imdb || tmdb)) {
     const ids = { ...(imdb ? { imdb } : {}), ...(tmdb ? { tmdb } : {}) };
     await Promise.allSettled([
@@ -78,12 +104,14 @@ export async function markMetaWatched(
   }
 }
 
-export async function unmarkMetaWatched(meta: Meta): Promise<void> {
+export async function unmarkMetaWatched(meta: Meta, imdbId?: string | null): Promise<void> {
   setWatchedFlag(meta.id, false);
   if (narrowMediaType(meta.type) === "movie") {
-    setMovieWatchedLocal(meta.id, false);
+    await unmarkMovieWatched(meta, imdbId);
     return;
   }
-  const eps = await releasedEpisodes(meta);
+  const resolvedImdb = resolveSeriesImdb(meta, imdbId);
+  const eps = await releasedEpisodes(meta, resolvedImdb);
   if (eps.length > 0) setManualWatchedMany(meta.id, eps, false);
+  void syncSeriesWatchedToStremio(meta, resolvedImdb);
 }

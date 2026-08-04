@@ -63,6 +63,10 @@ function writeMap(key: string, map: Map<string, MediaEntry>): void {
 
 export function createMediaListStore(prefix: string) {
   const keyFor = (pid: string) => prefix + pid;
+  const listeners = new Set<() => void>();
+  const emitExternal = () => {
+    for (const l of listeners) l();
+  };
   const Ctx = createContext<MediaListStore | null>(null);
 
   function Provider({ children }: { children: ReactNode }) {
@@ -72,6 +76,14 @@ export function createMediaListStore(prefix: string) {
 
     useEffect(() => {
       setItems(readMap(keyFor(pid)));
+    }, [pid]);
+
+    useEffect(() => {
+      const tick = () => setItems(readMap(keyFor(pid)));
+      listeners.add(tick);
+      return () => {
+        listeners.delete(tick);
+      };
     }, [pid]);
 
     const value = useMemo<MediaListStore>(
@@ -124,5 +136,26 @@ export function createMediaListStore(prefix: string) {
     }
   }
 
-  return { Provider, useStore, useIn, removeData };
+  function setExternal(pid: string, input: MediaInput, on: boolean): void {
+    const map = readMap(keyFor(pid));
+    if (on) {
+      map.set(input.id, {
+        id: input.id,
+        type: coerceType(input.type, input.id),
+        name: input.name ?? "",
+        poster: input.poster,
+        addedAt: Date.now(),
+      });
+    } else {
+      map.delete(input.id);
+    }
+    writeMap(keyFor(pid), map);
+    emitExternal();
+  }
+
+  function hasExternal(pid: string, id: string): boolean {
+    return readMap(keyFor(pid)).has(id);
+  }
+
+  return { Provider, useStore, useIn, removeData, setExternal, hasExternal };
 }

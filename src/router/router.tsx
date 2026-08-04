@@ -44,6 +44,7 @@ const routeTree = rootRoute.addChildren([
   tabRoute("/shows"),
   tabRoute("/kids"),
   tabRoute("/anime"),
+  tabRoute("/manga"),
   tabRoute("/live"),
   tabRoute("/vod"),
   tabRoute("/calendar"),

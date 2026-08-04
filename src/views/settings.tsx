@@ -73,6 +73,12 @@ const ThemePanel = lazy(() =>
 const WebhooksPanel = lazy(() =>
   import("./settings/webhooks-panel").then((m) => ({ default: m.WebhooksPanel })),
 );
+const RemotesPanel = lazy(() =>
+  import("./settings/remotes-panel").then((m) => ({ default: m.RemotesPanel })),
+);
+const StoragePanel = lazy(() =>
+  import("./settings/storage-panel").then((m) => ({ default: m.StoragePanel })),
+);
 
 function SettingsPanelFallback() {
   return (
@@ -166,6 +172,14 @@ const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   bug: {
     label: "Report a bug",
     sub: "Send a bug report straight to the Harbor team. Screenshots and screen recordings welcome.",
+  },
+  remotes: {
+    label: "Remotes",
+    sub: "Harbor on your other devices: the web app, the phone remote, and the manga reader remote.",
+  },
+  storage: {
+    label: "Storage",
+    sub: "See how much space Harbor is using on this computer, and clear caches that rebuild themselves.",
   },
   advanced: {
     label: "Advanced",
@@ -371,6 +385,10 @@ export function Settings() {
               {active === "webhooks" && <WebhooksPanel />}
 
               {active === "bug" && <BugReportPanel />}
+
+              {active === "remotes" && <RemotesPanel />}
+
+              {active === "storage" && <StoragePanel />}
 
               {active === "advanced" && <AdvancedPanel />}
             </Suspense>

@@ -15,8 +15,15 @@ import { useT } from "@/lib/i18n";
 import { publishResumeStates } from "@/lib/hover-preview/store";
 import { hasPageRowChanges, resetPageRows, usePageRows } from "@/lib/page-rows";
 import { useSettings } from "@/lib/settings";
-import { cwSortKey, isAnimeCwItem, isCwMember, library, type LibraryItem } from "@/lib/stremio";
-import { clearLocalCw } from "@/lib/local-cw";
+import {
+  ANIME_CLOUD_ID,
+  cwSortKey,
+  isAnimeCwItem,
+  isCwMember,
+  library,
+  type LibraryItem,
+} from "@/lib/stremio";
+import { clearLocalCw, listLocalCw, subscribeLocalCw } from "@/lib/local-cw";
 import {
   dismissManualWatched,
   manualWatchedLibraryItems,
@@ -30,6 +37,7 @@ import { showSpecs } from "./shows/show-specs";
 
 const HERO_POOL_TARGET = 6;
 const MAX_PER_ROW = 30;
+const EMPTY_LOCAL_CW: ReturnType<typeof listLocalCw> = [];
 
 const CINEMETA_GENRES = [
   "Drama",
@@ -124,19 +132,25 @@ export function Shows({ active = true }: { active?: boolean }) {
       .catch(() => {});
   }, [authKey]);
 
-  const continueWatching = useMemo(
-    () =>
-      items
-        .filter((i) => i.type === "series" && isCwMember(i) && !isCwDismissed(i))
-        .map((i) => ({ i, k: cwSortKey(i) }))
-        .sort((a, b) => b.k - a.k)
-        .map((e) => e.i)
-        .slice(0, 16),
-    [items, cwVersion],
-  );
+  const localCwItems = useSyncExternalStore(subscribeLocalCw, listLocalCw, () => EMPTY_LOCAL_CW);
+  const localCwIds = useMemo(() => new Set(localCwItems.map((item) => item.id)), [localCwItems]);
+  const continueWatching = useMemo(() => {
+    void cwVersion;
+    return items
+      .filter(
+        (i) =>
+          i.type === "series" && !ANIME_CLOUD_ID.test(i._id) && isCwMember(i) && !isCwDismissed(i),
+      )
+      .filter((i) => !settings.cwPerProfile || localCwIds.has(i._id))
+      .map((i) => ({ i, k: cwSortKey(i) }))
+      .sort((a, b) => b.k - a.k)
+      .map((e) => e.i)
+      .slice(0, 16);
+  }, [items, cwVersion, settings.cwPerProfile, localCwIds]);
 
   const manualWatchedVer = useSyncExternalStore(subscribeManualWatched, manualWatchedVersion);
   const resurfaceLibrary = useMemo(() => {
+    void manualWatchedVer;
     const manual = manualWatchedLibraryItems().filter((i) => !isAnimeCwItem(i));
     if (manual.length === 0) return items;
     const cwMemberIds = new Set(items.filter(isCwMember).map((i) => i._id));

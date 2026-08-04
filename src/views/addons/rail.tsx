@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
@@ -45,11 +45,15 @@ export function Rail({
             className="shrink-0 text-[12.5px] font-semibold text-accent transition-opacity hover:opacity-70"
           >
             {expanded ? t("Show less") : t("See all ({n})", { n: items.length })}
-            <ChevronRight
-              className={`-me-0.5 ms-0.5 inline transition-transform ${expanded ? "rotate-90" : "rtl:-scale-x-100"}`}
-              size={12}
-              strokeWidth={2.6}
-            />
+            {expanded ? (
+              <ChevronDown className="-me-0.5 ms-0.5 inline" size={12} strokeWidth={2.6} />
+            ) : (
+              <ChevronRight
+                className="dir-icon -me-0.5 ms-0.5 inline"
+                size={12}
+                strokeWidth={2.6}
+              />
+            )}
           </button>
         )}
       </header>

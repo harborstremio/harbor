@@ -2347,9 +2347,10 @@ html[data-theme-card="glass"] .harbor-together-pill {
 
 .dir-icon {
   display: inline-flex;
+  rotate: 0deg;
 }
 [dir="rtl"] .dir-icon {
-  transform: scaleX(-1);
+  rotate: 180deg;
 }
 
 [dir="rtl"] .dots-anim {

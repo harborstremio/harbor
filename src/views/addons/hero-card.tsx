@@ -82,7 +82,11 @@ export function HeroCard({
           </button>
           <span className="inline-flex h-9 items-center gap-1 rounded-full px-4 text-[12.5px] font-medium text-ink-muted transition-colors group-hover:text-ink">
             {t("View details")}
-            <ChevronRight size={13} strokeWidth={2.4} className="transition-transform group-hover:translate-x-0.5 rtl:-scale-x-100" />
+            <ChevronRight
+              size={13}
+              strokeWidth={2.4}
+              className="dir-icon transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
+            />
           </span>
         </div>
       </div>

@@ -18,7 +18,11 @@ import { ExtLink, KeyField, Section, ToggleRow } from "./shared";
 import { ManualAddonCard, ServiceCard } from "./streaming-panel";
 import { AioStatusModal } from "./aiostatus-modal";
 import { StreamFilterPreview } from "./stream-filter-preview";
-import { PickerLayoutPreview, StreamDescriptionPreview, TorrentNamePreview } from "./picker-previews";
+import {
+  PickerLayoutPreview,
+  StreamDescriptionPreview,
+  TorrentNamePreview,
+} from "./picker-previews";
 import { AdSkipShowcase } from "./ad-skip-showcase";
 import { useT } from "@/lib/i18n";
 
@@ -58,7 +62,9 @@ export function StreamingSourcesPanel({
     <>
       <Section
         title={t("Stream safety filter")}
-        subtitle={t("How aggressively Harbor rejects shady or mismatched streams before showing them in the picker.")}
+        subtitle={t(
+          "How aggressively Harbor rejects shady or mismatched streams before showing them in the picker.",
+        )}
       >
         <StreamFilterPicker
           value={settings.streamFilterLevel}
@@ -69,7 +75,9 @@ export function StreamingSourcesPanel({
 
       <Section
         title={t("Picker layout")}
-        subtitle={t("Condensed shows a top pick, quality tiles, and a drawer. Stremio is a flat list grouped by addon, no scoring.")}
+        subtitle={t(
+          "Condensed shows a top pick, quality tiles, and a drawer. Stremio is a flat list grouped by addon, no scoring.",
+        )}
       >
         <PickerLayoutPicker
           value={settings.pickerLayout}
@@ -80,7 +88,9 @@ export function StreamingSourcesPanel({
 
       <Section
         title={t("Refresh button")}
-        subtitle={t("Where the Refresh button sits in the picker header. Default keeps it on the right, across from Back.")}
+        subtitle={t(
+          "Where the Refresh button sits in the picker header. Default keeps it on the right, across from Back.",
+        )}
       >
         <ToggleRow
           label={t("Move Refresh next to Back")}
@@ -92,11 +102,15 @@ export function StreamingSourcesPanel({
 
       <Section
         title={t("Torrent name")}
-        subtitle={t("Show each source's full release filename on the condensed layout. The Stremio layout already shows it.")}
+        subtitle={t(
+          "Show each source's full release filename on the condensed layout. The Stremio layout already shows it.",
+        )}
       >
         <ToggleRow
           label={t("Show torrent name")}
-          sub={t("Display the raw release filename under each source in the condensed picker. Off keeps rows compact.")}
+          sub={t(
+            "Display the raw release filename under each source in the condensed picker. Off keeps rows compact.",
+          )}
           value={settings.pickerShowFilename}
           onChange={(v) => update({ pickerShowFilename: v })}
         />
@@ -105,11 +119,15 @@ export function StreamingSourcesPanel({
 
       <Section
         title={t("Stream descriptions")}
-        subtitle={t("How much of each source's description the Stremio picker layout shows. Full keeps everything the addon sends, which matters for AIOStreams and other custom formats.")}
+        subtitle={t(
+          "How much of each source's description the Stremio picker layout shows. Full keeps everything the addon sends, which matters for AIOStreams and other custom formats.",
+        )}
       >
         <ToggleRow
           label={t("Show full descriptions")}
-          sub={t("Show the addon's complete description instead of trimming it to a few lines. Turn off for shorter, tidier rows.")}
+          sub={t(
+            "Show the addon's complete description instead of trimming it to a few lines. Turn off for shorter, tidier rows.",
+          )}
           value={settings.fullStreamDescription}
           onChange={(v) => update({ fullStreamDescription: v })}
         />
@@ -118,12 +136,16 @@ export function StreamingSourcesPanel({
 
       <Section
         title={t("Injected ad skip (experimental)")}
-        subtitle={t("Some cam and new-release rips have ads spliced into the video itself. When the community has marked one, a Skip button appears. You can also report ads you spot for review. Off by default.")}
+        subtitle={t(
+          "Some cam and new-release rips have ads spliced into the video itself. When the community has marked one, a Skip button appears. You can also report ads you spot for review. Off by default.",
+        )}
       >
         <AdSkipShowcase />
         <ToggleRow
           label={t("Enable injected ad skip")}
-          sub={t("Show a Skip button when a known injected ad plays, and a small report button on new releases so you can mark ads for review.")}
+          sub={t(
+            "Show a Skip button when a known injected ad plays, and a small report button on new releases so you can mark ads for review.",
+          )}
           value={settings.adSkipEnabled}
           onChange={(v) => update({ adSkipEnabled: v })}
         />
@@ -147,20 +169,23 @@ export function StreamingSourcesPanel({
 
       <Section
         title={t("Result order")}
-        subtitle={t("Harbor ranking puts the best-scoring sources first. Addon order follows your addon priority (organize it in Addons, Installed tab, Reorder) and keeps each addon's results in the order it returned them, like the Stremio and Vidi apps.")}
+        subtitle={t(
+          "Harbor ranking puts the best-scoring sources first. Addon order follows your addon priority (organize it in Addons, Installed tab, Reorder) and keeps each addon's results in the order it returned them, like the Stremio and Vidi apps.",
+        )}
       >
-        <StreamSortPicker
-          value={settings.streamSort}
-          onChange={(v) => update({ streamSort: v })}
-        />
+        <StreamSortPicker value={settings.streamSort} onChange={(v) => update({ streamSort: v })} />
         <p className="mt-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted">
-          {t("Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.")}
+          {t(
+            "Using AIOStreams or another aggregator addon? Its own sorting and filtering happen inside the addon before Harbor ever sees the results, then Harbor applies the stream filter and result order above on top. If results look thinner than expected, keep one side permissive: either relax the addon's internal filters or set Harbor's stream filter to Balanced or Off.",
+          )}
         </p>
       </Section>
 
       <Section
         title={t("Debrid services")}
-        subtitle={t("Real-Debrid, TorBox, AllDebrid, Premiumize, Debrid-Link. Cached streams play direct. Keys stay local.")}
+        subtitle={t(
+          "Real-Debrid, TorBox, AllDebrid, Premiumize, Debrid-Link. Cached streams play direct. Keys stay local.",
+        )}
       >
         {aioHealth && <AioStatusBanner snapshot={aioHealth} />}
         <KeyField
@@ -175,8 +200,8 @@ export function StreamingSourcesPanel({
             <>
               Get yours at{" "}
               <ExtLink href="https://real-debrid.com/apitoken">real-debrid.com/apitoken</ExtLink>.
-              Used to check cache and unrestrict links. Harbor never adds or removes torrents on
-              its own.
+              Used to check cache and unrestrict links. Harbor never adds or removes torrents on its
+              own.
             </>
           }
           headerExtra={
@@ -195,10 +220,9 @@ export function StreamingSourcesPanel({
           iconSrc={torboxLogo}
           help={
             <>
-              Get yours at{" "}
-              <ExtLink href="https://torbox.app/settings">torbox.app/settings</ExtLink>. Same
-              read-only usage as Real-Debrid. Also lets you queue uncached torrents from the play
-              picker.
+              Get yours at <ExtLink href="https://torbox.app/settings">torbox.app/settings</ExtLink>
+              . Same read-only usage as Real-Debrid. Also lets you queue uncached torrents from the
+              play picker.
             </>
           }
           headerExtra={
@@ -219,8 +243,8 @@ export function StreamingSourcesPanel({
             <>
               Get yours at{" "}
               <ExtLink href="https://alldebrid.com/apikeys/">alldebrid.com/apikeys</ExtLink>.
-              AllDebrid deprecated their cache-check endpoint, so streams may show as unknown
-              until you actually hit Play.
+              AllDebrid deprecated their cache-check endpoint, so streams may show as unknown until
+              you actually hit Play.
             </>
           }
           headerExtra={
@@ -277,11 +301,15 @@ export function StreamingSourcesPanel({
 
       <Section
         title={t("Usenet")}
-        subtitle={t("Faster and quieter than torrents if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.")}
+        subtitle={t(
+          "Faster and quieter than torrents if you already pay for Usenet. Configure on the addon page, paste the manifest URL it returns.",
+        )}
       >
         <ManualAddonCard
           title="Easynews+"
-          blurb={t("Searches and streams directly off Easynews. No debrid needed. Just your Easynews login.")}
+          blurb={t(
+            "Searches and streams directly off Easynews. No debrid needed. Just your Easynews login.",
+          )}
           configureUrl="https://b89262c192b0-stremio-easynews-addon.baby-beamup.club/configure"
         />
       </Section>
@@ -322,17 +350,23 @@ function StreamFilterPicker({
     {
       id: "strict",
       label: t("Strict"),
-      sub: t("Default. Rejects size outliers, suspicious extensions, year/episode mismatches, season packs (for episode requests), trailers, and likely cams."),
+      sub: t(
+        "Default. Rejects size outliers, suspicious extensions, year/episode mismatches, season packs (for episode requests), trailers, and likely cams.",
+      ),
     },
     {
       id: "balanced",
       label: t("Balanced"),
-      sub: t("Keeps the malware/year/episode-mismatch checks but allows season packs and oversized files. Same as hitting Search wider in the picker."),
+      sub: t(
+        "Keeps the malware/year/episode-mismatch checks but allows season packs and oversized files. Same as hitting Search wider in the picker.",
+      ),
     },
     {
       id: "off",
       label: t("Off"),
-      sub: t("No filtering. Every stream every addon returns shows up, including obvious junk. You'll be on your own."),
+      sub: t(
+        "No filtering. Every stream every addon returns shows up, including obvious junk. You'll be on your own.",
+      ),
     },
   ];
   return (
@@ -380,12 +414,16 @@ function PickerLayoutPicker({
     {
       id: "condensed",
       label: t("Condensed"),
-      sub: t("Default. Top pick at the top, quality tiles, and an All-Sources drawer. Harbor scores and ranks results."),
+      sub: t(
+        "Default. Top pick at the top, quality tiles, and an All-Sources drawer. Harbor scores and ranks results.",
+      ),
     },
     {
       id: "stremio",
       label: "Stremio",
-      sub: t("Flat list of sources grouped by addon, with a filter dropdown. No re-ranking. Closest match to the Stremio app's stream picker."),
+      sub: t(
+        "Flat list of sources grouped by addon, with a filter dropdown. No re-ranking. Closest match to the Stremio app's stream picker.",
+      ),
     },
   ];
   return (
@@ -438,7 +476,9 @@ function StreamSortPicker({
     {
       id: "addon",
       label: t("Addon order"),
-      sub: t("Show each addon's results in the order it returned them, grouped by your addon list. Matches the Stremio and Vidi apps."),
+      sub: t(
+        "Show each addon's results in the order it returned them, grouped by your addon list. Matches the Stremio and Vidi apps.",
+      ),
     },
   ];
   return (
@@ -528,7 +568,7 @@ function AioStatusBanner({ snapshot }: { snapshot: AioStatusSnapshot }) {
         </span>
         <span className="flex shrink-0 items-center gap-0.5 font-semibold text-ink-subtle">
           {t("View all")}
-          <ChevronRight size={13} strokeWidth={2.4} />
+          <ChevronRight size={13} strokeWidth={2.4} className="dir-icon" />
         </span>
       </button>
       {open && <AioStatusModal snapshot={snapshot} onClose={() => setOpen(false)} />}
@@ -536,13 +576,7 @@ function AioStatusBanner({ snapshot }: { snapshot: AioStatusSnapshot }) {
   );
 }
 
-function HealthBadge({
-  health,
-  logo,
-}: {
-  health: ServiceHealth | undefined;
-  logo: string | null;
-}) {
+function HealthBadge({ health, logo }: { health: ServiceHealth | undefined; logo: string | null }) {
   const t = useT();
   if (!health) return null;
   const palette =

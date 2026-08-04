@@ -16,4 +16,10 @@ export const queryKeys = {
     data: (id: string, type: string, tmdbKey: string, language: string) =>
       ["harbor", "detail", id, type, tmdbKey ? "tmdb" : "cinemeta", language] as const,
   },
+  manga: {
+    all: () => ["harbor", "manga"] as const,
+    browse: (sourceId: string, query: string, tagId: string) =>
+      ["harbor", "manga", "browse", sourceId, query, tagId || "all"] as const,
+    tags: (sourceId: string) => ["harbor", "manga", "tags", sourceId] as const,
+  },
 } as const;

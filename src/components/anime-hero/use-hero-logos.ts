@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { resolveLogo } from "@/lib/logo";
+import { staticHeroArt } from "@/lib/providers/anime-hero-art-static";
 
-const CACHE_KEY = "harbor.anime.herologos.v2";
+const CACHE_KEY = "harbor.anime.herologos.v6";
 const POS_TTL = 30 * 24 * 60 * 60 * 1000;
 const NEG_TTL = 24 * 60 * 60 * 1000;
 const CAP = 300;
@@ -12,8 +13,11 @@ type Entry = { u: string | null; t: number };
 
 function load(): Record<string, Entry> {
   try {
-    const raw = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}") as { v?: number; map?: Record<string, Entry> };
-    if (raw.v !== 2 || !raw.map) return {};
+    const raw = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}") as {
+      v?: number;
+      map?: Record<string, Entry>;
+    };
+    if (raw.v !== 6 || !raw.map) return {};
     const now = Date.now();
     const out: Record<string, Entry> = {};
     for (const [id, e] of Object.entries(raw.map)) {
@@ -32,17 +36,20 @@ function persist(map: Record<string, Entry>) {
       ? Object.fromEntries(entries.sort((a, b) => b[1].t - a[1].t).slice(0, CAP))
       : map;
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ v: 2, map: trimmed }));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ v: 6, map: trimmed }));
   } catch {
     /* ignore */
   }
 }
 
-export function useHeroLogos(slides: Meta[], tmdbKey: string): Record<string, string> {
+type LogoSettings = { tmdbKey: string; fanartKey: string };
+
+export function useHeroLogos(slides: Meta[], settings: LogoSettings): Record<string, string> {
   const [cache, setCache] = useState<Record<string, Entry>>(load);
   const cacheRef = useRef(cache);
   cacheRef.current = cache;
   const triedRef = useRef<Set<string>>(new Set());
+  const { tmdbKey } = settings;
 
   useEffect(() => {
     const pending = slides.filter(
@@ -56,7 +63,9 @@ export function useHeroLogos(slides: Meta[], tmdbKey: string): Record<string, st
       while (!cancelled) {
         const m = queue.shift();
         if (!m) return;
-        const url = await resolveLogo(tmdbKey, m).catch(() => undefined);
+        const stat = (await staticHeroArt(m.id).catch(() => undefined))?.logo;
+        const url =
+          stat ?? (await resolveLogo(tmdbKey, m, { preferOwn: true }).catch(() => undefined));
         if (cancelled) return;
         setCache((prev) => {
           const next = { ...prev, [m.id]: { u: url ?? null, t: Date.now() } };

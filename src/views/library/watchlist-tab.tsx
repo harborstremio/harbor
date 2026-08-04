@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
+import { useMangaFavorites } from "@/lib/manga-favorites";
 import { type Meta } from "@/lib/cinemeta";
+import { MangaFavCard } from "./manga-fav-card";
 import {
   library,
   libraryMetaType,
@@ -39,6 +41,11 @@ export function WatchlistTab() {
   const { authKey } = useAuth();
   const { settings } = useSettings();
   const { isConnected: traktConnected } = useTrakt();
+  const { items: mangaItems } = useMangaFavorites();
+  const mangaFavs = useMemo(
+    () => [...mangaItems.values()].sort((a, b) => b.addedAt - a.addedAt),
+    [mangaItems],
+  );
   const [stremio, setStremio] = useState<LibraryItem[]>([]);
   const [rawCount, setRawCount] = useState(0);
   const [trakt, setTrakt] = useState<TraktItem[]>([]);
@@ -160,6 +167,18 @@ export function WatchlistTab() {
 
   return (
     <section className="flex flex-col gap-4">
+      {mangaFavs.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-ink-muted">
+            {tr("Favorite Manga")}
+          </h3>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3">
+            {mangaFavs.map((e) => (
+              <MangaFavCard key={e.id} entry={e} />
+            ))}
+          </div>
+        </div>
+      )}
       {merged.length > 0 && (
         <FilterBar
           type={type}

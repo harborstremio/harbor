@@ -20,7 +20,7 @@ export function AboutPanel({ onBack }: { onBack: () => void }) {
         onClick={onBack}
         className="inline-flex h-9 items-center gap-1.5 self-start rounded-lg border border-edge px-3 text-[13px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
       >
-        <ArrowLeft size={14} strokeWidth={2} className="rtl:-scale-x-100" />
+        <ArrowLeft size={14} strokeWidth={2} className="dir-icon" />
         {t("Back")}
       </button>
     </div>

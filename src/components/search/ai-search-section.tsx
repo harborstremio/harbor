@@ -1,20 +1,21 @@
 import { useEffect } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { keyForProvider, modelLabelFor, providerForModel } from "@/lib/ai-models";
+import { aiKey, modelLabelFor, providerForModel } from "@/lib/ai-models";
 import { AiResultList } from "./ai-search/ai-result-list";
 import { useAiSuggest } from "./ai-search/use-ai-suggest";
-import { AiSuggestButton } from "./ai-search/ai-suggest-button";
 import { AiThinking } from "./ai-search/ai-thinking";
 import { AiPicksHeader } from "./ai-search/ai-picks-header";
 
 export function AiSearchSection({
   query,
+  aiMode = false,
   onClose,
   onActive,
   runSignal,
 }: {
   query: string;
+  aiMode?: boolean;
   onClose: () => void;
   onActive?: (active: boolean) => void;
   runSignal?: number;
@@ -22,6 +23,8 @@ export function AiSearchSection({
   const { settings } = useSettings();
   const t = useT();
   const { status, results, error, ranQuery, run } = useAiSuggest(query, runSignal);
+  const provider = providerForModel(settings.aiSearchModel);
+  const hasKey = !!aiKey(settings).trim();
 
   const active =
     status === "loading" || (status === "done" && ranQuery === query && results.length > 0);
@@ -30,8 +33,27 @@ export function AiSearchSection({
     return () => onActive?.(false);
   }, [active, onActive]);
 
-  const provider = providerForModel(settings.aiSearchModel);
-  if (!keyForProvider(settings, provider).trim() || !query.trim()) return null;
+  useEffect(() => {
+    if (!aiMode || !hasKey || status !== "idle") return;
+    const q = query.trim();
+    if (q.length < 6) return;
+    const id = window.setTimeout(() => void run(), 1600);
+    return () => window.clearTimeout(id);
+  }, [aiMode, hasKey, status, query]);
+
+  if (!query.trim()) return null;
+  if (!hasKey) {
+    if (!aiMode) return null;
+    return (
+      <div className="mb-8">
+        <div className="animate-ai-entrance rounded-2xl border border-edge-soft bg-elevated/30 px-5 py-4 text-[13px] leading-relaxed text-ink-muted">
+          {settings.aiSearchProvider === "groq"
+            ? t("Add your Groq API key in Settings, AI search to use this model.")
+            : t("Add your OpenRouter API key in Settings, AI search to use this model.")}
+        </div>
+      </div>
+    );
+  }
 
   const label = modelLabelFor(settings.aiSearchModel);
   const shortQ = query.trim().length > 26 ? `${query.trim().slice(0, 25)}…` : query.trim();
@@ -49,9 +71,23 @@ export function AiSearchSection({
 
   return (
     <div className="mb-8">
-      {status === "idle" && <AiSuggestButton query={query} provider={provider} onRun={run} />}
+      {status === "idle" && aiMode && (
+        <div className="flex flex-col items-center gap-2 py-12 text-center">
+          <span className="ai-text-shimmer text-[17px] font-medium tracking-tight">
+            {t("Searches when you stop typing")}
+          </span>
+          <span className="flex items-center gap-1.5 text-[12.5px] text-ink-subtle">
+            <kbd className="rounded-md border border-edge-soft bg-canvas/60 px-1.5 py-0.5 font-mono text-[10px] text-ink-muted">
+              Enter
+            </kbd>
+            {t("to search now")}
+          </span>
+        </div>
+      )}
 
-      {status === "loading" && <AiThinking provider={provider} label={label} phrases={thinkingPhrases} />}
+      {status === "loading" && (
+        <AiThinking provider={provider} label={label} phrases={thinkingPhrases} />
+      )}
 
       {status === "error" && (
         <button

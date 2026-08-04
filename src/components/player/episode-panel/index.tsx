@@ -376,7 +376,7 @@ export function EpisodePanel({
                       className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-2xl bg-elevated px-4 py-3.5 text-[13.5px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
                     >
                       {t("Season {n}", { n: nextSeason })}
-                      <ChevronRight size={16} strokeWidth={2.4} />
+                      <ChevronRight size={16} strokeWidth={2.4} className="dir-icon" />
                     </button>
                   )}
                 </div>

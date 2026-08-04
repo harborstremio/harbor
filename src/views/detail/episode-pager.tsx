@@ -31,10 +31,10 @@ export function EpisodePager({
       </span>
       <div className="flex items-center gap-1">
         <NavBtn label={t("First page")} disabled={page === 0} onClick={() => onChange(0)}>
-          <ChevronsLeft size={16} strokeWidth={2.2} />
+          <ChevronsLeft size={16} strokeWidth={2.2} className="dir-icon" />
         </NavBtn>
         <NavBtn label={t("Previous")} disabled={page === 0} onClick={() => onChange(page - 1)}>
-          <ChevronLeft size={16} strokeWidth={2.2} />
+          <ChevronLeft size={16} strokeWidth={2.2} className="dir-icon" />
         </NavBtn>
         {pages.map((p, i) =>
           p === 0 ? (
@@ -46,21 +46,35 @@ export function EpisodePager({
               key={p}
               onClick={() => onChange(p - 1)}
               className={`h-8 min-w-8 rounded-lg px-2 text-[12.5px] font-medium tabular-nums transition-colors ${
-                p - 1 === page ? "bg-ink text-canvas" : "text-ink-muted hover:bg-elevated hover:text-ink"
+                p - 1 === page
+                  ? "bg-ink text-canvas"
+                  : "text-ink-muted hover:bg-elevated hover:text-ink"
               }`}
             >
               {p}
             </button>
           ),
         )}
-        <NavBtn label={t("Next")} disabled={page === pageCount - 1} onClick={() => onChange(page + 1)}>
-          <ChevronRight size={16} strokeWidth={2.2} />
+        <NavBtn
+          label={t("Next")}
+          disabled={page === pageCount - 1}
+          onClick={() => onChange(page + 1)}
+        >
+          <ChevronRight size={16} strokeWidth={2.2} className="dir-icon" />
         </NavBtn>
-        <NavBtn label={t("Last page")} disabled={page === pageCount - 1} onClick={() => onChange(pageCount - 1)}>
-          <ChevronsRight size={16} strokeWidth={2.2} />
+        <NavBtn
+          label={t("Last page")}
+          disabled={page === pageCount - 1}
+          onClick={() => onChange(pageCount - 1)}
+        >
+          <ChevronsRight size={16} strokeWidth={2.2} className="dir-icon" />
         </NavBtn>
       </div>
-      {onGoToEpisode && maxEpisode ? <GoToEpisode max={maxEpisode} onGo={onGoToEpisode} /> : <span />}
+      {onGoToEpisode && maxEpisode ? (
+        <GoToEpisode max={maxEpisode} onGo={onGoToEpisode} />
+      ) : (
+        <span />
+      )}
     </div>
   );
 }

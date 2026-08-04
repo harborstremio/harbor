@@ -35,7 +35,8 @@ export type View =
   | "live"
   | "vod"
   | "downloads"
-  | "wrapped";
+  | "wrapped"
+  | "manga";
 
 export type PlayEpisode = {
   season: number;
@@ -123,6 +124,7 @@ export type Frame =
   | { kind: "live" }
   | { kind: "vod" }
   | { kind: "downloads" }
+  | { kind: "manga"; mangaId?: string }
   | { kind: "service"; service: StreamingService }
   | {
       kind: "meta";
@@ -169,6 +171,7 @@ const ROOT_VIEW_BY_KIND: Record<Frame["kind"], View | null> = {
   live: "live",
   vod: "vod",
   downloads: "downloads",
+  manga: "manga",
   service: null,
   meta: null,
   "episode-detail": null,
@@ -242,6 +245,8 @@ type ViewValue = {
   openPerson: (id: number | null) => void;
   collectionId: number | null;
   openCollection: (id: number) => void;
+  mangaId: string | null;
+  openManga: (mangaId?: string) => void;
   openQueue: () => void;
   filter: MetaFilter | null;
   openFilter: (f: MetaFilter) => void;
@@ -345,6 +350,8 @@ function frameKey(f: Frame): string {
       return "vod";
     case "downloads":
       return "downloads";
+    case "manga":
+      return f.mangaId ? `manga:${f.mangaId}` : "manga";
     case "service":
       return `service:${f.service}`;
     case "meta":
@@ -459,6 +466,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
   const personId = personFrame ? personFrame.id : null;
   const collectionFrame = lastOfKind(stack, "collection");
   const collectionId = collectionFrame ? collectionFrame.id : null;
+  const mangaFrame = lastOfKind(stack, "manga");
+  const mangaId = mangaFrame ? (mangaFrame.mangaId ?? null) : null;
   const episodeDetail = useMemo(
     () =>
       top.kind === "episode-detail"
@@ -658,6 +667,11 @@ export function ViewProvider({ children }: { children: ReactNode }) {
           rowScrollMem.current.clear();
           return [{ kind: "vod" }];
         }
+        if (v === "manga") {
+          scrollMem.current.clear();
+          rowScrollMem.current.clear();
+          return [{ kind: "manga" }];
+        }
         if (t.kind === "settings") return s;
         return pushFrame(s, { kind: "settings" });
       });
@@ -784,6 +798,17 @@ export function ViewProvider({ children }: { children: ReactNode }) {
         const t = cur[cur.length - 1];
         if (t.kind === "collection" && t.id === id) return cur;
         return pushFrame(cur, { kind: "collection", id });
+      });
+    },
+    [setNavStack],
+  );
+
+  const openManga = useCallback(
+    (id?: string) => {
+      setNavStack((cur) => {
+        const t = cur[cur.length - 1];
+        if (t.kind === "manga" && t.mangaId === id) return cur;
+        return pushFrame(cur, { kind: "manga", mangaId: id });
       });
     },
     [setNavStack],
@@ -998,6 +1023,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       openPerson,
       collectionId,
       openCollection,
+      mangaId,
+      openManga,
       episodeDetail,
       openEpisodeDetail,
       matchDetailGame,
@@ -1052,6 +1079,8 @@ export function ViewProvider({ children }: { children: ReactNode }) {
       personId,
       collectionId,
       openCollection,
+      mangaId,
+      openManga,
       episodeDetail,
       openEpisodeDetail,
       matchDetailGame,

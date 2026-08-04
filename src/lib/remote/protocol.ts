@@ -36,6 +36,98 @@ export type RemoteTextEntry = {
   placeholder: string;
 };
 
+export type RemoteProfile = {
+  id?: string;
+  name: string;
+  avatar: string | null;
+  color: string;
+};
+
+export type RemoteLibraryItem = {
+  id: string;
+  type: string;
+  name?: string;
+  poster?: string;
+  background?: string;
+};
+
+export type RemoteLibrary = {
+  watchlist: RemoteLibraryItem[];
+  history: RemoteLibraryItem[];
+  favorites: RemoteLibraryItem[];
+};
+
+export type RemoteTrackers = {
+  trakt: boolean;
+  simkl: boolean;
+  stremio: boolean;
+  anilist: boolean;
+  mal: boolean;
+};
+
+export type SimklWatchStatus = "watching" | "plantowatch" | "hold" | "completed" | "dropped";
+export type AnilistWatchStatus =
+  | "CURRENT"
+  | "PLANNING"
+  | "COMPLETED"
+  | "REPEATING"
+  | "PAUSED"
+  | "DROPPED";
+export type MalWatchStatus = "watching" | "plan_to_watch" | "completed" | "on_hold" | "dropped";
+
+export type RemoteLibraryAction =
+  | { kind: "watchlist"; on: boolean }
+  | { kind: "watched"; on: boolean }
+  | { kind: "favorite"; on: boolean }
+  | { kind: "simkl"; status: SimklWatchStatus | null }
+  | { kind: "anilist"; status: AnilistWatchStatus | null }
+  | { kind: "mal"; status: MalWatchStatus | null };
+
+export type RemoteMangaChapter = {
+  id: string;
+  index: number;
+  label: string;
+  chapter: string | null;
+  title?: string;
+  group?: string;
+  sourceId?: string;
+  sourceName?: string;
+  downloaded?: boolean;
+};
+
+export type RemoteMangaBookmark = {
+  id: string;
+  chapterId: string;
+  chapterLabel: string;
+  page: number;
+  totalPages: number;
+  name: string;
+  createdAt: number;
+};
+
+export type RemoteMangaState = {
+  open: boolean;
+  seq: number;
+  mangaId: string;
+  title: string;
+  cover: string | null;
+  chapterId: string;
+  chapterIndex: number;
+  chapterLabel: string;
+  pageIndex: number;
+  pageCount: number;
+  spread?: number[];
+  pageUrls?: string[];
+  zoom: number;
+  canZoom: boolean;
+  rtl: boolean;
+  mode: "long" | "paged" | "double" | "book";
+  hasPrev: boolean;
+  hasNext: boolean;
+  chapters: RemoteMangaChapter[];
+  bookmarks: RemoteMangaBookmark[];
+};
+
 export type RemoteSnapshot = {
   proto: number;
   idle: boolean;
@@ -60,6 +152,18 @@ export type RemoteSnapshot = {
   canToggleSubtitles: boolean;
   /** Non-null when the host focus is in a text field. */
   textEntry: RemoteTextEntry | null;
+  /** Active profile identity on the host (name/avatar/color). */
+  profile: RemoteProfile | null;
+  /** All profiles on the host, for the phone's who's-watching switcher. */
+  profiles: RemoteProfile[];
+  /** Host metadata keys piped to a keyless phone so it can browse (tmdb, rpdb). */
+  tmdbKey?: string;
+  rpdbKey?: string;
+  tvdbKey?: string;
+  hostVersion?: string;
+  library?: RemoteLibrary;
+  trackers?: RemoteTrackers;
+  manga?: RemoteMangaState | null;
   updatedAt: number;
 };
 
@@ -89,6 +193,52 @@ export type RemoteCommand =
   | { action: "blurText" }
   /** Open host search (same as the "/" hotkey). */
   | { action: "openSearch" }
+  /** Tell the host to open a title's detail page. */
+  | { action: "openMeta"; metaId: string; metaType: string; name?: string; poster?: string }
+  /** Tell the host to open a streaming service catalog. */
+  | { action: "openService"; service: string }
+  /** Tell the host to jump to a root view (home, discover, etc.). */
+  | { action: "goView"; view: string }
+  /** Set the host player's playback speed. */
+  | { action: "setSpeed"; speed: number }
+  /** Set (or clear) the host sleep timer, in minutes. 0 clears it. */
+  | { action: "setSleep"; minutes: number }
+  /** Switch the host's active profile (phone who's-watching). */
+  | { action: "setProfile"; id: string }
+  /** Tell the host to play a title (opens the picker / auto-plays on the host). */
+  | {
+      action: "playMeta";
+      metaId: string;
+      metaType: string;
+      name?: string;
+      poster?: string;
+      season?: number;
+      episode?: number;
+      resume?: boolean;
+    }
+  | {
+      action: "libraryAction";
+      metaId: string;
+      metaType: string;
+      name?: string;
+      poster?: string;
+      imdbId?: string | null;
+      op: RemoteLibraryAction;
+    }
+  | { action: "mangaTurnPage"; dir: "next" | "prev" }
+  | { action: "mangaSetPage"; page: number }
+  | { action: "mangaJumpChapter"; index: number }
+  | { action: "mangaZoomIn" }
+  | { action: "mangaZoomOut" }
+  | { action: "mangaSetZoom"; zoom: number }
+  | { action: "mangaPan"; dx: number; dy: number }
+  | { action: "mangaFlipProgress"; p: number }
+  | { action: "mangaFlipEnd"; commit: boolean; dir: "next" | "prev" }
+  | { action: "mangaSetRtl"; rtl: boolean }
+  | { action: "mangaBookmark"; page?: number }
+  | { action: "mangaJumpBookmark"; id: string }
+  | { action: "mangaBookmarkRemove"; id: string }
+  | { action: "mangaCloseReader" }
   | { action: "ping" };
 
 export type RemoteServerMessage =
@@ -123,6 +273,8 @@ export function idleSnapshot(partial?: Partial<RemoteSnapshot>): RemoteSnapshot 
     subtitlesOn: false,
     canToggleSubtitles: false,
     textEntry: null,
+    profile: null,
+    profiles: [],
     updatedAt: Date.now(),
     ...partial,
   };
@@ -145,4 +297,8 @@ export function remoteWsUrl(host: string, port = WEB_PORT): string {
 
 export function remoteUiUrl(host: string, port = WEB_PORT): string {
   return `http://${host}:${port}/remote`;
+}
+
+export function mangaRemoteUiUrl(host: string, port = WEB_PORT): string {
+  return `http://${host}:${port}/reader`;
 }

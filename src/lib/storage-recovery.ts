@@ -44,11 +44,16 @@ const PRUNABLE_EXACT = new Set<string>([
   "harbor.surprise.recent.v1",
   "harbor.stremio-addons.velocity.v1",
   "harbor.playback-history.v1",
+  "harbor.manga.popular.v1",
 ]);
 
 const PRUNABLE_PREFIXES = [
   "harbor.libraryNameRepair.v1.",
   "harbor.anilist.collection.v1.",
+  "harbor.manga.cache.v1.",
+  "harbor.manga.cache.v2.",
+  "harbor.manga.cache.v3.",
+  "harbor.manga.art.",
 ];
 
 function isPrunable(key: string): boolean {
@@ -113,6 +118,11 @@ export function setItemWithRecovery(key: string, value: string): boolean {
   return false;
 }
 
+/** Alias used by manga favorites/bookmarks for critical profile data. */
+export function persistCritical(key: string, value: string): boolean {
+  return setItemWithRecovery(key, value);
+}
+
 export function freeStorageSpace(): { freedBytes: number; pruned: string[] } {
   let freed = 0;
   const pruned: string[] = [];
@@ -169,6 +179,8 @@ export function proactiveStorageCleanup(): void {
   }
   if (total > PROACTIVE_TOTAL_THRESHOLD) {
     const r = freeStorageSpace();
-    console.info(`[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`);
+    console.info(
+      `[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`,
+    );
   }
 }

@@ -19,7 +19,7 @@ export function EmptyState({
           className="flex h-10 items-center gap-1.5 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.98]"
         >
           {action.label}
-          <ArrowRight size={14} strokeWidth={2.2} />
+          <ArrowRight size={14} strokeWidth={2.2} className="dir-icon" />
         </button>
       )}
     </div>

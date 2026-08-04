@@ -455,6 +455,21 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
           "webdav",
         ],
       },
+      {
+        id: "remotes",
+        label: "Remotes",
+        Icon: IconRelay,
+        keywords: [
+          "remote",
+          "phone",
+          "web ui",
+          "manga remote",
+          "reader remote",
+          "11471",
+          "network",
+          "lan",
+        ],
+      },
     ],
   },
   {
@@ -600,6 +615,12 @@ const NAV_GROUPS: Array<{ heading: string | null; items: NavItem[] }> = [
     heading: "System",
     items: [
       {
+        id: "storage",
+        label: "Storage",
+        Icon: IconAdvanced,
+        keywords: ["storage", "cache", "manga cache", "disk", "quota", "clear cache", "free space"],
+      },
+      {
         id: "advanced",
         label: "Advanced",
         Icon: IconAdvanced,
@@ -617,6 +638,41 @@ type SettingsOption = {
 };
 
 const SETTINGS_OPTIONS: SettingsOption[] = [
+  {
+    label: "Manga reader remote",
+    section: "remotes",
+    anchorTitle: "Manga reader remote",
+    keywords: [
+      "manga remote",
+      "reader remote",
+      "flipbook remote",
+      "turn pages",
+      "page turner",
+      "manga phone",
+    ],
+  },
+  {
+    label: "Clear caches",
+    section: "storage",
+    anchorTitle: "Clear caches",
+    keywords: [
+      "clear cache",
+      "delete cache",
+      "free up space",
+      "picker cache",
+      "manga cache",
+      "live tv cache",
+      "epg",
+      "cleanup",
+      "purge",
+    ],
+  },
+  {
+    label: "Hide manga",
+    section: "library",
+    anchorTitle: "Content filters",
+    keywords: ["hide manga", "no manga", "remove manga tab", "manga sidebar"],
+  },
   {
     label: "Play button behavior",
     section: "player",
@@ -5468,6 +5524,8 @@ export function SettingsNav({
     webhooks: webhookActive ? "live" : null,
     hotkeys: null,
     bug: null,
+    remotes: settings.serveWebUi || settings.remoteControlEnabled ? "live" : null,
+    storage: null,
     advanced: null,
   };
 

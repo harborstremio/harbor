@@ -32,7 +32,7 @@ export function MinimalShell({
           className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 text-white backdrop-blur-md transition-colors hover:bg-black/85"
           aria-label={t("Back")}
         >
-          <ChevronLeft size={18} strokeWidth={2.2} />
+          <ChevronLeft size={18} strokeWidth={2.2} className="dir-icon" />
         </button>
         <button
           onClick={onPlayPause}

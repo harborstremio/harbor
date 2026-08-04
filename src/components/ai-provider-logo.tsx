@@ -21,6 +21,7 @@ export const AI_LOGOS: Record<AiProvider | "openrouter", string> = {
   xai: xaiLogo,
   qwen: qwenLogo,
   moonshot: moonshotLogo,
+  nvidia: openrouterLogo,
   groq: groqLogo,
   openrouter: openrouterLogo,
 };

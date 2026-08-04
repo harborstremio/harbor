@@ -118,7 +118,10 @@ export function LibraryPanel({
     if (extraTimerRef.current) window.clearTimeout(extraTimerRef.current);
     extraTimerRef.current = window.setTimeout(() => setExtraSaved(null), 1800);
   };
-  const pushHideContent = (key: "anime" | "sports" | "liveTv" | "adult", value: boolean) => {
+  const pushHideContent = (
+    key: "anime" | "sports" | "liveTv" | "adult" | "manga",
+    value: boolean,
+  ) => {
     const next = { ...settings.hideContent, [key]: value };
     update({ hideContent: next });
     if (activeProfile) updateProfile(activeProfile.id, { hideContent: next });
@@ -173,6 +176,14 @@ export function LibraryPanel({
           value={settings.cwAdvanceNext}
           onChange={(v) => update({ cwAdvanceNext: v })}
           preview={<HomeRowPreview kind="cw-advance" />}
+        />
+        <ToggleRow
+          label={t("Keep Continue Watching private to each profile")}
+          sub={t(
+            "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.",
+          )}
+          value={settings.cwPerProfile}
+          onChange={(v) => update({ cwPerProfile: v })}
         />
         <ToggleRow
           label={t("Hide watched titles in catalogs")}
@@ -925,6 +936,12 @@ export function LibraryPanel({
           )}
           value={settings.hideContent.anime}
           onChange={(v) => pushHideContent("anime", v)}
+        />
+        <ToggleRow
+          label={t("Hide manga")}
+          sub={t("Removes the Manga tab from the sidebar.")}
+          value={settings.hideContent.manga}
+          onChange={(v) => pushHideContent("manga", v)}
         />
         <ToggleRow
           label={t("Hide Live TV")}

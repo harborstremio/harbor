@@ -25,16 +25,19 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
         onClick={onBack}
         className="flex items-center gap-1.5 self-start text-[13px] font-semibold text-ink-muted transition-colors hover:text-ink"
       >
-        <ArrowLeft size={16} strokeWidth={2.2} />
+        <ArrowLeft size={16} strokeWidth={2.2} className="dir-icon" />
         {t("Back to lists")}
       </button>
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <h1 className="font-display text-[34px] font-medium leading-[1.05] text-ink">{list.name}</h1>
+          <h1 className="font-display text-[34px] font-medium leading-[1.05] text-ink">
+            {list.name}
+          </h1>
           <p className="text-[12.5px] text-ink-muted">
             {t("{n} / {max} items", { n: list.items.length, max: MAX_ITEMS })}
-            {list.updatedAt > 0 && ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
+            {list.updatedAt > 0 &&
+              ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
           </p>
         </div>
         <ListSettingsMenu list={list} onDeleted={onBack} />
@@ -72,7 +75,7 @@ function EmptyList() {
       <Layers size={26} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[15px] font-semibold text-ink">{t("Nothing here yet")}</h2>
       <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-        {t("Add titles with the search above, or hit \"Add to list\" on any movie or show's page.")}
+        {t('Add titles with the search above, or hit "Add to list" on any movie or show\'s page.')}
       </p>
     </div>
   );

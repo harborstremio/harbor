@@ -169,7 +169,7 @@ export function CastModal({
               onClick={back}
               className="flex items-center gap-1 rounded-full py-1.5 pl-2 pr-3.5 text-[13px] font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
             >
-              <ChevronLeft size={18} strokeWidth={2.3} />
+              <ChevronLeft size={18} strokeWidth={2.3} className="dir-icon" />
               {t("Back")}
             </button>
           ) : (

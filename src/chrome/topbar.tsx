@@ -5,6 +5,7 @@ import { BackChrome } from "@/chrome/back-chrome";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { TogetherPopover } from "@/components/together-modal";
 import { DownloadsButton } from "@/components/downloads-popover";
+import { BookmarksButton } from "@/components/bookmarks-popover";
 import { RecordingPill } from "@/chrome/recording-pill";
 import {
   effectiveBinding,
@@ -96,6 +97,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
         <div {...dragProps} className="flex h-full min-w-0 items-center justify-end gap-2">
           <RecordingPill />
           <DownloadsButton />
+          {!kid && <BookmarksButton />}
           {!onLiveRoot && !kid && <TogetherButton />}
           {IS_TAURI && !settings.useNativeTitleBar && (
             <div className="ms-1 flex items-center gap-2">

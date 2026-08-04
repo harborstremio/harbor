@@ -3,7 +3,14 @@ import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { ElegantHoverActions } from "./elegant-hover";
 
-export type CardHoverStyle = "none" | "default" | "elegant" | "frosted" | "cinema" | "spotlight" | "custom";
+export type CardHoverStyle =
+  | "none"
+  | "default"
+  | "elegant"
+  | "frosted"
+  | "cinema"
+  | "spotlight"
+  | "custom";
 
 const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
@@ -45,7 +52,8 @@ export function CardHoverOverlay({
   onPlay: () => void;
   preview?: boolean;
 }) {
-  if (style === "elegant") return <ElegantHoverActions meta={meta} onPlay={onPlay} preview={preview} />;
+  if (style === "elegant")
+    return <ElegantHoverActions meta={meta} onPlay={onPlay} preview={preview} />;
   if (style === "frosted") return <FrostedOverlay meta={meta} onPlay={onPlay} preview={preview} />;
   if (style === "cinema") return <CinemaOverlay onPlay={onPlay} preview={preview} />;
   if (style === "spotlight") return <SpotlightOverlay meta={meta} preview={preview} />;
@@ -74,7 +82,15 @@ function playHandler(onPlay: () => void) {
   };
 }
 
-function FrostedOverlay({ meta, onPlay, preview }: { meta: Meta; onPlay: () => void; preview?: boolean }) {
+function FrostedOverlay({
+  meta,
+  onPlay,
+  preview,
+}: {
+  meta: Meta;
+  onPlay: () => void;
+  preview?: boolean;
+}) {
   const t = useT();
   const btn = preview ? "pointer-events-none" : "pointer-events-auto";
   return (
@@ -108,7 +124,9 @@ function FrostedOverlay({ meta, onPlay, preview }: { meta: Meta; onPlay: () => v
 function CinemaOverlay({ onPlay, preview }: { onPlay: () => void; preview?: boolean }) {
   const t = useT();
   const btn = preview ? "pointer-events-none" : "pointer-events-auto";
-  const vis = preview ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100";
+  const vis = preview
+    ? "opacity-100"
+    : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100";
   const pop = preview
     ? "scale-100 opacity-100"
     : "scale-50 opacity-0 group-hover:scale-100 group-hover:opacity-100 group-focus-within:scale-100";
@@ -134,28 +152,36 @@ function CinemaOverlay({ onPlay, preview }: { onPlay: () => void; preview?: bool
 }
 
 function SpotlightOverlay({ meta, preview }: { meta: Meta; preview?: boolean }) {
-  const vis = preview ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100";
+  const vis = preview
+    ? "opacity-100"
+    : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100";
   return (
     <>
       <div
         className={`pointer-events-none absolute inset-0 z-20 rounded-[var(--poster-radius,12px)] transition-opacity duration-300 ${vis}`}
-        style={{ boxShadow: "inset 0 0 0 2px rgba(242,196,102,0.85), inset 0 0 34px rgba(242,196,102,0.3)" }}
+        style={{
+          boxShadow: "inset 0 0 0 2px rgba(242,196,102,0.85), inset 0 0 34px rgba(242,196,102,0.3)",
+        }}
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 rounded-b-[var(--poster-radius,12px)] bg-gradient-to-t from-black/85 via-black/25 to-transparent px-3 pb-3 pt-9">
-      <span
-        className={`block translate-y-2 text-[13px] font-semibold text-white transition-[transform,opacity] duration-300 ${EASE} ${
-          preview ? "translate-y-0 opacity-100" : "opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
-        }`}
-      >
-        {meta.name}
-      </span>
-      <span
-        className={`mt-1 block transition-opacity duration-300 delay-75 ${
-          preview ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-        }`}
-      >
-        {ratingLine(meta)}
-      </span>
+        <span
+          className={`block translate-y-2 text-[13px] font-semibold text-white transition-[transform,opacity] duration-300 ${EASE} ${
+            preview
+              ? "translate-y-0 opacity-100"
+              : "opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100"
+          }`}
+        >
+          {meta.name}
+        </span>
+        <span
+          className={`mt-1 block transition-opacity duration-300 delay-75 ${
+            preview
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+          }`}
+        >
+          {ratingLine(meta)}
+        </span>
       </div>
     </>
   );

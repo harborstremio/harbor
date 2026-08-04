@@ -8,11 +8,20 @@ export type AwardType =
   | "emmy"
   | "golden_globe"
   | "bafta"
+  | "bafta_tv"
   | "sag"
   | "critics_choice"
   | "cannes"
   | "venice"
   | "berlin"
+  | "annie"
+  | "spirit"
+  | "saturn"
+  | "cesar"
+  | "goya"
+  | "blue_dragon"
+  | "baeksang"
+  | "bifa"
   | "other";
 
 export type AwardEntry = {
@@ -138,6 +147,9 @@ const CATEGORY_PREFIXES = [
   "Critics' Choice Real TV Award for ",
   "Critics' Choice Super Award for ",
   "Critics' Choice Award for ",
+  "Annie Award for ",
+  "Independent Spirit Award for ",
+  "Saturn Award for ",
 ];
 
 function prettyCategory(awardName: string, provided?: string): string | undefined {
@@ -156,7 +168,21 @@ function classify(name: string): AwardType {
   if (n.includes("academy award") || n.includes("oscar")) return "oscar";
   if (n.includes("primetime emmy") || n.includes("emmy")) return "emmy";
   if (n.includes("golden globe")) return "golden_globe";
+  if (
+    n.includes("bafta tv") ||
+    n.includes("bafta television") ||
+    n.includes("british academy television")
+  )
+    return "bafta_tv";
   if (n.includes("bafta") || n.includes("british academy")) return "bafta";
+  if (n.includes("annie award")) return "annie";
+  if (n.includes("british independent film")) return "bifa";
+  if (n.includes("independent spirit")) return "spirit";
+  if (n.includes("saturn award")) return "saturn";
+  if (n.includes("césar award") || n.includes("cesar award")) return "cesar";
+  if (n.includes("goya award")) return "goya";
+  if (n.includes("blue dragon")) return "blue_dragon";
+  if (n.includes("baeksang")) return "baeksang";
   if (n.includes("screen actors guild") || n.includes("sag award")) return "sag";
   if (n.includes("critics' choice") || n.includes("critics choice")) return "critics_choice";
   if (n.includes("palme") || n.includes("cannes")) return "cannes";
@@ -184,7 +210,15 @@ function parseRows(data: any, result: "won" | "nominated"): AwardEntry[] {
     let bucket = map.get(key);
     if (!bucket) {
       bucket = {
-        entry: { type: classify(awardName), awardName, category, year, result, workTitle, workImdb },
+        entry: {
+          type: classify(awardName),
+          awardName,
+          category,
+          year,
+          result,
+          workTitle,
+          workImdb,
+        },
         recipients: new Set<string>(),
       };
       map.set(key, bucket);
@@ -242,6 +276,49 @@ function dropGenericDuplicates(entries: AwardEntry[]): AwardEntry[] {
   return entries.filter((e) => e.workImdb || e.workTitle || !hasWork.has(keyOf(e)));
 }
 
+function collapseAwards(entries: AwardEntry[], kind: "movie" | "series" | "person"): AwardEntry[] {
+  const best = new Map<string, AwardEntry>();
+  const order: string[] = [];
+  const keyOf = (e: AwardEntry) => {
+    const base = `${e.awardName.toLowerCase()}|${(e.category ?? "").toLowerCase()}`;
+    if (kind === "person") return `${base}|${e.workImdb ?? e.workTitle ?? ""}`;
+    if (kind === "series") return `${base}|${e.year ?? ""}`;
+    return base;
+  };
+  const scoreOf = (e: AwardEntry) => (e.result === "won" ? 1000 : 0) + (e.recipients?.length ?? 0);
+  for (const e of entries) {
+    const k = keyOf(e);
+    const prev = best.get(k);
+    if (!prev) {
+      best.set(k, e);
+      order.push(k);
+      continue;
+    }
+    const winner = scoreOf(e) > scoreOf(prev) ? e : prev;
+    const loser = winner === e ? prev : e;
+    best.set(k, {
+      ...winner,
+      year: Math.max(winner.year ?? 0, loser.year ?? 0) || undefined,
+      recipient: winner.recipient ?? loser.recipient,
+      recipients: winner.recipients ?? loser.recipients,
+      workImdb: winner.workImdb ?? loser.workImdb,
+      workTitle: winner.workTitle ?? loser.workTitle,
+    });
+  }
+  const collapsed = order.map((k) => best.get(k)!);
+  if (kind !== "movie") return collapsed;
+  const ceremonyYear = new Map<AwardType, number>();
+  for (const e of collapsed) {
+    if (e.year == null) continue;
+    const cur = ceremonyYear.get(e.type);
+    if (cur == null || e.year > cur) ceremonyYear.set(e.type, e.year);
+  }
+  return collapsed.map((e) => {
+    const y = ceremonyYear.get(e.type);
+    return y != null && e.year !== y ? { ...e, year: y } : e;
+  });
+}
+
 async function runQuery(query: string): Promise<any | null> {
   const url = `https://query.wikidata.org/sparql?query=${encodeURIComponent(query)}&format=json`;
   try {
@@ -262,7 +339,7 @@ export function awardsCached(imdbId?: string): AwardEntry[] | null {
   return hit.entries;
 }
 
-export async function fetchAwards(imdbId: string): Promise<AwardEntry[]> {
+export async function fetchAwards(imdbId: string, isSeries = false): Promise<AwardEntry[]> {
   if (!imdbId.startsWith("tt") && !imdbId.startsWith("nm")) return [];
   load();
   const hit = cache.get(imdbId);
@@ -274,12 +351,9 @@ export async function fetchAwards(imdbId: string): Promise<AwardEntry[]> {
       runQuery(NOMINATION_QUERY.replace("IMDB_ID", imdbId)),
     ]);
     const wins = winsData ? parseRows(winsData, "won") : [];
-    const allNoms = nomsData ? parseRows(nomsData, "nominated") : [];
-    const overlapKey = (e: AwardEntry) =>
-      `${e.awardName}|${e.category ?? ""}|${e.year ?? ""}|${e.workImdb ?? e.workTitle ?? ""}`;
-    const winKeys = new Set(wins.map(overlapKey));
-    const noms = allNoms.filter((n) => !winKeys.has(overlapKey(n)));
-    const entries = dropGenericDuplicates([...wins, ...noms]);
+    const noms = nomsData ? parseRows(nomsData, "nominated") : [];
+    const kind = imdbId.startsWith("nm") ? "person" : isSeries ? "series" : "movie";
+    const entries = collapseAwards(dropGenericDuplicates([...wins, ...noms]), kind);
     const complete = winsData !== null && nomsData !== null;
     lruSet(cache, imdbId, { entries, fetchedAt: Date.now(), complete }, CACHE_MAX);
     persistSoon();
@@ -297,13 +371,13 @@ export function subscribeAwards(fn: () => void): () => void {
   };
 }
 
-export function useAwards(imdbId?: string): AwardEntry[] | null {
+export function useAwards(imdbId?: string, isSeries = false): AwardEntry[] | null {
   const [v, setV] = useState<AwardEntry[] | null>(() => awardsCached(imdbId));
   useEffect(() => {
     setV(awardsCached(imdbId));
-    if (imdbId) fetchAwards(imdbId);
+    if (imdbId) fetchAwards(imdbId, isSeries);
     return subscribeAwards(() => setV(awardsCached(imdbId)));
-  }, [imdbId]);
+  }, [imdbId, isSeries]);
   return v;
 }
 
@@ -324,16 +398,53 @@ export function awardSummary(entries: AwardEntry[]): {
     "oscar",
     "emmy",
     "bafta",
+    "bafta_tv",
     "golden_globe",
     "sag",
     "cannes",
     "venice",
     "berlin",
     "critics_choice",
+    "spirit",
+    "annie",
+    "saturn",
+    "cesar",
+    "goya",
+    "blue_dragon",
+    "baeksang",
+    "bifa",
   ];
-  return order
+  const ranked = order
     .filter((t) => map.has(t))
     .map((t) => ({ type: t, ...(map.get(t) as { wins: number; nominations: number }) }));
+  ranked.sort(
+    (a, b) =>
+      (b.wins > 0 ? 1 : 0) - (a.wins > 0 ? 1 : 0) || order.indexOf(a.type) - order.indexOf(b.type),
+  );
+  return ranked;
+}
+
+const HERO_PRESTIGE: AwardType[] = [
+  "oscar",
+  "cannes",
+  "emmy",
+  "golden_globe",
+  "bafta",
+  "venice",
+  "berlin",
+  "sag",
+  "critics_choice",
+  "bafta_tv",
+];
+
+export function pickHeroAwards<T extends { type: AwardType; wins: number; nominations: number }>(
+  ranked: T[],
+  limit = 2,
+): T[] {
+  const top = ranked.slice(0, limit);
+  const prestige = HERO_PRESTIGE.map((t) => ranked.find((r) => r.type === t)).find(Boolean);
+  if (prestige && !top.some((r) => r.type === prestige.type)) return [...top, prestige];
+  return top;
 }
 
 export function awardTypeLabel(type: AwardType, n: number): string {

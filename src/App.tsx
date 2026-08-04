@@ -21,7 +21,7 @@ import { flushCloudSync } from "@/views/player/hooks/use-stremio-sync";
 import { PlayerRouteFallback } from "@/views/player/player-route-fallback";
 import { setNativeMemoryActive } from "@/lib/native-memory";
 import { useOverlayPinned } from "@/lib/overlay-pin";
-import { isMobileDevice, isWeb } from "@/lib/platform";
+import { isMobileWeb, isRemoteRoute } from "@/lib/platform";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { activeLayout } from "@/lib/theme";
 import { useThemePreview } from "@/lib/theme-preview";
@@ -40,7 +40,6 @@ import { UpdateRoot } from "@/components/update/update-root";
 import { CustomCodeMount } from "@/components/custom-code-mount";
 import { MemoryHud } from "@/components/memory-hud";
 import { OfflineBanner } from "@/chrome/offline-banner";
-import { MobileNotice } from "@/components/mobile-notice";
 import { WebhookLoopMount } from "@/components/webhook-loop-mount";
 import { ListToastHost } from "@/components/lists/list-toast";
 import { TogetherChatToast } from "@/components/together-chat-toast";
@@ -69,6 +68,7 @@ import { OnboardingProvider } from "@/lib/onboarding";
 import { RankingsProvider } from "@/lib/rankings";
 import { SettingsProvider } from "@/lib/settings";
 import { RemoteHostMount } from "@/lib/remote/host-mount";
+import { RemoteOpenBridge } from "@/lib/remote/remote-open-bridge";
 import { SearchProvider, useSearch } from "@/lib/search-context";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { SearchHotkey } from "@/components/search/search-hotkey";
@@ -76,6 +76,8 @@ import { TogetherProvider, useTogether } from "@/lib/together/provider";
 import { DvrProvider } from "@/lib/dvr/provider";
 import { FavoritesProvider } from "@/lib/iptv/favorites";
 import { MediaFavoritesProvider } from "@/lib/media-favorites";
+import { MangaFavoritesProvider } from "@/lib/manga-favorites";
+import { MangaTrackingRunner } from "@/lib/manga-tracking";
 import { LocalWatchlistProvider } from "@/lib/local-watchlist";
 import { useSettings } from "@/lib/settings";
 import { effectiveBinding, eventToBinding, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
@@ -166,6 +168,10 @@ const MatchDetailView = lazy(() =>
 );
 const PlaylistVodView = lazy(() => importVod().then((m) => ({ default: m.PlaylistVodView })));
 const DownloadsView = lazy(() => importDownloads().then((m) => ({ default: m.DownloadsView })));
+const MangaView = lazy(() => import("@/views/manga").then((m) => ({ default: m.MangaView })));
+const MobileShell = lazy(() =>
+  import("@/views/mobile/mobile-shell").then((m) => ({ default: m.MobileShell })),
+);
 const OnboardingModal = lazy(() =>
   importOnboarding().then((m) => ({ default: m.OnboardingModal })),
 );
@@ -279,8 +285,14 @@ function useIdleEvict(active: boolean, pin = false): boolean {
   return alive || active || pin;
 }
 
+function RevealOnMount({ onReady }: { onReady?: () => void }) {
+  useEffect(() => {
+    onReady?.();
+  }, [onReady]);
+  return null;
+}
+
 export function App({ onReady }: { onReady?: () => void }) {
-  if (isWeb() && isMobileDevice()) return <MobileNotice />;
   return (
     <HarborQueryProvider>
       <HarborRouterProvider>
@@ -303,53 +315,68 @@ export function App({ onReady }: { onReady?: () => void }) {
                                     <DvrProvider>
                                       <FavoritesProvider>
                                         <MediaFavoritesProvider>
-                                          <LocalWatchlistProvider>
-                                            <ContextMenuProvider>
-                                              <TopRankModalProvider>
-                                                <HarborErrorBoundary>
-                                                  <RemoteHostMount />
-                                                  <ProfileIdentitySync />
-                                                  <SettingsProfileBridge />
-                                                  <TrackerProfileBridge />
-                                                  <AnilistAvatarSync />
-                                                  <MalAvatarSync />
-                                                  <MiddleClickScroll />
-                                                  <ThemeBackdrop />
-                                                  <WatchlistSync />
-                                                  <Shell onReady={onReady} />
-                                                  <Suspense fallback={null}>
-                                                    <OnboardingModal />
-                                                  </Suspense>
-                                                  <TogetherInviteToast />
-                                                  <TogetherFloater />
-                                                  <TogetherHostLeavingPrompt />
-                                                  <TogetherSummonToast />
-                                                  <TogetherParticipantLeftToast />
-                                                  <AnilistSyncToast />
-                                                  <MalSyncToast />
-                                                  <ListToastHost />
-                                                  <TogetherLeaveForLiveModal />
-                                                  <TogetherLocationPublisher />
-                                                  <DiscordPresence />
-                                                  <ContextMenu />
-                                                  <WatchLocalModal />
-                                                  <LocalEpisodesModal />
-                                                  <HoverPreview />
-                                                  <CustomHoverCssMount />
-                                                  <TopRankModal />
-                                                  <ProfilePickerModal />
-                                                  <CurfewGuard />
-                                                  <SearchOverlay />
-                                                  <SearchHotkey />
-                                                  <EmbedViewportRoot />
-                                                  <InstallerViewportRoot />
-                                                  <UpdateRoot />
-                                                </HarborErrorBoundary>
-                                                <ErrorView />
-                                                <DevErrorTrigger />
-                                              </TopRankModalProvider>
-                                            </ContextMenuProvider>
-                                          </LocalWatchlistProvider>
+                                          <MangaFavoritesProvider>
+                                            <LocalWatchlistProvider>
+                                              <ContextMenuProvider>
+                                                <TopRankModalProvider>
+                                                  <HarborErrorBoundary>
+                                                    <RemoteHostMount />
+                                                    <RemoteOpenBridge />
+                                                    <ProfileIdentitySync />
+                                                    <SettingsProfileBridge />
+                                                    <TrackerProfileBridge />
+                                                    <AnilistAvatarSync />
+                                                    <MalAvatarSync />
+                                                    <MangaTrackingRunner />
+                                                    <MiddleClickScroll />
+                                                    <ThemeBackdrop />
+                                                    <WatchlistSync />
+                                                    {isMobileWeb() || isRemoteRoute() ? (
+                                                      <>
+                                                        <Suspense fallback={null}>
+                                                          <MobileShell />
+                                                        </Suspense>
+                                                        <RevealOnMount onReady={onReady} />
+                                                      </>
+                                                    ) : (
+                                                      <>
+                                                        <Shell onReady={onReady} />
+                                                        <Suspense fallback={null}>
+                                                          <OnboardingModal />
+                                                        </Suspense>
+                                                      </>
+                                                    )}
+                                                    <TogetherInviteToast />
+                                                    <TogetherFloater />
+                                                    <TogetherHostLeavingPrompt />
+                                                    <TogetherSummonToast />
+                                                    <TogetherParticipantLeftToast />
+                                                    <AnilistSyncToast />
+                                                    <MalSyncToast />
+                                                    <ListToastHost />
+                                                    <TogetherLeaveForLiveModal />
+                                                    <TogetherLocationPublisher />
+                                                    <DiscordPresence />
+                                                    <ContextMenu />
+                                                    <WatchLocalModal />
+                                                    <LocalEpisodesModal />
+                                                    <HoverPreview />
+                                                    <CustomHoverCssMount />
+                                                    <TopRankModal />
+                                                    <ProfilePickerModal />
+                                                    <CurfewGuard />
+                                                    <SearchOverlay />
+                                                    <SearchHotkey />
+                                                    <EmbedViewportRoot />
+                                                    <InstallerViewportRoot />
+                                                    <UpdateRoot />
+                                                  </HarborErrorBoundary>
+                                                  <ErrorView />
+                                                  <DevErrorTrigger />
+                                                </TopRankModalProvider>
+                                              </ContextMenuProvider>
+                                            </LocalWatchlistProvider>
+                                          </MangaFavoritesProvider>
                                         </MediaFavoritesProvider>
                                       </FavoritesProvider>
                                     </DvrProvider>
@@ -867,6 +894,10 @@ function Shell({ onReady }: { onReady?: () => void }) {
   }, [topKind, settings.hideContent.anime, setView]);
 
   useEffect(() => {
+    if (topKind === "manga" && settings.hideContent.manga) setView("home");
+  }, [topKind, settings.hideContent.manga, setView]);
+
+  useEffect(() => {
     if (!kid || player) return;
     const allowed =
       topKind === "kids" ||
@@ -926,6 +957,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const liveTop = topKind === "live";
   const vodTop = topKind === "vod";
   const downloadsTop = topKind === "downloads";
+  const mangaTop = topKind === "manga";
   const matchDetailTop = topKind === "match-detail";
 
   const [immersive, setImmersive] = useState(false);
@@ -989,6 +1021,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
   const liveAlive = useIdleEvict(liveTop);
   const vodAlive = useIdleEvict(vodTop);
   const downloadsAlive = useIdleEvict(downloadsTop);
+  const mangaAlive = useIdleEvict(mangaTop);
 
   return (
     <div data-kids={kidsTop || kid ? "on" : undefined} className="relative flex h-full">
@@ -1133,6 +1166,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
           <div className={layer(downloadsTop)}>
             <Suspense fallback={null}>
               <DownloadsView />
+            </Suspense>
+          </div>
+        )}
+        {mangaAlive && (
+          <div className={layer(mangaTop)}>
+            <Suspense fallback={null}>
+              <MangaView />
             </Suspense>
           </div>
         )}

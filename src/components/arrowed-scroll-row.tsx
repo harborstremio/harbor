@@ -35,8 +35,10 @@ export function ArrowedScrollRow({
     const el = trackRef.current;
     if (!el) return;
     const update = () => {
-      setCanPrev(el.scrollLeft > 2);
-      setCanNext(el.scrollWidth - (el.scrollLeft + el.clientWidth) > 2);
+      const rtl = getComputedStyle(el).direction === "rtl";
+      const position = rtl ? -el.scrollLeft : el.scrollLeft;
+      setCanPrev(position > 2);
+      setCanNext(el.scrollWidth - (position + el.clientWidth) > 2);
     };
     update();
     el.addEventListener("scroll", update, { passive: true });
@@ -51,7 +53,9 @@ export function ArrowedScrollRow({
   const scroll = (dir: -1 | 1) => {
     const el = trackRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
+    const rtl = getComputedStyle(el).direction === "rtl";
+    const delta = (rtl ? -dir : dir) * el.clientWidth * 0.85;
+    el.scrollBy({ left: delta, behavior: "smooth" });
   };
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {

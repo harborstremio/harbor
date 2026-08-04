@@ -13,7 +13,10 @@ export type StreamingService =
   | "max"
   | "paramount"
   | "peacock"
-  | "crunchyroll";
+  | "crunchyroll"
+  | "amcplus"
+  | "starz"
+  | "shudder";
 
 export type WebhookTrigger =
   | { event: "newMovie" }
@@ -27,7 +30,7 @@ export type WebhookTrigger =
   | { event: "fromTraktWatchlist" }
   | { event: "liveTvEvent"; channelIds?: string[]; favoritesOnly?: boolean; leadMinutes?: number };
 
-export type ContentCategory = "anime" | "liveTv" | "sports" | "adult";
+export type ContentCategory = "anime" | "liveTv" | "sports" | "adult" | "manga";
 
 export type ContentFilters = Record<ContentCategory, boolean>;
 export type LetterboxdSettings = {
@@ -278,6 +281,7 @@ export type Settings = {
   auddKey: string;
   aiSearchKey: string;
   aiSearchModel: string;
+  aiSearchProvider: "openrouter" | "groq";
   aiGroqKey: string;
   jinaKey: string;
   aiWebSearch: boolean;
@@ -337,6 +341,7 @@ export type Settings = {
   preferCustomMetaAddon: boolean;
   animeOnlyInAnimeRoom: boolean;
   cwAdvanceNext: boolean;
+  cwPerProfile: boolean;
   useNativeTitleBar: boolean;
   closeToTray: boolean;
   trayAlwaysOnTop: boolean;
@@ -454,6 +459,7 @@ export type Settings = {
   iptvEpgOffsetHours: number;
   sidebarCollapsed: boolean;
   wrappedButton: boolean;
+  mangaEnabled: boolean;
   feedLocaleBias: boolean;
   uiLanguage: UiLanguage;
   cropMode: string;

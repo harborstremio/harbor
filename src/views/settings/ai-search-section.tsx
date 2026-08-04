@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { AI_MODELS, DEFAULT_AI_MODEL, GROQ_MODELS, providerForModel } from "@/lib/ai-models";
+import { AI_MODELS, DEFAULT_AI_MODEL, GROQ_MODELS, providerTabFor } from "@/lib/ai-models";
 import openrouterLogo from "@/assets/ai-logos/openrouter.png";
 import groqLogo from "@/assets/ai-logos/groq.png";
 import jinaLogo from "@/assets/ai-logos/jina.png";
@@ -28,25 +28,34 @@ export function AiSearchSection() {
     timer.current = window.setTimeout(() => setSavedFlags((s) => ({ ...s, [tab]: false })), 1800);
   };
 
-  // Detect provider from current model so the tab reflects user's existing selection
-  const currentProvider = providerForModel(settings.aiSearchModel || DEFAULT_AI_MODEL);
-  const initialTab: ProviderTab = currentProvider === "groq" ? "groq" : "openrouter";
-  const [tab, _setTab] = useState<ProviderTab>(initialTab);
-
   const [openrouterKey, setOpenrouterKey] = keyDrafts.openrouter;
   const [groqKey, setGroqKey] = keyDrafts.groq;
   const [jinaDraft, setJinaDraft] = useState(settings.jinaKey);
+  const tab: ProviderTab = settings.aiSearchProvider === "groq" ? "groq" : "openrouter";
+  const setTab = (nextTab: ProviderTab) => {
+    if (nextTab === tab) return;
+    const currentModelMatches = providerTabFor(settings.aiSearchModel) === nextTab;
+    const nextModel = currentModelMatches
+      ? settings.aiSearchModel
+      : nextTab === "groq"
+        ? GROQ_MODELS[0].id
+        : DEFAULT_AI_MODEL;
+    update({ aiSearchProvider: nextTab, aiSearchModel: nextModel });
+  };
+  const setModel = (model: string) => update({ aiSearchModel: model, aiSearchProvider: tab });
   const renderedModel =
-    tab === "groq" && currentProvider !== "groq"
+    tab === "groq" && providerTabFor(settings.aiSearchModel) !== "groq"
       ? GROQ_MODELS[0].id
-      : tab === "openrouter" && currentProvider === "groq"
+      : tab === "openrouter" && providerTabFor(settings.aiSearchModel) === "groq"
         ? AI_MODELS[0].id
         : settings.aiSearchModel;
 
   return (
     <Section
       title={t("AI search")}
-      subtitle={t("Type what you want in plain language and let a model find it. Bring your own API key.")}
+      subtitle={t(
+        "Type what you want in plain language and let a model find it. Bring your own API key.",
+      )}
     >
       <div className="flex flex-col gap-1.5">
         <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
@@ -54,7 +63,7 @@ export function AiSearchSection() {
         </span>
         <Segmented
           value={tab}
-          onChange={(v) => _setTab(v)}
+          onChange={setTab}
           options={[
             { value: "openrouter", label: "OpenRouter" },
             { value: "groq", label: "Groq" },
@@ -79,15 +88,14 @@ export function AiSearchSection() {
               <>
                 Adds an "Ask AI" button to search, so you can type things like{" "}
                 <em>popular French TV shows last year</em>. Get a key at{" "}
-                <ExtLink href="https://openrouter.ai/keys">openrouter.ai/keys</ExtLink>. It
-                only runs when you tap that button, so it never costs anything unless you
-                ask.
+                <ExtLink href="https://openrouter.ai/keys">openrouter.ai/keys</ExtLink>. It only
+                runs when you tap that button, so it never costs anything unless you ask.
               </>
             }
           />
           <AiModelSelect
             value={renderedModel}
-            onChange={(v) => update({ aiSearchModel: v })}
+            onChange={setModel}
             models={AI_MODELS}
             defaultModel={DEFAULT_AI_MODEL}
           />
@@ -109,15 +117,15 @@ export function AiSearchSection() {
               <>
                 Adds an "Ask AI" button to search, so you can type things like{" "}
                 <em>popular French TV shows last year</em>. Get a key at{" "}
-                <ExtLink href="https://console.groq.com/keys">console.groq.com/keys</ExtLink>.
-                Groq runs open-source models on its LPU hardware with a generous free tier —
-                every model listed below runs on the free tier.
+                <ExtLink href="https://console.groq.com/keys">console.groq.com/keys</ExtLink>. Groq
+                runs open-source models on its LPU hardware with a generous free tier — every model
+                listed below runs on the free tier.
               </>
             }
           />
           <AiModelSelect
             value={renderedModel}
-            onChange={(v) => update({ aiSearchModel: v })}
+            onChange={setModel}
             models={GROQ_MODELS}
             defaultModel={GROQ_MODELS[0].id}
           />

@@ -2,7 +2,7 @@ import { safeFetch as fetch } from "@/lib/safe-fetch";
 
 const CINEMETA = "https://v3-cinemeta.strem.io";
 
-export type MetaType = "movie" | "series" | "channel" | "tv" | "anime" | "other";
+export type MetaType = "movie" | "series" | "channel" | "tv" | "anime" | "other" | "manga";
 
 export function narrowMediaType(t: MetaType | string | undefined): "movie" | "series" {
   return t === "series" ? "series" : "movie";

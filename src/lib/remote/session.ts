@@ -2,6 +2,9 @@ import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import type { CastDeviceInfo } from "@/lib/cast";
 import type { PlayerSrc } from "@/lib/view";
 import { injectHostNav } from "./inject-host-nav";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { setSleepMode } from "@/lib/sleep-timer-store";
+import { readActiveProfileIdentity, readAllProfilesIdentity } from "@/lib/profiles";
 import {
   applyTextToFocused,
   armFocusedTextEntry,
@@ -9,12 +12,16 @@ import {
   readHostTextEntry,
   submitFocusedText,
 } from "./text-entry";
+import { runLibraryAction } from "./library-commands";
+import { APP_VERSION } from "@/lib/build-info";
 import {
   idleSnapshot,
   REMOTE_PROTO,
   type RemoteCastDevice,
   type RemoteCommand,
   type RemoteEpisodeRef,
+  type RemoteLibrary,
+  type RemoteTrackers,
   type RemoteSnapshot,
   type RemoteSourceInfo,
   type RemoteTarget,
@@ -60,7 +67,10 @@ type StickyMedia = {
   canToggleSubtitles: boolean;
 };
 
-function subtitleFlags(b: RemotePlaybackBinding): { subtitlesOn: boolean; canToggleSubtitles: boolean } {
+function subtitleFlags(b: RemotePlaybackBinding): {
+  subtitlesOn: boolean;
+  canToggleSubtitles: boolean;
+} {
   const casting = !!b.castDevice;
   const tracks = b.snap.subtitleTracks ?? [];
   return {
@@ -254,11 +264,55 @@ function snapshotFromSticky(): RemoteSnapshot {
     subtitlesOn: s.subtitlesOn,
     canToggleSubtitles: s.canToggleSubtitles,
     textEntry: readHostTextEntry(),
+    profile: readActiveProfileIdentity(),
+    profiles: readAllProfilesIdentity(),
     updatedAt: Date.now(),
   };
 }
 
+let remoteHostConfig: { tmdbKey: string; rpdbKey: string; tvdbKey: string } = {
+  tmdbKey: "",
+  rpdbKey: "",
+  tvdbKey: "",
+};
+let remoteLibrary: RemoteLibrary | null = null;
+let remoteTrackers: RemoteTrackers = {
+  trakt: false,
+  simkl: false,
+  stremio: false,
+  anilist: false,
+  mal: false,
+};
+
+export function setRemoteHostConfig(config: {
+  tmdbKey: string;
+  rpdbKey: string;
+  tvdbKey: string;
+}): void {
+  remoteHostConfig = config;
+}
+
+export function setRemoteLibrary(next: RemoteLibrary | null): void {
+  remoteLibrary = next;
+}
+
+export function setRemoteTrackers(next: RemoteTrackers): void {
+  remoteTrackers = next;
+}
+
 export function buildRemoteSnapshot(positionSec?: number): RemoteSnapshot {
+  return {
+    ...buildRemoteSnapshotInner(positionSec),
+    tmdbKey: remoteHostConfig.tmdbKey,
+    rpdbKey: remoteHostConfig.rpdbKey,
+    tvdbKey: remoteHostConfig.tvdbKey,
+    hostVersion: APP_VERSION,
+    ...(remoteLibrary ? { library: remoteLibrary } : {}),
+    trackers: remoteTrackers,
+  };
+}
+
+function buildRemoteSnapshotInner(positionSec?: number): RemoteSnapshot {
   const b = binding;
   if (!b?.src) {
     if (sticky) return snapshotFromSticky();
@@ -269,6 +323,8 @@ export function buildRemoteSnapshot(positionSec?: number): RemoteSnapshot {
       volume: b?.snap.volume ?? 1,
       muted: b?.snap.muted ?? false,
       textEntry: readHostTextEntry(),
+      profile: readActiveProfileIdentity(),
+      profiles: readAllProfilesIdentity(),
     });
   }
 
@@ -279,9 +335,7 @@ export function buildRemoteSnapshot(positionSec?: number): RemoteSnapshot {
   const playing = casting
     ? b.castPlaying
     : status === "playing" || status === "loading" || status === "ready";
-  const pos = casting
-    ? b.castPositionSec || positionSec || 0
-    : (positionSec ?? b.snap.positionSec);
+  const pos = casting ? b.castPositionSec || positionSec || 0 : (positionSec ?? b.snap.positionSec);
   const target: RemoteTarget = casting
     ? {
         kind: "cast",
@@ -322,6 +376,8 @@ export function buildRemoteSnapshot(positionSec?: number): RemoteSnapshot {
     hasNextEpisode: !!b.onNextEpisode && !!b.hasNextEpisode,
     ...subtitleFlags(b),
     textEntry: readHostTextEntry(),
+    profile: readActiveProfileIdentity(),
+    profiles: readAllProfilesIdentity(),
     updatedAt: Date.now(),
   };
 }
@@ -333,6 +389,10 @@ export async function dispatchRemoteCommand(command: RemoteCommand): Promise<voi
     case "ping":
     case "castDiscover":
       return;
+    case "libraryAction": {
+      await runLibraryAction(command);
+      return;
+    }
     case "nav": {
       if (command.key === "select" && armFocusedTextEntry()) {
         notify();
@@ -358,6 +418,43 @@ export async function dispatchRemoteCommand(command: RemoteCommand): Promise<voi
     case "openSearch": {
       if (typeof window === "undefined") return;
       window.dispatchEvent(new Event("harbor:open-search"));
+      let tries = 0;
+      const focusSearchField = () => {
+        const el = document.querySelector<HTMLInputElement>(
+          '[role="dialog"] input[data-tv-text-auto], [role="dialog"] input',
+        );
+        if (el) {
+          tvFocus(el);
+          return;
+        }
+        if (tries++ < 10) window.setTimeout(focusSearchField, 70);
+      };
+      window.setTimeout(focusSearchField, 70);
+      return;
+    }
+    case "openMeta":
+    case "playMeta":
+    case "openService":
+    case "goView": {
+      if (typeof window === "undefined") return;
+      window.dispatchEvent(new CustomEvent("harbor:remote-open", { detail: command }));
+      return;
+    }
+    case "setSpeed": {
+      b?.bridge?.setRate(command.speed);
+      return;
+    }
+    case "setSleep": {
+      setSleepMode(
+        command.minutes > 0
+          ? { kind: "minutes", total: command.minutes, firesAt: 0 }
+          : { kind: "off" },
+      );
+      return;
+    }
+    case "setProfile": {
+      if (typeof window === "undefined") return;
+      window.dispatchEvent(new CustomEvent("harbor:remote-set-profile", { detail: command.id }));
       return;
     }
     case "toggleSubtitles": {

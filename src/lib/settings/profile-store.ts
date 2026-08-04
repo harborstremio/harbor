@@ -1,4 +1,5 @@
 import { loadStoredSettings } from "./load";
+import { setItemWithRecovery } from "@/lib/storage-recovery";
 import type { Settings } from "./types";
 
 export const MIRROR_KEY = "harbor.settings";
@@ -60,29 +61,21 @@ export function applyLegacyToActive(): boolean {
   const blob = recoverableLegacyBlob();
   if (blob == null) return false;
   const { profileId, linked } = readActiveSourceForRecovery();
-  try {
-    localStorage.setItem(sourceKeyFor(profileId, linked), blob);
-    localStorage.setItem(MIRROR_KEY, blob);
-    return true;
-  } catch {
-    return false;
-  }
+  const ok = setItemWithRecovery(sourceKeyFor(profileId, linked), blob);
+  setItemWithRecovery(MIRROR_KEY, blob);
+  return ok;
 }
 
 export function persistEffective(settings: Settings, profileId: string, linked: boolean): string {
   const json = serializeSettings(settings);
-  localStorage.setItem(MIRROR_KEY, json);
-  localStorage.setItem(sourceKeyFor(profileId, linked), json);
+  setItemWithRecovery(sourceKeyFor(profileId, linked), json);
+  setItemWithRecovery(MIRROR_KEY, json);
   return json;
 }
 
 export function forkToProfile(profileId: string): void {
-  try {
-    const shared = localStorage.getItem(SHARED_KEY) ?? localStorage.getItem(MIRROR_KEY);
-    if (shared != null) localStorage.setItem(profileKey(profileId), shared);
-  } catch {
-    return;
-  }
+  const shared = localStorage.getItem(SHARED_KEY) ?? localStorage.getItem(MIRROR_KEY);
+  if (shared != null) setItemWithRecovery(profileKey(profileId), shared);
 }
 
 export function dropProfileBlob(profileId: string): void {

@@ -136,7 +136,7 @@ export function GridView({ grid }: { grid: GridSpec }) {
                 aria-label="Back"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-elevated text-ink-muted transition-colors hover:text-ink"
               >
-                <ArrowLeft size={18} strokeWidth={2.2} />
+                <ArrowLeft size={18} strokeWidth={2.2} className="dir-icon" />
               </button>
             )}
             <h1 className="font-display text-[30px] font-medium leading-none tracking-tight text-ink">

@@ -7,7 +7,7 @@ import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { ModalOverlayApp } from "@/views/modal-overlay-app";
 import { HdrOverlayApp } from "@/views/hdr-overlay-app";
 import { PipApp } from "@/views/pip";
-import { RemoteApp } from "@/views/remote-app";
+import { MangaReaderApp } from "@/views/manga-reader-app";
 import "@/index.css";
 
 function detectRemoteMode(): boolean {
@@ -15,6 +15,15 @@ function detectRemoteMode(): boolean {
     const path = window.location.pathname.replace(/\/+$/, "") || "/";
     if (path === "/remote" || path.endsWith("/remote")) return true;
     if (new URLSearchParams(window.location.search).get("remote") === "1") return true;
+  } catch {}
+  return false;
+}
+
+function detectMangaReaderMode(): boolean {
+  try {
+    const path = window.location.pathname.replace(/\/+$/, "") || "/";
+    if (path === "/reader" || path.endsWith("/reader")) return true;
+    if (new URLSearchParams(window.location.search).get("reader") === "1") return true;
   } catch {}
   return false;
 }
@@ -49,7 +58,8 @@ function detectHdrOverlay(): boolean {
 const isPip = detectPipMode();
 const isModal = detectModalOverlay();
 const isHdrOverlay = detectHdrOverlay();
-const isRemote = detectRemoteMode();
+const isMangaReader = detectMangaReaderMode();
+const isRemote = detectRemoteMode() || isMangaReader;
 if (isModal || isHdrOverlay) {
   document.documentElement.style.background = "transparent";
   document.body.style.background = "transparent";
@@ -155,8 +165,10 @@ createRoot(document.getElementById("root")!).render(
       <ModalOverlayApp />
     ) : isPip ? (
       <PipApp />
+    ) : isMangaReader ? (
+      <MangaReaderApp />
     ) : isRemote ? (
-      <RemoteApp />
+      <MainRoot />
     ) : (
       <MainRoot />
     )}

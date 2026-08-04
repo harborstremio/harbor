@@ -97,7 +97,7 @@ export function StreamsView({
           onClick={onBack}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-elevated text-ink-muted transition-colors hover:bg-raised hover:text-ink"
         >
-          <ChevronLeft size={20} strokeWidth={2.2} />
+          <ChevronLeft size={20} strokeWidth={2.2} className="dir-icon" />
         </button>
         <div className="min-w-0 flex-1">
           <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
@@ -133,7 +133,10 @@ export function StreamsView({
               <span>
                 {totalStreams === 1
                   ? t("{n} source across {count} addons", { n: totalStreams, count: groups.length })
-                  : t("{n} sources across {count} addons", { n: totalStreams, count: groups.length })}
+                  : t("{n} sources across {count} addons", {
+                      n: totalStreams,
+                      count: groups.length,
+                    })}
               </span>
               {!pipelineDone && (
                 <span className="flex items-center gap-1.5">

@@ -69,7 +69,7 @@ export function BetaThemesModal({
             onClick={onClose}
             className="flex h-11 items-center gap-2 rounded-full border border-edge-soft bg-canvas/60 px-4 text-[13px] font-semibold text-ink-muted transition-all hover:-translate-x-0.5 hover:border-edge hover:text-ink"
           >
-            <ArrowLeft size={15} strokeWidth={2.2} />
+            <ArrowLeft size={15} strokeWidth={2.2} className="dir-icon" />
             Back
           </button>
           <div data-tauri-drag-region className="flex flex-col">
@@ -97,7 +97,12 @@ export function BetaThemesModal({
       <div className="min-h-0 flex-1 overflow-y-auto px-10 py-10">
         <div className="mx-auto grid max-w-[900px] gap-5 sm:grid-cols-2">
           {BETA_THEMES.map((t) => (
-            <BetaCard key={t.id} theme={t} active={activeId === t.id} onActivate={() => onActivate(t.id)} />
+            <BetaCard
+              key={t.id}
+              theme={t}
+              active={activeId === t.id}
+              onActivate={() => onActivate(t.id)}
+            />
           ))}
         </div>
       </div>
@@ -116,7 +121,8 @@ function BetaCard({
   onActivate: () => void;
 }) {
   const hasImage = !!theme.previewImage;
-  const bg = theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
+  const bg =
+    theme.background?.image ?? `linear-gradient(135deg, ${theme.swatch[0]}, ${theme.swatch[1]})`;
   return (
     <div
       className={`flex flex-col overflow-hidden rounded-2xl border transition-all ${
@@ -154,7 +160,9 @@ function BetaCard({
         <div className="flex min-w-0 flex-col gap-1">
           <span className="text-[16px] font-semibold tracking-tight text-ink">{theme.name}</span>
           {theme.blurb && (
-            <span className="line-clamp-2 text-[12.5px] leading-relaxed text-ink-muted">{theme.blurb}</span>
+            <span className="line-clamp-2 text-[12.5px] leading-relaxed text-ink-muted">
+              {theme.blurb}
+            </span>
           )}
         </div>
         <button
@@ -162,7 +170,9 @@ function BetaCard({
           onClick={onActivate}
           disabled={active}
           className={`h-10 rounded-xl text-[13px] font-semibold transition-opacity ${
-            active ? "bg-elevated/70 text-ink ring-1 ring-edge" : "bg-ink text-canvas hover:opacity-90"
+            active
+              ? "bg-elevated/70 text-ink ring-1 ring-edge"
+              : "bg-ink text-canvas hover:opacity-90"
           }`}
         >
           {active ? "Active" : "Apply"}
