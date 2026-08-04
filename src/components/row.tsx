@@ -15,10 +15,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import { resetPosterDock as resetPosterDockItems, updatePosterDock } from "@/lib/poster-dock";
-import {
-  POSTER_CARD_ANIMATION,
-  scrollDeltaToRevealCard,
-} from "@/lib/poster-backdrop-expansion";
+import { POSTER_CARD_ANIMATION, scrollDeltaToRevealCard } from "@/lib/poster-backdrop-expansion";
 import { useView } from "@/lib/view";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { RowCardExpansionProvider } from "@/components/row-card-expansion";

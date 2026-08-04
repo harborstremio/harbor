@@ -206,7 +206,8 @@ export function useExpandingCard({
     () => () => {
       focusIntentRef.current = false;
       if (collapseTimerRef.current !== null) window.clearTimeout(collapseTimerRef.current);
-      if (titleCollapseTimerRef.current !== null) window.clearTimeout(titleCollapseTimerRef.current);
+      if (titleCollapseTimerRef.current !== null)
+        window.clearTimeout(titleCollapseTimerRef.current);
       collapseRowCard?.();
     },
     [collapseRowCard],
