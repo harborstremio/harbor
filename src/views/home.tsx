@@ -11,9 +11,12 @@ import {
   moveRow,
   renameRow,
   resetHomeRows,
+  toggleCwTop,
   toggleHeroSource,
+  togglePlayButtonSquare,
   toggleRowHidden,
   toggleRowNumerals,
+  toggleSecondaryMoreInfo,
   type HomeRowCustomization,
 } from "@/lib/home-customization";
 import { useCustomLists } from "@/lib/custom-lists";
@@ -889,6 +892,18 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     (listId: string) => mutateHomeRows(addListRow(homeRowsCustom, listId)),
     [homeRowsCustom, mutateHomeRows],
   );
+  const handleTogglePlaySquare = useCallback(
+    () => mutateHomeRows(togglePlayButtonSquare(homeRowsCustom)),
+    [homeRowsCustom, mutateHomeRows],
+  );
+  const handleToggleMoreInfo = useCallback(
+    () => mutateHomeRows(toggleSecondaryMoreInfo(homeRowsCustom)),
+    [homeRowsCustom, mutateHomeRows],
+  );
+  const handleToggleCwTop = useCallback(
+    () => mutateHomeRows(toggleCwTop(homeRowsCustom)),
+    [homeRowsCustom, mutateHomeRows],
+  );
 
   const handleSaveCustomSources = useCallback((newSources: SourceRow[]) => {
     const existing = homeRowsCustom.customSources || [];
@@ -938,6 +953,29 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     [settings.tmdbKey, settings.streaming],
   );
 
+  const cwHidden = homeRowsCustom.hidden.includes("cw");
+  const cwTop = !!homeRowsCustom.cwTop;
+  const cwBlock =
+    cwHidden && !editMode ? null : (
+      <div data-scroll-anchor="cw">
+        {editMode && (
+          <PinnedRowControls
+            label={t("Continue Watching")}
+            hidden={cwHidden}
+            onToggleHidden={() => handleToggleHidden("cw")}
+          />
+        )}
+        {!cwHidden && (
+          <CWSection
+            signedIn={!!authKey}
+            items={cwItems}
+            watchedSet={traktWatched}
+            onDismiss={onDismissCw}
+          />
+        )}
+      </div>
+    );
+
   return (
     <main
       ref={scrollCb}
@@ -964,14 +1002,18 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
                   onAddSource={() => setAddSourceModalOpen(true)}
                   availableListRows={availableListRows}
                   onAddListRow={handleAddListRow}
+                  onTogglePlaySquare={handleTogglePlaySquare}
+                  onToggleMoreInfo={handleToggleMoreInfo}
+                  onToggleCwTop={handleToggleCwTop}
                 />
               </div>
             </div>
           )}
+          {cwTop && cwBlock}
           {settings.homeMode !== "classic" && !homeRowsCustom.hidden.includes("hero") && showHero && (
             <div
               data-scroll-anchor="hero"
-              className={`relative ${heroFull ? "-mt-24 lg:-mt-28 -mb-12 harbor-hero-full" : ""}`}
+              className={`relative ${heroFull ? `${cwTop ? "" : "-mt-24 lg:-mt-28"} -mb-12 harbor-hero-full` : ""}`}
             >
               {editMode && (
                 <PinnedRowControls
@@ -985,6 +1027,9 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
                 full={heroFull}
                 fullQuality={settings.heroFullQuality}
                 playTrailers={settings.heroTrailers}
+                bottomAlign
+                playSquare={!!homeRowsCustom.playButtonSquare}
+                moreInfo={!!homeRowsCustom.secondaryMoreInfo}
               />
               {!editMode && (
                 <div className="pointer-events-none absolute -bottom-3 end-5 z-20 flex justify-end [&>*]:pointer-events-auto">
@@ -1015,14 +1060,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
               />
             </div>
           )}
-          <div data-scroll-anchor="cw">
-            <CWSection
-              signedIn={!!authKey}
-              items={cwItems}
-              watchedSet={traktWatched}
-              onDismiss={onDismissCw}
-            />
-          </div>
+          {!cwTop && cwBlock}
           {settings.homeMode !== "classic" && (
             <div data-scroll-anchor="streaming">
               <StreamingRail services={enabledServices} />

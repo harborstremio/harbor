@@ -845,7 +845,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
               <AnimeHeroSkeleton />
             </div>
           )}
-          <div className="flex items-center justify-end gap-2">
+          <div className="-mb-6 -mt-6 flex items-center justify-end gap-2">
             {editMode && animeHasCustomization(settings.animeRows) && (
               <button
                 onClick={() => update({ animeRows: { order: [], hidden: [], renamed: {} } })}
@@ -1024,7 +1024,7 @@ export function AnimeView({ active = true }: { active?: boolean }) {
               const rowHidden = settings.animeRows.hidden.includes(d.key);
               const idx = orderKeys.indexOf(d.key);
               return (
-                <div key={d.key} data-scroll-anchor={`row:${d.key}`}>
+                <div key={d.key} data-scroll-anchor={`row:${d.key}`} className="empty:hidden">
                   {editMode && (
                     <RowControls
                       name={d.name}

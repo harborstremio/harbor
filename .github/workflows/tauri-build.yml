@@ -23,7 +23,7 @@ jobs:
             target: aarch64-apple-darwin
             bundle: dmg
           - name: macOS-Intel
-            runner: macos-13
+            runner: macos-15-intel
             target: x86_64-apple-darwin
             bundle: dmg
           - name: Linux-x86_64
@@ -148,13 +148,28 @@ jobs:
           cargo check
           cargo test --all-targets
 
+      - name: Detect signing key
+        id: sign
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -n "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "config=--config src-tauri/tauri.updater.conf.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "config=" >> "$GITHUB_OUTPUT"
+            echo "::warning::TAURI_SIGNING_PRIVATE_KEY not set — building installers only, no signed updater artifacts."
+          fi
+
       - name: Tauri build
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tauriScript: pnpm tauri
-          args: --target ${{ matrix.platform.target }}
+          args: --target ${{ matrix.platform.target }} ${{ steps.sign.outputs.config }}
 
       - name: Upload artifacts
         if: success()
@@ -167,5 +182,7 @@ jobs:
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.AppImage
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.msi
             src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.exe
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.app.tar.gz
+            src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.sig
           retention-days: 14
           if-no-files-found: warn

@@ -26,8 +26,7 @@ struct Desired {
     end_ts: Option<i64>,
     party_id: Option<String>,
     party_size: Option<[i32; 2]>,
-    button_label: Option<String>,
-    button_url: Option<String>,
+    buttons: Vec<(String, String)>,
 }
 
 pub struct DiscordState {
@@ -61,8 +60,14 @@ pub struct PresenceInput {
     pub paused: bool,
     pub party_id: Option<String>,
     pub party_size: Option<[i32; 2]>,
-    pub button_label: Option<String>,
-    pub button_url: Option<String>,
+    #[serde(default)]
+    pub buttons: Vec<ButtonInput>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ButtonInput {
+    pub label: String,
+    pub url: String,
 }
 
 fn clean(s: Option<String>) -> Option<String> {
@@ -78,13 +83,17 @@ fn safe_image(url: Option<String>) -> Option<String> {
     }
 }
 
-fn safe_button_url(url: Option<String>) -> Option<String> {
-    let u = url?;
-    if u.starts_with("https://") && u.len() <= 512 {
-        Some(u)
-    } else {
-        None
-    }
+fn safe_button_url(url: &str) -> bool {
+    url.starts_with("https://") && url.len() <= 512
+}
+
+fn safe_buttons(buttons: Vec<ButtonInput>) -> Vec<(String, String)> {
+    buttons
+        .into_iter()
+        .filter(|b| !b.label.trim().is_empty() && safe_button_url(&b.url))
+        .take(2)
+        .map(|b| (b.label.trim().to_string(), b.url))
+        .collect()
 }
 
 #[tauri::command]
@@ -103,8 +112,7 @@ pub fn discord_set_presence(state: tauri::State<'_, DiscordState>, p: PresenceIn
         d.end_ts = if p.paused { None } else { p.end_ts };
         d.party_id = clean(p.party_id);
         d.party_size = p.party_size;
-        d.button_label = clean(p.button_label);
-        d.button_url = safe_button_url(p.button_url);
+        d.buttons = safe_buttons(p.buttons);
     }
     state.generation.fetch_add(1, Ordering::SeqCst);
 }
@@ -211,10 +219,13 @@ pub fn run_loop(app: AppHandle) {
                 }
                 act = act.party(party);
             }
-            if let (Some(label), Some(url)) =
-                (desired.button_label.as_deref(), desired.button_url.as_deref())
-            {
-                act = act.buttons(vec![Button::new(label, url)]);
+            if !desired.buttons.is_empty() {
+                let buttons: Vec<Button> = desired
+                    .buttons
+                    .iter()
+                    .map(|(label, url)| Button::new(label, url))
+                    .collect();
+                act = act.buttons(buttons);
             }
             c.set_activity(act)
         } else {

@@ -14,7 +14,7 @@ export type Match = { id: number; name: string; character: string; score: number
 
 export const TAU_ABS = 0.38;
 export const TAU_MARGIN = 0.06;
-export const MIN_BOX_PX = 64;
+export const MIN_BOX_PX = 56;
 
 export function l2normalize(v: Float32Array): Float32Array {
   let s = 0;

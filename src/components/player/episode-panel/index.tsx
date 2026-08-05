@@ -224,8 +224,9 @@ export function EpisodePanel({
           style={
             isMpv
               ? {
-                  background:
-                    "linear-gradient(145deg, rgba(8,12,18,0.36), rgba(8,12,18,0.30) 48%, rgba(8,12,18,0.34))",
+                  backgroundColor: settings.liquidGlass
+                    ? "color-mix(in srgb, var(--color-canvas) 42%, transparent)"
+                    : "var(--color-canvas)",
                   boxShadow:
                     corner === "top-left" || corner === "bottom-left"
                       ? "inset -1px 0 0 rgba(255,255,255,0.13), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.08)"
@@ -428,11 +429,6 @@ export function EpisodePanel({
                   </div>
                 )}
               </div>
-              <footer className="border-t border-edge-soft/60 px-6 py-4 text-[12px] text-ink-subtle">
-                {manualMode
-                  ? t("Manual mode: clicking Play opens the source picker here.")
-                  : t("Instant Play: clicking Play queues the next stream automatically.")}
-              </footer>
             </>
           )}
         </ThreeLiquidGlassSurface>

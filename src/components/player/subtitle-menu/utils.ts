@@ -2,7 +2,7 @@ import type { TrackInfo } from "@/lib/player/bridge";
 import { subtitleTrackLanguageLabel, subtitleTrackTitle } from "@/lib/subtitles/track-label";
 import type { Group, SubtitleMenuProps } from "./types";
 
-export function buildOverlayState(props: SubtitleMenuProps) {
+export function buildOverlayState(props: SubtitleMenuProps, preferredLanguages: string[]) {
   return {
     tracks: props.tracks,
     selectedId: props.selectedId,
@@ -12,6 +12,7 @@ export function buildOverlayState(props: SubtitleMenuProps) {
     metaReleaseDate: props.metaReleaseDate ?? null,
     season: props.season ?? null,
     episode: props.episode ?? null,
+    preferredLanguages,
   };
 }
 

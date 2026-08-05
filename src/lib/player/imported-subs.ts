@@ -14,6 +14,10 @@ export function markImportedSub(title: string): void {
   emit();
 }
 
+export function hasImportedSubTitle(title: string | undefined | null): boolean {
+  return !!title && titles.has(title);
+}
+
 export function clearImportedSubs(): void {
   if (titles.size === 0) return;
   titles = new Set();

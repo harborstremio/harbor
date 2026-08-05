@@ -557,8 +557,52 @@ pub(crate) fn shutdown(app: &tauri::AppHandle) {
     tauri::async_runtime::block_on(state.stop());
 }
 
+async fn is_hdr_source(url: &str) -> bool {
+    let Some(ffprobe) = crate::transcode::locate_ffprobe() else {
+        return false;
+    };
+    let mut cmd = tokio::process::Command::new(&ffprobe);
+    cmd.args([
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "stream=color_transfer",
+        "-of",
+        "default=nw=1:nk=1",
+        url,
+    ])
+    .stdin(Stdio::null())
+    .stdout(Stdio::piped())
+    .stderr(Stdio::null());
+    #[cfg(windows)]
+    {
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    crate::proc_guard::configure_command(&mut cmd);
+    let probe = tokio::time::timeout(Duration::from_secs(8), cmd.output()).await;
+    let Ok(Ok(out)) = probe else {
+        return false;
+    };
+    let trc = String::from_utf8_lossy(&out.stdout).trim().to_ascii_lowercase();
+    trc.contains("smpte2084") || trc.contains("arib-std-b67")
+}
+
+fn thumb_filter(hdr: bool) -> String {
+    if !hdr {
+        return format!("scale={}:-2", THUMB_WIDTH);
+    }
+    format!(
+        "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,\
+tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p,scale={}:-2",
+        THUMB_WIDTH
+    )
+}
+
 async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shadow, String> {
     let bin = locate_mpv().ok_or_else(|| "mpv not found".to_string())?;
+    let hdr = is_hdr_source(url).await;
     let pipe = shadow_pipe(session);
     let dir = cache_dir(session);
     tokio::fs::create_dir_all(&dir)
@@ -578,7 +622,7 @@ async fn spawn_shadow(url: &str, session: &str, pending: Pending) -> Result<Shad
         "--ytdl=no".into(),
         "--cache=yes".into(),
         "--demuxer-max-bytes=32MiB".into(),
-        format!("--vf=scale={}:-2", THUMB_WIDTH),
+        format!("--vf={}", thumb_filter(hdr)),
         "--screenshot-format=jpg".into(),
         format!("--screenshot-jpeg-quality={}", SCREENSHOT_QUALITY),
         "--screenshot-tag-colorspace=no".into(),

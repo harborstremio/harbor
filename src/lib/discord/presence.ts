@@ -3,6 +3,10 @@ import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 const HARBOR_LOGO = `${HARBOR_API_BASE}/discord/harbordiscord.png`;
+// Discord strips buttons that link to its own invites: discord.gg makes it
+// reject the whole activity (presence vanishes), discord.com/invite is dropped
+// silently. A community-invite button needs a redirect on a domain we own.
+const STATIC_BUTTONS = [{ label: "Harbor Website", url: "https://harbor.elfhosted.com/" }];
 
 type DiscordConfig = {
   enabled: boolean;
@@ -140,10 +144,10 @@ function compute(): Computed {
     const people = headcount === 1 ? "1 👤" : `${headcount} 👥`;
     payload.details = `Watch Party · ${people}`;
     payload.state = context ?? "In the lobby";
-    if (party.joinUrl && config.showPartyJoin) {
-      payload.buttonLabel = "Join the Watch Party";
-      payload.buttonUrl = party.joinUrl;
-    }
+    payload.buttons =
+      party.joinUrl && config.showPartyJoin
+        ? [{ label: "Join the Watch Party", url: party.joinUrl }, ...STATIC_BUTTONS]
+        : STATIC_BUTTONS;
     const live = typeof payload.startTs === "number";
     return {
       payload,
@@ -151,7 +155,7 @@ function compute(): Computed {
     };
   }
   if (!base) return { payload: null, key: "clear" };
-  return base;
+  return { payload: { ...base.payload, buttons: STATIC_BUTTONS }, key: base.key };
 }
 
 function flush(): void {

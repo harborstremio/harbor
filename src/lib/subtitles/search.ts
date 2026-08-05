@@ -34,7 +34,11 @@ export async function searchSubtitles(
   const wyzieOn = want.wyzie === true;
   const addonsOn = want.addons ?? true;
   const osOn = want.opensubtitles ?? true;
-  dinfo("[subs] search", { q, providers: { osOn, addonsOn, wyzieOn }, addons: opts.addons?.length ?? 0 });
+  dinfo("[subs] search", {
+    q,
+    providers: { osOn, addonsOn, wyzieOn },
+    addons: opts.addons?.length ?? 0,
+  });
   const tmo = opts.timeoutMs ?? SUBTITLE_PROVIDER_TIMEOUT_MS;
   const tasks: Array<{ name: string; p: Promise<SubResult[]> }> = [];
   if (osOn)
@@ -50,7 +54,7 @@ export async function searchSubtitles(
   if (addonsOn && opts.addons && opts.addons.length > 0)
     tasks.push({
       name: "addons",
-      p: withSubtitleTimeout(searchAddons(opts.addons, q), tmo, []),
+      p: searchAddons(opts.addons, q, tmo),
     });
   if (opts.extra)
     tasks.push({
@@ -153,11 +157,7 @@ function sourcePriority(source: SubResult["source"]): number {
   }
 }
 
-function dedupAndRank(
-  results: SubResult[],
-  preferred: string[],
-  hints?: StreamHints,
-): SubResult[] {
+function dedupAndRank(results: SubResult[], preferred: string[], hints?: StreamHints): SubResult[] {
   const seen = new Set<string>();
   const filtered: SubResult[] = [];
   for (const r of results) {

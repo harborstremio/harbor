@@ -15,7 +15,7 @@ export function HoverTooltip({
   label: string;
   sublabel?: string | null;
   side?: "top" | "bottom";
-  align?: "start" | "center";
+  align?: "start" | "center" | "end";
   delayMs?: number;
   disabled?: boolean;
   large?: boolean;
@@ -41,7 +41,12 @@ export function HoverTooltip({
     const r = el.getBoundingClientRect();
     setPos({
       top: side === "top" ? r.top - 8 : r.bottom + 8,
-      left: align === "center" ? r.left + r.width / 2 : r.left + 8,
+      left:
+        align === "center"
+          ? r.left + r.width / 2
+          : align === "end"
+            ? r.right - 8
+            : r.left + 8,
     });
   };
   const enter = () => {
@@ -74,7 +79,7 @@ export function HoverTooltip({
     if (!el) return;
     const w = el.offsetWidth;
     const h = el.offsetHeight;
-    let left = align === "center" ? pos.left - w / 2 : pos.left;
+    let left = align === "center" ? pos.left - w / 2 : align === "end" ? pos.left - w : pos.left;
     left = Math.min(Math.max(8, left), window.innerWidth - w - 8);
     let top = side === "top" ? pos.top - h : pos.top;
     top = Math.min(Math.max(8, top), window.innerHeight - h - 8);
@@ -85,7 +90,7 @@ export function HoverTooltip({
   return (
     <div
       ref={wrapRef}
-      className={`relative ${className ?? ""}`}
+      className={`relative inline-flex ${className ?? ""}`}
       onMouseEnter={enter}
       onMouseLeave={leave}
       onFocus={enter}

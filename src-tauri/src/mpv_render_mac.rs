@@ -184,6 +184,7 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
             .openGLContext()
             .ok_or_else(|| "openGLContext was nil".to_string())?;
         gl_ctx.makeCurrentContext();
+        let _: () = msg_send![&*gl_ctx, update];
         let opaque_value: i32 = 1;
         let _: () = msg_send![
             &*gl_ctx,
@@ -229,6 +230,7 @@ pub fn install(mpv_ctx: NonNull<mpv_handle>, ns_window_ptr: i64, edr: bool) -> R
             render: Mutex::new(render),
         });
 
+        schedule_redraw();
         eprintln!("[harbor::mpv_mac] installed");
     }
     Ok(())

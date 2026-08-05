@@ -1,6 +1,7 @@
 import { Volume1, Volume2, VolumeX } from "lucide-react";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { NORMAL_FRACTION, VOL_MAX, boostColor, fractionFromValue } from "./transport/transport-utils";
 
 export type VolumeIndicatorState = {
@@ -28,13 +29,15 @@ export function VolumeIndicator({
   position: VolumeHudPosition;
 }) {
   const t = useT();
-  const max = allowBoost ? VOL_MAX : 1;
+  const { settings } = useSettings();
+  const boostMax = Math.max(1, Math.min(VOL_MAX, settings.volumeBoostMax || 2));
+  const max = allowBoost ? boostMax : 1;
   const volume = Math.max(0, Math.min(max, state.volume));
   const muted = state.muted || volume <= 0;
-  const fillPct = muted ? 0 : (allowBoost ? fractionFromValue(volume) : volume) * 100;
+  const fillPct = muted ? 0 : (allowBoost ? fractionFromValue(volume, boostMax) : volume) * 100;
   const pct = Math.round((muted ? 0 : volume) * 100);
   const boosting = allowBoost && !muted && volume > 1.001;
-  const color = boostColor(volume);
+  const color = boostColor(volume, boostMax);
   const Icon = muted ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
 
   return (

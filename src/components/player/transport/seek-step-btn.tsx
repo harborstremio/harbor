@@ -2,6 +2,7 @@ import { RotateCcw, RotateCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { SEEK_STEP_OPTIONS, sanitizeSeekStep } from "@/lib/seek-step";
+const DEFAULT_SHORT_SEC = 3;
 import { useSettings } from "@/lib/settings";
 import { Tooltip } from "./tooltip";
 
@@ -21,6 +22,10 @@ export function SeekStepBtn({
   const seconds = sanitizeSeekStep(
     direction === "back" ? settings.seekBackStepSec : settings.seekForwardStepSec,
     defaultSeconds,
+  );
+  const shortSeconds = sanitizeSeekStep(
+    direction === "back" ? settings.seekBackStepShortSec : settings.seekForwardStepShortSec,
+    DEFAULT_SHORT_SEC,
   );
   const [pickerOpen, setPickerOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -83,6 +88,12 @@ export function SeekStepBtn({
     setPickerOpen(false);
   };
 
+  const commitShortChoice = (s: number) => {
+    if (direction === "back") update({ seekBackStepShortSec: s });
+    else update({ seekForwardStepShortSec: s });
+    setPickerOpen(false);
+  };
+
   return (
     <div ref={wrapRef} className="relative">
       <Tooltip label={t("{word} {n}s · hold for options", { word, n: seconds })}>
@@ -112,28 +123,63 @@ export function SeekStepBtn({
           <div className="border-b border-edge-soft px-2.5 pb-2 pt-1.5 text-center text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
             {word}
           </div>
-          <div className="flex flex-col-reverse gap-1 pt-1.5">
-            {SEEK_STEP_OPTIONS.map((s) => {
-              const isSel = s === seconds;
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => commitChoice(s)}
-                  className={`flex h-10 w-12 items-center justify-center rounded-full font-mono text-[12px] font-bold tabular-nums transition-colors ${
-                    isSel
-                      ? "bg-elevated text-ink ring-1 ring-edge"
-                      : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
-                  }`}
-                  aria-label={t("{word} {n} seconds", { word, n: s })}
-                >
-                  {s}s
-                </button>
-              );
-            })}
+          <div className="flex items-start gap-1 pt-1.5">
+            <SeekColumn
+              label={t("Arrows")}
+              value={seconds}
+              onPick={commitChoice}
+              ariaFor={(n) => t("{word} {n} seconds", { word, n })}
+            />
+            <div className="my-1 w-px self-stretch bg-edge-soft" />
+            <SeekColumn
+              label={t("Shift + Arrows")}
+              value={shortSeconds}
+              onPick={commitShortChoice}
+              ariaFor={(n) => t("Short {word} {n} seconds", { word, n })}
+            />
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function SeekColumn({
+  label,
+  value,
+  onPick,
+  ariaFor,
+}: {
+  label: string;
+  value: number;
+  onPick: (seconds: number) => void;
+  ariaFor: (seconds: number) => string;
+}) {
+  return (
+    <div className="flex flex-col items-center">
+      <span className="px-1 pb-1 text-center text-[9.5px] font-semibold uppercase leading-tight tracking-[0.1em] text-ink-subtle">
+        {label}
+      </span>
+      <div className="flex flex-col-reverse gap-1">
+        {SEEK_STEP_OPTIONS.map((s) => {
+          const isSel = s === value;
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={() => onPick(s)}
+              className={`flex h-10 w-12 items-center justify-center rounded-full font-mono text-[12px] font-bold tabular-nums transition-colors ${
+                isSel
+                  ? "bg-elevated text-ink ring-1 ring-edge"
+                  : "text-ink-muted hover:bg-canvas/55 hover:text-ink"
+              }`}
+              aria-label={ariaFor(s)}
+            >
+              {s}s
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

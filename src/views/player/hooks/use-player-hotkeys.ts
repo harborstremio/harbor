@@ -78,7 +78,7 @@ export function usePlayerHotkeys(params: {
   } = params;
 
   const [showStats, setShowStats] = useState(false);
-  const { holdSpeedActive } = useKeyboardShortcuts({
+  const { holdSpeedActive, subtitleOffsetSec } = useKeyboardShortcuts({
     bridgeRef,
     snap,
     drawMode,
@@ -122,5 +122,5 @@ export function usePlayerHotkeys(params: {
     onVolumeFeedback,
   });
 
-  return { holdSpeedActive, showStats };
+  return { holdSpeedActive, showStats, subtitleOffsetSec };
 }

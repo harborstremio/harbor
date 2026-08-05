@@ -1,6 +1,6 @@
 import { Check, Crosshair, Languages, Sparkles } from "lucide-react";
 import type { TrackInfo } from "@/lib/player/bridge";
-import { Tooltip } from "../transport/tooltip";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { useContextMenu } from "@/lib/context-menu";
 import { isImageSubTrack } from "@/lib/player/sub-format";
 import { subtitleTrackLanguageLabel, subtitleTrackTitle } from "@/lib/subtitles/track-label";
@@ -139,7 +139,7 @@ export function VariantRow({
         </div>
       </button>
       {onPickSecondary && !selected && (
-        <Tooltip
+        <HoverTooltip
           label={isSecondary ? tr("Stop showing as second subtitle") : tr("Show as second subtitle")}
           align="end"
         >
@@ -156,7 +156,7 @@ export function VariantRow({
             <Languages size={11} strokeWidth={2.4} />
             {tr("2nd")}
           </button>
-        </Tooltip>
+        </HoverTooltip>
       )}
     </div>
   );

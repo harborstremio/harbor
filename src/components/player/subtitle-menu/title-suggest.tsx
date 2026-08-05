@@ -1,110 +1,108 @@
-import { Film, Loader2, Minus, Plus, Tv, X } from "lucide-react";
-import type { ReactNode } from "react";
+import { Film, Loader2, Minus, Plus, Tv } from "lucide-react";
+import { useLayoutEffect, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import type { TitleCandidate } from "@/lib/subtitles/title-search";
 
 export function TitleSuggestDropdown({
+  anchorRef,
   items,
   loading,
   onPick,
 }: {
+  anchorRef: RefObject<HTMLElement | null>;
   items: TitleCandidate[];
   loading: boolean;
   onPick: (c: TitleCandidate) => void;
 }) {
   const t = useT();
+  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  useLayoutEffect(() => {
+    const el = anchorRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setRect({ top: r.bottom + 6, left: r.left, width: r.width });
+  }, [anchorRef]);
+
   if (!loading && items.length === 0) return null;
-  return (
-    <div className="absolute inset-x-0 top-full z-30 mt-1.5 max-h-[300px] overflow-y-auto rounded-xl border border-edge bg-elevated/98 p-1.5 shadow-[0_24px_64px_-24px_rgba(0,0,0,0.85)] backdrop-blur-2xl">
-      {loading && items.length === 0 ? (
-        <div className="flex items-center gap-2 px-3 py-2.5 text-[12.5px] text-ink-muted">
-          <Loader2 size={13} className="animate-spin" /> {t("Searching titles…")}
-        </div>
-      ) : (
-        items.map((c) => (
-          <button
-            key={c.imdbId}
-            type="button"
-            onMouseDown={(e) => {
-              e.preventDefault();
-              onPick(c);
-            }}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-raised"
-          >
-            <span className="flex h-12 w-8 shrink-0 items-center justify-center overflow-hidden rounded bg-raised">
-              {c.poster ? (
-                <img src={c.poster} alt="" className="h-full w-full object-cover" loading="lazy" />
-              ) : c.type === "series" ? (
-                <Tv size={14} className="text-ink-subtle" />
-              ) : (
-                <Film size={14} className="text-ink-subtle" />
-              )}
-            </span>
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-[13px] font-medium text-ink">{c.name}</span>
-              <span className="flex items-center gap-1.5 text-[11px] text-ink-subtle">
-                {c.type === "series" ? <Tv size={11} /> : <Film size={11} />}
-                <span>{c.type === "series" ? t("Series") : t("Movie")}</span>
-                {c.year && (
-                  <>
-                    <span aria-hidden>·</span>
-                    <span className="tabular-nums">{c.year}</span>
-                  </>
+  if (!rect) return null;
+
+  return createPortal(
+    <div
+      data-title-suggest-dropdown=""
+      className="fixed z-[2000] overflow-hidden rounded-xl border border-edge bg-elevated/98 shadow-[0_24px_64px_-24px_rgba(0,0,0,0.85)] backdrop-blur-2xl"
+      style={{ top: rect.top, left: rect.left, width: rect.width }}
+    >
+      <div className="max-h-[300px] overflow-y-auto p-1.5">
+        {loading && items.length === 0 ? (
+          <div className="flex items-center gap-2 px-3 py-2.5 text-[12.5px] text-ink-muted">
+            <Loader2 size={13} className="animate-spin" /> {t("Searching titles…")}
+          </div>
+        ) : (
+          items.map((c) => (
+            <button
+              key={c.imdbId}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onPick(c);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-raised"
+            >
+              <span className="flex h-12 w-8 shrink-0 items-center justify-center overflow-hidden rounded bg-raised">
+                {c.poster ? (
+                  <img src={c.poster} alt="" className="h-full w-full object-cover" loading="lazy" />
+                ) : c.type === "series" ? (
+                  <Tv size={14} className="text-ink-subtle" />
+                ) : (
+                  <Film size={14} className="text-ink-subtle" />
                 )}
               </span>
-            </span>
-          </button>
-        ))
-      )}
-    </div>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate text-[13px] font-medium text-ink">{c.name}</span>
+                <span className="flex items-center gap-1.5 text-[11px] text-ink-subtle">
+                  {c.type === "series" ? <Tv size={11} /> : <Film size={11} />}
+                  <span>{c.type === "series" ? t("Series") : t("Movie")}</span>
+                  {c.year && (
+                    <>
+                      <span aria-hidden>·</span>
+                      <span className="tabular-nums">{c.year}</span>
+                    </>
+                  )}
+                </span>
+              </span>
+            </button>
+          ))
+        )}
+      </div>
+    </div>,
+    document.body,
   );
 }
 
 export function TargetBar({
-  label,
   type,
   season,
   episode,
   onSeason,
   onEpisode,
-  onClear,
-  showClear,
-  trailing,
 }: {
-  label: string;
   type: "movie" | "series";
   season?: number;
   episode?: number;
   onSeason: (n: number) => void;
   onEpisode: (n: number) => void;
-  onClear: () => void;
-  showClear: boolean;
-  trailing?: ReactNode;
 }) {
   const t = useT();
   return (
     <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-4 pb-2.5">
-      {showClear && (
-        <span className="flex items-center gap-1.5 rounded-full bg-raised px-2.5 py-1 text-[12px] font-semibold text-ink">
-          {type === "series" ? <Tv size={12} className="text-accent" /> : <Film size={12} className="text-accent" />}
-          <span className="max-w-[150px] truncate">{label}</span>
-          <button
-            type="button"
-            onClick={onClear}
-            aria-label={t("Back to what's playing")}
-            className="ms-0.5 flex h-4 w-4 items-center justify-center text-ink-subtle transition-colors hover:text-ink"
-          >
-            <X size={12} strokeWidth={2.4} />
-          </button>
-        </span>
-      )}
       {type === "series" && (
         <div className="flex items-center gap-1.5">
           <NumStepper label={t("Season")} value={season ?? 1} onChange={onSeason} />
           <NumStepper label={t("Ep")} value={episode ?? 1} onChange={onEpisode} />
         </div>
       )}
-      {trailing && <span className="flex flex-1 items-center gap-1.5">{trailing}</span>}
     </div>
   );
 }

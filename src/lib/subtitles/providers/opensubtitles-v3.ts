@@ -67,13 +67,14 @@ export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResul
       merged.push(s);
     }
   }
+  if (merged.length > 0) dinfo("[opensubtitles-v3] raw sample", merged[0]);
   const perLang = new Map<string, number>();
   return merged.map((s) => {
     const lang = normalizeLang(s.lang);
     const n = (perLang.get(lang) ?? 0) + 1;
     perLang.set(lang, n);
     return {
-      id: String(s.id ?? `os3:${s.url}`),
+      id: `os3:${s.id ?? s.url}`,
       url: s.url,
       lang,
       title: `OpenSubtitles V3 #${n}`,
@@ -81,6 +82,7 @@ export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResul
       format: (s.SubFormat?.toLowerCase() as SubResult["format"]) || undefined,
       encoding: s.encoding,
       fps: s.fps,
+      release: s.m || undefined,
     };
   });
 }

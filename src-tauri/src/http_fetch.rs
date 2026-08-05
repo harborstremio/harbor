@@ -378,3 +378,73 @@ fn is_cloudflare_challenge(status: u16, cf_mitigated: Option<&str>, body: &str) 
         || body.contains("cf-please-wait")
         || body.contains("cf_chl_opt")
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HarborUploadArgs {
+    pub url: String,
+    pub field: String,
+    pub filename: String,
+    pub content_type: Option<String>,
+    pub data_base64: String,
+    pub headers: Option<HashMap<String, String>>,
+    pub timeout_ms: Option<u64>,
+}
+
+#[tauri::command]
+pub async fn harbor_upload(args: HarborUploadArgs) -> Result<HarborFetchResponse, String> {
+    let timeout = Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS));
+    run_with_deadline(timeout, harbor_upload_inner(args)).await
+}
+
+async fn harbor_upload_inner(args: HarborUploadArgs) -> Result<HarborFetchResponse, String> {
+    let _permit = acquire_fetch_permit().await?;
+    let client = http_client()?;
+    let url = reqwest::Url::parse(&args.url).map_err(|e| format!("url: {}", e))?;
+    validate_target(&url).await?;
+
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(args.data_base64.as_bytes())
+        .map_err(|e| format!("base64: {}", e))?;
+
+    let mut part = reqwest::multipart::Part::bytes(bytes).file_name(args.filename);
+    if let Some(ct) = args.content_type.as_deref() {
+        part = part.mime_str(ct).map_err(|e| format!("mime: {}", e))?;
+    }
+    let form = reqwest::multipart::Form::new().part(args.field, part);
+
+    let mut req = client
+        .post(url)
+        .timeout(Duration::from_millis(args.timeout_ms.unwrap_or(DEFAULT_TIMEOUT_MS)))
+        .multipart(form);
+    let mut has_ua = false;
+    if let Some(caller_headers) = args.headers {
+        for (k, v) in caller_headers {
+            if k.to_ascii_lowercase() == "user-agent" {
+                has_ua = true;
+            }
+            req = req.header(k.as_str(), v.as_str());
+        }
+    }
+    if !has_ua {
+        req = req.header("User-Agent", BROWSER_UA);
+    }
+
+    let resp = req.send().await.map_err(|e| format!("send: {}", e))?;
+    let status = resp.status().as_u16();
+    let ok = resp.status().is_success();
+    let content_type = resp
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string());
+    let headers = collect_headers(resp.headers());
+    let body = resp.text().await.unwrap_or_default();
+    Ok(HarborFetchResponse {
+        status,
+        ok,
+        body,
+        content_type,
+        headers,
+    })
+}

@@ -21,7 +21,15 @@ export function useTweaks() {
     }
     update({ mpvTweaks: next });
   };
-  return { tweaks, setTweak, applyPatch };
+  const applyPreset = (resetKeys: string[], patch: Record<string, string | null>) => {
+    const next = { ...tweaks };
+    for (const k of resetKeys) delete next[k];
+    for (const [k, v] of Object.entries(patch)) {
+      if (v !== null) next[k] = v;
+    }
+    update({ mpvTweaks: next });
+  };
+  return { tweaks, setTweak, applyPatch, applyPreset };
 }
 
 export function TweakSlider({
@@ -114,7 +122,7 @@ export const PICTURE_KEYS = ["brightness", "contrast", "saturation", "gamma", "s
 
 export function PictureDialsSection() {
   const t = useT();
-  const { tweaks, setTweak, applyPatch } = useTweaks();
+  const { tweaks, setTweak, applyPatch, applyPreset } = useTweaks();
   const anyActive = PICTURE_KEYS.some((k) => tweaks[k] != null && tweaks[k] !== "");
   return (
     <Section
@@ -127,7 +135,7 @@ export function PictureDialsSection() {
             key={tpl.label}
             type="button"
             title={t(tpl.sub)}
-            onClick={() => applyPatch(tpl.patch)}
+            onClick={() => applyPreset(PICTURE_KEYS, tpl.patch)}
             className="rounded-full border border-edge-soft bg-canvas/40 px-3.5 py-1.5 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
           >
             {t(tpl.label)}

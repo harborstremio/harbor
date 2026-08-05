@@ -1,6 +1,6 @@
 {
   "name": "harbor",
-  "version": "0.9.116",
+  "version": "0.9.117",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -30,6 +30,7 @@
     "@tauri-apps/plugin-os": "^2.3.2",
     "@tauri-apps/plugin-process": "^2",
     "@tauri-apps/plugin-updater": "^2",
+    "fflate": "^0.8.3",
     "gifenc": "^1.0.3",
     "hls.js": "^1.6.16",
     "lottie-web": "^5.13.0",

@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import { AtSign, BadgeCheck, RefreshCw } from "lucide-react";
 
 const PROPS = [
@@ -7,6 +8,7 @@ const PROPS = [
 ];
 
 export function AccountValueProps() {
+  const t = useT();
   return (
     <ul className="flex flex-col gap-2.5">
       {PROPS.map(({ icon: Icon, title, body }) => (
@@ -15,8 +17,8 @@ export function AccountValueProps() {
             <Icon size={15} strokeWidth={2} />
           </span>
           <div className="flex min-w-0 flex-col">
-            <span className="text-[13px] font-semibold text-ink">{title}</span>
-            <span className="text-[12px] leading-snug text-ink-subtle">{body}</span>
+            <span className="text-[13px] font-semibold text-ink">{t(title)}</span>
+            <span className="text-[12px] leading-snug text-ink-subtle">{t(body)}</span>
           </div>
         </li>
       ))}

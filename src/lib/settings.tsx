@@ -216,6 +216,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           console.warn("[fonts] failed to load", family, e);
         }
       }
+      if (cancelled) return;
+      try {
+        const { syncSubFontsToDisk } = await import("@/lib/player/sub-font-install");
+        await syncSubFontsToDisk(fonts);
+      } catch (e) {
+        console.warn("[fonts] could not sync fonts to disk for libass", e);
+      }
     })();
     return () => {
       cancelled = true;
@@ -229,6 +236,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
   }, [settings.customFonts]);
 
+  useEffect(() => {
+    const fam = settings.subFontFamily;
+    if (!fam?.startsWith("custom:")) return;
+    const id = fam.slice("custom:".length);
+    if ((settings.customFonts ?? []).some((f) => f.id === id)) return;
+    setSettings((s) => ({ ...s, subFontFamily: "inter" }));
+  }, [settings.subFontFamily, settings.customFonts]);
+
   const fontMigratedRef = useRef(false);
   useEffect(() => {
     if (fontMigratedRef.current) return;
@@ -236,10 +251,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (legacy.length === 0) return;
     fontMigratedRef.current = true;
     void (async () => {
-      for (const f of legacy) if (f.dataUrl) await saveFontData(f.id, f.dataUrl).catch(() => {});
+      const moved = new Set<string>();
+      for (const f of legacy) {
+        if (!f.dataUrl) continue;
+        try {
+          await saveFontData(f.id, f.dataUrl);
+          moved.add(f.id);
+        } catch (e) {
+          console.warn("[fonts] keeping inline copy, IDB write failed for", f.id, e);
+        }
+      }
+      if (moved.size === 0) return;
       setSettings((s) => ({
         ...s,
-        customFonts: (s.customFonts ?? []).map((f) => ({ id: f.id, name: f.name, format: f.format })),
+        customFonts: (s.customFonts ?? []).map((f) =>
+          moved.has(f.id) ? { id: f.id, name: f.name, format: f.format } : f,
+        ),
       }));
     })();
   }, [settings.customFonts]);

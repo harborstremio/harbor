@@ -2,13 +2,14 @@ import type { Addon } from "@/lib/addons";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import type { Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
-import { langScore } from "./language";
+import { markAddedSub } from "./added-subs";
+import { langScore, normalizeLang } from "./language";
 import { providerLabel, releaseOf } from "./provider-label";
 import { searchSubtitles, streamMatchScore, type StreamHints } from "./search";
 import { loadFirstWorkingSubtitle } from "./autoload";
 import type { SubResult } from "./types";
 
-const EXTRA_TRACKS = 24;
+const EXTRA_TRACKS_PER_LANGUAGE = 40;
 const DEEP_EXTRA_TRACKS = 60;
 const DEEP_TIMEOUT_MS = 20_000;
 
@@ -85,6 +86,26 @@ function spreadBySource(list: SubResult[], skip: Set<SubResult>, limit: number):
   return out;
 }
 
+function spreadBySourcePerLanguage(
+  list: SubResult[],
+  skip: Set<SubResult>,
+  limit: number,
+): SubResult[] {
+  const groups = new Map<string, SubResult[]>();
+  for (const result of list) {
+    const key = normalizeLang(result.lang) || "und";
+    const group = groups.get(key) ?? [];
+    group.push(result);
+    groups.set(key, group);
+  }
+  const out: SubResult[] = [];
+  for (const group of groups.values()) {
+    const consumed = group.filter((result) => skip.has(result)).length;
+    out.push(...spreadBySource(group, skip, Math.max(0, limit - consumed)));
+  }
+  return out;
+}
+
 export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFetchResult> {
   const deep = p.deep === true;
   const enabled = p.settings.subProvidersEnabled ?? {};
@@ -129,6 +150,7 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
     release: releaseOf(r),
     provider: providerLabel(r),
     matchScore: streamMatchScore(r, hints),
+    subId: r.id,
   });
 
   let selected: SubResult | null = null;
@@ -137,6 +159,7 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
     selected = await loadFirstWorkingSubtitle(fresh, async (r) => {
       if (!p.isActive()) return false;
       const ok = await p.bridge.addSubtitle(r.url, r.lang, providerLabel(r), false, meta(r));
+      if (ok === true) markAddedSub(r.url);
       return ok === true;
     });
     if (selected) consumed.add(selected);
@@ -145,12 +168,17 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
   const byPreferredLang = [...fresh].sort(
     (a, b) => langScore(b.lang ?? "", p.langs) - langScore(a.lang ?? "", p.langs),
   );
-  const extras = spreadBySource(byPreferredLang, consumed, deep ? DEEP_EXTRA_TRACKS : EXTRA_TRACKS);
+  const extras = deep
+    ? spreadBySource(byPreferredLang, consumed, DEEP_EXTRA_TRACKS)
+    : spreadBySourcePerLanguage(byPreferredLang, consumed, EXTRA_TRACKS_PER_LANGUAGE);
   let added = selected ? 1 : 0;
   for (const r of extras) {
     if (!p.isActive()) break;
     const ok = await p.bridge.addSubtitle(r.url, r.lang, providerLabel(r), false, meta(r));
-    if (ok === true) added++;
+    if (ok === true) {
+      markAddedSub(r.url);
+      added++;
+    }
   }
   return { added, found: results.length, hints, selected };
 }

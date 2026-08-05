@@ -129,3 +129,41 @@ mod tests {
         assert!(!is_orphan_dir("hls-cache"));
     }
 }
+
+const MPV_CACHE_MAX_AGE: Duration = Duration::from_secs(6 * 60 * 60);
+
+pub fn sweep_mpv_cache(dir: PathBuf) -> u64 {
+    let entries = match std::fs::read_dir(&dir) {
+        Ok(e) => e,
+        Err(_) => return 0,
+    };
+    let now = SystemTime::now();
+    let mut freed = 0_u64;
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let Ok(meta) = entry.metadata() else {
+            continue;
+        };
+        let age = meta
+            .modified()
+            .ok()
+            .and_then(|m| now.duration_since(m).ok())
+            .unwrap_or_default();
+        if age < MPV_CACHE_MAX_AGE {
+            continue;
+        }
+        let size = if meta.is_dir() { dir_size(&path) } else { meta.len() };
+        let removed = if meta.is_dir() {
+            std::fs::remove_dir_all(&path).is_ok()
+        } else {
+            std::fs::remove_file(&path).is_ok()
+        };
+        if removed {
+            freed += size;
+        }
+    }
+    if freed > 0 {
+        eprintln!("[temp-prune] mpv cache reclaimed {freed} bytes");
+    }
+    freed
+}

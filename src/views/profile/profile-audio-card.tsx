@@ -17,6 +17,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
   const mode = settings.profileAudio ?? "auto";
   const [meta, setMeta] = useState<AudioMeta | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [started, setStarted] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(70);
   const [barOpen, setBarOpen] = useState(false);
@@ -26,6 +27,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
   const audio = audioUrl ? parseProfileAudio(audioUrl, { autoplay: true, muted: mountMuted }) : null;
 
   useEffect(() => {
+    setStarted(false);
     setPlaying(false);
     setMuted(false);
     setMeta(null);
@@ -39,25 +41,34 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
 
   const startPlay = () => {
     setMountMuted(muted);
+    setStarted(true);
     setPlaying(true);
   };
 
   useEffect(() => {
     if (audio && mode === "auto") {
       setMountMuted(muted);
+      setStarted(true);
       setPlaying(true);
     }
   }, [audioUrl, mode]);
 
+  // Real pause/resume against the mounted embed, so the song keeps its position
+  // instead of the iframe being torn down and rebuilt from the start.
   useEffect(() => {
-    if (!playing) return;
-    sendAudioCommand(frameRef.current, audio?.provider ?? "youtube", muted ? "mute" : "unmute");
-  }, [muted, playing]);
+    if (!started) return;
+    sendAudioCommand(frameRef.current, audio?.provider ?? "youtube", playing ? "play" : "pause");
+  }, [playing, started]);
 
   useEffect(() => {
-    if (!playing || muted) return;
+    if (!started) return;
+    sendAudioCommand(frameRef.current, audio?.provider ?? "youtube", muted ? "mute" : "unmute");
+  }, [muted, started]);
+
+  useEffect(() => {
+    if (!started || muted) return;
     sendAudioVolume(frameRef.current, audio?.provider ?? "youtube", volume);
-  }, [volume, playing, muted]);
+  }, [volume, started, muted]);
 
   const onVolumeDrag = (next: number) => {
     setVolume(next);
@@ -88,7 +99,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
           <div className="flex items-center gap-3 p-3">
             <button
               type="button"
-              onClick={() => (playing ? setPlaying(false) : startPlay())}
+              onClick={() => (started ? setPlaying((p) => !p) : startPlay())}
               aria-label={playing ? t("Pause") : t("Play")}
               className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-elevated ring-1 ring-edge-soft"
             >
@@ -143,6 +154,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
             type="button"
             onClick={() => {
               if (mode === "auto") {
+                setStarted(false);
                 setPlaying(false);
                 update({ profileAudio: "click" });
                 return;
@@ -155,7 +167,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
             {mode === "auto" ? t("Mute all profile songs") : t("Autoplay profile songs")}
           </button>
 
-          {playing && (
+          {started && (
             <iframe
               ref={frameRef}
               src={audio.embedSrc}
@@ -165,6 +177,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
               onLoad={() => {
                 sendAudioCommand(frameRef.current, audio.provider, muted ? "mute" : "unmute");
                 if (!muted) sendAudioVolume(frameRef.current, audio.provider, volume);
+                if (!playing) sendAudioCommand(frameRef.current, audio.provider, "pause");
               }}
               aria-hidden
               tabIndex={-1}

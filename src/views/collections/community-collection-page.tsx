@@ -82,8 +82,8 @@ export function CommunityCollectionPage({
   const poster = firstPoster(collection.items);
   const backdrop = collection.bgImage || poster;
   const backdropSharp = !!collection.bgImage;
-  const cover = collection.coverImage || poster;
   const count = collection.items.length;
+  const numbered = !!collection.numbered;
   const authorHandle = self.handle;
   const authorName = currentAuthor()?.username ?? authorHandle ?? "";
   const typeLabel = (ty: CollectionItemType) =>
@@ -162,52 +162,36 @@ export function CommunityCollectionPage({
           />
         </div>
 
-        <header className="flex flex-col gap-6 md:flex-row md:items-end md:gap-8">
-          <div className="w-full max-w-[420px] shrink-0 overflow-hidden rounded-[20px] border border-edge-soft shadow-[0_20px_60px_-24px_rgba(0,0,0,0.75)]">
-            <div className="relative aspect-[16/9] w-full" style={cover ? undefined : { background: posterPlate(seed) }}>
-              {cover && <img src={cover} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />}
-            </div>
-          </div>
-          <div className="flex min-w-0 flex-col gap-3 pb-1">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
-              {t("Collection")}
-            </span>
-            <h1 className="font-display text-[40px] font-medium leading-[1.04] tracking-tight text-ink">
-              {collection.name}
-            </h1>
+        <header className="flex min-w-0 max-w-4xl flex-col gap-4">
+          <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
+            {t("Collection")}
+          </span>
+          <h1 className="font-display text-[clamp(2.6rem,6vw,4.25rem)] font-medium leading-[1.02] tracking-tight text-ink">
+            {collection.name}
+          </h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {authorHandle && (
-              <div className="flex items-center gap-2">
-                <UserHoverCard handle={authorHandle}>
-                  <button
-                    type="button"
-                    onClick={() => requestOpenProfile(authorHandle)}
-                    aria-label={t("Open {alias} profile", { alias: authorName })}
-                    className="shrink-0 rounded-full"
-                  >
-                    <Avatar name={authorName} src={self.avatar} size={22} />
-                  </button>
-                </UserHoverCard>
-                <UserHoverCard handle={authorHandle}>
-                  <button
-                    type="button"
-                    onClick={() => requestOpenProfile(authorHandle)}
-                    className="text-[13px] font-medium text-ink transition-colors hover:text-accent"
-                  >
-                    {authorName}
-                  </button>
-                </UserHoverCard>
-                <span className="text-[12.5px] text-ink-subtle">@{authorHandle}</span>
-              </div>
+              <UserHoverCard handle={authorHandle}>
+                <button
+                  type="button"
+                  onClick={() => requestOpenProfile(authorHandle)}
+                  aria-label={t("Open {alias} profile", { alias: authorName })}
+                  className="inline-flex items-center gap-2 rounded-full border border-edge-soft bg-elevated/60 py-1 ps-1 pe-3 backdrop-blur-md transition-colors hover:bg-raised"
+                >
+                  <Avatar name={authorName} src={self.avatar} size={24} />
+                  <span className="text-[13px] font-semibold text-ink">@{authorHandle}</span>
+                </button>
+              </UserHoverCard>
             )}
-            {collection.description && (
-              <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">
-                {collection.description}
-              </p>
-            )}
-            <p className="text-[13px] tabular-nums text-ink-subtle">
+            <span className="text-[13px] tabular-nums text-ink-subtle">
               {count === 1 ? t("{n} title", { n: count }) : t("{n} titles", { n: count })}
-            </p>
+            </span>
           </div>
+          {collection.description && (
+            <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">
+              {collection.description}
+            </p>
+          )}
         </header>
 
         {count === 0 ? (
@@ -265,7 +249,7 @@ export function CommunityCollectionPage({
                   className="grid animate-fade-in gap-4"
                   style={{ gridTemplateColumns: "repeat(auto-fill, minmax(128px, 1fr))" }}
                 >
-                  {filteredItems.map((item) => (
+                  {filteredItems.map((item, i) => (
                     <button
                       key={item.id}
                       type="button"
@@ -279,7 +263,16 @@ export function CommunityCollectionPage({
                           poster={item.poster}
                           className="ring-1 ring-transparent transition-all duration-200 group-hover/poster:ring-edge"
                         />
-                        <span className="pointer-events-none absolute start-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/55 py-0.5 ps-1.5 pe-2 text-[10px] font-semibold text-white/90 backdrop-blur-md">
+                        {numbered && (
+                          <span className="pointer-events-none absolute start-1.5 top-1.5 flex min-w-[1.55rem] items-center justify-center rounded-full bg-black/70 px-1.5 py-0.5 text-[12.5px] font-bold tabular-nums text-white shadow-sm backdrop-blur-md">
+                            {i + 1}
+                          </span>
+                        )}
+                        <span
+                          className={`pointer-events-none absolute top-1.5 inline-flex items-center gap-1 rounded-full bg-black/55 py-0.5 ps-1.5 pe-2 text-[10px] font-semibold text-white/90 backdrop-blur-md ${
+                            numbered ? "end-1.5" : "start-1.5"
+                          }`}
+                        >
                           <span className={`h-1.5 w-1.5 rounded-full ${TYPE_DOT[item.type]}`} />
                           {typeLabel(item.type)}
                         </span>

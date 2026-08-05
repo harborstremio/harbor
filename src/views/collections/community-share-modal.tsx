@@ -7,6 +7,7 @@ import { readCollections, setCollectionShared, useCollection } from "@/lib/colle
 import {
   collectionCode,
   collectionShareUrl,
+  notifyCommunityChanged,
   publishCollections,
 } from "@/lib/social/collections-sync";
 import { useCurrentHandle } from "./community-share-button";
@@ -85,6 +86,9 @@ export function CommunityShareModal({
   const handle = useCurrentHandle();
   const collection = useCollection(collectionId);
   const shared = collection?.shared === true;
+  const isSaved = !!(collection?.sourceHandle && collection?.sourceId);
+  const linkHandle = collection?.sourceHandle || handle || "";
+  const linkId = collection?.sourceId || collectionId;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -95,7 +99,9 @@ export function CommunityShareModal({
   const toggleShared = () => {
     const next = !shared;
     setCollectionShared(collectionId, next);
-    void publishCollections(readCollections()).catch(() => {});
+    void publishCollections(readCollections())
+      .then(() => notifyCommunityChanged())
+      .catch(() => {});
   };
 
   return createPortal(
@@ -125,35 +131,47 @@ export function CommunityShareModal({
           <>
             <CopyField
               label={t("Link")}
-              value={collectionShareUrl(handle, collectionId)}
+              value={collectionShareUrl(linkHandle, linkId)}
               helper={t("Anyone with the link can open this collection once your Harbor server is live.")}
               icon={<Link size={12} strokeWidth={2} />}
             />
 
             <CopyField
               label={t("Code")}
-              value={collectionCode(handle, collectionId)}
+              value={collectionCode(linkHandle, linkId)}
               helper={t("Paste this code into Harbor to open the collection.")}
             />
 
-            <div className="flex flex-col gap-2 border-t border-edge-soft pt-5">
-              <button
-                type="button"
-                onClick={toggleShared}
-                aria-pressed={shared}
-                className={`flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-[14px] font-semibold transition-colors ${
-                  shared
-                    ? "border-accent/40 bg-accent/12 text-accent"
-                    : "border-edge bg-raised text-ink hover:bg-elevated"
-                }`}
-              >
-                {shared ? <Check size={16} strokeWidth={2.6} /> : <Users size={16} strokeWidth={2} />}
-                {shared ? t("Shared to the community") : t("Share to the community")}
-              </button>
-              <p className="text-[12.5px] leading-snug text-ink-muted">
-                {t("Listed collections will appear in community browse when that rolls out.")}
-              </p>
-            </div>
+            {isSaved ? (
+              <div className="flex items-start gap-2.5 border-t border-edge-soft pt-5 text-[12.5px] leading-snug text-ink-muted">
+                <Users size={15} strokeWidth={2} className="mt-0.5 shrink-0" />
+                <p>
+                  {t(
+                    "Saved from @{handle}. You can share their link, but only they can list it in the community.",
+                    { handle: collection?.sourceHandle ?? "" },
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2 border-t border-edge-soft pt-5">
+                <button
+                  type="button"
+                  onClick={toggleShared}
+                  aria-pressed={shared}
+                  className={`flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-[14px] font-semibold transition-colors ${
+                    shared
+                      ? "border-accent/40 bg-accent/12 text-accent"
+                      : "border-edge bg-raised text-ink hover:bg-elevated"
+                  }`}
+                >
+                  {shared ? <Check size={16} strokeWidth={2.6} /> : <Users size={16} strokeWidth={2} />}
+                  {shared ? t("Shared to the community") : t("Share to the community")}
+                </button>
+                <p className="text-[12.5px] leading-snug text-ink-muted">
+                  {t("Listed collections will appear in community browse when that rolls out.")}
+                </p>
+              </div>
+            )}
           </>
         ) : (
           <p className="rounded-xl border border-edge-soft bg-canvas px-4 py-6 text-center text-[13.5px] text-ink-muted">

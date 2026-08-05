@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, ChevronLeft, Filter, Loader2, RefreshCw, X } from "lucide-react";
+import { ArrowUp, ChevronLeft, Filter, Loader2, PackageX, RefreshCw, X } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { torrentEngineStatus } from "@/lib/torrent/local-engine";
@@ -69,6 +69,7 @@ import { usePipelineResult } from "./play-picker/use-pipeline-result";
 import { useStreamIds } from "./play-picker/use-stream-ids";
 import { findLocalEpisodeVersions, findLocalMovieVersions } from "@/lib/local-library/versions";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
+import { downloadableSeasonPacks } from "@/lib/download/season-pack";
 import { LocalStreamList } from "./play-picker/local-stream-card";
 import { SubtitleSelectStep } from "./play-picker/subtitle-select-step";
 
@@ -82,6 +83,7 @@ export function PlayPicker({
   autoPlay,
   attempt,
   intent,
+  seasonEpisodes,
   resume,
   playerActive,
 }: {
@@ -90,10 +92,13 @@ export function PlayPicker({
   autoPlay?: boolean;
   attempt?: number;
   intent?: "play" | "download";
+  seasonEpisodes?: PlayEpisode[];
   resume?: boolean;
   playerActive?: boolean;
 }) {
+  const t = useT();
   const isDownload = intent === "download";
+  const isSeasonDownload = isDownload && (seasonEpisodes?.length ?? 0) > 0;
   const { openPlayer, openSettings, exitPickerToDetail } = useView();
   const backToDetail = () => {
     if (playerActive) void exitWindowFullscreen();
@@ -259,7 +264,13 @@ export function PlayPicker({
 
   const filteredPicker = useMemo(() => {
     if (!result) return null;
-    let all = result.picker.all;
+    const candidatePool = isSeasonDownload
+      ? downloadableSeasonPacks(
+          result.picker.all,
+          /^(kitsu|mal|anilist|anidb):/.test(meta.id) ? null : (episode?.season ?? null),
+        )
+      : result.picker.all;
+    let all = candidatePool;
     if (settings.streamMode === "addons") {
       const addonsOnly = all.filter((s) => !isP2pStream(s));
       if (addonsOnly.length > 0) all = addonsOnly;
@@ -282,9 +293,9 @@ export function PlayPicker({
       if (matched.length > 0) all = matched;
       else fellBack = true;
     }
-    if (all.length === 0 && result.picker.all.length > 0) {
-      all = result.picker.all;
-      allRaw = result.picker.all;
+    if (all.length === 0 && candidatePool.length > 0) {
+      all = candidatePool;
+      allRaw = candidatePool;
       fellBack = true;
     }
     const cachedFirst = all.slice().sort((a, b) => (isCached(b) ? 1 : 0) - (isCached(a) ? 1 : 0));
@@ -312,6 +323,9 @@ export function PlayPicker({
     hostMatch,
     activeStreamFilter,
     settings.streamMode,
+    isSeasonDownload,
+    meta.id,
+    episode?.season,
   ]);
 
   const anyAddonRanked = useMemo(() => (addons ?? []).some((a) => isAddonRanked(a)), [addons]);
@@ -487,6 +501,7 @@ export function PlayPicker({
     claimHost,
     openPlayer: openPlayerGated,
     intent,
+    seasonEpisodes,
     autoActive,
     autoAttemptIdx,
     autoCandidatesLength: autoCandidates.length,
@@ -604,6 +619,7 @@ export function PlayPicker({
   const noResults =
     addonsSettled && !!streamIds && streamIds.length > 0 && allCount === 0 && debrids.length > 0;
   const terminalEmpty = noStreamIds || noDebrids || noResults;
+  const seasonPackEmpty = isSeasonDownload && addonsSettled && allCount === 0;
   const [stubBanner, setStubBanner] = useState<string | null>(null);
   useEffect(() => {
     const ev = consumeRecentStubEvent(8000);
@@ -757,7 +773,11 @@ export function PlayPicker({
 
         {isDownload && (
           <div className="rounded-2xl border border-edge-soft bg-elevated/60 px-5 py-3.5 text-[13.5px] text-ink-muted">
-            Choose a source to save offline. You can track progress on the Downloads page.
+            {isSeasonDownload
+              ? t(
+                  "Choose one season package. Harbor will match and download every available episode from it.",
+                )
+              : t("Choose a source to save offline. You can track progress on the Downloads page.")}
           </div>
         )}
 
@@ -808,26 +828,38 @@ export function PlayPicker({
           </div>
         )}
 
-        <PickerEmptyLadder
-          meta={meta}
-          result={result}
-          addonsSettled={addonsSettled}
-          pipelineDone={pipelineDone}
-          streamIds={streamIds}
-          debridCount={debrids.length}
-          addonCount={addons?.length ?? 0}
-          allCount={allCount}
-          rawCount={rawCount}
-          strictMode={strictMode}
-          forceShowAll={forceShowAll}
-          onOpenLibrarySettings={() => openSettings("library")}
-          onOpenStreamingSettings={() => openSettings("streaming")}
-          onShowAll={() => setForceShowAll(true)}
-          onSearchWider={() => {
-            if (strictMode) setStrictMode(false);
-            else setForceShowAll(true);
-          }}
-        />
+        {seasonPackEmpty ? (
+          <SeasonPackEmptyState
+            season={episode?.season ?? null}
+            rawCount={rawCount}
+            refreshing={loading}
+            onRefresh={refresh}
+            onOpenSettings={() => openSettings("streaming")}
+          />
+        ) : (
+          !isSeasonDownload && (
+            <PickerEmptyLadder
+              meta={meta}
+              result={result}
+              addonsSettled={addonsSettled}
+              pipelineDone={pipelineDone}
+              streamIds={streamIds}
+              debridCount={debrids.length}
+              addonCount={addons?.length ?? 0}
+              allCount={allCount}
+              rawCount={rawCount}
+              strictMode={strictMode}
+              forceShowAll={forceShowAll}
+              onOpenLibrarySettings={() => openSettings("library")}
+              onOpenStreamingSettings={() => openSettings("streaming")}
+              onShowAll={() => setForceShowAll(true)}
+              onSearchWider={() => {
+                if (strictMode) setStrictMode(false);
+                else setForceShowAll(true);
+              }}
+            />
+          )
+        )}
 
         {debrids.length > 0 && filteredPicker && filteredPicker.all.length > 0 && <CachedTip />}
 
@@ -960,6 +992,70 @@ export function PlayPicker({
           />
         )}
     </main>
+  );
+}
+
+function SeasonPackEmptyState({
+  season,
+  rawCount,
+  refreshing,
+  onRefresh,
+  onOpenSettings,
+}: {
+  season: number | null;
+  rawCount: number;
+  refreshing: boolean;
+  onRefresh: () => void;
+  onOpenSettings: () => void;
+}) {
+  const t = useT();
+  const seasonLabel = season == null ? t("this season") : t("Season {n}", { n: season });
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="rounded-[24px] border border-edge-soft/70 bg-canvas/80 px-9 py-11"
+    >
+      <div className="flex flex-col items-center gap-5 text-center">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-elevated text-ink-muted ring-1 ring-edge-soft">
+          <PackageX size={22} strokeWidth={1.8} aria-hidden />
+        </span>
+        <div className="flex max-w-lg flex-col gap-2">
+          <h2 className="font-display text-[30px] leading-tight text-ink">
+            {t("No season package found")}
+          </h2>
+          <p className="text-[13.5px] leading-relaxed text-ink-muted">
+            {rawCount > 0
+              ? t(
+                  "Harbor found episode sources, but none was a downloadable package for {season}. Try another addon or refresh the sources.",
+                  { season: seasonLabel },
+                )
+              : t(
+                  "None of your addons returned a downloadable package for {season}. Refresh the sources or check your source settings.",
+                  { season: seasonLabel },
+                )}
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2.5">
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={refreshing}
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[13px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55 motion-reduce:transition-none motion-reduce:hover:scale-100"
+          >
+            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} aria-hidden />
+            {t("Refresh sources")}
+          </button>
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className="h-10 rounded-full border border-edge-soft bg-elevated px-5 text-[13px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+          >
+            {t("Source settings")}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

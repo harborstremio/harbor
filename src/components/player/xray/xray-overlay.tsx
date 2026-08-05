@@ -88,6 +88,7 @@ export function XrayOverlay({
           galleryReady={galleryReady}
           progress={progress}
           error={error}
+          needsTmdbKey={!settings.tmdbKey}
           onViewAll={() => setView("browser")}
           onClose={() => setView("closed")}
         />

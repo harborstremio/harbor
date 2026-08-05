@@ -55,7 +55,9 @@ export function previewFamily(id: string): string {
     case "serif":
       return '"Fraunces", Georgia, serif';
     case "rounded":
-      return '"SF Pro Rounded", "Nunito", system-ui, sans-serif';
+      return '"Fredoka", "SF Pro Rounded", system-ui, sans-serif';
+    case "arabic":
+      return '"Vazirmatn", "Noto Sans Arabic", system-ui, sans-serif';
     default:
       return '"Inter", system-ui, sans-serif';
   }

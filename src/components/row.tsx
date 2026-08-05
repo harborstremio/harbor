@@ -664,7 +664,7 @@ export function Row({
     }
   };
 
-  const trackPad = dockEnabled ? "pb-8 pt-14 -mb-8 -mt-14" : "py-5 -my-5";
+  const trackPad = dockEnabled ? "pb-8 pt-14 -mb-8 -mt-14" : "py-5 -my-5 px-2 -mx-2 scroll-px-2";
 
   return (
     <div className={`flex min-w-0 flex-col gap-5 ps-[9px] ${className}`}>

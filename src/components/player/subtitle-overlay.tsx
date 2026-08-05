@@ -54,7 +54,7 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({
     align === "left" ? "items-start" : align === "right" ? "items-end" : "items-center";
 
   const borderSize = useMemo(
-    () => Math.max(1, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive)),
+    () => Math.max(0.5, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive * 2) / 2),
     [settings.subBorderSize, responsive],
   );
   const borderColor = settings.subBorderColor || "#000000";
@@ -171,7 +171,9 @@ function fontFamilyFor(family: string | undefined): string {
     case "serif":
       return '"Fraunces", Georgia, "Times New Roman", serif';
     case "rounded":
-      return '"SF Pro Rounded", "Nunito", "Quicksand", system-ui, sans-serif';
+      return '"Fredoka", "SF Pro Rounded", system-ui, sans-serif';
+    case "arabic":
+      return '"Vazirmatn", "Noto Sans Arabic", system-ui, sans-serif';
     case "inter":
     default:
       return '"Inter", -apple-system, system-ui, sans-serif';

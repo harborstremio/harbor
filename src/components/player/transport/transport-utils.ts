@@ -9,24 +9,24 @@ export function fmtTime(sec: number): string {
 }
 
 export const VOL_MAX = 6;
-export const NORMAL_FRACTION = 0.6;
-export const TRACK_WIDTH = 120;
+export const NORMAL_FRACTION = 0.64;
+export const TRACK_WIDTH = 128;
 
-export function fractionFromValue(v: number): number {
-  const clamped = Math.max(0, Math.min(VOL_MAX, v));
-  if (clamped <= 1) return (clamped / 1) * NORMAL_FRACTION;
-  return NORMAL_FRACTION + ((clamped - 1) / (VOL_MAX - 1)) * (1 - NORMAL_FRACTION);
+export function fractionFromValue(v: number, max: number = VOL_MAX): number {
+  const clamped = Math.max(0, Math.min(max, v));
+  if (clamped <= 1 || max <= 1) return clamped * NORMAL_FRACTION;
+  return NORMAL_FRACTION + ((clamped - 1) / (max - 1)) * (1 - NORMAL_FRACTION);
 }
 
-export function valueFromFraction(f: number): number {
+export function valueFromFraction(f: number, max: number = VOL_MAX): number {
   const clamped = Math.max(0, Math.min(1, f));
   if (clamped <= NORMAL_FRACTION) return (clamped / NORMAL_FRACTION) * 1;
-  return 1 + ((clamped - NORMAL_FRACTION) / (1 - NORMAL_FRACTION)) * (VOL_MAX - 1);
+  return 1 + ((clamped - NORMAL_FRACTION) / (1 - NORMAL_FRACTION)) * (max - 1);
 }
 
-export function boostColor(value: number): string {
+export function boostColor(value: number, max: number = VOL_MAX): string {
   if (value <= 1) return "#ffffff";
-  const t = Math.min(1, (value - 1) / (VOL_MAX - 1));
+  const t = max > 1 ? Math.min(1, (value - 1) / (max - 1)) : 0;
   const r = Math.round(249 - t * (249 - 220));
   const g = Math.round(115 - t * (115 - 38));
   const b = Math.round(22 - t * (22 - 38));

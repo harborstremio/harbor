@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
 import { chapterPages } from "@/lib/manga/api";
 
-export type MangaDownloadStatus = "idle" | "downloading" | "done" | "error";
+export type MangaDownloadStatus = "idle" | "downloading" | "paused" | "done" | "error";
 
 export type MangaDownloadRec = {
   status: MangaDownloadStatus;
   done: number;
   total: number;
   files: string[];
+};
+
+export type MangaDownloadBatchStatus = "idle" | "downloading" | "paused" | "done" | "error";
+
+export type MangaDownloadBatchRec = {
+  status: MangaDownloadBatchStatus;
+  done: number;
+  total: number;
+  failed: number;
 };
 
 export type MangaDownloadInfo = {
@@ -44,7 +53,17 @@ const MANIFEST_KEY = "harbor.manga.downloads.v1";
 const META_KEY = "harbor.manga.downloads.meta.v1";
 const DIR_KEY = "harbor.manga.downloads.dir.v1";
 const runtime = new Map<string, MangaDownloadRec>();
+const batchRuntime = new Map<string, MangaDownloadBatchRec>();
 const listeners = new Set<(changed?: string) => void>();
+
+type BatchControl = {
+  paused: boolean;
+  currentChapterId?: string;
+  waiters: Set<() => void>;
+  promise?: Promise<void>;
+};
+
+const batchControls = new Map<string, BatchControl>();
 
 function notify(changed?: string): void {
   for (const l of listeners) l(changed);
@@ -195,6 +214,54 @@ export function mangaDownloadStatus(chapterId: string): MangaDownloadRec {
   return recOf(chapterId);
 }
 
+function batchRecOf(mangaId: string): MangaDownloadBatchRec {
+  return batchRuntime.get(mangaId) ?? { status: "idle", done: 0, total: 0, failed: 0 };
+}
+
+function setBatchRec(mangaId: string, patch: Partial<MangaDownloadBatchRec>): void {
+  batchRuntime.set(mangaId, { ...batchRecOf(mangaId), ...patch });
+  notify(`batch:${mangaId}`);
+}
+
+export function mangaDownloadBatchStatus(mangaId: string): MangaDownloadBatchRec {
+  return batchRecOf(mangaId);
+}
+
+function setChapterPaused(chapterId: string | undefined, paused: boolean): void {
+  if (!chapterId) return;
+  const rec = recOf(chapterId);
+  if (paused && rec.status === "downloading") {
+    runtime.set(chapterId, { ...rec, status: "paused" });
+    notify(chapterId);
+  } else if (!paused && rec.status === "paused") {
+    runtime.set(chapterId, { ...rec, status: "downloading" });
+    notify(chapterId);
+  }
+}
+
+export function pauseMangaDownloadBatch(mangaId: string): void {
+  const control = batchControls.get(mangaId);
+  if (!control || batchRecOf(mangaId).status !== "downloading") return;
+  control.paused = true;
+  setChapterPaused(control.currentChapterId, true);
+  setBatchRec(mangaId, { status: "paused" });
+}
+
+export function resumeMangaDownloadBatch(mangaId: string): void {
+  const control = batchControls.get(mangaId);
+  if (!control || batchRecOf(mangaId).status !== "paused") return;
+  control.paused = false;
+  setChapterPaused(control.currentChapterId, false);
+  setBatchRec(mangaId, { status: "downloading" });
+  for (const resolve of control.waiters) resolve();
+  control.waiters.clear();
+}
+
+function waitForBatch(control?: BatchControl): Promise<void> {
+  if (!control?.paused) return Promise.resolve();
+  return new Promise((resolve) => control.waiters.add(resolve));
+}
+
 export async function downloadedPages(chapterId: string): Promise<string[] | null> {
   const files = readManifest()[chapterId];
   if (!files?.length) return null;
@@ -216,13 +283,16 @@ const IMG_HEADERS = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
 };
 
-export async function downloadChapter(
+async function downloadChapterWithControl(
   mangaId: string,
   chapterId: string,
   info?: MangaDownloadInfo,
-): Promise<void> {
+  batchControl?: BatchControl,
+): Promise<boolean> {
   const cur = recOf(chapterId);
-  if (cur.status === "downloading" || cur.status === "done") return;
+  if (cur.status === "downloading" || cur.status === "paused" || cur.status === "done") {
+    return cur.status === "done";
+  }
 
   const setRec = (patch: Partial<MangaDownloadRec>) => {
     runtime.set(chapterId, { ...recOf(chapterId), ...patch });
@@ -230,11 +300,17 @@ export async function downloadChapter(
   };
 
   try {
-    setRec({ status: "downloading", done: 0, total: 0, files: [] });
+    setRec({
+      status: batchControl?.paused ? "paused" : "downloading",
+      done: 0,
+      total: 0,
+      files: [],
+    });
+    await waitForBatch(batchControl);
     const urls = (await chapterPages(chapterId)).filter((u) => /^https?:/i.test(u));
     if (!urls.length) {
       setRec({ status: "error" });
-      return;
+      return false;
     }
     setRec({ total: urls.length });
 
@@ -260,7 +336,9 @@ export async function downloadChapter(
 
     const files: string[] = [];
     for (let i = 0; i < urls.length; i++) {
+      await waitForBatch(batchControl);
       const bytes = await fetchBytes(urls[i]);
+      await waitForBatch(batchControl);
       const path = await join(dir, `${String(i + 1).padStart(4, "0")}.${extOf(urls[i])}`);
       await writeFile(path, bytes);
       files.push(path);
@@ -280,21 +358,56 @@ export async function downloadChapter(
     };
     writeMeta(meta);
     setRec({ status: "done", files });
+    return true;
   } catch (e) {
     console.error("[manga-download] chapter failed", chapterId, e);
     setRec({ status: "error" });
+    return false;
   }
+}
+
+export function downloadChapter(
+  mangaId: string,
+  chapterId: string,
+  info?: MangaDownloadInfo,
+): Promise<boolean> {
+  return downloadChapterWithControl(mangaId, chapterId, info);
 }
 
 export async function downloadAllChapters(
   mangaId: string,
   items: Array<{ chapterId: string; info?: MangaDownloadInfo }>,
 ): Promise<void> {
-  for (const it of items) {
-    const rec = recOf(it.chapterId);
-    if (rec.status === "done" || rec.status === "downloading") continue;
-    await downloadChapter(mangaId, it.chapterId, it.info);
-  }
+  const running = batchControls.get(mangaId);
+  if (running?.promise) return running.promise;
+
+  const pending = items.filter((item) => {
+    const status = recOf(item.chapterId).status;
+    return status !== "done" && status !== "downloading" && status !== "paused";
+  });
+  const control: BatchControl = { paused: false, waiters: new Set() };
+  batchControls.set(mangaId, control);
+  setBatchRec(mangaId, { status: "downloading", done: 0, total: pending.length, failed: 0 });
+
+  const job = (async () => {
+    let done = 0;
+    let failed = 0;
+    for (const item of pending) {
+      await waitForBatch(control);
+      control.currentChapterId = item.chapterId;
+      const ok = await downloadChapterWithControl(mangaId, item.chapterId, item.info, control);
+      if (ok) done += 1;
+      else failed += 1;
+      setBatchRec(mangaId, { done, failed });
+    }
+    setBatchRec(mangaId, { status: failed > 0 ? "error" : "done", done, failed });
+  })().finally(() => {
+    control.currentChapterId = undefined;
+    control.promise = undefined;
+  });
+
+  control.promise = job;
+  return job;
 }
 
 async function removeChapterDir(firstFile: string): Promise<void> {
@@ -333,5 +446,17 @@ export function useMangaDownload(chapterId: string): MangaDownloadRec {
     sync();
     return subscribeMangaDownloads(sync);
   }, [chapterId]);
+  return rec;
+}
+
+export function useMangaDownloadBatch(mangaId: string): MangaDownloadBatchRec {
+  const [rec, setRec] = useState<MangaDownloadBatchRec>(() => mangaDownloadBatchStatus(mangaId));
+  useEffect(() => {
+    const sync = (changed?: string) => {
+      if (!changed || changed === `batch:${mangaId}`) setRec(mangaDownloadBatchStatus(mangaId));
+    };
+    sync();
+    return subscribeMangaDownloads(sync);
+  }, [mangaId]);
   return rec;
 }

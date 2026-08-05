@@ -29,12 +29,18 @@ export function HeroCarousel({
   fullQuality = false,
   playTrailers = false,
   billboard = false,
+  bottomAlign = false,
+  playSquare = false,
+  moreInfo = false,
 }: {
   slides: Slide[];
   full?: boolean;
   fullQuality?: boolean;
   playTrailers?: boolean;
   billboard?: boolean;
+  bottomAlign?: boolean;
+  playSquare?: boolean;
+  moreInfo?: boolean;
 }) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -94,6 +100,8 @@ export function HeroCarousel({
     if (active >= slides.length) setActive(0);
   }, [slides.length, active]);
 
+  const safeActive = slides.length > 0 ? Math.min(Math.max(active, 0), slides.length - 1) : 0;
+
   if (slides.length === 0) {
     return (
       <div
@@ -105,6 +113,12 @@ export function HeroCarousel({
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     if (slides.length < 2) return;
+    if (
+      e.target instanceof Element &&
+      e.target.closest("button, a, input, select, textarea, [role='button']")
+    ) {
+      return;
+    }
     widthRef.current = viewportRef.current?.clientWidth ?? 1000;
     downRef.current = true;
     moved.current = false;
@@ -172,7 +186,7 @@ export function HeroCarousel({
     }
   };
 
-  const trackTransform = `translate3d(calc(${-active * 100}% + ${offset - active * SLIDE_GAP_PX}px), 0, 0)`;
+  const trackTransform = `translate3d(calc(${-safeActive * 100}% + ${offset - safeActive * SLIDE_GAP_PX}px), 0, 0)`;
 
   const slideStyle = (isActive: boolean, distance: number): React.CSSProperties => {
     if (!billboard) {
@@ -236,8 +250,8 @@ export function HeroCarousel({
           }
         >
           {slides.map((s, i) => {
-            const isActive = i === active;
-            const distance = Math.abs(i - active);
+            const isActive = i === safeActive;
+            const distance = Math.abs(i - safeActive);
             const shouldMount = distance <= 1 || dragging;
             return (
               <div
@@ -256,6 +270,9 @@ export function HeroCarousel({
                     full={full}
                     fullQuality={fullQuality}
                     playTrailer={playTrailers && isActive && !dragging}
+                    bottomAlign={bottomAlign}
+                    playSquare={playSquare}
+                    moreInfo={moreInfo}
                   />
                 ) : (
                   <div
@@ -272,7 +289,7 @@ export function HeroCarousel({
               type="button"
               onClick={() => setActive((a) => (a - 1 + slides.length) % slides.length)}
               aria-label={t("Previous")}
-              className="group/hl absolute inset-y-0 start-0 z-30 my-auto flex h-2/3 w-[14%] max-w-[120px] items-center justify-start ps-4"
+              className="group/hl absolute inset-y-0 start-0 z-30 my-auto flex h-14 w-14 items-center justify-center"
             >
               <NavChevron
                 dir="left"
@@ -284,7 +301,7 @@ export function HeroCarousel({
               type="button"
               onClick={() => setActive((a) => (a + 1) % slides.length)}
               aria-label={t("Next")}
-              className="group/hr absolute inset-y-0 end-0 z-30 my-auto flex h-2/3 w-[14%] max-w-[120px] items-center justify-end pe-4"
+              className="group/hr absolute inset-y-0 end-0 z-30 my-auto flex h-14 w-14 items-center justify-center"
             >
               <NavChevron
                 dir="right"
@@ -305,7 +322,7 @@ export function HeroCarousel({
               onClick={() => setActive(i)}
               aria-label={t("Slide {n}", { n: i + 1 })}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === active ? "w-12 bg-ink" : "w-6 bg-ink-muted/70 hover:bg-ink-muted"
+                i === safeActive ? "w-12 bg-ink" : "w-6 bg-ink-muted/70 hover:bg-ink-muted"
               }`}
             />
           ))}

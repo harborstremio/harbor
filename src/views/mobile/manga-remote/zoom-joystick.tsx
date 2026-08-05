@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, X, ZoomIn, ZoomOut } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 const PAD = 176;
@@ -43,7 +51,6 @@ export function ZoomJoystick({
   zoom,
   min,
   max,
-  rtl,
   canZoom,
   onZoom,
   onPan,
@@ -53,7 +60,6 @@ export function ZoomJoystick({
   zoom: number;
   min: number;
   max: number;
-  rtl: boolean;
   canZoom: boolean;
   onZoom: (zoom: number) => void;
   onPan: (dx: number, dy: number) => void;
@@ -68,8 +74,8 @@ export function ZoomJoystick({
   const [pct, setPct] = useState(() => Math.round(zoom * 100));
 
   const padRef = useRef<HTMLDivElement>(null);
-  const propsRef = useRef({ zoom, min, max, rtl, onZoom, onPan });
-  propsRef.current = { zoom, min, max, rtl, onZoom, onPan };
+  const propsRef = useRef({ zoom, min, max, onZoom, onPan });
+  propsRef.current = { zoom, min, max, onZoom, onPan };
 
   const rafRef = useRef(0);
   const tickRef = useRef((_now: number) => {});
@@ -109,7 +115,7 @@ export function ZoomJoystick({
   const tick = (now: number) => {
     const dt = Math.min(0.05, (now - lastTRef.current) / 1000);
     lastTRef.current = now;
-    const { rtl: rl, onPan: emitPan } = propsRef.current;
+    const { onPan: emitPan } = propsRef.current;
 
     if (phaseRef.current === "drag") {
       const off = offRef.current;
@@ -118,7 +124,7 @@ export function ZoomJoystick({
       const px = shape(nx);
       const py = shape(ny);
       if (px !== 0 || py !== 0) {
-        panRemXRef.current += px * (rl ? -1 : 1) * PAN_SPEED * dt;
+        panRemXRef.current += px * PAN_SPEED * dt;
         panRemYRef.current += py * PAN_SPEED * dt;
         const wx = Math.trunc(panRemXRef.current);
         const wy = Math.trunc(panRemYRef.current);
@@ -235,7 +241,10 @@ export function ZoomJoystick({
     phaseRef.current = "idle";
     if (cancel) return;
     const held = performance.now() - startRef.current.t;
-    const moved = Math.hypot(lastRef.current.x - startRef.current.x, lastRef.current.y - startRef.current.y);
+    const moved = Math.hypot(
+      lastRef.current.x - startRef.current.x,
+      lastRef.current.y - startRef.current.y,
+    );
     if (held <= TAP_MS && moved <= TAP_SLOP) disengage();
   };
 
@@ -282,10 +291,7 @@ export function ZoomJoystick({
   if (!canZoom) return null;
 
   return (
-    <div
-      className="absolute end-4 z-40 flex flex-col items-end"
-      style={{ bottom: bottomOffset }}
-    >
+    <div className="absolute end-4 z-40 flex flex-col items-end" style={{ bottom: bottomOffset }}>
       {!engaged && (
         <button
           type="button"
@@ -294,7 +300,9 @@ export function ZoomJoystick({
           className="flex h-14 w-14 touch-none select-none flex-col items-center justify-center rounded-full bg-elevated/80 text-ink shadow-[0_10px_28px_-14px_rgba(0,0,0,0.65)] ring-1 ring-edge-soft/50 backdrop-blur-xl transition-transform duration-100 active:scale-90"
         >
           <ZoomIn size={20} strokeWidth={2.2} />
-          <span className="mt-0.5 text-[10.5px] font-semibold leading-none tabular-nums text-ink-subtle">{pct}%</span>
+          <span className="mt-0.5 text-[10.5px] font-semibold leading-none tabular-nums text-ink-subtle">
+            {pct}%
+          </span>
         </button>
       )}
 
@@ -347,14 +355,36 @@ export function ZoomJoystick({
             style={{ width: PAD, height: PAD }}
           >
             <div className="pointer-events-none absolute inset-3 rounded-full ring-1 ring-edge-soft/25" />
-            <ChevronUp aria-hidden size={16} strokeWidth={2.2} className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 text-ink-subtle/55" />
-            <ChevronDown aria-hidden size={16} strokeWidth={2.2} className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-ink-subtle/55" />
-            <ChevronLeft aria-hidden size={16} strokeWidth={2.2} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle/55" />
-            <ChevronRight aria-hidden size={16} strokeWidth={2.2} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle/55" />
+            <ChevronUp
+              aria-hidden
+              size={16}
+              strokeWidth={2.2}
+              className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 text-ink-subtle/55"
+            />
+            <ChevronDown
+              aria-hidden
+              size={16}
+              strokeWidth={2.2}
+              className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-ink-subtle/55"
+            />
+            <ChevronLeft
+              aria-hidden
+              size={16}
+              strokeWidth={2.2}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle/55"
+            />
+            <ChevronRight
+              aria-hidden
+              size={16}
+              strokeWidth={2.2}
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle/55"
+            />
 
             <div
               className={`pointer-events-none grid place-items-center rounded-full shadow-[0_8px_20px_-8px_rgba(0,0,0,0.7)] ${
-                active ? "bg-elevated ring-2 ring-accent/70" : "bg-elevated/95 ring-1 ring-edge-soft/60"
+                active
+                  ? "bg-elevated ring-2 ring-accent/70"
+                  : "bg-elevated/95 ring-1 ring-edge-soft/60"
               } ${reduce ? "" : "transition-[background-color,box-shadow] duration-150"}`}
               style={{
                 width: NUB,

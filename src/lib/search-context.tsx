@@ -247,7 +247,12 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         { movies: [], series: [] },
       );
       const addonGroupsPromise = guard(
-        addonsP.then((a) => searchAddonGroups(a, trimmed)),
+        addonsP.then((a) =>
+          searchAddonGroups(a, trimmed, (g) => {
+            acc.groups = [...acc.groups.filter((x) => x.id !== g.id), g];
+            publish();
+          }),
+        ),
         [],
       );
       const cinemetaPromise = guard(
@@ -367,6 +372,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         publish();
       });
       void addonGroupsPromise.then((g) => {
+        // The guard resolves to [] on timeout. Streamed groups are already correct,
+        // so an empty settle must never wipe what the user can already see.
+        if (g.length === 0) return;
         acc.groups = g;
         publish();
       });

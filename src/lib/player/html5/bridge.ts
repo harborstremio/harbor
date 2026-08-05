@@ -12,6 +12,7 @@ import { fetchAndParse, findActiveCue } from "@/lib/subtitles/parser";
 import type { SubTrack } from "./types";
 import { bufferedAhead, readAudioTracks, videoAudio } from "./audio-tracks";
 import { mapErrorCode, mapErrorMessage } from "./error-map";
+import { noteSubtitleOrigin } from "@/lib/subtitles/subtitle-memory";
 import { mountCustomPip } from "./pip";
 
 let DOCUMENT_PIP_KNOWN_BROKEN = false;
@@ -126,6 +127,7 @@ export function createHtml5Bridge(): PlayerBridge {
       release: t.metadata?.release,
       provider: t.metadata?.provider,
       matchScore: t.metadata?.matchScore,
+      subId: t.metadata?.subId,
     }));
   };
 
@@ -592,6 +594,7 @@ export function createHtml5Bridge(): PlayerBridge {
       const id = `ext-${subTracks.length}-${Date.now()}`;
       const track: SubTrack = { id, url: resolvedUrl, lang, title, external: true, cues: null, loading: false, metadata };
       subTracks.push(track);
+      noteSubtitleOrigin(resolvedUrl, url);
       if (select === true) {
         activeSubId = id;
         lastCueId = "";

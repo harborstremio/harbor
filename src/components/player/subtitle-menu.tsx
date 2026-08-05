@@ -9,7 +9,6 @@ import { useSettings } from "@/lib/settings";
 import { MenuBody } from "./subtitle-menu/menu-body";
 import type { SubtitleMenuProps } from "./subtitle-menu/types";
 import { buildOverlayState } from "./subtitle-menu/utils";
-import { useMenuSide } from "./menu-side";
 import { Tooltip } from "./transport/tooltip";
 
 export type { SubtitleMenuProps } from "./subtitle-menu/types";
@@ -22,10 +21,13 @@ export function SubtitleMenu(props: Props) {
   const [open, setOpen] = useState(false);
   const [forceInline, setForceInline] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const { side, measure } = useMenuSide(wrap, 500);
   const useOverlay = props.useOverlayPopup === true;
   const propsRef = useRef(props);
   propsRef.current = props;
+  const preferredLanguages =
+    settings.preferredSubLangs.length > 0
+      ? settings.preferredSubLangs
+      : settings.preferredLanguages;
   const onOpenChange = props.onOpenChange;
   useEffect(() => {
     onOpenChange?.(open && (forceInline || !useOverlay));
@@ -35,7 +37,10 @@ export function SubtitleMenu(props: Props) {
     if (useOverlay) return;
     if (!open) return;
     const close = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as HTMLElement | null;
+      if (wrap.current?.contains(target)) return;
+      if (target?.closest("[data-title-suggest-dropdown]")) return;
+      setOpen(false);
     };
     window.addEventListener("mousedown", close);
     return () => window.removeEventListener("mousedown", close);
@@ -81,7 +86,7 @@ export function SubtitleMenu(props: Props) {
 
   useEffect(() => {
     if (!useOverlay || !open) return;
-    void modalOverlayEmitState("subtitle", buildOverlayState(props));
+    void modalOverlayEmitState("subtitle", buildOverlayState(props, preferredLanguages));
   }, [
     useOverlay,
     open,
@@ -93,6 +98,7 @@ export function SubtitleMenu(props: Props) {
     props.metaReleaseDate,
     props.season,
     props.episode,
+    preferredLanguages,
   ]);
 
   useEffect(() => {
@@ -104,7 +110,6 @@ export function SubtitleMenu(props: Props) {
   }, [useOverlay, open]);
 
   const handleClick = () => {
-    if (!open) measure();
     if (!useOverlay) {
       setOpen((v) => !v);
       return;
@@ -114,7 +119,7 @@ export function SubtitleMenu(props: Props) {
       setOpen(false);
       setForceInline(false);
     } else {
-      void modalOverlayOpen("subtitle", buildOverlayState(propsRef.current))
+      void modalOverlayOpen("subtitle", buildOverlayState(propsRef.current, preferredLanguages))
         .then(() => {
           setOpen(true);
           setForceInline(false);
@@ -146,8 +151,13 @@ export function SubtitleMenu(props: Props) {
         </button>
       </Tooltip>
       {open && (forceInline || !useOverlay) && (
-        <div className={`absolute bottom-[calc(100%+10px)] ${side === "start" ? "start-0" : "end-0"} flex h-[400px] max-h-[72vh] w-[500px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl`}>
-          <MenuBody {...props} onClose={() => setOpen(false)} onOpenStyleBar={openStyleBar} />
+        <div className="fixed end-2 bottom-[84px] flex h-[460px] max-h-[calc(100vh-108px)] w-[560px] max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-18px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+          <MenuBody
+            {...props}
+            preferredLanguages={preferredLanguages}
+            onClose={() => setOpen(false)}
+            onOpenStyleBar={openStyleBar}
+          />
         </div>
       )}
     </div>

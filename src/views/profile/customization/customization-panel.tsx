@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, Eye } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { socialPost } from "@/lib/social/client";
 import type { CustomizationInput, ProfileSummary } from "../profile-types";
 import { CustomizePreview } from "./customize-preview";
@@ -30,10 +30,12 @@ export function CustomizationPanel({
     hideTopBanner: summary.hideTopBanner ?? false,
     hideCardTitles: summary.hideCardTitles ?? false,
   });
+  const initialForm = useRef(form);
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [previewMounted, setPreviewMounted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm.current);
 
   const set = <K extends keyof CustomizationInput>(k: K, v: CustomizationInput[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -119,13 +121,15 @@ export function CustomizationPanel({
             >
               Cancel
             </button>
-            <button
-              onClick={() => void save()}
-              disabled={saving}
-              className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
-            >
-              <Check size={18} /> {saving ? "Saving" : "Save"}
-            </button>
+            {(isDirty || saving) && (
+              <button
+                onClick={() => void save()}
+                disabled={saving}
+                className="inline-flex min-h-11 items-center gap-2 rounded-[10px] bg-accent px-5 text-[14px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
+              >
+                <Check size={18} /> {saving ? "Saving" : "Save"}
+              </button>
+            )}
           </div>
         </div>
 

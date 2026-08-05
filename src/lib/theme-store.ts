@@ -5,6 +5,7 @@ import {
   type CustomTheme,
 } from "@/lib/custom-themes";
 import { scanTheme } from "@/lib/theme-scan";
+import { safeFetch } from "@/lib/safe-fetch";
 import { authToken } from "./theme-auth";
 import { getDownloadRecords, recordDownloadedTheme } from "@/lib/theme-updates";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
@@ -78,7 +79,7 @@ function authHeaders(): Record<string, string> {
 
 export async function browseThemes(sort = "top", q = ""): Promise<StoreTheme[]> {
   const url = `${API}/themes?sort=${encodeURIComponent(sort)}${q ? `&q=${encodeURIComponent(q)}` : ""}`;
-  const r = await fetch(url);
+  const r = await safeFetch(url);
   if (!r.ok) throw new Error("Could not reach the theme library.");
   const d = await r.json();
   return (d.themes || []).map(normalize);
@@ -89,7 +90,7 @@ export async function downloadTheme(
   preview?: string | null,
   versionsCount?: number,
 ): Promise<CustomTheme> {
-  const r = await fetch(`${API}/themes/${id}/file?clientId=${encodeURIComponent(clientId())}`);
+  const r = await safeFetch(`${API}/themes/${id}/file?clientId=${encodeURIComponent(clientId())}`);
   if (!r.ok) throw new Error("Download failed.");
   const parsed = parseThemeJson(await r.text());
   if (!parsed.ok) throw new Error(parsed.error);
@@ -97,7 +98,13 @@ export async function downloadTheme(
     ([savedId, rec]) => rec.storeId === id && getCustomThemes().some((t) => t.id === savedId),
   );
   const base = existing ? { ...parsed.theme, id: existing[0] } : parsed.theme;
-  const theme = preview ? { ...base, previewImage: preview } : base;
+  // parseThemeJson never carries previewImage, and the update path passes no new
+  // preview, so an update would blank the card. Fall back to the saved preview.
+  const prevPreview = existing
+    ? getCustomThemes().find((t) => t.id === existing[0])?.previewImage
+    : undefined;
+  const nextPreview = preview ?? prevPreview;
+  const theme = nextPreview ? { ...base, previewImage: nextPreview } : base;
   const scan = scanTheme({ css: theme.css, js: theme.js, html: theme.html });
   if (scan.verdict === "block") {
     const f = scan.findings.find((x) => x.severity === "block");
@@ -157,7 +164,7 @@ export function subscribeUnseen(fn: () => void): () => void {
 }
 
 export async function rateTheme(id: string, value: number): Promise<StoreTheme> {
-  const r = await fetch(`${API}/themes/${id}/rate`, {
+  const r = await safeFetch(`${API}/themes/${id}/rate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ value, clientId: clientId() }),
@@ -189,7 +196,7 @@ function normalizeComment(c: Record<string, unknown>): ThemeComment {
 }
 
 export async function listComments(themeId: string): Promise<ThemeComment[]> {
-  const r = await fetch(`${API}/themes/${themeId}/comments`, { headers: authHeaders() });
+  const r = await safeFetch(`${API}/themes/${themeId}/comments`, { headers: authHeaders() });
   if (!r.ok) throw new Error("Could not load comments.");
   const d = await r.json();
   return ((d.comments as Record<string, unknown>[]) || []).map(normalizeComment);
@@ -200,7 +207,7 @@ export async function postComment(
   body: string,
   parentId?: string,
 ): Promise<ThemeComment> {
-  const r = await fetch(`${API}/themes/${themeId}/comments`, {
+  const r = await safeFetch(`${API}/themes/${themeId}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(parentId ? { body, parentId } : { body }),
@@ -211,7 +218,7 @@ export async function postComment(
 }
 
 export async function deleteComment(themeId: string, commentId: string): Promise<void> {
-  const r = await fetch(`${API}/themes/${themeId}/comments/${commentId}/delete`, {
+  const r = await safeFetch(`${API}/themes/${themeId}/comments/${commentId}/delete`, {
     method: "POST",
     headers: authHeaders(),
   });
@@ -219,7 +226,7 @@ export async function deleteComment(themeId: string, commentId: string): Promise
 }
 
 export async function getTheme(id: string): Promise<StoreTheme> {
-  const r = await fetch(`${API}/themes/${id}`);
+  const r = await safeFetch(`${API}/themes/${id}`);
   if (!r.ok) throw new Error("Theme not found.");
   return normalize(await r.json());
 }
@@ -240,7 +247,7 @@ export async function listNotifications(): Promise<{
   notifications: ThemeNotification[];
   unread: number;
 }> {
-  const r = await fetch(`${API}/me/notifications`, { headers: authHeaders() });
+  const r = await safeFetch(`${API}/me/notifications`, { headers: authHeaders() });
   if (!r.ok) throw new Error("Could not load notifications.");
   const d = await r.json();
   const notifications = ((d.notifications || []) as ThemeNotification[]).map((n) => ({
@@ -251,7 +258,7 @@ export async function listNotifications(): Promise<{
 }
 
 export async function markNotificationsRead(ids?: string[]): Promise<number> {
-  const r = await fetch(`${API}/me/notifications/read`, {
+  const r = await safeFetch(`${API}/me/notifications/read`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(ids ? { ids } : {}),
@@ -310,7 +317,7 @@ export async function setVisibility(
   ownerToken: string,
   visibility: "public" | "unlisted",
 ): Promise<void> {
-  const r = await fetch(`${API}/themes/${id}/visibility`, {
+  const r = await safeFetch(`${API}/themes/${id}/visibility`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${ownerToken}` },
     body: JSON.stringify({ visibility }),
@@ -319,7 +326,7 @@ export async function setVisibility(
 }
 
 export async function deleteUpload(id: string, ownerToken: string): Promise<void> {
-  const r = await fetch(`${API}/themes/${id}/delete`, {
+  const r = await safeFetch(`${API}/themes/${id}/delete`, {
     method: "POST",
     headers: { Authorization: `Bearer ${ownerToken}` },
   });
@@ -328,7 +335,7 @@ export async function deleteUpload(id: string, ownerToken: string): Promise<void
 }
 
 export async function myThemes(): Promise<StoreTheme[]> {
-  const r = await fetch(`${API}/me/themes`, { headers: authHeaders() });
+  const r = await safeFetch(`${API}/me/themes`, { headers: authHeaders() });
   if (!r.ok) throw new Error("Could not load your themes.");
   const d = await r.json();
   return (d.themes || []).map(normalize);
@@ -359,14 +366,14 @@ export async function updateTheme(
 export async function themeVersions(
   id: string,
 ): Promise<{ v: number; changelog: string; createdAt: string }[]> {
-  const r = await fetch(`${API}/themes/${id}/versions`, { headers: authHeaders() });
+  const r = await safeFetch(`${API}/themes/${id}/versions`, { headers: authHeaders() });
   if (!r.ok) throw new Error("Could not load version history.");
   const d = await r.json();
   return d.versions || [];
 }
 
 export async function claimTheme(id: string, ownerToken: string): Promise<StoreTheme> {
-  const r = await fetch(`${API}/themes/${id}/claim`, {
+  const r = await safeFetch(`${API}/themes/${id}/claim`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ ownerToken }),

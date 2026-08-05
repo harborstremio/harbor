@@ -185,11 +185,31 @@ export function normalizeName(name: string, type: string): string {
   return `${n}::${type ?? ""}`;
 }
 
+// Region-gated addons (Max, Disney+, ...) decide what to serve from the request
+// language. On web the browser attaches Accept-Language automatically, but the
+// app's harbor_fetch sends none, so those catalogs come back empty until the user
+// changes region by hand. Send an Accept-Language built from the region/language
+// they actually picked, so the app matches web and honours their choice.
+function addonAcceptLanguage(): string | null {
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("harbor.settings") : null;
+    const s = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
+    const region = String(s.region ?? "US").trim().toUpperCase();
+    const lang = String(s.tmdbLanguage || s.uiLanguage || "en").trim().toLowerCase().split("-")[0];
+    if (!/^[a-z]{2,3}$/.test(lang)) return null;
+    if (!/^[A-Z]{2}$/.test(region)) return `${lang},en;q=0.8`;
+    return lang === "en" ? `en-${region},en;q=0.8` : `${lang}-${region},${lang};q=0.9,en;q=0.8`;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response | null> {
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), timeoutMs);
   try {
-    return await fetch(url, { signal: ac.signal });
+    const al = addonAcceptLanguage();
+    return await fetch(url, { signal: ac.signal, headers: al ? { "Accept-Language": al } : undefined });
   } catch {
     return null;
   } finally {

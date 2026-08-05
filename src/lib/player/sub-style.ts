@@ -15,19 +15,27 @@ function mpvColor(hex: string, opacity: number): string {
   return `#${a}${rgb}`;
 }
 
-function mpvFontFor(id: string): string {
+function mpvFontFor(id: string, customName?: string): string {
+  if (id.startsWith("custom:")) return customName || "Inter";
   switch (id) {
     case "arabic":
-      return "Noto Sans Arabic";
+      return "Vazirmatn";
     case "system":
       return "Segoe UI";
     case "serif":
       return "Times New Roman";
     case "rounded":
-      return "Segoe UI";
+      return "Fredoka";
     default:
       return "Inter";
   }
+}
+
+function customFontName(s: Settings): string | undefined {
+  if (!s.subFontFamily?.startsWith("custom:")) return undefined;
+  const id = s.subFontFamily.slice("custom:".length);
+  const f = (s.customFonts ?? []).find((x) => x.id === id);
+  return f?.family || f?.name;
 }
 
 export type SubRenderContext = {
@@ -53,7 +61,7 @@ export async function applySubStyle(
   const reposition = !context.assNativeActive || override !== "no";
   const props: Array<[string, unknown]> = [
     ["sub-font-size", 32],
-    ["sub-font", mpvFontFor(s.subFontFamily)],
+    ["sub-font", mpvFontFor(s.subFontFamily, customFontName(s))],
     ["sub-scale", normScale != null ? clamp(normScale, 0.2, 6) : Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32))],
     ["sub-color", mpvColor(s.subFontColor, opacity)],
     ["sub-border-color", mpvColor(s.subBorderColor, opacity)],

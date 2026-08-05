@@ -1,4 +1,20 @@
 const profileFill: Record<string, string> = {
+  "General": "Общие",
+  "Look": "Оформление",
+  "optional": "необязательно",
+  "Your name and the details shown at the top of your profile.":
+    "Ваше имя и данные, которые показываются вверху профиля.",
+  "Your avatar, banner, and how the whole profile is styled.":
+    "Ваш аватар, баннер и оформление всего профиля.",
+  "Pick what appears on your profile, and the order it shows in.":
+    "Выберите, что показывать в профиле и в каком порядке.",
+  "Control who can see your friends, activity, and stats.":
+    "Управляйте тем, кто видит ваших друзей, активность и статистику.",
+  "Show a Minecraft card on your profile. Leave the username blank to hide it.":
+    "Показывать карточку Minecraft в профиле. Оставьте имя пользователя пустым, чтобы скрыть её.",
+  "Show a Minecraft card with your username":
+    "Показывать карточку Minecraft с вашим именем пользователя",
+  "Showing {name}": "Показывается {name}",
   "Manage connection": "Управление подключением",
   "Show your Simkl card": "Показывать карточку Simkl",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":

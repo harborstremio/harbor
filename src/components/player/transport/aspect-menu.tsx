@@ -19,7 +19,7 @@ export function AspectMenu({
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const { side, measure } = useMenuSide(wrap, 360);
-  const { tweaks, setTweak, applyPatch } = useTweaks();
+  const { tweaks, setTweak, applyPatch, applyPreset } = useTweaks();
   useEffect(() => {
     onOpenChange?.(open);
   }, [open, onOpenChange]);
@@ -78,7 +78,7 @@ export function AspectMenu({
                   key={tpl.label}
                   type="button"
                   title={t(tpl.sub)}
-                  onClick={() => applyPatch(tpl.patch)}
+                  onClick={() => applyPreset(PICTURE_KEYS, tpl.patch)}
                   className="rounded-full border border-edge-soft bg-canvas/40 px-3 py-1.5 text-[12px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
                 >
                   {t(tpl.label)}

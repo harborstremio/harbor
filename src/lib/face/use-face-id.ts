@@ -6,8 +6,8 @@ import { classify } from "./match";
 import type { CastEntry } from "@/lib/providers/tmdb";
 import type { GalleryEntry, WireFace } from "./match";
 
-const SCAN_MS = 1600;
-const SEEN_WINDOW_MS = 5000;
+const SCAN_MS = 1200;
+const SEEN_WINDOW_MS = 20000;
 
 export type OnScreenPerson = {
   id: number;

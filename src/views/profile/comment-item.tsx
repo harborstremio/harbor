@@ -71,7 +71,7 @@ export function CommentItem({
   const canReply = !!onReply && !!signedIn && !!replyToId;
   return (
     <div className="flex flex-col">
-      <div className="group flex gap-3 rounded-[10px] p-2 transition-colors hover:bg-elevated/60">
+      <div className="group flex items-start gap-3 rounded-[10px] p-2 transition-colors hover:bg-elevated/60">
         <UserHoverCard handle={c.authorHandle}>
           <button
             onClick={() => onOpenAuthor?.(c.authorHandle)}

@@ -93,6 +93,27 @@ export function useKeyboardShortcuts(params: {
   const seekForwardStepSec = settings.seekForwardStepSec;
   const seekBackStepShortSec = settings.seekBackStepShortSec;
   const seekForwardStepShortSec = settings.seekForwardStepShortSec;
+  const [subtitleOffsetSec, setSubtitleOffsetSec] = useState<number | null>(null);
+  const subtitleOffsetTimerRef = useRef<number | null>(null);
+  const showSubtitleOffset = (delaySec: number) => {
+    setSubtitleOffsetSec(delaySec);
+    if (subtitleOffsetTimerRef.current != null) {
+      window.clearTimeout(subtitleOffsetTimerRef.current);
+    }
+    subtitleOffsetTimerRef.current = window.setTimeout(() => {
+      setSubtitleOffsetSec(null);
+      subtitleOffsetTimerRef.current = null;
+    }, 1800);
+  };
+  useEffect(
+    () => () => {
+      if (subtitleOffsetTimerRef.current != null) {
+        window.clearTimeout(subtitleOffsetTimerRef.current);
+      }
+    },
+    [],
+  );
+
   const holdRef = useRef<{
     key: string | null;
     timer: number | null;
@@ -234,7 +255,7 @@ export function useKeyboardShortcuts(params: {
       if (match("playerVolumeUp")) {
         e.preventDefault();
         const step = e.shiftKey ? 0.5 : 0.05;
-        const max = bridgeRef.current?.capabilities().engine === "mpv" ? 6 : 1;
+        const max = bridgeRef.current?.capabilities().engine === "mpv" ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2)) : 1;
         const next = Math.min(max, Math.max(0, snap.volume + step));
         bridgeRef.current?.setVolume(next);
         bridgeRef.current?.setMuted(false);
@@ -246,7 +267,7 @@ export function useKeyboardShortcuts(params: {
       if (match("playerVolumeDown")) {
         e.preventDefault();
         const step = e.shiftKey ? 0.5 : 0.05;
-        const max = bridgeRef.current?.capabilities().engine === "mpv" ? 6 : 1;
+        const max = bridgeRef.current?.capabilities().engine === "mpv" ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2)) : 1;
         const next = Math.min(max, Math.max(0, snap.volume - step));
         bridgeRef.current?.setVolume(next);
         bridgeRef.current?.setMuted(false);
@@ -369,6 +390,7 @@ export function useKeyboardShortcuts(params: {
         const step = e.shiftKey ? 0.05 : 0.1;
         const delay = round2(snap.subDelaySec - step);
         bridgeRef.current?.setSubDelay(delay);
+        showSubtitleOffset(delay);
         writePlayerPrefs(metaId, { subDelaySec: delay });
         return;
       }
@@ -377,6 +399,7 @@ export function useKeyboardShortcuts(params: {
         const step = e.shiftKey ? 0.05 : 0.1;
         const delay = round2(snap.subDelaySec + step);
         bridgeRef.current?.setSubDelay(delay);
+        showSubtitleOffset(delay);
         writePlayerPrefs(metaId, { subDelaySec: delay });
         return;
       }
@@ -510,5 +533,5 @@ export function useKeyboardShortcuts(params: {
     };
   }, []);
 
-  return { holdSpeedActive };
+  return { holdSpeedActive, subtitleOffsetSec };
 }

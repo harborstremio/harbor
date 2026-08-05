@@ -2,7 +2,7 @@ import { MousePointerClick, RefreshCw, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { resolveAddonLogo } from "@/components/addon-logo";
 import { HostSourceBanner } from "@/components/host-source-banner";
-import { Tooltip } from "./transport/tooltip";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { fetchInstalledAddons } from "@/lib/addon-store";
 import { userAddons, type Addon } from "@/lib/addons";
 import { useAuth } from "@/lib/auth";
@@ -329,7 +329,7 @@ export function StreamSwitcher({
       <div className="flex h-full max-h-[82vh] w-full max-w-[880px] flex-col overflow-hidden rounded-[20px] bg-elevated shadow-[0_28px_72px_-20px_rgba(0,0,0,0.85)] ring-1 ring-edge animate-in fade-in slide-in-from-bottom-2 duration-150 backdrop-blur-xl">
         <header className="flex items-center justify-between gap-4 border-b border-edge-soft px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <Tooltip label={t("Refresh sources")} side="bottom">
+            <HoverTooltip label={t("Refresh sources")} side="bottom" align="center" disabled={refreshing}>
               <button
                 onClick={() => refresh()}
                 disabled={refreshing}
@@ -338,7 +338,7 @@ export function StreamSwitcher({
               >
                 <RefreshCw size={15} strokeWidth={2.2} className={refreshing ? "animate-spin" : ""} />
               </button>
-            </Tooltip>
+            </HoverTooltip>
             <span className="text-[13px] font-semibold tracking-[0.01em] text-ink-muted whitespace-nowrap">
               {refreshing
                 ? t("Refreshing…")

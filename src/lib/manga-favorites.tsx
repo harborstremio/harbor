@@ -1,11 +1,30 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useProfiles } from "./profiles";
 import { persistCritical } from "./storage-recovery";
+import { setMangaInLibrary } from "./manga/api";
+import { notifyMangaLibraryChanged } from "./manga/library-events";
 
 export type MangaFavEntry = { id: string; title: string; cover?: string; addedAt: number };
 
 const PREFIX = "harbor.mangafav.v1.";
 const keyFor = (pid: string) => PREFIX + pid;
+const librarySync = new Map<string, Promise<void>>();
+
+function syncLibrary(id: string, inLibrary: boolean): void {
+  const pending = librarySync.get(id) ?? Promise.resolve();
+  const next = pending
+    .catch(() => {})
+    .then(async () => {
+      await setMangaInLibrary(id, inLibrary);
+      notifyMangaLibraryChanged();
+    });
+  librarySync.set(id, next);
+  void next
+    .catch((error) => console.warn("[manga-favorites] Suwayomi library sync failed", error))
+    .finally(() => {
+      if (librarySync.get(id) === next) librarySync.delete(id);
+    });
+}
 
 function readMap(key: string): Map<string, MangaFavEntry> {
   const map = new Map<string, MangaFavEntry>();
@@ -60,6 +79,7 @@ export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
         const next = new Map(items);
         if (next.has(input.id)) {
           next.delete(input.id);
+          syncLibrary(input.id, false);
         } else {
           next.set(input.id, {
             id: input.id,
@@ -67,6 +87,7 @@ export function MangaFavoritesProvider({ children }: { children: ReactNode }) {
             cover: input.cover,
             addedAt: Date.now(),
           });
+          syncLibrary(input.id, true);
         }
         writeMap(keyFor(pid), next);
         setItems(next);

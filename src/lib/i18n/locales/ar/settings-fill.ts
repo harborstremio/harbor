@@ -292,6 +292,8 @@ const settingsFill: Record<string, string> = {
   "Expanding Cards": "البطاقات المتوسّعة",
   "Emphasize the selected card across the page while gently darkening and blurring the other cards.": "إبراز البطاقة المحددة في الصفحة مع تعتيم البطاقات الأخرى وتشويشها برفق.",
   "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.": "توسيع بطاقات الملصقات أثناء التنقل بلوحة المفاتيح أو جهاز التحكم عبر صفوف الملصقات، باستخدام صور عريضة محمّلة مسبقًا.",
+  "Add a TMDB key in Settings to identify the cast.": "أضف مفتاح TMDB في الإعدادات للتعرّف على طاقم العمل.",
+  "No cast photos are available for this title.": "لا تتوفر صور لطاقم العمل لهذا العنوان.",
 };
 
 export default settingsFill;

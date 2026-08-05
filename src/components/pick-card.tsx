@@ -65,6 +65,19 @@ const WATCHLIST_POS: Record<string, string> = {
   bottomEnd: "bottom-1.5 end-1.5",
 };
 
+function stackTop(slots: number, ribbon: boolean): string {
+  if (ribbon) return slots >= 2 ? "top-[74px]" : slots === 1 ? "top-[54px]" : "top-[34px]";
+  return slots >= 2 ? "top-[48px]" : slots === 1 ? "top-[28px]" : "top-2";
+}
+
+function circleTop(slots: number): string {
+  if (slots >= 4) return "top-[118px]";
+  if (slots >= 3) return "top-[90px]";
+  if (slots >= 2) return "top-[62px]";
+  if (slots >= 1) return "top-[34px]";
+  return "top-1.5";
+}
+
 function getTitleFromAniZip(titles: Record<string, string>, lang: "english" | "romaji" | "native"): string | null {
   if (lang === "english") return titles.en || titles.en_jp || titles.ja || null;
   if (lang === "romaji") return titles["x-jat"] || titles.en_jp || titles.en || null;
@@ -120,11 +133,8 @@ const PosterCard = memo(function PosterCard({
   const showCinema = inCinema && !rerun;
   const newBadge = !rerun && !inCinema ? deriveBadge(meta) : null;
   const topLeftBadges = (hasDub ? 1 : 0) + (rerun || showCinema || newBadge ? 1 : 0);
-  const watchlistTop = settings.watchlistBadge === "topStart" || settings.watchlistBadge === "topEnd";
-  const watchlistPos =
-    showTop10 && watchlistTop
-      ? `start-1.5 ${topLeftBadges >= 2 ? "top-[52px]" : topLeftBadges === 1 ? "top-[30px]" : "top-1.5"}`
-      : WATCHLIST_POS[settings.watchlistBadge];
+  const ribbonLeft = showTop10 && settings.top10RibbonSide === "left";
+  const ribbonRight = showTop10 && settings.top10RibbonSide === "right";
   const resolvedImdb = useTmdbImdbId(meta.id);
   const imdbId = resolvedImdb ?? undefined;
   const cached = useOmdbScores(imdbId);
@@ -222,14 +232,11 @@ const PosterCard = memo(function PosterCard({
   const inWatchlist = useInWatchlist(meta.id, altIds);
   const watched = useMetaWatched(meta.id, meta.type, resolvedImdb);
   const inLocalLibrary = useInLocalLibrary(meta.id, altIds);
-  const wlTopEnd =
-    inWatchlist &&
-    settings.watchlistBadge === "topEnd" &&
-    !(showTop10 && watchlistTop);
+  const bookmarkTopEnd = inWatchlist && settings.watchlistBadge === "topEnd";
   const watchedPos =
     settings.badgePlacement === "top"
       ? "bottom-1.5 end-1.5"
-      : `end-1.5 ${wlTopEnd ? "top-[34px]" : "top-1.5"}`;
+      : `end-1.5 ${circleTop((ribbonRight ? 1 : 0) + (bookmarkTopEnd ? 1 : 0))}`;
 
   const [imgIdx, setImgIdx] = useState(0);
   const [hydratedPoster, setHydratedPoster] = useState<string | undefined>();
@@ -498,6 +505,18 @@ const PosterCard = memo(function PosterCard({
   const hasAwardWin = !!animeAwardWin || !!classicWin;
   const awardTop = hasAwardWin && settings.awardTabPosition === "top";
   const awardBelow = hasAwardWin && settings.awardTabPosition === "below";
+  const leftAwardBadge =
+    settings.showCardBadges &&
+    !settings.awardTabs &&
+    (isAnimeCardId
+      ? !!(findTopAward(awardLookupName ?? meta.name, awardYear) ?? findTopAward(meta.name, awardYear))
+      : !!classicWin);
+  const watchlistPos =
+    settings.watchlistBadge === "topEnd"
+      ? `end-1.5 ${circleTop(ribbonRight ? 1 : 0)}`
+      : settings.watchlistBadge === "topStart" && showTop10
+        ? `start-1.5 ${circleTop(topLeftBadges + (leftAwardBadge ? 1 : 0) + (ribbonLeft ? 1 : 0))}`
+        : WATCHLIST_POS[settings.watchlistBadge];
 
   return (
     <button
@@ -592,15 +611,15 @@ const PosterCard = memo(function PosterCard({
         <div className={badgeFade}>
         {showTop10 && <TopTenRibbon side={settings.top10RibbonSide} />}
         {hasDub && (
-          <span className="pointer-events-none absolute start-2 top-2 z-10 rounded-md bg-accent/90 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-canvas ring-1 ring-black/10">
+          <span className={`pointer-events-none absolute start-2 ${stackTop(0, ribbonLeft)} z-10 rounded-md bg-accent/90 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-canvas ring-1 ring-black/10`}>
             DUB
           </span>
         )}
         {settings.showCardBadges && (
           <>
-            {rerun && <RerunBadge year={meta.releaseInfo} dubShift={hasDub} />}
-            {showCinema && <CinemaBadge dubShift={hasDub} />}
-            {newBadge && <Badge label={t(newBadge.label)} tone={newBadge.tone} kids={kids} dubShift={hasDub} />}
+            {rerun && <RerunBadge year={meta.releaseInfo} dubShift={hasDub} ribbonShift={ribbonLeft} />}
+            {showCinema && <CinemaBadge dubShift={hasDub} ribbonShift={ribbonLeft} />}
+            {newBadge && <Badge label={t(newBadge.label)} tone={newBadge.tone} kids={kids} dubShift={hasDub} ribbonShift={ribbonLeft} />}
             {!settings.awardTabs && isAnimeCardId && (
               <AnimeAwardBadge
                 name={awardLookupName ?? meta.name}
@@ -608,13 +627,14 @@ const PosterCard = memo(function PosterCard({
                 year={parseAwardYear(meta.releaseInfo)}
                 stacked={rerun || showCinema || !!newBadge}
                 dubShift={hasDub}
+                ribbonShift={ribbonLeft}
               />
             )}
             {!settings.awardTabs && !isAnimeCardId && (
               <ClassicAwardBadge
                 win={classicWin}
                 stacked={rerun || showCinema || !!newBadge}
-                dubShift={hasDub}
+                dubShift={ribbonLeft}
               />
             )}
           </>
@@ -799,7 +819,7 @@ function ScoreStack({
 
 type BadgeTone = "default" | "accent";
 
-function Badge({ label, tone = "default", kids = false, dubShift = false }: { label: string; tone?: BadgeTone; kids?: boolean; dubShift?: boolean }) {
+function Badge({ label, tone = "default", kids = false, dubShift = false, ribbonShift = false }: { label: string; tone?: BadgeTone; kids?: boolean; dubShift?: boolean; ribbonShift?: boolean }) {
   const styles = kids
     ? "bg-black text-white"
     : tone === "accent"
@@ -807,7 +827,7 @@ function Badge({ label, tone = "default", kids = false, dubShift = false }: { la
       : "border border-edge-soft bg-canvas/95 text-ink";
   return (
     <span
-      className={`absolute start-2 ${dubShift ? "top-[28px]" : "top-2"} rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${styles}`}
+      className={`absolute start-2 ${stackTop(dubShift ? 1 : 0, ribbonShift)} rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${styles}`}
     >
       {label}
     </span>
@@ -966,12 +986,14 @@ function AnimeAwardBadge({
   year,
   stacked,
   dubShift = false,
+  ribbonShift = false,
 }: {
   name: string;
   fallbackName?: string;
   year?: number;
   stacked: boolean;
   dubShift?: boolean;
+  ribbonShift?: boolean;
 }) {
   const t = useT();
   useAwardPacks();
@@ -982,7 +1004,7 @@ function AnimeAwardBadge({
   const short = shortCategory(win);
   const above = (dubShift ? 1 : 0) + (stacked ? 1 : 0);
   const label = above > 0 ? `${win.year}` : `${win.year} ${t(short)}`;
-  const topClass = above >= 2 ? "top-[48px]" : above === 1 ? "top-[28px]" : "top-2";
+  const topClass = stackTop(above, ribbonShift);
   return (
     <span
       className={`pointer-events-none absolute start-2 inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-md bg-canvas/85 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink backdrop-blur-md ring-1 ring-edge-soft/60 ${topClass}`}
@@ -1007,20 +1029,20 @@ function shortCategory(win: AwardWin): string {
   return win.categoryName.replace(/^Best\s+/i, "").replace(/Award$/i, "").trim();
 }
 
-function CinemaBadge({ dubShift = false }: { dubShift?: boolean }) {
+function CinemaBadge({ dubShift = false, ribbonShift = false }: { dubShift?: boolean; ribbonShift?: boolean }) {
   const t = useT();
   return (
-    <span className={`harbor-cinema-badge absolute start-2 ${dubShift ? "top-[28px]" : "top-2"} flex items-center gap-1 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em]`}>
+    <span className={`harbor-cinema-badge absolute start-2 ${stackTop(dubShift ? 1 : 0, ribbonShift)} flex items-center gap-1 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em]`}>
       <ClapperMini size={10} />
       <span>{t("In Cinema")}</span>
     </span>
   );
 }
 
-function RerunBadge({ year, dubShift = false }: { year?: string; dubShift?: boolean }) {
+function RerunBadge({ year, dubShift = false, ribbonShift = false }: { year?: string; dubShift?: boolean; ribbonShift?: boolean }) {
   const t = useT();
   return (
-    <span className={`absolute start-2 ${dubShift ? "top-[28px]" : "top-2"} flex items-center gap-1 rounded-md border border-edge-soft bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink-muted`}>
+    <span className={`absolute start-2 ${stackTop(dubShift ? 1 : 0, ribbonShift)} flex items-center gap-1 rounded-md border border-edge-soft bg-canvas/95 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-ink-muted`}>
       <RefreshCcw size={9} strokeWidth={2.4} />
       <span>{t("Rerun")}{year ? ` · ${year}` : ""}</span>
     </span>

@@ -60,7 +60,7 @@ export function MoreMenu({ visible, streamUrl, infoHash, selectedSub, onOpenChan
           title: selectedSub?.title || selectedSub?.label,
           lang: selectedSub?.lang,
           label: t("Subtitle"),
-        }),
+        }).then((r) => r === "ok"),
     });
   }
   if (httpUrl) {

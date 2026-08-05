@@ -1,5 +1,6 @@
+import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import { registerCache } from "@/lib/memory-profiler";
-import { externalToKitsu } from "./anime-mapping";
+import { externalToKitsu, imdbToKitsu } from "./anime-mapping";
 import { kitsuRelated, parseKitsuId } from "./kitsu";
 
 const MAX_WALK = 8;
@@ -18,6 +19,11 @@ function extService(id: string): string | null {
 async function normalizeToKitsu(id: string): Promise<number | null> {
   const direct = parseKitsuId(id);
   if (direct != null) return direct;
+  if (id.startsWith("tt")) {
+    const mapped = parseKitsuId(getAnimeCwId(id) ?? "");
+    if (mapped != null) return mapped;
+    return imdbToKitsu(id).catch(() => null);
+  }
   const service = extService(id);
   if (!service) return null;
   const n = Number(id.slice(id.indexOf(":") + 1));

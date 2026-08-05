@@ -7,6 +7,7 @@ import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import { Section, ToggleRow } from "./shared";
 import { SubtitleStylePanel } from "./player-panel";
+import { SubtitleOffsetSettings } from "./player-panel/subtitle-offset-settings";
 import { LanguagesPicker } from "./streaming-panel";
 import { DisplayLanguageSection } from "./language-panel/display-language-section";
 import { DualSubtitleSection } from "./language-panel/dual-subtitle-section";
@@ -115,6 +116,13 @@ export function LanguagePanel() {
       subtitle={t("How subtitles look during playback. Live preview below.")}
     >
       <SubtitleStylePanel />
+    </Section>
+
+    <Section
+      title={t("Subtitle sync indicator")}
+      subtitle={t("Choose where subtitle timing feedback appears and how large it is.")}
+    >
+      <SubtitleOffsetSettings />
     </Section>
 
     <Section

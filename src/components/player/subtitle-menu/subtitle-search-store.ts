@@ -6,6 +6,7 @@ export type SubtitleSearchHandle = {
   lastAdded: number | null;
   hints: StreamHints | null;
   refresh: () => void;
+  dismiss: () => void;
 };
 
 let current: SubtitleSearchHandle | null = null;

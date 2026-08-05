@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Check, Play, Plus, RotateCcw, TrendingUp, Volume2, VolumeX } from "lucide-react";
+import { Check, ChevronRight, Info, Play, Plus, RotateCcw, TrendingUp, Volume2, VolumeX } from "lucide-react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import tmdbIcon from "@/assets/addon-logos/tmdb.png";
 import traktIcon from "@/assets/trakt.svg";
@@ -46,6 +46,9 @@ export const Hero = memo(function Hero({
   loadBackdrop = true,
   full = false,
   fullQuality = false,
+  bottomAlign = false,
+  playSquare = false,
+  moreInfo = false,
 }: {
   meta: Meta;
   rank?: { label: string; position: number; sources?: Array<{ label: string; rank: number }> };
@@ -54,6 +57,9 @@ export const Hero = memo(function Hero({
   loadBackdrop?: boolean;
   full?: boolean;
   fullQuality?: boolean;
+  bottomAlign?: boolean;
+  playSquare?: boolean;
+  moreInfo?: boolean;
 }) {
   const { settings } = useSettings();
   const { openMeta, meta: activeDetail, player, picker, view } = useView();
@@ -64,7 +70,9 @@ export const Hero = memo(function Hero({
   const inWatchlist = useInWatchlist(meta.id, [resolvedImdb]);
   const [bgUrl, setBgUrl] = useState<string | undefined>(meta.background);
   const [bgResolved, setBgResolved] = useState<boolean>(!!meta.background);
-  const bg = bgUrl ? upsizeTmdb(bgUrl, fullQuality) : bgResolved ? meta.poster : undefined;
+  const bg = bgUrl
+    ? upsizeTmdb(bgUrl, fullQuality)
+    : (meta.background ?? (bgResolved ? meta.poster : undefined));
   const [trailerCandidates, setTrailerCandidates] = useState<string[]>([]);
   const [trailerInfo, setTrailerInfo] = useState<TrailerInfo | null>(null);
   const [videoReady, setVideoReady] = useState(false);
@@ -273,6 +281,8 @@ export const Hero = memo(function Hero({
     };
   }, [trailerInfo]);
 
+  const actionRadius = playSquare ? "rounded-md" : "rounded-full";
+
   return (
     <section
       ref={sectionRef}
@@ -344,7 +354,7 @@ export const Hero = memo(function Hero({
       <MetaAwardsCorner meta={meta} imdbId={resolvedImdb} />
 
       <div
-        className={`harbor-hero-content relative flex h-full flex-col justify-center p-14 ${full ? "pt-28 lg:pt-32" : ""}`}
+        className={`harbor-hero-content relative flex h-full flex-col p-14 ${bottomAlign ? "justify-end pb-24" : "justify-center"} ${full ? "pt-28 lg:pt-32" : ""}`}
       >
         <div className="max-w-2xl">
           {rank && (
@@ -436,31 +446,45 @@ export const Hero = memo(function Hero({
                 e.stopPropagation();
                 openMeta({ ...meta, logo: logo ?? meta.logo });
               }}
-              className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-1px_0_rgba(0,0,0,0.18)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+              className={`flex h-12 items-center gap-2.5 ${actionRadius} bg-ink px-7 text-[15px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-1px_0_rgba(0,0,0,0.18)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]`}
             >
               <Play size={18} fill="currentColor" />
               {t("Play")}
             </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleWatchlist({
-                  id: meta.id,
-                  type: meta.type,
-                  name: meta.name,
-                  poster: meta.poster,
-                  imdbId: resolvedImdb,
-                });
-              }}
-              className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75"
-            >
-              {inWatchlist ? (
-                <Check size={18} strokeWidth={2.4} />
-              ) : (
-                <Plus size={18} strokeWidth={2} />
-              )}
-              {inWatchlist ? t("In Watchlist") : t("Add to Watchlist")}
-            </button>
+            {moreInfo ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openMeta({ ...meta, logo: logo ?? meta.logo });
+                }}
+                className={`flex h-12 items-center gap-2.5 ${actionRadius} border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75`}
+              >
+                <Info size={18} strokeWidth={2} />
+                {t("More info")}
+                <ChevronRight size={16} strokeWidth={2} className="dir-icon opacity-65" />
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleWatchlist({
+                    id: meta.id,
+                    type: meta.type,
+                    name: meta.name,
+                    poster: meta.poster,
+                    imdbId: resolvedImdb,
+                  });
+                }}
+                className={`flex h-12 items-center gap-2.5 ${actionRadius} border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75`}
+              >
+                {inWatchlist ? (
+                  <Check size={18} strokeWidth={2.4} />
+                ) : (
+                  <Plus size={18} strokeWidth={2} />
+                )}
+                {inWatchlist ? t("In Watchlist") : t("Add to Watchlist")}
+              </button>
+            )}
           </div>
         </div>
       </div>

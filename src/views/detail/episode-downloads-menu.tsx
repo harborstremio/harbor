@@ -1,10 +1,10 @@
-import { ArrowDownToLine, CalendarClock, Check, Download, Loader2, SlidersHorizontal } from "lucide-react";
+import { ArrowDownToLine, CalendarClock, Check, Download, SlidersHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayEpisode } from "@/lib/view";
 import { toggleAutoDownload, useIsAutoDownloaded } from "@/lib/auto-download";
-import { downloadSeason, pendingSeasonEpisodes } from "@/lib/download/season-download";
+import { pendingSeasonEpisodes } from "@/lib/download/season-download";
 import { useDownloads } from "@/lib/download/downloads-store";
 import { useView } from "@/lib/view";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -12,13 +12,13 @@ import { useT } from "@/lib/i18n";
 
 export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes: PlayEpisode[] }) {
   const t = useT();
-  const { setView } = useView();
+  const { openPicker, setView } = useView();
   useDownloads();
   const autoOn = useIsAutoDownloaded(meta.id);
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
-  const [busy, setBusy] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
-  const pending = pendingSeasonEpisodes(meta.id, episodes).length;
+  const pendingEpisodes = pendingSeasonEpisodes(meta.id, episodes);
+  const pending = pendingEpisodes.length;
 
   useEffect(() => {
     if (!menu) return;
@@ -45,12 +45,14 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
     });
   };
 
-  const startSeason = async () => {
+  const startSeason = () => {
     setMenu(null);
-    if (busy || pending === 0) return;
-    setBusy(true);
-    await downloadSeason(meta, episodes).catch(() => {});
-    setBusy(false);
+    const firstEpisode = pendingEpisodes[0];
+    if (!firstEpisode) return;
+    openPicker(meta, firstEpisode, {
+      intent: "download",
+      seasonEpisodes: pendingEpisodes,
+    });
   };
 
   return (
@@ -72,11 +74,7 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
               : "border-edge-soft bg-canvas/60 text-ink-muted hover:border-edge hover:text-ink"
           }`}
         >
-          {busy ? (
-            <Loader2 size={16} className="animate-spin" />
-          ) : (
-            <ArrowDownToLine size={16} strokeWidth={2} />
-          )}
+          <ArrowDownToLine size={16} strokeWidth={2} />
         </button>
       </HoverTooltip>
       {menu &&
@@ -91,16 +89,24 @@ export function EpisodeDownloadsMenu({ meta, episodes }: { meta: Meta; episodes:
               icon={<Download size={15} strokeWidth={2} />}
               label={pending > 0 ? t("Download this season") : t("Season saved offline")}
               sub={pending > 0 ? t("{n} episodes", { n: pending }) : undefined}
-              disabled={pending === 0 || busy}
+              disabled={pending === 0}
               onClick={startSeason}
             />
             <div className="my-1 h-px bg-edge-soft" />
             <MenuItem
               icon={
-                autoOn ? <Check size={15} strokeWidth={2.4} /> : <CalendarClock size={15} strokeWidth={2} />
+                autoOn ? (
+                  <Check size={15} strokeWidth={2.4} />
+                ) : (
+                  <CalendarClock size={15} strokeWidth={2} />
+                )
               }
               label={t("Auto-download new episodes")}
-              sub={autoOn ? t("On. New episodes grab themselves.") : t("Grab each new episode as it airs")}
+              sub={
+                autoOn
+                  ? t("On. New episodes grab themselves.")
+                  : t("Grab each new episode as it airs")
+              }
               active={autoOn}
               onClick={() => {
                 toggleAutoDownload(meta);
@@ -150,7 +156,9 @@ function MenuItem({
     >
       <span className={`mt-0.5 ${active ? "text-accent" : "text-ink-muted"}`}>{icon}</span>
       <span className="flex min-w-0 flex-col">
-        <span className={`text-[13px] font-medium ${active ? "text-accent" : "text-ink"}`}>{label}</span>
+        <span className={`text-[13px] font-medium ${active ? "text-accent" : "text-ink"}`}>
+          {label}
+        </span>
         {sub && <span className="text-[11.5px] leading-snug text-ink-subtle">{sub}</span>}
       </span>
     </button>

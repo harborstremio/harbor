@@ -228,7 +228,7 @@ export function IconAssignStep({
         <div className="flex items-center gap-2 rounded-xl bg-accent-soft px-3.5 py-2.5 ring-1 ring-accent/25">
           <AlertTriangle size={14} strokeWidth={2.2} className="shrink-0 text-accent" />
           <span className="text-[12.5px] text-ink-muted">
-            {flattened} {flattened === 1 ? "GIF was" : "GIFs were"} over 8 MB, so we kept the first frame. Export it smaller to keep the animation.
+            {flattened} {flattened === 1 ? "GIF was" : "GIFs were"} over 2 MB, so we kept the first frame. Export it smaller to keep the animation.
           </span>
         </div>
       )}

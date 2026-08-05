@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Globe, SlidersHorizontal, Star, Tag } from "lucide-react";
+import { Check, ChevronDown, Globe, Layers, SlidersHorizontal, Star, Tag } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { mangaTags, type MangaTag } from "@/lib/manga/api";
@@ -11,6 +11,8 @@ import {
   subscribeMangaSources,
   type MangaSource,
 } from "@/lib/manga/sources";
+import { subscribeSuwayomiSourcesChanged } from "@/lib/manga/sources/suwayomi/source-events";
+import { subscribeMangaLibraryChanged } from "@/lib/manga/library-events";
 
 export const FAVORITES = "__favorites__";
 
@@ -128,17 +130,26 @@ export function TagDropdown({
 
   useEffect(() => {
     let alive = true;
-    mangaTags()
-      .then((list) => {
-        if (alive) setTags(list);
-      })
-      .catch(() => {});
+    const load = () => {
+      mangaTags()
+        .then((list) => {
+          if (alive) setTags(list);
+        })
+        .catch(() => {});
+    };
+    load();
+    const unsubSources = subscribeSuwayomiSourcesChanged(load);
+    const unsubLibrary = subscribeMangaLibraryChanged(load);
     return () => {
       alive = false;
+      unsubSources();
+      unsubLibrary();
     };
   }, []);
 
   const active = tags.find((t) => t.id === tagId);
+  const sourceMode = tags.length > 0 && tags.every((tg) => tg.group === "Sources");
+  const allLabel = sourceMode ? "All sources" : "All tags";
   const shown = useMemo(() => {
     const q = filter.trim().toLowerCase();
     const list = q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : tags;
@@ -148,9 +159,13 @@ export function TagDropdown({
   return (
     <div ref={ref} className="relative">
       <button type="button" onClick={() => setOpen((v) => !v)} className={TRIGGER}>
-        <Tag size={15} className="text-ink-subtle" />
+        {sourceMode ? (
+          <Layers size={15} className="text-ink-subtle" />
+        ) : (
+          <Tag size={15} className="text-ink-subtle" />
+        )}
         <span className="max-w-[140px] truncate font-medium">
-          {tagId === FAVORITES ? t("Favorites") : active ? active.name : t("All tags")}
+          {tagId === FAVORITES ? t("Favorites") : active ? active.name : t(allLabel)}
         </span>
         <ChevronDown size={14} className="text-ink-subtle" />
       </button>
@@ -161,7 +176,7 @@ export function TagDropdown({
               autoFocus
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder={t("Filter tags...")}
+              placeholder={t(sourceMode ? "Filter sources..." : "Filter tags...")}
               className="w-full rounded-md bg-elevated/50 px-3 py-1.5 text-[12.5px] text-ink placeholder:text-ink-subtle outline-none focus:ring-1 focus:ring-edge"
             />
           </div>
@@ -178,7 +193,11 @@ export function TagDropdown({
               {tagId === FAVORITES && <Check size={14} className="text-accent" />}
             </button>
             <div className="my-1 border-t border-edge-soft/60" />
-            <TagRow label={t("All tags")} active={!tagId} onClick={() => (onSelect(""), setOpen(false))} />
+            <TagRow
+              label={t(allLabel)}
+              active={!tagId}
+              onClick={() => (onSelect(""), setOpen(false))}
+            />
             {shown.map((t) => (
               <TagRow
                 key={t.id}

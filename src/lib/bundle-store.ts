@@ -3,6 +3,7 @@ import { clientId, type MyUpload } from "./theme-store";
 import { installAwardPack, type AwardPack } from "./award-icons";
 import { installStreamBadgePack } from "./community-badge-packs";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { safeFetch } from "@/lib/safe-fetch";
 
 const ORIGIN = HARBOR_API_BASE;
 const API = `${ORIGIN}/themes/api`;
@@ -76,20 +77,20 @@ export async function browseBundles(
 ): Promise<StoreBundle[]> {
   const params = new URLSearchParams({ kind, sort });
   if (q) params.set("q", q);
-  const r = await fetch(`${API}/bundles?${params.toString()}`);
+  const r = await safeFetch(`${API}/bundles?${params.toString()}`);
   if (!r.ok) throw new Error("Could not reach the bundle library.");
   const d = await r.json();
   return (d.bundles || []).map(normalize);
 }
 
 export async function getBundle(id: string): Promise<StoreBundle> {
-  const r = await fetch(`${API}/bundles/${id}?clientId=${encodeURIComponent(clientId())}`);
+  const r = await safeFetch(`${API}/bundles/${id}?clientId=${encodeURIComponent(clientId())}`);
   if (!r.ok) throw new Error("Bundle not found.");
   return normalize(await r.json());
 }
 
 export async function rateBundle(id: string, value: number): Promise<StoreBundle> {
-  const r = await fetch(`${API}/bundles/${id}/rate`, {
+  const r = await safeFetch(`${API}/bundles/${id}/rate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ value, clientId: clientId() }),
@@ -141,6 +142,10 @@ async function postBundleForm(url: string, fd: FormData): Promise<Record<string,
   return d as Record<string, unknown>;
 }
 
+function iconExt(blob: Blob): string {
+  return blob.type === "image/gif" ? "gif" : "png";
+}
+
 export async function uploadBundle(
   manifestJson: string,
   cover: Blob,
@@ -150,7 +155,7 @@ export async function uploadBundle(
   const fd = new FormData();
   fd.append("manifest", new Blob([manifestJson], { type: "application/json" }), "manifest.json");
   fd.append("cover", cover, "cover.png");
-  for (const icon of icons) fd.append("icons", icon.blob, `${icon.key}.png`);
+  for (const icon of icons) fd.append("icons", icon.blob, `${icon.key}.${iconExt(icon.blob)}`);
   if (author) fd.append("author", author);
   const d = await postBundleForm(`${API}/bundles`, fd);
   return d as unknown as BundleUploadResult;
@@ -167,21 +172,21 @@ export async function updateBundle(
   if (manifestJson)
     fd.append("manifest", new Blob([manifestJson], { type: "application/json" }), "manifest.json");
   if (cover) fd.append("cover", cover, "cover.png");
-  for (const icon of icons) fd.append("icons", icon.blob, `${icon.key}.png`);
+  for (const icon of icons) fd.append("icons", icon.blob, `${icon.key}.${iconExt(icon.blob)}`);
   if (changelog) fd.append("changelog", changelog);
   const d = await postBundleForm(`${API}/bundles/${id}/update`, fd);
   return normalize(d);
 }
 
 export async function myBundles(): Promise<StoreBundle[]> {
-  const r = await fetch(`${API}/me/bundles`, { headers: authHeaders() });
+  const r = await safeFetch(`${API}/me/bundles`, { headers: authHeaders() });
   if (!r.ok) throw new Error("Could not load your bundles.");
   const d = await r.json();
   return (d.bundles || []).map(normalize);
 }
 
 export async function deleteBundle(id: string, ownerToken: string): Promise<void> {
-  const r = await fetch(`${API}/bundles/${id}/delete`, {
+  const r = await safeFetch(`${API}/bundles/${id}/delete`, {
     method: "POST",
     headers: { Authorization: `Bearer ${ownerToken}` },
   });
@@ -190,7 +195,7 @@ export async function deleteBundle(id: string, ownerToken: string): Promise<void
 }
 
 export async function reportBundle(id: string, reason?: string): Promise<void> {
-  const r = await fetch(`${API}/bundles/${id}/report`, {
+  const r = await safeFetch(`${API}/bundles/${id}/report`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ reason: reason ?? "" }),

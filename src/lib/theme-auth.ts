@@ -1,4 +1,5 @@
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { safeFetch } from "@/lib/safe-fetch";
 
 const API = `${HARBOR_API_BASE}/themes/api`;
 const ORIGIN = HARBOR_API_BASE;
@@ -219,7 +220,7 @@ export function refreshToken(): Promise<boolean> {
   if (!refresh) return Promise.resolve(false);
   refreshing = (async () => {
     try {
-      const r = await fetch(`${API}/identity/api/token/refresh`, {
+      const r = await safeFetch(`${API}/identity/api/token/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh }),
@@ -250,7 +251,7 @@ export function subscribeAuthor(fn: () => void): () => void {
 async function postAuth(path: string, body: Record<string, unknown>, bearer?: string) {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (bearer) headers.Authorization = `Bearer ${bearer}`;
-  const r = await fetch(`${API}/auth/${path}`, {
+  const r = await safeFetch(`${API}/auth/${path}`, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
@@ -303,7 +304,7 @@ export async function checkUsernameAvailable(
   username: string,
   signal?: AbortSignal,
 ): Promise<boolean> {
-  const r = await fetch(`${API}/auth/username-available?u=${encodeURIComponent(username)}`, {
+  const r = await safeFetch(`${API}/auth/username-available?u=${encodeURIComponent(username)}`, {
     signal,
   });
   if (!r.ok) throw new Error("check failed");

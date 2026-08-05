@@ -30,7 +30,16 @@ export function compileMpvOptions(s: Settings): string {
   const lines: string[] = [...(QUALITY_LINES[s.mpvQuality] ?? [])];
   if (s.mpvHwdec === "on") lines.push("hwdec=yes");
   else if (s.mpvHwdec === "off") lines.push("hwdec=no");
-  if (s.mpvBufferBoost) lines.push("cache=yes", "demuxer-max-bytes=150MiB", "demuxer-readahead-secs=20");
+  if (s.mpvBufferBoost) {
+    lines.push(
+      "cache=yes",
+      "cache-secs=600",
+      "demuxer-max-bytes=1GiB",
+      "demuxer-readahead-secs=600",
+      "cache-pause-initial=yes",
+      "cache-pause-wait=10",
+    );
+  }
   if (s.mpvDownmixStereo) lines.push("audio-channels=stereo");
   if (s.audioDevice && s.audioDevice !== "auto") lines.push(`audio-device=${s.audioDevice}`);
   if (s.playerDisplayPanel === "oled" && s.playerHdrToSdr) lines.push("target-contrast=inf");

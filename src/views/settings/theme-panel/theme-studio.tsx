@@ -5,6 +5,7 @@ import { Inspector } from "./theme-studio/inspector";
 import { StudioHeader } from "./theme-studio/studio-header";
 import { CodePopout } from "./theme-studio/code-popout";
 import { buildChrome, DEFAULT_CHROME } from "./theme-studio/chrome-config";
+import { nextBackgroundImage } from "@/lib/theme-background";
 import { SUITE_CHROME as STABLE_CHROME } from "./theme-studio/suite-theme";
 import { useStudioPreview } from "./theme-studio/hooks/use-studio-preview";
 import { useDraftHistory } from "./theme-studio/hooks/use-draft-history";
@@ -17,6 +18,7 @@ import {
   applyTheme,
   customColorsToTokens,
   DEFAULT_CUSTOM_COLORS,
+  getThemeById,
   type ActiveThemeId,
   type ChromeConfig,
   type ThemePreset,
@@ -308,12 +310,15 @@ export function ThemeStudio({ seed, onClose }: { seed?: ThemePreset; onClose: ()
   const onSave = () => {
     if (!canSave) return;
     const theme = buildTheme();
+    const previous = settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
+    const image = nextBackgroundImage(settings.theme.backgroundImage, previous, theme);
     saveCustomTheme(theme);
     update({
       theme: {
         ...settings.theme,
         preset: theme.id as ActiveThemeId,
         customFontId: draft.customFontId,
+        backgroundImage: image,
       },
     });
     onClose();

@@ -9,6 +9,9 @@ export type HomeRowCustomization = {
   heroSource: string | null;
   customSources: SourceRow[];
   listRows?: string[];
+  playButtonSquare?: boolean;
+  secondaryMoreInfo?: boolean;
+  cwTop?: boolean;
 };
 
 export function applyHomeRowCustomization(
@@ -109,6 +112,18 @@ export function toggleHeroSource(
   return { ...custom, heroSource: custom.heroSource === key ? null : key };
 }
 
+export function togglePlayButtonSquare(custom: HomeRowCustomization): HomeRowCustomization {
+  return { ...custom, playButtonSquare: !custom.playButtonSquare };
+}
+
+export function toggleSecondaryMoreInfo(custom: HomeRowCustomization): HomeRowCustomization {
+  return { ...custom, secondaryMoreInfo: !custom.secondaryMoreInfo };
+}
+
+export function toggleCwTop(custom: HomeRowCustomization): HomeRowCustomization {
+  return { ...custom, cwTop: !custom.cwTop };
+}
+
 export function addListRow(custom: HomeRowCustomization, listId: string): HomeRowCustomization {
   const cur = custom.listRows ?? [];
   if (cur.includes(listId)) return custom;
@@ -121,5 +136,5 @@ export function removeListRow(custom: HomeRowCustomization, listId: string): Hom
 }
 
 export function resetHomeRows(): HomeRowCustomization {
-  return { order: [], hidden: [], renamed: {}, numerals: [], heroSource: null, customSources: [], listRows: [] };
+  return { order: [], hidden: [], renamed: {}, numerals: [], heroSource: null, customSources: [], listRows: [], playButtonSquare: false, secondaryMoreInfo: false, cwTop: false };
 }

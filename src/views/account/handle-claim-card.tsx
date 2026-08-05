@@ -6,6 +6,7 @@ import type { Author } from "@/lib/theme-auth";
 import { inputClass } from "./fields";
 import { useHandleAvailability, type HandleStatus } from "./use-handle-availability";
 import { HandleChangeConfirm } from "./handle-change-confirm";
+import { useT } from "@/lib/i18n";
 
 const COOLDOWN_LABEL = "once every 14 days";
 
@@ -18,6 +19,7 @@ function formatDate(ms: number): string {
 }
 
 export function HandleClaimCard({ author }: { author: Author }) {
+  const t = useT();
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +63,7 @@ export function HandleClaimCard({ author }: { author: Author }) {
           <div className="flex min-w-0 flex-col">
             <span className="font-display text-[15px] text-ink">@{author.handle}</span>
             <span className="text-[12px] text-ink-subtle">
-              Locked until {formatDate(availableAt)}. You can change your handle {COOLDOWN_LABEL}.
+              {t("Locked until")} {formatDate(availableAt)}. {t("You can change your handle")} {t(COOLDOWN_LABEL)}.
             </span>
           </div>
         </div>
@@ -83,7 +85,7 @@ export function HandleClaimCard({ author }: { author: Author }) {
             setValue(e.target.value);
             setError(null);
           }}
-          placeholder={hasCustom ? author.handle ?? "yourhandle" : "yourhandle"}
+          placeholder={hasCustom ? author.handle ?? t("yourhandle") : t("yourhandle")}
           maxLength={24}
           autoComplete="off"
           autoCapitalize="off"
@@ -106,8 +108,8 @@ export function HandleClaimCard({ author }: { author: Author }) {
       <StatusLine status={status} onPick={startClaim} />
       <p className="text-[11.5px] text-ink-subtle">
         {hasCustom
-          ? `You can change your handle ${COOLDOWN_LABEL}, so pick one you'll keep.`
-          : `You can change your handle ${COOLDOWN_LABEL} after you claim it.`}
+          ? `${t("You can change your handle")} ${t(COOLDOWN_LABEL)}, ${t("so pick one you'll keep.")}`
+          : `${t("You can change your handle")} ${t(COOLDOWN_LABEL)} ${t("after you claim it.")}`}
       </p>
       {error && <p className="text-[12px] text-danger">{error}</p>}
 
@@ -125,11 +127,12 @@ export function HandleClaimCard({ author }: { author: Author }) {
 }
 
 function HandleHeader({ hasCustom }: { hasCustom: boolean }) {
+  const t = useT();
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[13px] font-semibold text-ink">Handle</span>
+      <span className="text-[13px] font-semibold text-ink">{t("Handle")}</span>
       <span className="text-[12px] text-ink-subtle">
-        {hasCustom ? "How people find you across Harbor." : "Claim one so people can find you across Harbor."}
+        {hasCustom ? t("How people find you across Harbor.") : t("Claim one so people can find you across Harbor.")}
       </span>
     </div>
   );
@@ -145,19 +148,20 @@ function StatusIcon({ status }: { status: HandleStatus }) {
 }
 
 function StatusLine({ status, onPick }: { status: HandleStatus; onPick: (s: string) => void }) {
+  const t = useT();
   if (status.state === "idle") return null;
-  if (status.state === "checking") return <span className="text-[11.5px] text-ink-subtle">Checking availability</span>;
+  if (status.state === "checking") return <span className="text-[11.5px] text-ink-subtle">{t("Checking availability")}</span>;
   if (status.state === "available")
-    return <span className="text-[11.5px] font-medium text-accent">That handle is yours to claim.</span>;
+    return <span className="text-[11.5px] font-medium text-accent">{t("That handle is yours to claim.")}</span>;
   if (status.state === "error")
-    return <span className="text-[11.5px] text-ink-subtle">Sign in to Harbor to check availability.</span>;
+    return <span className="text-[11.5px] text-ink-subtle">{t("Sign in to Harbor to check availability.")}</span>;
 
   const label =
     status.state === "taken"
-      ? status.reason ?? "That handle is taken."
+      ? status.reason ?? t("That handle is taken.")
       : status.state === "reserved"
-        ? status.reason ?? "That handle is reserved."
-        : status.reason ?? "That handle is not valid.";
+        ? status.reason ?? t("That handle is reserved.")
+        : status.reason ?? t("That handle is not valid.")
   const suggestions = "suggestions" in status ? status.suggestions ?? [] : [];
 
   return (

@@ -183,6 +183,7 @@ export function ParentalPinModal({
             type="button"
             onClick={focus}
             aria-label={t("Focus PIN entry")}
+            dir="ltr"
             className="relative flex cursor-text items-center gap-3 rounded-full px-3 py-2"
           >
             <input
@@ -220,7 +221,7 @@ export function ParentalPinModal({
           {error && (
             <p className={`text-[12.5px] font-medium ${kids ? "text-amber-200" : "text-red-300"}`}>{error}</p>
           )}
-          <div className="grid grid-cols-3 gap-2.5 pt-1">
+          <div dir="ltr" className="grid grid-cols-3 gap-2.5 pt-1">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
               <PinKey key={d} onClick={() => tap(d)} disabled={busy} kids={kids}>
                 {d}

@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Anime4kIndicator } from "@/components/player/anime4k-indicator";
 import { SvpIndicator } from "@/components/player/svp-indicator";
 import { StatsOverlay } from "@/components/player/stats-overlay";
+import { SubtitleOffsetIndicator } from "@/components/player/subtitle-offset-indicator";
 import { SubStyleBar } from "@/components/player/sub-style-bar";
 import { PictureBar } from "@/components/player/picture-bar";
 import { SubSyncBar } from "@/components/player/sub-sync-bar";
@@ -23,6 +24,7 @@ export const StageOverlays = memo(function StageOverlays({
   subShowInPip,
   subAssNative,
   showStats,
+  subtitleOffsetSec,
   holdSpeedActive,
   volumeIndicator,
   volumeHudPosition,
@@ -39,6 +41,7 @@ export const StageOverlays = memo(function StageOverlays({
   subShowInPip: boolean;
   subAssNative: boolean;
   showStats: boolean;
+  subtitleOffsetSec: number | null;
   holdSpeedActive: boolean;
   volumeIndicator: VolumeIndicatorState;
   volumeHudPosition: VolumeHudPosition;
@@ -63,6 +66,7 @@ export const StageOverlays = memo(function StageOverlays({
         />
       )}
       {showStats && !pipMode && <StatsOverlay snap={snap} engine={engine} />}
+      {!pipMode && <SubtitleOffsetIndicator delaySec={subtitleOffsetSec} />}
       {!pipMode && <Anime4kIndicator engine={engine} chromeVisible={chromeVisible} suppressed={topVolumeShowing} />}
       {!pipMode && <SvpIndicator engine={engine} chromeVisible={chromeVisible} suppressed={topVolumeShowing} />}
       {holdSpeedActive && !pipMode && (

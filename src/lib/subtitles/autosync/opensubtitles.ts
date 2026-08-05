@@ -5,7 +5,7 @@ import { normalizeLang } from "@/lib/subtitles/language";
 import { fetchAndParse, type SubCue } from "@/lib/subtitles/parser";
 
 const API_BASE = "https://api.opensubtitles.com/api/v1";
-const POS_TTL_MS = 7 * 24 * 3600 * 1000;
+const POS_TTL_MS = 30 * 24 * 3600 * 1000;
 const NEG_TTL_MS = 6 * 3600 * 1000;
 const MIN_TRUSTED_DOWNLOADS = 50;
 

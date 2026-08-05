@@ -64,7 +64,7 @@ test("auto-sync is a real toggle with a visible best-effort pill", () => {
   assert.match(hook, /const stop = useCallback\(\(\) => \{\s*activeDisposeRef\.current\?\.\(\);\s*revert\(\);/);
   const popover = read("src/components/player/autosync/autosync-popover.tsx");
   assert.match(popover, /case "best-effort":\s*return "synced";/);
-  const menu = read("src/components/player/subtitle-menu/menu-body.tsx");
+  const menu = read("src/components/player/subtitle-menu/sync-control.tsx");
   assert.match(menu, /autoSync\?\.stop\(\);/);
   assert.match(menu, /aria-pressed=\{autoSyncOn\}/);
 });

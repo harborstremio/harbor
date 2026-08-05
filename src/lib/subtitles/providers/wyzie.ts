@@ -53,7 +53,7 @@ export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
     const lang = normalizeLang(r.language) || "en";
     const fmt = (r.format || "").toLowerCase();
     out.push({
-      id: String(r.id ?? r.url),
+      id: `wyzie:${r.id ?? r.url}`,
       url: r.url,
       lang,
       langName: r.display,

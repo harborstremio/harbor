@@ -6,6 +6,15 @@ import { Section, Segmented, ToggleRow, useSettingsActiveContext } from "./share
 import { CROP_PRESETS } from "@/views/player/hooks/use-video-fill";
 import { useT } from "@/lib/i18n";
 
+const VOLUME_BOOST_OPTIONS: ReadonlyArray<{ value: string; label: string }> = [
+  { value: "1", label: "100%" },
+  { value: "1.5", label: "150%" },
+  { value: "2", label: "200%" },
+  { value: "3", label: "300%" },
+  { value: "4", label: "400%" },
+  { value: "6", label: "600%" },
+];
+
 export function QualityPanel() {
   const t = useT();
   const { settings, update } = useSettings();
@@ -126,6 +135,13 @@ export function QualityPanel() {
             {t("Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.")}
           </p>
         </div>
+        <Segmented
+          value={String(settings.volumeBoostMax)}
+          options={VOLUME_BOOST_OPTIONS}
+          onChange={(v) => update({ volumeBoostMax: Number(v) })}
+          label={t("Maximum volume boost")}
+          sub={t("How far you can boost past 100 percent on the volume bar. Higher settings can get very loud.")}
+        />
         <AudioOutputRow />
       </Section>
 

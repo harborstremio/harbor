@@ -1,10 +1,19 @@
-import { Check, FolderOpen, Languages, Loader2, Search as SearchIcon, X } from "lucide-react";
+import {
+  Check,
+  FolderOpen,
+  Languages,
+  Loader2,
+  RotateCw,
+  Search as SearchIcon,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Flag } from "@/components/flag";
-import { markImportedSub } from "@/lib/player/imported-subs";
+import { hasImportedSubTitle, markImportedSub, useImportedSubs } from "@/lib/player/imported-subs";
 import { setSecondarySub } from "@/lib/player/secondary-sub";
 import { useT } from "@/lib/i18n";
-import { Tooltip } from "../transport/tooltip";
+import { HoverTooltip } from "@/components/hover-tooltip";
+import { filterTracksByPreferredLanguage } from "@/lib/subtitles/language";
 import { SearchSection } from "./search-section";
 import { VariantRow } from "./variant-row";
 import { MenuHeader } from "./menu-header";
@@ -20,8 +29,21 @@ const ALL_LANGS = "__all__";
 
 export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   const tr = useT();
-  const { tracks, selectedId, onSelect, onClose, delaySec, metaReleaseDate, onOpenStyleBar } = props;
-  const groups = useMemo(() => groupByLang(tracks), [tracks]);
+  const { tracks, selectedId, onSelect, onClose, delaySec, metaReleaseDate, onOpenStyleBar } =
+    props;
+  const preferredLanguages = props.preferredLanguages ?? [];
+  const importedTitles = useImportedSubs();
+  const languageTracks = useMemo(() => {
+    const filtered = filterTracksByPreferredLanguage(tracks, preferredLanguages);
+
+    const keep = new Set(filtered);
+    for (const t of tracks) {
+      const isImported = hasImportedSubTitle(t.title) || importedTitles.has(t.title ?? "");
+      if (isImported || t.id === props.selectedId || t.secondary) keep.add(t);
+    }
+    return tracks.filter((t) => keep.has(t));
+  }, [tracks, preferredLanguages, importedTitles, props.selectedId]);
+  const groups = useMemo(() => groupByLang(languageTracks), [languageTracks]);
   const [searchSettled, setSearchSettled] = useState(false);
   const [activeLang, setActiveLang] = useState<string | null>(null);
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>("all");
@@ -31,11 +53,11 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   const [justImported, setJustImported] = useState<string | null>(null);
 
   useEffect(() => {
-    if (tracks.length > 0) return;
+    if (languageTracks.length > 0) return;
     setSearchSettled(false);
     const timer = setTimeout(() => setSearchSettled(true), 9000);
     return () => clearTimeout(timer);
-  }, [tracks.length]);
+  }, [languageTracks.length]);
 
   useEffect(() => {
     if (groups.length === 0) {
@@ -56,7 +78,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
     [groups, activeLang],
   );
   const visibleVariants = useMemo(() => {
-    const list = allLangs ? tracks : (activeGroup?.variants ?? []);
+    const list = allLangs ? languageTracks : (activeGroup?.variants ?? []);
     return list.filter((t) => {
       if (sourceFilter === "embedded" && t.external) return false;
       if (sourceFilter === "external" && !t.external) return false;
@@ -64,15 +86,18 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
       if (forcedOnly && !t.forced) return false;
       return true;
     });
-  }, [allLangs, tracks, activeGroup, sourceFilter, hideHI, forcedOnly]);
+  }, [allLangs, languageTracks, activeGroup, sourceFilter, hideHI, forcedOnly]);
 
-  const totalEmbedded = tracks.filter((t) => !t.external).length;
-  const totalExternal = tracks.filter((t) => t.external).length;
+  const totalEmbedded = languageTracks.filter((t) => !t.external).length;
+  const totalExternal = languageTracks.filter((t) => t.external).length;
   const offSelected = selectedId == null;
   const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
   const [localError, setLocalError] = useState<string | null>(null);
   const delayNonZero = delaySec !== 0;
-  const selectedTrack = useMemo(() => tracks.find((t) => t.id === selectedId) ?? null, [tracks, selectedId]);
+  const selectedTrack = useMemo(
+    () => tracks.find((t) => t.id === selectedId) ?? null,
+    [tracks, selectedId],
+  );
   const secondaryTrack = useMemo(() => tracks.find((t) => t.secondary) ?? null, [tracks]);
   const pickSecondary = props.onSelectSecondary ?? setSecondarySub;
   const search = useSubtitleSearch();
@@ -81,14 +106,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
     () => pickBestMatch(visibleVariants, search?.hints ?? null),
     [visibleVariants, search],
   );
-  const bestMatchHint = useMemo(() => {
-    if (!best) return null;
-    if (best.track.id === selectedId) return tr("Already on the closest match for this release");
-    const why = best.reasons.slice(0, 2).join(", ");
-    return why
-      ? tr("Switch to {name}: {why}", { name: variantTitle(best.track), why })
-      : tr("Switch to {name}", { name: variantTitle(best.track) });
-  }, [best, selectedId, tr]);
+  const betterMatch = best && best.track.id !== selectedId ? best : null;
 
   const applyBestMatch = () => {
     if (!best || best.track.id === selectedId) return;
@@ -104,7 +122,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
         filters: [{ name: "Subtitles", extensions: ["srt", "ass", "ssa", "vtt", "sub"] }],
       });
       if (typeof path !== "string") return;
-      const name = path.split(/[\\\/]/).pop() || tr("Local subtitle");
+      const name = path.split(/[\\/]/).pop() || tr("Local subtitle");
       const ok = await props.onAddSubtitle(path, undefined, name);
       if (ok === false) {
         setLocalError(tr("Couldn't load that subtitle file. Try another."));
@@ -123,13 +141,12 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <MenuHeader
-        count={tracks.length}
+        count={languageTracks.length}
         selectedTrack={selectedTrack}
+        delaySec={delaySec}
         delayNonZero={delayNonZero}
         onOpenStyleBar={onOpenStyleBar}
         onClose={onClose}
-        onBestMatch={applyBestMatch}
-        bestMatchHint={bestMatchHint}
       />
 
       {/* ── Body ── */}
@@ -187,7 +204,10 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
           )}
           {groups.length > 1 && (
             <button
-              onClick={() => setActiveLang(ALL_LANGS)}
+              onClick={() => {
+                setActiveLang(ALL_LANGS);
+                setSearchOpen(false);
+              }}
               className={`flex items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] font-medium transition-colors ${
                 allLangs
                   ? "bg-elevated text-ink ring-1 ring-edge"
@@ -196,7 +216,9 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             >
               <Languages size={14} strokeWidth={2} className="shrink-0" />
               <span className="flex-1 truncate">{tr("All languages")}</span>
-              <span className="text-[10.5px] tabular-nums text-ink-subtle">{tracks.length}</span>
+              <span className="text-[10.5px] tabular-nums text-ink-subtle">
+                {languageTracks.length}
+              </span>
             </button>
           )}
           {groups.map((g) => {
@@ -205,7 +227,10 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             return (
               <button
                 key={g.langKey}
-                onClick={() => setActiveLang(g.langKey)}
+                onClick={() => {
+                  setActiveLang(g.langKey);
+                  setSearchOpen(false);
+                }}
                 className={`group flex items-center gap-2 rounded-md px-2.5 py-2 text-start text-[12.5px] transition-colors ${
                   isActive
                     ? "bg-elevated text-ink ring-1 ring-edge"
@@ -214,9 +239,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
               >
                 <Flag language={g.langDisplay} size="sm" showLabel={false} />
                 <span className="flex-1 truncate font-medium">{g.langDisplay}</span>
-                {hasSelected && (
-                  <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
-                )}
+                {hasSelected && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />}
                 <span className="text-[10.5px] tabular-nums text-ink-subtle">
                   {g.variants.length}
                 </span>
@@ -227,10 +250,10 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
 
         {/* Track list section */}
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
-          {!searchOpen && tracks.length > 0 && (activeGroup || allLangs) && (
+          {!searchOpen && languageTracks.length > 0 && (activeGroup || allLangs) && (
             <div className="flex flex-wrap items-center gap-1.5 border-b border-edge-soft bg-canvas/15 px-3 py-2">
               <Tab active={sourceFilter === "all"} onClick={() => setSourceFilter("all")}>
-                {tr("All")} <Count value={tracks.length} />
+                {tr("All")} <Count value={languageTracks.length} />
               </Tab>
               <Tab
                 active={sourceFilter === "embedded"}
@@ -262,6 +285,23 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             </div>
           )}
 
+          {!searchOpen && betterMatch && (
+            <div className="flex shrink-0 items-center gap-3 border-b border-edge-soft bg-accent/[0.07] px-3 py-2">
+              <span className="min-w-0 flex-1 truncate text-[12px] text-ink-muted">
+                <span className="font-semibold text-ink">{tr("Better match")}</span>
+                <span className="text-ink-subtle"> · </span>
+                {variantTitle(betterMatch.track)}
+              </span>
+              <button
+                type="button"
+                onClick={applyBestMatch}
+                className="shrink-0 rounded-full bg-accent px-2.5 py-1 text-[11.5px] font-semibold text-canvas transition-[filter] hover:brightness-110"
+              >
+                {tr("Use it")}
+              </button>
+            </div>
+          )}
+
           {search?.status === "searching" && (
             <p className="flex shrink-0 items-center gap-2 border-b border-edge-soft px-3 py-1.5 text-[11.5px] text-ink-subtle">
               <Loader2 size={12} className="animate-spin motion-reduce:animate-none" />
@@ -269,10 +309,20 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
             </p>
           )}
           {search?.status === "idle" && search.lastAdded != null && (
-            <p className="shrink-0 border-b border-edge-soft px-3 py-1.5 text-[11.5px] text-ink-subtle">
-              {search.lastAdded > 0
-                ? tr("Added {count} more subtitles.", { count: search.lastAdded })
-                : tr("No new subtitles found beyond what is already listed.")}
+            <p className="flex shrink-0 items-center gap-2 border-b border-edge-soft px-3 py-1.5 text-[11.5px] text-ink-subtle">
+              <span className="flex-1">
+                {search.lastAdded > 0
+                  ? tr("Added {count} more subtitles.", { count: search.lastAdded })
+                  : tr("No new subtitles found beyond what is already listed.")}
+              </span>
+              <button
+                type="button"
+                onClick={() => search.dismiss()}
+                aria-label={tr("Dismiss")}
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+              >
+                <X size={11} strokeWidth={2.6} />
+              </button>
             </p>
           )}
 
@@ -283,7 +333,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
           ) : (
             <div className="flex-1 overflow-y-auto">
               {justImported && <ImportBanner name={justImported} />}
-              {tracks.length === 0 ? (
+              {languageTracks.length === 0 ? (
                 <EmptyState searchSettled={searchSettled} veryNewMovie={veryNewMovie} />
               ) : visibleVariants.length === 0 ? (
                 <p className="px-5 py-6 text-[13.5px] text-ink-muted">
@@ -305,6 +355,27 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
                       }
                     />
                   ))}
+                  {search && (
+                    <button
+                      type="button"
+                      disabled={search.status === "searching"}
+                      onClick={() => search.refresh()}
+                      className="mt-1 flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-medium text-ink-subtle transition-colors hover:bg-raised hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-subtle"
+                    >
+                      <RotateCw
+                        size={12}
+                        strokeWidth={2.2}
+                        className={
+                          search.status === "searching"
+                            ? "animate-spin motion-reduce:animate-none"
+                            : ""
+                        }
+                      />
+                      {search.status === "searching"
+                        ? tr("Searching…")
+                        : tr("Not the one? Search every source again")}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -325,7 +396,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
               {searchOpen ? tr("Hide search") : tr("Find more subtitles")}
             </button>
             {isTauri && (
-              <Tooltip label={tr("Load a .srt or .ass from your computer")} align="end">
+              <HoverTooltip label={tr("Load a .srt or .ass from your computer")} align="end">
                 <button
                   onClick={() => void loadLocal()}
                   className="flex h-full shrink-0 items-center gap-2 border-s border-edge-soft px-3 py-2 text-[12px] font-semibold text-ink-muted transition-colors hover:bg-canvas/40 hover:text-ink"
@@ -333,7 +404,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
                   <FolderOpen size={12} strokeWidth={2.2} />
                   {tr("Load file")}
                 </button>
-              </Tooltip>
+              </HoverTooltip>
             )}
           </div>
         </section>
@@ -341,4 +412,3 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
     </div>
   );
 }
-

@@ -68,8 +68,13 @@ export function applyLegacyToActive(): boolean {
 
 export function persistEffective(settings: Settings, profileId: string, linked: boolean): string {
   const json = serializeSettings(settings);
-  setItemWithRecovery(sourceKeyFor(profileId, linked), json);
+  const ok = setItemWithRecovery(sourceKeyFor(profileId, linked), json);
   setItemWithRecovery(MIRROR_KEY, json);
+  if (!ok) {
+    console.error(
+      `[settings] blob of ${json.length} chars did not persist; changes will be lost on restart`,
+    );
+  }
   return json;
 }
 

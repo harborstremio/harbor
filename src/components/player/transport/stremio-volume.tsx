@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { VolumeStyle } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { Tooltip } from "./tooltip";
 import {
   fractionFromValue,
@@ -28,15 +29,17 @@ export function StremioVolume({
   compact?: boolean;
 }) {
   const tr = useT();
+  const { settings } = useSettings();
+  const boostMax = Math.max(1, Math.min(VOL_MAX, settings.volumeBoostMax || 2));
   const [hover, setHover] = useState(false);
   const [pinned, setPinned] = useState(false);
   const [barNear, setBarNear] = useState(false);
-  const allowBoost = capabilities.engine === "mpv";
-  const max = allowBoost ? VOL_MAX : 1;
+  const allowBoost = capabilities.engine === "mpv" && boostMax > 1;
+  const max = allowBoost ? boostMax : 1;
   const v = snap.muted ? 0 : Math.max(0, Math.min(max, snap.volume));
   const muted = snap.muted || v === 0;
   const trackRef = useRef<HTMLDivElement>(null);
-  const fill = allowBoost ? fractionFromValue(v) : v;
+  const fill = allowBoost ? fractionFromValue(v, boostMax) : v;
   const fillPct = fill * 100;
   const boosting = allowBoost && v > 1.001;
   const pct = Math.round(v * 100);
@@ -46,7 +49,7 @@ export function StremioVolume({
     if (!t) return;
     const r = t.getBoundingClientRect();
     const f = Math.max(0, Math.min(1, 1 - (clientY - r.top) / r.height));
-    const next = allowBoost ? valueFromFraction(f) : f;
+    const next = allowBoost ? valueFromFraction(f, boostMax) : f;
     onVolume(Math.round(Math.min(max, next) * 100) / 100);
   };
 
@@ -195,14 +198,14 @@ export function StremioVolume({
                 width: barWide ? "21px" : "15px",
                 height: barWide ? "21px" : "15px",
                 bottom: `${fillPct}%`,
-                backgroundColor: boosting ? boostColor(v) : "#ffffff",
+                backgroundColor: boosting ? boostColor(v, boostMax) : "#ffffff",
               }}
             />
           </div>
         </div>
         <div
           className="mt-2 text-[11.5px] font-semibold leading-none tabular-nums transition-colors"
-          style={{ color: boosting ? boostColor(v) : "rgba(255,255,255,0.92)" }}
+          style={{ color: boosting ? boostColor(v, boostMax) : "rgba(255,255,255,0.92)" }}
         >
           {pct}%
         </div>

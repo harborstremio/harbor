@@ -13,7 +13,6 @@ import {
   SIMKL_WATCHED_RATIO,
 } from "./config";
 import { getSession } from "./session";
-import { safeFetch } from "@/lib/safe-fetch";
 
 type Snap = {
   status: string;
@@ -40,8 +39,6 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
   const { isConnected } = useSimkl();
   const { settings } = useSettings();
   const enabled = isConnected && settings.simklScrobbleEnabled;
-  const pauseOnPauseRef = useRef(settings.pauseListStatusOnPause);
-  pauseOnPauseRef.current = settings.pauseListStatusOnPause;
   const lastActionRef = useRef<LastAction>(null);
   const lastKeyRef = useRef<string | null>(null);
   const infoRef = useRef<ScrobbleInfo>(srcInfo(src));
@@ -66,7 +63,6 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
       if (lastActionRef.current !== "start" && lastActionRef.current !== "pause") return;
       const live = (getPlaybackPosition() / a.snap.durationSec) * 100;
       const progress = Math.min(100, Math.max(0, progressRef.current, live));
-      if (progress < WATCHED_MARK_PCT && !pauseOnPauseRef.current) return;
       const action = progress >= WATCHED_MARK_PCT ? "stop" : "pause";
       sendBeacon(a.metaId, a.episode, action === "stop" ? 100 : progress, action, a.info);
       lastActionRef.current = action;
@@ -82,7 +78,7 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
       if (enabled && lastActionRef.current !== "stop") {
         if (prevProgress >= WATCHED_MARK_PCT) {
           void simklScrobble("stop", prev.metaId, prev.episode, 100, prev.info);
-        } else if (prevProgress > 0 && pauseOnPauseRef.current) {
+        } else if (prevProgress > 0) {
           void simklScrobble("pause", prev.metaId, prev.episode, prevProgress, prev.info);
         }
       }
@@ -127,9 +123,7 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
       void simklScrobble("start", metaId, src.episode, progress, infoRef.current);
       lastActionRef.current = "start";
     } else if (snap.status === "paused" && lastActionRef.current === "start") {
-      if (pauseOnPauseRef.current) {
-        void simklScrobble("pause", metaId, src.episode, progress, infoRef.current);
-      }
+      void simklScrobble("pause", metaId, src.episode, progress, infoRef.current);
       lastActionRef.current = "pause";
     }
   }, [enabled, metaId, src.episode, snap.status, snap.durationSec]);
@@ -151,15 +145,7 @@ export function useSimklScrobble({ src, snap }: { src: PlayerSrc; snap: Snap }):
         const live = (getPlaybackPosition() / a.snap.durationSec) * 100;
         const progress = Math.min(100, Math.max(progressRef.current, live));
         const action = progress >= WATCHED_MARK_PCT ? "stop" : "pause";
-        if (action === "stop" || pauseOnPauseRef.current) {
-          void simklScrobble(
-            action,
-            a.metaId,
-            a.episode,
-            action === "stop" ? 100 : progress,
-            a.info,
-          );
-        }
+        sendBeacon(a.metaId, a.episode, action === "stop" ? 100 : progress, action, a.info);
         lastActionRef.current = action;
       } else {
         lastActionRef.current = "pause";
@@ -187,7 +173,7 @@ function sendBeacon(
   url.searchParams.set("app-version", SIMKL_APP_VERSION);
 
   try {
-    void safeFetch(url.toString(), {
+    void fetch(url.toString(), {
       method: "POST",
       keepalive: true,
       headers: {

@@ -717,7 +717,7 @@ pub async fn mpv_start(
         let _ = mpv.set_property("secondary-sub-visibility", "no");
     }
 
-    if let Some(fonts) = crate::fonts::locate_fonts_dir(&app) {
+    if let Some(fonts) = crate::fonts::sub_fonts_dir(&app) {
         if let Some(s) = fonts.to_str() {
             let _ = mpv.set_property("sub-fonts-dir", s);
         }
@@ -728,7 +728,8 @@ pub async fn mpv_start(
 
     if let Some(subs) = &args.subtitles {
         for s in subs {
-            let _ = mpv_argv_command(&mpv, &["sub-add", &s.url, "auto"]);
+            let url = s.url.replace('\\', "/");
+            let _ = mpv_argv_command(&mpv, &["sub-add", &url, "auto"]);
         }
     }
 
@@ -1395,7 +1396,7 @@ pub async fn mpv_save_screenshot(
     }
     let _ = mpv.set_property("screenshot-format", "png");
     let _ = mpv.set_property("screenshot-png-compression", "3");
-    let _ = mpv.set_property("screenshot-sw", "yes");
+    let _ = mpv.set_property("screenshot-sw", "no");
     mpv_argv_command(&mpv, &["screenshot-to-file", path.as_str(), "video"])
         .map_err(|e| format!("screenshot-to-file: {}", e))?;
     let target = std::path::Path::new(&path).to_path_buf();
@@ -1463,7 +1464,7 @@ pub async fn mpv_gif_start(state: State<'_, MpvState>) -> Result<(), String> {
         let started = std::time::Instant::now();
         let _ = mpv.set_property("screenshot-format", "jpg");
         let _ = mpv.set_property("screenshot-jpeg-quality", "92");
-        let _ = mpv.set_property("screenshot-sw", "yes");
+        let _ = mpv.set_property("screenshot-sw", "no");
         let mut frame: u32 = 0;
         while !stop_task.load(std::sync::atomic::Ordering::Relaxed) && frame < GIF_MAX_FRAMES {
             let path = dir_task.join(format!("f{:05}.jpg", frame));
@@ -1759,7 +1760,7 @@ pub async fn mpv_screenshot_data_url(state: State<'_, MpvState>) -> Result<Strin
     let path_str = temp.to_string_lossy().to_string();
     let _ = mpv.set_property("screenshot-format", "jpg");
     let _ = mpv.set_property("screenshot-jpeg-quality", "72");
-    let _ = mpv.set_property("screenshot-sw", "yes");
+    let _ = mpv.set_property("screenshot-sw", "no");
     mpv_argv_command(&mpv, &["screenshot-to-file", path_str.as_str(), "video"])
         .map_err(|e| format!("screenshot-to-file: {}", e))?;
     let mut waited = 0u64;
@@ -1816,6 +1817,7 @@ pub async fn mpv_sub_add(
             .map(|s| s.mpv.clone())
             .ok_or_else(|| "mpv not started".to_string())?
     };
+    let url = url.replace('\\', "/");
     let flag = if select.unwrap_or(true) {
         "select"
     } else {
@@ -1928,6 +1930,31 @@ fn normalize_subtitle_bytes(
     };
     let (text, _, _) = encoding.decode(bytes);
     text.trim_start_matches('\u{feff}').as_bytes().to_vec()
+}
+
+fn extract_subtitle_from_zip(bytes: &[u8]) -> Option<Vec<u8>> {
+    const SUB_EXTS: &[&str] = &["srt", "ass", "ssa", "vtt", "sub"];
+    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes)).ok()?;
+    let mut best: Option<(usize, u64)> = None;
+    for i in 0..archive.len() {
+        let entry = archive.by_index(i).ok()?;
+        if entry.is_dir() {
+            continue;
+        }
+        let name = entry.name().to_ascii_lowercase();
+        let ext = name.rsplit('.').next().unwrap_or("");
+        if SUB_EXTS.contains(&ext) {
+            let size = entry.size();
+            if best.is_none_or(|(_, best_size)| size > best_size) {
+                best = Some((i, size));
+            }
+        }
+    }
+    let (idx, _) = best?;
+    let mut file = archive.by_index(idx).ok()?;
+    let mut out = Vec::with_capacity(file.size() as usize);
+    std::io::Read::read_to_end(&mut file, &mut out).ok()?;
+    Some(out)
 }
 
 fn prepare_subtitle_download(
@@ -2075,6 +2102,11 @@ pub async fn sub_download(
         decoded
     } else {
         raw.to_vec()
+    };
+    let unpacked = if unpacked.len() >= 4 && &unpacked[..4] == b"PK\x03\x04" {
+        extract_subtitle_from_zip(&unpacked).unwrap_or(unpacked)
+    } else {
+        unpacked
     };
     let (ext, bytes) = prepare_subtitle_download(
         &url,
@@ -2326,11 +2358,13 @@ fn position_embedded_mpv_child(app: &AppHandle, css: MpvGeometry) -> Result<(), 
             }
         }
         let new_rect = (first, x, y, w, h);
-        let prev_rect = {
-            let mut guard = MPV_POS_LAST_RECT.lock().unwrap();
-            let prev = *guard;
-            *guard = Some(new_rect);
-            prev
+        let prev_rect = match MPV_POS_LAST_RECT.lock() {
+            Ok(mut guard) => {
+                let prev = *guard;
+                *guard = Some(new_rect);
+                prev
+            }
+            Err(_) => None,
         };
         let first_position = prev_rect.map(|r| r.0) != Some(first);
         let rect_unchanged = prev_rect == Some(new_rect);

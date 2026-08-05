@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { movieWatchedIds } from "@/lib/movie-watched";
 import { watchedFlagIds } from "@/lib/watched-flag";
 import { library, type LibraryItem } from "@/lib/stremio";
+import { stremioMovieWatched } from "@/lib/stremio-watched";
 import { authToken } from "@/lib/theme-auth";
 import { socialPost } from "./client";
 
@@ -48,20 +49,8 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
         if (!isWatchedItem(i)) continue;
         allWatchedIds.add(i._id);
 
-        if (i.type === "movie") {
+        if (i.type === "movie" && stremioMovieWatched(i)) {
           movieIds.add(i._id);
-        } else {
-          const watchedStr = i.state?.watched ?? "";
-          if (typeof watchedStr === "string" && watchedStr.trim().length > 0) {
-            const parts = watchedStr.split(",").filter((p) => p.trim().length > 0);
-            for (const p of parts) {
-              episodeKeys.add(`${i._id}:${p.trim()}`);
-            }
-          } else if (i.state?.video_id) {
-            episodeKeys.add(`${i._id}:${i.state.video_id}`);
-          } else {
-            episodeKeys.add(`${i._id}:default`);
-          }
         }
       }
     } catch {
@@ -96,7 +85,7 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
       if (Array.isArray(arr)) {
         for (const key of arr) {
           if (typeof key !== "string") continue;
-          const parts = key.split(":");
+          const parts = key.split("|");
           const metaId = parts[0];
           if (!metaId) continue;
           allWatchedIds.add(metaId);
@@ -118,15 +107,9 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
     if (raw) {
       const obj = JSON.parse(raw) as Record<string, { watched?: string | null }>;
       if (obj && typeof obj === "object") {
-        for (const [id, v] of Object.entries(obj)) {
+        for (const id of Object.keys(obj)) {
           if (!id) continue;
           allWatchedIds.add(id);
-          if (typeof v?.watched === "string" && v.watched.trim().length > 0) {
-            const parts = v.watched.split(",").filter((p) => p.trim().length > 0);
-            for (const p of parts) {
-              episodeKeys.add(`${id}:${p.trim()}`);
-            }
-          }
         }
       }
     }
@@ -169,7 +152,11 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
         if (!metaId) continue;
         allWatchedIds.add(metaId);
         if (parts.length > 1) {
-          episodeKeys.add(`${metaId}:${parts[1]}`);
+          if (parts[1] === "s0e0") {
+            movieIds.add(metaId);
+          } else {
+            episodeKeys.add(`${metaId}:${parts[1]}`);
+          }
         }
       }
     }

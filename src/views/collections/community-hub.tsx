@@ -1,5 +1,5 @@
-import { ArrowLeft, GalleryVerticalEnd, Plus, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, BookmarkPlus, Check, GalleryVerticalEnd, Plus, RefreshCw, Users } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useScrollMemory, useView } from "@/lib/view";
 import { BackToTop } from "@/components/back-to-top";
@@ -14,11 +14,15 @@ import {
   createCollection,
   deleteCollection,
   readCollections,
+  saveCommunityCollection,
   useCollections,
   type CollectionItem,
 } from "@/lib/collections";
+import { useCurrentHandle } from "./community-share-button";
 import {
+  COMMUNITY_COLLECTIONS_EVENT,
   fetchCommunityCollections,
+  notifyCommunityChanged,
   publishCollections,
   type CommunityCollection,
 } from "@/lib/social/collections-sync";
@@ -92,18 +96,33 @@ function HubGrid({
   useScrollMemory("collections-hub", scrollRef, active);
   const [community, setCommunity] = useState<CommunityCollection[] | null>(null);
   const [communityFailed, setCommunityFailed] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadCommunity = useCallback((signal?: AbortSignal) => {
+    setRefreshing(true);
+    return fetchCommunityCollections(signal)
+      .then((list) => {
+        setCommunity(list);
+        setCommunityFailed(false);
+      })
+      .catch(() => {
+        if (signal?.aborted) return;
+        setCommunityFailed(true);
+        setCommunity((prev) => prev ?? []);
+      })
+      .finally(() => setRefreshing(false));
+  }, []);
 
   useEffect(() => {
     const ctrl = new AbortController();
-    fetchCommunityCollections(ctrl.signal)
-      .then((list) => setCommunity(list))
-      .catch(() => {
-        if (ctrl.signal.aborted) return;
-        setCommunityFailed(true);
-        setCommunity([]);
-      });
-    return () => ctrl.abort();
-  }, []);
+    void loadCommunity(ctrl.signal);
+    const onChanged = () => void loadCommunity();
+    window.addEventListener(COMMUNITY_COLLECTIONS_EVENT, onChanged);
+    return () => {
+      ctrl.abort();
+      window.removeEventListener(COMMUNITY_COLLECTIONS_EVENT, onChanged);
+    };
+  }, [loadCommunity]);
 
   const atMax = collections.length >= MAX_COLLECTIONS;
 
@@ -116,7 +135,9 @@ function HubGrid({
   const remove = (id: string) => {
     deleteCollection(id);
     purgeCollectionFromPages(id);
-    void publishCollections(readCollections()).catch(() => {});
+    void publishCollections(readCollections())
+      .then(() => notifyCommunityChanged())
+      .catch(() => {});
   };
 
   return (
@@ -181,7 +202,23 @@ function HubGrid({
         </section>
 
         <section className="flex flex-col gap-5">
-          <h2 className="text-[16px] font-semibold text-ink">{t("From the community")}</h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-[16px] font-semibold text-ink">{t("From the community")}</h2>
+            <button
+              type="button"
+              onClick={() => void loadCommunity()}
+              disabled={refreshing}
+              aria-label={t("Refresh")}
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink disabled:opacity-50"
+            >
+              <RefreshCw
+                size={14}
+                strokeWidth={2.2}
+                className={refreshing ? "animate-spin" : ""}
+              />
+              {t("Refresh")}
+            </button>
+          </div>
           {community === null ? (
             <CommunityLoading />
           ) : communityFailed ? (
@@ -323,6 +360,39 @@ function CommunityCard({
   );
 }
 
+function SaveCollectionButton({ collection }: { collection: CommunityCollection }) {
+  const t = useT();
+  const collections = useCollections();
+  const currentHandle = useCurrentHandle();
+  const saved = collections.some(
+    (c) => c.sourceHandle === collection.handle && c.sourceId === collection.id,
+  );
+  const isOwn =
+    !!currentHandle && currentHandle.toLowerCase() === collection.handle.toLowerCase();
+  if (isOwn) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (!saved) saveCommunityCollection(collection);
+      }}
+      disabled={saved}
+      className={`inline-flex h-11 items-center gap-2 rounded-full px-5 text-[14px] font-semibold transition-transform duration-200 ${
+        saved
+          ? "cursor-default border border-edge-soft bg-elevated/60 text-ink-muted"
+          : "bg-accent text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] hover:scale-[1.03] active:scale-[0.98]"
+      }`}
+    >
+      {saved ? (
+        <Check size={17} strokeWidth={2.4} />
+      ) : (
+        <BookmarkPlus size={17} strokeWidth={2.2} />
+      )}
+      {saved ? t("Saved to your collections") : t("Save to my collections")}
+    </button>
+  );
+}
+
 function CommunityDetail({
   collection,
   onBack,
@@ -338,7 +408,6 @@ function CommunityDetail({
   const poster = items.find((it) => it.poster)?.poster;
   const backdrop = collection.bgImage || poster;
   const backdropSharp = !!collection.bgImage;
-  const cover = collection.coverImage || poster;
   const count = items.length;
 
   const open = (item: CollectionItem) => {
@@ -367,7 +436,7 @@ function CommunityDetail({
       </div>
 
       <div className="relative mx-auto flex w-full max-w-[1400px] flex-col gap-9 px-5 pb-24 pt-24 sm:px-8 lg:px-12 lg:pt-28">
-        <div>
+        <div className="flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={onBack}
@@ -376,64 +445,37 @@ function CommunityDetail({
             <ArrowLeft size={17} strokeWidth={2.2} className="dir-icon" />
             {t("Collections")}
           </button>
+          <SaveCollectionButton collection={collection} />
         </div>
 
-        <header className="flex flex-col gap-6 md:flex-row md:items-end md:gap-8">
-          <div className="w-full max-w-[420px] shrink-0 overflow-hidden rounded-[20px] border border-edge-soft shadow-[0_20px_60px_-24px_rgba(0,0,0,0.75)]">
-            <div
-              className="relative aspect-[16/9] w-full"
-              style={cover ? undefined : { background: posterPlate(seed) }}
-            >
-              {cover && (
-                <img
-                  src={cover}
-                  alt=""
-                  draggable={false}
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              )}
-            </div>
-          </div>
-          <div className="flex min-w-0 flex-col gap-3 pb-1">
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
-              {t("Collection")}
-            </span>
-            <h1 className="font-display text-[40px] font-medium leading-[1.04] tracking-tight text-ink">
-              {collection.name}
-            </h1>
-            <div className="flex items-center gap-2.5">
-              <UserHoverCard handle={collection.handle}>
-                <button
-                  type="button"
-                  onClick={() => requestOpenProfile(collection.handle)}
-                  aria-label={t("Open {alias} profile", { alias: collection.displayName })}
-                  className="shrink-0 rounded-full"
-                >
-                  <Avatar name={collection.displayName} src={collection.avatarUrl} size={28} />
-                </button>
-              </UserHoverCard>
-              <div className="flex min-w-0 flex-col">
-                <UserHoverCard handle={collection.handle}>
-                  <button
-                    type="button"
-                    onClick={() => requestOpenProfile(collection.handle)}
-                    className="truncate text-start text-[14px] font-semibold text-ink transition-colors hover:text-accent"
-                  >
-                    {collection.displayName}
-                  </button>
-                </UserHoverCard>
-                <span className="truncate text-[12.5px] text-ink-subtle">@{collection.handle}</span>
-              </div>
-            </div>
-            {collection.description && (
-              <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">
-                {collection.description}
-              </p>
-            )}
-            <p className="text-[13px] tabular-nums text-ink-subtle">
+        <header className="flex min-w-0 max-w-4xl flex-col gap-4">
+          <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-ink-subtle">
+            {t("Collection")}
+          </span>
+          <h1 className="font-display text-[clamp(2.6rem,6vw,4.25rem)] font-medium leading-[1.02] tracking-tight text-ink">
+            {collection.name}
+          </h1>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <UserHoverCard handle={collection.handle}>
+              <button
+                type="button"
+                onClick={() => requestOpenProfile(collection.handle)}
+                aria-label={t("Open {alias} profile", { alias: collection.displayName })}
+                className="inline-flex items-center gap-2 rounded-full border border-edge-soft bg-elevated/60 py-1 ps-1 pe-3 backdrop-blur-md transition-colors hover:bg-raised"
+              >
+                <Avatar name={collection.displayName} src={collection.avatarUrl} size={24} />
+                <span className="text-[13px] font-semibold text-ink">@{collection.handle}</span>
+              </button>
+            </UserHoverCard>
+            <span className="text-[13px] tabular-nums text-ink-subtle">
               {count === 1 ? t("{n} title", { n: count }) : t("{n} titles", { n: count })}
-            </p>
+            </span>
           </div>
+          {collection.description && (
+            <p className="max-w-2xl text-[15px] leading-relaxed text-ink-muted">
+              {collection.description}
+            </p>
+          )}
         </header>
 
         {count === 0 ? (

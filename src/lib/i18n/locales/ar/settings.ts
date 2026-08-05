@@ -1203,6 +1203,8 @@ const settings: Record<string, string> = {
   "Audio": "الصوت",
   "Shape the sound without touching your system EQ. Applies on the mpv engine; the HTML5 engine plays audio untouched.": "شكّل الصوت دون لمس معادل الصوت في نظامك. يُطبق على محرك mpv؛ محرك HTML5 يُشغل الصوت كما هو.",
   "Normalize loudness": "تطبيع مستوى الصوت",
+  "Maximum volume boost": "الحد الأقصى لتعزيز الصوت",
+  "How far you can boost past 100 percent on the volume bar. Higher settings can get very loud.": "إلى أي مدى يمكنك تجاوز 100 بالمئة على شريط الصوت. القيم الأعلى قد تجعل الصوت مرتفعًا جدًا.",
   "Evens out quiet dialogue and loud action scenes with a dynamic normalizer.": "يوازن بين الحوار الهادئ ومشاهد الحركة الصاخبة باستخدام مُطبع ديناميكي.",
   "Flat": "مسطح",
   "Bass boost": "تضخيم الباس",

@@ -4,6 +4,7 @@ import type { SourceRow } from "@/lib/custom-sources";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import type { SyncIndicatorPosition } from "@/lib/sync-toast-position";
 import type { FullscreenClockFormat, FullscreenClockStyle } from "@/lib/local-time";
+import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/subtitle-offset";
 
 export type StreamingService =
   | "netflix"
@@ -281,7 +282,7 @@ export type Settings = {
   subStyle: "shadow" | "outline" | "box";
   subFontFamily: string;
   subBold: boolean;
-  customFonts: Array<{ id: string; name: string; format: string; dataUrl?: string }>;
+  customFonts: Array<{ id: string; name: string; format: string; family?: string; dataUrl?: string }>;
   subBoxOpacity: number;
   subBoxColor: string;
   subOpacity: number;
@@ -294,6 +295,9 @@ export type Settings = {
     subdl?: boolean;
     subsource?: boolean;
   };
+  subOffsetIndicatorEnabled: boolean;
+  subOffsetIndicatorPosition: SubtitleOffsetPosition;
+  subOffsetIndicatorSize: SubtitleOffsetSize;
   subShowInPip: boolean;
   secondarySubLang: string;
   subSecondaryPlacement: "top" | "bottom";
@@ -364,6 +368,7 @@ export type Settings = {
   mpvHwdec: "auto" | "on" | "off";
   mpvBufferBoost: boolean;
   mpvDownmixStereo: boolean;
+  volumeBoostMax: number;
   mpvTweaks: Record<string, string>;
   playerSvp: boolean;
   svpVpyPath: string;
@@ -457,6 +462,9 @@ export type Settings = {
     heroSource: string | null;
     customSources: SourceRow[];
     listRows?: string[];
+    playButtonSquare?: boolean;
+    secondaryMoreInfo?: boolean;
+    cwTop?: boolean;
   };
   navCustomization: {
     order: string[];

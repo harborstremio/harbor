@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
-import { isRtxHdrBlocked, isRtxHdrEligibleSource } from "../src/lib/player/rtx-hdr-policy.ts";
+import { isRtxHdrBlocked, isRtxHdrEligibleSource } from "../src/lib/player/rtx-video-policy.ts";
 
 test("blocks RTX HDR when HDR-to-SDR or SVP is active", () => {
   assert.equal(isRtxHdrBlocked(false, false), false);

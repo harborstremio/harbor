@@ -3,6 +3,12 @@ import type { CastDeviceInfo } from "@/lib/cast";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { writePlayerPrefs } from "@/lib/player-prefs";
+import {
+  rememberedFromChoice,
+  writeRememberedSub,
+  type SubChoiceInput,
+} from "@/lib/subtitles/subtitle-memory";
+import { hasImportedSubTitle } from "@/lib/player/imported-subs";
 import type { RoomCommand } from "@/lib/together/protocol";
 
 const SEEK_ACCUM_WINDOW_MS = 700;
@@ -11,6 +17,7 @@ export function usePlaybackControls(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
   snapRef: RefObject<PlayerSnapshot>;
   metaId: string;
+  mediaKey: string;
   inRoom: boolean;
   isHost: boolean;
   hasStarted: boolean;
@@ -25,6 +32,7 @@ export function usePlaybackControls(params: {
     bridgeRef,
     snapRef,
     metaId,
+    mediaKey,
     inRoom,
     isHost,
     hasStarted,
@@ -37,11 +45,20 @@ export function usePlaybackControls(params: {
   } = params;
 
   const rememberSubChoice = useCallback(
-    (t: { lang?: string } | null | undefined) => {
-      if (t) writePlayerPrefs(metaId, t.lang ? { subLang: t.lang, subsOff: false } : { subsOff: false });
-      else writePlayerPrefs(metaId, { subsOff: true });
+    (choice: SubChoiceInput | null | undefined) => {
+      if (choice) {
+        writePlayerPrefs(
+          metaId,
+          choice.lang ? { subLang: choice.lang, subsOff: false } : { subsOff: false },
+        );
+        const imported = choice.imported === true || hasImportedSubTitle(choice.title);
+        writeRememberedSub(mediaKey, rememberedFromChoice({ ...choice, imported }));
+      } else {
+        writePlayerPrefs(metaId, { subsOff: true });
+        writeRememberedSub(mediaKey, { off: true });
+      }
     },
-    [metaId],
+    [metaId, mediaKey],
   );
 
   const cycleSubtitles = () => {

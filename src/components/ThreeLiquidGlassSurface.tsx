@@ -109,12 +109,12 @@ function PlainSurface({
     position: "relative",
     overflow: "hidden",
     borderRadius: radius,
-    ...style,
     backgroundImage: "none",
     backdropFilter: "none",
     border: "none",
     backgroundColor: variantBg(_variant),
-    boxShadow: "0 10px 28px -8px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.15)",
+    boxShadow: "0 3px 12px -6px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.08)",
+    ...style,
   };
   return (
     <div {...wrapperProps} style={plain} className={`${className} ${surfaceClassName}`}>
@@ -124,7 +124,9 @@ function PlainSurface({
 }
 
 function variantBg(variant: LiquidGlassSurfaceProps["variant"]): string {
-  return variant === "overlay" ? "rgba(8,12,20,0.92)" : "var(--color-canvas)";
+  return variant === "overlay"
+    ? "var(--color-canvas)"
+    : "color-mix(in srgb, var(--color-canvas) 60%, transparent)";
 }
 
 export function ThreeLiquidGlassSurface({

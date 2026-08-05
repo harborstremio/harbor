@@ -136,6 +136,7 @@ export function useAnimeTvdbPanel(
     }
     const items: PickerItem[] = [];
     const subset = new Map<string, KitsuEpisode[]>();
+    const claimed = new Set<number>();
     for (const s of ordering.seasons) {
       if (s.seasonNumber < 1) continue;
       const bucket = ordering.bySeason.get(s.seasonNumber) ?? [];
@@ -147,6 +148,7 @@ export function useAnimeTvdbPanel(
         const img = e.stillPath ?? (abs != null ? ordering.imageByAbs.get(abs) : undefined);
         let match = byTvdbId.get(e.id) ?? byPair.get(`${e.seasonNumber}:${e.episodeNumber}`);
         if (!match && abs != null) match = byAbs.get(abs);
+        if (match && claimed.has(match.id)) match = undefined;
         const ep: KitsuEpisode = match
           ? !match.thumbnail && img
             ? { ...match, thumbnail: img }
@@ -167,6 +169,7 @@ export function useAnimeTvdbPanel(
             };
         if (seenId.has(ep.id)) continue;
         seenId.add(ep.id);
+        if (match) claimed.add(match.id);
         eps.push(ep);
       }
       const key = String(s.seasonNumber);

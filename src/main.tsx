@@ -5,6 +5,7 @@ import { App } from "@/App";
 import { hydrateCustomThemes } from "@/lib/custom-themes";
 import { applyOsDataset } from "@/lib/platform";
 import { loadSecrets } from "@/lib/secret-store";
+import { initSubtitleCache } from "@/lib/subtitles/subtitle-cache";
 import { ModalOverlayApp } from "@/views/modal-overlay-app";
 import { HdrOverlayApp } from "@/views/hdr-overlay-app";
 import { PipApp } from "@/views/pip";
@@ -113,6 +114,7 @@ function MainRoot() {
 
 async function mount() {
   await Promise.all([loadSecrets(), hydrateCustomThemes().catch(() => {})]);
+  if (!isHdrOverlay && !isModal) void initSubtitleCache();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       {isHdrOverlay ? (

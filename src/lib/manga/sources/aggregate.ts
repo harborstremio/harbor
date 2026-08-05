@@ -14,9 +14,9 @@ const EMPTY_PROVIDER: MangaProvider = {
   pageUrls: async () => [],
 };
 
-function withTimeout<T>(p: Promise<T>, fallback: T): Promise<T> {
+function withTimeout<T>(p: Promise<T>, fallback: T, timeout = SOURCE_TIMEOUT): Promise<T> {
   return new Promise((resolve) => {
-    const t = setTimeout(() => resolve(fallback), SOURCE_TIMEOUT);
+    const t = setTimeout(() => resolve(fallback), timeout);
     p.then(
       (v) => {
         clearTimeout(t);
@@ -56,12 +56,14 @@ export function routeById(id: string): { provider: MangaProvider; orig: string }
 
 async function mergeLists(
   fn: (p: MangaProvider) => Promise<MangaSummary[]>,
+  timeout = SOURCE_TIMEOUT,
 ): Promise<MangaSummary[]> {
   const lists = await Promise.all(
     aggregateSubProviders().map((p) =>
       withTimeout(
         fn(p).then((l) => l.map((m) => ({ ...m, id: prefixId(p.id, m.id) }))),
         [] as MangaSummary[],
+        timeout,
       ).catch(() => [] as MangaSummary[]),
     ),
   );
@@ -124,7 +126,10 @@ export async function streamAggregateChapters(
     ...others.map((p) =>
       withTimeout(
         (async () => {
-          const hit = pickSameTitle(await p.search(title as string, 0).catch(() => []), title as string);
+          const hit = pickSameTitle(
+            await p.search(title as string, 0).catch(() => []),
+            title as string,
+          );
           if (!hit) return;
           const labeled = labelChapters(await p.chapters(hit.id).catch(() => []), p);
           if (labeled.length) onChunk(labeled);
@@ -157,6 +162,38 @@ function pickSameTitle(hits: MangaSummary[], title: string): MangaSummary | null
   );
 }
 
+async function mergeSearchLists(query: string): Promise<MangaSummary[]> {
+  const providers = aggregateSubProviders();
+  if (!providers.length) return [];
+
+  const lists = new Map<number, MangaSummary[]>();
+  let releaseExact: () => void = () => {};
+  const exact = new Promise<void>((resolve) => {
+    releaseExact = resolve;
+  });
+  let exactFound = false;
+
+  const requests = providers.map((provider, index) =>
+    withTimeout(
+      (provider.searchAll?.(query) ?? provider.search(query, 0)).then((items) =>
+        items.map((item) => ({ ...item, id: prefixId(provider.id, item.id) })),
+      ),
+      [] as MangaSummary[],
+      30_000,
+    ).then((items) => {
+      lists.set(index, items);
+      if (!exactFound && pickSameTitle(items, query)) {
+        exactFound = true;
+        releaseExact();
+      }
+    }),
+  );
+
+  const all = Promise.all(requests).then(() => undefined);
+  await Promise.race([all, exact]);
+  return [...lists.entries()].sort(([a], [b]) => a - b).flatMap(([, items]) => items);
+}
+
 export async function ownSourceChapters(id: string): Promise<MangaChapter[]> {
   const { source, orig } = parseId(id);
   const ownP = subById(source);
@@ -168,9 +205,12 @@ export const aggregateProvider: MangaProvider = {
   name: "All Sources",
   popular: (offset, tagId) => mergeLists((p) => p.popular(offset, tagId)),
   search: (query, offset, tagId) => mergeLists((p) => p.search(query, offset, tagId)),
+  searchAll: mergeSearchLists,
   detail: async (id) => {
     const { source, orig } = parseId(id);
-    const d = await subById(source).detail(orig).catch(() => null);
+    const d = await subById(source)
+      .detail(orig)
+      .catch(() => null);
     return d ? { ...d, id } : null;
   },
   chapters: async (id) => {
@@ -193,13 +233,18 @@ export const aggregateProvider: MangaProvider = {
           [] as MangaChapter[],
         ),
       ),
-
     );
     return [...ownChs, ...extra.flat()];
   },
   pageUrls: async (chapterId) => {
     const { source, orig } = parseId(chapterId);
-    return subById(source).pageUrls(orig).catch(() => []);
+    return subById(source)
+      .pageUrls(orig)
+      .catch(() => []);
+  },
+  setLibrary: async (id, inLibrary) => {
+    const { source, orig } = parseId(id);
+    await subById(source).setLibrary?.(orig, inLibrary);
   },
   tags: () => aggregateSubProviders()[0]?.tags?.() ?? Promise.resolve([]),
 };

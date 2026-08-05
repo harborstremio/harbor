@@ -75,6 +75,17 @@ function pngName(name: string): string {
   return `${base || "icon"}.png`;
 }
 
+function gifName(name: string): string {
+  if (/\.gif$/i.test(name)) return name;
+  const base = name.replace(/\.[^./\\]+$/, "").trim();
+  return `${base || "icon"}.gif`;
+}
+
+function asGif(file: File): File {
+  if (file.type === "image/gif" && /\.gif$/i.test(file.name)) return file;
+  return new File([file], gifName(file.name), { type: "image/gif" });
+}
+
 async function optimize(
   img: HTMLImageElement,
   name: string,
@@ -99,21 +110,32 @@ export async function cleanPng(file: File): Promise<CleanPngResult> {
   const url = URL.createObjectURL(file);
   try {
     const img = await loadImage(url);
-    if (!img || !img.naturalWidth || !img.naturalHeight) return { ok: false, error: "is not an image we can read" };
 
     if (gif) {
+      const width = img?.naturalWidth ?? 0;
+      const height = img?.naturalHeight ?? 0;
       if (file.size <= GIF_UPLOAD_MAX) {
-        const preview =
-          file.size <= GIF_PREVIEW_MAX ? await fileToDataUrl(file).catch(() => previewFrom(img)) : previewFrom(img);
-        return { ok: true, icon: { file, preview, width: img.naturalWidth, height: img.naturalHeight, optimized: false } };
+        let preview = "";
+        if (file.size <= GIF_PREVIEW_MAX) {
+          preview = await fileToDataUrl(file).catch(() => "");
+          if (!preview && img) preview = previewFrom(img);
+        } else {
+          preview = img ? previewFrom(img) : await fileToDataUrl(file).catch(() => "");
+        }
+        if (preview) return { ok: true, icon: { file: asGif(file), preview, width, height, optimized: false } };
       }
-      const opt = await optimize(img, file.name);
-      if (!opt) return { ok: false, error: "could not be optimized" };
-      return {
-        ok: true,
-        icon: { file: opt.file, preview: previewFrom(img), width: opt.width, height: opt.height, optimized: true, flattened: true },
-      };
+      if (img) {
+        const opt = await optimize(img, file.name);
+        if (opt)
+          return {
+            ok: true,
+            icon: { file: opt.file, preview: previewFrom(img), width: opt.width, height: opt.height, optimized: true, flattened: true },
+          };
+      }
+      return { ok: false, error: "could not be optimized" };
     }
+
+    if (!img || !img.naturalWidth || !img.naturalHeight) return { ok: false, error: "is not an image we can read" };
 
     const preview = previewFrom(img);
     const isPng = !!head && hasPngMagic(head);

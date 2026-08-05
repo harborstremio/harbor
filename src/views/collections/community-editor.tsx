@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Eye, ImagePlus, Loader2, Plus, Search, Trash2, X } from "lucide-react";
+import { ArrowLeft, Check, Eye, GripVertical, ImagePlus, ListOrdered, Loader2, Plus, Search, Trash2, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
@@ -20,9 +20,11 @@ import {
   removeCollectionTag,
   removeFromCollection,
   renameCollection,
+  reorderCollectionItems,
   setCollectionBackground,
   setCollectionCover,
   setCollectionDescription,
+  setCollectionNumbered,
   toggleInCollection,
   useCollection,
   type CollectionItemType,
@@ -72,6 +74,14 @@ export function CommunityCollectionEditor({
   const [confirmClear, setConfirmClear] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const clearTimerRef = useRef<number | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [order, setOrder] = useState<string[]>(() => collection?.items.map((it) => it.id) ?? []);
+
+  const itemIds = collection?.items.map((it) => it.id).join(",") ?? "";
+  useEffect(() => {
+    if (dragId) return;
+    setOrder(itemIds ? itemIds.split(",") : []);
+  }, [itemIds, dragId]);
 
   useEffect(() => {
     const q = query.trim();
@@ -127,6 +137,14 @@ export function CommunityCollectionEditor({
     () => (typeFilter === "all" ? hits : hits.filter((h) => h.type === typeFilter)),
     [hits, typeFilter],
   );
+  const orderedItems = useMemo(() => {
+    const source = collection?.items ?? [];
+    const byId = new Map(source.map((it) => [it.id, it] as const));
+    const seq = order.length ? order : source.map((it) => it.id);
+    const out = seq.map((oid) => byId.get(oid)).filter((x): x is (typeof source)[number] => !!x);
+    for (const it of source) if (!out.includes(it)) out.push(it);
+    return out;
+  }, [collection, order]);
   const hitFilters: { id: "all" | CollectionItemType; label: string; count: number }[] = [
     { id: "all", label: t("All"), count: hits.length },
     { id: "movie", label: t("Movies"), count: hitCounts.movie },
@@ -197,6 +215,32 @@ export function CommunityCollectionEditor({
     syncSoon();
   };
 
+  const onDragEnterItem = (overId: string) => {
+    if (!dragId || dragId === overId) return;
+    setOrder((cur) => {
+      const base = cur.length ? [...cur] : collection.items.map((it) => it.id);
+      const from = base.indexOf(dragId);
+      const to = base.indexOf(overId);
+      if (from < 0 || to < 0) return cur;
+      base.splice(from, 1);
+      base.splice(to, 0, dragId);
+      return base;
+    });
+  };
+
+  const commitReorder = () => {
+    if (dragId && order.length) {
+      reorderCollectionItems(id, order);
+      syncSoon();
+    }
+    setDragId(null);
+  };
+
+  const toggleNumbered = () => {
+    setCollectionNumbered(id, !collection.numbered);
+    syncSoon();
+  };
+
   return (
     <main
       ref={scrollRef}
@@ -248,10 +292,15 @@ export function CommunityCollectionEditor({
             onUpload={async (file) => {
               const local = await fileToCollectionCover(file);
               setCollectionCover(id, local);
+              await publishCollections(readCollections()).catch(() => {});
               try {
                 const { url } = await uploadCollectionCover(id, file);
                 if (url) setCollectionCover(id, url);
-              } catch {}
+              } catch {
+                throw new Error(
+                  t("Saved on your device, but it couldn't be uploaded for others to see. Try again."),
+                );
+              }
               syncSoon();
             }}
             onRemove={async () => {
@@ -268,10 +317,15 @@ export function CommunityCollectionEditor({
             onUpload={async (file) => {
               const local = await fileToCollectionBackground(file);
               setCollectionBackground(id, local);
+              await publishCollections(readCollections()).catch(() => {});
               try {
                 const { url } = await uploadCollectionBackground(id, file);
                 if (url) setCollectionBackground(id, url);
-              } catch {}
+              } catch {
+                throw new Error(
+                  t("Saved on your device, but it couldn't be uploaded for others to see. Try again."),
+                );
+              }
               syncSoon();
             }}
             onRemove={async () => {
@@ -372,6 +426,40 @@ export function CommunityCollectionEditor({
               </span>
             </div>
           </div>
+
+          {collection.items.length > 0 && (
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!!collection.numbered}
+              onClick={toggleNumbered}
+              className="flex items-center justify-between gap-3 rounded-2xl border border-edge-soft bg-elevated/40 px-4 py-3 text-start transition-colors hover:border-edge"
+            >
+              <span className="flex min-w-0 items-center gap-2.5">
+                <ListOrdered size={18} strokeWidth={2} className="shrink-0 text-ink-muted" />
+                <span className="min-w-0">
+                  <span className="block text-[13.5px] font-semibold text-ink">
+                    {t("Number the titles")}
+                  </span>
+                  <span className="block text-[12px] leading-snug text-ink-subtle">
+                    {t("Show rank numbers on the cards. Drag the titles below to set the order.")}
+                  </span>
+                </span>
+              </span>
+              <span
+                aria-hidden
+                className={`flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+                  collection.numbered ? "bg-accent" : "bg-edge"
+                }`}
+              >
+                <span
+                  className={`h-4 w-4 rounded-full bg-white transition-transform ${
+                    collection.numbered ? "translate-x-4" : ""
+                  }`}
+                />
+              </span>
+            </button>
+          )}
 
           <div className="relative w-full max-w-xl">
             <Search
@@ -489,20 +577,45 @@ export function CommunityCollectionEditor({
 
           {collection.items.length > 0 && (
             <div className="mt-2 flex flex-col gap-3">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                {t("In this collection")}
-              </p>
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+                  {t("In this collection")}
+                </p>
+                {orderedItems.length > 1 && (
+                  <p className="text-[11.5px] text-ink-subtle">{t("Drag to reorder")}</p>
+                )}
+              </div>
               <div
                 className="grid gap-4"
                 style={{ gridTemplateColumns: "repeat(auto-fill, minmax(112px, 1fr))" }}
               >
-                {collection.items.map((item) => (
-                  <div key={item.id} className="group/item flex flex-col gap-1.5">
+                {orderedItems.map((item, i) => (
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={() => setDragId(item.id)}
+                    onDragEnter={() => onDragEnterItem(item.id)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDragEnd={commitReorder}
+                    onDrop={commitReorder}
+                    className={`group/item flex cursor-grab flex-col gap-1.5 active:cursor-grabbing ${
+                      dragId === item.id ? "opacity-50" : ""
+                    }`}
+                  >
                     <div className="relative">
                       <ResultPoster id={item.id} poster={item.poster} />
-                      <span className="pointer-events-none absolute start-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/55 py-0.5 ps-1.5 pe-2 text-[10px] font-semibold text-white/90 backdrop-blur-md">
-                        <span className={`h-1.5 w-1.5 rounded-full ${TYPE_DOT[item.type]}`} />
-                        {typeLabel(item.type)}
+                      {collection.numbered ? (
+                        <span className="pointer-events-none absolute start-1.5 top-1.5 flex min-w-[1.4rem] items-center justify-center rounded-full bg-black/70 px-1.5 py-0.5 text-[11.5px] font-bold tabular-nums text-white backdrop-blur-md">
+                          {i + 1}
+                        </span>
+                      ) : (
+                        <span className="pointer-events-none absolute start-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-black/55 py-0.5 ps-1.5 pe-2 text-[10px] font-semibold text-white/90 backdrop-blur-md">
+                          <span className={`h-1.5 w-1.5 rounded-full ${TYPE_DOT[item.type]}`} />
+                          {typeLabel(item.type)}
+                        </span>
+                      )}
+                      <span className="pointer-events-none absolute bottom-1.5 start-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/45 text-white/70 opacity-0 backdrop-blur-md transition-opacity group-hover/item:opacity-100">
+                        <GripVertical size={13} strokeWidth={2} />
                       </span>
                       <button
                         type="button"
@@ -514,7 +627,12 @@ export function CommunityCollectionEditor({
                         <X size={13} strokeWidth={2.4} />
                       </button>
                     </div>
-                    <span className="line-clamp-1 text-[12px] text-ink-muted">{item.name}</span>
+                    <span className="flex items-center gap-1.5 text-[12px] text-ink-muted">
+                      {collection.numbered && (
+                        <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${TYPE_DOT[item.type]}`} />
+                      )}
+                      <span className="line-clamp-1">{item.name}</span>
+                    </span>
                   </div>
                 ))}
               </div>

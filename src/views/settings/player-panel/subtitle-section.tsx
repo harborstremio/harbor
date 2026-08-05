@@ -1,6 +1,8 @@
 import { Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import godfatherStill from "@/assets/godfather-offer.svg";
+import { sfntFamilyName } from "@/lib/font-family-name";
+import { saveFontData } from "@/lib/font-storage";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { ColorPopoverTrigger } from "../color-picker";
@@ -140,9 +142,12 @@ export function SubtitleStylePanel() {
             type="range"
             min={1}
             max={6}
-            step={1}
+            step={0.5}
             value={Math.max(1, settings.subBorderSize)}
-            onChange={(e) => update({ subBorderSize: parseInt(e.target.value, 10) })}
+            onChange={(e) => {
+              const v = parseFloat(e.target.value);
+              if (Number.isFinite(v)) update({ subBorderSize: Math.min(6, Math.max(1, v)) });
+            }}
             className="h-1 w-full appearance-none rounded-full bg-edge-soft accent-ink"
           />
         </SubField>
@@ -430,15 +435,21 @@ function FontPicker() {
         r.readAsDataURL(file);
       });
       const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+      const bytes = await file.arrayBuffer();
+      const family = sfntFamilyName(bytes) ?? undefined;
+      const face = new FontFace(`harbor-font-${id}`, bytes, { display: "swap" });
+      await face.load();
+      await saveFontData(id, dataUrl);
+      document.fonts.add(face);
       const baseName = file.name.replace(/\.(ttf|otf|woff2?|ttc)$/i, "");
       const next = [
         ...customFonts,
-        { id, name: baseName || `Custom ${customFonts.length + 1}`, dataUrl, format: formatMap[ext] },
+        { id, name: baseName || `Custom ${customFonts.length + 1}`, family, format: formatMap[ext] },
       ];
       update({ customFonts: next, subFontFamily: `custom:${id}` });
     } catch (e) {
       console.warn("[fonts] read failed", e);
-      setError("Couldn't read that font file.");
+      setError("Couldn't save that font. It may be invalid, or storage is full.");
     }
   };
 
@@ -460,6 +471,30 @@ function FontPicker() {
 
   const confirmFont = customFonts.find((f) => `custom:${f.id}` === `custom:${confirmId}`);
 
+  const [unloaded, setUnloaded] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    if (typeof document === "undefined" || !("fonts" in document)) return;
+    let cancelled = false;
+    const check = () => {
+      const missing = new Set<string>();
+      for (const f of customFonts) {
+        let ok = false;
+        document.fonts.forEach((face) => {
+          if (face.family === `harbor-font-${f.id}` && face.status === "loaded") ok = true;
+        });
+        if (!ok) missing.add(f.id);
+      }
+      if (!cancelled) setUnloaded(missing);
+    };
+    check();
+    void document.fonts.ready.then(check);
+    const t = window.setTimeout(check, 1200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [customFonts]);
+
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
@@ -473,15 +508,19 @@ function FontPicker() {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {allFonts.map((f) => {
           const sel = settings.subFontFamily === f.id;
+          const broken = f.custom && unloaded.has(f.id.slice("custom:".length));
           return (
             <div key={f.id} className="relative">
               <button
                 type="button"
                 onClick={() => update({ subFontFamily: f.id })}
+                title={broken ? t("This font did not load. Remove it and upload it again.") : undefined}
                 className={`flex h-11 w-full items-center justify-center rounded-xl border px-2 text-[13px] font-semibold transition-colors ${
-                  sel
-                    ? "border-ink bg-elevated text-ink"
-                    : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
+                  broken
+                    ? "border-danger/40 bg-danger/10 text-danger"
+                    : sel
+                      ? "border-ink bg-elevated text-ink"
+                      : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
                 }`}
                 style={{ fontFamily: previewFamily(f.id) }}
               >

@@ -14,6 +14,10 @@ import {
   sanitizeFullscreenClockStyle,
 } from "@/lib/local-time";
 import { normalizePosterCardSettings } from "@/lib/poster-backdrop-expansion";
+import {
+  sanitizeSubtitleOffsetPosition,
+  sanitizeSubtitleOffsetSize,
+} from "@/lib/player/subtitle-offset";
 
 const RETIRED_GEMINI = new Set([
   "gemini-2.0-flash",
@@ -144,6 +148,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _navThemeRepairV1?: boolean;
       _playlistsTabV1?: boolean;
       _smoothScrollOptIn?: boolean;
+      _streamCacheCapV1?: boolean;
     };
     if (!parsed._animeRowsV1) {
       const prev = (parsed.animeRows ?? {}) as Partial<Settings["animeRows"]>;
@@ -232,6 +237,15 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       parsed.smoothScroll = false;
       parsed._smoothScrollOptIn = true;
     }
+    if (!parsed._streamCacheCapV1) {
+      if (parsed.streamCacheMaxGb === 0 || parsed.streamCacheMaxGb == null) {
+        parsed.streamCacheMaxGb = DEFAULT.streamCacheMaxGb;
+      }
+      if (parsed.streamCacheRetentionHours === 24 || parsed.streamCacheRetentionHours == null) {
+        parsed.streamCacheRetentionHours = DEFAULT.streamCacheRetentionHours;
+      }
+      parsed._streamCacheCapV1 = true;
+    }
     if (!parsed._playlistsTabV1) {
       const lists = parsed.iptvPlaylists;
       const hasVodSource =
@@ -273,6 +287,12 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
           : DEFAULT.fullscreenClockShowEndTime,
       fullscreenClockSizePx: sanitizeFullscreenClockSize(parsed.fullscreenClockSizePx),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
+      subOffsetIndicatorEnabled:
+        typeof parsed.subOffsetIndicatorEnabled === "boolean"
+          ? parsed.subOffsetIndicatorEnabled
+          : DEFAULT.subOffsetIndicatorEnabled,
+      subOffsetIndicatorPosition: sanitizeSubtitleOffsetPosition(parsed.subOffsetIndicatorPosition),
+      subOffsetIndicatorSize: sanitizeSubtitleOffsetSize(parsed.subOffsetIndicatorSize),
       subProvidersEnabled: {
         ...DEFAULT.subProvidersEnabled,
         ...(parsed.subProvidersEnabled ?? {}),

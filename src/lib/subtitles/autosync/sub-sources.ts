@@ -55,7 +55,7 @@ export type AggregateSubResult = {
   degraded: SubProviderId[];
 };
 
-const POS_TTL_MS = 7 * 24 * 3600 * 1000;
+const POS_TTL_MS = 30 * 24 * 3600 * 1000;
 const NEG_TTL_MS = 6 * 3600 * 1000;
 const DEFAULT_TIMEOUT_MS = 8000;
 

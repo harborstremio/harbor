@@ -1,3 +1,4 @@
+import coverage from "./ar/coverage";
 import addons from "./ar/addons";
 import awards from "./ar/awards";
 import catalog from "./ar/catalog";
@@ -26,6 +27,7 @@ import controllers from "./ar/controllers";
 import used from "./ar/used";
 
 const ar: Record<string, string> = {
+  ...coverage,
   ...chrome,
   ...common,
   ...catalog,

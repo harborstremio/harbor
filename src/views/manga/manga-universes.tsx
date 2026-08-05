@@ -1,11 +1,11 @@
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePageVisible } from "@/lib/visibility";
 import { useT } from "@/lib/i18n";
 import { mangaBackdrop } from "@/lib/manga/backdrop";
 import { topCharacterImage } from "@/lib/manga/character";
 import { universeLogo } from "@/lib/manga/universe-logo";
-import { searchManga } from "@/lib/manga/api";
+import { searchMangaEverywhere } from "@/lib/manga/api";
 import { MANGA_UNIVERSES, type MangaUniverse } from "@/lib/manga/universes";
 
 const AMES = '"QR Ames Beta", var(--font-display), serif';
@@ -58,7 +58,15 @@ function useUniverseLogo(query: string, baked?: string): string | null {
   return baked ?? url;
 }
 
-function BannerLayer({ name, backdrop, active }: { name: string; backdrop?: string; active: boolean }) {
+function BannerLayer({
+  name,
+  backdrop,
+  active,
+}: {
+  name: string;
+  backdrop?: string;
+  active: boolean;
+}) {
   const [seen, setSeen] = useState(active);
   useEffect(() => {
     if (active) setSeen(true);
@@ -122,7 +130,9 @@ export function UniversesCta({ onClick }: { onClick: () => void }) {
       </span>
       <div className="relative flex min-w-0 flex-1 flex-col">
         <span className="text-[15.5px] font-semibold text-ink">{t("Universes")}</span>
-        <span className="truncate text-[13px] text-ink-muted">{t("One Piece, Naruto and more worlds")}</span>
+        <span className="truncate text-[13px] text-ink-muted">
+          {t("One Piece, Naruto and more worlds")}
+        </span>
       </div>
       <ChevronRight
         size={22}
@@ -132,14 +142,26 @@ export function UniversesCta({ onClick }: { onClick: () => void }) {
   );
 }
 
-function UniverseCard({ universe, onSelect }: { universe: MangaUniverse; onSelect: () => void }) {
+function UniverseCard({
+  universe,
+  onSelect,
+  loading,
+  disabled,
+}: {
+  universe: MangaUniverse;
+  onSelect: () => void;
+  loading: boolean;
+  disabled: boolean;
+}) {
   const art = useBackdrop(universe.query, universe.backdrop);
   const logo = useUniverseLogo(universe.noLogo ? "" : universe.query, universe.logo);
   return (
     <button
       type="button"
       onClick={onSelect}
-      className="group relative aspect-[16/10] overflow-hidden rounded-2xl ring-1 ring-edge-soft transition-shadow duration-200 [clip-path:inset(0_round_1rem)] hover:ring-edge active:scale-[0.98]"
+      disabled={disabled}
+      aria-busy={loading}
+      className="group relative aspect-[16/10] overflow-hidden rounded-2xl ring-1 ring-edge-soft transition-[box-shadow,opacity,transform] duration-200 [clip-path:inset(0_round_1rem)] hover:ring-edge active:scale-[0.96] disabled:cursor-wait disabled:opacity-70 motion-reduce:active:scale-100"
     >
       <div className="absolute inset-0" style={{ background: NEUTRAL }} />
       {art && (
@@ -163,6 +185,11 @@ function UniverseCard({ universe, onSelect }: { universe: MangaUniverse; onSelec
           style={{ fontFamily: AMES }}
         >
           {universe.name}
+        </span>
+      )}
+      {loading && (
+        <span className="absolute end-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-black/55 text-white ring-1 ring-white/15 backdrop-blur-sm">
+          <Loader2 size={15} className="animate-spin motion-reduce:animate-none" />
         </span>
       )}
     </button>
@@ -204,10 +231,17 @@ export function MangaUniverses({
   onBack: () => void;
 }) {
   const t = useT();
+  const [selecting, setSelecting] = useState<string | null>(null);
   const select = async (u: MangaUniverse) => {
-    const results = await searchManga(u.query, 0).catch(() => []);
-    const found = pickBestMatch(results, u.query, u.name);
-    if (found) onOpen(found.id);
+    if (selecting) return;
+    setSelecting(u.id);
+    try {
+      const results = await searchMangaEverywhere(u.query).catch(() => []);
+      const found = pickBestMatch(results, u.query, u.name);
+      if (found) onOpen(found.id);
+    } finally {
+      setSelecting(null);
+    }
   };
   return (
     <div className="animate-fade-in flex flex-col gap-6">
@@ -220,14 +254,25 @@ export function MangaUniverses({
         {t("Back")}
       </button>
       <div className="flex flex-col gap-1.5">
-        <h1 className="text-[34px] font-medium tracking-tight text-ink" style={{ fontFamily: AMES }}>
+        <h1
+          className="text-[34px] font-medium tracking-tight text-ink"
+          style={{ fontFamily: AMES }}
+        >
           {t("Universes")}
         </h1>
-        <p className="text-[15px] text-ink-muted">{t("Pick a world and dive into everything in it.")}</p>
+        <p className="text-[15px] text-ink-muted">
+          {t("Pick a world and dive into everything in it.")}
+        </p>
       </div>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {MANGA_UNIVERSES.map((u) => (
-          <UniverseCard key={u.id} universe={u} onSelect={() => void select(u)} />
+          <UniverseCard
+            key={u.id}
+            universe={u}
+            onSelect={() => void select(u)}
+            loading={selecting === u.id}
+            disabled={selecting !== null}
+          />
         ))}
       </div>
     </div>

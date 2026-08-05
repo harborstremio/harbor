@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export function HandleChangeConfirm({
   current,
@@ -14,6 +15,7 @@ export function HandleChangeConfirm({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -41,9 +43,9 @@ export function HandleChangeConfirm({
       >
         <h2 className="text-[18px] font-bold text-ink">Change your handle?</h2>
         <p className="mt-2.5 text-[14px] leading-relaxed text-ink-muted">
-          You are changing <span className="font-display text-ink">@{current}</span> to{" "}
-          <span className="font-display text-ink">@{next}</span>. You will not be able to change it
-          again for 14 days, and your old handle may be taken by someone else.
+          {t("You are changing")} <span className="font-display text-ink">@{current}</span> {t("to")}{" "}
+          <span className="font-display text-ink">@{next}</span>. {t("You will not be able to change it again for 14 days, and your old handle may be taken by someone else.")}
+          
         </p>
         <div className="mt-6 flex gap-2.5">
           <button
@@ -51,7 +53,7 @@ export function HandleChangeConfirm({
             onClick={onCancel}
             className="h-11 flex-1 rounded-xl bg-elevated text-[14.5px] font-semibold text-ink transition-colors hover:bg-raised"
           >
-            Keep @{current}
+            {t("Keep")} @{current}
           </button>
           <button
             type="button"
@@ -60,7 +62,7 @@ export function HandleChangeConfirm({
             autoFocus
             className="flex h-11 flex-1 items-center justify-center rounded-xl bg-ink text-[14.5px] font-semibold text-canvas transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-50 motion-reduce:active:scale-100"
           >
-            {busy ? <Loader2 size={15} className="animate-spin" /> : "Change handle"}
+            {busy ? <Loader2 size={15} className="animate-spin" /> : t("Change handle")}
           </button>
         </div>
       </div>

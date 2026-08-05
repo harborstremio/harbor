@@ -1,8 +1,9 @@
 import { Minus, Plus, Volume2, VolumeX } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { VolumeStyle } from "@/lib/player-chrome";
 import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { Tooltip } from "./tooltip";
 import {
   NORMAL_FRACTION,
@@ -27,22 +28,29 @@ export function VolumeControl({
   style?: VolumeStyle;
 }) {
   const tr = useT();
-  const allowBoost = capabilities.engine === "mpv";
-  const max = allowBoost ? VOL_MAX : 1;
+  const { settings } = useSettings();
+  const boostMax = Math.max(1, Math.min(VOL_MAX, settings.volumeBoostMax || 2));
+  const allowBoost = capabilities.engine === "mpv" && boostMax > 1;
+  const max = allowBoost ? boostMax : 1;
   const v = snap.muted ? 0 : Math.max(0, Math.min(max, snap.volume));
   const trackRef = useRef<HTMLDivElement>(null);
+  const [barNear, setBarNear] = useState(false);
+  const [pinned, setPinned] = useState(false);
 
   const setFromClientX = (clientX: number) => {
     const t = trackRef.current;
     if (!t) return;
     const rect = t.getBoundingClientRect();
     const f = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    const next = allowBoost ? valueFromFraction(f) : f;
+    let next = allowBoost ? valueFromFraction(f, boostMax) : f;
+    if (Math.abs(next - 1) < 0.06) next = 1;
+    else if (next < 0.03) next = 0;
     onVolume(Math.round(Math.min(max, next) * 100) / 100);
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
     e.currentTarget.setPointerCapture(e.pointerId);
+    setPinned(true);
     setFromClientX(e.clientX);
   };
   const onPointerMove = (e: React.PointerEvent) => {
@@ -51,6 +59,7 @@ export function VolumeControl({
   };
   const onPointerUp = (e: React.PointerEvent) => {
     e.currentTarget.releasePointerCapture(e.pointerId);
+    setPinned(false);
   };
 
   const onWheel = (e: React.WheelEvent) => {
@@ -60,8 +69,8 @@ export function VolumeControl({
     onVolume(Math.round(next * 100) / 100);
   };
 
-  const fillFraction = allowBoost ? fractionFromValue(v) : v;
-  const color = boostColor(v);
+  const fillFraction = allowBoost ? fractionFromValue(v, boostMax) : v;
+  const color = boostColor(v, boostMax);
   const muted = snap.muted || v === 0;
   const pct = Math.round(v * 100);
   const boosting = allowBoost && v > 1.001;
@@ -129,8 +138,9 @@ export function VolumeControl({
     );
   }
 
+  const active = barNear || pinned;
   return (
-    <div className="flex items-center gap-2" onWheel={onWheel}>
+    <div className="flex items-center gap-1.5" onWheel={onWheel}>
       {muteBtn}
       <div
         ref={trackRef}
@@ -138,32 +148,55 @@ export function VolumeControl({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        className="relative h-2 shrink-0 cursor-pointer rounded-full bg-white/15"
+        onMouseEnter={() => setBarNear(true)}
+        onMouseLeave={() => setBarNear(false)}
+        className="relative flex h-12 shrink-0 cursor-pointer touch-none items-center"
         style={{ width: TRACK_WIDTH }}
       >
         <div
-          className="pointer-events-none absolute inset-y-0 left-0 rounded-full"
-          style={{ width: `${filledPct}%`, background: fillBackground }}
-        />
-        <div
-          className="pointer-events-none absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            left: `${filledPct}%`,
-            width: 14,
-            height: 14,
-            background: boosting ? color : "white",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
-          }}
-        />
-      </div>
-      {boosting && (
-        <span
-          className="text-[12px] font-semibold tabular-nums leading-none"
-          style={{ color, minWidth: 36 }}
+          className="pointer-events-none relative w-full rounded-full bg-white/[0.18] transition-[height] duration-200 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+          style={{ height: active ? 8 : 4 }}
         >
-          {pct}%
-        </span>
-      )}
+          {allowBoost && (
+            <div
+              className="absolute inset-y-0 rounded-r-full"
+              style={{
+                left: `${breakPct}%`,
+                right: 0,
+                background: "linear-gradient(to right, rgba(245,158,11,0.18), rgba(220,38,38,0.26))",
+              }}
+            />
+          )}
+          <div
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{ width: `${filledPct}%`, background: fillBackground }}
+          />
+          {allowBoost && (
+            <div
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/40 transition-[height] duration-200"
+              style={{ left: `${breakPct}%`, width: 2, height: active ? 12 : 8 }}
+            />
+          )}
+          <div
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full transition-[width,height] duration-200 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+            style={{
+              left: `${filledPct}%`,
+              width: active ? 17 : 12,
+              height: active ? 17 : 12,
+              background: boosting ? color : "white",
+              boxShadow: active ? "0 2px 10px rgba(0,0,0,0.55)" : "0 1px 5px rgba(0,0,0,0.5)",
+            }}
+          />
+          <div
+            className={`absolute bottom-full mb-3 -translate-x-1/2 rounded-md bg-black/80 px-1.5 py-0.5 text-[11px] font-semibold leading-none tabular-nums backdrop-blur-sm transition-[opacity,transform] duration-150 ${
+              active || boosting ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
+            }`}
+            style={{ left: `${filledPct}%`, color: boosting ? color : "rgba(255,255,255,0.95)" }}
+          >
+            {pct}%
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

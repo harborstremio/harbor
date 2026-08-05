@@ -32,7 +32,18 @@ test("the declared aspect ratios match the aspect padding", () => {
 });
 
 test("row tracks do not bleed the next card into horizontal padding", () => {
-  assert.match(row, /const trackPad = dockEnabled \? "pb-8 pt-14 -mb-8 -mt-14" : "py-5 -my-5";/);
+  const track = row.match(/const trackPad = dockEnabled \? "([^"]*)" : "([^"]*)";/);
+  assert.ok(track, "trackPad must stay a single declaration so the sliver fix is auditable");
+  for (const cls of [track[1], track[2]]) {
+    const pad = [...cls.matchAll(/(?:^|\s)p([xy]?)-(\d+)/g)];
+    for (const [, axis, n] of pad) {
+      assert.match(
+        cls,
+        new RegExp(`(?:^|\\s)-m${axis}-${n}(?:\\s|$)`),
+        `p${axis}-${n} in "${cls}" is not cancelled by -m${axis}-${n}, which shows a sliver of the next card`,
+      );
+    }
+  }
   assert.doesNotMatch(row, /px-5 pb-8 pt-14 -mx-5/, "horizontal padding shows a sliver of the next card");
   assert.doesNotMatch(row, /"p-5 -m-5"/, "horizontal padding shows a sliver of the next card");
 });

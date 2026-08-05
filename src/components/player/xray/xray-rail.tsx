@@ -8,12 +8,25 @@ type Props = {
   galleryReady: boolean;
   progress: { done: number; total: number };
   error: string | null;
+  needsTmdbKey?: boolean;
   onViewAll: () => void;
   onClose: () => void;
 };
 
-export function XrayRail({ people, ready, galleryReady, progress, error, onViewAll, onClose }: Props) {
+export function XrayRail({
+  people,
+  ready,
+  galleryReady,
+  progress,
+  error,
+  needsTmdbKey,
+  onViewAll,
+  onClose,
+}: Props) {
   const t = useT();
+  // An empty gallery can never match anyone, so saying "Looking for who is on
+  // screen" forever is a lie. Say what is actually missing.
+  const emptyGallery = galleryReady && progress.total === 0;
   const status = error
     ? t("X-Ray unavailable")
     : !ready
@@ -22,9 +35,13 @@ export function XrayRail({ people, ready, galleryReady, progress, error, onViewA
         ? progress.total > 0
           ? `${t("Reading the cast")} ${progress.done}/${progress.total}`
           : t("Reading the cast")
-        : people.length === 0
-          ? t("Looking for who is on screen")
-          : null;
+        : emptyGallery
+          ? needsTmdbKey
+            ? t("Add a TMDB key in Settings to identify the cast.")
+            : t("No cast photos are available for this title.")
+          : people.length === 0
+            ? t("Looking for who is on screen")
+            : null;
 
   return (
     <div className="pointer-events-auto absolute left-0 top-24 z-40 max-h-[68%] w-[300px] animate-in fade-in slide-in-from-left-3 duration-200 motion-reduce:animate-none">

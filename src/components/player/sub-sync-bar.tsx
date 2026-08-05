@@ -4,9 +4,9 @@
  * يتيح التحكم بتأخير/تقديم الترجمة أثناء تشغيل الفيديو مباشرة
  */
 import { Check, RotateCcw, Type, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { useT } from "@/lib/i18n";
-import { closeSyncBar, useSyncBarOpen } from "@/lib/player/sub-sync";
+import { closeSyncBar, useSyncBarState } from "@/lib/player/sub-sync";
 import { AutosyncPopover } from "./autosync/autosync-popover";
 import { useAutoSyncHandle } from "./autosync/autosync-store";
 
@@ -23,18 +23,10 @@ type Props = {
 export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Props) {
 
   const t = useT();
-  const open = useSyncBarOpen();
+  const { open, initialDelaySec } = useSyncBarState();
   const autoSyncHandle = useAutoSyncHandle();
-  const [localDelay, setLocalDelay] = useState(delaySec);
-  const savedRef = useRef(delaySec);
-
-  // Sync external delay into local state when bar opens
-  useEffect(() => {
-    if (open) {
-      setLocalDelay(delaySec);
-      savedRef.current = delaySec;
-    }
-  }, [open]);
+  // The live prop is the single source of truth: a local copy only synced on open
+  // meant keyboard offset changes made while the bar was open never showed.
 
   // Auto-close after idle
   useEffect(() => {
@@ -67,25 +59,22 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
 
   // Apply delay to player live
   const applyDelay = (sec: number) => {
-    const v = round(sec);
-    setLocalDelay(v);
-    onDelay(v);
+    onDelay(round(sec));
   };
 
   // Save = just close (delay is already applied live)
   const handleSave = () => {
-    savedRef.current = localDelay;
     closeSyncBar();
   };
 
   // Discard = restore saved value
   const handleDiscard = () => {
-    applyDelay(savedRef.current);
+    applyDelay(initialDelaySec);
     closeSyncBar();
   };
 
-  const isDirty = round(localDelay) !== round(savedRef.current);
-  const isNonZero = localDelay !== 0;
+  const isDirty = round(delaySec) !== round(initialDelaySec);
+  const isNonZero = delaySec !== 0;
 
   const popover = autoSyncHandle ? <AutosyncPopover handle={autoSyncHandle} /> : null;
 
@@ -126,25 +115,25 @@ export function SubSyncBar({ delaySec, onDelay, onEnterSync, syncAvailable }: Pr
         <div className="flex items-center gap-[2px] rounded-xl bg-raised p-[2px] shadow-inner">
           <StepBtn
             label="−0.5s"
-            onClick={() => applyDelay(localDelay - 0.5)}
+            onClick={() => applyDelay(delaySec - 0.5)}
             wide
           />
           <StepBtn
             label="−0.1s"
-            onClick={() => applyDelay(localDelay - 0.1)}
+            onClick={() => applyDelay(delaySec - 0.1)}
           />
           
           <div className="mx-1.5 flex h-10 w-[96px] items-center justify-center rounded-lg bg-elevated">
-            <DelayDisplay value={localDelay} nonZero={isNonZero} onReset={() => applyDelay(0)} />
+            <DelayDisplay value={delaySec} nonZero={isNonZero} onReset={() => applyDelay(0)} />
           </div>
 
           <StepBtn
             label="+0.1s"
-            onClick={() => applyDelay(localDelay + 0.1)}
+            onClick={() => applyDelay(delaySec + 0.1)}
           />
           <StepBtn
             label="+0.5s"
-            onClick={() => applyDelay(localDelay + 0.5)}
+            onClick={() => applyDelay(delaySec + 0.5)}
             wide
           />
         </div>

@@ -1,5 +1,6 @@
 import { Fragment, useRef, useState } from "react";
 import { ClipboardPaste } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 const GROUPS = 4;
 const LEN = 5;
@@ -14,6 +15,7 @@ export function RecoveryKeyInput({
   onChange: (code: string) => void;
   autoFocus?: boolean;
 }) {
+  const t = useT();
   const [segs, setSegs] = useState<string[]>(() => Array(GROUPS).fill(""));
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -65,13 +67,13 @@ export function RecoveryKeyInput({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[12.5px] font-semibold text-ink">Recovery key</span>
+        <span className="text-[12.5px] font-semibold text-ink">{t("Recovery key")}</span>
         <button
           type="button"
           onClick={pasteButton}
           className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-[11.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
         >
-          <ClipboardPaste size={12} strokeWidth={2} /> Paste
+          <ClipboardPaste size={12} strokeWidth={2} /> {t("Paste")}
         </button>
       </div>
       <div
@@ -105,7 +107,7 @@ export function RecoveryKeyInput({
         ))}
       </div>
       <span className="text-[11.5px] text-ink-subtle">
-        The 20-character key from when you created your account. Paste it or type each block.
+        {t("The 20-character key from when you created your account. Paste it or type each block.")}
       </span>
     </div>
   );

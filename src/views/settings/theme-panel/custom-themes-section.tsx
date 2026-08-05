@@ -15,6 +15,7 @@ import {
   type CustomTheme,
 } from "@/lib/custom-themes";
 import { downloadText } from "@/lib/download-text";
+import { nextBackgroundImage } from "@/lib/theme-background";
 import {
   consumeThemeLibraryRequest,
   setThemeLibraryOpen,
@@ -109,9 +110,8 @@ export function CustomThemesSection() {
       theme: {
         ...settings.theme,
         preset: id as ActiveThemeId,
-        ...(bg
-          ? { backgroundImage: bg.image, backgroundDim: bg.dim ?? settings.theme.backgroundDim }
-          : {}),
+        backgroundImage: nextBackgroundImage(settings.theme.backgroundImage, activeTheme, next),
+        ...(bg ? { backgroundDim: bg.dim ?? settings.theme.backgroundDim } : {}),
       },
       ...navPatch,
     });
@@ -169,9 +169,13 @@ export function CustomThemesSection() {
   const activate = (id: string) => activateTheme(id, getThemeById(id)?.navCustomization);
 
   const remove = (id: string) => {
+    const wasActive = settings.theme.preset === id;
+    const image = wasActive
+      ? nextBackgroundImage(settings.theme.backgroundImage, getThemeById(id), getThemeById("cool-grey"))
+      : null;
     removeCustomTheme(id);
-    if (settings.theme.preset === id) {
-      update({ theme: { ...settings.theme, preset: "cool-grey" } });
+    if (wasActive) {
+      update({ theme: { ...settings.theme, preset: "cool-grey", backgroundImage: image } });
     }
   };
 

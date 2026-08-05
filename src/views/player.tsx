@@ -28,7 +28,11 @@ import { useAutoRetry } from "./player/hooks/use-auto-retry";
 import { useWakeReconnect } from "./player/hooks/use-wake-reconnect";
 import { useEngineStats } from "./player/hooks/use-engine-stats";
 import { useContentAdvisory } from "./player/hooks/use-content-advisory";
-import { getPlaybackPosition, setPlaybackDownloaded } from "@/lib/player/playback-clock";
+import {
+  getPlaybackPosition,
+  resolvePlaybackDownloadedFraction,
+  setPlaybackDownloaded,
+} from "@/lib/player/playback-clock";
 import { isBundledEngineUrl, isLocalEngineUrl } from "@/lib/stremio-server";
 import { usePauseOnInactive } from "./player/hooks/use-pause-on-inactive";
 import { spoilerMaskFor } from "@/lib/spoilers";
@@ -161,9 +165,13 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     const isLive = src.isLive || !!src.meta.id?.startsWith("iptv:");
     const isHls = src.url.includes("/hlsv2/");
     if (isP2pEngine) {
-      const len = engineStats?.streamLen ?? 0;
-      const prog = engineStats?.streamProgress ?? 0;
-      setPlaybackDownloaded(len > 0 ? prog / len : 0);
+      setPlaybackDownloaded(
+        resolvePlaybackDownloadedFraction({
+          isP2pEngine,
+          streamProgress: engineStats?.streamProgress ?? 0,
+          streamLen: engineStats?.streamLen ?? 0,
+        }),
+      );
     } else if (!isLive && !isHls) {
       const dur = snap.durationSec || 0;
       setPlaybackDownloaded(dur > 0 ? Math.min(1, (snap.positionSec + snap.bufferedSec) / dur) : 0);
@@ -614,6 +622,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     bridgeRef,
     snapRef,
     metaId: src.meta.id,
+    mediaKey: `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`,
     inRoom,
     isHost,
     hasStarted,
@@ -669,7 +678,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const videoFill = useVideoFill(bridgeRef, src.url, playing);
   useLivePictureEq(bridgeRef, src.url);
   const anime4k = useAnime4k(bridgeRef, src.url, src, snap.videoWidth);
-  const { holdSpeedActive, showStats } = usePlayerHotkeys({
+  const { holdSpeedActive, showStats, subtitleOffsetSec } = usePlayerHotkeys({
     bridgeRef,
     snap,
     metaId: src.meta.id,
@@ -903,7 +912,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const onVolumeWheel = useCallback((deltaY: number) => {
     const dir = deltaY < 0 ? 1 : -1;
     const boost = !isKid && bridgeRef.current?.capabilities().engine === "mpv";
-    const max = boost ? 6 : 1;
+    const max = boost ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2)) : 1;
     const next = Math.min(max, Math.max(0, volumeRef.current + dir * 0.05));
     volumeRef.current = next;
     bridgeRef.current?.setVolume(next);
@@ -912,7 +921,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
 
     if (settings.playerVolumeSfx) SFX.volumeChange(dir > 0);
     showVolumeFeedback(next, false);
-  }, [showVolumeFeedback, isKid, settings.playerVolumeSfx]);
+  }, [showVolumeFeedback, isKid, settings.playerVolumeSfx, settings.volumeBoostMax]);
 
   const onLoaderRetry = useCallback(() => {
     const b = bridgeRef.current;
@@ -937,6 +946,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     subAssNative,
     showStats,
     holdSpeedActive,
+    subtitleOffsetSec,
     volumeIndicator,
     volumeHudPosition: settings.playerVolumeHudPosition,
     videoFillPill: videoFill.pill,

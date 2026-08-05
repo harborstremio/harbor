@@ -2,7 +2,8 @@ import { addonAccepts, type Addon } from "@/lib/addons";
 import { safeFetch } from "@/lib/safe-fetch";
 import { dlog } from "@/lib/debug";
 import type { SubResult, SubSearchQuery } from "../types";
-import { normalizeLang } from "../language";
+import { isPlausibleLang, normalizeLang } from "../language";
+import { withSubtitleTimeout } from "../autoload";
 
 type RawAddonSub = {
   id?: string;
@@ -39,7 +40,9 @@ function idPriority(id: string): number {
 
 function declaresSubtitles(addon: Addon): boolean {
   const resources = addon.manifest?.resources ?? [];
-  return resources.some((r) => (typeof r === "string" ? r === "subtitles" : r.name === "subtitles"));
+  return resources.some((r) =>
+    typeof r === "string" ? r === "subtitles" : r.name === "subtitles",
+  );
 }
 
 function pickAddonId(
@@ -54,8 +57,7 @@ function pickAddonId(
   }
   if (fallback && addonAccepts(addon, "subtitles", type, fallback)) return fallback;
   if (!declaresSubtitles(addon)) return null;
-  const best =
-    candidates.find((id) => id.startsWith("tt")) ?? fallback ?? candidates[0] ?? null;
+  const best = candidates.find((id) => id.startsWith("tt")) ?? fallback ?? candidates[0] ?? null;
   if (best) {
     dlog(
       `[addons] ${addon.manifest.name} manifest does not advertise ${type}/${best}, asking anyway`,
@@ -72,30 +74,51 @@ function extraSegment(q: SubSearchQuery): string {
   return parts.length > 0 ? `/${parts.join("&")}` : "";
 }
 
-async function callOne(addon: Addon, type: string, id: string, extra: string): Promise<RawAddonSub[]> {
+async function fetchAddonSubtitles(url: string, addonName: string): Promise<RawAddonSub[]> {
+  dlog(`[addons] Fetching from ${addonName}: ${url}`);
+  const res = await safeFetch(url, { headers: { Accept: "application/json" } });
+  if (!res.ok) {
+    dlog(`[addons] ${addonName} returned ${res.status}`);
+    return [];
+  }
+  const data = (await res.json()) as { subtitles?: RawAddonSub[] };
+  const subtitles = Array.isArray(data?.subtitles) ? data.subtitles : [];
+  dlog(`[addons] ${addonName} returned ${subtitles.length} subtitles`);
+  return subtitles;
+}
+
+async function callOne(
+  addon: Addon,
+  type: string,
+  id: string,
+  extra: string,
+  timeoutMs: number,
+): Promise<RawAddonSub[]> {
   const base = transportBase(addon.transportUrl);
   const url = `${base}/subtitles/${type}/${id}${extra}.json`;
-  dlog(`[addons] Fetching from ${addon.manifest.name}: ${url}`);
+  const startedAt = Date.now();
   try {
-    const res = await safeFetch(url, { headers: { Accept: "application/json" } });
-    let subs: RawAddonSub[] = [];
-    if (res.ok) {
-      const data = (await res.json()) as { subtitles?: RawAddonSub[] };
-      subs = Array.isArray(data?.subtitles) ? data.subtitles : [];
-      dlog(`[addons] ${addon.manifest.name} returned ${subs.length} subtitles`);
-    } else {
-      dlog(`[addons] ${addon.manifest.name} returned ${res.status}`);
+    if (!extra) {
+      return await fetchAddonSubtitles(url, addon.manifest.name);
     }
-    if (subs.length === 0 && extra) {
-      const bareRes = await safeFetch(`${base}/subtitles/${type}/${id}.json`, {
-        headers: { Accept: "application/json" },
-      });
-      if (bareRes.ok) {
-        const bareData = (await bareRes.json()) as { subtitles?: RawAddonSub[] };
-        return Array.isArray(bareData?.subtitles) ? bareData.subtitles : [];
-      }
-    }
-    return subs;
+
+    const enrichedBudget = Math.min(4_000, Math.max(1_500, Math.floor(timeoutMs / 3)));
+    const enriched = await withSubtitleTimeout(
+      fetchAddonSubtitles(url, addon.manifest.name),
+      enrichedBudget,
+      [],
+    );
+    if (enriched.length > 0) return enriched;
+
+    const elapsed = Date.now() - startedAt;
+    const remaining = Math.max(1_000, timeoutMs - elapsed);
+    const bareUrl = `${base}/subtitles/${type}/${id}.json`;
+    dlog(`[addons] ${addon.manifest.name} retrying without stream hints`);
+    return await withSubtitleTimeout(
+      fetchAddonSubtitles(bareUrl, addon.manifest.name),
+      remaining,
+      [],
+    );
   } catch (e) {
     dlog(`[addons] ${addon.manifest.name} error: ${e}`);
     return [];
@@ -105,17 +128,20 @@ async function callOne(addon: Addon, type: string, id: string, extra: string): P
 export async function searchAddons(
   addons: Addon[],
   q: SubSearchQuery,
+  timeoutMs: number,
 ): Promise<SubResult[]> {
   dlog(`[addons] searchAddons called with ${addons.length} addons`);
 
   const fallbackId = contentId(q);
   if (!fallbackId && (q.candidateIds ?? []).length === 0) {
-    dlog('[addons] No content ID, returning empty');
+    dlog("[addons] No content ID, returning empty");
     return [];
   }
 
   const type = q.type ?? (q.season != null && q.episode != null ? "series" : "movie");
-  dlog(`[addons] Candidate IDs: ${(q.candidateIds ?? []).join(', ') || '(none)'}, fallback: ${fallbackId}, Type: ${type}`);
+  dlog(
+    `[addons] Candidate IDs: ${(q.candidateIds ?? []).join(", ") || "(none)"}, fallback: ${fallbackId}, Type: ${type}`,
+  );
 
   const targets = addons
     .map((addon) => ({ addon, id: pickAddonId(addon, type, q, fallbackId) }))
@@ -127,18 +153,25 @@ export async function searchAddons(
     });
   dlog(`[addons] === Filtered subtitle addons: ${targets.length} of ${addons.length} ===`);
   if (targets.length > 0) {
-    dlog(`[addons] Accepting addons: ${targets.map(t => `${t.addon.manifest.name}→${t.id}`).join(', ')}`);
+    dlog(
+      `[addons] Accepting addons: ${targets.map((t) => `${t.addon.manifest.name}→${t.id}`).join(", ")}`,
+    );
   }
   if (targets.length === 0) {
-    dlog('[addons] No subtitle addons accept this content');
+    dlog("[addons] No subtitle addons accept this content");
     return [];
   }
 
   const extra = extraSegment(q);
   const settled = await Promise.all(
     targets.map(async ({ addon, id }) => {
-      const result = await callOne(addon, type, id, extra);
+      const result = await withSubtitleTimeout(
+        callOne(addon, type, id, extra, timeoutMs),
+        timeoutMs,
+        [],
+      );
       dlog(`[addons] ${addon.manifest.name}: ${result.length} subtitles`);
+      if (result.length > 0) dlog(`[addons] ${addon.manifest.name} raw sample`, result[0]);
       return result;
     }),
   );
@@ -148,11 +181,11 @@ export async function searchAddons(
     const addonName = targets[i].addon.manifest.name;
     for (let idx = 0; idx < subs.length; idx++) {
       const s = subs[idx];
-      if (!s.url) continue;
+      if (!s.url || s.url === "about:blank" || !isPlausibleLang(s.lang)) continue;
       // Include addon name and index to ensure unique IDs across different addons
       const uniqueId = s.id
-        ? `${addonName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${s.id}`
-        : `${addonName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${idx}`;
+        ? `${addonName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${s.id}`
+        : `${addonName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${idx}`;
       out.push({
         id: uniqueId,
         url: s.url,
@@ -160,6 +193,7 @@ export async function searchAddons(
         title: addonName,
         source: "addon",
         format: (s.SubFormat?.toLowerCase() as SubResult["format"]) || undefined,
+        release: s.m || undefined,
       });
     }
   });
@@ -167,4 +201,3 @@ export async function searchAddons(
   dlog(`[addons] Total addon results: ${out.length}`);
   return out;
 }
-

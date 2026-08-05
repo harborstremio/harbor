@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { subtitleDownloadArgs } from "./subtitle-load";
+import { markLimitReached } from "@/lib/subtitles/limit-signal";
 import { mpvFailureSnapshot } from "./mpv-failure";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
@@ -151,7 +152,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let secondarySid: string | null = null;
   const urlByExternalFilename = new Map<
     string,
-    { url: string; release?: string; provider?: string; matchScore?: number }
+    { url: string; release?: string; provider?: string; matchScore?: number; subId?: string }
   >();
 
   const handleSvpFilterFailure = () => {
@@ -257,6 +258,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             release: extMeta?.release,
             provider: extMeta?.provider,
             matchScore: extMeta?.matchScore,
+            subId: extMeta?.subId,
           };
           if (type === "audio") audio.push(info);
           else if (type === "sub") subs.push(info);
@@ -591,14 +593,21 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             subtitleDownloadArgs(url, { ...metadata, lang }),
           );
         } catch (e) {
+          const message = e instanceof Error ? e.message : String(e);
           console.warn("[mpv] sub_download failed, falling back to URL", e);
+          if (/status 429/.test(message)) {
+            markLimitReached(url);
+            return false;
+          }
         }
       }
+      mpvUrl = mpvUrl.replace(/\\/g, "/");
       urlByExternalFilename.set(mpvUrl, {
         url,
         release: metadata?.release,
         provider: metadata?.provider,
         matchScore: metadata?.matchScore,
+        subId: metadata?.subId,
       });
       try {
         await invoke("mpv_sub_add", {

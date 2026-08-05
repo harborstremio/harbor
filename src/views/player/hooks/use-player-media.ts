@@ -232,7 +232,11 @@ export function usePlayerMedia(params: {
   useResumeAutosave({ src, snap, season, episode, resolvedImdbId, resolvedImdbVerified });
   useStremioSync({ src, snap, authKey, resolvedImdbId, resolvedImdbVerified, resolutionSettled, castActiveRef });
   usePowerInhibit(snap);
-  const subDropToast = useSubDrop(bridgeRef, src.meta.id);
+  const subDropToast = useSubDrop(
+    bridgeRef,
+    src.meta.id,
+    `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`,
+  );
 
   useEffect(() => {
     const name = src.meta.name ?? "";

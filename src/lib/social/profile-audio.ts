@@ -30,6 +30,48 @@ function spotifyPath(u: URL): string | null {
   return m ? `${m[1]}/${m[2]}` : null;
 }
 
+export function parseClockToSec(v: string | null | undefined): number | null {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (/^\d+$/.test(s)) return parseInt(s, 10);
+  const mmss = s.match(/^(\d+):([0-5]?\d)$/);
+  if (mmss) return parseInt(mmss[1], 10) * 60 + parseInt(mmss[2], 10);
+  const hms = s.match(/^(?:(\d+)m)?(?:(\d+)s)?$/i);
+  if (hms && (hms[1] || hms[2])) return parseInt(hms[1] || "0", 10) * 60 + parseInt(hms[2] || "0", 10);
+  return null;
+}
+
+export function formatClock(sec: number): string {
+  const s = Math.max(0, Math.round(sec));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+export function audioTimes(raw: string): { startSec: number | null; endSec: number | null } {
+  try {
+    const u = new URL(raw.trim());
+    return {
+      startSec: parseClockToSec(u.searchParams.get("start") || u.searchParams.get("t")),
+      endSec: parseClockToSec(u.searchParams.get("end")),
+    };
+  } catch {
+    return { startSec: null, endSec: null };
+  }
+}
+
+export function setAudioTimes(raw: string, startSec: number | null, endSec: number | null): string {
+  try {
+    const u = new URL(raw.trim());
+    u.searchParams.delete("t");
+    if (startSec && startSec > 0) u.searchParams.set("start", String(Math.round(startSec)));
+    else u.searchParams.delete("start");
+    if (endSec && endSec > 0) u.searchParams.set("end", String(Math.round(endSec)));
+    else u.searchParams.delete("end");
+    return u.toString();
+  } catch {
+    return raw;
+  }
+}
+
 export function parseProfileAudio(
   raw: string,
   opts?: { autoplay?: boolean; muted?: boolean },
@@ -57,6 +99,10 @@ export function parseProfileAudio(
       autoplay: autoplay ? "1" : "0",
       mute: muted ? "1" : "0",
     });
+    const startSec = parseClockToSec(u.searchParams.get("start") || u.searchParams.get("t"));
+    const endSec = parseClockToSec(u.searchParams.get("end"));
+    if (startSec && startSec > 0) p.set("start", String(startSec));
+    if (endSec && endSec > 0) p.set("end", String(endSec));
     return {
       provider: "youtube",
       url: `https://youtu.be/${yt}`,

@@ -1,14 +1,25 @@
+import { invoke } from "@tauri-apps/api/core";
 import { safeFetch } from "@/lib/safe-fetch";
 import { authToken } from "@/lib/theme-auth";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 import {
   MAX_COLLECTIONS,
   MAX_COLLECTION_ITEMS,
+  absCollectionImage,
   type Collection,
   type CollectionItem,
 } from "@/lib/collections";
 
 const BASE = `${HARBOR_API_BASE}/themes/api/social`;
+const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+export const COMMUNITY_COLLECTIONS_EVENT = "harbor:community-collections-changed";
+
+export function notifyCommunityChanged(): void {
+  try {
+    window.dispatchEvent(new Event(COMMUNITY_COLLECTIONS_EVENT));
+  } catch {}
+}
 
 const COVER_WIDTH = 1200;
 const COVER_HEIGHT = 675;
@@ -50,10 +61,11 @@ function normalizeCollection(raw: unknown): Collection | null {
     id: e.id,
     name: e.name,
     description: typeof e.description === "string" ? e.description : undefined,
-    coverImage: typeof e.coverImage === "string" ? e.coverImage : undefined,
-    bgImage: typeof e.bgImage === "string" ? e.bgImage : undefined,
+    coverImage: absCollectionImage(typeof e.coverImage === "string" ? e.coverImage : undefined),
+    bgImage: absCollectionImage(typeof e.bgImage === "string" ? e.bgImage : undefined),
     tags: tags.length ? tags.slice(0, 8) : undefined,
     shared: e.shared === true ? true : undefined,
+    numbered: e.numbered === true ? true : undefined,
     items,
     createdAt: typeof e.createdAt === "number" ? e.createdAt : 0,
     updatedAt: typeof e.updatedAt === "number" ? e.updatedAt : 0,
@@ -71,10 +83,19 @@ function extractCollections(data: unknown): Collection[] {
   return out;
 }
 
+function stripDataUrl(u: string | undefined): string | undefined {
+  return typeof u === "string" && u.startsWith("data:") ? undefined : u;
+}
+
 function trimForPublish(collections: Collection[]): Collection[] {
   return collections.slice(0, MAX_COLLECTIONS).map((c) => ({
     ...c,
-    items: c.items.slice(0, MAX_COLLECTION_ITEMS),
+    coverImage: stripDataUrl(c.coverImage),
+    bgImage: stripDataUrl(c.bgImage),
+    items: c.items.slice(0, MAX_COLLECTION_ITEMS).map((it) => ({
+      ...it,
+      poster: stripDataUrl(it.poster),
+    })),
   }));
 }
 
@@ -219,9 +240,25 @@ async function readImageResult(r: Response): Promise<CollectionImageResult> {
     bgImage?: string;
   };
   if (!r.ok) throw new Error(d.error || "Could not upload image.");
-  return { url: d.url || d.coverImage || d.bgImage || "" };
+  return { url: absCollectionImage(d.url || d.coverImage || d.bgImage) || "" };
 }
 
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const s = String(reader.result);
+      const comma = s.indexOf(",");
+      resolve(comma >= 0 ? s.slice(comma + 1) : s);
+    };
+    reader.onerror = () => reject(new Error("Could not read image."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+// The image endpoints are multipart uploads, which harbor_fetch (string body) can't
+// carry. In Tauri a plain fetch to harbor.site is CORS-blocked, so route the bytes
+// through a Rust multipart command; on web the browser fetch reaches the origin fine.
 async function postImage(
   path: string,
   field: "cover" | "bg",
@@ -230,6 +267,21 @@ async function postImage(
 ): Promise<CollectionImageResult> {
   const token = authToken();
   if (!token) throw new Error("Sign in first.");
+  if (isTauri) {
+    const dataBase64 = await blobToBase64(blob);
+    const resp = await invoke<{ status: number; ok: boolean; body: string }>("harbor_upload", {
+      args: {
+        url: `${BASE}${path}`,
+        field,
+        filename,
+        contentType: blob.type || "image/webp",
+        dataBase64,
+        headers: { authorization: `Bearer ${token}` },
+        timeoutMs: 30000,
+      },
+    });
+    return readImageResult(new Response(resp.body, { status: resp.status || 502 }));
+  }
   const fd = new FormData();
   fd.append(field, blob, filename);
   const r = await fetch(`${BASE}${path}`, {
@@ -243,7 +295,7 @@ async function postImage(
 async function postRemove(path: string): Promise<void> {
   const token = authToken();
   if (!token) throw new Error("Sign in first.");
-  const r = await fetch(`${BASE}${path}`, {
+  const r = await safeFetch(`${BASE}${path}`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });

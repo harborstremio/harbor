@@ -1,4 +1,20 @@
 const profileFill: Record<string, string> = {
+  "General": "عام",
+  "Look": "المظهر",
+  "optional": "اختياري",
+  "Your name and the details shown at the top of your profile.":
+    "اسمك والتفاصيل التي تظهر أعلى ملفك الشخصي.",
+  "Your avatar, banner, and how the whole profile is styled.":
+    "صورتك الرمزية واللافتة وأسلوب ملفك الشخصي بالكامل.",
+  "Pick what appears on your profile, and the order it shows in.":
+    "اختر ما يظهر في ملفك الشخصي وترتيب ظهوره.",
+  "Control who can see your friends, activity, and stats.":
+    "تحكّم بمن يمكنه رؤية أصدقائك ونشاطك وإحصائياتك.",
+  "Show a Minecraft card on your profile. Leave the username blank to hide it.":
+    "اعرض بطاقة Minecraft في ملفك الشخصي. اترك اسم المستخدم فارغًا لإخفائها.",
+  "Show a Minecraft card with your username":
+    "اعرض بطاقة Minecraft باسم المستخدم الخاص بك",
+  "Showing {name}": "يظهر {name}",
   "Manage connection": "إدارة الاتصال",
   "Show your Simkl card": "إظهار بطاقة Simkl",
   "Off by default. Shows your Simkl avatar, name and watch stats on your profile for anyone who visits. Manage the connection itself in Settings, Simkl.":

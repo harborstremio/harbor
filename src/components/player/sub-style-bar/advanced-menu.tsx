@@ -92,8 +92,8 @@ export function AdvancedMenu() {
                 <Row label={t("Thickness")}>
                   <Stepper
                     value={settings.subBorderSize}
-                    onDec={() => update({ subBorderSize: clamp(settings.subBorderSize - 1, 1, 6) })}
-                    onInc={() => update({ subBorderSize: clamp(Math.max(1, settings.subBorderSize) + 1, 1, 6) })}
+                    onDec={() => update({ subBorderSize: stepBorder(settings.subBorderSize, -0.5) })}
+                    onInc={() => update({ subBorderSize: stepBorder(settings.subBorderSize, 0.5) })}
                   />
                 </Row>
               )}
@@ -184,13 +184,19 @@ function Segmented({
   );
 }
 
+function stepBorder(current: number, delta: number): number {
+  const base = Number.isFinite(current) ? current : 2;
+  return Math.round(clamp(base + delta, 1, 6) * 2) / 2;
+}
+
 function Stepper({ value, onDec, onInc }: { value: number; onDec: () => void; onInc: () => void }) {
+  const shown = Number.isInteger(value) ? String(value) : value.toFixed(1);
   return (
     <div className="flex items-center rounded-[9px] bg-raised">
       <IconBtn label="−" onClick={onDec}>
         <Minus size={14} />
       </IconBtn>
-      <span className="min-w-[28px] text-center font-mono text-[13px] tabular-nums text-ink">{value}</span>
+      <span className="min-w-[34px] text-center font-mono text-[13px] tabular-nums text-ink">{shown}</span>
       <IconBtn label="+" onClick={onInc}>
         <Plus size={14} />
       </IconBtn>

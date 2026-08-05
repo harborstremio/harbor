@@ -1,8 +1,13 @@
 import { AlertCircle, ChevronRight, Compass, Loader2, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { listSources, type ServerConfig, type SuwayomiSource } from "@/lib/manga/sources/suwayomi/provider";
+import {
+  listSources,
+  type ServerConfig,
+  type SuwayomiSource,
+} from "@/lib/manga/sources/suwayomi/provider";
 import { languageName } from "@/lib/manga/types";
 import { useT } from "@/lib/i18n";
+import { subscribeSuwayomiSourcesChanged } from "@/lib/manga/sources/suwayomi/source-events";
 import { CARD, INPUT } from "../shared";
 import { initials } from "./types";
 
@@ -32,6 +37,8 @@ export function SourcePicker({
   const [query, setQuery] = useState("");
   const [reload, setReload] = useState(0);
 
+  useEffect(() => subscribeSuwayomiSourcesChanged(() => setReload((n) => n + 1)), []);
+
   useEffect(() => {
     let cancelled = false;
     setState("loading");
@@ -60,7 +67,9 @@ export function SourcePicker({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3 px-1">
-        <p className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-ink-subtle">{t("Browse sources")}</p>
+        <p className="text-[12.5px] font-bold uppercase tracking-[0.12em] text-ink-subtle">
+          {t("Browse sources")}
+        </p>
         <button
           type="button"
           onClick={() => setReload((n) => n + 1)}
@@ -72,7 +81,10 @@ export function SourcePicker({
       </div>
 
       <div className="relative">
-        <Search size={17} className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ink-subtle" />
+        <Search
+          size={17}
+          className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-ink-subtle"
+        />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -94,10 +106,14 @@ export function SourcePicker({
           <span className="text-[13.5px]">{t("Could not load sources")}</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className={`flex flex-col items-center gap-2 py-10 text-center text-ink-muted ${CARD}`}>
+        <div
+          className={`flex flex-col items-center gap-2 py-10 text-center text-ink-muted ${CARD}`}
+        >
           <Compass size={20} className="text-ink-subtle" />
           <span className="text-[13.5px]">
-            {query ? t("No sources match your filter") : t("Install an extension above to get sources")}
+            {query
+              ? t("No sources match your filter")
+              : t("Install an extension above to get sources")}
           </span>
         </div>
       ) : (
@@ -119,7 +135,9 @@ export function SourcePicker({
                     </span>
                   )}
                 </div>
-                <span className="truncate text-[12.5px] text-ink-muted">{languageName(s.lang)}</span>
+                <span className="truncate text-[12.5px] text-ink-muted">
+                  {languageName(s.lang)}
+                </span>
               </div>
               <ChevronRight size={18} className="shrink-0 text-ink-subtle" />
             </button>

@@ -21,6 +21,7 @@ export type SubtitleLoadMetadata = {
   release?: string;
   provider?: string;
   matchScore?: number;
+  subId?: string;
 };
 
 export type SubSearchQuery = {

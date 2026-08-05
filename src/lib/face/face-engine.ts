@@ -7,7 +7,7 @@ import { l2normalize, MIN_BOX_PX } from "./match";
 import type { WireFace } from "./match";
 
 ort.env.wasm.wasmPaths = { wasm: ortWasmUrl, mjs: ortMjsUrl };
-ort.env.wasm.numThreads = 1;
+ort.env.wasm.numThreads = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 2) - 1));
 ort.env.wasm.proxy = false;
 ort.env.wasm.simd = true;
 
@@ -18,7 +18,7 @@ let readyPromise: Promise<void> | null = null;
 async function boot(): Promise<void> {
   const fileset = await FilesetResolver.forVisionTasks("/mp-wasm");
   detector = await FaceDetector.createFromOptions(fileset, {
-    baseOptions: { modelAssetPath: "/models/face/blaze_face_short_range.tflite", delegate: "CPU" },
+    baseOptions: { modelAssetPath: "/models/face/face_detection_full_range.tflite", delegate: "CPU" },
     runningMode: "IMAGE",
     minDetectionConfidence: 0.5,
   });
