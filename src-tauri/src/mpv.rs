@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ffi::CString;
 use std::path::PathBuf;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 use libmpv2::events::{Event, EventContext, PropertyData};
@@ -276,6 +276,34 @@ fn read_audio_devices(mpv: &Mpv) -> Vec<AudioDevice> {
     out
 }
 
+/// Long-lived mpv context used only to enumerate audio devices.
+///
+/// Reading `audio-device-list` makes mpv call `create_hotplug()`, which on
+/// macOS registers `hotplug_cb` against `kAudioObjectSystemObject` with the
+/// `struct ao *` as the listener context. CoreAudio delivers those
+/// notifications on its own serial dispatch queue, and
+/// `AudioObjectRemovePropertyListener` does not drain callbacks that are
+/// already in flight. Creating a throwaway `Mpv` here and dropping it at the
+/// end of the call therefore frees the `ao` out from under a callback that
+/// CoreAudio may already have queued, and `hotplug_cb`'s first statement is
+/// `MP_VERBOSE(ao, ...)` -> `mp_msg(ao->log, ...)` on freed memory.
+///
+/// Keeping a single context alive for the process lifetime means the listener
+/// is registered once and its context outlives every notification, so the
+/// race cannot be lost. The context is idle and holds no audio output.
+static DEVICE_PROBE_MPV: OnceLock<Result<Arc<Mpv>, String>> = OnceLock::new();
+
+fn device_probe_mpv() -> Result<Arc<Mpv>, String> {
+    DEVICE_PROBE_MPV
+        .get_or_init(|| {
+            force_c_numeric_locale();
+            Mpv::new()
+                .map(Arc::new)
+                .map_err(|e| format!("mpv init: {}", e))
+        })
+        .clone()
+}
+
 #[tauri::command]
 pub async fn mpv_audio_devices(state: State<'_, MpvState>) -> Result<Vec<AudioDevice>, String> {
     let existing = {
@@ -285,8 +313,7 @@ pub async fn mpv_audio_devices(state: State<'_, MpvState>) -> Result<Vec<AudioDe
     if let Some(mpv) = existing {
         return Ok(read_audio_devices(&mpv));
     }
-    force_c_numeric_locale();
-    let mpv = Mpv::new().map_err(|e| format!("mpv init: {}", e))?;
+    let mpv = device_probe_mpv()?;
     Ok(read_audio_devices(&mpv))
 }
 
