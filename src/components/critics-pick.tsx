@@ -85,7 +85,8 @@ export function CriticsPick({ meta }: { meta: Meta }) {
       return;
     }
     let cancelled = false;
-    tmdbMovieImages(settings.tmdbKey, meta.id)
+    const langArg = settings.heroLocalizedMetadata ? meta.originalLanguage : undefined;
+    tmdbMovieImages(settings.tmdbKey, meta.id, langArg)
       .then((urls) => !cancelled && setStills(urls))
       .catch(() => !cancelled && setStills([]));
     return () => {

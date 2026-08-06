@@ -161,8 +161,9 @@ export const Hero = memo(function Hero({
     }
     if (!bgResolved) {
       const isTmdb = meta.id.startsWith("tmdb:");
+      const langArg = settings.heroLocalizedMetadata ? meta.originalLanguage : undefined;
       const bg: Promise<string | undefined> = isTmdb
-        ? tmdbMovieImages(settings.tmdbKey, meta.id).then((urls) => urls[0])
+        ? tmdbMovieImages(settings.tmdbKey, meta.id, langArg).then((urls) => urls[0])
         : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) => full?.background);
       bg.then((b) => {
         if (cancelled) return;
@@ -416,7 +417,7 @@ export const Hero = memo(function Hero({
             }}
           />
           {description && (
-            <p className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted">
+            <p dir="auto" className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted">
               {description}
             </p>
           )}

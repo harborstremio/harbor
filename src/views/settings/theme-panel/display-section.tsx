@@ -218,6 +218,12 @@ export function DisplaySection() {
           onChange={(v) => update({ heroFullQuality: v })}
         />
         <ToggleRow
+          label={t("Localized hero metadata")}
+          sub={t("Prioritize original language artwork and localized descriptions for the featured title.")}
+          value={settings.heroLocalizedMetadata}
+          onChange={(v) => update({ heroLocalizedMetadata: v })}
+        />
+        <ToggleRow
           label={t("Play trailers in the hero")}
           newId="theme:hero-video"
           sub={t("After a moment on a slide, the featured title's trailer plays muted in the background. Uses more bandwidth.")}

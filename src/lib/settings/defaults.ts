@@ -102,6 +102,7 @@ export const DEFAULT: Settings = {
   heroShadow: 100,
   heroFull: false,
   heroFullQuality: true,
+  heroLocalizedMetadata: true,
   heroFeed: "trending",
   heroTrailers: false,
   heroTrailerAudio: false,

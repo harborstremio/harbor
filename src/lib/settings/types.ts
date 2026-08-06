@@ -152,6 +152,7 @@ export type Settings = {
   heroShadow: number;
   heroFull: boolean;
   heroFullQuality: boolean;
+  heroLocalizedMetadata: boolean;
   heroFeed: "trending" | "trakt" | "simkl" | "classic";
   heroTrailers: boolean;
   heroTrailerAudio: boolean;
