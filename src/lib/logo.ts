@@ -23,10 +23,14 @@ registerEvictable("logo", () => {
   inflight.clear();
 });
 
+import { loadStoredSettings } from "@/lib/settings/load";
+
 const isAnimeLogoId = (id: string) => /^(kitsu|mal|anilist|anidb):/.test(id);
 
 function preferTmdbLogo(tmdbKey: string, meta: Meta): boolean {
   if (!tmdbKey || !shouldLocalizePosters()) return false;
+  const settings = loadStoredSettings();
+  if (!settings.heroLocalizedMetadata) return false;
   return meta.id.startsWith("tt") || meta.id.startsWith("tmdb:");
 }
 

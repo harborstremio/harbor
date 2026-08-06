@@ -31,7 +31,8 @@ export function SidePanel({
       return;
     }
     let cancelled = false;
-    tmdbMovieImages(settings.tmdbKey, meta.id, meta.originalLanguage)
+    const langArg = settings.heroLocalizedMetadata ? meta.originalLanguage : undefined;
+    tmdbMovieImages(settings.tmdbKey, meta.id, langArg)
       .then((urls) => {
         if (cancelled) return;
         setStills(urls);

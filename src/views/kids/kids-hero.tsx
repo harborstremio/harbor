@@ -72,8 +72,9 @@ function KidsHeroCard({
     if (logo) return;
     let cancelled = false;
     const isTmdb = meta.id.startsWith("tmdb:");
+    const langArg = settings.heroLocalizedMetadata ? meta.originalLanguage : undefined;
     const lookup = isTmdb
-      ? tmdbLogo(settings.tmdbKey, meta.id, meta.originalLanguage)
+      ? tmdbLogo(settings.tmdbKey, meta.id, langArg)
       : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) => full?.logo);
     lookup
       .then((url) => {
