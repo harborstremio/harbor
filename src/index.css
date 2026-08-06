@@ -1584,6 +1584,166 @@ button.group:not([data-no-card-ring]):hover .harbor-card-ring::after {
   pointer-events: none;
 }
 
+.harbor-expanding-card-scope [data-expanding-card] {
+  isolation: isolate;
+}
+
+.harbor-expanding-card-scope [data-poster-card-cell] > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.harbor-expanding-card-scope .expanding-card-poster-frame {
+  height: var(--row-poster-height);
+}
+
+.harbor-expanding-card-scope .expanding-card-poster-frame > .harbor-poster {
+  height: 100%;
+}
+
+.harbor-expanding-card-scope
+  .expanding-card-poster-frame
+  > .harbor-poster
+  > div[aria-hidden]:first-child {
+  display: none;
+}
+
+.expanding-card-artwork {
+  opacity: 0;
+  transition: opacity var(--row-card-wide-fade-duration) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-expanding-card][data-row-card-expanded="true"] .expanding-card-artwork {
+  opacity: 1;
+  transition-delay: 0ms;
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card][data-row-card-expanded="true"]
+  .harbor-poster
+  > img:not([data-expanding-card-artwork]),
+.harbor-expanding-card-scope
+  [data-expanding-card][data-row-card-collapsing]
+  .harbor-poster
+  > img:not([data-expanding-card-artwork]) {
+  right: auto;
+  width: var(--row-card-base-width) !important;
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card][data-row-card-expanded="true"]
+  .harbor-poster
+  > img:not([data-expanding-card-artwork]) {
+  opacity: 0 !important;
+  transition: opacity var(--row-card-wide-fade-duration) cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card][data-row-card-collapsing]
+  .harbor-poster
+  > img:not([data-expanding-card-artwork]) {
+  opacity: 1 !important;
+  transition: opacity var(--row-card-wide-fade-duration) cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card][data-row-card-collapsing]
+  .expanding-card-artwork {
+  opacity: 0;
+  transition: opacity var(--row-card-wide-fade-duration) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.harbor-expanding-card-scope [data-expanding-card-title-meta] {
+  display: none;
+}
+
+.harbor-expanding-card-scope [data-expanding-card-title] {
+  transition: opacity var(--row-card-title-restore-duration) ease-out;
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card]:is([data-row-card-expanded="true"], [data-row-card-title-collapsing])
+  > [data-expanding-card-title] {
+  position: absolute;
+  z-index: 20;
+  top: calc(var(--row-poster-height) - 5.5rem);
+  inset-inline: 0;
+  display: flex;
+  min-height: 5.5rem;
+  margin: 0;
+  padding: 2.2rem 1rem 0.8rem;
+  overflow: hidden;
+  color: white;
+  background: linear-gradient(to bottom, transparent, rgb(0 0 0 / 0.8));
+  flex-direction: column;
+  justify-content: end;
+  gap: 0.15rem;
+  opacity: 1;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.85);
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card][data-row-card-title-collapsing]
+  > [data-expanding-card-title] {
+  opacity: 0;
+  transition: opacity var(--row-card-wide-fade-duration) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card]:is([data-row-card-expanded="true"], [data-row-card-title-collapsing])
+  [data-expanding-card-title-name] {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.harbor-expanding-card-scope
+  [data-expanding-card]:is([data-row-card-expanded="true"], [data-row-card-title-collapsing])
+  [data-expanding-card-title-meta] {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgb(255 255 255 / 0.72);
+}
+
+html:not([data-input-modality="pointer"])
+  [data-focused-card]:is(:focus-visible, [data-tv-focused="true"])
+  .harbor-poster {
+  box-shadow:
+    0 24px 48px -14px rgb(0 0 0 / 0.65),
+    inset 0 0 0 2px var(--color-accent),
+    0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+html:not([data-input-modality="pointer"]) #root [data-media-card] {
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease;
+}
+
+html:not([data-input-modality="pointer"])
+  #root[data-card-focus-active]
+  [data-media-card]:not([data-tv-focused="true"]) {
+  opacity: 0.34;
+  filter: brightness(0.68) saturate(0.78) blur(0.7px);
+}
+
+html:not([data-input-modality="pointer"])
+  #root[data-card-focus-active]
+  [data-media-card][data-tv-focused="true"] {
+  opacity: 1;
+  filter: none;
+}
+
+html:not([data-input-modality="pointer"])
+  [data-focused-card]:is(:focus-visible, [data-tv-focused="true"]) {
+  outline: none;
+  z-index: 0;
+  box-shadow: none !important;
+  transform: none;
+}
+
 html[data-theme-card="stremio"] button.group:not([data-no-card-ring]):hover > .relative {
   transform: none;
 }
