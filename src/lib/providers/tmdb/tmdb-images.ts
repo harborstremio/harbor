@@ -95,8 +95,8 @@ export async function tmdbDefaultPoster(key: string, metaId: string): Promise<st
   return url;
 }
 
-export async function tmdbMovieImages(key: string, metaId: string): Promise<string[]> {
-  const data = await fetchMovieAssets(key, metaId);
+export async function tmdbMovieImages(key: string, metaId: string, originalLang?: string | null): Promise<string[]> {
+  const data = await fetchMovieAssets(key, metaId, originalLang);
   const seen = new Set<string>();
   const out: string[] = [];
   for (const b of (data?.backdrops ?? []).sort(

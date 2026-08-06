@@ -11,7 +11,7 @@ import { fetchTvdbArtwork } from "@/lib/providers/tvdb-proxy";
 import { tmdbAnimeLogo, tmdbIdFromImdb, tmdbImdbId, tmdbLogo } from "@/lib/providers/tmdb";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
 import { getTitleLogo } from "@/lib/title-logo";
-
+import { loadStoredSettings } from "@/lib/settings/load";
 const CACHE_MAX = 1200;
 const cache = new Map<string, string | undefined>();
 const inflight = new Map<string, Promise<string | undefined>>();
@@ -23,10 +23,13 @@ registerEvictable("logo", () => {
   inflight.clear();
 });
 
+
 const isAnimeLogoId = (id: string) => /^(kitsu|mal|anilist|anidb):/.test(id);
 
 function preferTmdbLogo(tmdbKey: string, meta: Meta): boolean {
   if (!tmdbKey || !shouldLocalizePosters()) return false;
+  const settings = loadStoredSettings();
+  if (!settings.heroLocalizedMetadata) return false;
   return meta.id.startsWith("tt") || meta.id.startsWith("tmdb:");
 }
 

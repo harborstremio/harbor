@@ -9,7 +9,12 @@ import { useSettings } from "@/lib/settings";
 import { useTitleLogo } from "@/lib/title-logo";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { smartPlayEpisode } from "@/lib/smart-play";
-import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
+import {
+  fetchTrailer,
+  prefetchTrailer,
+  trailerSrc,
+  type TrailerInfo,
+} from "@/lib/trailer";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 import { observe, usePageVisible } from "@/lib/visibility";
@@ -54,8 +59,12 @@ export function CinemaHero({
   }, []);
 
   useEffect(() => {
-    if (paused || dragging || !inViewport || !pageVisible || slides.length < 2) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % slides.length), ROTATE_MS);
+    if (paused || dragging || !inViewport || !pageVisible || slides.length < 2)
+      return;
+    const id = setInterval(
+      () => setActive((a) => (a + 1) % slides.length),
+      ROTATE_MS,
+    );
     return () => clearInterval(id);
   }, [paused, dragging, inViewport, pageVisible, slides.length]);
 
@@ -112,7 +121,9 @@ export function CinemaHero({
     const distance = offset;
     const threshold = W * SNAP_RATIO;
     const v = velocity.current;
-    const wantNext = (distance < -threshold || v < -FLICK_VELOCITY) && active < slides.length - 1;
+    const wantNext =
+      (distance < -threshold || v < -FLICK_VELOCITY) &&
+      active < slides.length - 1;
     const wantPrev = (distance > threshold || v > FLICK_VELOCITY) && active > 0;
     if (wantNext) setActive(active + 1);
     else if (wantPrev) setActive(active - 1);
@@ -148,7 +159,11 @@ export function CinemaHero({
         onPointerCancel={endDrag}
         onClickCapture={onClickCapture}
         className={`relative h-full w-full overflow-hidden select-none ${
-          slides.length > 1 ? (dragging ? "cursor-grabbing" : "cursor-grab") : ""
+          slides.length > 1
+            ? dragging
+              ? "cursor-grabbing"
+              : "cursor-grab"
+            : ""
         }`}
         style={{ touchAction: "pan-y" }}
       >
@@ -186,7 +201,9 @@ export function CinemaHero({
               onClick={() => setActive(i)}
               aria-label={t("Slide {n}", { n: i + 1 })}
               className={`h-1.5 rounded-full transition-all duration-500 ${
-                i === active ? "w-10 bg-ink" : "w-1.5 bg-ink-muted/55 hover:bg-ink-muted"
+                i === active
+                  ? "w-10 bg-ink"
+                  : "w-1.5 bg-ink-muted/55 hover:bg-ink-muted"
               }`}
             />
           ))}
@@ -223,7 +240,12 @@ function CinemaSlide({
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pageVisible = usePageVisible();
-  const wantsPlayback = active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
+  const wantsPlayback =
+    active &&
+    !!trailerInfo &&
+    pageVisible &&
+    inViewport &&
+    settings.heroTrailers;
   const bg = upsizeTmdb(meta.background || meta.poster);
 
   useEffect(() => {
@@ -231,9 +253,14 @@ function CinemaSlide({
     let cancelled = false;
     if (!logoResolved) {
       const isTmdb = meta.id.startsWith("tmdb:");
+      const langArg = settings.heroLocalizedMetadata
+        ? meta.originalLanguage
+        : undefined;
       const lookup = isTmdb
-        ? tmdbLogo(settings.tmdbKey, meta.id, meta.originalLanguage)
-        : fetchMeta(narrowMediaType(meta.type), meta.id).then((full) => full?.logo);
+        ? tmdbLogo(settings.tmdbKey, meta.id, langArg)
+        : fetchMeta(narrowMediaType(meta.type), meta.id).then(
+            (full) => full?.logo,
+          );
       lookup
         .then((url) => {
           if (cancelled) return;
@@ -280,7 +307,13 @@ function CinemaSlide({
   }, [active, meta.id, meta.type, settings.tmdbKey, settings.heroTrailers]);
 
   useEffect(() => {
-    if (!active || !settings.heroTrailers || trailerCandidates.length === 0 || trailerInfo) return;
+    if (
+      !active ||
+      !settings.heroTrailers ||
+      trailerCandidates.length === 0 ||
+      trailerInfo
+    )
+      return;
     let cancelled = false;
     fetchTrailer(trailerCandidates[0], "360p").then((info) => {
       if (!cancelled && info) setTrailerInfo(info);
@@ -316,10 +349,7 @@ function CinemaSlide({
   }, [trailerInfo]);
 
   return (
-    <div
-      aria-hidden={!active}
-      className="relative h-full w-full"
-    >
+    <div aria-hidden={!active} className="relative h-full w-full">
       {bg && (
         <img
           src={bg}
@@ -390,7 +420,11 @@ function CinemaSlide({
           )}
           <div className="mt-2 flex items-center gap-3">
             <button
-              onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
+              onClick={() =>
+                openPicker(meta, smartPlayEpisode(meta), {
+                  autoPlay: settings.instantPlay,
+                })
+              }
               className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.5)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               <Play size={17} fill="currentColor" />
@@ -402,7 +436,11 @@ function CinemaSlide({
             >
               <Info size={16} strokeWidth={2} />
               {t("More info")}
-              <ChevronRight size={15} strokeWidth={2} className="dir-icon opacity-65" />
+              <ChevronRight
+                size={15}
+                strokeWidth={2}
+                className="dir-icon opacity-65"
+              />
             </button>
           </div>
         </div>
@@ -444,7 +482,10 @@ function CinemaTitlePlate({
       ) : resolved ? (
         <h2
           className="font-display text-[72px] font-medium leading-[0.95] tracking-tight text-ink"
-          style={{ animation: "harbor-fade-in 420ms cubic-bezier(0.32, 0.72, 0.24, 1) both" }}
+          style={{
+            animation:
+              "harbor-fade-in 420ms cubic-bezier(0.32, 0.72, 0.24, 1) both",
+          }}
         >
           {name}
         </h2>
