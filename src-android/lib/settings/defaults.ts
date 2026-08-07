@@ -39,7 +39,7 @@ export const DEFAULT: Settings = {
   rowTitleScale: 1,
   playerTitleScale: 1,
   playerTitleSeriesFirst: false,
-  uiScale: 1,
+  uiScale: 0.8,
   serveWebUi: false,
   trailerQuality: "auto",
   detailTrailerAutoplay: false,

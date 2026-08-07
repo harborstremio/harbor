@@ -30,7 +30,6 @@ mod fonts;
 mod fullscreen;
 #[cfg(desktop)]
 mod hdr_overlay;
-#[cfg(desktop)]
 mod local_lib;
 #[cfg(desktop)]
 mod modal_overlay;
@@ -115,7 +114,6 @@ mod tray {
 
     pub fn show_main(_: &AppHandle) {}
 }
-#[cfg(desktop)]
 mod web_server;
 
 pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
@@ -779,16 +777,27 @@ pub fn run() {
         app_builder
             .invoke_handler(tauri::generate_handler![
                 harbor_flush_done,
+                close_aux_windows,
+                browser::browser_open,
+                browser::browser_close,
                 harbor_set_webview_memory_low,
                 harbor_set_webview_visible,
                 harbor_try_suspend_webview,
                 harbor_resume_webview,
                 save_text_file,
+                web_server::web_serve_start,
+                web_server::web_serve_stop,
+                web_server::web_serve_status,
                 settings_store::settings_read,
                 settings_store::settings_write,
+                streams::streams_run_pipeline,
+                streams::streams_parse,
+                streams::streams_core_version,
+                local_lib::harbor_scan_folder,
                 download::download_start,
                 download::download_cancel,
                 http_fetch::harbor_fetch,
+                stremio_auth::stremio_auth_start,
                 // just strip it down to the bare minimum for now.
             ])
             .run(tauri::generate_context!())

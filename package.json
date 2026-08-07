@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "build:android": "tsc -b && vite build --mode android",
     "preview": "vite preview",
+    "preview-android": "vite preview --mode android",
     "tauri": "tauri",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
     "setup:libmpv": "node scripts/fetch-libmpv.mjs",

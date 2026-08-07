@@ -74,8 +74,10 @@ pub async fn browser_open(app: AppHandle, url: String) -> Result<(), String> {
 
   #[cfg(target_os = "android")]
   {
-    // On Android we don't spawn additional webview windows; no-op for now.
-    eprintln!("[browser] android: open requested: {}", url);
+    use tauri_plugin_opener::OpenerExt;
+    app.opener()
+      .open_url(parsed.to_string(), None::<&str>)
+      .map_err(|e| format!("open url: {}", e))?;
     return Ok(());
   }
 

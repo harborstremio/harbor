@@ -41,12 +41,12 @@ export function OnboardingModal() {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-canvas/85 backdrop-blur-md ${
+      className={`fixed inset-0 z-50 flex h-dvh w-dvw items-stretch justify-stretch bg-canvas/85 backdrop-blur-md ${
         closing ? "opacity-0 transition-opacity duration-300" : "animate-fade-in"
       }`}
     >
       <div
-        className={`relative flex w-[min(92vw,580px)] flex-col overflow-hidden rounded-[28px] border border-edge-soft bg-elevated/95 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] ${
+        className={`relative flex h-full w-full flex-col overflow-hidden bg-elevated/95 ${
           closing ? "scale-[0.97] opacity-0 transition-all duration-300" : "animate-modal-in"
         }`}
       >
@@ -64,7 +64,7 @@ export function OnboardingModal() {
           <SplashStep onAdvance={next} />
         ) : (
           <>
-            <div className="flex min-h-[440px] flex-col justify-center px-12 py-10">
+            <div className="flex min-h-0 flex-1 flex-col justify-center px-12 py-10">
               <div key={step} className="animate-step-in">
                 {step === "welcome" && <WelcomeStep />}
                 {step === "layout" && <LayoutStep />}

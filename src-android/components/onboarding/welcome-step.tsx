@@ -24,7 +24,7 @@ export function WelcomeStep() {
         </div>
         <p className="text-[15.5px] leading-relaxed text-ink-muted">
           {t(
-            "A client for the Stremio protocol. Two minutes to set up; most of it optional. You stay in control of every key.",
+            "A client for the Stremio protocol. Two minutes to set up; most of it optional. You stay in control of every key. Now on Android!",
           )}
         </p>
       </div>

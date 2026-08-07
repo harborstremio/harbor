@@ -427,6 +427,13 @@ function getFocusableCandidates(root: ParentNode = document): HTMLElement[] {
   });
 }
 
+function focusFirstFocusable(root: ParentNode = document): boolean {
+  const [first] = getFocusableCandidates(root);
+  if (!first) return false;
+  first.focus();
+  return true;
+}
+
 function focusClosestInDirection(direction: "up" | "down" | "left" | "right") {
   const current = document.activeElement;
   if (!(current instanceof HTMLElement)) return false;
@@ -532,9 +539,12 @@ function Shell() {
       if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
         if (isEditableTarget(e.target)) return;
         const active = document.activeElement;
-        if (active instanceof HTMLElement) {
+        if (active instanceof HTMLElement && active !== document.body && active !== document.documentElement) {
           e.preventDefault();
           active.click();
+        } else if (focusFirstFocusable()) {
+          e.preventDefault();
+          (document.activeElement as HTMLElement | null)?.click();
         }
         return;
       }
@@ -553,6 +563,16 @@ function Shell() {
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [tvRemote, canGoBack, goBack]);
+
+  useEffect(() => {
+    if (!tvRemote || player) return;
+    const id = window.requestAnimationFrame(() => {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active !== document.body && active !== document.documentElement) return;
+      focusFirstFocusable();
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [tvRemote, player, topKind, layout]);
 
   useEffect(() => {
     uiScaleRef.current = settings.uiScale;
