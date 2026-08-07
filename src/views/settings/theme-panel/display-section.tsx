@@ -422,6 +422,14 @@ export function DisplaySection() {
           value={settings.heroFullQuality}
           onChange={(v) => update({ heroFullQuality: v })}
         />
+        <ToggleRow
+          label={t("Localized hero metadata")}
+          sub={t(
+            "Prioritize original language artwork and localized descriptions for the featured title.",
+          )}
+          value={settings.heroLocalizedMetadata}
+          onChange={(v) => update({ heroLocalizedMetadata: v })}
+        />
       </Section>
 
       <Section

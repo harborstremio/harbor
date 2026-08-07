@@ -72,8 +72,12 @@ export async function tmdbLocalizedPoster(key: string, metaId: string): Promise<
   return best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
 }
 
-export async function tmdbMovieImages(key: string, metaId: string): Promise<string[]> {
-  const data = await fetchMovieAssets(key, metaId);
+export async function tmdbMovieImages(
+  key: string,
+  metaId: string,
+  originalLang?: string | null,
+): Promise<string[]> {
+  const data = await fetchMovieAssets(key, metaId, originalLang);
   const seen = new Set<string>();
   const out: string[] = [];
   for (const b of (data?.backdrops ?? []).sort(
