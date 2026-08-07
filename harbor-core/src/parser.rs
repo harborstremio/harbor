@@ -165,8 +165,20 @@ static TORRENTIO_NOISE_SUFFIX_RX: Lazy<Regex> = Lazy::new(|| {
 static CONTAINER_RX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)\.(mkv|mp4|m4v|avi|webm|mov|ts|wmv)\b").unwrap());
 
-static SIZE_RX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?i)(\d+(?:\.\d+)?)\s*(GB|MB|TB|GiB|MiB|TiB)\b").unwrap());
+// Groups: 1 = integer part (may carry `,`/space thousands separators),
+// 2 = fractional digits, 3 = unit.
+//
+// The leading `(?:^|[^\d.,])` is a consuming boundary (the regex crate has no
+// lookbehind). Without it the pattern happily matched the tail of a longer
+// number, so "2,75 GB" parsed as 75 GB. A fraction is capped at two digits so
+// a three-digit group is read as a thousands separator instead: "1,500 MB" is
+// 1500 MB, while "1,5 GB" is 1.5 GB.
+static SIZE_RX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"(?i)(?:^|[^\d.,])(\d{1,3}(?:[ ,]\d{3})+|\d+)(?:[.,](\d{1,2}))?\s*(GB|MB|TB|GiB|MiB|TiB)\b",
+    )
+    .unwrap()
+});
 
 static SEEDERS_RX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?i)(?:\x{1F465}|\x{1F464}|S:|seeds?:?|\bS\s*=\s*)\s*(\d+)").unwrap()
@@ -1259,8 +1271,14 @@ fn parse_size(text: &str, hint: Option<u64>) -> Option<u64> {
         }
     }
     let c = SIZE_RX.captures(text)?;
-    let n: f64 = c.get(1)?.as_str().parse().ok()?;
-    let unit = c.get(2)?.as_str().to_lowercase();
+    let int_part = c.get(1)?.as_str();
+    let mut digits: String = int_part.chars().filter(char::is_ascii_digit).collect();
+    if let Some(frac) = c.get(2) {
+        digits.push('.');
+        digits.push_str(frac.as_str());
+    }
+    let n: f64 = digits.parse().ok()?;
+    let unit = c.get(3)?.as_str().to_lowercase();
     let bytes = if unit.starts_with('t') {
         n * (1024f64.powi(4))
     } else if unit.starts_with('g') {
@@ -1775,5 +1793,48 @@ mod tests {
         s.behavior_hints = Some(json!({ "videoSize": 5_000_000_000_u64 }));
         let p = parse_stream(s);
         assert_eq!(p.size, Some(5_000_000_000));
+    }
+
+    fn gb(v: f64) -> Option<u64> {
+        Some((v * 1024.0 * 1024.0 * 1024.0).round() as u64)
+    }
+
+    fn mb(v: f64) -> Option<u64> {
+        Some((v * 1024.0 * 1024.0).round() as u64)
+    }
+
+    #[test]
+    fn size_parses_dot_decimals() {
+        assert_eq!(parse_size("1.5 GB", None), gb(1.5));
+        assert_eq!(parse_size("3.2GB", None), gb(3.2));
+        assert_eq!(parse_size("700 MB", None), mb(700.0));
+    }
+
+    #[test]
+    fn size_parses_comma_decimals() {
+        // The pattern used to match the tail of a longer number, so the leading
+        // digits were dropped and "2,75 GB" came back as 75 GB.
+        assert_eq!(parse_size("2,75 GB", None), gb(2.75));
+        assert_eq!(parse_size("1,5 GB", None), gb(1.5));
+        assert_eq!(parse_size("12,4 GB", None), gb(12.4));
+    }
+
+    #[test]
+    fn size_parses_grouped_thousands() {
+        assert_eq!(parse_size("1,500 MB", None), mb(1500.0));
+        assert_eq!(parse_size("1 500 MB", None), mb(1500.0));
+        assert_eq!(parse_size("1,234.56 GB", None), gb(1234.56));
+    }
+
+    #[test]
+    fn size_reads_from_surrounding_text() {
+        assert_eq!(parse_size("Size: 2.75 GB | 40 seeds", None), gb(2.75));
+        assert_eq!(parse_size("\u{1F4BE} 4.7 GiB", None), gb(4.7));
+    }
+
+    #[test]
+    fn size_hint_takes_precedence() {
+        assert_eq!(parse_size("2,75 GB", Some(123)), Some(123));
+        assert_eq!(parse_size("2,75 GB", Some(0)), gb(2.75));
     }
 }
