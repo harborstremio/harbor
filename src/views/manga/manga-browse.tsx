@@ -1,8 +1,9 @@
-import { Loader2, Search, Star } from "lucide-react";
+import { Loader2, RefreshCw, Search, Star } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Poster } from "@/components/poster";
 import {
+  clearMangaCache,
   MANGA_PAGE,
   popularManga,
   popularMangaStream,
@@ -36,6 +37,7 @@ export function MangaBrowse({
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [reloadTick, setReloadTick] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   const offsetRef = useRef(0);
   const seenRef = useRef(new Set<string>());
@@ -63,6 +65,16 @@ export function MangaBrowse({
   );
 
   const reload = useCallback(() => setReloadTick((n) => n + 1), []);
+
+  const handleRefresh = useCallback(() => {
+    clearMangaCache();
+    setRefreshing(true);
+    reload();
+  }, [reload]);
+
+  useEffect(() => {
+    if (status !== "loading") setRefreshing(false);
+  }, [status]);
 
   const sourceRef = useRef(activeMangaSourceId());
   useEffect(
@@ -199,6 +211,16 @@ export function MangaBrowse({
         </div>
         <SourceDropdown onManageSources={onManageSources} />
         <TagDropdown tagId={tagId} onSelect={setTagId} />
+        <button
+          type="button"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          aria-label={t("Refresh library")}
+          title={t("Refresh library")}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-elevated/40 text-ink-subtle ring-1 ring-edge-soft/60 transition-colors hover:bg-elevated/70 hover:text-ink disabled:opacity-50"
+        >
+          <RefreshCw size={15} className={refreshing ? "animate-spin" : undefined} />
+        </button>
       </div>
 
       {status === "loading" ? (
