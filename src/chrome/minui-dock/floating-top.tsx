@@ -70,7 +70,10 @@ export function FloatingTop() {
           <Search size={16} strokeWidth={2.2} />
           <span className="hidden sm:inline">{t("common.search")}</span>
         </PillBtn>
-        <ProfilePill onOpenSettings={() => setView("settings")} settingsActive={view === "settings"} />
+        <ProfilePill
+          onOpenSettings={() => setView("settings")}
+          settingsActive={view === "settings"}
+        />
         {IS_TAURI && !settings.useNativeTitleBar && (
           <div className="ms-1 flex items-center gap-1">
             <WinBtn onClick={minimize} label={t("chrome.minimize")}>
@@ -111,7 +114,12 @@ export function FloatingTop() {
               )}
             </WinBtn>
             <WinBtn onClick={close} label={t("common.close")} danger>
-              <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </WinBtn>
           </div>
         )}
@@ -210,7 +218,12 @@ function ProfilePill({
           style={{ background: color, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)" }}
         >
           {harborAvatar ? (
-            <img src={harborAvatar} alt="" className="h-full w-full object-cover" draggable={false} />
+            <img
+              src={harborAvatar}
+              alt=""
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
           ) : (
             <CatAvatar className="h-full w-full" />
           )}
