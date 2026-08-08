@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useRatingPoster } from "@/lib/ratings/poster";
 import { createPortal } from "react-dom";
-import { Eye, Loader2, X } from "lucide-react";
+import { Eye, Loader2, Search, X } from "lucide-react";
 import { Poster } from "@/components/poster";
 import { RatingStars } from "@/components/ratings/rating-stars";
 import { useT } from "@/lib/i18n";
@@ -32,6 +32,8 @@ export function UserRatings({
 }) {
   const t = useT();
   const [type, setType] = useState("all");
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(query);
   const [items, setItems] = useState<PublicRating[]>([]);
   const [counts, setCounts] = useState<RatingCounts>(EMPTY_COUNTS);
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -50,35 +52,63 @@ export function UserRatings({
     };
   }, [onClose]);
 
+  const trimmedQuery = deferredQuery.trim();
+  const normalizedQuery = trimmedQuery.toLowerCase();
+  const visibleItems = useMemo(
+    () =>
+      normalizedQuery
+        ? items.filter((r) => r.title.toLowerCase().includes(normalizedQuery))
+        : items,
+    [items, normalizedQuery],
+  );
+
   useEffect(() => {
     const ac = new AbortController();
     setLoading(true);
     setItems([]);
-    fetchUserRatings(handle, { type }, ac.signal)
-      .then((page) => {
+    let countsFromFirstPage: RatingCounts | undefined;
+
+    const fetchPages = async () => {
+      let nextCursor: string | undefined = undefined;
+      const loaded: PublicRating[] = [];
+
+      do {
+        const page = await fetchUserRatings(handle, {
+          type,
+          cursor: nextCursor,
+          query: trimmedQuery || undefined,
+        }, ac.signal);
         if (ac.signal.aborted) return;
-        setItems(page.items);
-        setCursor(page.nextCursor);
-        if (!seen.current || type === "all") setCounts(page.counts);
-        seen.current = true;
-        setLoading(false);
-      })
-      .catch(() => {
-        if (!ac.signal.aborted) setLoading(false);
-      });
+        if (!countsFromFirstPage) countsFromFirstPage = page.counts;
+        loaded.push(...page.items);
+        nextCursor = page.nextCursor;
+      } while (trimmedQuery && nextCursor);
+
+      if (ac.signal.aborted) return;
+      setItems(loaded);
+      setCursor(trimmedQuery ? undefined : nextCursor);
+      if (!seen.current || type === "all") setCounts(countsFromFirstPage ?? EMPTY_COUNTS);
+      seen.current = true;
+      setLoading(false);
+    };
+
+    fetchPages().catch(() => {
+      if (!ac.signal.aborted) setLoading(false);
+    });
+
     return () => ac.abort();
-  }, [handle, type]);
+  }, [handle, type, trimmedQuery]);
 
   const loadMore = useCallback(() => {
-    if (!cursor || more) return;
+    if (trimmedQuery || !cursor || more) return;
     setMore(true);
-    fetchUserRatings(handle, { type, cursor })
+    fetchUserRatings(handle, { type, cursor, query: undefined })
       .then((page) => {
         setItems((prev) => [...prev, ...page.items]);
         setCursor(page.nextCursor);
       })
       .finally(() => setMore(false));
-  }, [cursor, more, handle, type]);
+  }, [cursor, more, handle, type, trimmedQuery]);
 
   return createPortal(
     <div
@@ -105,25 +135,37 @@ export function UserRatings({
           </button>
         </header>
 
-        <div className="flex flex-wrap gap-1.5 border-b border-edge-soft px-7 py-3">
-          {TABS.map((tab) => {
-            const n = counts[tab.countKey];
-            if (tab.id !== "all" && n === 0) return null;
-            const active = type === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setType(tab.id)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                  active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-elevated hover:text-ink"
-                }`}
-              >
-                {t(tab.label)}
-                <span className={`tabular-nums ${active ? "text-canvas/70" : "text-ink-subtle"}`}>{n}</span>
-              </button>
-            );
-          })}
+        <div className="space-y-3 border-b border-edge-soft px-7 py-3">
+          <div className="relative max-w-[420px]">
+            <Search size={14} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-ink-subtle" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t("Search ratings")}
+              aria-label={t("Search ratings")}
+              className="h-10 w-full rounded-full border border-edge-soft bg-surface/90 ps-11 pe-4 text-[13px] text-ink placeholder:text-ink-subtle outline-none transition-colors focus:border-edge"
+            />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {TABS.map((tab) => {
+              const n = counts[tab.countKey];
+              if (tab.id !== "all" && n === 0) return null;
+              const active = type === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setType(tab.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
+                    active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-elevated hover:text-ink"
+                  }`}
+                >
+                  {t(tab.label)}
+                  <span className={`tabular-nums ${active ? "text-canvas/70" : "text-ink-subtle"}`}>{n}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-7 py-6">
@@ -131,16 +173,16 @@ export function UserRatings({
             <div className="flex h-40 items-center justify-center">
               <Loader2 size={22} className="animate-spin text-ink-subtle" />
             </div>
-          ) : items.length === 0 ? (
+          ) : visibleItems.length === 0 ? (
             <div className="flex h-40 items-center justify-center text-[13.5px] text-ink-muted">
-              {t("No ratings yet")}
+              {trimmedQuery ? t('No ratings match "{query}"', { query: trimmedQuery }) : t("No ratings yet")}
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {items.map((r) => (
+              {visibleItems.map((r) => (
                 <RatingRow key={r.itemKey} r={r} onOpenMeta={onOpenMeta} />
               ))}
-              {cursor && (
+              {!trimmedQuery && cursor && (
                 <button
                   type="button"
                   onClick={loadMore}

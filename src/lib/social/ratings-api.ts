@@ -48,12 +48,13 @@ export async function fetchMyRatings(signal?: AbortSignal): Promise<MyRating[]> 
 
 export async function fetchUserRatings(
   handle: string,
-  opts: { type?: string; cursor?: string } = {},
+  opts: { type?: string; cursor?: string; query?: string } = {},
   signal?: AbortSignal,
 ): Promise<UserRatingsPage> {
   const q = new URLSearchParams();
   if (opts.type && opts.type !== "all") q.set("type", opts.type);
   if (opts.cursor) q.set("cursor", opts.cursor);
+  if (opts.query) q.set("q", opts.query);
   const qs = q.toString();
   return socialGet<UserRatingsPage>(
     `/social/u/${encodeURIComponent(handle)}/ratings${qs ? `?${qs}` : ""}`,
