@@ -198,7 +198,7 @@ test("Focused Card is global and independent from card expansion", () => {
   assert.match(hookSource, /focusIntentRef\.current = true/);
   assert.doesNotMatch(hookSource, /row\?\.setFocused|setRowCardFocused/);
   assert.doesNotMatch(rowSource, /focusedCardIndex|deemphasized/);
-  assert.match(cssSource, /#root:has\(\[data-focused-card\]/);
+  assert.match(cssSource, /#root\[data-card-focus-active\]/);
   assert.match(cssSource, /\[data-media-card\]/);
   assert.match(cssSource, /brightness\(0\.68\) saturate\(0\.78\) blur\(0\.7px\)/);
   assert.match(cssSource, /\[data-focused-card\]:is\(:focus-visible, \[data-tv-focused="true"\]\)/);

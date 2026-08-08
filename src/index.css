@@ -1723,15 +1723,15 @@ html:not([data-input-modality="pointer"]) #root [data-media-card] {
 }
 
 html:not([data-input-modality="pointer"])
-  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
-  [data-media-card]:not([data-focused-card]:is(:focus, [data-tv-focused="true"])) {
+  #root[data-card-focus-active]
+  [data-media-card]:not([data-tv-focused="true"]) {
   opacity: 0.34;
   filter: brightness(0.68) saturate(0.78) blur(0.7px);
 }
 
 html:not([data-input-modality="pointer"])
-  #root:has([data-focused-card]:is(:focus, [data-tv-focused="true"]))
-  [data-media-card]:is([data-focused-card]:focus, [data-focused-card][data-tv-focused="true"]) {
+  #root[data-card-focus-active]
+  [data-media-card][data-tv-focused="true"] {
   opacity: 1;
   filter: none;
 }
