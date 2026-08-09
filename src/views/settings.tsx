@@ -192,9 +192,7 @@ export function Settings() {
   const [dlDraft, setDlDraft] = useState(settings.dlKey);
   const [savedKey, setSavedKey] = useState<SavedKey | null>(null);
   const { settingsSectionRequest } = useView();
-  const [active, setActive] = useState<SectionId>(
-    (settingsSectionRequest.section as SectionId | null) ?? "account",
-  );
+  const [active, setActive] = useState<SectionId>(settingsSectionRequest.section ?? "account");
   const [relayMode, setRelayMode] = useState<RelayMode>("panel");
   const [pendingAnchor, setPendingAnchor] = useState<string | null>(null);
   const scrollRef = useRef<HTMLElement>(null);
@@ -207,7 +205,7 @@ export function Settings() {
   };
 
   useEffect(() => {
-    if (settingsSectionRequest.section) setActive(settingsSectionRequest.section as SectionId);
+    if (settingsSectionRequest.section) setActive(settingsSectionRequest.section);
   }, [settingsSectionRequest]);
 
   useEffect(() => {
