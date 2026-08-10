@@ -19,6 +19,8 @@ import { buildPlayInvite } from "@/lib/together/build-invite";
 import { type PlayEpisode, type PlayerSrc } from "@/lib/view";
 import { openInAppBrowser, openUrl } from "@/lib/window";
 import { enqueueDownload } from "@/lib/download/downloads-store";
+import { snapshotDownloadPlaybackContext } from "@/lib/download/playback-context";
+import { subtitleHintsFromStreamRef } from "@/lib/subtitles/player-hints";
 import { formatStreamQuality, humanError, isDebridFailure } from "./picker-utils";
 
 export function usePickHandler({
@@ -80,7 +82,9 @@ export function usePickHandler({
 }) {
   const [queuedHash, setQueuedHash] = useState<string | null>(null);
   const [debridDown, setDebridDown] = useState(false);
-  const [p2pConfirm, setP2pConfirm] = useState<{ stream: ScoredStream; forceP2p?: boolean } | null>(null);
+  const [p2pConfirm, setP2pConfirm] = useState<{ stream: ScoredStream; forceP2p?: boolean } | null>(
+    null,
+  );
   const debridFailStreakRef = useRef(0);
   const resolveAcRef = useRef<AbortController | null>(null);
   const autoPickRef = useRef(false);
@@ -121,7 +125,9 @@ export function usePickHandler({
     resolveAcRef.current = ac;
     let opened = false;
     try {
-      const hint = episode ? { season: episode.season ?? null, episode: episode.episode ?? null } : undefined;
+      const hint = episode
+        ? { season: episode.season ?? null, episode: episode.episode ?? null }
+        : undefined;
       const r = await resolveStream(stream, debrids, ac.signal, userCommitted, forceP2p, hint);
       if (ac.signal.aborted) return;
       if (!r.ok) {
@@ -158,7 +164,8 @@ export function usePickHandler({
         } catch (e) {
           setFailedStreams((prev) => new Set(prev).add(stream));
           const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
-          if (!willRetry) setResolveError("Could not start the local stream proxy. Pick another stream.");
+          if (!willRetry)
+            setResolveError("Could not start the local stream proxy. Pick another stream.");
           advanceAuto();
           return;
         }
@@ -185,10 +192,28 @@ export function usePickHandler({
         const willRetry = autoActive && autoAttemptIdx + 1 < autoCandidatesLength;
         advanceAuto();
         if (!willRetry && !autoActive) {
-          setResolveError("This source isn't ready on your debrid yet. Try it again in a moment or pick another.");
+          setResolveError(
+            "This source isn't ready on your debrid yet. Try it again in a moment or pick another.",
+          );
         }
         return;
       }
+      const streamRef = {
+        infoHash: stream.infoHash ?? null,
+        fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
+        addonId: stream.addonId ?? null,
+        title: stream.title ?? null,
+        parsedTitle: stream.parsedTitle ?? null,
+        resolution: stream.resolution ?? null,
+        quality: formatStreamQuality(stream),
+        releaseGroup: stream.releaseGroupNormalized ?? null,
+        source: stream.source ?? null,
+        bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
+        size: stream.size ?? null,
+        cachedSlugs: Object.entries(stream.cached ?? {})
+          .filter(([, v]) => v === true)
+          .map(([k]) => k),
+      };
       if (intent === "download") {
         const label =
           [stream.resolution, stream.source].filter(Boolean).join(" ") ||
@@ -197,7 +222,19 @@ export function usePickHandler({
           stream.name ||
           stream.addonName ||
           null;
-        void enqueueDownload({ meta, episode, streamLabel: label, url: r.data.url, headers: r.data.headers });
+        void enqueueDownload({
+          meta,
+          episode,
+          streamLabel: label,
+          playback: snapshotDownloadPlaybackContext({
+            imdbId: imdbId ?? undefined,
+            imdbIdVerified: imdbIdVerified === true,
+            episode,
+            subtitleHints: subtitleHintsFromStreamRef(streamRef),
+          }),
+          url: r.data.url,
+          headers: r.data.headers,
+        });
         opened = true;
         setResolving(null);
         onDownloadStarted?.(label);
@@ -223,22 +260,7 @@ export function usePickHandler({
         attempt: attempt ?? 0,
         autoFired: autoPickRef.current,
         resume: !!resume,
-        streamRef: {
-          infoHash: stream.infoHash ?? null,
-          fileIdx: r.data.fileIdx ?? stream.fileIdx ?? null,
-          addonId: stream.addonId ?? null,
-          title: stream.title ?? null,
-          parsedTitle: stream.parsedTitle ?? null,
-          resolution: stream.resolution ?? null,
-          quality: formatStreamQuality(stream),
-          releaseGroup: stream.releaseGroupNormalized ?? null,
-          source: stream.source ?? null,
-          bingeGroup: stream.behaviorHints?.bingeGroup ?? null,
-          size: stream.size ?? null,
-          cachedSlugs: Object.entries(stream.cached ?? {})
-            .filter(([, v]) => v === true)
-            .map(([k]) => k),
-        },
+        streamRef,
       });
       opened = true;
       sameSourceRetryRef.current = 0;
@@ -363,5 +385,15 @@ export function usePickHandler({
     sameSourceRetryRef.current = 0;
   };
 
-  return { onPlay, onCache, queuedHash, debridDown, resetDebridDown, abortResolve, p2pConfirm, confirmP2p, cancelP2p };
+  return {
+    onPlay,
+    onCache,
+    queuedHash,
+    debridDown,
+    resetDebridDown,
+    abortResolve,
+    p2pConfirm,
+    confirmP2p,
+    cancelP2p,
+  };
 }

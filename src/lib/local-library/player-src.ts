@@ -10,21 +10,33 @@ export function episodeLabel(e: LocalEntry): string | null {
 
 export function localPlayerSrc(entry: LocalEntry): PlayerSrc {
   const epLabel = episodeLabel(entry);
+  const imdbId = /^tt\d+$/.test(entry.imdbId ?? "") ? (entry.imdbId ?? undefined) : undefined;
   return {
     meta: {
-      id: entry.imdbId ?? `local:${entry.id}`,
+      id: imdbId ?? `local:${entry.id}`,
       type: entry.type === "show" ? "series" : "movie",
       name: entry.title,
       poster: entry.poster ?? undefined,
       releaseInfo: entry.year ? String(entry.year) : undefined,
     },
-    imdbId: entry.imdbId ?? undefined,
+    imdbId,
+    imdbIdVerified: !!imdbId,
+    tmdbId: entry.tmdbId ?? undefined,
     episode: epLabel
-      ? { season: entry.season as number, episode: entry.episode as number, imdbId: entry.imdbId ?? undefined }
+      ? {
+          season: entry.season as number,
+          episode: entry.episode as number,
+          imdbId,
+        }
       : undefined,
     url: entry.path,
     title: entry.title,
     subtitle: epLabel ?? (entry.year ? String(entry.year) : entry.filename),
     notWebReady: true,
+    subtitleHints: {
+      filename: entry.filename,
+      release: entry.filename,
+      resolution: entry.resolution ?? null,
+    },
   };
 }
