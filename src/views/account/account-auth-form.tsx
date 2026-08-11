@@ -2,6 +2,7 @@ import { useState } from "react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { loginIdentity, registerIdentity } from "@/lib/account/identity";
+import { useCapabilities } from "@/lib/account/capabilities";
 import { accountErrorMessage } from "@/lib/account/error-messages";
 import { PasswordField, TextField } from "./fields";
 import { AccountRecoverForm } from "./account-recover-form";
@@ -23,13 +24,26 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
   const [mode, setMode] = useState<Mode>("register");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Optional throughout. Never gates `ready`, so a blank address still registers.
+  const [email, setEmail] = useState("");
+  const [newsletter, setNewsletter] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Asked of the connected instance, not compiled in: one binary serves
+  // harbor.site and every self-hosted backend, and an instance with no mailer
+  // must not offer to send anything. Defaults to "no", so this is invisible
+  // until a server says otherwise.
+  const caps = useCapabilities();
   const trimmed = username.trim();
+  const trimmedEmail = email.trim();
+  // Intentionally forgiving: the server is the authority, and the verification
+  // mail either arrives or it does not. A strict regex here only rejects valid
+  // addresses.
+  const emailOk = trimmedEmail.length === 0 || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail);
   const usernameOk = USERNAME_RE.test(trimmed);
   const passwordOk = mode === "register" ? password.length >= 8 : password.length > 0;
-  const ready = usernameOk && passwordOk;
+  const ready = usernameOk && passwordOk && emailOk;
   const usernameHint =
     mode === "register" && trimmed.length > 0 && !usernameOk
       ? "3 to 24 letters, numbers, or underscores."
@@ -41,7 +55,12 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
     setError(null);
     try {
       if (mode === "register") {
-        const { recoveryCode } = await registerIdentity(trimmed, password);
+        const { recoveryCode } = await registerIdentity(
+          trimmed,
+          password,
+          caps.email && trimmedEmail ? trimmedEmail : undefined,
+          caps.newsletter.enabled ? (newsletter ?? caps.newsletter.defaultChecked) : false,
+        );
         onRecovery?.(recoveryCode);
       } else {
         await loginIdentity(trimmed, password);
@@ -130,6 +149,37 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
             placeholder={mode === "register" ? t("At least 8 characters") : t("Your password")}
             onEnter={submit}
           />
+
+          {mode === "register" && caps.email && (
+            <>
+              <TextField
+                label={t("Email (optional)")}
+                value={email}
+                onChange={setEmail}
+                placeholder={t("you@example.com")}
+                hint={
+                  emailOk
+                    ? t("Lets you reset your password if you lose your recovery key. You can add it later.")
+                    : t("That doesn't look like an email address.")
+                }
+                tone={emailOk ? "muted" : "danger"}
+                autoComplete="email"
+              />
+              {caps.newsletter.enabled && caps.newsletter.label && (
+                <label className="flex cursor-pointer items-start gap-2.5 text-[12.5px] leading-snug text-ink-subtle">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 size-3.5 shrink-0 accent-ink"
+                    checked={newsletter ?? caps.newsletter.defaultChecked}
+                    onChange={(e) => setNewsletter(e.target.checked)}
+                    disabled={!trimmedEmail}
+                  />
+                  {/* Operator-supplied. Never hardcode a label -- not every instance runs a list. */}
+                  <span>{caps.newsletter.label}</span>
+                </label>
+              )}
+            </>
+          )}
 
           {mode === "signin" && (
             <button
