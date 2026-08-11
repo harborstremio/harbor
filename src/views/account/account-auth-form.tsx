@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { loginIdentity, registerIdentity } from "@/lib/account/identity";
+import { loginIdentity, registerIdentity, requestPasswordReset } from "@/lib/account/identity";
 import { useCapabilities } from "@/lib/account/capabilities";
 import { accountErrorMessage } from "@/lib/account/error-messages";
 import { PasswordField, TextField } from "./fields";
@@ -20,7 +20,8 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,24}$/;
 
 export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) => void }) {
   const t = useT();
-  const [view, setView] = useState<"auth" | "recover">("auth");
+  const [view, setView] = useState<"auth" | "recover" | "forgot">("auth");
+  const [resetSent, setResetSent] = useState(false);
   const [mode, setMode] = useState<Mode>("register");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +41,14 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
   // Intentionally forgiving: the server is the authority, and the verification
   // mail either arrives or it does not. A strict regex here only rejects valid
   // addresses.
-  const emailOk = trimmedEmail.length === 0 || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail);
+  // REQUIRED ONLY WHEN THE INSTANCE CAN SEND. If the backend reports no mail
+  // support, requiring an address here would make registration impossible --
+  // which is exactly what happens during the window where this ships before the
+  // server does.
+  const emailRequired = mode === "register" && caps.email;
+  const emailOk = emailRequired
+    ? /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail)
+    : trimmedEmail.length === 0 || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail);
   const usernameOk = USERNAME_RE.test(trimmed);
   const passwordOk = mode === "register" ? password.length >= 8 : password.length > 0;
   const ready = usernameOk && passwordOk && emailOk;
@@ -73,6 +81,63 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
   };
 
   const active = MODES.find((m) => m.id === mode)!;
+
+  if (view === "forgot")
+    return (
+      <div className="flex flex-col gap-4">
+        <p className="text-[13px] leading-snug text-ink-muted">
+          {resetSent
+            ? /* Deliberately does not confirm whether the address exists. The
+                 server answers the same either way, because saying otherwise
+                 would make this an account-enumeration oracle. */
+              t("If that address is on file, we've sent a reset link. It's good for one hour.")
+            : t("Enter the email on your account and we'll send a reset link.")}
+        </p>
+        {!resetSent && (
+          <>
+            <TextField
+              label={t("Email")}
+              value={email}
+              onChange={setEmail}
+              placeholder={t("you@example.com")}
+              autoComplete="email"
+            />
+            <button
+              type="button"
+              disabled={busy || !trimmedEmail}
+              onClick={() => {
+                setBusy(true);
+                void requestPasswordReset(trimmedEmail)
+                  .catch(() => {})
+                  .finally(() => {
+                    // Always reports sent, matching the server. See above.
+                    setResetSent(true);
+                    setBusy(false);
+                  });
+              }}
+              className="flex h-11 items-center justify-center gap-2 rounded-[11px] bg-ink text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 disabled:opacity-40"
+            >
+              {busy && <Loader2 size={16} className="animate-spin" />}
+              {t("Send reset link")}
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => { setView("recover"); setResetSent(false); setError(null); }}
+          className="text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink"
+        >
+          {t("Use a recovery key instead")}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setView("auth"); setResetSent(false); }}
+          className="text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink"
+        >
+          {t("Back to sign in")}
+        </button>
+      </div>
+    );
 
   if (view === "recover") {
     return (
@@ -153,16 +218,16 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
           {mode === "register" && caps.email && (
             <>
               <TextField
-                label={t("Email (optional)")}
+                label={emailRequired ? t("Email") : t("Email (optional)")}
                 value={email}
                 onChange={setEmail}
                 placeholder={t("you@example.com")}
                 hint={
-                  emailOk
-                    ? t("Lets you reset your password if you lose your recovery key. You can add it later.")
-                    : t("That doesn't look like an email address.")
+                  !emailOk && trimmedEmail.length > 0
+                    ? t("That doesn't look like an email address.")
+                    : t("We'll send a confirmation link. It also lets you reset your password if you lose your recovery key.")
                 }
-                tone={emailOk ? "muted" : "danger"}
+                tone={!emailOk && trimmedEmail.length > 0 ? "danger" : "muted"}
                 autoComplete="email"
               />
               {caps.newsletter.enabled && caps.newsletter.label && (
@@ -185,7 +250,7 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
             <button
               type="button"
               onClick={() => {
-                setView("recover");
+                setView(caps.email ? "forgot" : "recover");
                 setError(null);
               }}
               className="-mt-1 self-end text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink"

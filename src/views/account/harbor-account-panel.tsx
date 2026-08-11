@@ -5,6 +5,7 @@ import { useT } from "@/lib/i18n";
 import { Section } from "@/views/settings/shared";
 import { RecoveryReveal } from "@/views/settings/theme-panel/custom-themes-section/author-account-panel/recovery-reveal";
 import { AccountAuthForm } from "./account-auth-form";
+import { AccountEmailRow } from "./account-email-row";
 import { AccountSignedInBar } from "./account-signed-in-bar";
 import { HandleClaimCard } from "./handle-claim-card";
 
@@ -35,6 +36,9 @@ export function HarborAccountPanel() {
           </div>
           <div className="p-5">
             <HandleClaimCard author={author} />
+          </div>
+          <div className="p-5">
+            <AccountEmailRow author={author} />
           </div>
         </div>
       )}

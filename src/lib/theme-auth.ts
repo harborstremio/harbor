@@ -65,6 +65,11 @@ export type Author = {
   handleChangeAvailableAt?: string | null;
   verified?: boolean;
   stremioLinked?: boolean;
+  /** Verified address. Empty until a confirmation link has been clicked. */
+  email?: string;
+  emailVerified?: boolean;
+  /** Awaiting confirmation. Never replaces the verified address until clicked. */
+  emailPending?: string;
   badges?: AuthorBadge[];
 };
 
@@ -81,6 +86,9 @@ function absAvatar(p: unknown): string | null {
 
 function toAuthor(u: RawUser): Author {
   return {
+    email: typeof u.email === "string" ? u.email : "",
+    emailVerified: u.emailVerified === true,
+    emailPending: typeof u.emailPending === "string" ? u.emailPending : "",
     id: u.id,
     username: u.username,
     avatar: absAvatar(u.avatar),

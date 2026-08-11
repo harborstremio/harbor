@@ -2,17 +2,23 @@ import { useEffect, useState } from "react";
 import { getJson } from "./client";
 
 /**
- * What the CONNECTED instance supports, asked at runtime rather than compiled in.
+ * What the CONNECTED backend supports, asked at runtime rather than compiled in.
  *
- * One client binary serves harbor.site, self-hosted instances and anyone running
- * their own backend, so an email feature cannot be a build flag -- a self-hoster
- * with no SMTP configured would get a signup form promising a verification mail
- * that never arrives, which is worse than not offering it.
+ * NOTE ON WHO THIS PROTECTS, because the obvious answer is wrong. It is NOT
+ * self-hosters: HARBOR_API_BASE defaults to https://harbor.site, so a
+ * self-hosted client still uses the primary backend for its Harbor account, and
+ * would get a working mailer. Repointing needs a build-time VITE_HARBOR_API_BASE
+ * and a harbor-themes of your own.
  *
- * So the server is asked, and every email affordance in the UI is rendered only
- * if it answers yes. An instance that has not configured mail -- or one running a
- * backend older than this endpoint, where the request 404s -- looks exactly as it
- * does today.
+ * It earns its place for three narrower reasons:
+ *
+ *   1. ROLLOUT ORDER. This lands before the endpoints exist. Every backend 404s
+ *      today, so today every client renders exactly as it does now, and the two
+ *      halves can ship independently in either order.
+ *   2. KILL SWITCH. A provider outage or an abuse wave is one config flip away
+ *      from the UI disappearing, rather than a client release.
+ *   3. Backends that genuinely differ -- the maintainer's dev instances, CI, and
+ *      a self-hostable harbor-themes if that ever exists.
  */
 export type AccountCapabilities = {
   /** Instance can send mail: verification and email password reset are available. */
