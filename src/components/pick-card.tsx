@@ -22,7 +22,7 @@ import { harborImdbTitle } from "@/lib/providers/harbor-imdb";
 import { mdblistCardPrefetch, useMdblistCardScores } from "@/lib/providers/mdblist-batch";
 import { needsImdbForPoster, needsTmdbForPoster, rpdbPoster } from "@/lib/providers/rpdb";
 import { useTitlePoster } from "@/lib/title-poster";
-import { externalToKitsu, kitsuToImdb, kitsuToTvdb } from "@/lib/providers/anime-mapping";
+import { externalToKitsu, kitsuToImdb, kitsuToTvdb, aniZipByKitsuWithFallback } from "@/lib/providers/anime-mapping";
 import {
   tmdbIdFromImdb,
   tmdbImdbId,
@@ -34,7 +34,7 @@ import { useSettings } from "@/lib/settings";
 import { useSimklCardScores, useSimklCardScoresByAnimeId } from "@/lib/simkl/ratings";
 import { simklRequest } from "@/lib/simkl/client";
 import { getLocalCache } from "@/lib/simkl/activities";
-import { aniZipByKitsu, aniZipByMal } from "@/lib/providers/anizip";
+import { aniZipByMal } from "@/lib/providers/anizip";
 import { useView } from "@/lib/view";
 import { TvCard } from "@/components/tv-card";
 import { useTilt } from "@/lib/use-tilt";
@@ -412,7 +412,7 @@ const PosterCard = memo(function PosterCard({
       }
 
       if (kitsuId) {
-        const map = await aniZipByKitsu(kitsuId).catch(() => null);
+        const map = await aniZipByKitsuWithFallback(kitsuId).catch(() => null);
         if (cancelled) return;
         if (map?.titles) {
           const title = getTitleFromAniZip(map.titles, preferred);

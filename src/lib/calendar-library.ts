@@ -8,7 +8,8 @@ import {
   tmdbMovieRelease,
   tmdbTvUpcoming,
 } from "./providers/tmdb/tmdb-calendar";
-import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, pickEpisodeTitle } from "./providers/anizip";
+import { aniZipByAnilist, aniZipByMal, pickEpisodeTitle } from "./providers/anizip";
+import { aniZipByKitsuWithFallback } from "./providers/anime-mapping";
 import type { CalendarItem } from "./calendar";
 
 const SERIES_LIMIT = 80;
@@ -101,7 +102,7 @@ async function animeUpcoming(
   const numId = animeNumericId(id);
   if (numId == null) return null;
   const mapping = id.startsWith("kitsu:")
-    ? await aniZipByKitsu(numId)
+    ? await aniZipByKitsuWithFallback(numId)
     : id.startsWith("mal:")
       ? await aniZipByMal(numId)
       : await aniZipByAnilist(numId);

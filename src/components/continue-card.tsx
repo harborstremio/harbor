@@ -23,7 +23,8 @@ import { getWatchedBy } from "@/lib/watched-by";
 import { playLocalAware } from "@/lib/local-library/playback";
 import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { fetchSeasonEpisodes } from "@/lib/series-episodes";
-import { aniZipByAnidb, aniZipByAnilist, aniZipByKitsu, aniZipByMal } from "@/lib/providers/anizip";
+import { aniZipByAnidb, aniZipByAnilist, aniZipByMal } from "@/lib/providers/anizip";
+import { aniZipByKitsuWithFallback } from "@/lib/providers/anime-mapping";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
@@ -327,7 +328,7 @@ export const ContinueCard = memo(function ContinueCard({
               ? aniZipByAnilist
               : key.scheme === "anidb"
                 ? aniZipByAnidb
-                : aniZipByKitsu;
+                : aniZipByKitsuWithFallback;
         episode = applyAniZipEpisode(episode, await lookup(key.id).catch(() => null));
       }
     }

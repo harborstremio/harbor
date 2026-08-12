@@ -1,8 +1,8 @@
 import type { Meta } from "@/lib/cinemeta";
-import { aniZipByKitsu } from "@/lib/providers/anizip";
+
 import { buildKitsuEpisodes, mergeAniZipEpisodes, mergeTvdbEpisodes } from "@/lib/providers/anime-episode-build";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
-import { kitsuToTvdb, kitsuToImdb, externalToKitsu, kitsuToAnilist } from "@/lib/providers/anime-mapping";
+import { kitsuToTvdb, kitsuToImdb, externalToKitsu, kitsuToAnilist, aniZipByKitsuWithFallback } from "@/lib/providers/anime-mapping";
 import { anilistFranchise, type AnilistFranchiseNode } from "@/lib/anilist/relations";
 import { anilistArtById, anilistRecommendations } from "@/lib/anilist/browse";
 import { enrichEpisodes } from "@/lib/providers/anime-episode-enrich";
@@ -367,7 +367,7 @@ export async function animeDetails(
       effectiveSlugs.length > 0
         ? kitsuSimilarByGenres(effectiveSlugs, kitsuId, 34)
         : Promise.resolve([] as Meta[]),
-      aniZipByKitsu(kitsuId).catch(() => null),
+      aniZipByKitsuWithFallback(kitsuId).catch(() => null),
       kitsuToAnilist(kitsuId)
         .then((aid) => (aid ? anilistRecommendations(aid) : []))
         .catch(() => [] as Meta[]),

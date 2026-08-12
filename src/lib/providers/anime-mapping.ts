@@ -9,6 +9,26 @@ import {
 } from "@/lib/providers/anizip";
 import { kitsuMainTvSeries } from "@/lib/providers/kitsu";
 
+export async function aniZipByKitsuWithFallback(kitsuId: number): Promise<AniZipMapping | null> {
+  let az = await aniZipByKitsu(kitsuId).catch(() => null);
+  const hasTvdb = !!az?.mappings?.thetvdb_id;
+  const hasEps = !!az?.episodes && Object.keys(az.episodes).length > 0;
+  
+  if (!hasTvdb || !hasEps) {
+    const anilistId = await kitsuToAnilist(kitsuId).catch(() => null);
+    if (anilistId != null) {
+      const alt = await aniZipByAnilist(anilistId).catch(() => null);
+      const altHasTvdb = !!alt?.mappings?.thetvdb_id;
+      const altHasEps = !!alt?.episodes && Object.keys(alt.episodes).length > 0;
+      
+      if (altHasTvdb || (altHasEps && !hasEps)) {
+        az = alt;
+      }
+    }
+  }
+  return az;
+}
+
 const SIDE_ENTRY_TYPES = new Set(["ova", "ona", "special", "music"]);
 
 async function preferMainTv(kitsuId: number, type?: string): Promise<number> {

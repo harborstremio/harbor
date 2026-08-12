@@ -6,9 +6,9 @@ import type { PlayEpisode } from "./view";
 import { tmdbDetails, tmdbSeasonEpisodes } from "./providers/tmdb";
 import { resolveMeta } from "./meta-resource";
 import { animeKitsuMeta } from "./providers/anime-kitsu-addon";
-import { externalToKitsu, kitsuToAnilist } from "./providers/anime-mapping";
+import { externalToKitsu, aniZipByKitsuWithFallback } from "./providers/anime-mapping";
 import { parseKitsuId } from "./providers/kitsu";
-import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/anizip";
+import { pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
 
@@ -78,14 +78,7 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
   const seriesImdb = addonMeta?.imdb_id ?? eps.find((e) => e.imdbId)?.imdbId ?? undefined;
   const rootId = await franchiseRoot(id).catch(() => id);
   const rootKitsu = parseKitsuId(rootId) ?? kitsuId;
-  let az = await aniZipByKitsu(kitsuId).catch(() => null);
-  if (!az?.mappings?.thetvdb_id) {
-    const anilistId = await kitsuToAnilist(kitsuId).catch(() => null);
-    if (anilistId != null) {
-      const alt = await aniZipByAnilist(anilistId).catch(() => null);
-      if (alt?.mappings?.thetvdb_id || (alt?.episodes && !az?.episodes)) az = alt;
-    }
-  }
+  let az = await aniZipByKitsuWithFallback(kitsuId).catch(() => null);
   const tvdbImages = await fetchTvdbProxyImages({
     series: az?.mappings?.thetvdb_id,
     kitsuId: rootKitsu,

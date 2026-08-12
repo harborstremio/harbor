@@ -1,4 +1,5 @@
-import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, type AniZipMapping } from "@/lib/providers/anizip";
+import { aniZipByAnilist, aniZipByMal, type AniZipMapping } from "@/lib/providers/anizip";
+import { aniZipByKitsuWithFallback } from "@/lib/providers/anime-mapping";
 
 export type AnimeTitleLang = "english" | "romaji" | "native";
 
@@ -29,7 +30,7 @@ export async function resolvePreferredAnimeTitle(
   let mapping: AniZipMapping | null = null;
   if (id.startsWith("kitsu:")) {
     const n = parseInt(id.slice(6), 10);
-    if (Number.isFinite(n)) mapping = await aniZipByKitsu(n).catch(() => null);
+    if (Number.isFinite(n)) mapping = await aniZipByKitsuWithFallback(n).catch(() => null);
   } else if (id.startsWith("mal:")) {
     const n = parseInt(id.slice(4), 10);
     if (Number.isFinite(n)) mapping = await aniZipByMal(n).catch(() => null);

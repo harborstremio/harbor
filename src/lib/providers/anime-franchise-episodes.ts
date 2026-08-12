@@ -1,5 +1,5 @@
-import { aniZipByKitsu } from "@/lib/providers/anizip";
 import { buildKitsuEpisodes, mergeAniZipEpisodes, mergeTvdbEpisodes } from "@/lib/providers/anime-episode-build";
+import { aniZipByKitsuWithFallback } from "@/lib/providers/anime-mapping";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { kitsuEpisodes, type KitsuEpisode } from "@/lib/providers/kitsu";
 import { kitsuToTvdb } from "@/lib/providers/anime-mapping";
@@ -22,7 +22,7 @@ export function fetchEntryEpisodes(kitsuId: number, settings: Settings): Promise
     const [addonMeta, raw, aniZip, tvdbEpsRaw] = await Promise.all([
       animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null),
       kitsuEpisodes(kitsuId, 100).catch(() => [] as KitsuEpisode[]),
-      aniZipByKitsu(kitsuId).catch(() => null),
+      aniZipByKitsuWithFallback(kitsuId).catch(() => null),
       kitsuToTvdb(kitsuId)
         .then((tid) => {
           if (!tid) return null;
