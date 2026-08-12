@@ -2,6 +2,8 @@ import { Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useSettings } from "@/lib/settings";
+import type { Anime4kMode } from "@/lib/player/anime4k-modes";
+import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
