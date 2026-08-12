@@ -16,7 +16,7 @@ export function usePendingSeekApply(params: {
     if (!b) return;
     const target = pendingSeekSec;
     clearPendingSeek();
-    const t = target <= 5 ? 0 : Math.min(target, durationSec - 1);
+    const t = target <= 5 || target >= durationSec - 20 ? 0 : Math.min(target, durationSec - 1);
     b.seek(t);
     if (!inRoomRef.current) b.play().catch(() => {});
   }, [pendingSeekSec, durationSec, clearPendingSeek]);
