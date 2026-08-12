@@ -76,6 +76,7 @@ export function useAnime4k(
   const available = !!settings.playerAnime4kFolder;
   const dims: Anime4kDims = { srcWidth: videoWidth, displayWidth: screenWidthPx() };
   const generalKey = generalShaderKey(settings);
+  const mode = settings.playerAnime4kMode as Anime4kMode | undefined;
 
   const applyShaders = (c: Anime4kChoice) => {
     const chain = [...anime4kShadersFor(settings, src, c, dims), ...generalShaderChain(settings)];
@@ -86,7 +87,7 @@ export function useAnime4k(
   useEffect(() => {
     applyShaders(choice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [srcKey, videoWidth, generalKey]);
+  }, [srcKey, videoWidth, generalKey, mode]);
 
   const setMode = (c: string) => {
     update({ playerAnime4kOverride: c });
