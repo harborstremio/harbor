@@ -34,13 +34,19 @@ export function Anime4kIndicator({ engine, chromeVisible, suppressed = false }: 
 
   if (!active) return null;
 
+  // Determine the effective mode: HUD override takes precedence over base setting
+  const choice = (settings.playerAnime4kOverride as Anime4kChoice) || "auto";
+  const isAuto = choice === "auto";
+  const autoActive = isAuto && settings.playerAnime4k && settings.playerAnime4kFolder;
+  const effectiveMode = isAuto && autoActive ? (settings.playerAnime4kMode as Anime4kMode) : (choice === "off" ? "Off" : choice);
+
   return (
     <div
       className={`pointer-events-none absolute left-1/2 top-[3.25rem] z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-edge-soft bg-canvas/85 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-ink/85 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)] backdrop-blur-md transition-opacity duration-300 ${chromeVisible && !suppressed ? "opacity-100" : "opacity-0"}`}
     >
       <Sparkles size={13} className="text-accent" />
       <span>Anime4K</span>
-      {settings.playerAnime4kMode && <span className="text-ink-subtle">{settings.playerAnime4kMode}</span>}
+      {effectiveMode && <span className="text-ink-subtle">{effectiveMode}</span>}
     </div>
   );
 }
