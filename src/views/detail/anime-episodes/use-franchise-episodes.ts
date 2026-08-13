@@ -32,11 +32,18 @@ export function useFranchiseEpisodes(
       return;
     }
     let cancelled = false;
-    void Promise.all(otherIds.map((id) => fetchEntryEpisodes(id, settings).catch(() => [] as KitsuEpisode[]))).then(
-      (lists) => {
-        if (!cancelled) setExtra(lists.flat());
-      },
-    );
+    void Promise.all(
+      otherIds.map((id) => {
+        return fetchEntryEpisodes(id, settings).catch(() => ({ base: [] as KitsuEpisode[], enrichPromise: Promise.resolve() }));
+      })
+    ).then((results) => {
+      if (!cancelled) {
+        setExtra(results.map((r) => r.base).flat());
+        void Promise.all(results.map((r) => r.enrichPromise)).then(() => {
+          if (!cancelled) setExtra((prev) => [...prev]);
+        });
+      }
+    });
     return () => {
       cancelled = true;
     };

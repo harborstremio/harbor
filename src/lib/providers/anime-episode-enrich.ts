@@ -1,5 +1,6 @@
 import { kitsuToMal, kitsuToTvdb } from "@/lib/providers/anime-mapping";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
+import { omdbSeasonRatings } from "@/lib/providers/omdb";
 import { fillerEpisodes } from "@/lib/anime-fillers";
 import { fetchTvdbThumbs } from "@/lib/providers/anime-tvdb-thumbs";
 import { meta as fetchCinemetaMeta } from "@/lib/cinemeta";
@@ -83,10 +84,20 @@ async function enrichHarborImdb(episodes: KitsuEpisode[], imdbId: string | null)
   for (const ep of episodes) {
     const season = ep.imdbSeason ?? ep.seasonNumber ?? 1;
     const num = ep.imdbEpisode ?? ep.number;
-    const real = map.get(`${season}:${num}`);
+    let real = map.get(`${season}:${num}`);
+    
+    if (real == null && ep.number) {
+      real = map.get(`1:${ep.number}`);
+    }
+    if (real == null && ep.absoluteNumber) {
+      real = map.get(`1:${ep.absoluteNumber}`);
+    }
+
     if (real != null && real > 0) {
-      ep.rating = real;
-      ep.ratingIsImdb = true;
+      if (!ep.airdate || new Date(ep.airdate).getTime() <= Date.now()) {
+        ep.rating = real;
+        ep.ratingIsImdb = true;
+      }
     }
   }
 }
@@ -105,4 +116,48 @@ export async function enrichEpisodes(
       await enrichTvdbThumbs(episodes, settings, kitsuId);
     })(),
   ]);
+
+  if (settings.omdbKey && imdbId) {
+    const missingSeasons = new Set<number>();
+    const now = Date.now();
+    for (const ep of episodes) {
+      if (!ep.airdate) continue;
+      const airtime = new Date(ep.airdate).getTime();
+      if (airtime > now) {
+        ep.rating = undefined;
+        ep.ratingIsImdb = false;
+        continue;
+      }
+      
+      const isRecent = now - airtime < 14 * 24 * 60 * 60 * 1000;
+      if (!ep.ratingIsImdb || isRecent) {
+        missingSeasons.add(ep.imdbSeason ?? ep.seasonNumber ?? 1);
+      }
+    }
+    const seasonsToFetch = Array.from(missingSeasons).slice(0, 2);
+    if (seasonsToFetch.length > 0) {
+      const omdbMaps = await Promise.all(
+        seasonsToFetch.map((s) =>
+          omdbSeasonRatings(settings.omdbKey!, imdbId, s).then((m) => ({ s, m })),
+        ),
+      );
+      for (const ep of episodes) {
+        if (ep.airdate && new Date(ep.airdate).getTime() > now) continue;
+        
+        const isRecent = ep.airdate && (now - new Date(ep.airdate).getTime() < 14 * 24 * 60 * 60 * 1000);
+        if (ep.ratingIsImdb && !isRecent) continue;
+
+        const season = ep.imdbSeason ?? ep.seasonNumber ?? 1;
+        const num = ep.imdbEpisode ?? ep.number;
+        const omdbData = omdbMaps.find((x) => x.s === season);
+        if (omdbData) {
+          const rating = omdbData.m.get(num);
+          if (rating != null && rating > 0) {
+            ep.rating = rating;
+            ep.ratingIsImdb = true;
+          }
+        }
+      }
+    }
+  }
 }
