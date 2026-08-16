@@ -28,8 +28,28 @@ import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
-import { aniZipLookupKey, applyAniZipEpisode, needsAniZipSyncIds } from "@/lib/cw-anime-episode";
+import {
+  aniZipLookupKey,
+  applyAniZipEpisode,
+  effectiveAnimeLookupId,
+  needsAniZipEpisodeLookup,
+} from "@/lib/cw-anime-episode";
+import { isGenericEpisodeTitle, pickPreferredEpisodeTitle } from "@/lib/episode-title";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+
+async function fetchAniZipMapping(metaId: string) {
+  const key = aniZipLookupKey(metaId);
+  if (!key) return null;
+  const lookup =
+    key.scheme === "mal"
+      ? aniZipByMal
+      : key.scheme === "anilist"
+        ? aniZipByAnilist
+        : key.scheme === "anidb"
+          ? aniZipByAnidb
+          : aniZipByKitsu;
+  return lookup(key.id).catch(() => null);
+}
 
 type Props = {
   item: LibraryItem;
@@ -100,9 +120,10 @@ export const ContinueCard = memo(function ContinueCard({
       : kitsuThreeSeg
         ? null
         : episodeFromVideoId(item.state?.video_id);
+  const animeLookupId = effectiveAnimeLookupId(item._id, getAnimeCwId(item._id));
   const animeEp = kitsuThreeSeg
     ? Number((item.state?.video_id ?? "").split(":")[2])
-    : isAnimeCwItem(item) && ep
+    : animeLookupId && ep
       ? ep.episode
       : null;
   const [logo, setLogo] = useState<string | undefined>();
@@ -110,6 +131,7 @@ export const ContinueCard = memo(function ContinueCard({
   const [hydratedMeta, setHydratedMeta] = useState<Meta | null>(null);
   const [kitsuVideo, setKitsuVideo] = useState<AnimeKitsuVideo | null>(null);
   const [epTitle, setEpTitle] = useState<string | null>(null);
+  const [aniZipTitle, setAniZipTitle] = useState<string | null>(null);
   const [translatedTitle, setTranslatedTitle] = useState<string | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
   const cardRef = useRef<HTMLButtonElement>(null);
@@ -135,6 +157,7 @@ export const ContinueCard = memo(function ContinueCard({
     setMetaBg(undefined);
     setHydratedMeta(null);
     setKitsuVideo(null);
+    setAniZipTitle(null);
     setTranslatedTitle(null);
     setImgIdx(0);
     const el = cardRef.current;
@@ -144,15 +167,38 @@ export const ContinueCard = memo(function ContinueCard({
     const start = () => {
       if (started) return;
       started = true;
-      if (/^(kitsu|mal|anilist|anidb):/.test(item._id)) {
-        resolvePreferredAnimeTitle(item._id, settingsRef.current.simklAnimeTitleLanguage)
+      if (animeLookupId) {
+        let aniZipStarted = false;
+        const loadAniZipTitle = () => {
+          if (
+            aniZipStarted ||
+            animeEp == null ||
+            !Number.isFinite(animeEp) ||
+            animeEp <= 0
+          )
+            return;
+          aniZipStarted = true;
+          void fetchAniZipMapping(animeLookupId).then((mapping) => {
+            if (cancelled) return;
+            const resolved = applyAniZipEpisode(
+              { season: ep?.season ?? 1, episode: animeEp },
+              mapping,
+            );
+            setAniZipTitle(resolved.name ?? null);
+          });
+        };
+        resolvePreferredAnimeTitle(animeLookupId, settingsRef.current.simklAnimeTitleLanguage)
           .then((tt) => {
             if (!cancelled && tt) setTranslatedTitle(tt);
           })
           .catch(() => {});
-        animeKitsuMeta(item._id)
+        animeKitsuMeta(animeLookupId)
           .then((m) => {
-            if (cancelled || !m) return;
+            if (cancelled) return;
+            if (!m) {
+              loadAniZipTitle();
+              return;
+            }
             setHydratedMeta({
               id: item._id,
               type: libraryMetaType(item.type),
@@ -179,9 +225,10 @@ export const ContinueCard = memo(function ContinueCard({
                 m.videos.find((v) => v.id === item.state?.video_id) ??
                 m.videos.find((v) => v.episode === animeEp);
               if (vid) setKitsuVideo(vid);
+              if (!vid || isGenericEpisodeTitle(vid.title, animeEp)) loadAniZipTitle();
             }
           })
-          .catch(() => {});
+          .catch(() => loadAniZipTitle());
         return;
       }
       if (item._id.startsWith("tmdb:")) {
@@ -241,7 +288,7 @@ export const ContinueCard = memo(function ContinueCard({
       cancelled = true;
       io.disconnect();
     };
-  }, [item._id, item.type, item.state?.video_id]);
+  }, [item._id, item.type, item.state?.video_id, animeLookupId]);
 
   useEffect(() => {
     setEpTitle(null);
@@ -262,7 +309,10 @@ export const ContinueCard = memo(function ContinueCard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item._id, ep?.season, ep?.episode, kitsuThreeSeg]);
 
-  const episodeTitle = epTitle ?? kitsuVideo?.title ?? null;
+  const episodeTitle =
+    animeEp != null && Number.isFinite(animeEp) && animeEp > 0
+      ? pickPreferredEpisodeTitle(animeEp, epTitle, kitsuVideo?.title, aniZipTitle)
+      : epTitle;
 
   const animeSeasonMapped =
     kitsuVideo &&
@@ -317,23 +367,11 @@ export const ContinueCard = memo(function ContinueCard({
         if (Number.isFinite(epNum) && epNum > 0) episode = { season: 1, episode: epNum };
       }
     }
-    if (needsAniZipSyncIds(item._id, episode) && episode) {
-      const key = aniZipLookupKey(item._id);
-      if (key) {
-        const lookup =
-          key.scheme === "mal"
-            ? aniZipByMal
-            : key.scheme === "anilist"
-              ? aniZipByAnilist
-              : key.scheme === "anidb"
-                ? aniZipByAnidb
-                : aniZipByKitsu;
-        episode = applyAniZipEpisode(episode, await lookup(key.id).catch(() => null));
-      }
+    if (animeLookupId && needsAniZipEpisodeLookup(animeLookupId, episode) && episode) {
+      episode = applyAniZipEpisode(episode, await fetchAniZipMapping(animeLookupId));
     }
-    if (episode && !episode.sourceMetaId && item._id.startsWith("tt")) {
-      const animeId = getAnimeCwId(item._id);
-      if (animeId) episode = { ...episode, sourceMetaId: animeId };
+    if (episode && !episode.sourceMetaId && item._id.startsWith("tt") && animeLookupId) {
+      episode = { ...episode, sourceMetaId: animeLookupId };
     }
     return episode;
   };

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Check, HardDrive, Heart, Layers, Pencil, Play, Plus, RotateCcw } from "lucide-react";
 import { animeDetails, type FranchiseEntry } from "@/lib/providers/anime-detail";
+import { waitForEpisodeTitles } from "@/lib/episode-title";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
 import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
@@ -621,7 +622,13 @@ export function DetailView({
             }
             return null;
           }
-          setAnimeEpisodes(res.episodes);
+          void waitForEpisodeTitles(res.episodes, res.titleEnrichPromise)
+            .then((episodes) => {
+              if (!cancelled) setAnimeEpisodes([...episodes]);
+            })
+            .catch(() => {
+              if (!cancelled) setAnimeEpisodes([...res.episodes]);
+            });
           setFranchise([]);
           void res.franchisePromise
             .then((fr) => {

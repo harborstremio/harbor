@@ -5,8 +5,11 @@ import { kitsuEpisodes, type KitsuEpisode } from "@/lib/providers/kitsu";
 import { kitsuToTvdb } from "@/lib/providers/anime-mapping";
 import { tvdbEpisodesByType, tvdbEpisodesAbsolute, tvdbLangFromIso1 } from "@/lib/providers/tvdb";
 import type { Settings } from "@/lib/settings";
+import { isGenericEpisodeTitle } from "@/lib/episode-title";
 
 const cache = new Map<string, Promise<KitsuEpisode[]>>();
+const genericRetryAt = new Map<string, number>();
+const GENERIC_TITLE_RETRY_MS = 120000;
 
 function isPlayable(ep: KitsuEpisode): boolean {
   if (ep.streamId) return true;
@@ -17,7 +20,12 @@ export function fetchEntryEpisodes(kitsuId: number, settings: Settings): Promise
   const lang = tvdbLangFromIso1(settings.tmdbLanguage || settings.uiLanguage);
   const cacheKey = `${kitsuId}:${lang}`;
   const cached = cache.get(cacheKey);
-  if (cached) return cached;
+  if (cached) {
+    const retryAt = genericRetryAt.get(cacheKey);
+    if (retryAt == null || Date.now() < retryAt) return cached;
+    cache.delete(cacheKey);
+    genericRetryAt.delete(cacheKey);
+  }
   const p = (async () => {
     const [addonMeta, raw, aniZip, tvdbEpsRaw] = await Promise.all([
       animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null),
@@ -47,7 +55,21 @@ export function fetchEntryEpisodes(kitsuId: number, settings: Settings): Promise
       out.push({ ...ep, sourceMetaId });
     }
     return out;
-  })();
+  })().then(
+    (episodes) => {
+      if (episodes.some((episode) => isGenericEpisodeTitle(episode.title, episode.number))) {
+        genericRetryAt.set(cacheKey, Date.now() + GENERIC_TITLE_RETRY_MS);
+      } else {
+        genericRetryAt.delete(cacheKey);
+      }
+      return episodes;
+    },
+    (error) => {
+      cache.delete(cacheKey);
+      genericRetryAt.delete(cacheKey);
+      throw error;
+    },
+  );
   cache.set(cacheKey, p);
   return p;
 }

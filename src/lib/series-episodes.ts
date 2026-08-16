@@ -11,6 +11,8 @@ import { parseKitsuId } from "./providers/kitsu";
 import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
+import { isGenericEpisodeTitle } from "./episode-title";
+import { coalesceKeyed } from "./keyed-inflight";
 
 export function isAnimeId(id: string): boolean {
   return (
@@ -46,7 +48,20 @@ async function resolveAnimeKitsuId(id: string): Promise<number | null> {
 
 async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
   const cacheKey = `anime:${id}`;
-  if (addonEpsCache.has(cacheKey)) return addonEpsCache.get(cacheKey)!;
+  const cached = addonEpsCache.get(cacheKey);
+  if (cached) {
+    const retryAt = genericAnimeEpsRetryAt.get(cacheKey);
+    if (retryAt == null || Date.now() < retryAt) return cached;
+    addonEpsCache.delete(cacheKey);
+    genericAnimeEpsRetryAt.delete(cacheKey);
+  }
+  return coalesceKeyed(animeEpsInflight, cacheKey, () => refreshAnimeEpisodes(id, cacheKey));
+}
+
+async function refreshAnimeEpisodes(
+  id: string,
+  cacheKey: string,
+): Promise<PlayEpisode[] | null> {
   const kitsuId = await resolveAnimeKitsuId(id).catch(() => null);
   if (kitsuId == null) return null;
   const addonMeta = await animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null);
@@ -104,7 +119,9 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
       const air = m.airDateUtc ?? m.airDate;
       if (air && (!ep.airDate || bogusAirdates)) ep.airDate = air;
       if (!ep.overview && m.overview) ep.overview = m.overview;
-      if (!ep.name) ep.name = pickEpisodeTitle(m) ?? undefined;
+      if (isGenericEpisodeTitle(ep.name, ep.episode)) {
+        ep.name = pickEpisodeTitle(m) ?? ep.name;
+      }
       if (!ep.still && m.image) ep.still = m.image;
       if (ep.runtime == null && m.runtime && m.runtime > 0) ep.runtime = m.runtime;
       if (ep.rating == null && m.rating) {
@@ -126,6 +143,16 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
   }
   eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
   lruSet(addonEpsCache, cacheKey, eps, SEASON_CACHE_MAX);
+  if (eps.some((ep) => isGenericEpisodeTitle(ep.name, ep.episode))) {
+    lruSet(
+      genericAnimeEpsRetryAt,
+      cacheKey,
+      Date.now() + GENERIC_TITLE_RETRY_MS,
+      SEASON_CACHE_MAX,
+    );
+  } else {
+    genericAnimeEpsRetryAt.delete(cacheKey);
+  }
   return eps;
 }
 
@@ -141,9 +168,12 @@ type Adjacent = { prev: PlayEpisode | null; next: PlayEpisode | null };
 
 const TT_CACHE_MAX = 800;
 const SEASON_CACHE_MAX = 400;
+const GENERIC_TITLE_RETRY_MS = 120000;
 const ttCache = new Map<string, Adjacent>();
 const tmdbSeasonCache = new Map<string, PlayEpisode[]>();
 const addonEpsCache = new Map<string, PlayEpisode[]>();
+const genericAnimeEpsRetryAt = new Map<string, number>();
+const animeEpsInflight = new Map<string, Promise<PlayEpisode[] | null>>();
 const cinemetaListCache = new Map<string, PlayEpisode[]>();
 
 registerCache("episodes:tt", () => ttCache.size);

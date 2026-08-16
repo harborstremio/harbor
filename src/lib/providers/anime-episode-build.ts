@@ -1,4 +1,6 @@
-import { pickEpisodeTitle, type AniZipMapping } from "@/lib/providers/anizip";
+import { isGenericEpisodeTitle, pickPreferredEpisodeTitle } from "../episode-title.ts";
+import { pickEpisodeTitle } from "./anizip-episode-title.ts";
+import type { AniZipMapping } from "./anizip";
 import type { AnimeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import type { TvdbEpisode } from "@/lib/providers/tvdb";
@@ -16,7 +18,7 @@ export function buildKitsuEpisodes(
       id: k?.id ?? v.episode,
       number: v.episode,
       seasonNumber: v.season ?? 1,
-      title: v.title || k?.title || `Episode ${v.episode}`,
+      title: pickPreferredEpisodeTitle(v.episode, v.title, k?.title) ?? `Episode ${v.episode}`,
       synopsis: v.overview ?? k?.synopsis ?? "",
       thumbnail: v.thumbnail ?? k?.thumbnail ?? null,
       airdate: v.released ?? k?.airdate ?? null,
@@ -36,7 +38,7 @@ export function mergeAniZipEpisodes(episodes: KitsuEpisode[], aniZip: AniZipMapp
     const az = aniZip.episodes[String(ep.number)];
     if (!az) continue;
     const enrichedTitle = pickEpisodeTitle(az);
-    if (enrichedTitle && (!ep.title || ep.title === `Episode ${ep.number}`)) {
+    if (enrichedTitle && isGenericEpisodeTitle(ep.title, ep.number)) {
       ep.title = enrichedTitle;
     }
     if (az.overview && !ep.synopsis) ep.synopsis = az.overview;
@@ -87,7 +89,11 @@ export function mergeTvdbEpisodes(episodes: KitsuEpisode[], tvdbEps: TvdbEpisode
     if (!tvdbEp) tvdbEp = tvdbByAbsolute.get(ep.number);
 
     if (tvdbEp) {
-      if (tvdbEp.name && (!ep.title || ep.title === `Episode ${ep.number}`)) {
+      if (
+        tvdbEp.name &&
+        !isGenericEpisodeTitle(tvdbEp.name, tvdbEp.number) &&
+        isGenericEpisodeTitle(ep.title, ep.number)
+      ) {
         ep.title = tvdbEp.name;
       }
       if (tvdbEp.aired) ep.airdate = tvdbEp.aired;
