@@ -5,6 +5,7 @@ import { fetchTvdbThumbs } from "@/lib/providers/anime-tvdb-thumbs";
 import { meta as fetchCinemetaMeta } from "@/lib/cinemeta";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import type { Settings } from "@/lib/settings";
+import { mergeCinemetaEpisodes } from "./anime-episode-cinemeta-merge";
 
 async function enrichFiller(episodes: KitsuEpisode[], kitsuId: number): Promise<void> {
   if (episodes.some((ep) => ep.filler)) return;
@@ -18,36 +19,21 @@ async function enrichFiller(episodes: KitsuEpisode[], kitsuId: number): Promise<
   }
 }
 
-async function enrichCinemetaThumbs(episodes: KitsuEpisode[], imdbId: string | null): Promise<void> {
+async function enrichCinemetaEpisodes(
+  episodes: KitsuEpisode[],
+  imdbId: string | null,
+): Promise<void> {
   if (!imdbId || !imdbId.startsWith("tt")) return;
-  if (episodes.every((ep) => ep.thumbnail)) return;
+  if (
+    episodes.every(
+      (ep) => ep.thumbnail && ep.synopsis && ep.title && ep.title !== `Episode ${ep.number}`,
+    )
+  )
+    return;
   const m = await fetchCinemetaMeta("series", imdbId).catch(() => null);
   const videos = m?.videos ?? [];
   if (videos.length === 0) return;
-
-  const bySeasonEpisode = new Map<string, string>();
-  const byAbsolute = new Map<number, string>();
-  const ordered = videos
-    .filter((v) => v.thumbnail && v.season != null && v.episode != null)
-    .sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0));
-  let pos = 0;
-  for (const v of ordered) {
-    const thumb = v.thumbnail as string;
-    bySeasonEpisode.set(`${v.season}:${v.episode}`, thumb);
-    if ((v.season ?? 0) > 0) {
-      pos += 1;
-      if (!byAbsolute.has(pos)) byAbsolute.set(pos, thumb);
-    }
-  }
-
-  for (const ep of episodes) {
-    if (ep.thumbnail) continue;
-    const season = ep.imdbSeason ?? ep.seasonNumber ?? 1;
-    const epNum = ep.imdbEpisode ?? ep.number;
-    const hit =
-      bySeasonEpisode.get(`${season}:${epNum}`) ?? byAbsolute.get(ep.absoluteNumber ?? ep.number);
-    if (hit) ep.thumbnail = hit;
-  }
+  mergeCinemetaEpisodes(episodes, videos);
 }
 
 async function enrichTvdbThumbs(
@@ -59,9 +45,7 @@ async function enrichTvdbThumbs(
   if (episodes.every((ep) => ep.thumbnail)) return;
   const tvdbId = await kitsuToTvdb(kitsuId).catch(() => null);
   if (!tvdbId) return;
-  const seasons = Array.from(
-    new Set(episodes.map((ep) => ep.imdbSeason ?? ep.seasonNumber ?? 1)),
-  );
+  const seasons = Array.from(new Set(episodes.map((ep) => ep.imdbSeason ?? ep.seasonNumber ?? 1)));
   const index = await fetchTvdbThumbs(settings.tvdbKey, tvdbId, seasons).catch(() => null);
   if (!index) return;
   for (const ep of episodes) {
@@ -101,7 +85,7 @@ export async function enrichEpisodes(
     enrichFiller(episodes, kitsuId),
     enrichHarborImdb(episodes, imdbId),
     (async () => {
-      await enrichCinemetaThumbs(episodes, imdbId);
+      await enrichCinemetaEpisodes(episodes, imdbId);
       await enrichTvdbThumbs(episodes, settings, kitsuId);
     })(),
   ]);
