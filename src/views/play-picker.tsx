@@ -72,6 +72,7 @@ import { localPlayerSrc } from "@/lib/local-library/player-src";
 import { downloadableSeasonPacks } from "@/lib/download/season-pack";
 import { LocalStreamList } from "./play-picker/local-stream-card";
 import { SubtitleSelectStep } from "./play-picker/subtitle-select-step";
+import { useResolvedPickerEpisode } from "./play-picker/use-resolved-picker-episode";
 
 const TIER_ORDER: Tier[] = ["4K_DV", "4K_HDR", "4K", "1080p_HDR", "1080p", "720p", "SD", "ROUGH"];
 
@@ -124,6 +125,12 @@ export function PlayPicker({
     prefetchSegments(meta, episode);
   }, [meta, episode]);
   const imdbId = resolvedImdb.id;
+  const { episode: resolvedEpisode, settleEpisode } = useResolvedPickerEpisode(
+    meta,
+    episode,
+    imdbId,
+    settings.tmdbKey,
+  );
   const streamIds = useStreamIds(meta, episode, imdbId);
   const localMatches = useMemo(() => {
     const m = meta.id.match(/^tmdb:(?:movie|tv):(\d+)$/);
@@ -215,7 +222,8 @@ export function PlayPicker({
   const { inviteKey, canInvite, inviteSentRef, hostSourceForMedia, expectHostSource } =
     useRoomInvite({
       meta,
-      episode,
+      episode: resolvedEpisode,
+      settleEpisode,
       inSession,
       roomSnapshot,
       clientId,
@@ -486,7 +494,8 @@ export function PlayPicker({
     meta: metaForDisplay,
     imdbId,
     imdbIdVerified: resolvedImdb.verified,
-    episode,
+    episode: resolvedEpisode,
+    settleEpisode,
     attempt,
     resume,
     debrids,
@@ -604,7 +613,7 @@ export function PlayPicker({
     }
     return [...seen.values()];
   }, [result, addonLogoMap]);
-  const backdropSrc = episode?.still || meta.background || meta.poster;
+  const backdropSrc = resolvedEpisode?.still || episode?.still || meta.background || meta.poster;
 
   const [maxWaitElapsed, setMaxWaitElapsed] = useState(false);
   useEffect(() => {
@@ -715,7 +724,7 @@ export function PlayPicker({
     return (
       <AutoPlayTransition
         meta={metaForDisplay}
-        episode={episode}
+        episode={resolvedEpisode}
         resolving={resolving != null}
         attemptIdx={autoAttemptIdx}
         download={isDownload}
@@ -738,7 +747,7 @@ export function PlayPicker({
     return (
       <AutoExhaustedModal
         meta={meta}
-        episode={episode}
+        episode={resolvedEpisode}
         triedCount={autoCandidates.length}
         onBrowseManually={() => {
           setAutoCancelled(true);
@@ -760,7 +769,7 @@ export function PlayPicker({
 
       <div className="relative mx-auto flex min-h-full w-full max-w-5xl flex-col gap-12 px-12 pb-32 pt-32">
         <PickerNav onBack={backToDetail} onRefresh={refresh} refreshing={loading} />
-        <PickerHeader meta={metaForDisplay} episode={episode} />
+        <PickerHeader meta={metaForDisplay} episode={resolvedEpisode} />
 
         {!isDownload && (
           <LocalStreamList
@@ -901,7 +910,7 @@ export function PlayPicker({
             {!loading && currentPick && (
               <PrimaryCard
                 meta={metaForDisplay}
-                episode={episode}
+                episode={resolvedEpisode}
                 stream={currentPick}
                 debrids={debrids}
                 addonLogo={lookupLogo(currentPick.addonId)}
@@ -963,7 +972,7 @@ export function PlayPicker({
                 onPlay={playManually}
                 resolvingId={resolving?.stream.infoHash ?? null}
                 showName={meta.name}
-                episode={episode}
+                episode={resolvedEpisode}
               />
             )}
           </>

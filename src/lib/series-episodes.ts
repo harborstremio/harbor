@@ -11,7 +11,7 @@ import { parseKitsuId } from "./providers/kitsu";
 import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
-import { isGenericEpisodeTitle } from "./episode-title";
+import { isGenericEpisodeTitle, pickPreferredEpisodeTitle } from "./episode-title";
 import { coalesceKeyed } from "./keyed-inflight";
 
 export function isAnimeId(id: string): boolean {
@@ -200,7 +200,12 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
     const episode =
       typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null || season < 1) continue;
-    const ep: PlayEpisode = { season, episode, name: v.title || v.name || undefined, still: v.thumbnail };
+    const ep: PlayEpisode = {
+      season,
+      episode,
+      name: pickPreferredEpisodeTitle(episode, v.title, v.name) ?? undefined,
+      still: v.thumbnail,
+    };
     const vid = (v as { id?: string }).id;
     if (vid && (vid.startsWith("kitsu:") || vid.startsWith("mal:"))) ep.kitsuStreamId = vid;
     else if (vid) ep.videoId = vid;
@@ -316,7 +321,7 @@ async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
     eps.push({
       season,
       episode,
-      name: v.title || v.name || undefined,
+      name: pickPreferredEpisodeTitle(episode, v.title, v.name) ?? undefined,
       still: v.thumbnail,
       overview: v.overview || v.description,
       airDate: v.released || v.firstAired,

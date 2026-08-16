@@ -12,6 +12,7 @@ import { useHiddenEpisodes } from "@/lib/hidden-episodes";
 import type { Meta } from "@/lib/cinemeta";
 import { getEpisodeProgress, resumeDefaultSeason } from "@/lib/episode-progress";
 import { scrollToDataEp } from "@/lib/episode-scroll";
+import { mergeSeriesEpisodeTitles } from "@/lib/episode-title";
 import { tmdbSeasonEpisodes, type Episode, type Season } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider, tvdbPanelEnabled } from "@/lib/settings/episode-order";
@@ -168,6 +169,7 @@ export function SeriesEpisodes({
     imdbId,
     tvdbKey: settings.tvdbKey,
     omdbKey: settings.omdbKey,
+    cinemetaVideos,
   });
   const tvdbStills = useSeriesTvdbStills(imdbId, enrichedBase.length, settings.tvdbSeasonType);
   const enrichedEpisodes = useMemo(() => {
@@ -236,14 +238,25 @@ export function SeriesEpisodes({
     : ordering
       ? ordering.bySeason.get(orderSeasonEff) ?? []
       : [];
+  const orderedEpsWithTitles = useMemo(
+    () =>
+      orderActive
+        ? mergeSeriesEpisodeTitles(orderedEpsRaw, {
+            tmdb: episodes,
+            tvdb: orderedEpsRaw,
+            cinemeta: cinemetaVideos,
+          })
+        : orderedEpsRaw,
+    [orderActive, orderedEpsRaw, episodes, cinemetaVideos],
+  );
   const orderedEps = useMemo(() => {
-    if (imdbRatings.size === 0) return orderedEpsRaw;
-    return orderedEpsRaw.map((ep) => {
+    if (imdbRatings.size === 0) return orderedEpsWithTitles;
+    return orderedEpsWithTitles.map((ep) => {
       if (ep.imdbRating != null) return ep;
       const r = imdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`);
       return r != null && r > 0 ? { ...ep, imdbRating: r } : ep;
     });
-  }, [orderedEpsRaw, imdbRatings]);
+  }, [orderedEpsWithTitles, imdbRatings]);
   const visibleOrderedEps = useMemo(
     () =>
       hideActive && hiddenSet.size > 0
