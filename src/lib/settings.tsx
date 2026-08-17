@@ -75,10 +75,17 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   setTmdbLanguage(settings.tmdbLanguage);
 
+  const lastSavedImageRef = useRef<{ profileId: string; image: string | null }>({
+    profileId: sourceRef.current.profileId,
+    image: null,
+  });
+
   useEffect(() => {
     let cancelled = false;
-    void loadBgImage().then((img) => {
+    const activeId = sourceRef.current.profileId;
+    void loadBgImage(activeId).then((img) => {
       if (cancelled || !img) return;
+      lastSavedImageRef.current = { profileId: activeId, image: img };
       setSettings((s) => (s.theme.backgroundImage ? s : { ...s, theme: { ...s.theme, backgroundImage: img } }));
     });
     return () => {
@@ -106,12 +113,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings((s) => (isRemovedBuiltinAvatar(s.harborAvatar) ? { ...s, harborAvatar: null } : s));
   }, []);
 
-  const lastSavedImageRef = useRef<string | null>(null);
   useEffect(() => {
+    const activeId = sourceRef.current.profileId;
     const img = settings.theme.backgroundImage;
-    if (img === lastSavedImageRef.current) return;
-    lastSavedImageRef.current = img;
-    void saveBgImage(img);
+    if (lastSavedImageRef.current.profileId === activeId && lastSavedImageRef.current.image === img) {
+      return;
+    }
+    lastSavedImageRef.current = { profileId: activeId, image: img };
+    void saveBgImage(img, activeId);
   }, [settings.theme.backgroundImage]);
 
   const fileTimerRef = useRef(0);
@@ -402,20 +411,44 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const switchProfile = useCallback((profileId: string, linked: boolean) => {
     const cur = sourceRef.current;
-    if (sourceKeyFor(cur.profileId, cur.linked) === sourceKeyFor(profileId, linked)) {
-      sourceRef.current = { profileId, linked };
+    if (cur.profileId === profileId && cur.linked === linked) {
       return;
     }
-    persistEffective(settingsRef.current, cur.profileId, cur.linked);
-    const next = loadEffective(profileId, linked);
-    setUiLanguage(next.uiLanguage);
-    setTmdbLanguage(next.tmdbLanguage);
-    tmdbLangRef.current = effectiveTmdbLanguage();
-    imgLangRef.current = next.tmdbImageLangs.join(",");
-    sourceRef.current = { profileId, linked };
-    persistEffective(next, profileId, linked);
-    settingsRef.current = next;
-    setSettings(next);
+
+    // Background images are profile-scoped in IndexedDB independent of the
+    // settings blob, so even a linked-profile switch (same settings key)
+    // must still swap the wallpaper below.
+    if (sourceKeyFor(cur.profileId, cur.linked) === sourceKeyFor(profileId, linked)) {
+      sourceRef.current = { profileId, linked };
+    } else {
+      persistEffective(settingsRef.current, cur.profileId, cur.linked);
+      const next = loadEffective(profileId, linked);
+      setUiLanguage(next.uiLanguage);
+      setTmdbLanguage(next.tmdbLanguage);
+      tmdbLangRef.current = effectiveTmdbLanguage();
+      imgLangRef.current = next.tmdbImageLangs.join(",");
+      sourceRef.current = { profileId, linked };
+      persistEffective(next, profileId, linked);
+      settingsRef.current = next;
+      setSettings(next);
+    }
+
+    lastSavedImageRef.current = { profileId, image: null };
+    settingsRef.current = {
+      ...settingsRef.current,
+      theme: { ...settingsRef.current.theme, backgroundImage: null },
+    };
+    setSettings((s) => ({ ...s, theme: { ...s.theme, backgroundImage: null } }));
+
+    void loadBgImage(profileId).then((img) => {
+      if (sourceRef.current.profileId !== profileId) return;
+      lastSavedImageRef.current = { profileId, image: img };
+      settingsRef.current = {
+        ...settingsRef.current,
+        theme: { ...settingsRef.current.theme, backgroundImage: img },
+      };
+      setSettings((s) => ({ ...s, theme: { ...s.theme, backgroundImage: img } }));
+    });
   }, []);
 
   const setSettingsLinked = useCallback(

@@ -10,6 +10,7 @@ import {
 import type { HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
 import { isRemovedBuiltinAvatar } from "./avatars/catalog";
+import { deleteProfileBgImage } from "./theme-storage";
 
 export const PROFILE_COLORS = [
   "#7dd3fc",
@@ -513,6 +514,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       } catch {
         /* ignore */
       }
+      void deleteProfileBgImage(id);
       setState((s) => {
         const profiles = s.profiles
           .filter((p) => p.id !== id)

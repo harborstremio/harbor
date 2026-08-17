@@ -1,5 +1,6 @@
 import { downloadText } from "@/lib/download-text";
 import { loadBgImage, saveBgImage } from "@/lib/theme-storage";
+import { readAllProfilesIdentity } from "@/lib/profiles";
 
 declare const __APP_VERSION__: string;
 
@@ -12,6 +13,8 @@ export type Backup = {
   app: string;
   exportedAt: string;
   data: Record<string, string>;
+  bgImages?: Record<string, string>;
+  /** @deprecated legacy single-image field from before per-profile backgrounds; still read on restore */
   bgImage?: string | null;
 };
 
@@ -30,14 +33,18 @@ export async function buildBackup(): Promise<Backup> {
     const value = localStorage.getItem(key);
     if (value != null) data[key] = value;
   }
-  const bgImage = await loadBgImage();
+  const bgImages: Record<string, string> = {};
+  for (const { id } of readAllProfilesIdentity()) {
+    const img = await loadBgImage(id);
+    if (img) bgImages[id] = img;
+  }
   return {
     format: FORMAT,
     version: VERSION,
     app: typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "dev",
     exportedAt: new Date().toISOString(),
     data,
-    ...(bgImage ? { bgImage } : {}),
+    ...(Object.keys(bgImages).length ? { bgImages } : {}),
   };
 }
 
@@ -74,6 +81,12 @@ export function parseBackup(text: string): ParsedBackup {
   if (Object.keys(data).length === 0) {
     return { ok: false, error: "This backup contained nothing restorable." };
   }
+  const bgImages: Record<string, string> = {};
+  if (b.bgImages && typeof b.bgImages === "object") {
+    for (const [id, v] of Object.entries(b.bgImages)) {
+      if (typeof v === "string") bgImages[id] = v;
+    }
+  }
   return {
     ok: true,
     backup: {
@@ -82,6 +95,7 @@ export function parseBackup(text: string): ParsedBackup {
       app: typeof b.app === "string" ? b.app : "unknown",
       exportedAt: typeof b.exportedAt === "string" ? b.exportedAt : "",
       data,
+      ...(Object.keys(bgImages).length ? { bgImages } : {}),
       ...(typeof b.bgImage === "string" || b.bgImage === null ? { bgImage: b.bgImage } : {}),
     },
   };
@@ -106,7 +120,15 @@ export async function applyBackup(backup: Backup): Promise<void> {
       /* keep restoring the rest even if one entry is rejected */
     }
   }
-  if (backup.bgImage !== undefined) {
+  if (backup.bgImages) {
+    for (const [id, img] of Object.entries(backup.bgImages)) {
+      try {
+        await saveBgImage(img, id);
+      } catch {
+        /* background restore is best-effort */
+      }
+    }
+  } else if (backup.bgImage !== undefined) {
     try {
       await saveBgImage(backup.bgImage);
     } catch {
