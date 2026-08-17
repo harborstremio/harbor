@@ -1,5 +1,5 @@
 import { Move } from "lucide-react";
-import { useRef, type RefObject } from "react";
+import { useRef, useState, type RefObject } from "react";
 import {
   SPLIT3A_MAX,
   SPLIT3A_MIN,
@@ -35,12 +35,14 @@ function Divider({
   min,
   max,
   onChange,
+  onDragStart,
 }: {
   axis: Axis;
   split: number;
   min: number;
   max: number;
   onChange: (pct: number) => void;
+  onDragStart?: () => void;
 }) {
   const dragRef = useRef<DividerDrag | null>(null);
   const isX = axis === "x";
@@ -82,6 +84,7 @@ function Divider({
         dragRef.current = { pointerId: event.pointerId, value: split };
         event.currentTarget.setPointerCapture(event.pointerId);
         event.preventDefault();
+        onDragStart?.();
       }}
       onPointerMove={(event) => {
         const drag = dragRef.current;
@@ -139,9 +142,11 @@ function Nexus({
   split,
   splitRow,
   splitRow2,
+  linked,
   onSplitChange,
   onSplitRowChange,
   onSplitRow2Change,
+  onAlign,
 }: {
   rootRef: RefObject<HTMLDivElement | null>;
   leftRef: RefObject<HTMLDivElement | null>;
@@ -150,9 +155,11 @@ function Nexus({
   split: number;
   splitRow: number;
   splitRow2: number;
+  linked: boolean;
   onSplitChange: (pct: number) => void;
   onSplitRowChange: (pct: number) => void;
   onSplitRow2Change: (pct: number) => void;
+  onAlign: () => void;
 }) {
   const handleRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<NexusDrag | null>(null);
@@ -200,7 +207,12 @@ function Nexus({
   return (
     <div
       ref={handleRef}
-      title="Drag to resize all four panels"
+      title={
+        linked
+          ? "Double-click to unlink rows"
+          : "Drag to resize all four panels · Double-click to align rows"
+      }
+      onDoubleClick={onAlign}
       onPointerDown={(event) => {
         if (event.button !== 0 || !event.isPrimary || dragRef.current || !rootRef.current) return;
         dragRef.current = {
@@ -234,7 +246,12 @@ function Nexus({
       onPointerCancel={(event) => {
         if (dragRef.current?.pointerId === event.pointerId) finish();
       }}
-      className="absolute z-20 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center rounded-full border border-edge-soft bg-elevated/95 text-ink-muted shadow-[0_3px_14px_rgba(0,0,0,0.28)] transition-colors hover:border-accent hover:bg-accent hover:text-black active:cursor-grabbing"
+      className={
+        "absolute z-20 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 cursor-grab touch-none select-none items-center justify-center rounded-full border shadow-[0_3px_14px_rgba(0,0,0,0.28)] transition-colors active:cursor-grabbing " +
+        (linked
+          ? "border-accent bg-accent text-black"
+          : "border-edge-soft bg-elevated/95 text-ink-muted hover:border-accent hover:bg-accent hover:text-black")
+      }
       style={{
         left: "calc(" + split + "% + " + HANDLE_CENTER_OFFSET + ")",
         top: "calc(" + center + "% + " + HANDLE_CENTER_OFFSET + ")",
@@ -286,6 +303,14 @@ export function Grid({
   const leftRef = useRef<HTMLDivElement>(null);
   const leftTopRef = useRef<HTMLDivElement>(null);
   const rightTopRef = useRef<HTMLDivElement>(null);
+  const [rowsLinked, setRowsLinked] = useState(false);
+  const alignRows = () => {
+    const avg = (splitRow + splitRow2) / 2;
+    onSplitRowChange(avg);
+    onSplitRow2Change(avg);
+    setRowsLinked(true);
+  };
+  const unlinkRows = () => setRowsLinked(false);
   const count = layoutSlotCount(layout);
   const renderCell = (index: number) => (
     <Cell
@@ -377,6 +402,7 @@ export function Grid({
             min={SPLIT_MIN}
             max={SPLIT_MAX}
             onChange={onSplitRowChange}
+            onDragStart={unlinkRows}
           />
           <div className="flex h-full min-h-0 flex-1">{renderCell(1)}</div>
         </div>
@@ -395,6 +421,7 @@ export function Grid({
             min={SPLIT_MIN}
             max={SPLIT_MAX}
             onChange={onSplitRow2Change}
+            onDragStart={unlinkRows}
           />
           <div className="flex h-full min-h-0 flex-1">{renderCell(3)}</div>
         </div>
@@ -406,9 +433,11 @@ export function Grid({
           split={split}
           splitRow={splitRow}
           splitRow2={splitRow2}
+          linked={rowsLinked}
           onSplitChange={onSplitChange}
           onSplitRowChange={onSplitRowChange}
           onSplitRow2Change={onSplitRow2Change}
+          onAlign={alignRows}
         />
       </div>
     );
