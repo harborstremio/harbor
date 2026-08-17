@@ -1007,23 +1007,35 @@ function Shell({ onReady }: { onReady?: () => void }) {
       {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "stremio" && (
         <StremioRail />
       )}
-      {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && <TopDock />}
-      {!settingsTop && !playerActive && !pickerTop && layout === "cinematic" && (
+      {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && !immersive && (
+        <TopDock />
+      )}
+      {!settingsTop && !playerActive && !pickerTop && layout === "cinematic" && !immersive && (
         <CinematicOverlay />
       )}
-      {!settingsTop && !playerActive && !pickerTop && layout === "royal" && <RoyalTopbar />}
-      {!settingsTop && !playerActive && !pickerTop && layout === "rail" && <SideRail />}
-      {!playerActive && !pickerTop && layout === "minui" && <MinUIDock />}
-      {!playerActive && !pickerTop && layout === "topdock" && <FloatingBack offsetTop={92} />}
-      {!playerActive && !pickerTop && layout === "cinematic" && <FloatingBack offsetTop={92} />}
-      {!playerActive && !pickerTop && layout === "royal" && <FloatingBack offsetTop={92} />}
-      {!playerActive && !pickerTop && layout === "rail" && (
+      {!settingsTop && !playerActive && !pickerTop && layout === "royal" && !immersive && (
+        <RoyalTopbar />
+      )}
+      {!settingsTop && !playerActive && !pickerTop && layout === "rail" && !immersive && (
+        <SideRail />
+      )}
+      {!playerActive && !pickerTop && layout === "minui" && !immersive && <MinUIDock />}
+      {!playerActive && !pickerTop && layout === "topdock" && !immersive && (
+        <FloatingBack offsetTop={92} />
+      )}
+      {!playerActive && !pickerTop && layout === "cinematic" && !immersive && (
+        <FloatingBack offsetTop={92} />
+      )}
+      {!playerActive && !pickerTop && layout === "royal" && !immersive && (
+        <FloatingBack offsetTop={92} />
+      )}
+      {!playerActive && !pickerTop && layout === "rail" && !immersive && (
         <FloatingBack offsetLeft={settings.sidebarCollapsed ? 88 : 220} offsetTop={28} />
       )}
-      {!playerActive && !pickerTop && layout === "custom" && (
+      {!playerActive && !pickerTop && layout === "custom" && !immersive && (
         <FloatingBack offsetLeft={20} offsetTop={20} />
       )}
-      {!playerActive && !pickerTop && layout === "custom" && (
+      {!playerActive && !pickerTop && layout === "custom" && !immersive && (
         <div className="fixed end-3 top-3 z-[120]">
           <WindowControls />
         </div>
@@ -1259,10 +1271,12 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <WindowControls />
           </div>
         )}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent"
-        />
+        {!immersive && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent"
+          />
+        )}
         {!immersive &&
           (themeHasTopbar || (settingsTop && layout !== "minui" && layout !== "custom")) && (
             <Topbar />
