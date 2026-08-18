@@ -11,8 +11,6 @@ import {
   type VolumeIndicatorState,
 } from "@/components/player/volume-indicator";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
-import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
-import { ContentAdvisoryToast } from "@/components/player/content-advisory-toast";
 import { useT } from "@/lib/i18n";
 
 export const StageOverlays = memo(function StageOverlays({
@@ -27,7 +25,6 @@ export const StageOverlays = memo(function StageOverlays({
   volumeHudPosition,
   videoFillPill,
   subDropToast,
-  contentAdvisory,
   onSubDelay,
   onEnterSync,
   chromeVisible,
@@ -43,7 +40,6 @@ export const StageOverlays = memo(function StageOverlays({
   volumeHudPosition: VolumeHudPosition;
   videoFillPill: string | null;
   subDropToast: string | null;
-  contentAdvisory: { categories: ParentalCategory[]; playKey: string };
   onSubDelay: (sec: number) => void;
   onEnterSync?: () => void;
   chromeVisible: boolean;
@@ -96,12 +92,7 @@ export const StageOverlays = memo(function StageOverlays({
           {subDropToast}
         </div>
       )}
-      {!pipMode && (
-        <ContentAdvisoryToast
-          categories={contentAdvisory.categories}
-          playKey={contentAdvisory.playKey}
-        />
-      )}
+
       {!pipMode && <SubStyleBar />}
       {!pipMode && (
         <SubSyncBar

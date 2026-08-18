@@ -115,7 +115,7 @@ export type PlayerOverlayLayersProps = {
   setHideOthersDrawings: (fn: (h: boolean) => boolean) => void;
   canPickAnother: boolean;
   resolvedImdbId: string | null;
-  contentAdvisory: { categories: ParentalCategory[]; playKey: string };
+  contentAdvisory: { categories: ParentalCategory[]; playKey: string; mpaRating?: string | null };
   tmdbKey: string | null;
   download: Shell["download"];
   liveOverlay: Live["liveOverlay"];
@@ -197,7 +197,6 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         volumeHudPosition={p.volumeHudPosition}
         videoFillPill={p.videoFillPill}
         subDropToast={p.subDropToast}
-        contentAdvisory={p.contentAdvisory}
         onSubDelay={(s) => {
           p.bridgeRef.current?.setSubDelay(s);
         }}
@@ -272,6 +271,8 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         onSkip={p.seekTo}
         onNextEpisode={() => p.goToEpisode(p.adjacentNext)}
         onCancelAutoNext={() => p.setAutoNextCancelled(true)}
+        contentAdvisory={p.contentAdvisory}
+        playing={!p.loaderActive && (p.snap.status === "playing" || p.snap.positionSec > 0.1)}
         showChrome={p.showChrome}
         ab={p.ab}
         frameGrabToast={p.frameGrabToast}

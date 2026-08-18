@@ -328,13 +328,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       episode,
     });
 
-  const contentAdvisory = useContentAdvisory(
-    settings.contentAdvisoryToast,
-    resolvedImdbId,
-    src.url,
-    playing,
-  );
-
   const {
     streamCheckOpen,
     setStreamCheckOpen,
@@ -808,6 +801,12 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   });
   const [loaderShowing, setLoaderShowing] = useState(false);
   const showChrome = !loaderActive && !loaderShowing && (chromeVisible || drawMode);
+  const contentAdvisory = useContentAdvisory(
+    settings.contentAdvisoryToast,
+    resolvedImdbId ?? src.imdbId ?? (src.meta?.id?.startsWith("tt") ? src.meta.id : null),
+    src.url,
+    src.meta,
+  );
   const liveShellSnap = cast.castDevice
     ? { ...snap, status: (cast.castPlaying ? "playing" : "paused") as typeof snap.status }
     : snap;

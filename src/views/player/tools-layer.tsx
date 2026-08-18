@@ -5,6 +5,8 @@ import { GifRecordPill } from "@/components/player/gif-record-pill";
 import { QuickTools } from "@/components/player/quick-tools";
 import type { PlayEpisode } from "@/lib/view";
 import { SkipPillContainer } from "./skip-pill-container";
+import { ContentAdvisoryToast } from "@/components/player/content-advisory-toast";
+import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
 import type { useClipRecorder } from "./hooks/use-clip-recorder";
 import type { useGifRecorder } from "./hooks/use-gif-recorder";
 
@@ -26,6 +28,8 @@ export const ToolsLayer = memo(function ToolsLayer({
   nextEpMask,
   pillsVisible,
   allowAutoSkip,
+  contentAdvisory,
+  playing = true,
   onSkip,
   onNextEpisode,
   onCancelAutoNext,
@@ -49,6 +53,12 @@ export const ToolsLayer = memo(function ToolsLayer({
   nextEpMask: SkipProps["nextEpMask"];
   pillsVisible: boolean;
   allowAutoSkip: boolean;
+  contentAdvisory?: {
+    categories: ParentalCategory[];
+    playKey: string;
+    mpaRating?: string | null;
+  };
+  playing?: boolean;
   onSkip: (sec: number) => void;
   onNextEpisode: () => void;
   onCancelAutoNext: () => void;
@@ -60,6 +70,14 @@ export const ToolsLayer = memo(function ToolsLayer({
 }) {
   return (
     <>
+      {!pipMode && !drawMode && contentAdvisory && playing && (
+        <ContentAdvisoryToast
+          categories={contentAdvisory.categories}
+          playKey={contentAdvisory.playKey}
+          mpaRating={contentAdvisory.mpaRating}
+        />
+      )}
+
       {!pipMode &&
         !drawMode &&
         !showWaiting &&

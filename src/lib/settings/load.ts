@@ -108,6 +108,8 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _pickerLayoutStremio?: boolean;
       _pickerLayoutStremioV2?: boolean;
       _stremioDeeplinkOnByDefault?: boolean;
+      _contentAdvisoryOnByDefaultV1?: boolean;
+      _skipButtonHideSecV2?: boolean;
       _anilistSyncOnV1?: boolean;
       _rememberLastStreamOnV1?: boolean;
       _streamSortAddonV1?: boolean;
@@ -123,6 +125,23 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     if (!parsed._stremioDeeplinkOnByDefault) {
       parsed.stremioDeeplinkInstall = true;
       parsed._stremioDeeplinkOnByDefault = true;
+    }
+    if (!parsed._contentAdvisoryOnByDefaultV1) {
+      parsed.contentAdvisoryToast = true;
+      parsed._contentAdvisoryOnByDefaultV1 = true;
+    }
+    if (parsed.contentAdvisoryTheme !== "monochrome" && parsed.contentAdvisoryTheme !== "colored") {
+      parsed.contentAdvisoryTheme = "colored";
+    }
+    if (!parsed._skipButtonHideSecV2) {
+      if (
+        parsed.skipButtonHideSec === 10 ||
+        parsed.skipButtonHideSec === 20 ||
+        parsed.skipButtonHideSec == null
+      ) {
+        parsed.skipButtonHideSec = 14;
+      }
+      parsed._skipButtonHideSecV2 = true;
     }
     if (!parsed._anilistSyncOnV1) {
       parsed.anilistAutoSync = true;

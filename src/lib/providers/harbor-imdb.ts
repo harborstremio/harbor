@@ -62,7 +62,9 @@ export async function harborImdbTitle(tt: string): Promise<number | null> {
   }
 }
 
-export async function harborImdbParental(tt: string): Promise<ParentalCategory[]> {
+export async function harborImdbParental(rawTt: string): Promise<ParentalCategory[]> {
+  const m = rawTt.match(/tt\d+/);
+  const tt = m ? m[0] : rawTt;
   if (!tt.startsWith("tt")) return [];
   const cached = parentalCache.get(tt);
   if (cached) return cached;

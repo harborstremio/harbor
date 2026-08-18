@@ -17,6 +17,7 @@ export function SkipPill({
   remainingSec,
   leadSec,
   visible,
+  countdownSec = 0,
   onSkip,
   onNextEpisode,
   onCancelAutoNext,
@@ -30,6 +31,7 @@ export function SkipPill({
   remainingSec: number;
   leadSec?: number;
   visible: boolean;
+  countdownSec?: number;
   onSkip: () => void;
   onNextEpisode: () => void;
   onCancelAutoNext?: () => void;
@@ -38,17 +40,38 @@ export function SkipPill({
   const t = useT();
   const [mounted, setMounted] = useState<SkipSegment | null>(segment);
   const [show, setShow] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const hasCountdown = typeof countdownSec === "number" && countdownSec > 0;
+  const [timeLeft, setTimeLeft] = useState<number>(hasCountdown ? countdownSec : 0);
 
   useEffect(() => {
     if (segment) {
       setMounted(segment);
+      setTimeLeft(hasCountdown ? countdownSec : 0);
       const id = window.requestAnimationFrame(() => setShow(true));
       return () => window.cancelAnimationFrame(id);
     }
     setShow(false);
     const timer = window.setTimeout(() => setMounted(null), 240);
     return () => window.clearTimeout(timer);
-  }, [segment?.kind, segment?.startSec, segment?.endSec]);
+  }, [segment?.kind, segment?.startSec, segment?.endSec, hasCountdown, countdownSec]);
+
+  useEffect(() => {
+    if (timeLeft <= 0 || hovered || !mounted) return;
+    const interval = 50;
+    const timer = window.setInterval(() => {
+      setTimeLeft((prev) => {
+        const next = prev - interval / 1000;
+        if (next <= 0) {
+          window.clearInterval(timer);
+          onDismiss?.();
+          return 0;
+        }
+        return next;
+      });
+    }, interval);
+    return () => window.clearInterval(timer);
+  }, [timeLeft, hovered, onDismiss, mounted]);
 
   if (!mounted) return null;
 
@@ -83,61 +106,86 @@ export function SkipPill({
   const action = isOutroNext ? onNextEpisode : onSkip;
   const Icon = isOutroNext ? ChevronsRight : FastForward;
   const isMpv = engine === "mpv";
+  const countdownProgress =
+    hasCountdown && countdownSec > 0 ? Math.max(0, Math.min(1, 1 - timeLeft / countdownSec)) : 0;
+
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className={`pointer-events-none absolute end-7 z-30 flex items-center gap-2 transition-all duration-200 ease-out ${
         visible && show
           ? "bottom-44 translate-y-0 opacity-100"
           : "bottom-40 translate-y-2 opacity-0"
       }`}
     >
-      <ThreeLiquidGlassSurface
-        radius="9999px"
-        shaderRadius={0.48}
-        intensity={0.3}
-        refractionStrength={0.08}
-        interactive={false}
-        alwaysActive
-        experimentalStyle={{
-          background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
-          backdropFilter: "blur(18px) saturate(1.25)",
-          WebkitBackdropFilter: "blur(18px) saturate(1.25)",
-        }}
-        style={{
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
-        }}
-        className="pointer-events-auto inline-flex h-[42px] w-fit shrink-0"
-        surfaceClassName={`border ${isAd ? "border-rose-400/50" : "border-white/[0.08]"}`}
-        contentClassName="flex h-full w-full"
-      >
-        <button
-          type="button"
-          onClick={action}
-          className="
-            inline-flex
-            h-full
-            w-full
-            items-center
-            gap-2
-            rounded-full
-            bg-transparent
-            px-5
-            text-[14px]
-            font-semibold
-            text-white
-            transition-transform
-            active:scale-[0.97]
-          "
+      <div className="relative inline-flex h-[42px] w-fit shrink-0 items-center justify-center">
+        <ThreeLiquidGlassSurface
+          radius="9999px"
+          shaderRadius={0.48}
+          intensity={0.3}
+          refractionStrength={0.08}
+          interactive={false}
+          alwaysActive
+          experimentalStyle={{
+            background: isMpv ? "rgba(8,12,18,0.35)" : "transparent",
+            backdropFilter: "blur(18px) saturate(1.25)",
+            WebkitBackdropFilter: "blur(18px) saturate(1.25)",
+          }}
+          style={{
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+          }}
+          className="pointer-events-auto relative inline-flex h-full w-fit shrink-0 overflow-hidden"
+          surfaceClassName={`border ${isAd ? "border-rose-400/50" : "border-white/[0.08]"}`}
+          contentClassName="flex h-full w-full"
         >
-          {isAd ? (
-            <AdSkipIcon className="h-[18px] w-[18px]" />
-          ) : (
-            <Icon size={18} strokeWidth={2.2} />
-          )}
+          <button
+            type="button"
+            onClick={action}
+            className="
+              inline-flex
+              h-full
+              w-full
+              items-center
+              gap-2
+              rounded-full
+              bg-transparent
+              px-5
+              pb-[2px]
+              text-[14px]
+              font-semibold
+              text-white
+              transition-transform
+              active:scale-[0.97]
+            "
+          >
+            {isAd ? (
+              <AdSkipIcon className="h-[18px] w-[18px]" />
+            ) : (
+              <Icon size={18} strokeWidth={2.2} />
+            )}
 
-          {label}
-        </button>
-      </ThreeLiquidGlassSurface>
+            {label}
+          </button>
+        </ThreeLiquidGlassSurface>
+
+        {/* White Animated Countdown Progress Line (Left to Right) */}
+        {hasCountdown && (
+          <div
+            dir="ltr"
+            className="pointer-events-none absolute inset-x-4 bottom-[3px] z-30 h-[2.5px] overflow-hidden rounded-full bg-white/20"
+            style={{ direction: "ltr" }}
+          >
+            <div
+              className="h-full rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.95)]"
+              style={{
+                width: `${countdownProgress * 100}%`,
+                transition: hovered ? "none" : "width 50ms linear",
+              }}
+            />
+          </div>
+        )}
+      </div>
 
       {onDismiss && !isOutroNext && (
         <ThreeLiquidGlassSurface
@@ -206,7 +254,8 @@ function UpNextCard({
   const t = useT();
   const { settings } = useSettings();
   const seconds = Math.max(0, Math.ceil(remainingSec));
-  const progress = Math.min(1, Math.max(0, 1 - seconds / leadSec));
+  // Progress fills from 0% on the left to 100% on the right (Left-to-Right)
+  const progress = Math.min(1, Math.max(0, 1 - remainingSec / leadSec));
   const epLabel =
     typeof ep.season === "number" && typeof ep.episode === "number"
       ? `S${ep.imdbSeason ?? ep.season} · E${ep.imdbEpisode ?? ep.episode}`
@@ -272,9 +321,15 @@ function UpNextCard({
             {t("Play now")}
           </button>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-[3px] bg-white/15">
+
+        {/* White Animated Countdown Progress Line (Left to Right) */}
+        <div
+          dir="ltr"
+          className="absolute inset-x-0 bottom-0 z-30 h-[3.5px] overflow-hidden bg-white/20"
+          style={{ direction: "ltr" }}
+        >
           <div
-            className="h-full bg-white transition-[width] duration-200 ease-linear"
+            className="h-full rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.95)] transition-[width] duration-150 ease-linear"
             style={{ width: `${progress * 100}%` }}
           />
         </div>

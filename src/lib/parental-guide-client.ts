@@ -90,9 +90,11 @@ export function createParentalGuideClient(
   }
 
   async function fetchParentalGuide(
-    imdbId: string,
+    rawImdbId: string,
     type: "movie" | "tv",
   ): Promise<ParentalGuide | null> {
+    const m = rawImdbId.match(/tt\d+/);
+    const imdbId = m ? m[0] : rawImdbId;
     const key = `${type}:${imdbId}`;
     const cached = lruGet(cache, key);
     if (cached) return cached;
