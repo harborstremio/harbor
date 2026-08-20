@@ -218,6 +218,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       const tmdbCacheKey = [
         settings.tmdbKey,
         settings.tmdbLanguage,
+        settings.translateTitles,
         excludeGenres.join(","),
         normalizedQuery,
       ].join("\0");
@@ -399,7 +400,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         debounceRef.current = null;
       }
     };
-  }, [query, aiHold, settings.tmdbKey, settings.tmdbLanguage, settings.iptvPlaylists, excludeGenres, hiddenTabs.anime, settings.hideContent.anime, hiddenTabs.liveTv, settings.mangaEnabled, settings.hideContent.manga, authKey]);
+  }, [query, aiHold, settings.tmdbKey, settings.tmdbLanguage, settings.translateTitles, settings.iptvPlaylists, excludeGenres, hiddenTabs.anime, settings.hideContent.anime, hiddenTabs.liveTv, settings.mangaEnabled, settings.hideContent.manga, authKey]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

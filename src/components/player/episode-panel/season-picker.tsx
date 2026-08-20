@@ -42,7 +42,7 @@ export function SeasonPicker({
         aria-expanded={open}
         className="flex h-9 items-center gap-1.5 rounded-full bg-elevated ps-3.5 pe-2.5 text-[13px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
       >
-        {t("Season {n}", { n: active })}
+        {active === 0 ? t("Specials") : t("Season {n}", { n: active })}
         <ChevronDown
           size={15}
           strokeWidth={2.4}
@@ -64,7 +64,7 @@ export function SeasonPicker({
                   : "text-ink-muted hover:bg-raised hover:text-ink"
               }`}
             >
-              {t("Season {n}", { n })}
+              {n === 0 ? t("Specials") : t("Season {n}", { n })}
             </button>
           ))}
         </div>

@@ -1,5 +1,5 @@
 import { lruSet } from "../../cache";
-import { get } from "./tmdb-client";
+import { get, effectiveTmdbLanguage } from "./tmdb-client";
 
 export type TitleCreditPerson = {
   id: number;
@@ -26,10 +26,16 @@ function cacheKey(kind: "movie" | "tv", id: number): string {
   return `${kind}:${id}`;
 }
 
-function toPerson(raw: any): TitleCreditPerson {
+function toPerson(raw: any, enNameById: Map<number, string> | null): TitleCreditPerson {
+  // TMDB returns the original-language name (e.g. Japanese for anime staff) when no
+  // translation exists for the requested language, so fall back to the English name.
+  const localized = typeof raw.name === "string" ? raw.name : "";
+  const original = typeof raw.original_name === "string" ? raw.original_name : "";
+  const name =
+    enNameById && original && localized === original ? enNameById.get(raw.id) ?? localized : localized;
   return {
     id: raw.id,
-    name: raw.name ?? "",
+    name,
     profilePath: raw.profile_path ?? null,
     popularity: typeof raw.popularity === "number" ? raw.popularity : 0,
     order: typeof raw.order === "number" ? raw.order : undefined,
@@ -37,9 +43,9 @@ function toPerson(raw: any): TitleCreditPerson {
   };
 }
 
-function parse(raw: any): TitleCredits {
+function parse(raw: any, enNameById: Map<number, string> | null): TitleCredits {
   const cast: TitleCreditPerson[] = (raw?.cast ?? [])
-    .map(toPerson)
+    .map((c: any) => toPerson(c, enNameById))
     .sort(
       (a: TitleCreditPerson, b: TitleCreditPerson) =>
         (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER),
@@ -47,7 +53,7 @@ function parse(raw: any): TitleCredits {
     .slice(0, KEEP_CAST);
   const crew: TitleCreditPerson[] = (raw?.crew ?? [])
     .filter((c: any) => c?.department === "Directing" || c?.department === "Writing")
-    .map(toPerson)
+    .map((c: any) => toPerson(c, enNameById))
     .slice(0, KEEP_CREW);
   return { cast, crew };
 }
@@ -72,7 +78,24 @@ export async function tmdbTitleCredits(
   if (pending) return pending;
   const p = (async () => {
     const raw = await get<any>(key, `${kind}/${id}/credits`);
-    const parsed = raw ? parse(raw) : null;
+    if (!raw) {
+      lruSet(cache, k, null, CACHE_MAX);
+      return null;
+    }
+    const langBase = effectiveTmdbLanguage().split("-")[0]?.toLowerCase() ?? "";
+    let enNameById: Map<number, string> | null = null;
+    if (langBase && langBase !== "en") {
+      const en = await get<any>(key, `${kind}/${id}/credits`, { language: "en-US" });
+      enNameById = new Map();
+      for (const list of [en?.cast, en?.crew]) {
+        for (const p of list ?? []) {
+          if (p?.id != null && typeof p.name === "string" && p.name && !enNameById.has(p.id)) {
+            enNameById.set(p.id, p.name);
+          }
+        }
+      }
+    }
+    const parsed = parse(raw, enNameById);
     lruSet(cache, k, parsed, CACHE_MAX);
     return parsed;
   })().finally(() => inflight.delete(k));

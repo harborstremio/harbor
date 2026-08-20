@@ -181,6 +181,8 @@ function KidsSeekBar({
   return (
     <div
       ref={ref}
+      data-player-seekbar
+      onClick={(e) => { if (!e.isTrusted && duration > 0) onSeek(fromX(e.clientX) * duration); }}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         setDrag(fromX(e.clientX));

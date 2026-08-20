@@ -19,6 +19,12 @@ export function useChromeVisibility(params: {
   const chromeVisibleRef = useRef(false);
   useEffect(() => {
     chromeVisibleRef.current = chromeVisible;
+    document.documentElement.toggleAttribute("data-player-chrome-visible", chromeVisible);
+    document.documentElement.setAttribute("data-player-chrome-mounted", "");
+    return () => {
+      document.documentElement.removeAttribute("data-player-chrome-visible");
+      document.documentElement.removeAttribute("data-player-chrome-mounted");
+    };
   }, [chromeVisible]);
 
   const hideTimer = useRef<number | null>(null);

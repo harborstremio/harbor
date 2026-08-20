@@ -65,7 +65,7 @@ export function AnimeSeasonPicker({
   const tags = franchiseTags(franchise);
   const positionLabel = tags[currentIdx]?.short ?? `S${currentIdx + 1}`;
   const seasonIdxs = tags.map((tg, i) => (tg?.kind === "season" ? i : -1)).filter((i) => i >= 0);
-  const extraIdxs = tags.map((tg, i) => (tg?.kind !== "season" ? i : -1)).filter((i) => i >= 0);
+
   const renderEntry = (i: number) => {
     const f = franchise[i];
     const isActive = i === currentIdx;
@@ -126,12 +126,7 @@ export function AnimeSeasonPicker({
           >
             <div className="overflow-y-auto" style={{ maxHeight: menu.maxH }}>
               {seasonIdxs.map(renderEntry)}
-              {extraIdxs.length > 0 && (
-                <div className="mt-1 border-t border-edge-soft/60 px-4 pb-1.5 pt-2.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                  {t("Movies & Specials")}
-                </div>
-              )}
-              {extraIdxs.map(renderEntry)}
+
             </div>
           </div>,
           document.body,

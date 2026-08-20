@@ -14,7 +14,7 @@ const BY_CODE: Record<string, string> = {
   handle_too_long: "That handle is too long. Use at most 24 characters.",
   handle_invalid: "Handles can use letters, numbers, and single hyphens only.",
   handle_taken: "That handle is already taken. Try one of the suggestions.",
-  handle_cooldown_other: "Someone released that handle recently. It frees up 30 days after they dropped it.",
+  handle_cooldown_other: "Someone released that handle recently. It frees up 14 days after they dropped it.",
   handle_cooldown: "You changed your handle recently. You can change it again after the cooldown.",
   stremio_already_bound: "That Stremio account is already linked to a different Harbor account. Unlink it there first.",
   stremio_key_invalid: "That Stremio sign-in did not go through. Try again.",

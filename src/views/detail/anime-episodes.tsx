@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { scrollToDataEp } from "@/lib/episode-scroll";
 import { type FranchiseEntry } from "@/lib/providers/anime-detail";
@@ -31,7 +31,7 @@ import { useAnimeAiSearch } from "./anime-episodes/use-anime-ai-search";
 import { useAnimeProgressMap } from "./anime-episodes/use-anime-progress-map";
 import { useAnimePreferredSeason } from "./anime-episodes/use-anime-preferred-season";
 import { useAnimeTvdbPanel } from "./anime-episodes/use-anime-tvdb-panel";
-import { useAnimePanelExtras } from "./anime-episodes/use-anime-panel-extras";
+
 import { useFranchiseEpisodes } from "./anime-episodes/use-franchise-episodes";
 import { useAnimeWatchedRouting } from "./anime-episodes/use-anime-watched-routing";
 import { useAnimeFranchiseNav } from "./anime-episodes/use-anime-franchise-nav";
@@ -52,6 +52,8 @@ export function AnimeEpisodes({
   trackId,
   imdbId,
   episodeHint,
+  localizedOverview,
+  seasonOverviews,
   onSeasonArt,
 }: {
   meta: Meta;
@@ -62,6 +64,8 @@ export function AnimeEpisodes({
   trackId?: string;
   imdbId?: string | null;
   episodeHint?: { season: number; episode: number };
+  localizedOverview?: string;
+  seasonOverviews?: Record<number, string>;
   onSeasonArt?: (
     sel:
       | { background?: string; description?: string; logo?: string; name?: string; entryId: string }
@@ -183,8 +187,9 @@ export function AnimeEpisodes({
     panelPool,
     preferredSeasonKey ?? undefined,
     intentSeasonKey ?? undefined,
+    franchise,
   );
-  const panelExtras = useAnimePanelExtras(tvdbPanel.panel, franchise, currentId, openMeta);
+
   const onSeasonArtRef = useRef(onSeasonArt);
   onSeasonArtRef.current = onSeasonArt;
   const tvdbActiveSeason = tvdbPanel.panel
@@ -194,19 +199,40 @@ export function AnimeEpisodes({
     () => mapSeasonToEntry(tvdbActiveSeason, franchise, currentId),
     [tvdbActiveSeason, franchise, currentId],
   );
+  // The matched franchise entry's episodes carry their TMDB season number (AniZip), which selects
+  // the right localized per-season overview so the hero changes per season instead of staying static.
+  const seasonOverview = useMemo(() => {
+    if (!seasonEntry || !seasonOverviews) return undefined;
+    const counts = new Map<number, number>();
+    for (const ep of franchiseEpisodes) {
+      if (ep.sourceMetaId !== seasonEntry.meta.id || ep.imdbSeason == null) continue;
+      counts.set(ep.imdbSeason, (counts.get(ep.imdbSeason) ?? 0) + 1);
+    }
+    let best: number | null = null;
+    let bestN = 0;
+    for (const [s, n] of counts) {
+      if (n > bestN) {
+        best = s;
+        bestN = n;
+      }
+    }
+    return best != null ? seasonOverviews[best] : undefined;
+  }, [seasonEntry, seasonOverviews, franchiseEpisodes]);
   useEffect(() => {
     onSeasonArtRef.current?.(
       seasonEntry
         ? {
             background: seasonEntry.meta.background,
-            description: seasonEntry.meta.description,
+            // Prefer the localized per-season TMDB overview, then the localized series overview,
+            // over the franchise entry's Kitsu synopsis (localized* is only set when localization is active).
+            description: seasonOverview ?? localizedOverview ?? seasonEntry.meta.description,
             logo: seasonEntry.meta.logo,
             name: seasonEntry.meta.name,
             entryId: seasonEntry.meta.id,
           }
         : null,
     );
-  }, [seasonEntry]);
+  }, [seasonEntry, localizedOverview, seasonOverview]);
   useEffect(() => () => onSeasonArtRef.current?.(null), []);
   const proxyImages = useTvdbProxyImages(
     parseKitsuId(meta.id),
@@ -434,13 +460,13 @@ export function AnimeEpisodes({
                 onSelectEntry={onSelectEntry}
               />
             ) : null
-          ) : panelExtras ? (
+          ) : tvdbPanel.panel ? (
             <TvdbOrderPanel
-              items={panelExtras.items}
-              activeKey={panelExtras.activeKey}
-              onSelect={panelExtras.onSelect}
-              orderTypes={panelExtras.orderTypes}
-              activeType={panelExtras.activeType}
+              items={tvdbPanel.panel.items}
+              activeKey={tvdbPanel.panel.activeKey}
+              onSelect={tvdbPanel.panel.onSelect}
+              orderTypes={tvdbPanel.panel.orderTypes}
+              activeType={tvdbPanel.panel.activeType}
               onSelectType={(v) => update({ tvdbSeasonType: v as typeof settings.tvdbSeasonType })}
             />
           ) : tvdbPanel.active ? (

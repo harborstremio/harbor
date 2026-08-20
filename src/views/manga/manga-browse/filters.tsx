@@ -149,7 +149,7 @@ export function TagDropdown({
 
   const active = tags.find((t) => t.id === tagId);
   const sourceMode = tags.length > 0 && tags.every((tg) => tg.group === "Sources");
-  const allLabel = sourceMode ? "All sources" : "All tags";
+  const allLabel = sourceMode ? "All sources" : "Categories";
   const shown = useMemo(() => {
     const q = filter.trim().toLowerCase();
     const list = q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : tags;

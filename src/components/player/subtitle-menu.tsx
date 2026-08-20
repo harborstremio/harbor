@@ -137,6 +137,7 @@ export function SubtitleMenu(props: Props) {
     <div ref={wrap} className="relative">
       <Tooltip label={t("Subtitles")}>
         <button
+          data-player-subtitles
           type="button"
           onClick={handleClick}
           aria-label={t("Subtitles")}

@@ -1,4 +1,4 @@
-import { Loader2, Search, Star } from "lucide-react";
+import { BookCheck, Clock3, Loader2, Search, Sparkles, Star } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Poster } from "@/components/poster";
@@ -17,6 +17,8 @@ import { BrowseEmpty, BrowseError, SkeletonGrid } from "./manga-browse/states";
 import { CollectionBadges } from "./collection-badge";
 
 type Status = "loading" | "ready" | "error";
+type SortMode = "latest" | "new" | "chapters";
+type StatusFilter = "all" | "completed" | "ongoing";
 
 const GRID = "repeat(auto-fill, minmax(150px, 1fr))";
 
@@ -30,6 +32,8 @@ export function MangaBrowse({
   const t = useT();
   const [query, setQuery] = useState("");
   const [tagId, setTagId] = useState("");
+  const [sortMode, setSortMode] = useState<SortMode>("latest");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const { items: favItems } = useMangaFavorites();
   const [items, setItems] = useState<MangaSummary[]>([]);
   const [status, setStatus] = useState<Status>("loading");
@@ -130,19 +134,23 @@ export function MangaBrowse({
   }, [status, hasMore, items.length, fetchPage]);
 
   const displayItems = useMemo(() => {
+    let list: MangaSummary[];
     if (tagId === FAVORITES) {
       const qf = query.trim().toLowerCase();
       const favs = [...favItems.values()]
         .sort((a, b) => b.addedAt - a.addedAt)
         .map((e) => ({ id: e.id, title: e.title, cover: e.cover }));
-      return qf ? favs.filter((m) => m.title.toLowerCase().includes(qf)) : favs;
+      list = qf ? favs.filter((m) => m.title.toLowerCase().includes(qf)) : favs;
+    } else {
+      const favs: MangaSummary[] = [], rest: MangaSummary[] = [];
+      for (const m of items) (favItems.has(m.id) ? favs : rest).push(m);
+      list = favs.length ? [...favs, ...rest] : items;
     }
-    if (favItems.size === 0) return items;
-    const favs: MangaSummary[] = [];
-    const rest: MangaSummary[] = [];
-    for (const m of items) (favItems.has(m.id) ? favs : rest).push(m);
-    return favs.length ? [...favs, ...rest] : items;
-  }, [items, favItems, tagId, query]);
+    if (statusFilter !== "all") list = list.filter((m) => mangaStatus(m.status) === statusFilter);
+    if (sortMode === "new") return [...list].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
+    if (sortMode === "chapters") return [...list].sort((a, b) => chapterNumber(b.lastChapter) - chapterNumber(a.lastChapter));
+    return list;
+  }, [items, favItems, tagId, query, sortMode, statusFilter]);
 
   const loadMore = useCallback(() => {
     if (loadingMore || status !== "ready" || !hasMore) return;
@@ -200,6 +208,14 @@ export function MangaBrowse({
         <SourceDropdown onManageSources={onManageSources} />
         <TagDropdown tagId={tagId} onSelect={setTagId} />
       </div>
+      <div className="-mt-3 flex flex-wrap items-center gap-2 border-b border-edge-soft/60 pb-4">
+        <FilterButton active={sortMode === "latest"} onClick={() => setSortMode("latest")} icon={<Clock3 size={14} />} label={t("Latest")} />
+        <FilterButton active={sortMode === "new"} onClick={() => setSortMode("new")} icon={<Sparkles size={14} />} label={t("New releases")} />
+        <FilterButton active={sortMode === "chapters"} onClick={() => setSortMode("chapters")} icon={<BookCheck size={14} />} label={t("Latest chapters")} />
+        <span className="mx-1 h-5 w-px bg-edge-soft" />
+        <FilterButton active={statusFilter === "completed"} onClick={() => setStatusFilter(statusFilter === "completed" ? "all" : "completed")} label={t("Completed")} />
+        <FilterButton active={statusFilter === "ongoing"} onClick={() => setStatusFilter(statusFilter === "ongoing" ? "all" : "ongoing")} label={t("Ongoing")} />
+      </div>
 
       {status === "loading" ? (
         <SkeletonGrid />
@@ -229,6 +245,21 @@ export function MangaBrowse({
       )}
     </div>
   );
+}
+
+function chapterNumber(value?: string): number {
+  return Number(value?.match(/\d+(?:\.\d+)?/)?.[0]) || 0;
+}
+
+function mangaStatus(value?: string): StatusFilter {
+  const status = value?.toLowerCase() ?? "";
+  if (/complete|finished|ended/.test(status)) return "completed";
+  if (/ongoing|publishing|releasing|serialization/.test(status)) return "ongoing";
+  return "all";
+}
+
+function FilterButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon?: React.ReactNode; label: string }) {
+  return <button type="button" onClick={onClick} className={`inline-flex h-9 items-center gap-1.5 rounded-full px-3.5 text-[12.5px] font-semibold transition-colors ${active ? "bg-ink text-canvas" : "bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 hover:bg-elevated hover:text-ink"}`}>{icon}{label}</button>;
 }
 
 function MangaCard({ manga, onOpen }: { manga: MangaSummary; onOpen: (id: string) => void }) {

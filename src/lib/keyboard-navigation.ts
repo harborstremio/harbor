@@ -46,10 +46,18 @@ export function dispatchTvNav(action: Dir | "select" | "back" | "home"): void {
     if (active && !isEditable(active)) active.click();
     return;
   }
+  const anchor = action !== "back" ? hoveredEl : null;
+  const fromHover = !!anchor;
+  if (anchor) {
+    anchor.focus({ preventScroll: true });
+    hoveredEl = null;
+  }
   const key = TV_NAV_KEY[action];
+  suppressFocusScroll = fromHover;
   window.dispatchEvent(
     new KeyboardEvent("keydown", { key, code: key, bubbles: true, cancelable: true }),
   );
+  suppressFocusScroll = false;
 }
 
 let focusStylesInjected = false;
@@ -71,9 +79,16 @@ function ensureFocusStyles() {
 }
 
 let lastFocusedEl: HTMLElement | null = null;
+let hoveredEl: HTMLElement | null = null;
+let suppressFocusScroll = false;
 
 export function tvFocus(el: HTMLElement) {
   focusElement(el);
+}
+
+export function tvHover(el: HTMLElement | null) {
+  clearTvFocusRing();
+  hoveredEl = el;
 }
 
 function clearTvFocusRing() {
@@ -120,6 +135,7 @@ function focusElement(el: HTMLElement) {
   lastFocusedEl = el;
 
   el.focus({ preventScroll: true });
+  if (suppressFocusScroll) return;
   if (isInHero(el)) {
     const scroller = getScrollParent(el);
     if (scroller) scroller.scrollTo({ top: 0, left: 0, behavior: "smooth" });

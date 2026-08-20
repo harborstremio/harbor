@@ -1,6 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import { aniZipByKitsu } from "@/lib/providers/anizip";
-import { buildKitsuEpisodes, mergeAniZipEpisodes, mergeTvdbEpisodes } from "@/lib/providers/anime-episode-build";
+import { buildKitsuEpisodes, mergeAniZipEpisodes, mergeTvdbEpisodes, mergeTmdbEpisodes, isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { kitsuToTvdb, kitsuToImdb, externalToKitsu, kitsuToAnilist } from "@/lib/providers/anime-mapping";
 import { anilistFranchise, type AnilistFranchiseNode } from "@/lib/anilist/relations";
@@ -22,7 +22,8 @@ import {
   type KitsuEpisode,
   type KitsuStreamer,
 } from "@/lib/providers/kitsu";
-import { tmdbAnimeLogo, tmdbDetails } from "@/lib/providers/tmdb";
+import { tmdbAnimeLogo, tmdbDetails, tmdbSeasonEpisodes } from "@/lib/providers/tmdb";
+import type { Episode as TmdbEpisode } from "@/lib/providers/tmdb/tmdb-details";
 import type { CastEntry, TmdbDetail } from "@/lib/providers/tmdb";
 import type { Settings } from "@/lib/settings";
 
@@ -36,7 +37,10 @@ export type FranchiseEntry = {
   isUpcoming: boolean;
 };
 
-export type AnimeDetailExtras = Partial<TmdbDetail>;
+export type AnimeDetailExtras = Partial<TmdbDetail> & {
+  /** Localized TMDB overviews keyed by TMDB season number (only populated when localization is active). */
+  seasonOverviews?: Record<number, string>;
+};
 
 export type AnimeDetailResult = {
   detail: TmdbDetail;
@@ -352,6 +356,10 @@ export async function animeDetails(
   const addonMeta = await animeKitsuMeta(`kitsu:${kitsuId}`).catch(() => null);
   if (!anime) return null;
 
+  const kind: "movie" | "tv" = anime.subtype === "movie" ? "movie" : "tv";
+  const iso1 = settings.tmdbLanguage || settings.uiLanguage || "en";
+  const localized = settings.localizeAnimeMetadata && iso1.split("-")[0]?.toLowerCase() !== "en";
+
   const franchisePromise = buildFranchise(kitsuId, anime).catch(() => [] as FranchiseEntry[]);
 
   const slugify = (s: string) =>
@@ -390,8 +398,21 @@ export async function animeDetails(
     ]);
 
   const episodes = buildKitsuEpisodes(addonMeta, kitsuRawEpisodes);
-  mergeAniZipEpisodes(episodes, aniZip);
-  mergeTvdbEpisodes(episodes, tvdbEpsRaw);
+  let tmdbEpsRaw: TmdbEpisode[] | null = null;
+  let tmdbEpisodesId = 0;
+  let tmdbEpisodesSeason = 0;
+  if (localized && settings.tmdbKey && kind === "tv") {
+    tmdbEpisodesId = Number(aniZip?.mappings?.themoviedb_id);
+    for (const az of Object.values(aniZip?.episodes ?? {})) {
+      if (az.seasonNumber != null && az.seasonNumber > tmdbEpisodesSeason) tmdbEpisodesSeason = az.seasonNumber;
+    }
+    if (tmdbEpisodesId > 0 && tmdbEpisodesSeason > 0) {
+      tmdbEpsRaw = await tmdbSeasonEpisodes(settings.tmdbKey, tmdbEpisodesId, tmdbEpisodesSeason, iso1).catch(() => null);
+    }
+  }
+  mergeAniZipEpisodes(episodes, aniZip, { lang: localized ? iso1 : undefined });
+  mergeTvdbEpisodes(episodes, tvdbEpsRaw, { lang: localized ? iso1 : undefined });
+  mergeTmdbEpisodes(episodes, tmdbEpsRaw, { lang: localized ? iso1 : undefined });
 
   let seriesImdb = aniZip?.mappings?.imdb_id ?? episodes.find((e) => e.imdbId)?.imdbId ?? null;
   if (!seriesImdb) seriesImdb = await kitsuToImdb(kitsuId).catch(() => null);
@@ -404,8 +425,6 @@ export async function animeDetails(
       ep.thumbnailFallback = `https://episodes.metahub.space/${seriesImdb}/${s}/${e}/w780.jpg`;
     }
   }
-
-  const kind: "movie" | "tv" = anime.subtype === "movie" ? "movie" : "tv";
 
   const toCast = (chars: typeof characters): CastEntry[] =>
     chars.map((c, i) => ({
@@ -446,7 +465,7 @@ export async function animeDetails(
   const detail: TmdbDetail = {
     ...emptyDetail(kind),
     id: anime.id,
-    imdbId: addonMeta?.imdb_id ?? null,
+    imdbId: seriesImdb ?? addonMeta?.imdb_id ?? null,
     title: anime.title,
     originalTitle: anime.title,
     overview: anime.synopsis,
@@ -523,13 +542,15 @@ export async function animeDetails(
         : settings.fanartKey && kind === "tv" && tvdbId
           ? fanartTv(settings.fanartKey, tvdbId).catch(() => null)
           : Promise.resolve(null);
+    const tmdbFullId = Number(aniZip?.mappings?.themoviedb_id) || tmdbHit?.tmdbId || 0;
+    const tmdbFullFromMapping = Number(aniZip?.mappings?.themoviedb_id) > 0;
     const tmdbFullPromise =
-      settings.tmdbKey && tmdbHit?.tmdbId
+      settings.tmdbKey && tmdbFullId
         ? tmdbDetails(settings.tmdbKey, {
-            id: `tmdb:${kind === "movie" ? "movie" : "tv"}:${tmdbHit.tmdbId}`,
+            id: `tmdb:${kind === "movie" ? "movie" : "tv"}:${tmdbFullId}`,
             type: kind === "movie" ? "movie" : "series",
             name: anime.title,
-          } as Meta).catch(() => null)
+          } as Meta, localized ? iso1 : undefined).catch(() => null)
         : Promise.resolve(null);
     const [fa, fullRaw] = await Promise.all([fanartPromise, tmdbFullPromise]);
     if (fa) {
@@ -541,15 +562,20 @@ export async function animeDetails(
     const backdrops = gallery;
     let tmdbFull: TmdbDetail | null = null;
     if (fullRaw) {
-      const ay = Number(anime.year);
-      const ty = Number(fullRaw.year);
-      if (!Number.isFinite(ay) || !Number.isFinite(ty) || Math.abs(ty - ay) <= 1) tmdbFull = fullRaw;
+      // AniZip's themoviedb_id is authoritative per entry; the title-search id can false-positive, so it keeps the year gate.
+      if (tmdbFullFromMapping) {
+        tmdbFull = fullRaw;
+      } else {
+        const ay = Number(anime.year);
+        const ty = Number(fullRaw.year);
+        if (!Number.isFinite(ay) || !Number.isFinite(ty) || Math.abs(ty - ay) <= 1) tmdbFull = fullRaw;
+      }
     }
     const patch: AnimeDetailExtras = {
       logo,
       backdrop,
       poster,
-      imdbId: addonMeta?.imdb_id ?? tmdbFull?.imdbId ?? null,
+      imdbId: seriesImdb ?? addonMeta?.imdb_id ?? tmdbFull?.imdbId ?? null,
       extraVideos: tmdbFull?.extraVideos ?? [],
       gallery: {
         backdrops: Array.from(new Set([...backdrops, ...(tmdbFull?.gallery.backdrops ?? [])])),
@@ -566,6 +592,19 @@ export async function animeDetails(
       editor: tmdbFull?.editor ?? [],
       keywords: tmdbFull?.keywords ?? [],
     };
+    if (localized && tmdbFull) {
+      const overviewOk = !!tmdbFull.overview && isTextInLanguage(tmdbFull.overview, iso1);
+      const titleOk = !!tmdbFull.title && isTextInLanguage(tmdbFull.title, iso1);
+      if (overviewOk) patch.overview = tmdbFull.overview;
+      if (titleOk) patch.title = tmdbFull.title;
+      // TMDB's tv/{id} response carries per-season localized overviews; surface them so the season
+      // hero can vary per season instead of showing the static series overview everywhere.
+      const seasonOverviews: Record<number, string> = {};
+      for (const s of tmdbFull.seasons ?? []) {
+        if (s.overview && isTextInLanguage(s.overview, iso1)) seasonOverviews[s.seasonNumber] = s.overview;
+      }
+      patch.seasonOverviews = seasonOverviews;
+    }
     if (cast.length === 0) {
       let fallback: CastEntry[] | undefined;
       for (const k of castKeys) {
@@ -589,7 +628,7 @@ export async function animeDetails(
     episodes,
     streamers,
     backdrops: anime.backdrop ? [anime.backdrop] : [],
-    imdbId: addonMeta?.imdb_id,
+    imdbId: seriesImdb ?? addonMeta?.imdb_id,
     franchisePromise,
     enrichPromise,
     titleEnrichPromise,

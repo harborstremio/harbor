@@ -69,7 +69,7 @@ async function refreshAnimeEpisodes(
   const eps: PlayEpisode[] = [];
   for (const v of raw) {
     if (!Number.isFinite(v.episode)) continue;
-    const season = v.season >= 1 ? v.season : 1;
+    const season = v.season >= 0 ? v.season : 1;
     const ep: PlayEpisode = {
       season,
       episode: v.episode,
@@ -340,6 +340,7 @@ function uniqueSeasons(eps: PlayEpisode[] | null): number[] {
 }
 
 function animeSeasonKey(e: PlayEpisode): number {
+  if (e.imdbSeason === 0) return 0;
   return e.imdbSeason != null && e.imdbSeason >= 1 ? e.imdbSeason : e.season;
 }
 

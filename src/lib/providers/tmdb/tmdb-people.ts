@@ -145,11 +145,23 @@ export async function tmdbPerson(key: string, personId: number): Promise<PersonD
 }
 
 async function fetchPerson(key: string, personId: number): Promise<PersonDetail | null> {
+  const lang = effectiveTmdbLanguage();
+  const langBase = lang.split("-")[0]?.toLowerCase() ?? "";
   const raw = await get<any>(key, `person/${personId}`, {
     append_to_response: "combined_credits,external_ids",
-    language: effectiveTmdbLanguage() || "en",
+    language: lang || "en",
   });
   if (!raw) return null;
+
+  // TMDB falls back to the original-language name (e.g. Japanese for anime staff) when
+  // the requested language has no translation, so prefer the English name in that case.
+  const localized = typeof raw.name === "string" ? raw.name : "";
+  const original = typeof raw.original_name === "string" ? raw.original_name : "";
+  let name = localized;
+  if (langBase && langBase !== "en" && original && localized === original) {
+    const enRaw = await get<any>(key, `person/${personId}`, { language: "en-US" });
+    if (typeof enRaw?.name === "string" && enRaw.name) name = enRaw.name;
+  }
 
   const toCredit = (c: any): PersonCredit => ({
     id: c.id,
@@ -174,7 +186,7 @@ async function fetchPerson(key: string, personId: number): Promise<PersonDetail 
 
   const detail: PersonDetail = {
     id: raw.id,
-    name: raw.name ?? "",
+    name,
     biography: raw.biography ?? "",
     birthday: raw.birthday ?? null,
     deathday: raw.deathday ?? null,

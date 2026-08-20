@@ -49,11 +49,7 @@ function relativeDate(iso?: string): string | null {
   if (hours < 24) return t("{n}h ago", { n: hours });
   const days = Math.round(hours / 24);
   if (days < 7) return t("{n}d ago", { n: days });
-  const weeks = Math.round(days / 7);
-  if (weeks < 5) return t("{n}w ago", { n: weeks });
-  const months = Math.round(days / 30);
-  if (months < 12) return t("{n}mo ago", { n: months });
-  return t("{n}y ago", { n: Math.round(days / 365) });
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(then);
 }
 
 function chapterLabel(chapter: string | null): string {
@@ -386,6 +382,7 @@ export function ChapterList({
   const [view, setView] = useState<ChapterView>(readView);
   const [range, setRange] = useState<number | null>(null);
   const [sourceFilter, setSourceFilter] = useState("");
+  const [sourceChoice, setSourceChoice] = useState<MangaChapter | null>(null);
   const batch = useMangaDownloadBatch(mangaId ?? "");
 
   useEffect(() => {
@@ -412,11 +409,34 @@ export function ChapterList({
     if (sourceFilter && !sourceOptions.some((o) => o.id === sourceFilter)) setSourceFilter("");
   }, [sourceOptions, sourceFilter]);
 
-  const scoped = useMemo(
+  const rawScoped = useMemo(
     () =>
       sourceFilter ? chapters.filter((c) => chapterSourceId(c.id) === sourceFilter) : chapters,
     [chapters, sourceFilter],
   );
+
+  const chapterGroups = useMemo(() => {
+    const groups = new Map<string, MangaChapter[]>();
+    for (const c of rawScoped) {
+      const number = c.chapter == null ? NaN : Number(c.chapter);
+      const identity = Number.isFinite(number) ? String(number) : c.chapter ?? c.title?.trim().toLowerCase() ?? "oneshot";
+      const key = `${c.language}|${identity}`;
+      groups.set(key, [...(groups.get(key) ?? []), c]);
+    }
+    const list: MangaChapter[] = [], options = new Map<string, MangaChapter[]>();
+    for (const group of groups.values()) {
+      const sources = new Set(group.map((c) => chapterSourceId(c.id)).filter(Boolean));
+      if (sources.size < 2) {
+        for (const c of group) { list.push(c); options.set(c.id, [c]); }
+        continue;
+      }
+      const sorted = [...group].sort((a, b) => new Date(b.publishAt ?? 0).getTime() - new Date(a.publishAt ?? 0).getTime());
+      list.push(sorted[0]);
+      options.set(sorted[0].id, sorted);
+    }
+    return { list, options };
+  }, [rawScoped]);
+  const scoped = chapterGroups.list;
 
   const animeEndId = useMemo(() => {
     if (animeEndChapter == null) return null;
@@ -475,6 +495,12 @@ export function ChapterList({
     () => (sort === "newest" ? [...ascending].reverse() : ascending),
     [ascending, sort],
   );
+  const readChapter = (chapter: MangaChapter, selected = chapter) => {
+    const options = chapterGroups.options.get(chapter.id) ?? [chapter];
+    if (selected === chapter && options.length > 1) { setSourceChoice(chapter); return; }
+    const list = ascending.map((c) => c.id === chapter.id ? selected : c);
+    onRead(list, list.findIndex((c) => c.id === selected.id));
+  };
 
   if (chapters.length === 0) {
     return (
@@ -665,12 +691,7 @@ export function ChapterList({
               <button
                 key={c.id}
                 type="button"
-                onClick={() =>
-                  onRead(
-                    ascending,
-                    ascending.findIndex((x) => x.id === c.id),
-                  )
-                }
+                onClick={() => readChapter(c)}
                 className={`group flex min-h-[64px] w-full items-center justify-between gap-4 border-b border-edge-soft/60 px-5 py-3.5 text-start transition-colors last:border-b-0 hover:bg-elevated/40 ${
                   cur ? "bg-accent/5" : ""
                 }`}
@@ -719,12 +740,7 @@ export function ChapterList({
               <button
                 key={c.id}
                 type="button"
-                onClick={() =>
-                  onRead(
-                    ascending,
-                    ascending.findIndex((x) => x.id === c.id),
-                  )
-                }
+                onClick={() => readChapter(c)}
                 className={`group flex min-h-[64px] flex-col justify-between gap-2 rounded-xl border bg-surface/60 px-4 py-3.5 text-start transition-colors hover:bg-elevated/60 ${
                   cur ? "border-accent/70" : "border-edge-soft hover:border-edge"
                 }`}
@@ -764,6 +780,26 @@ export function ChapterList({
               </button>
             );
           })}
+        </div>
+      )}
+      {sourceChoice && (
+        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/65 p-6 backdrop-blur-sm" onClick={() => setSourceChoice(null)}>
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_80px_rgba(0,0,0,0.65)]" onClick={(e) => e.stopPropagation()}>
+            <div className="border-b border-edge-soft px-5 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{t("Choose source")}</p>
+              <h3 className="mt-1 text-[18px] font-semibold text-ink">{chapterLabel(sourceChoice.chapter)}</h3>
+            </div>
+            <div className="max-h-[55vh] overflow-y-auto p-2">
+              {(chapterGroups.options.get(sourceChoice.id) ?? [sourceChoice]).map((option) => {
+                const source = sourceOptions.find((s) => s.id === chapterSourceId(option.id));
+                return <button key={option.id} type="button" onClick={() => { setSourceChoice(null); readChapter(sourceChoice, option); }} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-start transition-colors hover:bg-raised">
+                  <SourceIcon iconUrl={source?.iconUrl} />
+                  <span className="min-w-0 flex-1"><span className="block truncate text-[14px] font-semibold text-ink">{source?.name ?? option.group ?? t("Source")}</span><span className="block truncate text-[12px] text-ink-subtle">{relativeDate(option.publishAt) ?? option.group}</span></span>
+                  <BookOpen size={17} className="text-ink-subtle" />
+                </button>;
+              })}
+            </div>
+          </div>
         </div>
       )}
     </section>

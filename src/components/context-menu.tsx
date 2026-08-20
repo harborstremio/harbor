@@ -516,7 +516,17 @@ export function ContextMenu() {
 
   return (
     <>
-      <div aria-hidden className="fixed inset-0 z-[144]" onClick={close} onWheel={close} />
+      <div
+        aria-hidden
+        className="fixed inset-0 z-[144]"
+        // In fullscreen, some WebViews dispatch the secondary click after the
+        // contextmenu event. Dismiss on a new primary press instead so that
+        // event cannot immediately close the menu it just opened.
+        onMouseDown={(e) => {
+          if (e.button === 0) close();
+        }}
+        onWheel={close}
+      />
       <div
         ref={ref}
         role="menu"

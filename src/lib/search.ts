@@ -7,6 +7,7 @@ import type { AddonHit } from "@/lib/search-addon-index";
 import { getCachedPlaylist } from "@/lib/iptv/store";
 import { arabicAwareMatch } from "@/lib/iptv/rtl";
 import type { Settings } from "@/lib/settings";
+import { loadStoredSettings } from "@/lib/settings/load";
 import { safeFetch } from "@/lib/safe-fetch";
 import { anilistAnimeSearch } from "@/lib/anilist/browse";
 import type { MangaSummary } from "@/lib/manga/model";
@@ -263,6 +264,7 @@ export async function searchAll(
   const data = await get<Page<MultiItem>>(key, "search/multi", {
     query: trimmed,
     include_adult: "false",
+    ...(loadStoredSettings().translateTitles ? {} : { language: "en-US" }),
   });
   if (!data) {
     return {

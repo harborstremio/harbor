@@ -8,12 +8,10 @@ import { dispatchTvNav } from "@/lib/keyboard-navigation";
 import { publishGamepads } from "./store";
 import { resetLiveGamepad, setLiveAxis, setLiveButton } from "./live";
 import { startWebGamepadSource } from "./web-source";
-import type { GamepadEventPayload, GamepadInfo, GpAxis, GpButton } from "./protocol";
+import type { GamepadEventPayload, GamepadInfo, GpButton } from "./protocol";
 import {
-  NAV_AXIS,
   NAV_BUTTON,
   NAV_REPEATABLE,
-  PLAYER_AXIS,
   PLAYER_BUTTON,
   PLAYER_REPEATABLE,
   type PlayerKey,
@@ -25,6 +23,29 @@ function synthKey({ key, code }: PlayerKey): void {
   const init = { key, code, bubbles: true, cancelable: true };
   window.dispatchEvent(new KeyboardEvent("keydown", init));
   window.dispatchEvent(new KeyboardEvent("keyup", init));
+}
+
+function keyboardNav(dir: string): boolean {
+  const root = document.querySelector<HTMLElement>("[data-controller-keyboard]");
+  if (!root || !["up", "down", "left", "right"].includes(dir)) return false;
+  const keys = [...root.querySelectorAll<HTMLButtonElement>("button:not([disabled])")];
+  const current = root.contains(document.activeElement) ? document.activeElement as HTMLButtonElement : null;
+  if (!current) { keys[0]?.focus({ preventScroll: true }); return true; }
+  const a = current.getBoundingClientRect(), ax = a.left + a.width / 2, ay = a.top + a.height / 2;
+  let candidates = keys.filter((key) => key !== current).map((key) => {
+    const b = key.getBoundingClientRect(), dx = b.left + b.width / 2 - ax, dy = b.top + b.height / 2 - ay;
+    const valid = dir === "left" ? dx < 0 : dir === "right" ? dx > 0 : dir === "up" ? dy < 0 : dy > 0;
+    const primary = dir === "left" || dir === "right" ? Math.abs(dx) : Math.abs(dy);
+    const cross = dir === "left" || dir === "right" ? Math.abs(dy) : Math.abs(dx);
+    return { key, valid, primary, cross };
+  }).filter((x) => x.valid);
+  if (dir === "left" || dir === "right") {
+    const sameRow = candidates.filter((x) => x.cross < a.height / 2);
+    if (sameRow.length) candidates = sameRow;
+  }
+  const next = candidates.sort((x, y) => x.primary + x.cross * 2 - y.primary - y.cross * 2)[0];
+  next?.key.focus({ preventScroll: true });
+  return true;
 }
 
 let nativePads: GamepadInfo[] = [];
@@ -54,12 +75,10 @@ export function useGamepad(): void {
   }, [backgroundInput]);
 
   const cfgRef = useRef({
-    deadzone: settings.controllerDeadzone,
     repeatMs: settings.controllerRepeatMs,
     initialDelayMs: settings.controllerInitialDelayMs,
   });
   cfgRef.current = {
-    deadzone: settings.controllerDeadzone,
     repeatMs: settings.controllerRepeatMs,
     initialDelayMs: settings.controllerInitialDelayMs,
   };
@@ -71,8 +90,6 @@ export function useGamepad(): void {
     if (!isTauri || !enabled) return;
 
     const repeats = new Map<string, { delay: number | null; interval: number | null }>();
-    const axisDir = new Map<GpAxis, "neg" | "pos" | null>();
-
     const stopRepeat = (id: string) => {
       const r = repeats.get(id);
       if (!r) return;
@@ -101,17 +118,10 @@ export function useGamepad(): void {
         return;
       }
       const nav = NAV_BUTTON[button];
-      if (nav) dispatchTvNav(nav);
-    };
-
-    const fireAxis = (axis: GpAxis, dir: "neg" | "pos") => {
-      if (playerRef.current) {
-        const key = PLAYER_AXIS[axis]?.[dir];
-        if (key) synthKey(key);
-        return;
+      if (nav && !keyboardNav(nav)) {
+        dispatchTvNav(nav);
+        document.activeElement?.dispatchEvent(new CustomEvent("harbor-controller-focus", { bubbles: true }));
       }
-      const nav = NAV_AXIS[axis]?.[dir];
-      if (nav) dispatchTvNav(nav);
     };
 
     const onButton = (button: GpButton, pressed: boolean) => {
@@ -124,22 +134,6 @@ export function useGamepad(): void {
         : NAV_REPEATABLE.has(button);
       if (repeatable) startRepeat(`btn:${button}`, () => fireButton(button));
       else fireButton(button);
-    };
-
-    const onAxis = (axis: GpAxis, value: number) => {
-      const mapped = playerRef.current ? PLAYER_AXIS[axis] : NAV_AXIS[axis];
-      const dz = Math.max(0.05, cfgRef.current.deadzone);
-      const dir: "neg" | "pos" | null = !mapped
-        ? null
-        : value <= -dz
-          ? "neg"
-          : value >= dz
-            ? "pos"
-            : null;
-      if ((axisDir.get(axis) ?? null) === dir) return;
-      axisDir.set(axis, dir);
-      stopRepeat(`axis:${axis}`);
-      if (dir) startRepeat(`axis:${axis}`, () => fireAxis(axis, dir));
     };
 
     let unlisten: (() => void) | undefined;
@@ -164,7 +158,6 @@ export function useGamepad(): void {
           break;
         case "axis":
           setLiveAxis(p.axis, p.value);
-          onAxis(p.axis, p.value);
           break;
       }
     }).then((raw) => {
@@ -180,7 +173,6 @@ export function useGamepad(): void {
       },
       onAxis: (axis, value) => {
         setLiveAxis(axis, value);
-        onAxis(axis, value);
       },
       onPads: (pads) => {
         webPads = pads;
@@ -192,7 +184,6 @@ export function useGamepad(): void {
       cancelled = true;
       stopAll();
       stopWebSource();
-      axisDir.clear();
       webPads = [];
       resetLiveGamepad();
       unlisten?.();

@@ -3,6 +3,20 @@ import { MOVIE_GENRES, TV_GENRES } from "../../feed/tags";
 import { loadStoredSettings } from "../../settings/load";
 import { IMG } from "./tmdb-client";
 
+export function isAnimeItem(item: {
+  genre_ids?: number[];
+  genres?: any[];
+  original_language?: string;
+  origin_country?: string[];
+}): boolean {
+  const hasAnim =
+    (item.genre_ids ?? []).includes(16) ||
+    (item.genres ?? []).some((g: any) => g === "Animation" || g?.id === 16);
+  const isJp =
+    item.original_language === "ja" || (item.origin_country ?? []).includes("JP");
+  return hasAnim && isJp;
+}
+
 export type RawMovie = {
   id: number;
   title: string;
@@ -59,10 +73,12 @@ function genresFromIds(ids: number[] | undefined, kind: "movie" | "tv"): string[
 export const movieMeta = (m: RawMovie): Meta => {
   const st = loadStoredSettings();
   const translate = st.translateTitles;
+  const anime = isAnimeItem(m);
+  const name = translate ? m.title : anime ? m.title : m.original_title || m.title;
   return {
     id: `tmdb:movie:${m.id}`,
     type: "movie",
-    name: translate ? m.title : m.original_title || m.title,
+    name,
     poster: poster(m.poster_path),
     background: back(m.backdrop_path),
     description: m.overview,
@@ -78,10 +94,12 @@ export const movieMeta = (m: RawMovie): Meta => {
 export const seriesMeta = (s: RawSeries): Meta => {
   const st = loadStoredSettings();
   const translate = st.translateTitles;
+  const anime = isAnimeItem(s);
+  const name = translate ? s.name : anime ? s.name : s.original_name || s.name;
   return {
     id: `tmdb:tv:${s.id}`,
     type: "series",
-    name: translate ? s.name : s.original_name || s.name,
+    name,
     poster: poster(s.poster_path),
     background: back(s.backdrop_path),
     description: s.overview,

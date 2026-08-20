@@ -40,7 +40,9 @@ export function ContextMenuProvider({ children }: { children: ReactNode }) {
       if (t instanceof Element && t.closest("[data-harbor-player]")) return;
       close();
     };
-    const onResize = () => close();
+    // Fullscreen window chrome can briefly resize while opening a context menu.
+    // Keep the menu open and let its viewport-clamped position update instead.
+    const onResize = () => setState((current) => (current ? { ...current } : null));
     document.addEventListener("scroll", onScroll, true);
     window.addEventListener("resize", onResize);
     return () => {

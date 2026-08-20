@@ -103,15 +103,6 @@ export function useBridgeLoad(params: {
           notWebReady: src.notWebReady,
           isLive,
           headers: src.headers,
-          startAtSec: guestInRoom
-            ? undefined
-            : eligibleForPrompt
-              ? undefined
-              : startSec > 5
-                ? startSec
-                : isFirstLoad
-                  ? undefined
-                  : 0,
         });
       } catch (e) {
         if (cancelled) return;
@@ -119,24 +110,6 @@ export function useBridgeLoad(params: {
         return;
       }
       if (cancelled) return;
-      if (!eligibleForPrompt && !guestInRoom && startSec > 5) {
-        let unsub: (() => void) | null = null;
-        let synced = false;
-        const stop = () => {
-          synced = true;
-          unsub?.();
-        };
-        unsub = bridge.subscribe((s) => {
-          if (cancelled) {
-            stop();
-            return;
-          }
-          if (s.durationSec <= 0) return;
-          stop();
-          if (startSec >= s.durationSec - 20) bridge.seek(0);
-        });
-        if (synced) unsub?.();
-      }
       if (eligibleForPrompt) {
         bridge.pause();
         setPendingResumeSec(startSec);
@@ -149,6 +122,13 @@ export function useBridgeLoad(params: {
             setPendingSeekSec(0);
           }
         };
+        return;
+      }
+      if (!guestInRoom && startSec > 5) {
+        // On Linux's embedded mpv renderer, supplying `start` during load can
+        // race the initial render context with a network seek. Load the first
+        // frame normally, then seek once the bridge reports a duration.
+        setPendingSeekSec(startSec);
         return;
       }
       if (!inRoomRef.current) {

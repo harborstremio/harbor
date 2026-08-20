@@ -254,7 +254,8 @@ export async function kitsuSimilarByGenres(
   limit = 18,
 ): Promise<Meta[]> {
   if (genreSlugs.length === 0) return [];
-  const slug = genreSlugs.slice(0, 4).join(",");
+  // Kitsu 400s when the comma-joined genres filter is combined with the multi-value ageRating filter, so match on the primary genre only.
+  const slug = genreSlugs[0];
   const ageFilter = adultContentHidden() ? "&filter[ageRating]=G,PG,R" : "";
   const params = `filter[genres]=${encodeURIComponent(slug)}${ageFilter}&sort=-userCount&page[limit]=${limit + 6}`;
   const j = await get<Doc<Resource<KitsuAnimeAttrs>[]>>(`/anime?${params}`);

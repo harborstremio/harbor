@@ -28,20 +28,8 @@ export function useAnimeFranchiseNav(
   );
 
   const pickerItems: PickerItem[] = useMemo(
-    () =>
-      order
-        ? [
-            ...order.items,
-            ...franchiseNav.map((n) => ({
-              key: n.key,
-              name: n.name,
-              count: n.count,
-              year: n.year,
-              extra: true,
-            })),
-          ]
-        : [],
-    [order, franchiseNav],
+    () => (order ? order.items : []),
+    [order],
   );
 
   const franchiseActiveKey = activeEntryId !== currentId ? `nav:${activeEntryId}` : undefined;

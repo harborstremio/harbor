@@ -7,17 +7,21 @@ import { ControllerPreview } from "./controllers-panel/controller-preview";
 
 const BROWSE_MAP: Array<{ control: string; action: string }> = [
   { control: "D-pad", action: "Move focus" },
-  { control: "A / Cross", action: "Select" },
+  { control: "A / Cross", action: "Click cursor" },
+  { control: "Right stick", action: "Move cursor" },
+  { control: "Left stick", action: "Scroll" },
   { control: "B / Circle", action: "Back" },
   { control: "Menu / Options", action: "Home" },
 ];
 
 const PLAYER_MAP: Array<{ control: string; action: string }> = [
-  { control: "A / Cross", action: "Play or pause" },
+  { control: "A / Cross", action: "Click cursor" },
+  { control: "Right stick", action: "Move cursor" },
+  { control: "Left stick", action: "Scroll" },
   { control: "X / Square", action: "Subtitles" },
   { control: "Y / Triangle", action: "Stats overlay" },
   { control: "Bumpers (LB / RB)", action: "Previous or next episode" },
-  { control: "Triggers (LT / RT)", action: "Seek back or forward" },
+  { control: "D-pad left / right", action: "Seek back or forward" },
   { control: "D-pad up / down", action: "Volume up or down" },
   { control: "B / Circle", action: "Exit player" },
 ];
@@ -115,6 +119,26 @@ export function ControllersPanel() {
           value={settings.controllerDeadzone}
           display={`${Math.round(settings.controllerDeadzone * 100)}%`}
           onChange={(v) => update({ controllerDeadzone: v })}
+        />
+        <SliderRow
+          label={t("Cursor speed")}
+          sub={t("How quickly the Harbor cursor moves with the right stick.")}
+          min={300}
+          max={1500}
+          step={100}
+          value={settings.controllerCursorSpeed}
+          display={t("{n} px/s", { n: settings.controllerCursorSpeed })}
+          onChange={(v) => update({ controllerCursorSpeed: v })}
+        />
+        <SliderRow
+          label={t("Keyboard size")}
+          sub={t("Size of the controller on-screen keyboard.")}
+          min={70}
+          max={130}
+          step={5}
+          value={settings.controllerKeyboardSize}
+          display={`${settings.controllerKeyboardSize}%`}
+          onChange={(v) => update({ controllerKeyboardSize: v })}
         />
         <SliderRow
           label={t("Repeat speed")}
