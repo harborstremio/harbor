@@ -1,4 +1,4 @@
-import { get } from "@/lib/providers/tmdb/tmdb-client";
+import { effectiveTmdbLanguage, get } from "@/lib/providers/tmdb/tmdb-client";
 import { movieMeta, seriesMeta, type Page, type RawMovie, type RawSeries } from "@/lib/providers/tmdb/tmdb-meta-mappers";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
 import type { Meta } from "@/lib/cinemeta";
@@ -283,6 +283,22 @@ export async function searchAll(
       tmdbUnavailable: true,
     };
   }
+  const metaBase = effectiveTmdbLanguage().split("-")[0]?.toLowerCase() ?? "";
+  let enNameById: Map<number, string> | null = null;
+  if (loadStoredSettings().translateTitles && metaBase !== "" && metaBase !== "en" && metaBase !== "ja") {
+    const en = await get<Page<MultiItem>>(key, "search/multi", {
+      query: trimmed,
+      include_adult: "false",
+      language: "en-US",
+    });
+    if (en?.results) {
+      enNameById = new Map();
+      for (const r of en.results) {
+        const n = (r as { title?: string; name?: string }).title ?? (r as { name?: string }).name;
+        if (n && typeof r.id === "number") enNameById.set(r.id, n);
+      }
+    }
+  }
   const exclude = new Set(opts.excludeGenres ?? []);
   const hasExcludedGenre = (gs?: number[]) => (gs ?? []).some((id) => exclude.has(id));
   const results = (data?.results ?? []).filter((r) => {
@@ -302,14 +318,14 @@ export async function searchAll(
 
   for (const r of results) {
     if (r.media_type === "movie" && r.poster_path) {
-      movies.push(movieMeta(r));
+      movies.push(movieMeta(r, enNameById?.get(r.id)));
       const pop = r.popularity ?? 0;
       if (pop > topPop) {
         topRaw = r;
         topPop = pop;
       }
     } else if (r.media_type === "tv" && r.poster_path) {
-      series.push(seriesMeta(r));
+      series.push(seriesMeta(r, enNameById?.get(r.id)));
       const pop = r.popularity ?? 0;
       if (pop > topPop) {
         topRaw = r;
@@ -346,7 +362,9 @@ export async function searchAll(
     const isMovie = winner.media_type === "movie";
     topMatch = {
       kind: isMovie ? "movie" : "series",
-      meta: isMovie ? movieMeta(winner as RawMovie) : seriesMeta(winner as RawSeries),
+      meta: isMovie
+        ? movieMeta(winner as RawMovie, enNameById?.get(winner.id))
+        : seriesMeta(winner as RawSeries, enNameById?.get(winner.id)),
       popularity: winner.popularity ?? 0,
       backdrop: winner.backdrop_path ? `https://image.tmdb.org/t/p/w1280${winner.backdrop_path}` : undefined,
       overview: winner.overview,

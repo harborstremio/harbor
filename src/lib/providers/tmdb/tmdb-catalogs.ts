@@ -28,7 +28,7 @@ export async function tmdbMovieRow(
     page: String(page),
     ...(lang ? { language: lang } : {}),
   });
-  return (data?.results ?? []).map(movieMeta);
+  return (data?.results ?? []).map((m) => movieMeta(m));
 }
 
 async function tmdbInCinema(key: string, region: string, page = 1): Promise<Meta[]> {
@@ -58,7 +58,7 @@ export async function tmdbSeriesRow(
     page: String(page),
     ...(lang ? { language: lang } : {}),
   });
-  return (data?.results ?? []).map(seriesMeta);
+  return (data?.results ?? []).map((s) => seriesMeta(s));
 }
 
 export async function tmdbTrending(
@@ -74,8 +74,8 @@ export async function tmdbTrending(
   });
   const results = data?.results ?? [];
   return type === "movie"
-    ? (results as RawMovie[]).map(movieMeta)
-    : (results as RawSeries[]).map(seriesMeta);
+    ? (results as RawMovie[]).map((m) => movieMeta(m))
+    : (results as RawSeries[]).map((s) => seriesMeta(s));
 }
 
 export async function tmdbDiscover(
@@ -91,8 +91,8 @@ export async function tmdbDiscover(
   });
   const results = data?.results ?? [];
   return type === "movie"
-    ? (results as RawMovie[]).map(movieMeta)
-    : (results as RawSeries[]).map(seriesMeta);
+    ? (results as RawMovie[]).map((m) => movieMeta(m))
+    : (results as RawSeries[]).map((s) => seriesMeta(s));
 }
 
 export async function tmdbSearchMovie(

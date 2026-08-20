@@ -1,4 +1,5 @@
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { pickLocalizedText } from "@/lib/localized-text";
 import { seasonDateRange, type TvdbOrder } from "@/lib/providers/tvdb-order";
 import type { PickerItem } from "../series-episodes/season-arc-picker";
 
@@ -8,6 +9,7 @@ export function buildAnimeOrder(
   ordering: TvdbOrder | null,
   episodes: KitsuEpisode[],
   specialsLabel: string,
+  lang?: string,
 ): AnimeOrderBuild | null {
   if (!ordering) return null;
   const byPair = new Map<string, KitsuEpisode>();
@@ -43,8 +45,8 @@ export function buildAnimeOrder(
         id: -e.id,
         number: e.episodeNumber,
         seasonNumber: e.seasonNumber,
-        title: e.name || `Episode ${e.episodeNumber}`,
-        synopsis: e.overview ?? "",
+        title: pickLocalizedText([{ text: e.name }, { text: e.nameEn ?? "" }], { forName: true, lang }) ?? `Episode ${e.episodeNumber}`,
+        synopsis: pickLocalizedText([{ text: e.overview }, { text: e.overviewEn ?? "" }], { lang }) ?? e.overview ?? "",
         thumbnail: img ?? null,
         airdate: e.airDate ?? null,
         length: e.runtime ?? null,

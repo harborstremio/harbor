@@ -51,6 +51,13 @@ export function isTextInLanguage(text: string | null | undefined, lang: string |
   return !FOREIGN_SCRIPT.test(text);
 }
 
+export function isUsableLocalizedText(text: string | null | undefined, lang: string | null | undefined): boolean {
+  if (!text) return false;
+  if (isTextInLanguage(text, lang)) return true;
+  const base = lang?.trim().split("-")[0]?.toLowerCase() ?? "";
+  return base !== "en" && !FOREIGN_SCRIPT.test(text);
+}
+
 // "Episode N" words in various languages: providers ship such placeholders when a real
 // translated title is missing, and they must not be merged in as if they were titles.
 const EPISODE_NUMBER_WORDS = [
@@ -137,6 +144,8 @@ export function mergeAniZipEpisodes(
       const localizedTitle = pickLocalizedTitle(az, opts?.lang);
       if (localizedTitle && !isGenericEpisodeName(localizedTitle) && isTextInLanguage(localizedTitle, opts?.lang)) {
         ep.title = localizedTitle;
+      } else if (az.titles?.en && !isGenericEpisodeName(az.titles.en)) {
+        ep.title = az.titles.en;
       }
     } else {
       const enrichedTitle = pickEpisodeTitle(az);
@@ -235,12 +244,24 @@ export function mergeTmdbEpisodes(
 ): void {
   if (!tmdbEps || tmdbEps.length === 0) return;
   const localized = wantsLocalized(opts);
+  const byPair = new Map<string, TmdbEpisode>();
   const byNumber = new Map<number, TmdbEpisode>();
-  for (const e of tmdbEps) byNumber.set(e.episodeNumber, e);
+  for (const e of tmdbEps) {
+    byPair.set(`${e.seasonNumber}:${e.episodeNumber}`, e);
+    byNumber.set(e.episodeNumber, e);
+  }
   for (const ep of episodes) {
-    // Kitsu restarts numbering per season entry, so prefer AniZip's TMDB episode number
-    // (imdbEpisode) to keep split-season parts matched to the correct TMDB episodes.
-    const tmdbEp = byNumber.get(ep.imdbEpisode ?? ep.number);
+    // Prefer matching by AniZip's TMDB season+episode pair (normal multi-season shows where
+    // each season restarts numbering). When TMDB merged cours into one generalized season 1
+    // (episodeNumber == absolute position), fall back to the AniZip absolute episode number.
+    // The Kitsu seasonNumber:number pair is unreliable for anime (franchise entries often
+    // report season 1 for every cour), so only use it when no AniZip mapping is available.
+    const hasAzMapping = ep.imdbSeason != null && ep.imdbEpisode != null;
+    const tmdbEp =
+      byPair.get(`${ep.imdbSeason}:${ep.imdbEpisode}`) ??
+      (ep.absoluteNumber != null ? byNumber.get(ep.absoluteNumber) : undefined) ??
+      (!hasAzMapping ? byPair.get(`${ep.seasonNumber}:${ep.number}`) : undefined) ??
+      byNumber.get(ep.number);
     if (!tmdbEp) continue;
     if (tmdbEp.name && !isGenericEpisodeName(tmdbEp.name) && (localized || !ep.title || ep.title === `Episode ${ep.number}`)) {
       if (!localized || isTextInLanguage(tmdbEp.name, opts?.lang)) {

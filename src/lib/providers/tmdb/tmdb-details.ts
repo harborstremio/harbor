@@ -337,6 +337,13 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
         ? `${seasons.length} season${seasons.length === 1 ? "" : "s"}`
         : undefined;
 
+  const anime = isAnimeItem(raw);
+  const requestedTitle = raw.title || raw.name;
+  const originalTitle = raw.original_title || raw.original_name || requestedTitle;
+  // TMDB falls back to the original (Japanese) title when the requested language lacks a
+  // translation, so anime falls back to English rather than unreadable Japanese.
+  const titleFellBackToOriginal = requestedTitle === originalTitle;
+
   let overview = raw.overview ?? "";
   let tagline = raw.tagline ?? "";
   // Explicit per-call languages (anime localization) bypass the global "Translate overviews"
@@ -360,18 +367,17 @@ export async function tmdbDetails(key: string, meta: Meta, lang?: string): Promi
     if (best) finalPosterPath = best.file_path;
   }
 
-  const anime = isAnimeItem(raw);
-  const useEnglishForAnime = !settings.translateTitles && anime;
+  const useEnglishForAnime = anime && (!settings.translateTitles || titleFellBackToOriginal);
 
   return {
     kind,
     id: raw.id,
     imdbId: raw.external_ids?.imdb_id ?? null,
-    title: settings.translateTitles
-      ? (raw.title || raw.name)
-      : useEnglishForAnime
-        ? (enTitle || raw.title || raw.name)
-        : (raw.original_title || raw.original_name || raw.title || raw.name),
+    title: useEnglishForAnime
+      ? (enTitle || requestedTitle)
+      : settings.translateTitles
+        ? requestedTitle
+        : originalTitle,
     originalTitle: raw.original_title ?? raw.original_name ?? "",
     tagline,
     overview,
@@ -448,19 +454,32 @@ export async function tmdbSeasonEpisodes(
   lang?: string,
 ): Promise<Episode[]> {
   if (!key) return [];
+  const requested = lang ?? (effectiveTmdbLanguage() || "en");
   const data = await get<any>(key, `tv/${tvId}/season/${seasonNumber}`, {
-    language: lang ?? (effectiveTmdbLanguage() || "en"),
+    language: requested,
   });
   if (!data?.episodes) return [];
-  return data.episodes.map((e: any) => ({
-    id: e.id,
-    episodeNumber: e.episode_number,
-    seasonNumber: e.season_number,
-    name: e.name ?? "",
-    overview: e.overview ?? "",
-    stillPath: e.still_path ?? null,
-    airDate: e.air_date ?? null,
-    runtime: e.runtime ?? null,
-    voteAverage: e.vote_average ?? null,
-  }));
+  const toEpisodes = (d: any): Episode[] =>
+    d.episodes.map((e: any) => ({
+      id: e.id,
+      episodeNumber: e.episode_number,
+      seasonNumber: e.season_number,
+      name: e.name ?? "",
+      overview: e.overview ?? "",
+      stillPath: e.still_path ?? null,
+      airDate: e.air_date ?? null,
+      runtime: e.runtime ?? null,
+      voteAverage: e.vote_average ?? null,
+    }));
+  const episodes = toEpisodes(data);
+  const base = requested.split("-")[0]?.toLowerCase() ?? "";
+  const wantsEnglishFallback = base !== "" && base !== "en" && base !== "ja";
+  const japanese = /[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]/;
+  const fellBackToJapanese = wantsEnglishFallback &&
+    episodes.some((e) => japanese.test(e.name) || japanese.test(e.overview));
+  if (fellBackToJapanese) {
+    const en = await get<any>(key, `tv/${tvId}/season/${seasonNumber}`, { language: "en-US" });
+    if (en?.episodes) return toEpisodes(en);
+  }
+  return episodes;
 }

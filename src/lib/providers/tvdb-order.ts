@@ -3,9 +3,11 @@ import { tvdbEpisodesByType, tvdbSeasonNames, tvdbSeriesByRemote, type TvdbEpiso
 import { readOrderCacheEntry, writeOrderCache } from "./tvdb-order-cache";
 import { tvdbOrderMemoryExpiresAt } from "./tvdb-order-cache-policy.ts";
 
+export type OrderedEpisode = Episode & { nameEn?: string; overviewEn?: string };
+
 export type TvdbOrder = {
   seasons: Season[];
-  bySeason: Map<number, Episode[]>;
+  bySeason: Map<number, OrderedEpisode[]>;
   absByEpId: Map<number, number>;
   imageByAbs: Map<number, string>;
 };
@@ -91,17 +93,26 @@ async function build(
   ]);
   const altEps = slug === "default" ? defaultEps : await tvdbEpisodesByType(apiKey, seriesId, slug);
   if (altEps.length === 0) return null;
-  const transAlt: TvdbEpisode[] = lang
-    ? await tvdbEpisodesByType(apiKey, seriesId, slug, lang).catch(() => [])
-    : [];
+  // Translations in the requested language. When a translation is missing, TVDB falls back to
+  // the original (e.g. Japanese for anime) name, which we keep so users see text in their
+  // requested language first. The English translation is always fetched as the base/fallback —
+  // the language-less default fetch returns the series' original language (Japanese for anime),
+  // so without this English users would see original-language names — and is carried alongside
+  // as nameEn/overviewEn for consumers that need an English fallback when no localized text exists.
+  const requestedLang = lang && lang !== "eng" ? lang : undefined;
+  const [transAlt, transEn] = await Promise.all([
+    requestedLang ? tvdbEpisodesByType(apiKey, seriesId, slug, requestedLang).catch(() => []) : Promise.resolve<TvdbEpisode[]>([]),
+    tvdbEpisodesByType(apiKey, seriesId, slug, "eng").catch(() => []),
+  ]);
   const transById = new Map(transAlt.map((e) => [e.id, e] as const));
+  const transEnById = new Map(transEn.map((e) => [e.id, e] as const));
 
   const canonical = new Map<number, { season: number; episode: number }>();
   for (const e of defaultEps) {
     if (e.seasonNumber >= 1) canonical.set(e.id, { season: e.seasonNumber, episode: e.number });
   }
 
-  const bySeason = new Map<number, Episode[]>();
+  const bySeason = new Map<number, OrderedEpisode[]>();
   const altBySeason = new Map<number, Array<{ season: number; episode: number }>>();
   const seenEpisodeId = new Set<number>();
   for (const e of altEps) {
@@ -115,12 +126,15 @@ async function build(
     altBucket.push({ season: e.seasonNumber, episode: e.number });
     altBySeason.set(bucketKey, altBucket);
     const tr = transById.get(e.id);
+    const trEn = transEnById.get(e.id);
     bucket.push({
       id: e.id,
       seasonNumber: c.season,
       episodeNumber: c.episode,
-      name: (tr?.name || e.name) ?? "",
-      overview: (tr?.overview || e.overview) ?? "",
+      name: (tr?.name || trEn?.name || e.name) ?? "",
+      overview: (tr?.overview || trEn?.overview || e.overview) ?? "",
+      nameEn: trEn?.name,
+      overviewEn: trEn?.overview,
       stillPath: null,
       stillUrl: e.image ?? undefined,
       airDate: e.aired ?? null,

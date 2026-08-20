@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { mergeSeriesEpisodeTitles } from "@/lib/episode-title";
+import { pickLocalizedText } from "@/lib/localized-text";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
 import type { Episode } from "@/lib/providers/tmdb";
-import { tvdbEpisodes, tvdbSeriesByImdb, type TvdbEpisode } from "@/lib/providers/tvdb";
+import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
+import { tvdbEpisodes, tvdbLangFromIso1, tvdbSeriesByImdb, type TvdbEpisode } from "@/lib/providers/tvdb";
 
 export function useEpisodeEnrich({
   episodes,
@@ -32,7 +34,7 @@ export function useEpisodeEnrich({
     void (async () => {
       const seriesId = await tvdbSeriesByImdb(tvdbKey, imdbId);
       if (!seriesId || cancelled) return;
-      const eps = await tvdbEpisodes(tvdbKey, seriesId, active);
+      const eps = await tvdbEpisodes(tvdbKey, seriesId, active, tvdbLangFromIso1(tmdbLanguageIso()));
       if (cancelled) return;
       const map = new Map<number, TvdbEpisode>();
       for (const e of eps) map.set(e.number, e);
@@ -83,12 +85,17 @@ export function useEpisodeEnrich({
       let next: Episode = ep;
       const tv = tvdbForSeason?.get(ep.episodeNumber);
       if (tv) {
+        // pickLocalizedText keys script tests by ISO-1 ("ko"), not TVDB codes ("kor").
+        const lang = tmdbLanguageIso();
+        const name =
+          pickLocalizedText([{ text: tv.name ?? "" }, { text: next.name }], { forName: true, lang }) ??
+          next.name;
         const overview =
-          tv.overview && tv.overview.trim().length > (next.overview?.trim().length ?? 0)
-            ? tv.overview
-            : next.overview;
+          pickLocalizedText([{ text: tv.overview ?? "" }, { text: next.overview }], { lang }) ??
+          next.overview;
         next = {
           ...next,
+          name,
           overview,
           runtime: next.runtime ?? tv.runtime ?? null,
           airDate: next.airDate ?? tv.aired ?? null,

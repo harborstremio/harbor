@@ -17,6 +17,8 @@ export function isAnimeItem(item: {
   return hasAnim && isJp;
 }
 
+const JAPANESE_SCRIPT = /[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]/;
+
 export type RawMovie = {
   id: number;
   title: string;
@@ -70,11 +72,12 @@ function genresFromIds(ids: number[] | undefined, kind: "movie" | "tv"): string[
   return names.length > 0 ? names : undefined;
 }
 
-export const movieMeta = (m: RawMovie): Meta => {
+export const movieMeta = (m: RawMovie, englishName?: string): Meta => {
   const st = loadStoredSettings();
   const translate = st.translateTitles;
   const anime = isAnimeItem(m);
-  const name = translate ? m.title : anime ? m.title : m.original_title || m.title;
+  let name = translate ? m.title : anime ? m.title : m.original_title || m.title;
+  if (anime && translate && englishName && JAPANESE_SCRIPT.test(name)) name = englishName;
   return {
     id: `tmdb:movie:${m.id}`,
     type: "movie",
@@ -91,11 +94,12 @@ export const movieMeta = (m: RawMovie): Meta => {
   };
 };
 
-export const seriesMeta = (s: RawSeries): Meta => {
+export const seriesMeta = (s: RawSeries, englishName?: string): Meta => {
   const st = loadStoredSettings();
   const translate = st.translateTitles;
   const anime = isAnimeItem(s);
-  const name = translate ? s.name : anime ? s.name : s.original_name || s.name;
+  let name = translate ? s.name : anime ? s.name : s.original_name || s.name;
+  if (anime && translate && englishName && JAPANESE_SCRIPT.test(name)) name = englishName;
   return {
     id: `tmdb:tv:${s.id}`,
     type: "series",

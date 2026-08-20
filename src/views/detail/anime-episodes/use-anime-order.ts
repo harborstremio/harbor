@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useT } from "@/lib/i18n";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
+import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import { useEpisodeOrder } from "../series-episodes/use-episode-order";
 import type { PickerItem } from "../series-episodes/season-arc-picker";
 import { buildAnimeOrder } from "./anime-order-utils";
@@ -25,7 +26,8 @@ export function useAnimeOrder(
   const t = useT();
   const ordering = useEpisodeOrder(imdbId, metaId, provider, seasonType, tvdbKey);
   const built = useMemo(
-    () => buildAnimeOrder(ordering, episodes, t("Specials")),
+    // pickLocalizedText keys its script tests by ISO-1 ("ko"), not TVDB codes ("kor").
+    () => buildAnimeOrder(ordering, episodes, t("Specials"), tmdbLanguageIso()),
     [ordering, episodes, t],
   );
   const [sel, setSel] = useState<string | null>(null);

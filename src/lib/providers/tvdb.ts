@@ -305,9 +305,14 @@ export async function tvdbEpisodes(
   apiKey: string,
   seriesId: number,
   season: number,
+  lang?: string,
 ): Promise<TvdbEpisode[]> {
   if (!seriesId) return [];
-  const data = await getJson<any>(apiKey, `/series/${seriesId}/episodes/default?season=${season}`);
+  const langSeg = lang ? `&language=${lang}` : "";
+  const data = await getJson<any>(
+    apiKey,
+    `/series/${seriesId}/episodes/default?season=${season}${langSeg}`,
+  );
   const arr = data?.episodes ?? [];
   return (arr as any[])
     .filter((e) => typeof e.number === "number" && typeof e.seasonNumber === "number")

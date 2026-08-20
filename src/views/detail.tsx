@@ -9,6 +9,7 @@ import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
 import { recordAnimeCwId } from "@/lib/anime-cw-ids";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
+import { pickLocalizedText } from "@/lib/localized-text";
 import { useMalRating } from "@/lib/mal-rating";
 import type { KitsuEpisode, KitsuStreamer } from "@/lib/providers/kitsu";
 import { AnimeAwardsBlock } from "@/components/anime-awards-block";
@@ -238,10 +239,11 @@ export function DetailView({
   // Season picker swaps franchise seasons in-place without re-running animeDetails, so the
   // localized TMDB series overview must be passed down for the season hero description.
   const localizedAnimeOverview = useMemo(() => {
-    if (!settings.localizeAnimeMetadata || !detail?.overview) return undefined;
+    if (!detail?.overview) return undefined;
     const iso1 = settings.tmdbLanguage || settings.uiLanguage || "en";
+    if (iso1.split("-")[0]?.toLowerCase() === "en") return undefined;
     return isTextInLanguage(detail.overview, iso1) ? detail.overview : undefined;
-  }, [settings.localizeAnimeMetadata, settings.tmdbLanguage, settings.uiLanguage, detail?.overview]);
+  }, [settings.tmdbLanguage, settings.uiLanguage, detail?.overview]);
   const pinnedBackdrop = useTitleBackdrop(meta.id);
   const pinnedBackdropHi = pinnedBackdrop
     ? pinnedBackdrop.replace(/\/t\/p\/w\d+\//, "/t/p/original/")
@@ -687,10 +689,17 @@ export function DetailView({
             !idAnime &&
             (settingsRef.current.translateTitles || settingsRef.current.translateDescriptions)
           ) {
+            const lang = settingsRef.current.tmdbLanguage || settingsRef.current.uiLanguage || "en";
+            const pickedTitle = settingsRef.current.translateTitles
+              ? pickLocalizedText([{ text: prev.title }, { text: d.title }], { forName: true, lang })
+              : undefined;
+            const pickedOverview = settingsRef.current.translateDescriptions
+              ? pickLocalizedText([{ text: prev.overview }, { text: d.overview }], { lang })
+              : undefined;
             return {
               ...d,
-              title: settingsRef.current.translateTitles ? prev.title : d.title,
-              overview: settingsRef.current.translateDescriptions ? prev.overview : d.overview,
+              title: pickedTitle ?? (settingsRef.current.translateTitles ? prev.title : d.title),
+              overview: pickedOverview ?? (settingsRef.current.translateDescriptions ? prev.overview : d.overview),
               tagline: settingsRef.current.translateDescriptions ? prev.tagline : d.tagline,
             };
           }

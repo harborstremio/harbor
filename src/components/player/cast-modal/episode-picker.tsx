@@ -3,11 +3,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { queueToggle, useQueue } from "@/lib/queue";
 import { useT } from "@/lib/i18n";
+import { pickLocalizedText } from "@/lib/localized-text";
 import { useSettings } from "@/lib/settings";
 import { effectiveOrderProvider } from "@/lib/settings/episode-order";
 import { getEpisodeProgress, resumeDefaultSeason } from "@/lib/episode-progress";
 import { fetchEpisodeList } from "@/lib/series-episodes";
 import type { Episode } from "@/lib/providers/tmdb";
+import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useSimkl } from "@/lib/simkl/provider";
 import type { PlayEpisode } from "@/lib/view";
@@ -18,7 +20,7 @@ import { useWatchedSets } from "@/views/detail/series-episodes/use-watched-sets"
 import { useTvdbSeasonTypes } from "@/views/detail/series-episodes/use-tvdb-season-types";
 import { TvdbOrderPanel } from "@/views/detail/series-episodes/tvdb-order-panel";
 import type { PickerItem } from "@/views/detail/series-episodes/season-arc-picker";
-import { seasonDateRange } from "@/lib/providers/tvdb-order";
+import { seasonDateRange, type OrderedEpisode } from "@/lib/providers/tvdb-order";
 
 type DropOption = { key: string; label: string };
 
@@ -183,16 +185,28 @@ export function EpisodePicker({
   }, [eps]);
 
   const toPlay = useCallback(
-    (e: Episode): PlayEpisode => {
+    (e: Episode | OrderedEpisode): PlayEpisode => {
       const match = flatByKey.get(`${e.seasonNumber}:${e.episodeNumber}`);
       const still = e.stillUrl ?? (e.stillPath ? `https://image.tmdb.org/t/p/w300${e.stillPath}` : undefined);
+      // pickLocalizedText keys script tests by ISO-1 ("ko"), not TVDB codes ("kor").
+      const lang = tmdbLanguageIso();
+      const enName = "nameEn" in e ? e.nameEn : undefined;
+      const enOverview = "overviewEn" in e ? e.overviewEn : undefined;
       return {
         ...match,
         season: e.seasonNumber,
         episode: e.episodeNumber,
-        name: e.name || match?.name || undefined,
+        name:
+          (pickLocalizedText(
+            [{ text: e.name }, { text: enName ?? "" }, { text: match?.name ?? "" }],
+            { forName: true, lang },
+          ) ?? e.name) || undefined,
         still: match?.still ?? still,
-        overview: e.overview || match?.overview || undefined,
+        overview:
+          (pickLocalizedText(
+            [{ text: e.overview }, { text: enOverview ?? "" }, { text: match?.overview ?? "" }],
+            { lang },
+          ) ?? e.overview) || undefined,
         rating: e.voteAverage && e.voteAverage > 0 ? e.voteAverage : match?.rating,
         airDate: e.airDate || match?.airDate || undefined,
         runtime: e.runtime && e.runtime > 0 ? e.runtime : match?.runtime,
