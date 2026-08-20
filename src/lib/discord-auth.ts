@@ -1,0 +1,76 @@
+import { openUrl } from "@/lib/window";
+
+const TIMEOUT_MS = 300000;
+
+function isTauri(): boolean {
+  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+
+export function canDiscordAuth(): boolean {
+  return isTauri();
+}
+
+type DiscordAuthEvent = {
+  state?: unknown;
+  code?: unknown;
+  error?: unknown;
+};
+
+// Unlike startStremioWebAuth, this cannot build its own URL: client_id and
+// scope are server config, and `state` has to be the same value the backend
+// embedded in `authorizeUrl` and will later verify atomically. So the caller
+// (lib/account/discord-link.ts) gets state+authorizeUrl from
+// POST /identity/api/discord/loopback/start first, then calls this with both.
+//
+// A redirect whose `state` doesn't match `expectedState` is ignored rather
+// than rejected -- discord_auth.rs's Rust listener relays whatever query
+// params Discord sends with no validation of its own, so a stale request
+// hitting the fixed loopback port must not resolve or reject this call.
+export async function startDiscordAuth(authorizeUrl: string, expectedState: string): Promise<string> {
+  if (!isTauri()) throw new Error("Linking Discord needs the desktop app.");
+  const { invoke } = await import("@tauri-apps/api/core");
+  const { listen } = await import("@tauri-apps/api/event");
+  await invoke<number>("discord_auth_start");
+
+  return new Promise<string>((resolve, reject) => {
+    let settled = false;
+    let unlisten: (() => void) | null = null;
+    let timer = 0;
+    const finish = () => {
+      settled = true;
+      if (timer) window.clearTimeout(timer);
+      if (unlisten) unlisten();
+    };
+    timer = window.setTimeout(() => {
+      if (settled) return;
+      finish();
+      reject(new Error("Timed out waiting for Discord. Try again."));
+    }, TIMEOUT_MS);
+    void listen<DiscordAuthEvent>("discord-auth", (e) => {
+      if (settled) return;
+      const payload = e.payload || {};
+      if (payload.state !== expectedState) return;
+      finish();
+      if (typeof payload.error === "string" && payload.error) {
+        reject(
+          new Error(
+            payload.error === "access_denied"
+              ? "Discord sign-in was cancelled."
+              : "Discord sign-in failed. Try again.",
+          ),
+        );
+        return;
+      }
+      const code = typeof payload.code === "string" ? payload.code : "";
+      if (!code) {
+        reject(new Error("No Discord code came through. Try again."));
+        return;
+      }
+      resolve(code);
+    }).then((fn) => {
+      if (settled) fn();
+      else unlisten = fn;
+    });
+    openUrl(authorizeUrl);
+  });
+}

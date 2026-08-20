@@ -6,6 +6,7 @@ import { Section } from "@/views/settings/shared";
 import { RecoveryReveal } from "@/views/settings/theme-panel/custom-themes-section/author-account-panel/recovery-reveal";
 import { AccountAuthForm } from "./account-auth-form";
 import { AccountSignedInBar } from "./account-signed-in-bar";
+import { DiscordLinkCard } from "./discord-link-card";
 import { HandleClaimCard } from "./handle-claim-card";
 
 export function HarborAccountPanel() {
@@ -35,6 +36,9 @@ export function HarborAccountPanel() {
           </div>
           <div className="p-5">
             <HandleClaimCard author={author} />
+          </div>
+          <div className="p-5">
+            <DiscordLinkCard author={author} />
           </div>
         </div>
       )}

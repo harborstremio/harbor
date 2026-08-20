@@ -13,9 +13,15 @@ export const HARBOR_TRAKT_BASE = resolveBase(
   HARBOR_API_BASE,
 );
 
-export const HARBOR_MAL_BASE = resolveBase(import.meta.env.VITE_HARBOR_MAL_BASE, HARBOR_API_BASE);
+export const HARBOR_MAL_BASE = resolveBase(
+  import.meta.env.VITE_HARBOR_MAL_BASE,
+  HARBOR_API_BASE,
+);
 
-export const HARBOR_TVDB_BASE = resolveBase(import.meta.env.VITE_HARBOR_TVDB_BASE, HARBOR_API_BASE);
+export const HARBOR_TVDB_BASE = resolveBase(
+  import.meta.env.VITE_HARBOR_TVDB_BASE,
+  HARBOR_API_BASE,
+);
 
 export const HARBOR_BUGS_BASE = resolveBase(
   import.meta.env.VITE_HARBOR_BUGS_BASE,

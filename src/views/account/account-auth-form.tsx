@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { KeyRound, Loader2 } from "lucide-react";
+import { ExternalLink, KeyRound, Loader2 } from "lucide-react";
 import { HarborMark } from "@/components/icons/harbor-mark";
+import { DiscordIcon } from "@/components/discord-icon";
 import { loginIdentity, registerIdentity } from "@/lib/account/identity";
+import { signInWithDiscord, signUpWithDiscord } from "@/lib/account/discord-link";
 import { accountErrorMessage } from "@/lib/account/error-messages";
+import { canDiscordAuth } from "@/lib/discord-auth";
 import { PasswordField, TextField } from "./fields";
 import { AccountRecoverForm } from "./account-recover-form";
 import { AccountValueProps } from "./account-value-props";
@@ -24,7 +27,9 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [discordBusy, setDiscordBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const canDiscord = canDiscordAuth();
 
   const trimmed = username.trim();
   const usernameOk = USERNAME_RE.test(trimmed);
@@ -36,7 +41,7 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
       : undefined;
 
   const submit = async () => {
-    if (!ready || busy) return;
+    if (!ready || busy || discordBusy) return;
     setBusy(true);
     setError(null);
     try {
@@ -50,6 +55,20 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
       setError(accountErrorMessage(err));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const runDiscord = async () => {
+    if (busy || discordBusy) return;
+    setDiscordBusy(true);
+    setError(null);
+    try {
+      if (mode === "register") await signUpWithDiscord();
+      else await signInWithDiscord();
+    } catch (err) {
+      setError(accountErrorMessage(err));
+    } finally {
+      setDiscordBusy(false);
     }
   };
 
@@ -152,7 +171,7 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
 
           <button
             type="submit"
-            disabled={!ready || busy}
+            disabled={!ready || busy || discordBusy}
             className="flex h-11 items-center justify-center gap-2 rounded-[11px] bg-ink text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
@@ -166,6 +185,35 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
             </p>
           )}
         </form>
+
+        {canDiscord && (
+          <>
+            <div className="flex items-center gap-3">
+              <span className="h-px flex-1 bg-edge-soft" />
+              <span className="text-[11px] font-medium uppercase tracking-wide text-ink-subtle">{t("or")}</span>
+              <span className="h-px flex-1 bg-edge-soft" />
+            </div>
+            <button
+              type="button"
+              onClick={() => void runDiscord()}
+              disabled={busy || discordBusy}
+              className="flex h-11 items-center justify-center gap-2 rounded-[11px] border border-edge-soft text-[13.5px] font-semibold text-ink transition-all duration-150 hover:bg-elevated/60 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
+            >
+              {discordBusy ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  {t("Continue in your browser...")}
+                </>
+              ) : (
+                <>
+                  <DiscordIcon size={16} />
+                  {mode === "register" ? t("Continue with Discord") : t("Sign in with Discord")}
+                  <ExternalLink size={13} />
+                </>
+              )}
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

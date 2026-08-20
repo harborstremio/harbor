@@ -14,7 +14,10 @@ function silenceMediapipeSourcemap() {
     load(id: string) {
       const file = id.split("?")[0];
       if (file.includes("@mediapipe") && file.endsWith(".mjs")) {
-        const code = readFileSync(file, "utf-8").replace(/\/\/#\s*sourceMappingURL=[^\n]*/g, "");
+        const code = readFileSync(file, "utf-8").replace(
+          /\/\/#\s*sourceMappingURL=[^\n]*/g,
+          "",
+        );
         return { code, map: null };
       }
       return null;
