@@ -1,6 +1,4 @@
 import { isGenericEpisodeTitle, pickPreferredEpisodeTitle } from "../episode-title.ts";
-import { pickEpisodeTitle } from "./anizip-episode-title.ts";
-import type { AniZipMapping } from "./anizip";
 import { pickEpisodeTitle, pickLocalizedTitle, type AniZipMapping } from "@/lib/providers/anizip";
 import type { AnimeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
@@ -134,6 +132,7 @@ export function mergeAniZipEpisodes(
     const enrichedTitle = pickEpisodeTitle(az);
     if (enrichedTitle && isGenericEpisodeTitle(ep.title, ep.number)) {
       ep.title = enrichedTitle;
+    }
     if (localized) {
       const localizedTitle = pickLocalizedTitle(az, opts?.lang);
       if (localizedTitle && !isGenericEpisodeName(localizedTitle) && isTextInLanguage(localizedTitle, opts?.lang)) {
@@ -206,6 +205,7 @@ export function mergeTvdbEpisodes(
         isGenericEpisodeTitle(ep.title, ep.number)
       ) {
         ep.title = tvdbEp.name;
+      }
       if (tvdbEp.name && !isGenericEpisodeName(tvdbEp.name) && (localized || !ep.title || ep.title === `Episode ${ep.number}`)) {
         if (!localized || isTextInLanguage(tvdbEp.name, opts?.lang)) {
           ep.title = tvdbEp.name;

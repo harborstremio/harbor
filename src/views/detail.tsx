@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Check, HardDrive, Heart, Layers, Pencil, Play, Plus, RotateCcw } from "lucide-react";
-import { animeDetails, type FranchiseEntry } from "@/lib/providers/anime-detail";
 import { waitForEpisodeTitles } from "@/lib/episode-title";
 import { animeDetails, type AnimeDetailExtras, type FranchiseEntry } from "@/lib/providers/anime-detail";
 import { isTextInLanguage } from "@/lib/providers/anime-episode-build";

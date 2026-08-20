@@ -125,11 +125,6 @@ async function get(query: string): Promise<AniZipMapping | null> {
   return p;
 }
 
-export function pickEpisodeTitle(ep: AniZipEpisode | undefined): string | null {
-  if (!ep?.titles) return null;
-  return ep.titles.en ?? ep.titles["x-jat"] ?? ep.titles.ja ?? null;
-}
-
 export function pickLocalizedTitle(
   ep: AniZipEpisode | undefined,
   lang: string | null | undefined,
