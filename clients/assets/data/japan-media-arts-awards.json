@@ -1,0 +1,628 @@
+{
+  "id": "jmaf",
+  "name": "Japan Media Arts Festival",
+  "shortName": "JMAF",
+  "wikipedia": "https://en.wikipedia.org/wiki/Japan_Media_Arts_Festival",
+  "updatedAt": "2026-05-24",
+  "categories": {
+    "grand_prize": {
+      "name": "Grand Prize",
+      "winners": [
+        {
+          "year": 1997,
+          "title": "Princess Mononoke"
+        },
+        {
+          "year": 1998,
+          "title": "Glassy Ocean"
+        },
+        {
+          "year": 1999,
+          "title": "The Old Man and the Sea"
+        },
+        {
+          "year": 2000,
+          "title": "Blood: The Last Vampire"
+        },
+        {
+          "year": 2001,
+          "title": "Spirited Away"
+        },
+        {
+          "year": 2002,
+          "title": "Crayon Shin-chan: The Storm Called: The Battle of the Warring States"
+        },
+        {
+          "year": 2003,
+          "title": "Winter Days"
+        },
+        {
+          "year": 2004,
+          "title": "Mind Game"
+        },
+        {
+          "year": 2005,
+          "title": "Flow"
+        },
+        {
+          "year": 2006,
+          "title": "The Girl Who Leapt Through Time"
+        },
+        {
+          "year": 2007,
+          "title": "Summer Days with Coo"
+        },
+        {
+          "year": 2008,
+          "title": "La Maison en petits cubes"
+        },
+        {
+          "year": 2009,
+          "title": "Summer Wars"
+        },
+        {
+          "year": 2010,
+          "title": "The Tatami Galaxy"
+        },
+        {
+          "year": 2011,
+          "title": "Puella Magi Madoka Magica"
+        },
+        {
+          "year": 2012,
+          "title": "Combustible"
+        },
+        {
+          "year": 2013,
+          "title": "Approved for Adoption"
+        },
+        {
+          "year": 2014,
+          "title": "The Wound"
+        },
+        {
+          "year": 2015,
+          "title": "Rhizome"
+        },
+        {
+          "year": 2017,
+          "title": "Your Name"
+        },
+        {
+          "year": 2019,
+          "title": "La Chute"
+        },
+        {
+          "year": 2020,
+          "title": "Children of the Sea"
+        },
+        {
+          "year": 2021,
+          "title": "Keep Your Hands Off Eizouken!"
+        },
+        {
+          "year": 2022,
+          "title": "The Fourth Wall"
+        }
+      ]
+    },
+    "excellence": {
+      "name": "Excellence Prize",
+      "winners": [
+        {
+          "year": 1997,
+          "title": "Mini Cartoon ~Knyacki~"
+        },
+        {
+          "year": 1997,
+          "title": "Donguri's House"
+        },
+        {
+          "year": 1997,
+          "title": "The Bugs"
+        },
+        {
+          "year": 1997,
+          "title": "Neon Genesis Evangelion"
+        },
+        {
+          "year": 1998,
+          "title": "Kaidohryoku REAL"
+        },
+        {
+          "year": 1998,
+          "title": "Serial Experiments Lain"
+        },
+        {
+          "year": 1998,
+          "title": "Believe in It"
+        },
+        {
+          "year": 1998,
+          "title": "Doraemon: Nobita's South Sea Adventure"
+        },
+        {
+          "year": 1999,
+          "title": "Ojarumaru 2"
+        },
+        {
+          "year": 1999,
+          "title": "Mother"
+        },
+        {
+          "year": 1999,
+          "title": "TYO Story"
+        },
+        {
+          "year": 1999,
+          "title": "My Neighbors the Yamadas"
+        },
+        {
+          "year": 2000,
+          "title": "Luz"
+        },
+        {
+          "year": 2000,
+          "title": "Hidamari no Ki"
+        },
+        {
+          "year": 2000,
+          "title": "TarePanda"
+        },
+        {
+          "year": 2000,
+          "title": "S.O.S"
+        },
+        {
+          "year": 2001,
+          "title": "Nostalgia"
+        },
+        {
+          "year": 2001,
+          "title": "Cat Soup"
+        },
+        {
+          "year": 2002,
+          "title": "Mt. Head"
+        },
+        {
+          "year": 2002,
+          "title": "Magical Shopping Arcade Abenobashi"
+        },
+        {
+          "year": 2002,
+          "title": "Ghost in the Shell: Stand Alone Complex"
+        },
+        {
+          "year": 2002,
+          "title": "The Cat Returns"
+        },
+        {
+          "year": 2003,
+          "title": "Tokyo Godfathers"
+        },
+        {
+          "year": 2003,
+          "title": "Mr. Stain on Junk Alley"
+        },
+        {
+          "year": 2003,
+          "title": "Komaneko"
+        },
+        {
+          "year": 2003,
+          "title": "Visions of Frank"
+        },
+        {
+          "year": 2004,
+          "title": "Howl's Moving Castle"
+        },
+        {
+          "year": 2004,
+          "title": "Grrl Power!"
+        },
+        {
+          "year": 2004,
+          "title": "ACIDMAN"
+        },
+        {
+          "year": 2004,
+          "title": "Birthday Boy"
+        },
+        {
+          "year": 2005,
+          "title": "The Book of the Dead"
+        },
+        {
+          "year": 2005,
+          "title": "Kamichu!"
+        },
+        {
+          "year": 2005,
+          "title": "flowery"
+        },
+        {
+          "year": 2005,
+          "title": "The Old Crocodile"
+        },
+        {
+          "year": 2006,
+          "title": "Bloomed Words"
+        },
+        {
+          "year": 2006,
+          "title": "A Country Between the World"
+        },
+        {
+          "year": 2006,
+          "title": "My Love"
+        },
+        {
+          "year": 2006,
+          "title": "PIKA PIKA"
+        },
+        {
+          "year": 2007,
+          "title": "Ukkari Pénélope"
+        },
+        {
+          "year": 2007,
+          "title": "Gurren Lagann"
+        },
+        {
+          "year": 2007,
+          "title": "Dennō Coil"
+        },
+        {
+          "year": 2007,
+          "title": "Franz Kafka's A Country Doctor"
+        },
+        {
+          "year": 2008,
+          "title": "Kaiba"
+        },
+        {
+          "year": 2008,
+          "title": "Dreams"
+        },
+        {
+          "year": 2008,
+          "title": "KUDAN"
+        },
+        {
+          "year": 2008,
+          "title": "A Child's Metaphysics'"
+        },
+        {
+          "year": 2009,
+          "title": "In the Attic"
+        },
+        {
+          "year": 2009,
+          "title": "Tokyo Magnitude 8.0"
+        },
+        {
+          "year": 2009,
+          "title": "The Cable Car"
+        },
+        {
+          "year": 2009,
+          "title": "ELEMI'"
+        },
+        {
+          "year": 2010,
+          "title": "Colorful"
+        },
+        {
+          "year": 2010,
+          "title": "Mai Mai Miracle"
+        },
+        {
+          "year": 2010,
+          "title": "Fumiko's Confession"
+        },
+        {
+          "year": 2010,
+          "title": "In a pig's eye"
+        },
+        {
+          "year": 2011,
+          "title": "Legend of the Millennium Dragon"
+        },
+        {
+          "year": 2011,
+          "title": "A Letter to Momo"
+        },
+        {
+          "year": 2011,
+          "title": "Muybridge's Strings"
+        },
+        {
+          "year": 2011,
+          "title": "Folksongs & Ballads"
+        },
+        {
+          "year": 2012,
+          "title": "Asura"
+        },
+        {
+          "year": 2012,
+          "title": "Wolf Children Ame and Yuki"
+        },
+        {
+          "year": 2012,
+          "title": "The Great Rabbit"
+        },
+        {
+          "year": 2012,
+          "title": "The Life of Budori Gusuko"
+        },
+        {
+          "year": 2013,
+          "title": "The Eccentric Family"
+        },
+        {
+          "year": 2013,
+          "title": "Golden Time"
+        },
+        {
+          "year": 2013,
+          "title": "Patema Inverted"
+        },
+        {
+          "year": 2013,
+          "title": "Evangelion: 3.33 You Can (Not) Redo"
+        },
+        {
+          "year": 2014,
+          "title": "Crayon Shin-chan: Serious Battle! Robot Dad Strikes Back"
+        },
+        {
+          "year": 2014,
+          "title": "Giovanni's Island"
+        },
+        {
+          "year": 2014,
+          "title": "Padre"
+        },
+        {
+          "year": 2014,
+          "title": "The Sense of Touch"
+        },
+        {
+          "year": 2015,
+          "title": "The Case of Hana & Alice"
+        },
+        {
+          "year": 2015,
+          "title": "Yùl and the Snake"
+        },
+        {
+          "year": 2015,
+          "title": "My Home"
+        },
+        {
+          "year": 2015,
+          "title": "Isand"
+        },
+        {
+          "year": 2017,
+          "title": "A Silent Voice"
+        },
+        {
+          "year": 2017,
+          "title": "Boy and the World"
+        },
+        {
+          "year": 2017,
+          "title": "A Love Story"
+        },
+        {
+          "year": 2017,
+          "title": "Among the black waves"
+        },
+        {
+          "year": 2018,
+          "title": "Harmonia feat. Makoto"
+        },
+        {
+          "year": 2018,
+          "title": "Cocolors"
+        },
+        {
+          "year": 2018,
+          "title": "Negative Space"
+        },
+        {
+          "year": 2019,
+          "title": "The Girl Without Hands"
+        },
+        {
+          "year": 2019,
+          "title": "Dragon Pilot: Hisone and Masotan"
+        },
+        {
+          "year": 2019,
+          "title": "Penguin Highway"
+        },
+        {
+          "year": 2019,
+          "title": "Okko's Inn"
+        },
+        {
+          "year": 2020,
+          "title": "A Japanese Boy Who Draws"
+        },
+        {
+          "year": 2020,
+          "title": "Gon, the Little Fox"
+        },
+        {
+          "year": 2020,
+          "title": "Long Way North"
+        },
+        {
+          "year": 2020,
+          "title": "Nettle Head"
+        },
+        {
+          "year": 2021,
+          "title": "Violet Evergarden: The Movie"
+        },
+        {
+          "year": 2021,
+          "title": "A Whisker Away"
+        },
+        {
+          "year": 2021,
+          "title": "Marona's Fantastic Tale"
+        },
+        {
+          "year": 2021,
+          "title": "Grey to Green"
+        },
+        {
+          "year": 2022,
+          "title": "Dozens of Norths"
+        },
+        {
+          "year": 2022,
+          "title": "Fortune Favors Lady Nikuko"
+        },
+        {
+          "year": 2022,
+          "title": "Letter to a Pig"
+        },
+        {
+          "year": 2022,
+          "title": "Sonny Boy"
+        }
+      ]
+    },
+    "new_face": {
+      "name": "New Face Award",
+      "winners": [
+        {
+          "year": 2012,
+          "title": "Futon"
+        },
+        {
+          "year": 2012,
+          "title": "Lupin III: The Woman Called Fujiko Mine"
+        },
+        {
+          "year": 2012,
+          "title": "Oh Willy"
+        },
+        {
+          "year": 2013,
+          "title": "YOKOSOBOKUDESU Selection"
+        },
+        {
+          "year": 2013,
+          "title": "Airy Me"
+        },
+        {
+          "year": 2013,
+          "title": "While the Crow Weeps"
+        },
+        {
+          "year": 2014,
+          "title": "My Milk Cup Cow"
+        },
+        {
+          "year": 2014,
+          "title": "Tamako Love Story"
+        },
+        {
+          "year": 2014,
+          "title": "Man on the Chair"
+        },
+        {
+          "year": 2015,
+          "title": "Deux Amis"
+        },
+        {
+          "year": 2015,
+          "title": "Chulyen, a Crow's tale"
+        },
+        {
+          "year": 2015,
+          "title": "Typhoon Noruda"
+        },
+        {
+          "year": 2017,
+          "title": "Moom"
+        },
+        {
+          "year": 2017,
+          "title": "Have Dreamed Of You So Much"
+        },
+        {
+          "year": 2017,
+          "title": "Rebellious"
+        },
+        {
+          "year": 2018,
+          "title": "The Great Passage"
+        },
+        {
+          "year": 2018,
+          "title": "The First Thunder"
+        },
+        {
+          "year": 2018,
+          "title": "Yin"
+        },
+        {
+          "year": 2019,
+          "title": "Invisible"
+        },
+        {
+          "year": 2019,
+          "title": "Am I a Wolf?"
+        },
+        {
+          "year": 2019,
+          "title": "The Little Ship"
+        },
+        {
+          "year": 2020,
+          "title": "Wandering Mouse"
+        },
+        {
+          "year": 2020,
+          "title": "Daughter"
+        },
+        {
+          "year": 2020,
+          "title": "Elephant in the Bath House"
+        },
+        {
+          "year": 2021,
+          "title": "The Man on the Shore"
+        },
+        {
+          "year": 2021,
+          "title": "The Mark of Emi"
+        },
+        {
+          "year": 2021,
+          "title": "À la mer poussèire"
+        },
+        {
+          "year": 2022,
+          "title": "Odd Taxi"
+        },
+        {
+          "year": 2022,
+          "title": "A Bite of Bone"
+        },
+        {
+          "year": 2022,
+          "title": "Yallah!"
+        }
+      ]
+    }
+  }
+}

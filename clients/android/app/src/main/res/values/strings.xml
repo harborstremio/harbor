@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_search_short">Search</string>
+    <string name="shortcut_search_long">Search titles</string>
+    <string name="shortcut_continue_short">Continue</string>
+    <string name="shortcut_continue_long">Continue watching</string>
+    <string name="shortcut_profiles_short">Profiles</string>
+    <string name="shortcut_profiles_long">Who\'s watching</string>
+</resources>

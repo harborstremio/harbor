@@ -1,0 +1,409 @@
+{
+  "id": "taaf",
+  "name": "Tokyo Anime Award Festival",
+  "shortName": "TAAF",
+  "wikipedia": "https://en.wikipedia.org/wiki/Tokyo_Anime_Award_Festival",
+  "updatedAt": "2026-05-24",
+  "categories": {
+    "anime_of_the_year": {
+      "name": "Animation of the Year",
+      "winners": [
+        {
+          "year": 2002,
+          "title": "Spirited Away"
+        },
+        {
+          "year": 2004,
+          "title": "Mobile Suit Gundam Seed"
+        },
+        {
+          "year": 2005,
+          "title": "Howl's Moving Castle"
+        },
+        {
+          "year": 2006,
+          "title": "Fullmetal Alchemist the Movie: Conqueror of Shamballa"
+        },
+        {
+          "year": 2007,
+          "title": "The Girl Who Leapt Through Time"
+        },
+        {
+          "year": 2008,
+          "title": "Evangelion: 1.0 You Are (Not) Alone"
+        },
+        {
+          "year": 2009,
+          "title": "Ponyo"
+        },
+        {
+          "year": 2010,
+          "title": "Summer Wars"
+        },
+        {
+          "year": 2011,
+          "title": "The Secret World of Arrietty"
+        },
+        {
+          "year": 2012,
+          "title": "From up on Poppy Hill"
+        },
+        {
+          "year": 2013,
+          "title": "Wolf Children"
+        },
+        {
+          "year": 2014,
+          "title": "The Wind Rises"
+        },
+        {
+          "year": 2015,
+          "title": "Frozen"
+        },
+        {
+          "year": 2016,
+          "title": "Love Live! The School Idol Movie"
+        },
+        {
+          "year": 2017,
+          "title": "A Silent Voice"
+        },
+        {
+          "year": 2018,
+          "title": "In This Corner of the World"
+        },
+        {
+          "year": 2019,
+          "title": "Detective Conan: Zero the Enforcer"
+        },
+        {
+          "year": 2020,
+          "title": "Weathering with You"
+        },
+        {
+          "year": 2021,
+          "title": "Violet Evergarden: The Movie"
+        },
+        {
+          "year": 2022,
+          "title": "Evangelion: 3.0+1.0 Thrice Upon a Time"
+        },
+        {
+          "year": 2023,
+          "title": "One Piece Film: Red"
+        },
+        {
+          "year": 2024,
+          "title": "The First Slam Dunk"
+        },
+        {
+          "year": 2025,
+          "title": "Look Back"
+        }
+      ]
+    },
+    "best_tv": {
+      "name": "Animation of the Year (TV)",
+      "winners": [
+        {
+          "year": 2002,
+          "title": "Inuyasha"
+        },
+        {
+          "year": 2003,
+          "title": "Hanada Shōnen-shi"
+        },
+        {
+          "year": 2004,
+          "title": "Astro Boy"
+        },
+        {
+          "year": 2005,
+          "title": "Gankutsuou: The Count of Monte Cristo"
+        },
+        {
+          "year": 2006,
+          "title": "Eureka Seven"
+        },
+        {
+          "year": 2007,
+          "title": "Code Geass: Lelouch of the Rebellion"
+        },
+        {
+          "year": 2008,
+          "title": "Dennō Coil"
+        },
+        {
+          "year": 2009,
+          "title": "Macross Frontier"
+        },
+        {
+          "year": 2010,
+          "title": "Eden of the East"
+        },
+        {
+          "year": 2011,
+          "title": "K-On!!"
+        },
+        {
+          "year": 2012,
+          "title": "Puella Magi Madoka Magica"
+        },
+        {
+          "year": 2013,
+          "title": "Kuroko's Basketball"
+        },
+        {
+          "year": 2014,
+          "title": "Space Brothers"
+        },
+        {
+          "year": 2015,
+          "title": "Yo-Kai Watch"
+        },
+        {
+          "year": 2016,
+          "title": "Shirobako"
+        },
+        {
+          "year": 2017,
+          "title": "Yuri!!! on Ice"
+        },
+        {
+          "year": 2018,
+          "title": "Kemono Friends"
+        },
+        {
+          "year": 2019,
+          "title": "Zombie Land Saga"
+        },
+        {
+          "year": 2020,
+          "title": "Demon Slayer: Kimetsu no Yaiba"
+        },
+        {
+          "year": 2021,
+          "title": "Keep Your Hands Off Eizouken!"
+        },
+        {
+          "year": 2022,
+          "title": "Jujutsu Kaisen"
+        },
+        {
+          "year": 2023,
+          "title": "Spy × Family"
+        },
+        {
+          "year": 2024,
+          "title": "Oshi no Ko"
+        },
+        {
+          "year": 2025,
+          "title": "Frieren: Beyond Journey's End"
+        }
+      ]
+    },
+    "best_film": {
+      "name": "Animation of the Year (Film)",
+      "winners": [
+        {
+          "year": 2002,
+          "title": "Princess Arete"
+        },
+        {
+          "year": 2003,
+          "title": "Millennium Actress"
+        },
+        {
+          "year": 2004,
+          "title": "Tokyo Godfathers"
+        },
+        {
+          "year": 2005,
+          "title": "Ghost in the Shell 2: Innocence"
+        },
+        {
+          "year": 2006,
+          "title": "Detective Conan: Strategy Above the Depths"
+        },
+        {
+          "year": 2007,
+          "title": "Paprika"
+        },
+        {
+          "year": 2008,
+          "title": "Summer Days with Coo"
+        },
+        {
+          "year": 2009,
+          "title": "Ponyo"
+        },
+        {
+          "year": 2010,
+          "title": "Summer Wars"
+        },
+        {
+          "year": 2011,
+          "title": "The Secret World of Arrietty"
+        },
+        {
+          "year": 2012,
+          "title": "From Up on Poppy Hill"
+        },
+        {
+          "year": 2013,
+          "title": "Wolf Children"
+        },
+        {
+          "year": 2014,
+          "title": "The Wind Rises"
+        },
+        {
+          "year": 2015,
+          "title": "Stand by Me Doraemon"
+        },
+        {
+          "year": 2016,
+          "title": "Love Live! The School Idol Movie"
+        },
+        {
+          "year": 2017,
+          "title": "A Silent Voice"
+        },
+        {
+          "year": 2018,
+          "title": "In This Corner of the World"
+        },
+        {
+          "year": 2019,
+          "title": "Detective Conan: Zero the Enforcer"
+        },
+        {
+          "year": 2020,
+          "title": "Weathering with You"
+        },
+        {
+          "year": 2021,
+          "title": "Violet Evergarden: The Movie"
+        },
+        {
+          "year": 2022,
+          "title": "Evangelion: 3.0+1.0 Thrice Upon a Time"
+        },
+        {
+          "year": 2023,
+          "title": "One Piece Film: Red"
+        },
+        {
+          "year": 2024,
+          "title": "The First Slam Dunk"
+        },
+        {
+          "year": 2025,
+          "title": "Look Back"
+        }
+      ]
+    },
+    "best_ova": {
+      "name": "Animation of the Year (OVA)",
+      "winners": [
+        {
+          "year": 2002,
+          "title": "Animation Runner Kuromi"
+        },
+        {
+          "year": 2003,
+          "title": "Sentō Yōsei Yukikaze"
+        },
+        {
+          "year": 2004,
+          "title": "The Animatrix"
+        },
+        {
+          "year": 2005,
+          "title": "Animation Runner Kuromi 2"
+        },
+        {
+          "year": 2006,
+          "title": "Karas"
+        },
+        {
+          "year": 2007,
+          "title": "Diebuster"
+        },
+        {
+          "year": 2008,
+          "title": "Nasu: A Migratory Bird with Suitcase"
+        },
+        {
+          "year": 2009,
+          "title": "Detroit Metal City"
+        },
+        {
+          "year": 2010,
+          "title": "Time of Eve"
+        },
+        {
+          "year": 2011,
+          "title": "Mobile Suit Gundam Unicorn"
+        },
+        {
+          "year": 2012,
+          "title": "Mobile Suit Gundam Unicorn"
+        },
+        {
+          "year": 2013,
+          "title": "The Adventures of Tintin: The Secret of the Unicorn"
+        },
+        {
+          "year": 2014,
+          "title": "Tetsurō Araki"
+        },
+        {
+          "year": 2015,
+          "title": "Isao Takahata"
+        },
+        {
+          "year": 2016,
+          "title": "Yōichi Fujita"
+        },
+        {
+          "year": 2017,
+          "title": "Makoto Shinkai"
+        },
+        {
+          "year": 2018,
+          "title": "Tatsuki"
+        },
+        {
+          "year": 2019,
+          "title": "Yoshiaki Kyōgoku"
+        },
+        {
+          "year": 2020,
+          "title": "Makoto Shinkai"
+        },
+        {
+          "year": 2021,
+          "title": "Haruo Sotozaki"
+        },
+        {
+          "year": 2022,
+          "title": "Hideaki Anno"
+        },
+        {
+          "year": 2023,
+          "title": "Gorō Taniguchi"
+        },
+        {
+          "year": 2024,
+          "title": "Takehiko Inoue"
+        },
+        {
+          "year": 2025,
+          "title": "Kiyotaka Oshiyama"
+        }
+      ]
+    }
+  }
+}

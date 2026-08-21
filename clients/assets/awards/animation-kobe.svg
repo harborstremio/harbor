@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" 
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="300" height="300" viewBox="-6 -10 12 12" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+  <desc>Emblem of Kobe, Hyogo</desc>
+  <path id="a" d="M1,0 a4 4 0 0,0 0,-8" fill="none" stroke-width="2" stroke="#207130" transform="rotate(-45)" />
+  <use xlink:href="#a" transform="scale(-1,1)" />
+</svg>

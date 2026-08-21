@@ -1,0 +1,67 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code (keep shared launch configs, ignore the rest)
+.vscode/*
+!.vscode/launch.json
+
+# Flutter / Dart / Pub
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/build/
+**/doc/api/
+# NOTE: pubspec.lock IS committed — this is an application, not a package.
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+android/.gradle/
+android/.cxx/
+android/captures/
+android/local.properties
+android/key.properties
+android/app/upload-keystore.jks
+*.keystore
+*.jks
+
+# iOS / tvOS
+**/ios/Flutter/.last_build_id
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Runner/GeneratedPluginRegistrant.*
+**/DerivedData/
+*.mobileprovision
+*.p12
+*.cer
+
+# Secrets / environment
+.env
+.env.*
+*.pem
