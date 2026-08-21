@@ -83,7 +83,13 @@ async function enrichHarborImdb(episodes: KitsuEpisode[], imdbId: string | null)
   for (const ep of episodes) {
     const season = ep.imdbSeason ?? ep.seasonNumber ?? 1;
     const num = ep.imdbEpisode ?? ep.number;
-    const real = map.get(`${season}:${num}`);
+    let real = map.get(`${season}:${num}`);
+    if (real == null) {
+      const abs = ep.absoluteNumber ?? ep.number;
+      if (abs != null) {
+        real = map.get(`1:${abs}`) ?? map.get(`0:${abs}`);
+      }
+    }
     if (real != null && real > 0) {
       ep.rating = real;
       ep.ratingIsImdb = true;
