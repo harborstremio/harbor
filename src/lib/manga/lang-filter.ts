@@ -41,7 +41,16 @@ export function subscribeMangaLangFilter(cb: () => void): () => void {
   };
 }
 
+const AGNOSTIC_LANGS = new Set(["multi", "all"]);
+
+export function isAgnosticLang(lang?: string): boolean {
+  return !!lang && AGNOSTIC_LANGS.has(lang.toLowerCase());
+}
+
 export function langFilterMatches(filter: string[], lang?: string): boolean {
   if (filter.includes(ALL_LANGS)) return true;
-  return !!lang && filter.includes(lang);
+  if (!lang) return false;
+  const normalized = lang.toLowerCase();
+  if (AGNOSTIC_LANGS.has(normalized)) return true;
+  return filter.some((f) => f.toLowerCase() === normalized);
 }

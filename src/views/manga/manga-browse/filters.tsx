@@ -139,17 +139,20 @@ export function TagDropdown({
 
   useEffect(() => {
     let alive = true;
-    const load = () => {
+    const load = (opts?: { clear?: boolean }) => {
+      if (opts?.clear && alive) setTags([]);
       mangaTags()
         .then((list) => {
           if (alive) setTags(list);
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.warn("[manga] extension list refresh failed", err);
+        });
     };
     load();
-    const unsubSources = subscribeSuwayomiSourcesChanged(load);
-    const unsubLibrary = subscribeMangaLibraryChanged(load);
-    const unsubLang = subscribeMangaLangFilter(load);
+    const unsubSources = subscribeSuwayomiSourcesChanged(() => load());
+    const unsubLibrary = subscribeMangaLibraryChanged(() => load());
+    const unsubLang = subscribeMangaLangFilter(() => load({ clear: true }));
     return () => {
       alive = false;
       unsubSources();

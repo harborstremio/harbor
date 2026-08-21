@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, Languages } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { activeMangaSource } from "@/lib/manga/sources";
-import { languageFlag, languageName } from "@/lib/manga/types";
+import { languageName } from "@/lib/manga/types";
 import {
   ALL_LANGS,
   cachedSuwayomiSources,
+  isAgnosticLang,
   loadMangaLangFilter,
   saveMangaLangFilter,
   subscribeMangaLangFilter,
@@ -81,7 +82,9 @@ export function LanguageDropdown() {
       .then((list) => {
         if (!alive) return;
         const unique = new Set<string>();
-        for (const s of list) if (s.lang) unique.add(s.lang);
+        for (const s of list) {
+          if (s.lang && !isAgnosticLang(s.lang)) unique.add(s.lang);
+        }
         setLangs([...unique].sort((a, b) => languageName(a).localeCompare(languageName(b))));
       })
       .catch(() => {
@@ -95,19 +98,18 @@ export function LanguageDropdown() {
   const isAll = filter.includes(ALL_LANGS);
   const summary = isAll
     ? t("All")
-    : filter
-        .map((c) => c.toUpperCase())
-        .slice(0, 3)
-        .join(", ") + (filter.length > 3 ? "…" : "");
+    : t("{n} selected", { n: filter.length });
 
   const rows = useMemo(
     () =>
-      (langs ?? []).map((code) => ({
-        code,
-        name: languageName(code),
-        flag: languageFlag(code),
-        checked: !isAll && filter.includes(code),
-      })),
+      (langs ?? [])
+        .map((code) => ({
+          code,
+          badge: code.split(/[-_]/)[0].toUpperCase(),
+          name: languageName(code),
+          checked: !isAll && filter.includes(code),
+        }))
+        .sort((a, b) => Number(b.checked) - Number(a.checked) || a.name.localeCompare(b.name)),
     [langs, filter, isAll],
   );
 
@@ -164,7 +166,12 @@ export function LanguageDropdown() {
               className="flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-[13px] text-ink hover:bg-elevated/60"
             >
               <span className="flex min-w-0 items-center gap-2">
-                <span aria-hidden>{row.flag}</span>
+                <span
+                  aria-hidden
+                  className="w-7 shrink-0 text-center text-[10px] font-bold tracking-wide text-white"
+                >
+                  {row.badge}
+                </span>
                 <span className="truncate">{row.name}</span>
               </span>
               {row.checked && <Check size={14} className="text-accent" />}

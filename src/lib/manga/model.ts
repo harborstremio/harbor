@@ -55,8 +55,22 @@ export const LANGUAGE_NAMES: Record<string, string> = {
   fil: "Filipino",
 };
 
+let displayNames: Intl.DisplayNames | null = null;
+function icuLanguageName(code: string): string | null {
+  try {
+    displayNames ??= new Intl.DisplayNames(["en"], { type: "language" });
+    const name = displayNames.of(code.toLowerCase());
+    if (name && name.toLowerCase() !== code.toLowerCase()) return name;
+  } catch {
+    /* malformed code — fall through */
+  }
+  return null;
+}
+
+
 export function languageName(code: string): string {
-  return LANGUAGE_NAMES[code] ?? code.toUpperCase();
+  const key = code.toLowerCase();
+  return LANGUAGE_NAMES[key] ?? icuLanguageName(code) ?? code.toUpperCase();
 }
 
 const LANGUAGE_FLAGS: Record<string, string> = {
@@ -113,7 +127,7 @@ const LANGUAGE_FLAGS: Record<string, string> = {
 };
 
 export function languageFlag(code: string): string {
-  return LANGUAGE_FLAGS[code] ?? "🏳️";
+  return LANGUAGE_FLAGS[code.toLowerCase()] ?? "🏳️";
 }
 
 export function chapterLanguages(chapters: MangaChapter[]): Array<{ code: string; count: number }> {
