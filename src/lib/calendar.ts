@@ -15,12 +15,14 @@ export type CalendarItem = {
   background: string | null;
   releaseDate: string;
   releaseTime?: string;
+  releaseAtMs?: number;
   isAnime: boolean;
   overview: string;
   voteAverage: number;
 };
 
 export type CalendarFilter = "all" | "movie" | "tv" | "anime";
+export type CalendarPosterSize = "default" | "large";
 
 const POSTER = (path: string | null | undefined) => (path ? `${IMG}/w342${path}` : null);
 const BACKDROP = (path: string | null | undefined) => (path ? `${IMG}/w780${path}` : null);

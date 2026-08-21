@@ -1,4 +1,4 @@
-import type { CalendarFilter, CalendarItem } from "@/lib/calendar";
+import { type CalendarFilter, type CalendarItem, type CalendarPosterSize } from "@/lib/calendar";
 import { type LibraryItem } from "@/lib/stremio";
 import type { Meta } from "@/lib/cinemeta";
 import type { Cell } from "./types";
@@ -21,6 +21,15 @@ export const FILTERS: Array<{ id: CalendarFilter; label: string }> = [
   { id: "tv", label: "TV" },
   { id: "anime", label: "Anime" },
 ];
+
+export const CALENDAR_POSTER_SIZES: Array<{ value: CalendarPosterSize; label: string }> = [
+  { value: "default", label: "Default" },
+  { value: "large", label: "Large" },
+];
+
+export function isUpcoming(item: CalendarItem): boolean {
+  return item.releaseAtMs != null && item.releaseAtMs > Date.now();
+}
 
 export function calendarToMeta(item: CalendarItem): Meta {
   return {

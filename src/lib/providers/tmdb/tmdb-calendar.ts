@@ -68,6 +68,11 @@ type SeasonDetail = {
   }>;
 };
 
+export async function tmdbTvPoster(key: string, tvId: number): Promise<string | null> {
+  const tv = await get<TvDetail>(key, `tv/${tvId}`);
+  return tv ? poster(tv.poster_path) : null;
+}
+
 export async function tmdbTvUpcoming(
   key: string,
   tvId: number,

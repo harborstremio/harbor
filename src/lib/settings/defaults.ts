@@ -474,6 +474,7 @@ export const DEFAULT: Settings = {
   simklScrobbleEnabled: true,
   simklAnimeTitleLanguage: "english",
   weekStartsMonday: false,
+  calendarPosterSize: "default",
   customCalendar: {
     trackedPeople: [],
     includeTraktWatchlist: false,

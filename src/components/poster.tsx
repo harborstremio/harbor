@@ -248,11 +248,17 @@ export function Poster({
     if (!inView || qMult === 0) return;
     const el = rootRef.current;
     if (!el) return;
-    const box = el.getBoundingClientRect();
-    if (box.width <= 0) return;
-    const need = Math.max(box.width, box.height * RATIO_AR[ratio]);
-    const t = Math.ceil(need * (window.devicePixelRatio || 1) * qMult);
-    setTargetPx((prev) => (t > prev ? t : prev));
+    const measure = () => {
+      const box = el.getBoundingClientRect();
+      if (box.width <= 0) return;
+      const need = Math.max(box.width, box.height * RATIO_AR[ratio]);
+      const t = Math.ceil(need * (window.devicePixelRatio || 1) * qMult);
+      setTargetPx((prev) => (t > prev ? t : prev));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [inView, qMult, ratio]);
   const rawCandidates = [src, ...(fallbacks ?? [])].filter((u): u is string => !!u);
   const candidates =

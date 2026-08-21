@@ -1,3 +1,4 @@
+import type { CalendarPosterSize } from "@/lib/calendar";
 import type { ThemeSettings } from "@/lib/theme";
 import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
@@ -541,6 +542,7 @@ export type Settings = {
   simklScrobbleEnabled: boolean;
   simklAnimeTitleLanguage: "english" | "romaji" | "native";
   weekStartsMonday: boolean;
+  calendarPosterSize: CalendarPosterSize;
   customCalendar: {
     trackedPeople: Array<{
       id: number;

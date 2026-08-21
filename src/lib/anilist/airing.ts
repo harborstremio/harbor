@@ -1,4 +1,5 @@
 import type { CalendarItem } from "@/lib/calendar";
+import { toLocalDateISO, toLocalTimeLabel } from "@/lib/calendar-time";
 import { anilistRequest } from "./client";
 
 const AIRING_QUERY = `query ($start: Int, $end: Int, $page: Int) {
@@ -58,22 +59,6 @@ const CONCURRENCY = 3;
 
 function pad(n: number): string {
   return String(n).padStart(2, "0");
-}
-
-function toLocalISO(epochSeconds: number): string {
-  const d = new Date(epochSeconds * 1000);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function toLocalTime(epochSeconds: number): string {
-  const d = new Date(epochSeconds * 1000);
-  const hour = d.getHours();
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  const period = hour >= 12 ? "PM" : "AM";
-  return `${hour12}:${pad(d.getMinutes())} ${period}`;
 }
 
 function stripHtml(s: string): string {
@@ -144,6 +129,7 @@ export async function fetchAniListAiringCalendar(
       const id = `${baseId}:1:${node.episode}`;
       if (seen.has(id)) continue;
       seen.add(id);
+      const airMs = node.airingAt * 1000;
       out.push({
         id,
         imdbId: null,
@@ -151,8 +137,9 @@ export async function fetchAniListAiringCalendar(
         name: `${title} S1E${pad(node.episode)}`,
         poster: media.coverImage?.extraLarge ?? media.coverImage?.large ?? null,
         background: media.bannerImage ?? null,
-        releaseDate: toLocalISO(node.airingAt),
-        releaseTime: toLocalTime(node.airingAt),
+        releaseDate: toLocalDateISO(new Date(airMs)),
+        releaseTime: toLocalTimeLabel(new Date(airMs)),
+        releaseAtMs: airMs,
         isAnime: true,
         overview: media.description ? stripHtml(media.description) : "",
         voteAverage: media.averageScore != null ? media.averageScore / 10 : 0,

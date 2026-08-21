@@ -6,10 +6,12 @@ import { tvmazeUpcoming } from "./providers/tvmaze";
 import {
   tmdbFindByImdb,
   tmdbMovieRelease,
+  tmdbTvPoster,
   tmdbTvUpcoming,
 } from "./providers/tmdb/tmdb-calendar";
 import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, pickEpisodeTitle } from "./providers/anizip";
 import type { CalendarItem } from "./calendar";
+import { localDateTimeFromIso } from "./calendar-time";
 
 const SERIES_LIMIT = 80;
 const MOVIE_LIMIT = 80;
@@ -31,6 +33,8 @@ type ResolvedEpisode = {
   number: number;
   name: string;
   airDate: string;
+  releaseTime?: string;
+  releaseAtMs?: number;
   image: string | null;
   overview: string;
   voteAverage: number;
@@ -97,6 +101,7 @@ function animeNumericId(id: string): number | null {
 async function animeUpcoming(
   id: string,
   inWindow: (date: string) => boolean,
+  tmdbKey: string,
 ): Promise<ResolvedSeries | null> {
   const numId = animeNumericId(id);
   if (numId == null) return null;
@@ -108,21 +113,32 @@ async function animeUpcoming(
   if (!mapping?.episodes) return null;
   const episodes: ResolvedEpisode[] = [];
   for (const [k, ep] of Object.entries(mapping.episodes)) {
-    const date = (ep.airDate ?? ep.airDateUtc ?? "").slice(0, 10);
+    const { date, time, atMs } = localDateTimeFromIso(ep.airDate ?? ep.airDateUtc);
     if (!date || !inWindow(date)) continue;
     episodes.push({
       season: ep.seasonNumber ?? 1,
       number: ep.episodeNumber ?? (Number(k) || 0),
       name: pickEpisodeTitle(ep) ?? "",
       airDate: date,
+      releaseTime: time,
+      releaseAtMs: atMs,
       image: ep.image ?? null,
       overview: ep.overview ?? "",
       voteAverage: 0,
     });
   }
+  // AniZip has no series-poster field, only small per-episode stills, so the
+  // per-episode images are frequently low-resolution. Resolve a proper poster
+  // via the TMDB cross-reference AniZip already supplies, when available.
+  let poster: string | null = null;
+  const tmdbId = mapping.mappings?.themoviedb_id;
+  const numTmdbId = typeof tmdbId === "string" ? Number(tmdbId) : tmdbId;
+  if (tmdbKey && numTmdbId != null && Number.isFinite(numTmdbId)) {
+    poster = await tmdbTvPoster(tmdbKey, numTmdbId).catch(() => null);
+  }
   return {
     name: mapping.titles?.en ?? mapping.titles?.["x-jat"] ?? "",
-    poster: null,
+    poster,
     isAnime: true,
     episodes,
   };
@@ -150,7 +166,7 @@ async function cinemetaSeriesUpcoming(
   if (!m?.videos) return null;
   const episodes: ResolvedEpisode[] = [];
   for (const v of m.videos) {
-    const date = (v.released ?? v.firstAired ?? "").slice(0, 10);
+    const { date, time, atMs } = localDateTimeFromIso(v.released ?? v.firstAired);
     if (!date || !inWindow(date)) continue;
     const number = v.episode ?? v.number;
     if (number == null) continue;
@@ -159,6 +175,8 @@ async function cinemetaSeriesUpcoming(
       number,
       name: v.name ?? v.title ?? "",
       airDate: date,
+      releaseTime: time,
+      releaseAtMs: atMs,
       image: v.thumbnail ?? null,
       overview: "",
       voteAverage: 0,
@@ -173,7 +191,7 @@ async function seriesUpcoming(
   inWindow: (date: string) => boolean,
   tmdbKey: string,
 ): Promise<ResolvedSeries | null> {
-  if (isAnimeId(c.id)) return animeUpcoming(c.id, inWindow);
+  if (isAnimeId(c.id)) return animeUpcoming(c.id, inWindow, tmdbKey);
   if (c.id.startsWith("tt")) {
     const cm = await cinemetaSeriesUpcoming(c.id, inWindow);
     if (cm) return cm;
@@ -370,9 +388,11 @@ export async function resolveSavedCalendar(
         imdbId: c.id.startsWith("tt") ? c.id.split(":")[0] : null,
         type: "tv",
         name: ep.name ? `${showName} ${epLabel}: ${ep.name}` : `${showName} ${epLabel}`,
-        poster: ep.image ?? r.poster ?? null,
+        poster: r.isAnime ? (r.poster ?? ep.image ?? null) : (ep.image ?? r.poster ?? null),
         background: null,
         releaseDate: ep.airDate,
+        releaseTime: ep.releaseTime,
+        releaseAtMs: ep.releaseAtMs,
         isAnime: r.isAnime,
         overview: ep.overview,
         voteAverage: ep.voteAverage,

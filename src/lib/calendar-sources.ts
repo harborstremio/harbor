@@ -6,6 +6,7 @@ import {
   fetchUpcomingMovies,
 } from "./trakt/calendar";
 import type { CalendarItem } from "./calendar";
+import { localDateTimeFromIso } from "./calendar-time";
 import { resolveSavedCalendar, type SavedCandidate } from "./calendar-library";
 import { fetchWatchlist as fetchSimklWatchlist, fetchWatchingItems } from "./simkl/watchlist";
 import { fetchSimklCdnCalendar } from "./simkl/calendar";
@@ -103,9 +104,8 @@ async function mapDubFeedToCalendar(year: number, month: number): Promise<Calend
     if (!media) continue;
     if (media.isAdult) continue;
     if (media.format === "MOVIE" || e.episodeNumber == null) continue;
-    const dateISO = e.episodeDate ? toLocalISO(e.episodeDate) : "";
+    const { date: dateISO, time, atMs } = localDateTimeFromIso(e.episodeDate);
     if (!inMonth(dateISO, year, month)) continue;
-    const time = e.episodeDate ? toLocalTime(e.episodeDate) : "";
     const title =
       media.title?.english?.trim() ||
       media.title?.romaji?.trim() ||
@@ -124,7 +124,8 @@ async function mapDubFeedToCalendar(year: number, month: number): Promise<Calend
       poster: media.coverImage?.extraLarge ?? media.coverImage?.medium ?? null,
       background: media.bannerImage ?? null,
       releaseDate: dateISO,
-      releaseTime: time || undefined,
+      releaseTime: time,
+      releaseAtMs: atMs,
       isAnime: true,
       overview: "",
       voteAverage: 0,
@@ -132,24 +133,6 @@ async function mapDubFeedToCalendar(year: number, month: number): Promise<Calend
   }
   out.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
   return out;
-}
-
-function toLocalISO(isoDateTime: string): string {
-  const d = new Date(isoDateTime);
-  if (Number.isNaN(d.getTime())) return "";
-  const y = d.getFullYear();
-  const m = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  return `${y}-${m}-${day}`;
-}
-
-function toLocalTime(isoDateTime: string): string {
-  const d = new Date(isoDateTime);
-  if (Number.isNaN(d.getTime())) return "";
-  const hour = d.getHours();
-  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-  const period = hour >= 12 ? "PM" : "AM";
-  return `${hour12}:${pad(d.getMinutes())} ${period}`;
 }
 
 export async function fetchSimklCalendar(
@@ -226,11 +209,19 @@ export async function fetchTraktCalendar(
     fetchUpcomingMovies(days),
   ]);
 
-  const epsInMonth = eps.filter((ep) => inMonth((ep.airDate ?? "").slice(0, 10), year, month));
-  const mvsInMonth = mvs.filter((m) => inMonth((m.contextDate ?? "").slice(0, 10), year, month));
+  const epsInMonth = eps
+    .map((ep) => ({ ep, ...localDateTimeFromIso(ep.airDate) }))
+    .filter((x) => inMonth(x.date, year, month));
+  const mvsInMonth = mvs
+    .map((m) => ({ m, ...localDateTimeFromIso(m.contextDate) }))
+    .filter((x) => inMonth(x.date, year, month));
 
-  const showIds = [...new Set(epsInMonth.map((e) => e.ids.imdb).filter((x): x is string => !!x))];
-  const movieIds = [...new Set(mvsInMonth.map((m) => m.ids.imdb).filter((x): x is string => !!x))];
+  const showIds = [
+    ...new Set(epsInMonth.map((x) => x.ep.ids.imdb).filter((x): x is string => !!x)),
+  ];
+  const movieIds = [
+    ...new Set(mvsInMonth.map((x) => x.m.ids.imdb).filter((x): x is string => !!x)),
+  ];
   const [showMetas, movieMetas] = await Promise.all([
     Promise.all(showIds.map((id) => cinemetaMeta("series", id).catch(() => null))),
     Promise.all(movieIds.map((id) => cinemetaMeta("movie", id).catch(() => null))),
@@ -239,8 +230,7 @@ export async function fetchTraktCalendar(
   const movieMeta = new Map(movieIds.map((id, i) => [id, movieMetas[i]] as const));
 
   const out: CalendarItem[] = [];
-  for (const ep of epsInMonth) {
-    const date = (ep.airDate ?? "").slice(0, 10);
+  for (const { ep, date, time, atMs } of epsInMonth) {
     const imdb = ep.ids.imdb ?? null;
     const meta = imdb ? showMeta.get(imdb) ?? null : null;
     const baseId = imdb ?? `trakt:${ep.ids.tmdb ?? ep.ids.tvdb ?? ep.title}`;
@@ -258,13 +248,14 @@ export async function fetchTraktCalendar(
       poster: vid?.thumbnail ?? meta?.poster ?? null,
       background: meta?.background ?? null,
       releaseDate: date,
+      releaseTime: time,
+      releaseAtMs: atMs,
       isAnime: isAnimationGenre(meta?.genres),
       overview: meta?.description ?? "",
       voteAverage: parseFloat(meta?.imdbRating ?? "0") || 0,
     });
   }
-  for (const m of mvsInMonth) {
-    const date = (m.contextDate ?? "").slice(0, 10);
+  for (const { m, date, time, atMs } of mvsInMonth) {
     const imdb = m.ids.imdb ?? null;
     const meta = imdb ? movieMeta.get(imdb) ?? null : null;
     const id = imdb ?? `trakt:${m.ids.tmdb ?? m.title}`;
@@ -276,6 +267,8 @@ export async function fetchTraktCalendar(
       poster: meta?.poster ?? null,
       background: meta?.background ?? null,
       releaseDate: date,
+      releaseTime: time,
+      releaseAtMs: atMs,
       isAnime: isAnimationGenre(meta?.genres),
       overview: meta?.description ?? "",
       voteAverage: parseFloat(meta?.imdbRating ?? "0") || 0,

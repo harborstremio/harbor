@@ -28,6 +28,7 @@ import { SourceSwitcher } from "./calendar/source-switcher";
 import {
   buildLibraryNameSet,
   buildMonthCells,
+  CALENDAR_POSTER_SIZES,
   calendarEpisodeHint,
   calendarToMeta,
   FILTERS,
@@ -296,6 +297,25 @@ export function CalendarView() {
           >
             {t("Start week on Monday")}
           </button>
+          <div className="flex items-center gap-1 rounded-full border border-edge-soft bg-elevated/30 p-1">
+            {CALENDAR_POSTER_SIZES.map(({ value, label }) => {
+              const active = settings.calendarPosterSize === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => update({ calendarPosterSize: value })}
+                  aria-pressed={active}
+                  className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
+                    active
+                      ? "bg-ink text-canvas"
+                      : "text-ink-muted hover:bg-raised/60 hover:text-ink"
+                  }`}
+                >
+                  {t(label)}
+                </button>
+              );
+            })}
+          </div>
           {source === "custom" && railOverlay && (
             <button
               type="button"

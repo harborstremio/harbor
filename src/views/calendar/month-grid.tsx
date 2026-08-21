@@ -22,6 +22,7 @@ export function MonthGrid({
   hideTypeTag: boolean;
 }) {
   const t = useT();
+  const cap = 2;
   const weekdays = orderedWeekdayNames(weekStartsMonday);
   return (
     <div className="flex flex-col gap-2">
@@ -42,7 +43,7 @@ export function MonthGrid({
           return (
             <div
               key={cell.iso}
-              className={`flex min-h-[112px] flex-col gap-1.5 rounded-xl border p-2 transition-colors ${
+              className={`flex min-h-[136px] flex-col gap-1.5 rounded-xl border p-2 transition-colors ${
                 cell.inMonth
                   ? isToday
                     ? "border-ink/60 bg-elevated/40"
@@ -65,7 +66,7 @@ export function MonthGrid({
                 )}
               </div>
               <div className="flex min-h-0 flex-col gap-1.5">
-                {events.slice(0, 3).map((item) => (
+                {events.slice(0, cap).map((item) => (
                   <CalendarChip
                     key={item.id}
                     item={item}
@@ -73,12 +74,12 @@ export function MonthGrid({
                     hideTypeTag={hideTypeTag}
                   />
                 ))}
-                {events.length > 3 && (
+                {events.length > cap && (
                   <button
                     onClick={() => onOpenDay(cell.iso)}
                     className="self-start rounded px-1 text-start text-[11px] text-ink-subtle transition-colors hover:text-ink"
                   >
-                    {t("+{n} more", { n: events.length - 3 })}
+                    {t("+{n} more", { n: events.length - cap })}
                   </button>
                 )}
               </div>
