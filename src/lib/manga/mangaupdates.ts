@@ -228,3 +228,22 @@ export async function mangaUpdatesFor(title?: string): Promise<MangaUpdatesInfo 
     return null;
   }
 }
+
+export async function mangaUpdatesTop(limit = 30): Promise<MangaUpdatesInfo[]> {
+  const res = await gate(() =>
+    safeFetch(`${BASE}/series/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderby: "rating",
+        order: "desc",
+        perpage: Math.min(limit, 100),
+      }),
+    }),
+  );
+  if (!res.ok) return [];
+  const j = (await res.json()) as { results?: SearchHit[] };
+  return (j.results ?? [])
+    .map((h) => (h.record ? toInfo(h.record) : null))
+    .filter((i): i is MangaUpdatesInfo => !!i);
+}

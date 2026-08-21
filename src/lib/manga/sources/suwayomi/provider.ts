@@ -108,8 +108,46 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
       .filter((m): m is MangaSummary => !!m);
   }
 
+  let popularCache: { key: string; at: number; items: MangaSummary[] } | null = null;
+  const POPULAR_CACHE_TTL = 5 * 60_000;
+
+  async function mergedPopular(): Promise<MangaSummary[]> {
+    const filter = loadMangaLangFilter();
+    const cacheKey = `${server.base}|${[...filter].sort().join("+")}`;
+    if (popularCache && popularCache.key === cacheKey && Date.now() - popularCache.at < POPULAR_CACHE_TTL) {
+      return popularCache.items;
+    }
+    const t = await pickTransport(client);
+    const sources = (await loadSources(client, t)).filter((s) => langFilterMatches(filter, s.lang));
+    if (sources.length === 0) {
+      popularCache = { key: cacheKey, at: Date.now(), items: [] };
+      return [];
+    }
+    const seen = new Set<string>();
+    const out: MangaSummary[] = [];
+    let next = 0;
+    const worker = async () => {
+      while (next < sources.length) {
+        const source = sources[next++];
+        try {
+          const items = await browse(source.id, "popular", 0, "");
+          for (const m of items) {
+            if (seen.has(m.id)) continue;
+            seen.add(m.id);
+            out.push(m);
+          }
+        } catch {
+          /* skip source that fails to return popular */
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(4, sources.length) }, () => worker()));
+    popularCache = { key: cacheKey, at: Date.now(), items: out };
+    return out;
+  }
+
   async function popular(offset: number, tagId?: string): Promise<MangaSummary[]> {
-    if (!tagId) return offset > 0 ? [] : library();
+    if (!tagId) return offset > 0 ? [] : mergedPopular();
     return browse(tagId, "popular", offset, "");
   }
 
