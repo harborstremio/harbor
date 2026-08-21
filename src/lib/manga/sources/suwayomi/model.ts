@@ -156,6 +156,18 @@ export function encodeMangaId(sourceId: string, mangaId: string): string {
   return `${sourceId}${DELIM}${mangaId}`;
 }
 
+export function toDateIso(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value === "number" && Number.isFinite(value)) return new Date(value).toISOString();
+  const raw = String(value).trim();
+  if (/^\d+$/.test(raw)) {
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? new Date(n).toISOString() : undefined;
+  }
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed.toISOString();
+}
+
 export function decodeMangaId(id: string): { sourceId: string; mangaId: string } | null {
   const at = id.indexOf(DELIM);
   if (at < 0) return null;

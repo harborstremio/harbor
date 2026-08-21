@@ -1,6 +1,7 @@
 import {
   imageUrl,
   isDigits,
+  toDateIso,
   type BrowseKind,
   type SuwayomiClient,
   type SuwayomiExtension,
@@ -129,7 +130,7 @@ function mapGqlChapters(chapters: any[]): RestChapter[] {
         chapterNumber: Number.isFinite(cn) && cn >= 0 ? cn : null,
         name: ch.name || undefined,
         scanlator: ch.scanlator || undefined,
-        uploadDate: ch.uploadDate != null ? String(ch.uploadDate) : undefined,
+        uploadDate: toDateIso(ch.uploadDate),
         pageCount: Number.isFinite(pc) && pc >= 0 ? pc : 0,
         downloaded: !!ch.isDownloaded,
         isRead: ch.isRead === true,
