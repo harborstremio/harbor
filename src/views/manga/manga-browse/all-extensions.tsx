@@ -21,7 +21,7 @@ import {
 } from "./langs";
 import { MangaCard } from "./manga-card";
 
-function sourceDisplayName(source: SuwayomiSource): string {
+export function sourceDisplayName(source: SuwayomiSource): string {
   return source.lang && source.lang !== "en"
     ? `${source.name} (${source.lang.toUpperCase()})`
     : source.name;

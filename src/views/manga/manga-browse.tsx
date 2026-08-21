@@ -1,6 +1,7 @@
-import { BookCheck, Clock3, Loader2, Search, Sparkles } from "lucide-react";
+import { BookCheck, ChevronDown, Clock3, Loader2, Search, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { Row } from "@/components/row";
 import {
   MANGA_PAGE,
   popularManga,
@@ -13,15 +14,24 @@ import { useMangaFavorites } from "@/lib/manga-favorites";
 import { activeMangaSource, activeMangaSourceId, subscribeMangaSources } from "@/lib/manga/sources";
 import { FAVORITES, ManageServersButton, SourceDropdown, TagDropdown } from "./manga-browse/filters";
 import { BrowseEmpty, BrowseError, SkeletonGrid } from "./manga-browse/states";
-import { AllExtensionsView } from "./manga-browse/all-extensions";
+import { AllExtensionsView, sourceDisplayName } from "./manga-browse/all-extensions";
 import { LanguageDropdown } from "./manga-browse/language-dropdown";
 import { MangaCard } from "./manga-browse/manga-card";
+import {
+  cachedSuwayomiSources,
+  langFilterMatches,
+  loadMangaLangFilter,
+  subscribeMangaLangFilter,
+} from "./manga-browse/langs";
+import { searchExtensions } from "./manga-browse/extensions-search";
 
 type Status = "loading" | "ready" | "error";
 type SortMode = "latest" | "new" | "chapters";
 type StatusFilter = "all" | "completed" | "ongoing";
 
 const GRID = "repeat(auto-fill, minmax(150px, 1fr))";
+
+type SearchResultGroup = { sourceId: string; name: string; items: MangaSummary[] };
 
 export function MangaBrowse({
   onOpen,
@@ -37,6 +47,7 @@ export function MangaBrowse({
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const { items: favItems } = useMangaFavorites();
   const [items, setItems] = useState<MangaSummary[]>([]);
+  const [searchGroups, setSearchGroups] = useState<SearchResultGroup[]>([]);
   const [status, setStatus] = useState<Status>("loading");
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -72,6 +83,16 @@ export function MangaBrowse({
   const sourceRef = useRef(activeMangaSourceId());
   const activeSource = activeMangaSource();
   const allExtensionsMode = tagId === "" && !query.trim() && activeSource?.kind === "suwayomi";
+  const extensionsSearchMode = !!query.trim() && tagId === "" && activeSource?.kind === "suwayomi";
+
+  useEffect(
+    () =>
+      subscribeMangaLangFilter(() => {
+        if (activeMangaSource()?.kind !== "suwayomi") return;
+        reload();
+      }),
+    [reload],
+  );
 
   useEffect(
     () =>
@@ -99,6 +120,56 @@ export function MangaBrowse({
       setHasMore(false);
       setStatus("ready");
       return;
+    }
+    if (extensionsSearchMode) {
+      setStatus("loading");
+      setItems([]);
+      setSearchGroups([]);
+      offsetRef.current = 0;
+      seenRef.current = new Set();
+      setHasMore(false);
+      const timer = window.setTimeout(() => {
+        const config = { baseUrl: activeMangaSource()?.baseUrl ?? "" };
+        void cachedSuwayomiSources(config)
+          .then((all) => {
+            if (id !== reqRef.current) return { okSources: 0, failedSources: 0 };
+            const filtered = all.filter((s) => langFilterMatches(loadMangaLangFilter(), s.lang));
+            return searchExtensions(
+              config,
+              filtered,
+              query.trim(),
+              () => id !== reqRef.current,
+              (source, chunk) => {
+                if (id !== reqRef.current || chunk.length === 0) return;
+                setStatus("ready");
+                const fresh = chunk.filter((m) => !seenRef.current.has(m.id));
+                fresh.forEach((m) => seenRef.current.add(m.id));
+                if (!fresh.length) return;
+                setItems((prev) => [...prev, ...fresh]);
+                setSearchGroups((prev) => {
+                  const idx = prev.findIndex((g) => g.sourceId === source.id);
+                  if (idx === -1) {
+                    return [
+                      ...prev,
+                      { sourceId: source.id, name: sourceDisplayName(source), items: fresh },
+                    ];
+                  }
+                  const next = [...prev];
+                  next[idx] = { ...next[idx], items: [...next[idx].items, ...fresh] };
+                  return next;
+                });
+              },
+            );
+          })
+          .then(({ okSources }) => {
+            if (id !== reqRef.current) return;
+            setStatus(okSources > 0 ? "ready" : "error");
+          })
+          .catch(() => {
+            if (id === reqRef.current) setStatus("error");
+          });
+      }, 350);
+      return () => window.clearTimeout(timer);
     }
     setStatus("loading");
     setItems([]);
@@ -163,6 +234,11 @@ export function MangaBrowse({
     return list;
   }, [items, favItems, tagId, query, sortMode, statusFilter]);
 
+  const sortedSearchGroups = useMemo(
+    () => [...searchGroups].sort((a, b) => a.name.localeCompare(b.name)),
+    [searchGroups],
+  );
+
   const loadMore = useCallback(() => {
     if (loadingMore || status !== "ready" || !hasMore) return;
     const id = reqRef.current;
@@ -221,7 +297,7 @@ export function MangaBrowse({
         {activeSource?.kind === "suwayomi" && <LanguageDropdown />}
         <ManageServersButton onClick={onManageSources} className="ms-auto me-2" />
       </div>
-      {!allExtensionsMode && (
+      {!allExtensionsMode && !extensionsSearchMode && (
         <div className="-mt-3 flex flex-wrap items-center gap-2 border-b border-edge-soft/60 pb-4">
           <FilterButton active={sortMode === "latest"} onClick={() => setSortMode("latest")} icon={<Clock3 size={14} />} label={t("Latest")} />
           <FilterButton active={sortMode === "new"} onClick={() => setSortMode("new")} icon={<Sparkles size={14} />} label={t("New releases")} />
@@ -234,6 +310,17 @@ export function MangaBrowse({
 
       {allExtensionsMode ? (
         <AllExtensionsView key={activeSource?.id ?? ""} onOpen={onOpen} />
+      ) : extensionsSearchMode && sortedSearchGroups.length > 0 ? (
+        <div className="flex flex-col gap-9">
+          {sortedSearchGroups.map((group) => (
+            <SearchGroupSection
+              key={group.sourceId}
+              name={group.name}
+              items={group.items}
+              onOpen={onOpen}
+            />
+          ))}
+        </div>
       ) : status === "loading" ? (
         <SkeletonGrid />
       ) : status === "error" ? (
@@ -261,6 +348,43 @@ export function MangaBrowse({
         </>
       )}
     </div>
+  );
+}
+
+function SearchGroupSection({
+  name,
+  items,
+  onOpen,
+}: {
+  name: string;
+  items: MangaSummary[];
+  onOpen: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <section className="flex flex-col gap-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="group flex w-fit items-center gap-1.5"
+      >
+        <ChevronDown
+          size={14}
+          strokeWidth={2.2}
+          className={`shrink-0 text-ink-subtle transition-transform duration-200 ${open ? "" : "-rotate-90"}`}
+        />
+        <h3 className="font-medium tracking-tight text-ink transition-colors group-hover:text-ink-muted">
+          {name}
+        </h3>
+      </button>
+      <div className={open ? "" : "hidden"}>
+        <Row min={140}>
+          {items.map((m) => (
+            <MangaCard key={m.id} manga={m} onOpen={onOpen} />
+          ))}
+        </Row>
+      </div>
+    </section>
   );
 }
 
