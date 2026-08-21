@@ -13,6 +13,7 @@ import {
 } from "@/lib/manga/sources";
 import { subscribeSuwayomiSourcesChanged } from "@/lib/manga/sources/suwayomi/source-events";
 import { subscribeMangaLibraryChanged } from "@/lib/manga/library-events";
+import { subscribeMangaLangFilter } from "@/lib/manga/lang-filter";
 
 export const FAVORITES = "__favorites__";
 
@@ -148,10 +149,12 @@ export function TagDropdown({
     load();
     const unsubSources = subscribeSuwayomiSourcesChanged(load);
     const unsubLibrary = subscribeMangaLibraryChanged(load);
+    const unsubLang = subscribeMangaLangFilter(load);
     return () => {
       alive = false;
       unsubSources();
       unsubLibrary();
+      unsubLang();
     };
   }, []);
 

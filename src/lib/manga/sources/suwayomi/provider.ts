@@ -31,6 +31,7 @@ import {
 } from "./graphql";
 import { loadSources, pickTransport, sourceLang, withTransportFallback } from "./transport";
 import { registerServerPageHeaders } from "@/lib/manga/plugins/adapter";
+import { langFilterMatches, loadMangaLangFilter } from "@/lib/manga/lang-filter";
 
 const SEARCH_ALL_CONCURRENCY = 4;
 
@@ -211,11 +212,14 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
 
   async function tags(): Promise<MangaTag[]> {
     const t = await pickTransport(client);
-    return (await loadSources(client, t)).map((s) => ({
-      id: s.id,
-      name: s.lang && s.lang !== "en" ? `${s.name} (${s.lang.toUpperCase()})` : s.name,
-      group: "Sources",
-    }));
+    const filter = loadMangaLangFilter();
+    return (await loadSources(client, t))
+      .filter((s) => langFilterMatches(filter, s.lang))
+      .map((s) => ({
+        id: s.id,
+        name: s.lang && s.lang !== "en" ? `${s.name} (${s.lang.toUpperCase()})` : s.name,
+        group: "Sources",
+      }));
   }
 
   async function setLibrary(id: string, inLibrary: boolean): Promise<void> {

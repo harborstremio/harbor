@@ -13,6 +13,7 @@ import {
 } from "./sources/aggregate";
 import { suwayomiSourcesRevision } from "./sources/suwayomi/source-events";
 import { mangaLibraryRevision } from "./library-events";
+import { mangaLangFilterRevision } from "./lang-filter";
 import type { MangaChapter, MangaProvider, MangaSummary } from "./types";
 
 export {
@@ -363,14 +364,15 @@ export function chapterPages(chapterId: string) {
 export function mangaTags() {
   const revision = suwayomiSourcesRevision();
   const lib = mangaLibraryRevision();
+  const langRev = mangaLangFilterRevision();
   return cached(
     "tags",
-    `${revision}|${lib}`,
+    `${revision}|${lib}|${langRev}`,
     30 * MIN,
     (p) => (p.tags ? p.tags() : Promise.resolve([])),
     {
       tries: 1,
-      disk: { key: `tags|${revision}|${lib}`, ...TAGS_DISK },
+      disk: { key: `tags|${revision}|${lib}|${langRev}`, ...TAGS_DISK },
     },
   );
 }
