@@ -1,5 +1,7 @@
-import { searchManga, type MangaSummary } from "@/lib/manga/api";
+import { searchMangaEverywhere, type MangaSummary } from "@/lib/manga/api";
 import { activeMangaSourceId } from "@/lib/manga/sources";
+import { suwayomiSourcesRevision } from "@/lib/manga/sources/suwayomi/source-events";
+import { setItemWithRecovery } from "@/lib/storage-recovery";
 
 export type MangaCollection = {
   id: string;
@@ -127,6 +129,45 @@ export function collectionsForTitle(title?: string): MangaCollection[] {
 
 const resolveCache = new Map<string, MangaSummary[]>();
 
+const COLLECTION_CACHE_KEY = "harbor.manga.collections.v1";
+const COLLECTION_TTL = 24 * 60 * 60 * 1000;
+const COLLECTION_CACHE_CAP = 12;
+
+type CollectionCacheEntry = { at: number; revision: number; items: MangaSummary[] };
+
+function readCollectionDisk(cacheKey: string, revision: number): MangaSummary[] | null {
+  try {
+    const raw = localStorage.getItem(COLLECTION_CACHE_KEY);
+    if (!raw) return null;
+    const store = JSON.parse(raw) as Record<string, CollectionCacheEntry>;
+    const entry = store[cacheKey];
+    if (!entry || entry.revision !== revision || Date.now() - entry.at > COLLECTION_TTL) return null;
+    return entry.items;
+  } catch {
+    return null;
+  }
+}
+
+function writeCollectionDisk(cacheKey: string, revision: number, items: MangaSummary[]): void {
+  try {
+    const raw = localStorage.getItem(COLLECTION_CACHE_KEY);
+    const store = raw
+      ? (JSON.parse(raw) as Record<string, CollectionCacheEntry>)
+      : {};
+    store[cacheKey] = { at: Date.now(), revision, items };
+    const keys = Object.keys(store);
+    if (keys.length > COLLECTION_CACHE_CAP) {
+      const stale = keys.sort(
+        (a, b) => (store[a]?.at ?? 0) - (store[b]?.at ?? 0),
+      );
+      for (const k of stale.slice(0, keys.length - COLLECTION_CACHE_CAP)) delete store[k];
+    }
+    setItemWithRecovery(COLLECTION_CACHE_KEY, JSON.stringify(store));
+  } catch {
+    return;
+  }
+}
+
 async function poolEach<T>(
   items: T[],
   concurrency: number,
@@ -145,21 +186,46 @@ export async function streamCollection(
   collection: MangaCollection,
   onChunk: (items: MangaSummary[]) => void,
 ): Promise<void> {
+  const revision = suwayomiSourcesRevision();
   const cacheKey = `${activeMangaSourceId()}::${collection.id}`;
   const cached = resolveCache.get(cacheKey);
   if (cached) {
     onChunk(cached);
     return;
   }
+  const disk = readCollectionDisk(cacheKey, revision);
+  if (disk) {
+    resolveCache.set(cacheKey, disk);
+    onChunk(disk);
+    return;
+  }
   const out: MangaSummary[] = [];
   const seen = new Set<string>();
+  const BATCH = 4;
+  let pending: MangaSummary[] = [];
+  const flush = () => {
+    if (pending.length) {
+      onChunk(pending);
+      pending = [];
+    }
+  };
   await poolEach(collection.titles, 5, async (title) => {
-    const hit = (await searchManga(title, 0).catch(() => []))[0];
+    const hits = await searchMangaEverywhere(title).catch(() => []);
+    const key = normalize(title);
+    const hit =
+      hits.find((h) => normalize(h.title) === key) ??
+      hits.find((h) => normalize(h.title).includes(key) || key.includes(normalize(h.title))) ??
+      hits[0];
     if (hit && hit.cover && !seen.has(hit.id)) {
       seen.add(hit.id);
       out.push(hit);
-      onChunk([hit]);
+      pending.push(hit);
+      if (pending.length >= BATCH) flush();
     }
   });
-  if (out.length) resolveCache.set(cacheKey, out);
+  flush();
+  if (out.length) {
+    resolveCache.set(cacheKey, out);
+    writeCollectionDisk(cacheKey, revision, out);
+  }
 }
