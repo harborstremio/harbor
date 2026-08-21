@@ -45,6 +45,7 @@ import { decodeMangaId } from "@/lib/manga/sources/suwayomi/model";
 import { suwayomiBaseForSource } from "@/lib/manga/sources/suwayomi/auth-registry";
 import { cachedSuwayomiSources } from "./manga-browse/langs";
 import { sourceDisplayName } from "./manga-browse/all-extensions";
+import { pushActivityHint } from "@/lib/discord/activity-hint";
 
 const GRADIENT_SIDE =
   "bg-gradient-to-r from-[var(--color-canvas)] from-0% via-[color-mix(in_oklch,var(--color-canvas),transparent_45%)] via-55% to-[color-mix(in_oklch,var(--color-canvas),transparent_88%)] to-100%";
@@ -263,6 +264,16 @@ export function MangaDetail({
       cancelled = true;
     };
   }, [detail?.title]);
+
+  useEffect(() => {
+    if (!detail?.title) return;
+    return pushActivityHint({
+      details: `Browsing ${detail.title}`,
+      state: "Manga",
+      largeImage: detail.cover,
+      largeText: detail.title,
+    });
+  }, [detail?.title, detail?.cover]);
 
   const langs = useMemo(() => chapterLanguages(chapters), [chapters]);
   const langFiltered = useMemo(
