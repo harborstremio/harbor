@@ -1,5 +1,6 @@
 import type { SubCue } from "@/lib/subtitles/parser";
 import type { SubtitleLoadMetadata } from "./subtitle-load";
+import type { AudioProfileId } from "./audio-profiles";
 
 export type TrackInfo = {
   id: string;
@@ -104,7 +105,7 @@ export type PlayerBridge = {
   getSelectedTrackCues: () => SubCue[] | null;
   getSelectedTrackUrl: () => string | null;
   setAudioNormalize: (on: boolean) => void;
-  setAudioProfile?: (profile: string) => void;
+  setAudioProfile?: (profile: AudioProfileId) => void;
   setHdrToSdr?: (on: boolean, oled: boolean) => void;
   setAudioDevice?: (name: string) => void;
   setMediaInfo?: (info: { title: string; artist?: string; artwork?: string }) => void;

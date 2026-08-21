@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { listMpvAudioDevices, type MpvAudioDevice } from "@/lib/player/mpv";
+import { audioProfileHint, audioProfileOptions } from "@/lib/player/audio-profiles";
 import { PlayModePanel, PlayerEnginePanel } from "./player-panel";
 import { Section, Segmented, ToggleRow, useSettingsActiveContext } from "./shared";
 import { CROP_PRESETS } from "@/views/player/hooks/use-video-fill";
@@ -10,6 +11,8 @@ export function QualityPanel() {
   const t = useT();
   const { settings, update } = useSettings();
   const { setActive } = useSettingsActiveContext();
+  const profileOptions = audioProfileOptions(t);
+  const activeProfileHint = audioProfileHint(settings.audioProfile, t);
   return (
     <>
       <Section
@@ -72,17 +75,14 @@ export function QualityPanel() {
         <div>
           <Segmented
             value={settings.audioProfile}
-            options={[
-              { value: "off", label: "Flat" },
-              { value: "bass", label: "Bass boost" },
-              { value: "voice", label: "Vocal clarity" },
-              { value: "bass-reduce", label: "Less bass" },
-              { value: "night", label: "Night mode" },
-            ]}
+            options={profileOptions}
             onChange={(v) => update({ audioProfile: v })}
           />
           <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.")}
+            {activeProfileHint}
+          </p>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-subtle">
+            {t("Profiles take effect when the next track loads and stack with the normalizer.")}
           </p>
         </div>
         <AudioOutputRow />

@@ -3,6 +3,7 @@ import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import type { UiLanguage } from "@/lib/i18n";
+import type { AudioProfileId } from "@/lib/player/audio-profiles";
 
 export type StreamingService =
   | "netflix"
@@ -304,7 +305,7 @@ export type Settings = {
   opensubtitlesApiKey: string;
   jimakuToken: string;
   audioNormalize: boolean;
-  audioProfile: "off" | "bass" | "voice" | "bass-reduce" | "night";
+  audioProfile: AudioProfileId;
   audioDevice: string;
   bandwidthMbps: number;
   nextEpisodeLeadSec: number;
