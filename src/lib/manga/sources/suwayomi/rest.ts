@@ -58,6 +58,7 @@ export async function restSources(client: SuwayomiClient): Promise<SuwayomiSourc
       iconUrl: typeof s.iconUrl === "string" ? client.server.base + s.iconUrl : undefined,
       supportsLatest: !!s.supportsLatest,
       isNsfw: !!s.isNsfw,
+      isLocal: !!s.isLocal,
     }));
 }
 

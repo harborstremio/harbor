@@ -15,6 +15,7 @@ import type { MangaSummary } from "@/lib/manga/types";
 import {
   cachedSuwayomiSources,
   invalidateSuwayomiSources,
+  isAgnosticLang,
   langFilterMatches,
   loadMangaLangFilter,
   subscribeMangaLangFilter,
@@ -22,6 +23,7 @@ import {
 import { MangaCard } from "./manga-card";
 
 export function sourceDisplayName(source: SuwayomiSource): string {
+  if (isAgnosticLang(source.lang)) return `${source.name} · All languages`;
   return source.lang && source.lang !== "en"
     ? `${source.name} (${source.lang.toUpperCase()})`
     : source.name;

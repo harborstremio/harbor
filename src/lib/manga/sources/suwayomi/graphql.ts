@@ -51,7 +51,7 @@ export async function gqlAbout(
 export async function gqlSources(client: SuwayomiClient): Promise<SuwayomiSource[]> {
   const data = await gql(
     client,
-    `query { sources { nodes { id name lang iconUrl supportsLatest isNsfw } } }`,
+    `query { sources { nodes { id name lang iconUrl supportsLatest isNsfw isLocal } } }`,
   );
   const nodes = data?.sources?.nodes;
   if (!Array.isArray(nodes)) return [];
@@ -69,6 +69,7 @@ export async function gqlSources(client: SuwayomiClient): Promise<SuwayomiSource
           : undefined,
       supportsLatest: !!s.supportsLatest,
       isNsfw: !!s.isNsfw,
+      isLocal: !!s.isLocal,
     }));
 }
 

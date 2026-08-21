@@ -217,7 +217,12 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
       .filter((s) => langFilterMatches(filter, s.lang))
       .map((s) => ({
         id: s.id,
-        name: s.lang && s.lang !== "en" ? `${s.name} (${s.lang.toUpperCase()})` : s.name,
+        name:
+          s.lang.toLowerCase() === "localsourcelang"
+            ? "Local Source"
+            : s.lang && s.lang !== "en"
+              ? `${s.name} (${s.lang.toUpperCase()})`
+              : s.name,
         group: "Sources",
       }));
   }

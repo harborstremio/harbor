@@ -17,6 +17,7 @@ export type SuwayomiSource = {
   iconUrl?: string;
   supportsLatest: boolean;
   isNsfw: boolean;
+  isLocal: boolean;
 };
 
 export type SuwayomiExtension = {
