@@ -38,7 +38,7 @@ export function HarborAccountPanel() {
             <HandleClaimCard author={author} />
           </div>
           <div className="p-5">
-            <DiscordLinkCard author={author} />
+            <DiscordLinkCard author={author} onRecovery={setReveal} />
           </div>
         </div>
       )}

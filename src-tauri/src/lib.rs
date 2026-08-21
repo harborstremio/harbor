@@ -532,6 +532,7 @@ pub fn run() {
         .manage(multiview_state)
         .manage(modal_overlay_state)
         .manage(discord_rp::DiscordState::new())
+        .manage(discord_auth::DiscordLoopbackState::new())
         .manage(download::DownloadState::new());
 
     #[cfg(target_os = "macos")]

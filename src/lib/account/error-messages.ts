@@ -25,6 +25,8 @@ const BY_CODE: Record<string, string> = {
   discord_code_invalid: "That Discord sign-in did not go through. Try again.",
   discord_unreachable: "Could not reach Discord right now. Try again in a moment.",
   challenge_invalid: "That verification attempt expired. Start it again.",
+  discord_recovery_unavailable: "That account doesn't have Discord linked. Use your recovery key instead.",
+  discord_recovery_invalid: "That code is wrong or expired. Request a new one.",
   no_alternate_credential: "Link another way to sign in first — a password, Stremio, or Discord — so you don't get locked out.",
   no_image: "Choose an image file first.",
   bad_image: "That file could not be read as an image. Try a PNG, JPG, or WEBP.",

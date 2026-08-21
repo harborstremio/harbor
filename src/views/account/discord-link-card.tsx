@@ -7,7 +7,7 @@ import { canDiscordAuth } from "@/lib/discord-auth";
 import type { Author } from "@/lib/theme-auth";
 import { useT } from "@/lib/i18n";
 
-export function DiscordLinkCard({ author }: { author: Author }) {
+export function DiscordLinkCard({ author, onRecovery }: { author: Author; onRecovery?: (code: string) => void }) {
   const t = useT();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,12 @@ export function DiscordLinkCard({ author }: { author: Author }) {
       setBusy(true);
       setError(null);
       try {
-        await unlinkDiscord();
+        const { recoveryCode } = await unlinkDiscord();
+        // Unlinking rotates the recovery code (see discord/unlink on the
+        // backend): the old one was delivered via a Discord DM that outlives
+        // this unlink, so it must not stay valid. Show the replacement the
+        // same way a fresh signup does.
+        if (recoveryCode) onRecovery?.(recoveryCode);
       } catch (e) {
         setError(accountErrorMessage(e));
       } finally {

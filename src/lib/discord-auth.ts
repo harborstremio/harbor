@@ -30,7 +30,11 @@ export async function startDiscordAuth(authorizeUrl: string, expectedState: stri
   if (!isTauri()) throw new Error("Linking Discord needs the desktop app.");
   const { invoke } = await import("@tauri-apps/api/core");
   const { listen } = await import("@tauri-apps/api/event");
-  await invoke<number>("discord_auth_start");
+  try {
+    await invoke<number>("discord_auth_start");
+  } catch {
+    throw new Error("Couldn't start the Discord sign-in listener. Try again in a moment.");
+  }
 
   return new Promise<string>((resolve, reject) => {
     let settled = false;

@@ -6,9 +6,29 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, State};
 use tokio::net::TcpListener;
 use tokio::sync::{oneshot, Mutex};
+
+// Tracks the shutdown sender for whichever loopback listener is currently
+// bound to DISCORD_LOOPBACK_PORT, if any. Needed because the port is fixed
+// (see the comment below) -- a second discord_auth_start call before the
+// first one's 5-minute window elapses (user retries, double-clicks, or the
+// first attempt was abandoned) would otherwise hit "address already in use"
+// and surface as an unmapped Rust error string on the frontend.
+pub struct DiscordLoopbackState(Mutex<Option<oneshot::Sender<()>>>);
+
+impl DiscordLoopbackState {
+    pub fn new() -> Self {
+        Self(Mutex::new(None))
+    }
+}
+
+impl Default for DiscordLoopbackState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 // Fixed, not ephemeral, unlike stremio_auth's port-0 bind: Discord requires an
 // exact pre-registered redirect_uri match at both /authorize and
@@ -38,21 +58,73 @@ struct DiscordAuthResult {
     error: Option<String>,
 }
 
+// 40 attempts * 75ms = 3s total budget. Generous on purpose: mio does not set
+// SO_REUSEADDR on Windows (unlike Unix), so there is no OS-level guarantee
+// the previous listener's port is released promptly -- only an observed
+// common case. AV/endpoint-protection loopback interception on Windows can
+// plausibly add real delay to socket teardown.
+const BIND_RETRY_ATTEMPTS: u32 = 40;
+const BIND_RETRY_DELAY: std::time::Duration = std::time::Duration::from_millis(75);
+
+// Signaling a previous listener's shutdown doesn't release the OS port
+// synchronously -- axum's graceful_shutdown has to unwind the serve future
+// first. Retry the bind rather than assuming a fixed delay is long enough
+// (or too long). Takes `addr`/`attempts`/`delay` as parameters (rather than
+// hard-coding DISCORD_LOOPBACK_PORT) so tests can exercise this against a
+// throwaway port instead of the one a running app instance may actually be
+// using.
+async fn bind_with_retry(
+    addr: SocketAddr,
+    attempts: u32,
+    delay: std::time::Duration,
+) -> Result<TcpListener, String> {
+    let mut last_err = None;
+    for attempt in 0..attempts {
+        match TcpListener::bind(addr).await {
+            Ok(listener) => return Ok(listener),
+            Err(e) => {
+                last_err = Some(e);
+                if attempt + 1 < attempts {
+                    tokio::time::sleep(delay).await;
+                }
+            }
+        }
+    }
+    Err(format!(
+        "bind failed on {}: {}",
+        addr,
+        last_err.map(|e| e.to_string()).unwrap_or_default()
+    ))
+}
+
+async fn bind_loopback() -> Result<TcpListener, String> {
+    let addr = SocketAddr::from(([127, 0, 0, 1], DISCORD_LOOPBACK_PORT));
+    let result = bind_with_retry(addr, BIND_RETRY_ATTEMPTS, BIND_RETRY_DELAY).await;
+    if let Err(ref e) = result {
+        eprintln!("[harbor::discord_auth] {}", e);
+    }
+    result
+}
+
 #[tauri::command]
-pub async fn discord_auth_start(app: AppHandle) -> Result<u16, String> {
-    let listener = TcpListener::bind(SocketAddr::from((
-        [127, 0, 0, 1],
-        DISCORD_LOOPBACK_PORT,
-    )))
-    .await
-    .map_err(|e| format!("bind failed on 127.0.0.1:{}: {}", DISCORD_LOOPBACK_PORT, e))?;
+pub async fn discord_auth_start(
+    app: AppHandle,
+    loopback: State<'_, DiscordLoopbackState>,
+) -> Result<u16, String> {
+    if let Some(prev) = loopback.0.lock().await.take() {
+        let _ = prev.send(());
+    }
+
+    let listener = bind_loopback().await?;
     let port = listener
         .local_addr()
         .map_err(|e| format!("local_addr: {}", e))?
         .port();
 
     let (tx, rx) = oneshot::channel::<()>();
-    let done = Arc::new(Mutex::new(Some(tx)));
+    *loopback.0.lock().await = Some(tx);
+    let (tx_done, rx_done) = oneshot::channel::<()>();
+    let done = Arc::new(Mutex::new(Some(tx_done)));
     let app_handle = app.clone();
 
     let router = Router::new().route(
@@ -97,6 +169,7 @@ pub async fn discord_auth_start(app: AppHandle) -> Result<u16, String> {
         let shutdown = async {
             tokio::select! {
                 _ = rx => {}
+                _ = rx_done => {}
                 _ = tokio::time::sleep(std::time::Duration::from_secs(300)) => {}
             }
         };
@@ -106,4 +179,61 @@ pub async fn discord_auth_start(app: AppHandle) -> Result<u16, String> {
     });
 
     Ok(port)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Both tests bind to an OS-assigned port (port 0) first to get a real,
+    // currently-free port number, rather than using DISCORD_LOOPBACK_PORT --
+    // a running app instance may genuinely be listening on 51988, and these
+    // tests must not fight it for the port.
+    async fn free_port() -> u16 {
+        TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
+            .await
+            .expect("bind to an OS-assigned port")
+            .local_addr()
+            .expect("local_addr")
+            .port()
+    }
+
+    #[tokio::test]
+    async fn bind_with_retry_succeeds_immediately_when_the_port_is_free() {
+        let port = free_port().await;
+        let addr = SocketAddr::from(([127, 0, 0, 1], port));
+        let result = bind_with_retry(addr, 5, std::time::Duration::from_millis(10)).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn bind_with_retry_recovers_once_the_prior_listener_is_dropped() {
+        let occupied = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
+            .await
+            .expect("occupy a port");
+        let port = occupied.local_addr().expect("local_addr").port();
+        let addr = SocketAddr::from(([127, 0, 0, 1], port));
+
+        tokio::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_millis(80)).await;
+            drop(occupied);
+        });
+
+        // Enough attempts/delay to comfortably outlast the 80ms drop above.
+        let result = bind_with_retry(addr, 20, std::time::Duration::from_millis(20)).await;
+        assert!(result.is_ok(), "expected bind to succeed once the port was released");
+    }
+
+    #[tokio::test]
+    async fn bind_with_retry_fails_once_attempts_are_exhausted() {
+        let occupied = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
+            .await
+            .expect("occupy a port");
+        let port = occupied.local_addr().expect("local_addr").port();
+        let addr = SocketAddr::from(([127, 0, 0, 1], port));
+
+        let result = bind_with_retry(addr, 3, std::time::Duration::from_millis(10)).await;
+        assert!(result.is_err());
+        drop(occupied);
+    }
 }
