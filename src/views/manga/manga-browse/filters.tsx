@@ -80,7 +80,7 @@ export function SourceDropdown({ onManageSources }: { onManageSources: () => voi
             className="flex w-full items-center gap-2 px-3 py-2 text-start text-[13px] font-medium text-ink hover:bg-elevated/60"
           >
             <SlidersHorizontal size={14} className="text-ink-subtle" />
-            {t("Manage sources")}
+            {t("Manage Servers")}
           </button>
           <div className="my-1 border-t border-edge-soft/60" />
           {sources.map((s) => (
@@ -149,7 +149,7 @@ export function TagDropdown({
 
   const active = tags.find((t) => t.id === tagId);
   const sourceMode = tags.length > 0 && tags.every((tg) => tg.group === "Sources");
-  const allLabel = sourceMode ? "All sources" : "Categories";
+  const allLabel = sourceMode ? "All Extensions" : "Categories";
   const shown = useMemo(() => {
     const q = filter.trim().toLowerCase();
     const list = q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : tags;
