@@ -191,10 +191,10 @@ export function clearMangaCache(): void {
 
 export function popularManga(offset = 0, tagId?: string) {
   const tag = tagId ?? "";
-  return cached("pop", `${offset}|${tag}`, 5 * MIN, (p) => p.popular(offset, tagId), {
+  return cached("pop2", `${offset}|${tag}`, 5 * MIN, (p) => p.popular(offset, tagId), {
     tries: 3,
     timeout: 10_000,
-    disk: offset === 0 ? { key: `pop|${tag}`, ...POPULAR_DISK } : undefined,
+    disk: offset === 0 ? { key: `pop2|${tag}`, ...POPULAR_DISK } : undefined,
   });
 }
 
@@ -276,14 +276,14 @@ async function streamOrCall(
 export function popularMangaStream(offset: number, tagId: string | undefined, onChunk: Chunk) {
   const tag = tagId ?? "";
   return streamOrCall(
-    "pop",
+    "pop2",
     `${offset}|${tag}`,
     5 * MIN,
     (p) => p.popular(offset, tagId),
     {
       tries: 3,
       timeout: 10_000,
-      disk: offset === 0 ? { key: `pop|${tag}`, ...POPULAR_DISK } : undefined,
+    disk: offset === 0 ? { key: `pop2|${tag}`, ...POPULAR_DISK } : undefined,
     },
     onChunk,
   );
