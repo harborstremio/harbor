@@ -245,7 +245,7 @@ export async function fetchTraktCalendar(
       name: ep.episodeTitle
         ? `${ep.title} ${epLabel}: ${ep.episodeTitle}`
         : `${ep.title} ${epLabel}`,
-      poster: vid?.thumbnail ?? meta?.poster ?? null,
+      poster: meta?.poster ?? vid?.thumbnail ?? null,
       background: meta?.background ?? null,
       releaseDate: date,
       releaseTime: time,

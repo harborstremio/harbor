@@ -388,7 +388,7 @@ export async function resolveSavedCalendar(
         imdbId: c.id.startsWith("tt") ? c.id.split(":")[0] : null,
         type: "tv",
         name: ep.name ? `${showName} ${epLabel}: ${ep.name}` : `${showName} ${epLabel}`,
-        poster: r.isAnime ? (r.poster ?? ep.image ?? null) : (ep.image ?? r.poster ?? null),
+        poster: r.poster ?? ep.image ?? null,
         background: null,
         releaseDate: ep.airDate,
         releaseTime: ep.releaseTime,
