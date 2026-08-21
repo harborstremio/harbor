@@ -41,6 +41,10 @@ import { badgeArtFor, CollectionBadges } from "./collection-badge";
 import { MangaAdaptationCard, MangaRecommendedRail } from "./manga-extras";
 import { enrichManga, MangaUpdatesRank, MangaUpdatesSection, useMangaUpdates } from "./mangaupdates-info";
 import { TopMangaModal } from "./top-manga-modal";
+import { decodeMangaId } from "@/lib/manga/sources/suwayomi/model";
+import { suwayomiBaseForSource } from "@/lib/manga/sources/suwayomi/auth-registry";
+import { cachedSuwayomiSources } from "./manga-browse/langs";
+import { sourceDisplayName } from "./manga-browse/all-extensions";
 
 const GRADIENT_SIDE =
   "bg-gradient-to-r from-[var(--color-canvas)] from-0% via-[color-mix(in_oklch,var(--color-canvas),transparent_45%)] via-55% to-[color-mix(in_oklch,var(--color-canvas),transparent_88%)] to-100%";
@@ -186,10 +190,30 @@ export function MangaDetail({
   const [backdrop, setBackdrop] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [topMangaOpen, setTopMangaOpen] = useState(false);
+  const [extInfo, setExtInfo] = useState<{ name: string; icon?: string } | null>(null);
 
   const favorites = useMangaFavorites();
   const isFavorite = useIsMangaFavorite(mangaId);
   const progress = useMangaProgressEntry(mangaId, detail?.title);
+
+  useEffect(() => {
+    let alive = true;
+    setExtInfo(null);
+    const parsed = decodeMangaId(mangaId);
+    if (!parsed) return;
+    const base = suwayomiBaseForSource(parsed.sourceId);
+    if (!base) return;
+    cachedSuwayomiSources({ baseUrl: base })
+      .then((list) => {
+        if (!alive) return;
+        const source = list.find((s) => s.id === parsed.sourceId);
+        if (source) setExtInfo({ name: sourceDisplayName(source), icon: source.iconUrl });
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [mangaId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -336,6 +360,24 @@ export function MangaDetail({
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                {extInfo && (
+                  <span
+                    title={t("Source extension")}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-elevated/60 px-3 py-1 text-[13px] font-medium text-ink ring-1 ring-edge-soft backdrop-blur-sm"
+                  >
+                    {extInfo.icon && (
+                      <img
+                        src={extInfo.icon}
+                        alt=""
+                        className="h-3.5 w-3.5 rounded-[3px] object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    )}
+                    {extInfo.name}
+                  </span>
+                )}
                 {pills.map((p) => (
                   <span
                     key={p}
