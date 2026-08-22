@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   REMOTE_PROTO,
+  readRemoteToken,
   remoteWsUrl,
   type RemoteClientMessage,
   type RemoteCommand,
@@ -56,10 +57,7 @@ export function useRemoteClient(initialHost?: string) {
     return true;
   }, []);
 
-  const sendCommand = useCallback(
-    (command: RemoteCommand) => send({ t: "cmd", command }),
-    [send],
-  );
+  const sendCommand = useCallback((command: RemoteCommand) => send({ t: "cmd", command }), [send]);
 
   const disconnect = useCallback(() => {
     manualClose.current = true;
@@ -90,9 +88,20 @@ export function useRemoteClient(initialHost?: string) {
         wsRef.current = null;
       }
 
+      const token = readRemoteToken();
+      if (!token) {
+        // No pairing key: retrying can't help, and the socket would just be
+        // refused. Point the user at the link Harbor shows on the desktop.
+        setStatus("error");
+        setError(
+          "This device isn't paired. Open the phone remote link from Harbor's settings on the computer.",
+        );
+        return;
+      }
+
       setStatus((s) => (s === "error" ? "error" : "connecting"));
       setError(null);
-      const ws = new WebSocket(remoteWsUrl(h));
+      const ws = new WebSocket(remoteWsUrl(h, undefined, token));
       wsRef.current = ws;
 
       ws.onopen = () => {

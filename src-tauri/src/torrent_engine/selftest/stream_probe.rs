@@ -173,7 +173,10 @@ fn no_live_peers_step(seen: usize, connecting: usize) -> SelfTestStep {
 async fn first_byte(steps: &mut Vec<SelfTestStep>, port: u16, hash: &str, idx: usize) {
     let client = reqwest::Client::new();
     let byte_started = Instant::now();
-    let url = format!("http://127.0.0.1:{port}/stream/{hash}/{idx}");
+    let url = format!(
+        "http://127.0.0.1:{port}/stream/{hash}/{idx}?tok={}",
+        crate::torrent_engine::engine_token()
+    );
     match client
         .get(&url)
         .header(reqwest::header::RANGE, "bytes=0-65535")

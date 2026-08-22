@@ -138,11 +138,45 @@ export function parseClientMessage(raw: string): RemoteClientMessage | null {
   }
 }
 
-export function remoteWsUrl(host: string, port = WEB_PORT): string {
-  const proto = typeof location !== "undefined" && location.protocol === "https:" ? "wss" : "ws";
-  return `${proto}://${host}:${port}${REMOTE_WS_PATH}`;
+const REMOTE_TOKEN_KEY = "harbor.remote-token";
+
+/**
+ * Pairing token for the remote socket. It arrives in the URL fragment of the
+ * link the desktop shows (fragments are never sent to the server, so it stays
+ * out of request logs), and is kept locally so a refresh doesn't unpair.
+ */
+export function readRemoteToken(): string {
+  if (typeof window === "undefined") return "";
+  let token = "";
+  const hash = window.location.hash.replace(/^#/, "");
+  if (hash) {
+    const fromHash = new URLSearchParams(hash).get("t");
+    if (fromHash) {
+      token = fromHash;
+      try {
+        window.localStorage.setItem(REMOTE_TOKEN_KEY, token);
+      } catch {
+        /* private mode: keep the in-memory value */
+      }
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }
+  if (!token) {
+    try {
+      token = window.localStorage.getItem(REMOTE_TOKEN_KEY) ?? "";
+    } catch {
+      token = "";
+    }
+  }
+  return token;
 }
 
-export function remoteUiUrl(host: string, port = WEB_PORT): string {
-  return `http://${host}:${port}/remote`;
+export function remoteWsUrl(host: string, port = WEB_PORT, token = readRemoteToken()): string {
+  const proto = typeof location !== "undefined" && location.protocol === "https:" ? "wss" : "ws";
+  return `${proto}://${host}:${port}${REMOTE_WS_PATH}?token=${encodeURIComponent(token)}`;
+}
+
+export function remoteUiUrl(host: string, port = WEB_PORT, token?: string): string {
+  const base = `http://${host}:${port}/remote`;
+  return token ? `${base}#t=${encodeURIComponent(token)}` : base;
 }

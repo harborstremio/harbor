@@ -49,18 +49,7 @@
         visibility: hidden;
       }
     </style>
-    <script>
-      (function () {
-        try {
-          var p = new URLSearchParams(window.location.search);
-          if (p.get("harbor-modal") === "1") {
-            var s = document.createElement("style");
-            s.textContent = "#harbor-boot{display:none !important}";
-            document.head.appendChild(s);
-          }
-        } catch (e) {}
-      })();
-    </script>
+    <script src="/boot-modal.js"></script>
   </head>
   <body>
     <div id="harbor-boot"></div>

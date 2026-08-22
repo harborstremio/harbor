@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { sanitizeHtml } from "@/lib/sanitize-html";
 import { useSettings } from "@/lib/settings";
 import { getThemeById } from "@/lib/theme";
 import { useView } from "@/lib/view";
@@ -85,7 +86,15 @@ export function CustomCodeMount() {
     return () => runThemeCleanup("__harborThemeCleanup");
   }, [themeExt?.js]);
 
-  const html = `${settings.customHtml ?? ""}${themeExt?.html ?? ""}`;
+  // Themes are downloadable from the store, and this overlay covers the whole
+  // window. Raw markup here would let a theme paint a convincing fake prompt
+  // over the app, so it goes through the same allowlist as any other untrusted
+  // HTML. The user's own `customHtml` is sanitised as well — it survives a
+  // settings import, which is not necessarily their own file.
+  const html = useMemo(
+    () => sanitizeHtml(`${settings.customHtml ?? ""}${themeExt?.html ?? ""}`),
+    [settings.customHtml, themeExt?.html],
+  );
   return (
     <div
       id={OVERLAY_ID}

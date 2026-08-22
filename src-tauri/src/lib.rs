@@ -657,6 +657,8 @@ pub fn run() {
             web_server::web_serve_start,
             web_server::web_serve_stop,
             web_server::web_serve_status,
+            web_server::remote_pair_token,
+            torrent_engine::torrent_engine_token,
             web_server::remote_ws_broadcast,
             web_server::remote_ws_client_count,
             anime4k::anime4k_download,

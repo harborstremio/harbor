@@ -238,17 +238,13 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
     if !has_ua {
         cmd.arg("-user_agent").arg(default_ua());
     }
-    let mut header_blob = String::new();
-    for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" {
-            continue;
-        }
-        header_blob.push_str(&format!("{}: {}\r\n", k, v));
+    let blob = header_blob(headers);
+    if !blob.is_empty() {
+        cmd.arg("-headers").arg(blob);
     }
-    if !header_blob.is_empty() {
-        cmd.arg("-headers").arg(header_blob);
-    }
-    cmd.arg("-analyzeduration")
+    cmd.arg("-protocol_whitelist")
+        .arg(input_protocol_whitelist(url))
+        .arg("-analyzeduration")
         .arg("8M")
         .arg("-probesize")
         .arg("8M")
@@ -304,6 +300,94 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
 
 fn default_ua() -> &'static str {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
+
+/// Protocols the demuxer may open while reading `url`, for ffmpeg's
+/// `-protocol_whitelist` (an input option: pass it before `-i`).
+///
+/// ffmpeg applies the whitelist to *nested* opens too, and `file` is allowed by
+/// default. A remote HLS or DASH playlist can therefore list `file:///etc/passwd`
+/// as a segment and have the transcoder read local files back out to whoever is
+/// watching the stream — including a cast device on the network. Remote inputs
+/// get the protocols real streams need and nothing that touches this machine.
+pub(crate) fn input_protocol_whitelist(url: &str) -> &'static str {
+    let lower = url.trim_start().to_ascii_lowercase();
+    if lower.starts_with("http://") || lower.starts_with("https://") {
+        "http,https,tcp,tls,crypto,data"
+    } else {
+        // Local media: library files, extracted subtitles, burn-in inputs.
+        "file,crypto,data,pipe"
+    }
+}
+
+/// Build the CRLF-delimited blob for ffmpeg's `-headers`, minus `user-agent`
+/// (which has its own flag).
+///
+/// Header names and values come from addon stream objects. The blob is a single
+/// argument delimited by CRLF, so a `\r` or `\n` on either side lets an addon
+/// append headers of its own to every request ffmpeg makes for that stream.
+/// Entries carrying either are dropped rather than truncated: a half-applied
+/// header is no more correct than the injected one.
+pub(crate) fn header_blob(headers: &HashMap<String, String>) -> String {
+    let mut blob = String::new();
+    for (k, v) in headers {
+        if k.eq_ignore_ascii_case("user-agent") {
+            continue;
+        }
+        if has_crlf(k) || has_crlf(v) {
+            eprintln!("[harbor::transcode] dropped header with a line break: {k:?}");
+            continue;
+        }
+        blob.push_str(&format!("{}: {}\r\n", k, v));
+    }
+    blob
+}
+
+fn has_crlf(value: &str) -> bool {
+    value.contains('\r') || value.contains('\n')
+}
+
+#[cfg(test)]
+mod ffmpeg_input_tests {
+    use super::*;
+
+    #[test]
+    fn remote_inputs_cannot_reach_the_filesystem() {
+        let remote = input_protocol_whitelist("https://cdn.example/stream.m3u8");
+        assert!(!remote.split(',').any(|p| p == "file"));
+        // The protocols ordinary HLS/DASH playback needs stay available.
+        for needed in ["http", "https", "tcp", "tls", "crypto"] {
+            assert!(remote.split(',').any(|p| p == needed), "missing {needed}");
+        }
+        assert_eq!(
+            input_protocol_whitelist("HTTP://cdn.example/x.m3u8"),
+            remote,
+            "scheme match must be case-insensitive"
+        );
+    }
+
+    #[test]
+    fn local_inputs_may_read_their_own_file() {
+        let local = input_protocol_whitelist("/Users/someone/Movies/a.mkv");
+        assert!(local.split(',').any(|p| p == "file"));
+        assert!(!local.split(',').any(|p| p == "http"));
+    }
+
+    #[test]
+    fn drops_headers_that_would_inject_more_headers() {
+        let mut headers = HashMap::new();
+        headers.insert("Referer".to_string(), "https://ok.example".to_string());
+        headers.insert(
+            "X-Evil".to_string(),
+            "a\r\nAuthorization: Bearer stolen".to_string(),
+        );
+        headers.insert("X-Also\nEvil".to_string(), "b".to_string());
+        headers.insert("User-Agent".to_string(), "ua".to_string());
+
+        let blob = header_blob(&headers);
+
+        assert_eq!(blob, "Referer: https://ok.example\r\n");
+    }
 }
 
 fn relay_child_stdout(
@@ -458,18 +542,14 @@ pub async fn handle_transcode(
     if !has_ua {
         cmd.arg("-user_agent").arg(default_ua());
     }
-    let mut header_blob = String::new();
-    for (k, v) in headers {
-        if k.to_lowercase() == "user-agent" {
-            continue;
-        }
-        header_blob.push_str(&format!("{}: {}\r\n", k, v));
-    }
-    if !header_blob.is_empty() {
-        cmd.arg("-headers").arg(header_blob);
+    let blob = header_blob(headers);
+    if !blob.is_empty() {
+        cmd.arg("-headers").arg(blob);
     }
 
-    cmd.arg("-analyzeduration")
+    cmd.arg("-protocol_whitelist")
+        .arg(input_protocol_whitelist(url))
+        .arg("-analyzeduration")
         .arg("8M")
         .arg("-probesize")
         .arg("8M")

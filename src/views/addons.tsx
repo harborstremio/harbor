@@ -187,16 +187,27 @@ export function AddonsView() {
     if (trimmedQuery.length > 0 && tab !== "installed") setTab("browse");
   }, [trimmedQuery, tab]);
 
-  const onInstall = async (r: ResolvedAddon) => {
+  /**
+   * Returns whether the addon was actually installed. A configurable addon is
+   * sent to its detail page to be configured first, which installs nothing —
+   * callers that show an installed state must not assume otherwise. Pass
+   * `skipConfigure` from the detail page itself, where "install with defaults"
+   * is the explicit choice.
+   */
+  const onInstall = async (
+    r: ResolvedAddon,
+    opts?: { skipConfigure?: boolean },
+  ): Promise<boolean> => {
     try {
       let manifest = r.manifest ?? null;
       if (!manifest?.behaviorHints) {
         manifest = await fetchManifestAt(r.transportUrl).catch(() => manifest);
       }
       const hints = manifest?.behaviorHints;
-      if (hints?.configurable === true || hints?.configurationRequired === true) {
+      const needsConfigure = hints?.configurable === true || hints?.configurationRequired === true;
+      if (needsConfigure && opts?.skipConfigure !== true) {
         openAddonDetail(manifest?.id ?? r.manifest?.id ?? r.curated?.id ?? r.transportUrl);
-        return;
+        return false;
       }
       const addon = await installAddon(
         manifest?.id ?? r.manifest?.id ?? r.curated?.id ?? "",
@@ -213,10 +224,12 @@ export function AddonsView() {
         name: addon.manifest.name,
         logo: addon.manifest.logo ?? r.manifest?.logo ?? null,
       });
+      return true;
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("Install failed.");
       console.warn("[addons] install failed", e);
       showToast("error", msg);
+      return false;
     }
   };
   const onInstallUrl = async (rawUrl: string): Promise<string | null> => {
@@ -603,7 +616,7 @@ function RemoteOrLocalDetail({
   installedIds: Set<string>;
   allAddons: ResolvedAddon[];
   onOpen: (id: string) => void;
-  onInstall: (r: ResolvedAddon) => Promise<void>;
+  onInstall: (r: ResolvedAddon, opts?: { skipConfigure?: boolean }) => Promise<boolean>;
   onUninstall: (r: ResolvedAddon) => Promise<void>;
   onInstallUrl: (rawUrl: string) => Promise<string | null>;
   showToast: (kind: "ok" | "error", text: string) => void;
@@ -672,7 +685,7 @@ function RemoteOrLocalDetail({
         recommended={recs.recommended}
         installedIds={installedIds}
         onOpen={onOpen}
-        onInstall={() => onInstall(resolved)}
+        onInstall={() => onInstall(resolved, { skipConfigure: true })}
         onInstallAddon={onInstall}
         onUninstall={() => onUninstall(resolved)}
         onInstallUrl={onInstallUrl}

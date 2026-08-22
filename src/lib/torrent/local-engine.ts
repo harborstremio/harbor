@@ -22,6 +22,8 @@ export type AddResult = {
   info_hash: string;
   files: EngineFile[];
   stream_base: string;
+  /** Access key for `stream_base` — see lib/torrent/engine-token. */
+  stream_token: string;
 };
 
 export type TorrentEngineStats = {
@@ -112,7 +114,11 @@ export async function torrentEngineRemove(infoHash: string, deleteFiles: boolean
 
 const pendingRemovals = new Map<string, number>();
 
-export function scheduleTorrentRemoval(infoHash: string, deleteFiles = false, delayMs = 1200): void {
+export function scheduleTorrentRemoval(
+  infoHash: string,
+  deleteFiles = false,
+  delayMs = 1200,
+): void {
   if (!isTauri) return;
   cancelTorrentRemoval(infoHash);
   const id = window.setTimeout(() => {
@@ -171,4 +177,3 @@ export async function torrentEngineSetOptions(
     console.warn("[engine] set options failed", e),
   );
 }
-
