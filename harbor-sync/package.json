@@ -1,0 +1,16 @@
+{
+  "name": "harbor-sync",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 execute harbor-sync --file=schema.sql",
+    "test": "node --test test/*.test.ts"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260718.1",
+    "typescript": "~6.0.3",
+    "wrangler": "^4.112.0"
+  }
+}

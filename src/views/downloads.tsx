@@ -1,16 +1,21 @@
-import { useMemo, type ReactNode } from "react";
-import { Check, Download as DownloadIcon, FolderOpen, Play, Trash2, X } from "lucide-react";
+import { useMemo } from "react";
+import type { ReactNode } from "react";
+import { Check, Cloud, Download as DownloadIcon, FolderOpen, Play, Trash2, X } from "lucide-react";
 import { Poster, usePosterChain } from "@/components/poster";
-import { useSettings } from "@/lib/settings";
-import { useView } from "@/lib/view";
-import { DownloadDirBar } from "./downloads/download-dir-bar";
+import type { Meta } from "@/lib/cinemeta";
+import { useDownloadCatalog, tombstoneDownloadInCatalog } from "@/lib/download/download-catalog";
+import type { CatalogEntry } from "@/lib/download/download-catalog";
 import {
   cancelDownload,
   removeDownload,
   revealDownload,
   useDownloads,
-  type DownloadItem,
 } from "@/lib/download/downloads-store";
+import type { DownloadItem } from "@/lib/download/downloads-store";
+import { useT } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
+import { useView } from "@/lib/view";
+import { DownloadDirBar } from "./downloads/download-dir-bar";
 
 function fmtBytes(n: number | null): string {
   if (n == null || n <= 0) return "";
@@ -75,12 +80,24 @@ function buildGroups(items: DownloadItem[]): DownloadGroup[] {
 
 export function DownloadsView() {
   const items = useDownloads();
+  const catalog = useDownloadCatalog();
+  const t = useT();
   const active = items.filter((d) => d.status === "downloading").length;
   const savedBytes = items.reduce(
     (sum, d) => (d.status === "done" ? sum + (d.totalBytes ?? d.receivedBytes) : sum),
     0,
   );
   const groups = useMemo(() => buildGroups(items), [items]);
+  const remoteEntries = useMemo(() => {
+    const localEntryKeys = new Set<string>();
+    for (const item of items) {
+      localEntryKeys.add(`${item.metaId}|${item.season ?? ""}|${item.episode ?? ""}`);
+    }
+    return catalog.filter(
+      (entry) =>
+        !localEntryKeys.has(`${entry.metaId}|${entry.season ?? ""}|${entry.episode ?? ""}`),
+    );
+  }, [catalog, items]);
 
   return (
     <main className="flex-1 overflow-y-auto bg-canvas px-5 pb-24 pt-24 sm:px-8 lg:px-12 lg:pt-28">
@@ -102,18 +119,35 @@ export function DownloadsView() {
 
         <DownloadDirBar />
 
-        {items.length === 0 ? (
+        {items.length === 0 && remoteEntries.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="flex flex-col gap-2.5">
-            {groups.map((g) =>
-              g.kind === "movie" ? (
-                <ul key={g.item.id} className="contents">
-                  <DownloadRow d={g.item} />
+          <div className="flex flex-col gap-7">
+            {items.length > 0 && (
+              <div className="flex flex-col gap-2.5">
+                {groups.map((g) =>
+                  g.kind === "movie" ? (
+                    <ul key={g.item.id} className="contents">
+                      <DownloadRow d={g.item} />
+                    </ul>
+                  ) : (
+                    <ShowGroup key={g.metaId} group={g} />
+                  ),
+                )}
+              </div>
+            )}
+            {remoteEntries.length > 0 && (
+              <section className="flex flex-col gap-2.5">
+                <h2 className="text-[15px] font-semibold text-ink">{t("On your other devices")}</h2>
+                <ul className="flex flex-col gap-2.5">
+                  {remoteEntries.map((entry) => (
+                    <RemoteDownloadRow
+                      key={`${entry.metaId}|${entry.season ?? ""}|${entry.episode ?? ""}`}
+                      entry={entry}
+                    />
+                  ))}
                 </ul>
-              ) : (
-                <ShowGroup key={g.metaId} group={g} />
-              ),
+              </section>
             )}
           </div>
         )}
@@ -131,7 +165,8 @@ function EmptyState() {
       <div className="flex flex-col gap-1.5">
         <p className="text-[15px] font-semibold text-ink">No downloads yet</p>
         <p className="max-w-[340px] text-[13.5px] leading-relaxed text-ink-muted">
-          Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.
+          Open any movie or show, hover an episode, and click the download icon. Pick the exact
+          source you want and it saves here for offline watching.
         </p>
       </div>
     </div>
@@ -140,7 +175,12 @@ function EmptyState() {
 
 function ShowGroup({ group }: { group: Extract<DownloadGroup, { kind: "show" }> }) {
   const { settings } = useSettings();
-  const poster = usePosterChain(settings.rpdbKey, group.metaId, group.poster ?? undefined, "series");
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    group.metaId,
+    group.poster ?? undefined,
+    "series",
+  );
   const episodes = useMemo(
     () =>
       [...group.items].sort(
@@ -172,6 +212,76 @@ function ShowGroup({ group }: { group: Extract<DownloadGroup, { kind: "show" }> 
         ))}
       </ul>
     </div>
+  );
+}
+
+function RemoteDownloadRow({ entry }: { entry: CatalogEntry }) {
+  const { settings } = useSettings();
+  const { openPicker } = useView();
+  const t = useT();
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    entry.metaId,
+    entry.poster ?? undefined,
+    entry.season != null ? "series" : "movie",
+  );
+  const type =
+    entry.metaType === "movie" ||
+    entry.metaType === "series" ||
+    entry.metaType === "channel" ||
+    entry.metaType === "tv" ||
+    entry.metaType === "anime" ||
+    entry.metaType === "other"
+      ? entry.metaType
+      : "movie";
+  const downloadHere = () => {
+    const meta: Meta = {
+      id: entry.metaId,
+      type,
+      name: entry.title,
+      poster: entry.poster ?? undefined,
+    };
+    const episode =
+      entry.season != null && entry.episode != null
+        ? { season: entry.season, episode: entry.episode }
+        : undefined;
+    openPicker(meta, episode, { intent: "download" });
+  };
+  return (
+    <li className="flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3 opacity-60">
+      <div className="h-[68px] w-[46px] shrink-0 overflow-hidden rounded-lg">
+        <Poster src={poster.src} onError={poster.onError} seed={entry.metaId} ratio="portrait" />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="truncate text-[14.5px] font-semibold text-ink">{entry.title}</span>
+        {entry.subtitle && (
+          <span className="truncate text-[12px] text-ink-subtle">{entry.subtitle}</span>
+        )}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11.5px] text-ink-muted">
+          <span className="flex items-center gap-1">
+            <Cloud size={13} strokeWidth={2} />
+            {t("Downloaded on another device")}
+          </span>
+          {entry.streamLabel && <span>· {entry.streamLabel}</span>}
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={downloadHere}
+          className="rounded-lg bg-[var(--color-accent)] px-3 py-2 text-[12px] font-semibold text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        >
+          {t("Download here")}
+        </button>
+        <button
+          type="button"
+          onClick={() => tombstoneDownloadInCatalog(entry.metaId, entry.season, entry.episode)}
+          className="rounded-lg px-2 py-2 text-[12px] font-medium text-ink-muted transition-colors hover:bg-ink/10 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        >
+          {t("Hide")}
+        </button>
+      </div>
+    </li>
   );
 }
 
@@ -249,7 +359,9 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
                 </span>
               </>
             )}
-            {d.status === "error" && <span className="text-danger">Failed: {d.error ?? "download error"}</span>}
+            {d.status === "error" && (
+              <span className="text-danger">Failed: {d.error ?? "download error"}</span>
+            )}
             {d.status === "canceled" && <span className="text-ink-subtle">Canceled</span>}
             {d.status === "interrupted" && (
               <span className="text-amber-300/85">Interrupted: re-download to finish</span>
@@ -284,14 +396,22 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
   );
 }
 
-function RowBtn({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+function RowBtn({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-ink/10 hover:text-ink"
+      className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-ink/10 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
     >
       {children}
     </button>
