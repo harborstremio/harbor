@@ -7,7 +7,13 @@ import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { omdbPrefetch, useOmdbScores } from "@/lib/providers/omdb";
 import { useImdbRating } from "@/lib/imdb-rating";
-import { tmdbImdbId, tmdbLogo, tmdbMovieImages, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
+import {
+  tmdbImdbId,
+  tmdbLogo,
+  tmdbMovieImages,
+  tmdbTrailerList,
+  useTmdbImdbId,
+} from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
@@ -214,19 +220,37 @@ export const Hero = memo(function Hero({
       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-canvas via-canvas/70 via-50% to-transparent" />
       <MetaAwardsCorner meta={meta} imdbId={resolvedImdb} />
 
-      <div className={`relative flex h-full flex-col justify-center p-14 ${full ? "pt-28 lg:pt-32" : ""}`}>
+      <div
+        className={`relative flex h-full flex-col justify-center p-14 ${full ? "pt-28 lg:pt-32" : ""}`}
+      >
         <div className="max-w-2xl">
           {rank && (
             <div className="mb-5 inline-flex items-center gap-1.5 self-start rounded-md bg-canvas/85 px-2.5 py-1 text-[12px] font-semibold text-ink">
               <TrendingUp size={12} className="text-accent" />
               <span>
-                {t("#{position} in {label} Today", { position: rank.position, label: t(rank.label) })}
+                {t("#{position} in {label} Today", {
+                  position: rank.position,
+                  label: t(rank.label),
+                })}
               </span>
             </div>
           )}
-          <HeroTitlePlate name={meta.name} logo={logo} loaded={logoLoaded} resolved={logoResolved} onLoad={() => setLogoLoaded(true)} onError={() => { setLogo(undefined); setLogoResolved(true); }} />
+          <HeroTitlePlate
+            name={meta.name}
+            logo={logo}
+            loaded={logoLoaded}
+            resolved={logoResolved}
+            onLoad={() => setLogoLoaded(true)}
+            onError={() => {
+              setLogo(undefined);
+              setLogoResolved(true);
+            }}
+          />
           {description && (
-            <p className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted">
+            <p
+              dir="auto"
+              className="mt-6 line-clamp-3 max-w-xl text-[16px] leading-relaxed text-ink-muted"
+            >
               {description}
             </p>
           )}
@@ -275,7 +299,11 @@ export const Hero = memo(function Hero({
               }}
               className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75"
             >
-              {inWatchlist ? <Check size={18} strokeWidth={2.4} /> : <Plus size={18} strokeWidth={2} />}
+              {inWatchlist ? (
+                <Check size={18} strokeWidth={2.4} />
+              ) : (
+                <Plus size={18} strokeWidth={2} />
+              )}
               {inWatchlist ? t("In Watchlist") : t("Add to Watchlist")}
             </button>
           </div>

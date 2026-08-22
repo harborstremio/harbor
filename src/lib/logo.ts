@@ -9,6 +9,7 @@ import { parseKitsuId } from "@/lib/providers/kitsu";
 import { fetchTvdbArtwork } from "@/lib/providers/tvdb-proxy";
 import { tmdbAnimeLogo, tmdbIdFromImdb, tmdbImdbId, tmdbLogo } from "@/lib/providers/tmdb";
 import { shouldLocalizePosters } from "@/lib/providers/tmdb/tmdb-image-lang";
+import { loadStoredSettings } from "@/lib/settings/load";
 
 const CACHE_MAX = 1200;
 const cache = new Map<string, string | undefined>();
@@ -18,14 +19,18 @@ registerCache("logo:url", () => cache.size);
 registerCache("logo:inflight", () => inflight.size);
 
 registerEvictable("logo", (aggressive) => {
-  if (!aggressive) return;
-  cache.clear();
+  if (aggressive) {
+    cache.clear();
+  }
+  inflight.clear();
 });
 
 const isAnimeLogoId = (id: string) => /^(kitsu|mal|anilist|anidb):/.test(id);
 
 function preferTmdbLogo(tmdbKey: string, meta: Meta): boolean {
   if (!tmdbKey || !shouldLocalizePosters()) return false;
+  const settings = loadStoredSettings();
+  if (!settings.heroLocalizedMetadata) return false;
   return meta.id.startsWith("tt") || meta.id.startsWith("tmdb:");
 }
 
@@ -71,7 +76,7 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
         if (localized) return localized;
       }
     }
-    const full = await fetchCinemeta(narrowMediaType(m.type),m.id);
+    const full = await fetchCinemeta(narrowMediaType(m.type), m.id);
     return full?.logo;
   }
   if (m.id.startsWith("tmdb:")) {
@@ -80,7 +85,7 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
       if (fromTmdb) return fromTmdb;
       const tt = await tmdbImdbId(tmdbKey, m.id);
       if (tt) {
-        const full = await fetchCinemeta(narrowMediaType(m.type),tt);
+        const full = await fetchCinemeta(narrowMediaType(m.type), tt);
         if (full?.logo) return full.logo;
       }
     }
@@ -106,7 +111,8 @@ async function doResolve(tmdbKey: string, m: Meta): Promise<string | undefined> 
     let kitsuId = parseKitsuId(m.id);
     if (kitsuId == null && m.id.startsWith("mal:")) {
       const malId = Number(m.id.slice(4));
-      if (Number.isFinite(malId)) kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
+      if (Number.isFinite(malId))
+        kitsuId = await externalToKitsu("myanimelist", malId).catch(() => null);
     }
     if (kitsuId != null) {
       const art = await fetchTvdbArtwork({ kitsuId }).catch(() => null);
