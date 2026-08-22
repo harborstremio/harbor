@@ -198,6 +198,7 @@ export const DEFAULT: Settings = {
   subMarginY: 12,
   subAlignX: "center",
   subAssOverride: "no",
+  subAssNormalizeSize: false,
   subStyle: "shadow",
   subFontFamily: "inter",
   subBold: false,

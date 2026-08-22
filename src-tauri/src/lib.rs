@@ -652,6 +652,7 @@ pub fn run() {
             subsync::moviehash::compute_moviehash,
             subsync::sync_subtitle,
             sub_extract::subtitle_extract,
+            sub_extract::subtitle_extract_ass,
             cast_server::stop_stremio_sidecar,
             cast_server::cast_server_stop,
             web_server::web_serve_start,

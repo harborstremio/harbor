@@ -15,6 +15,8 @@ export function useSubStyleApply(params: {
   sourceGamma: string;
   bridgeKey: string | number;
   svpActive: boolean;
+  assScale?: number;
+  subTrackId?: string;
 }) {
   const {
     engine,
@@ -26,13 +28,15 @@ export function useSubStyleApply(params: {
     sourceGamma,
     bridgeKey,
     svpActive,
+    assScale,
+    subTrackId,
   } = params;
 
   useEffect(() => {
     if (engine !== "mpv") return;
     if (!bridgeReady) return;
     if (!mediaReady) return;
-    void applySubStyle(settings, { assNativeActive, imageNativeActive });
+    void applySubStyle(settings, { assNativeActive, imageNativeActive, assScale });
   }, [
     engine,
     bridgeReady,
@@ -40,6 +44,9 @@ export function useSubStyleApply(params: {
     bridgeKey,
     assNativeActive,
     imageNativeActive,
+    assScale,
+    subTrackId,
+    settings.subAssNormalizeSize,
     settings.subFontSize,
     settings.subFontColor,
     settings.subBorderColor,

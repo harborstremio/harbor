@@ -25,6 +25,7 @@ import { useResumeAutosave } from "./use-resume-autosave";
 import { useStremioSync } from "./use-stremio-sync";
 import { useSubDrop } from "./use-sub-drop";
 import { useSubStyleApply } from "./use-sub-style-apply";
+import { useAssNormalize } from "./use-ass-normalize";
 import { useTrackAutoload } from "./use-track-autoload";
 import { useAutoSync } from "./use-auto-sync";
 import { useVideoDownload } from "./use-video-download";
@@ -133,6 +134,15 @@ export function usePlayerMedia(params: {
   const subNativeRender = hdrNativeSurface || subAssNative || (subEmbed && selectedImageSub);
   const assNativeActive = selectedAssSub && (subNativeRender || !subEmbed);
   const imageNativeActive = selectedImageSub && (subNativeRender || !subEmbed);
+  const assNormalizeScale = useAssNormalize({
+    enabled:
+      engine === "mpv" && settings.subAssNormalizeSize && assNativeActive && !subAssOverridden,
+    sourceUrl: src.url ?? null,
+    headers: src.headers,
+    track: selectedSubTrack,
+    tracks: snap.subtitleTracks,
+    targetFontSize: settings.subFontSize,
+  });
   const mpvMediaReadyForStyle =
     snap.status !== "idle" &&
     snap.status !== "loading" &&
@@ -151,6 +161,8 @@ export function usePlayerMedia(params: {
     sourceGamma: snap.hdrGamma,
     bridgeKey,
     svpActive,
+    assScale: assNormalizeScale,
+    subTrackId: selectedSubTrack?.id,
   });
   useEffect(() => {
     if (!subEmbed && !hdrNativeSurface) return;

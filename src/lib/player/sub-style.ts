@@ -33,6 +33,7 @@ function mpvFontFor(id: string): string {
 export type SubRenderContext = {
   assNativeActive: boolean;
   imageNativeActive: boolean;
+  assScale?: number;
 };
 
 export async function applySubStyle(
@@ -40,6 +41,11 @@ export async function applySubStyle(
   context: SubRenderContext = { assNativeActive: false, imageNativeActive: false },
 ): Promise<void> {
   const override = s.subAssOverride;
+  const normalizedScale =
+    typeof context.assScale === "number" && Number.isFinite(context.assScale)
+      ? clamp(context.assScale, 0.2, 6)
+      : null;
+  const effectiveOverride = normalizedScale == null ? override : "scale";
   const assMargins = context.assNativeActive && override !== "no" ? "yes" : "no";
   const marginY = clamp(Number(s.subMarginY) || 0, 0, 100);
   const opacity = clamp(Number(s.subOpacity ?? 1), 0.1, 1);
@@ -50,7 +56,10 @@ export async function applySubStyle(
   const props: Array<[string, unknown]> = [
     ["sub-font-size", 32],
     ["sub-font", mpvFontFor(s.subFontFamily)],
-    ["sub-scale", Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32))],
+    [
+      "sub-scale",
+      normalizedScale ?? Math.min(4, Math.max(0.4, (Number(s.subFontSize) || 32) / 32)),
+    ],
     ["sub-color", mpvColor(s.subFontColor, opacity)],
     ["sub-border-color", mpvColor(s.subBorderColor, opacity)],
     ["sub-border-size", s.subBorderSize],
@@ -59,7 +68,7 @@ export async function applySubStyle(
     ["sub-shadow-offset", isShadow ? 1.4 : 0],
     ["sub-margin-y", marginY],
     ["sub-align-x", s.subAlignX],
-    ["sub-ass-override", override],
+    ["sub-ass-override", effectiveOverride],
     ["sub-ass-force-margins", assMargins],
     ["sub-use-margins", assMargins],
     ["sub-spacing", s.subLineSpacing],
@@ -67,8 +76,6 @@ export async function applySubStyle(
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
   await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
+    props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
   );
 }
