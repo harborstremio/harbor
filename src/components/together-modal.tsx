@@ -415,7 +415,6 @@ export function TogetherPopover({
   return liquidGlassEnabled ? (
     <ThreeLiquidGlassSurface
       role="dialog"
-      aria-modal="true"
       data-tv-focus-scope
       aria-label={t("Watch together")}
       radius="16px"

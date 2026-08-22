@@ -1,16 +1,23 @@
+import { Cloud, ExternalLink, KeyRound, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { DownloadMenu, SavePill } from "./relay-docs-export";
 import { useT } from "@/lib/i18n";
+import { openUrl } from "@/lib/window";
+import { DownloadMenu, SavePill } from "./relay-docs-export";
+
+const RELAY_DEPLOY_URL =
+  "https://deploy.workers.cloudflare.com/?url=https://github.com/harborstremio/together-relay";
 
 export function RelayDocs({ onBack }: { onBack: () => void }) {
   const t = useT();
   const docsRef = useRef<HTMLDivElement>(null);
   const [savedPath, setSavedPath] = useState<string | null>(null);
+
   useEffect(() => {
     if (!savedPath) return;
-    const to = window.setTimeout(() => setSavedPath(null), 7000);
-    return () => window.clearTimeout(to);
+    const timeout = window.setTimeout(() => setSavedPath(null), 7000);
+    return () => window.clearTimeout(timeout);
   }, [savedPath]);
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-3">
@@ -38,163 +45,110 @@ export function RelayDocs({ onBack }: { onBack: () => void }) {
       </div>
 
       <div ref={docsRef} className="flex flex-col gap-8">
-      <header className="flex flex-col gap-2 border-b border-edge-soft pb-6">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-accent">
-          {t("Self-host")}
-        </p>
-        <h2 className="font-display text-[32px] font-medium leading-tight tracking-tight text-ink">
-          {t("Run your own Harbor Relay")}
-        </h2>
-        <p className="text-[14px] leading-relaxed text-ink-muted">
-          {t("Two paths: Harbor handles the deploy for you, or you do it yourself with wrangler.")}
-        </p>
-      </header>
+        <header className="flex flex-col gap-2 border-b border-edge-soft pb-6">
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-accent">
+            {t("Watch Together host setup")}
+          </p>
+          <h2 className="font-display text-[32px] font-medium leading-tight tracking-tight text-ink">
+            {t("Run your own Harbor Relay")}
+          </h2>
+          <p className="max-w-2xl text-[14px] leading-relaxed text-ink-muted">
+            {t(
+              "Only the host sets up a relay. Everyone else joins with the host's Harbor invite link—no Cloudflare account or setup required.",
+            )}
+          </p>
+        </header>
 
-      <DocsBlock>
-        <DocsH2>{t("Overview")}</DocsH2>
-        <DocsP>
-          {t("The Harbor relay is a Cloudflare Worker that hosts WebSocket rooms for Watch Together. Each user runs their own. There is no central Harbor server.")}
-        </DocsP>
-        <DocsP>
-          {t("Source:")} <DocsCode>src-tauri/relay/worker.js</DocsCode>. {t("About 200 lines of JavaScript, no dependencies. Read it before deploying if you want to know what runs.")}
-        </DocsP>
-      </DocsBlock>
+        <DocsBlock>
+          <div className="flex items-start gap-3">
+            <Cloud size={19} strokeWidth={1.9} className="mt-1 shrink-0 text-accent" />
+            <div>
+              <DocsH2>{t("Fastest: Deploy to Cloudflare")}</DocsH2>
+              <DocsP>
+                {t("Cloudflare sets up and deploys the open-source relay in your account.")}
+              </DocsP>
+            </div>
+          </div>
+          <DocsOl>
+            <li>{t("Open Cloudflare with the button below and sign in.")}</li>
+            <li>{t("Choose your Cloudflare account, keep the suggested settings, and deploy.")}</li>
+            <li>
+              {t("Copy the resulting")} <DocsCode>workers.dev</DocsCode> {t("URL.")}
+            </li>
+            <li>
+              {t("Return to Harbor Relay, paste the URL, and select")}{" "}
+              <DocsKbd>{t("Save")}</DocsKbd>.
+            </li>
+          </DocsOl>
+          <button
+            type="button"
+            onClick={() => openUrl(RELAY_DEPLOY_URL)}
+            className="flex h-12 w-fit items-center justify-center gap-2 rounded-xl bg-ink px-5 text-[14px] font-medium text-canvas transition-transform hover:scale-[1.01]"
+          >
+            <ExternalLink size={15} strokeWidth={1.9} />
+            {t("Deploy to Cloudflare")}
+          </button>
+        </DocsBlock>
 
-      <DocsBlock>
-        <DocsH2>{t("Requirements")}</DocsH2>
-        <DocsList>
-          <li>{t("A free Cloudflare account.")}</li>
-          <li>{t("About two minutes for the auto-deploy path.")}</li>
-          <li>
-            {t("For the manual path:")} <DocsCode>node</DocsCode> {t("20+ and")} <DocsCode>wrangler</DocsCode> {t("CLI.")}
-          </li>
-        </DocsList>
-      </DocsBlock>
+        <DocsBlock>
+          <div className="flex items-start gap-3">
+            <KeyRound size={19} strokeWidth={1.9} className="mt-1 shrink-0 text-accent" />
+            <div>
+              <DocsH2>{t("Alternative: deploy from Harbor")}</DocsH2>
+              <DocsP>
+                {t(
+                  "Harbor can deploy directly with a limited Cloudflare API token. The token stays on this device and is used to manage your relay.",
+                )}
+              </DocsP>
+            </div>
+          </div>
+          <DocsOl>
+            <li>
+              {t("Go back to Harbor Relay and select")} <DocsKbd>{t("Deploy a relay")}</DocsKbd>.
+            </li>
+            <li>{t("Follow the short token guide shown by Harbor.")}</li>
+            <li>
+              {t(
+                "Choose your Cloudflare account. Harbor deploys the relay and saves its URL automatically.",
+              )}
+            </li>
+          </DocsOl>
+        </DocsBlock>
 
-      <DocsBlock>
-        <DocsH2>{t("Auto-deploy from Harbor")}</DocsH2>
-        <DocsP>
-          {t("Easiest path. Harbor uploads the worker, creates the Durable Object namespace, and stores the resulting URL.")}
-        </DocsP>
-        <DocsOl>
-          <li>{t("Open Settings, then Harbor Relay.")}</li>
-          <li>
-            {t("Click")} <DocsKbd>{t("Deploy a relay")}</DocsKbd>.
-          </li>
-          <li>
-            {t("Generate a Cloudflare API token with")} <DocsCode>Workers Scripts: Edit</DocsCode> {t("and")} <DocsCode>Account: Read</DocsCode> {t("permissions at")} <DocsCode>dash.cloudflare.com/profile/api-tokens</DocsCode>. {t("Paste it into Harbor.")}
-          </li>
-          <li>{t("Pick the Cloudflare account to deploy under.")}</li>
-          <li>
-            {t("Wait for the upload to finish. The relay URL gets written to")} <DocsCode>togetherRelayUrl</DocsCode> {t("in Harbor settings.")}
-          </li>
-        </DocsOl>
-      </DocsBlock>
+        <DocsBlock>
+          <DocsH2>{t("Verify and invite")}</DocsH2>
+          <DocsOl>
+            <li>
+              {t("In Harbor Relay, select")} <DocsKbd>{t("Run test")}</DocsKbd>{" "}
+              {t("to verify the Worker.")}
+            </li>
+            <li>{t("Open Watch Together, create a room, and share its invite link.")}</li>
+            <li>
+              {t(
+                "Participants open the invite link. It already contains the relay URL and room code.",
+              )}
+            </li>
+          </DocsOl>
+          <div className="flex items-start gap-3 rounded-xl border border-edge-soft bg-canvas/50 p-4">
+            <Users size={17} strokeWidth={1.9} className="mt-0.5 shrink-0 text-ink-subtle" />
+            <DocsP>
+              {t(
+                "Participants never need your Cloudflare login or API token. The invite only shares the public relay URL and room code.",
+              )}
+            </DocsP>
+          </div>
+        </DocsBlock>
 
-      <DocsBlock>
-        <DocsH2>{t("Manual deploy with wrangler")}</DocsH2>
-        <DocsP>
-          {t("For users who want to deploy themselves or already have a wrangler workflow.")}
-        </DocsP>
-        <DocsOl>
-          <li>
-            {t("Install wrangler and authenticate:")}
-            <DocsPre>{`npm install -g wrangler\nwrangler login`}</DocsPre>
-          </li>
-          <li>
-            {t("Save the worker source. Copy")} <DocsCode>src-tauri/relay/worker.js</DocsCode> {t("from the Harbor repo into a new directory as")} <DocsCode>worker.js</DocsCode>.
-          </li>
-          <li>
-            {t("Save this")} <DocsCode>wrangler.toml</DocsCode> {t("next to it:")}
-            <DocsPre>{`name = "harbor-together-relay"\nmain = "worker.js"\ncompatibility_date = "2026-05-01"\n\n[[durable_objects.bindings]]\nname = "ROOM"\nclass_name = "Room"\n\n[[migrations]]\ntag = "v1"\nnew_sqlite_classes = ["Room"]`}</DocsPre>
-          </li>
-          <li>
-            {t("Deploy:")}
-            <DocsPre>wrangler deploy</DocsPre>
-          </li>
-          <li>
-            {t("Note the URL Cloudflare returns. It looks like")} <DocsCode>https://harbor-together-relay.&lt;subdomain&gt;.workers.dev</DocsCode>.
-          </li>
-          <li>
-            {t("In Harbor: Settings, Harbor Relay, then")} <DocsKbd>{t("Use a different URL")}</DocsKbd>. {t("Paste the URL with")} <DocsCode>wss://</DocsCode> {t("as the scheme instead of")} <DocsCode>https://</DocsCode>.
-          </li>
-        </DocsOl>
-      </DocsBlock>
-
-      <DocsBlock>
-        <DocsH2>{t("Verify it works")}</DocsH2>
-        <DocsP>
-          {t("Settings, Harbor Relay, then")} <DocsKbd>{t("Run test")}</DocsKbd>.
-        </DocsP>
-        <DocsP>
-          {t("The test calls")} <DocsCode>/health</DocsCode> {t("and confirms the worker is reachable and running a current version. A passing test means Watch Together rooms will connect.")}
-        </DocsP>
-        <DocsP>
-          {t("If the Watch Together popover shows an outdated-relay banner, redeploying with the steps above is the fix. The banner clears automatically the next time you connect once the relay reports the current version.")}
-        </DocsP>
-      </DocsBlock>
-
-      <DocsBlock>
-        <DocsH2>{t("Sharing your relay")}</DocsH2>
-        <DocsP>
-          {t("A relay URL is shareable. Anyone with the URL can join Watch Together rooms hosted on your relay. The unique")} <DocsCode>workers.dev</DocsCode> {t("subdomain acts as the access token. There is no login.")}
-        </DocsP>
-        <DocsP>
-          {t("To run a public relay, post the")} <DocsCode>wss://</DocsCode> {t("URL on r/Stremio or wherever your community lives. Other Harbor users paste it into Settings, Harbor Relay,")} <DocsKbd>{t("Use a different URL")}</DocsKbd>.
-        </DocsP>
-      </DocsBlock>
-
-      <DocsBlock>
-        <DocsH2>{t("Costs")}</DocsH2>
-        <DocsP>{t("Cloudflare Workers free tier:")}</DocsP>
-        <DocsList>
-          <li>{t("100,000 requests per day.")}</li>
-          <li>{t("10ms CPU time per request.")}</li>
-          <li>{t("Unlimited Durable Object storage at $0.20 per million reads.")}</li>
-        </DocsList>
-        <DocsP>
-          {t("A typical Watch Together session uses a few hundred messages per hour. Solo and small-group use stays well under free tier limits.")}
-        </DocsP>
-        <DocsP>
-          {t("If you exceed free tier, the Workers Paid plan is $5 per month and bumps the request allowance to 10 million per day.")}
-        </DocsP>
-      </DocsBlock>
-
-      <DocsBlock>
-        <DocsH2>{t("Troubleshooting")}</DocsH2>
-        <DocsTable
-          rows={[
-            {
-              symptom: t("Health check returns 5xx"),
-              cause: t("Worker crashed or hit memory limits"),
-              fix: t("Check logs in Cloudflare dashboard, then redeploy"),
-            },
-            {
-              symptom: t("Connection refused / DNS does not resolve"),
-              cause: t("Worker deleted or URL wrong"),
-              fix: t("Re-run deploy or paste the correct URL"),
-            },
-            {
-              symptom: t("Watch Together rooms drop after 6 hours"),
-              cause: t("Durable Object idle eviction"),
-              fix: t("Expected. Rooms recreate on next join."),
-            },
-          ]}
-        />
-      </DocsBlock>
-
-      <DocsBlock>
-        <DocsH2>{t("What the worker does")}</DocsH2>
-        <DocsList>
-          <li>
-            <DocsCode>GET /health</DocsCode>: {t("returns JSON with the worker version. Used by the test button.")}
-          </li>
-          <li>
-            <DocsCode>GET /r/&lt;code&gt;</DocsCode> {t("with a WebSocket upgrade: opens a Watch Together room. State is held in a Durable Object, no persistence beyond the active session.")}
-          </li>
-        </DocsList>
-      </DocsBlock>
+        <DocsBlock>
+          <DocsH2>{t("If something fails")}</DocsH2>
+          <DocsP>
+            {t(
+              "Check that the saved URL ends in workers.dev, then run the connection test again. For deployment errors, open the Worker in Cloudflare and check its deployment logs before redeploying.",
+            )}
+          </DocsP>
+        </DocsBlock>
       </div>
+
       {savedPath && <SavePill path={savedPath} onDismiss={() => setSavedPath(null)} />}
     </div>
   );
@@ -212,14 +166,6 @@ function DocsH2({ children }: { children: React.ReactNode }) {
 
 function DocsP({ children }: { children: React.ReactNode }) {
   return <p className="text-[13.5px] leading-relaxed text-ink-muted">{children}</p>;
-}
-
-function DocsList({ children }: { children: React.ReactNode }) {
-  return (
-    <ul className="ms-5 flex list-disc flex-col gap-1.5 text-[13.5px] leading-relaxed text-ink-muted marker:text-ink-subtle">
-      {children}
-    </ul>
-  );
 }
 
 function DocsOl({ children }: { children: React.ReactNode }) {
@@ -243,43 +189,5 @@ function DocsKbd({ children }: { children: React.ReactNode }) {
     <kbd className="rounded-md border border-edge-soft bg-elevated px-1.5 py-0.5 font-mono text-[11.5px] font-medium text-ink shadow-[0_1px_0_var(--color-edge)]">
       {children}
     </kbd>
-  );
-}
-
-function DocsPre({ children }: { children: React.ReactNode }) {
-  return (
-    <pre className="mt-2 overflow-x-auto rounded-xl border border-edge-soft bg-canvas/70 p-3 font-mono text-[12px] leading-relaxed text-ink">
-      {children}
-    </pre>
-  );
-}
-
-function DocsTable({
-  rows,
-}: {
-  rows: Array<{ symptom: string; cause: string; fix: string }>;
-}) {
-  const t = useT();
-  return (
-    <div className="overflow-hidden rounded-xl border border-edge-soft">
-      <table className="w-full text-start text-[12.5px] text-ink-muted">
-        <thead className="bg-canvas/60 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-          <tr>
-            <th className="px-3 py-2.5">{t("Symptom")}</th>
-            <th className="px-3 py-2.5">{t("Cause")}</th>
-            <th className="px-3 py-2.5">{t("Fix")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-t border-edge-soft align-top">
-              <td className="px-3 py-2.5 text-ink">{r.symptom}</td>
-              <td className="px-3 py-2.5">{r.cause}</td>
-              <td className="px-3 py-2.5">{r.fix}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
 }

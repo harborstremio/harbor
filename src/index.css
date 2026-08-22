@@ -204,7 +204,7 @@ body {
   opacity: 1;
 }
 [data-kids="on"] .harbor-win-control,
-[data-kids="on"] .harbor-together-btn:not(.harbor-wt-tab) {
+[data-kids="on"] .harbor-together-btn {
   background-color: #d1eaed;
 }
 [data-kids="on"] .harbor-win-close:hover {
@@ -1549,23 +1549,6 @@ html[data-theme-layout="stremio"] .harbor-hero-full {
   border: 1px solid oklch(0.78 0.13 60 / 0.35);
 }
 
-.harbor-together-surface {
-  background-color: var(--color-canvas);
-  background-image: linear-gradient(var(--color-elevated), var(--color-elevated));
-}
-
-html[data-theme-card="crunch"] .harbor-wt-wrap,
-html[data-theme-card="noir"] .harbor-wt-wrap {
-  transform: translateY(2px);
-}
-
-html[data-theme-card="crunch"] .harbor-wt-tab,
-html[data-theme-card="noir"] .harbor-wt-tab,
-html[data-theme-card="glass"] .harbor-wt-tab {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
 html[data-theme-card="stremio"] .harbor-rating-star {
   color: #f5a623;
 }
@@ -2486,14 +2469,6 @@ html[data-theme-card="glass"] .glass-card {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--color-ink) 12%, transparent),
     0 18px 50px -22px color-mix(in srgb, var(--color-canvas) 70%, transparent);
-}
-
-html[data-theme-card="glass"] .harbor-together-surface {
-  background-color: color-mix(in srgb, var(--color-canvas) 90%, white);
-  background-image: linear-gradient(
-    color-mix(in srgb, var(--color-canvas) 86%, white),
-    color-mix(in srgb, var(--color-canvas) 86%, white)
-  );
 }
 
 html[data-theme-card="glass"] .harbor-chat-toast,

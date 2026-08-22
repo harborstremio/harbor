@@ -417,7 +417,7 @@ aside[data-harbor-sidebar] [data-tauri-drag-region] > span > span {
   background-color: color-mix(in srgb, var(--color-accent) 24%, transparent) !important;
   color: var(--color-accent) !important;
 }
-aside[data-harbor-sidebar].w-\[72px\] [data-harbor-nav][data-active],
+aside[data-harbor-sidebar].w-[72px] [data-harbor-nav][data-active],
 html:not(.lg) [data-harbor-nav][data-active] {
   box-shadow: inset 0 0 0 var(--ef-border-w) color-mix(in srgb, var(--color-accent) 55%, transparent) !important;
 }
@@ -430,7 +430,7 @@ aside[data-harbor-sidebar] .h-px.bg-gradient-to-r {
   ) !important;
 }
 aside[data-harbor-sidebar] > div:last-child .rounded-full.border,
-aside[data-harbor-sidebar] > div:last-child .bg-elevated\/50 {
+aside[data-harbor-sidebar] > div:last-child .bg-elevated/50 {
   background-color: color-mix(in srgb, var(--color-raised) 40%, transparent) !important;
   border-color: color-mix(in srgb, var(--ef-hairline) 80%, transparent) !important;
 }
@@ -480,37 +480,6 @@ header.fixed.inset-x-0.top-0 > div {
   background-color: var(--color-danger) !important;
   color: #ffffff !important;
 }
-.harbor-together-btn:not(.harbor-wt-tab) {
-  background-color: transparent !important;
-  background-image: none !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  border-radius: 999px !important;
-  color: var(--color-ink-muted) !important;
-  transition: background-color 125ms ease, color 125ms ease !important;
-}
-.harbor-together-btn:not(.harbor-wt-tab):hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: var(--color-ink) !important;
-}
-.harbor-together-surface {
-  background-color: var(--ef-panel-glass) !important;
-  background-image: none !important;
-  border-color: color-mix(in srgb, var(--ef-hairline) 90%, transparent) !important;
-  backdrop-filter: blur(24px) saturate(130%);
-  -webkit-backdrop-filter: blur(24px) saturate(130%);
-}
-.harbor-wt-tab {
-  background-color: var(--ef-panel-glass) !important;
-  color: var(--color-ink) !important;
-}
-.harbor-wt-modal .modal-panel,
-.harbor-wt-modal > div {
-  background-color: var(--ef-panel-glass) !important;
-  backdrop-filter: blur(24px) saturate(130%);
-  -webkit-backdrop-filter: blur(24px) saturate(130%);
-}
-
 /* ==========================================================================
    HOME + DETAIL RAILS  (main transparent so gradient shows; detail main opaque)
    ========================================================================== */
@@ -527,11 +496,11 @@ h3.truncate.font-medium.tracking-tight {
   letter-spacing: -0.018em !important;
   color: var(--color-ink) !important;
 }
-.group\/va {
+.group/va {
   color: var(--color-ink-subtle) !important;
   transition: color 125ms ease !important;
 }
-.group\/va:hover {
+.group/va:hover {
   color: var(--color-accent) !important;
 }
 .harbor-row-arrow {
@@ -600,7 +569,7 @@ button.group > p.line-clamp-2 {
   font-weight: 500 !important;
   color: var(--color-ink) !important;
 }
-.harbor-poster > .absolute.rounded-md.bg-canvas\/95 {
+.harbor-poster > .absolute.rounded-md.bg-canvas/95 {
   background-color: color-mix(in srgb, var(--ef-panel-glass) 95%, transparent) !important;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
@@ -609,7 +578,7 @@ button.group > p.line-clamp-2 {
   color: var(--color-accent) !important;
   border: var(--ef-border-w) solid color-mix(in srgb, var(--color-accent) 45%, transparent) !important;
 }
-.harbor-poster .rounded-full.bg-canvas\/85 {
+.harbor-poster .rounded-full.bg-canvas/85 {
   background-color: color-mix(in srgb, var(--ef-panel-glass) 85%, transparent) !important;
 }
 

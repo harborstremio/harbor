@@ -98,7 +98,8 @@ type TogetherValue = {
   suppressOutgoingFor: (ms: number) => void;
   onIncomingState: (cb: (state: SyncState) => void) => () => void;
   modalOpen: boolean;
-  openModal: () => void;
+  modalOwner: string | null;
+  openModal: (owner: string) => void;
   closeModal: () => void;
   incomingInvite: IncomingInvite | null;
   dismissInvite: () => void;
@@ -186,7 +187,8 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
     lastError: null,
   });
   const [chat, setChat] = useState<ChatMessage[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOwner, setModalOwner] = useState<string | null>(null);
+  const modalOpen = modalOwner !== null;
   const [incomingInvite, setIncomingInvite] = useState<IncomingInvite | null>(null);
   const [incomingHostLeaving, setIncomingHostLeaving] = useState<IncomingHostLeaving | null>(null);
   const [incomingParticipantLeft, setIncomingParticipantLeft] =
@@ -198,8 +200,8 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
     Map<string, ParticipantLocation>
   >(new Map());
 
-  const openModal = useCallback(() => setModalOpen(true), []);
-  const closeModal = useCallback(() => setModalOpen(false), []);
+  const openModal = useCallback((owner: string) => setModalOwner(owner), []);
+  const closeModal = useCallback(() => setModalOwner(null), []);
   const dismissInvite = useCallback(() => setIncomingInvite(null), []);
   const dismissHostLeaving = useCallback(() => setIncomingHostLeaving(null), []);
   const dismissParticipantLeft = useCallback(() => setIncomingParticipantLeft(null), []);
@@ -297,7 +299,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
       if (settings.togetherRelayUrl !== invite.relayUrl) {
         update({ togetherRelayUrl: invite.relayUrl });
       }
-      setModalOpen(true);
+      setModalOwner("auto");
     })();
   }, []);
 
@@ -498,6 +500,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
       suppressOutgoingFor,
       onIncomingState,
       modalOpen,
+      modalOwner,
       openModal,
       closeModal,
       incomingInvite,
@@ -547,6 +550,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
       suppressOutgoingFor,
       onIncomingState,
       modalOpen,
+      modalOwner,
       openModal,
       closeModal,
       incomingInvite,
