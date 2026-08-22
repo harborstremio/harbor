@@ -62,13 +62,11 @@ export async function applySubStyle(
     ["sub-ass-override", override],
     ["sub-ass-force-margins", assMargins],
     ["sub-use-margins", assMargins],
-    ["sub-spacing", s.subLineSpacing],
+    ["sub-line-spacing", s.subLineSpacing],
     ["sub-bold", s.subBold ? "yes" : "no"],
     ["sub-pos", reposition ? clamp(100 - marginY, 0, 100) : 100],
   ];
   await Promise.all(
-    props.map(([name, value]) =>
-      invoke("mpv_set_property", { name, value }).catch(() => {}),
-    ),
+    props.map(([name, value]) => invoke("mpv_set_property", { name, value }).catch(() => {})),
   );
 }
