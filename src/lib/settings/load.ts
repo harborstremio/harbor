@@ -170,7 +170,6 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
         ...DEFAULT.subProvidersEnabled,
         ...(parsed.subProvidersEnabled ?? {}),
         wyzie: false,
-        opensubtitles: true,
       },
       hideContent: {
         ...DEFAULT.hideContent,
