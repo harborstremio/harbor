@@ -18,9 +18,11 @@ export function toLocalTimeLabel(d: Date): string {
   return `${hour12}:${pad(d.getMinutes())} ${period}`;
 }
 
-export function localDateTimeFromIso(
-  iso: string | null | undefined,
-): { date: string; time?: string; atMs?: number } {
+export function localDateTimeFromIso(iso: string | null | undefined): {
+  date: string;
+  time?: string;
+  atMs?: number;
+} {
   if (!iso) return { date: "" };
   if (!iso.includes("T")) return { date: iso.slice(0, 10) };
   const d = new Date(iso);

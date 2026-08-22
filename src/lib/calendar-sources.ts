@@ -87,10 +87,7 @@ export async function fetchAniListAiringCalendar(
   return withCalendarCache(cacheKey, () => fetchAniListAiring(year, month).catch(() => []));
 }
 
-export async function fetchAnimeDubCalendar(
-  year: number,
-  month: number,
-): Promise<CalendarItem[]> {
+export async function fetchAnimeDubCalendar(year: number, month: number): Promise<CalendarItem[]> {
   const cacheKey = `anime-dub:${year}-${month}`;
   return withCalendarCache(cacheKey, () => mapDubFeedToCalendar(year, month).catch(() => []));
 }
@@ -194,20 +191,14 @@ function isAnimationGenre(genres: string[] | undefined): boolean {
   return genres.some((g) => wanted.includes(g.toLowerCase()));
 }
 
-export async function fetchTraktCalendar(
-  year: number,
-  month: number,
-): Promise<CalendarItem[]> {
+export async function fetchTraktCalendar(year: number, month: number): Promise<CalendarItem[]> {
   const today = new Date();
   const cur = new Date(year, month, 1);
   const fwdMonths =
     (cur.getFullYear() - today.getFullYear()) * 12 + (cur.getMonth() - today.getMonth());
   if (fwdMonths < 0 || fwdMonths > TRAKT_MAX_FORWARD_MONTHS) return [];
   const days = Math.max(31, (fwdMonths + 1) * 31);
-  const [eps, mvs] = await Promise.all([
-    fetchUpcomingEpisodes(days),
-    fetchUpcomingMovies(days),
-  ]);
+  const [eps, mvs] = await Promise.all([fetchUpcomingEpisodes(days), fetchUpcomingMovies(days)]);
 
   const epsInMonth = eps
     .map((ep) => ({ ep, ...localDateTimeFromIso(ep.airDate) }))
@@ -232,7 +223,7 @@ export async function fetchTraktCalendar(
   const out: CalendarItem[] = [];
   for (const { ep, date, time, atMs } of epsInMonth) {
     const imdb = ep.ids.imdb ?? null;
-    const meta = imdb ? showMeta.get(imdb) ?? null : null;
+    const meta = imdb ? (showMeta.get(imdb) ?? null) : null;
     const baseId = imdb ?? `trakt:${ep.ids.tmdb ?? ep.ids.tvdb ?? ep.title}`;
     const epLabel = `S${pad(ep.season)}E${pad(ep.number)}`;
     const vid = meta?.videos?.find(
@@ -257,7 +248,7 @@ export async function fetchTraktCalendar(
   }
   for (const { m, date, time, atMs } of mvsInMonth) {
     const imdb = m.ids.imdb ?? null;
-    const meta = imdb ? movieMeta.get(imdb) ?? null : null;
+    const meta = imdb ? (movieMeta.get(imdb) ?? null) : null;
     const id = imdb ?? `trakt:${m.ids.tmdb ?? m.title}`;
     out.push({
       id,
@@ -282,10 +273,7 @@ export async function fetchAnticipatedCalendar(
   year: number,
   month: number,
 ): Promise<CalendarItem[]> {
-  const [shows, mvs] = await Promise.all([
-    fetchAnticipatedShows(),
-    fetchAnticipatedMovies(),
-  ]);
+  const [shows, mvs] = await Promise.all([fetchAnticipatedShows(), fetchAnticipatedMovies()]);
   const inMonthShows = shows.filter((s) => inMonth(s.firstAired, year, month));
   const inMonthMovies = mvs.filter((m) => inMonth(m.released, year, month));
   const [showMetas, movieMetas] = await Promise.all([

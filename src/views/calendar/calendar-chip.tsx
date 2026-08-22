@@ -134,7 +134,9 @@ function ChipTooltip({
       className={`pointer-events-none fixed z-[200] flex flex-col gap-3 rounded-2xl border border-edge bg-elevated/95 p-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-md transition-opacity duration-100 ${panelWidthClass}`}
     >
       <div className="flex items-start gap-3">
-        <div className={`shrink-0 overflow-hidden rounded-lg bg-canvas/40 ring-1 ring-edge-soft ${posterSizeClass}`}>
+        <div
+          className={`shrink-0 overflow-hidden rounded-lg bg-canvas/40 ring-1 ring-edge-soft ${posterSizeClass}`}
+        >
           <Poster
             src={poster.src}
             onError={poster.onError}

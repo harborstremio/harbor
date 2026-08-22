@@ -100,7 +100,9 @@ function DayModalRow({
       onClick={() => onOpen(item)}
       className="flex items-start gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-3 text-start transition-colors hover:border-edge hover:bg-canvas/65"
     >
-      <div className={`shrink-0 overflow-hidden rounded-md bg-elevated/50 ring-1 ring-edge-soft ${posterSizeClass}`}>
+      <div
+        className={`shrink-0 overflow-hidden rounded-md bg-elevated/50 ring-1 ring-edge-soft ${posterSizeClass}`}
+      >
         <Poster
           src={poster.src}
           onError={poster.onError}

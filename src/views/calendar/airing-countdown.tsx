@@ -6,5 +6,7 @@ export function AiringCountdown({ atMs }: { atMs: number }) {
   const now = useNow(30000);
   const remaining = atMs - now;
   if (remaining <= 0) return null;
-  return <span className="text-accent"> · {t("in {time}", { time: formatRemaining(remaining) })}</span>;
+  return (
+    <span className="text-accent"> · {t("in {time}", { time: formatRemaining(remaining) })}</span>
+  );
 }

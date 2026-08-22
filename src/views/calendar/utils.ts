@@ -4,8 +4,18 @@ import type { Meta } from "@/lib/cinemeta";
 import type { Cell } from "./types";
 
 export const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export const WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -44,7 +54,9 @@ export function calendarToMeta(item: CalendarItem): Meta {
   };
 }
 
-export function calendarEpisodeHint(item: CalendarItem): { season: number; episode: number } | null {
+export function calendarEpisodeHint(
+  item: CalendarItem,
+): { season: number; episode: number } | null {
   const m = item.id.match(/:(\d+):(\d+)$/);
   if (!m) return null;
   return { season: Number(m[1]), episode: Number(m[2]) };

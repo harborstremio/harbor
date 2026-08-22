@@ -1,4 +1,10 @@
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, SlidersHorizontal, Star } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+  Star,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyCalendarFilter,
@@ -172,15 +178,16 @@ export function CalendarView() {
   };
 
   const todayISO = todayLocalISO();
-  const dayModalItems = dayModal ? grouped.get(dayModal) ?? [] : [];
+  const dayModalItems = dayModal ? (grouped.get(dayModal) ?? []) : [];
 
   const showAllControls = source === "all";
   const showPremiereFilters = source === "simkl-anticipated";
   const hideTypeTag = source === "anime";
   const filtersActiveCount = buildActiveCount(settings.customCalendar);
-  const filters = settings.hideContent.anime || source === "all"
-    ? FILTERS.filter((f) => f.id !== "anime")
-    : FILTERS;
+  const filters =
+    settings.hideContent.anime || source === "all"
+      ? FILTERS.filter((f) => f.id !== "anime")
+      : FILTERS;
 
   let body: React.ReactNode;
   if (source === "library" && !authKey) {
@@ -347,9 +354,7 @@ export function CalendarView() {
                 {filters.map((f) => {
                   const active = filter === f.id;
                   const count =
-                    f.id === "all"
-                      ? filtered.length
-                      : applyCalendarFilter(items, f.id).length;
+                    f.id === "all" ? filtered.length : applyCalendarFilter(items, f.id).length;
                   return (
                     <button
                       key={f.id}

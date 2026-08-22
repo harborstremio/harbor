@@ -89,12 +89,7 @@ export async function fetchAniListAiringCalendar(
     while (!pastLast && next <= MAX_PAGES && inflight < CONCURRENCY) {
       const page = next++;
       inflight++;
-      anilistRequest<AiringResponse>(
-        AIRING_QUERY,
-        { start, end, page },
-        undefined,
-        true,
-      )
+      anilistRequest<AiringResponse>(AIRING_QUERY, { start, end, page }, undefined, true)
         .then((data) => {
           const nodes = data?.Page?.airingSchedules ?? [];
           pages.set(page, nodes);
