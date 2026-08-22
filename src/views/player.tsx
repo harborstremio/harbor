@@ -83,6 +83,7 @@ import { markStreamDead, STUB_TTL_MS } from "@/lib/dead-streams";
 import type { VolumeIndicatorState } from "@/components/player/volume-indicator";
 import type { ToastInfo } from "@/views/addons/addons-types";
 import { SFX } from "@/lib/sfx";
+import { clearMediaControls, updateMediaControls } from "@/lib/media-session";
 
 let hdrFallbackNoticeShown = false;
 
@@ -659,6 +660,23 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     videoFill,
     onVolumeFeedback: showVolumeFeedback,
   });
+
+  useEffect(() => {
+    const currentEpisode = src.episode;
+    const subtitle = currentEpisode
+      ? `S${currentEpisode.season} E${currentEpisode.episode}${
+          currentEpisode.name ? ` · ${currentEpisode.name}` : ""
+        }`
+      : "";
+    updateMediaControls(playing, src.meta.name, subtitle);
+  }, [playing, src.episode, src.meta.name]);
+
+  useEffect(
+    () => () => {
+      clearMediaControls();
+    },
+    [],
+  );
 
   const { pendingResumeSec, acknowledgeResume, pendingSeekSec, clearPendingSeek } = useBridgeLoad({
     bridgeRef,

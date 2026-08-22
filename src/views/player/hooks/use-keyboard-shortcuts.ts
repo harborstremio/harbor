@@ -5,6 +5,13 @@ import { writePlayerVolume } from "@/lib/player-volume";
 import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
+import {
+  dispatchMediaControlAction,
+  isMediaControlAction,
+  mediaKeyGate,
+  type MediaControlAction,
+} from "@/lib/media-session";
+import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { useSettings } from "@/lib/settings";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
@@ -96,6 +103,25 @@ export function useKeyboardShortcuts(params: {
     baseRate: number;
   }>({ key: null, timer: null, engaged: false, baseRate: 1 });
   const [holdSpeedActive, setHoldSpeedActive] = useState(false);
+  const mediaRef = useRef({
+    playing: snap.status === "playing",
+    playPause: playPauseToggle,
+    next: onNextEp,
+    previous: onPrevEp,
+    hasNext: !!hasNextEp,
+    hasPrevious: !!hasPrevEp,
+  });
+
+  useEffect(() => {
+    mediaRef.current = {
+      playing: snap.status === "playing",
+      playPause: playPauseToggle,
+      next: onNextEp,
+      previous: onPrevEp,
+      hasNext: !!hasNextEp,
+      hasPrevious: !!hasPrevEp,
+    };
+  }, [hasNextEp, hasPrevEp, onNextEp, onPrevEp, playPauseToggle, snap.status]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -103,20 +129,43 @@ export function useKeyboardShortcuts(params: {
 
       const binding = eventToBinding(e);
       const match = (id: HotkeyId): boolean => effectiveBinding(id, overrides) === binding;
+      const dispatchMediaKey = (action: MediaControlAction) =>
+        dispatchMediaControlAction(
+          action,
+          {
+            playing: snap.status === "playing",
+            playPause: playPauseToggle,
+            next: onNextEp,
+            previous: onPrevEp,
+            hasNext: !!hasNextEp,
+            hasPrevious: !!hasPrevEp,
+          },
+          mediaKeyGate,
+        );
 
       if (e.key === "MediaPlayPause") {
         e.preventDefault();
-        playPauseToggle();
+        dispatchMediaKey("playpause");
+        return;
+      }
+      if (e.key === "MediaPlay") {
+        e.preventDefault();
+        dispatchMediaKey("play");
+        return;
+      }
+      if (e.key === "MediaPause" || e.key === "MediaStop") {
+        e.preventDefault();
+        dispatchMediaKey(e.key === "MediaPause" ? "pause" : "stop");
         return;
       }
       if (e.key === "MediaTrackNext" && hasNextEp && onNextEp) {
         e.preventDefault();
-        onNextEp();
+        dispatchMediaKey("next");
         return;
       }
       if (e.key === "MediaTrackPrevious" && hasPrevEp && onPrevEp) {
         e.preventDefault();
-        onPrevEp();
+        dispatchMediaKey("previous");
         return;
       }
 
@@ -452,6 +501,33 @@ export function useKeyboardShortcuts(params: {
     svpActive,
     update,
   ]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
+    let disposed = false;
+    let stopListening: (() => void) | undefined;
+
+    void (async () => {
+      try {
+        const { listen } = await import("@tauri-apps/api/event");
+        const unlisten = makeSafeTauriUnlisten(
+          await listen<unknown>("harbor://media-key", (event) => {
+            if (!isMediaControlAction(event.payload)) return;
+            dispatchMediaControlAction(event.payload, mediaRef.current, mediaKeyGate);
+          }),
+        );
+        if (disposed) unlisten();
+        else stopListening = unlisten;
+      } catch (error) {
+        console.warn("[media-controls] failed to register native controls", error);
+      }
+    })();
+
+    return () => {
+      disposed = true;
+      stopListening?.();
+    };
+  }, []);
 
   return { holdSpeedActive };
 }

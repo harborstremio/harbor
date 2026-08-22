@@ -16,6 +16,7 @@ mod fullscreen;
 mod hdr_overlay;
 mod http_fetch;
 mod local_lib;
+mod media_controls;
 mod modal_overlay;
 mod mpv;
 mod multiview;
@@ -540,6 +541,7 @@ pub fn run() {
             webview_helpers::install_process_failure_watchdog(&app.handle(), "main");
             #[cfg(windows)]
             install_maximize_guard(&app.handle());
+            media_controls::ensure_started_on_setup(&app.handle());
             ensure_window_on_screen(&app.handle());
             // Fail-open: if PageLoadEvent::Finished never arrives (WebView hang),
             // still show the main window so the user is not stuck on a blank frame.
@@ -644,6 +646,8 @@ pub fn run() {
             harbor_startup_ready,
             close_aux_windows,
             power::power_inhibit,
+            media_controls::media_controls_update,
+            media_controls::media_controls_clear,
             harbor_set_webview_memory_low,
             harbor_set_webview_visible,
             harbor_try_suspend_webview,
