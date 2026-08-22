@@ -23,15 +23,22 @@ export function HdrStageBridge({
   active,
   payload,
   handlers,
+  onInput,
 }: {
   active: boolean;
   payload: HdrStagePayload;
   handlers: HdrStageHandlers;
+  onInput?: () => void;
 }) {
   const handlersRef = useRef(handlers);
   handlersRef.current = handlers;
   const payloadRef = useRef(payload);
   payloadRef.current = payload;
+  const onInputRef = useRef(onInput);
+
+  useEffect(() => {
+    onInputRef.current = onInput;
+  }, [onInput]);
 
   useEffect(() => {
     if (!active) return;
@@ -57,24 +64,29 @@ export function HdrStageBridge({
         if (cancelled) off();
         else offs.push(off);
       };
+      const bindInput = async (event: string, fn: (p: unknown) => void) =>
+        bind(event, (inputPayload) => {
+          onInputRef.current?.();
+          fn(inputPayload);
+        });
       const h = () => handlersRef.current;
-      await bind("hdr-stage://play-pause", () => h().playPause());
-      await bind("hdr-stage://fullscreen", () => h().fullscreen());
-      await bind("hdr-stage://seek", (p) => h().seek((p as { sec: number }).sec));
-      await bind("hdr-stage://seek-step", (p) => h().seekStep((p as { delta: number }).delta));
-      await bind("hdr-stage://remember-sub", (p) => {
+      await bindInput("hdr-stage://play-pause", () => h().playPause());
+      await bindInput("hdr-stage://fullscreen", () => h().fullscreen());
+      await bindInput("hdr-stage://seek", (p) => h().seek((p as { sec: number }).sec));
+      await bindInput("hdr-stage://seek-step", (p) => h().seekStep((p as { delta: number }).delta));
+      await bindInput("hdr-stage://remember-sub", (p) => {
         const lang = (p as { lang: string | null }).lang;
         h().rememberSub(lang ? { lang } : null);
       });
-      await bind("hdr-stage://pip", () => h().pip());
-      await bind("hdr-stage://cast", () => h().cast());
-      await bind("hdr-stage://back", () => h().back());
-      await bind("hdr-stage://prev-ep", () => h().prevEp());
-      await bind("hdr-stage://next-ep", () => h().nextEp());
-      await bind("hdr-stage://pick-another", () => h().pickAnother());
-      await bind("hdr-stage://screenshot", () => h().screenshot());
+      await bindInput("hdr-stage://pip", () => h().pip());
+      await bindInput("hdr-stage://cast", () => h().cast());
+      await bindInput("hdr-stage://back", () => h().back());
+      await bindInput("hdr-stage://prev-ep", () => h().prevEp());
+      await bindInput("hdr-stage://next-ep", () => h().nextEp());
+      await bindInput("hdr-stage://pick-another", () => h().pickAnother());
+      await bindInput("hdr-stage://screenshot", () => h().screenshot());
       await bind("hdr-stage://menu-open", (p) => h().menuOpen((p as { open: boolean }).open));
-      await bind("hdr-stage://activity", () => h().activity());
+      await bindInput("hdr-stage://activity", () => h().activity());
       await bind("hdr-stage://request", () => void hdrOverlayEmitProps(payloadRef.current));
     })();
     return () => {

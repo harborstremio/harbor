@@ -23,6 +23,7 @@ export function useRemotePlaybackBinding(params: {
   hasPrevEpisode?: boolean;
   hasNextEpisode?: boolean;
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
+  onActivity?: () => void;
 }) {
   const {
     bridgeRef,
@@ -42,6 +43,7 @@ export function useRemotePlaybackBinding(params: {
     hasPrevEpisode,
     hasNextEpisode,
     onVolumeFeedback,
+    onActivity,
   } = params;
 
   // Keep latest callbacks in refs so we can re-register media/snap without
@@ -55,6 +57,7 @@ export function useRemotePlaybackBinding(params: {
     onPrevEpisode,
     onNextEpisode,
     onVolumeFeedback,
+    onActivity,
   });
   callbacksRef.current = {
     playCast,
@@ -65,6 +68,7 @@ export function useRemotePlaybackBinding(params: {
     onPrevEpisode,
     onNextEpisode,
     onVolumeFeedback,
+    onActivity,
   };
 
   useEffect(() => {
@@ -86,6 +90,7 @@ export function useRemotePlaybackBinding(params: {
       hasPrevEpisode,
       hasNextEpisode,
       onVolumeFeedback: (volume, muted) => cbs.onVolumeFeedback?.(volume, muted),
+      onActivity: () => cbs.onActivity?.(),
     };
     // Update in place — do NOT clear to null between dep changes.
     // Clearing was broadcasting a brief idle snapshot (~every snap tick).

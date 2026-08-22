@@ -8,6 +8,7 @@ import {
 import { languageName } from "@/lib/subtitles/language";
 import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
+import { clampStillWatchingThreshold } from "@/lib/still-watching";
 import { resolveUiLanguage } from "@/lib/i18n";
 import { normalizePosterCardSettings } from "@/lib/poster-backdrop-expansion";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
@@ -164,6 +165,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       ...parsed,
       ...posterCards,
       posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
+      stillWatchingAfter: clampStillWatchingThreshold(parsed.stillWatchingAfter),
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
       subProvidersEnabled: {

@@ -86,7 +86,9 @@ export type PlayerOverlayLayersProps = {
   pillsVisible: boolean;
   allowAutoSkip: boolean;
   seekTo: (sec: number) => void;
-  goToEpisode: (ep: PlayEpisode | null) => void;
+  playNext: () => void;
+  playPrevious: () => void;
+  hasPreviousEpisode: boolean;
   setAutoNextCancelled: (v: boolean) => void;
   showChrome: boolean;
   ab: Tools["ab"];
@@ -270,7 +272,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         pillsVisible={p.pillsVisible}
         allowAutoSkip={p.allowAutoSkip}
         onSkip={p.seekTo}
-        onNextEpisode={() => p.goToEpisode(p.adjacentNext)}
+        onNextEpisode={p.playNext}
         onCancelAutoNext={() => p.setAutoNextCancelled(true)}
         showChrome={p.showChrome}
         ab={p.ab}
@@ -338,10 +340,10 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
               ? `S${p.src.episode.imdbSeason ?? p.src.episode.season} · E${String(p.src.episode.imdbEpisode ?? p.src.episode.episode).padStart(2, "0")}`
               : undefined
           }
-          hasPrevEp={p.canChangeEpisode && !!p.adjacentPrev}
-          hasNextEp={p.canChangeEpisode && !!p.adjacentNext}
-          onPrevEp={() => p.goToEpisode(p.adjacentPrev)}
-          onNextEp={() => p.goToEpisode(p.adjacentNext)}
+          hasPrevEp={p.hasPreviousEpisode}
+          hasNextEp={p.hasNextEpisode}
+          onPrevEp={p.playPrevious}
+          onNextEp={p.playNext}
           metaImdbId={p.resolvedImdbId}
           metaTitle={p.src.meta.name ?? null}
           metaReleaseDate={p.src.meta.releaseDate ?? null}

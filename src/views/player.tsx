@@ -9,7 +9,7 @@ import { nameColor } from "@/lib/together/colors";
 import { useTogether } from "@/lib/together/provider";
 import { buildPlayInvite } from "@/lib/together/build-invite";
 import { useView, type PlayerSrc, type PlayEpisode } from "@/lib/view";
-import { queueShift, useQueue, useSleepAtEnd } from "@/lib/queue";
+import { queueIndexOf, useQueue, useSleepAtEnd } from "@/lib/queue";
 import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
 import { isLocalUrl } from "@/lib/player/local-url";
@@ -57,6 +57,8 @@ import { useGifRecorder } from "./player/hooks/use-gif-recorder";
 import { useSleepTimer } from "./player/hooks/use-sleep-timer";
 import { useAutoEndExit } from "./player/hooks/use-auto-end-exit";
 import { useQueueAdvance } from "./player/hooks/use-queue-advance";
+import { useQueueNav } from "./player/hooks/use-queue-nav";
+import { useStillWatching } from "./player/hooks/use-still-watching";
 import { usePipMode } from "./player/hooks/use-pip-mode";
 import { usePlaybackControls } from "./player/hooks/use-playback-controls";
 import { useRemotePlaybackBinding } from "@/lib/remote/use-remote-playback-binding";
@@ -78,6 +80,7 @@ import { PlayerOverlayLayers, type PlayerOverlayLayersProps } from "./player/pla
 import { SourceErrorCard } from "./player/source-error-card";
 import { LeaveConfirmModal } from "@/components/player/leave-confirm-modal";
 import { HdrStageBridge } from "./player/hdr-stage-bridge";
+import { StillWatchingPrompt } from "./player/still-watching-prompt";
 import { setSkipSegmentsView } from "@/lib/skip-intro/segment-store";
 import { markStreamDead, STUB_TTL_MS } from "@/lib/dead-streams";
 import type { VolumeIndicatorState } from "@/components/player/volume-indicator";
@@ -253,10 +256,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   });
 
   const canChangeEpisode = src.meta.type === "series" && (!inRoom || isHost);
-  const adjacentRef = useRef(adjacent);
-  adjacentRef.current = adjacent;
-  const onPrevEpisode = useCallback(() => goToEpisode(adjacentRef.current.prev), [goToEpisode]);
-  const onNextEpisode = useCallback(() => goToEpisode(adjacentRef.current.next), [goToEpisode]);
 
   const roomGuest = inRoom && !isHost;
   const broadcastEpisode = useCallback(
@@ -277,17 +276,9 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
 
   const queue = useQueue();
   const sleepAtEndArmed = useSleepAtEnd();
-  const queueOrSleepArmed = queue.length > 0 || sleepAtEndArmed;
-
-  useAutoNextEpisode({
-    src,
-    snap,
-    nextEp: settings.autoPlayNextEpisode && !queueOrSleepArmed ? adjacent.next : null,
-    canChangeEpisode,
-    cancelled: autoNextCancelled,
-    startedNearEndRef,
-    goToEpisode,
-  });
+  const queueOwnsCurrent = queueIndexOf(src.meta, src.episode) >= 0;
+  const queueOrSleepArmed = queueOwnsCurrent || sleepAtEndArmed;
+  const showAdjacentUpNext = !queueOwnsCurrent && canChangeEpisode && !autoNextCancelled;
 
   const quickToolsEnabled = !inRoom || isHost;
   const ab = useAbLoop({
@@ -370,6 +361,21 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     src,
     replacePlayerSrc,
   });
+  const isLiveLike =
+    liveOverlay.isLive ||
+    !!src.meta.id?.startsWith("iptv:") ||
+    (!!src.meta.type &&
+      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+  const { hasNext, hasPrevious, playNext, playPrevious } = useQueueNav({
+    src,
+    adjacent,
+    canChangeEpisode,
+    canNavigate: !inRoom || isHost,
+    isLiveLike,
+    queueDrivesNav: settings.queueDrivesNav,
+    goToEpisode,
+    openPicker,
+  });
 
   usePlaybackPresence({ src, snap, season, episode, liveGuideOpen: liveOverlay.open });
   useCastReturnPublish({
@@ -421,6 +427,46 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     settings.playerConfirmLeave,
     update,
   ]);
+  const requestStillWatchingStop = useCallback(() => {
+    void requestPlayerClose({
+      drawMode: false,
+      setDrawMode,
+      closePlayer,
+      playerEscExitsFullscreen: false,
+      playerConfirmLeave: true,
+      onRememberConfirmLeave: () => update({ playerConfirmLeave: false }),
+    });
+  }, [setDrawMode, closePlayer, update]);
+  const {
+    prompt: stillWatchingPrompt,
+    gateAdvance,
+    continueWatching,
+    stopWatching,
+    resetStillWatching,
+  } = useStillWatching({
+    storeKey: src.meta.id,
+    enabled: settings.stillWatching,
+    threshold: settings.stillWatchingAfter,
+    onContinue: goToEpisode,
+    onStop: requestStillWatchingStop,
+  });
+  const autoAdvanceEpisode = useCallback(
+    (nextEpisode: PlayEpisode | null) => {
+      if (nextEpisode && gateAdvance(nextEpisode)) return;
+      goToEpisode(nextEpisode);
+    },
+    [gateAdvance, goToEpisode],
+  );
+
+  useAutoNextEpisode({
+    src,
+    snap,
+    nextEp: settings.autoPlayNextEpisode && !queueOrSleepArmed ? adjacent.next : null,
+    canChangeEpisode,
+    cancelled: autoNextCancelled,
+    startedNearEndRef,
+    goToEpisode: autoAdvanceEpisode,
+  });
 
   useKeyboardNavigation({
     // TV focus navigation intentionally owns arrows and Space while enabled.
@@ -602,11 +648,12 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     seekCast: cast.seekCast,
     stopCast: cast.stopCast,
     onPickDevice: cast.onPickDevice,
-    onPrevEpisode,
-    onNextEpisode,
-    hasPrevEpisode: canChangeEpisode && !!adjacent.prev,
-    hasNextEpisode: canChangeEpisode && !!adjacent.next,
+    onPrevEpisode: playPrevious,
+    onNextEpisode: playNext,
+    hasPrevEpisode: hasPrevious,
+    hasNextEpisode: hasNext,
     onVolumeFeedback: showVolumeFeedback,
+    onActivity: resetStillWatching,
   });
 
   const videoFill = useVideoFill(bridgeRef, src.url, playing);
@@ -627,9 +674,10 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     togglePip: togglePipMode,
     fullscreen,
     cycleSubtitles,
-    canChangeEpisode,
-    adjacent,
-    goToEpisode,
+    playNext,
+    playPrevious,
+    hasNextEpisode: hasNext,
+    hasPreviousEpisode: hasPrevious,
     toggleSwitcher: () => setSwitcherOpen((v) => !v),
     toggleEpisodePanel: () => setEpisodePanelOpen((v) => !v),
     liveOverlay,
@@ -683,11 +731,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
 
   useStubDetection({ src, snap, onStub: onStubEject, instantPlay: settings.instantPlay });
 
-  const isLiveLike =
-    liveOverlay.isLive ||
-    !!src.meta.id?.startsWith("iptv:") ||
-    (!!src.meta.type &&
-      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
   const reloadLive = useCallback(() => {
     bridgeRef.current?.load({
       url: src.url,
@@ -716,6 +759,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     snap,
     queue,
     isLive: isLiveLike,
+    canAdvance: !inRoom || isHost,
     startedNearEndRef,
     openPicker,
     exitPlayer,
@@ -767,8 +811,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     setSkipSegmentsView(skipSegments);
     return () => setSkipSegmentsView([]);
   }, [skipSegments]);
-  const hasNextEpisodeNow = canChangeEpisode && !!adjacent.next;
-
   useMpvEmbed({ engine, settings });
 
   useSdrBoostGate({
@@ -898,14 +940,16 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     pendingResumeSec,
     pendingSeekSec,
     skipSegments,
-    hasNextEpisode: hasNextEpisodeNow,
-    hasNextEpDisplay: canChangeEpisode && !autoNextCancelled && !!adjacent.next,
-    nextEp: canChangeEpisode && !autoNextCancelled ? adjacent.next : null,
+    hasNextEpisode: hasNext,
+    hasNextEpDisplay: showAdjacentUpNext && !!adjacent.next,
+    nextEp: showAdjacentUpNext ? adjacent.next : null,
     nextEpMask,
     pillsVisible: hasStarted || !inRoom,
     allowAutoSkip: !roomGuest,
     seekTo,
-    goToEpisode,
+    playNext,
+    playPrevious,
+    hasPreviousEpisode: hasPrevious,
     setAutoNextCancelled,
     showChrome,
     ab,
@@ -1030,6 +1074,14 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
         }}
       />
       {!hdrStageActive && <PlayerOverlayLayers {...overlayProps} />}
+      {stillWatchingPrompt && (
+        <StillWatchingPrompt
+          show={src.meta.name ?? ""}
+          nextLabel={`S${stillWatchingPrompt.season} E${stillWatchingPrompt.episode}`}
+          onContinue={continueWatching}
+          onStop={stopWatching}
+        />
+      )}
       {sourceError && (
         <SourceErrorCard
           error={sourceError}
@@ -1046,6 +1098,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       <LeaveConfirmModal />
       <HdrStageBridge
         active={hdrStageRequested}
+        onInput={resetStillWatching}
         payload={{
           snap,
           src,
@@ -1056,8 +1109,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           resolvedImdbId,
           tmdbKey: settings.tmdbKey ?? null,
           canChangeEpisode,
-          hasPrevEp: canChangeEpisode && !!adjacent.prev,
-          hasNextEp: canChangeEpisode && !!adjacent.next,
+          hasPrevEp: hasPrevious,
+          hasNextEp: hasNext,
           pipMode,
         }}
         handlers={{
@@ -1069,17 +1122,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           pip: togglePipMode,
           cast: () => cast.openCastMenu(null),
           back: closePlayer,
-          prevEp: () => goToEpisode(adjacent.prev),
-          nextEp: () => {
-            if (queue.length > 0) {
-              const item = queueShift();
-              if (item) {
-                openPicker(item.meta, item.episode, { autoPlay: true, resume: true });
-                return;
-              }
-            }
-            goToEpisode(adjacent.next);
-          },
+          prevEp: playPrevious,
+          nextEp: playNext,
           pickAnother: pickAnotherOrGuide,
           screenshot: () => frameGrab.trigger(),
           menuOpen: setAnyMenuOpen,

@@ -62,7 +62,9 @@ function CwSuggestionRow({
   const episode = cwEpisode(card);
   const queued = useIsQueued(meta, episode);
   const pct = Math.round(card.progress * 100);
-  const epLabel = episode ? `S${episode.season} · E${String(episode.episode).padStart(2, "0")}` : null;
+  const epLabel = episode
+    ? `S${episode.season} · E${String(episode.episode).padStart(2, "0")}`
+    : null;
   return (
     <div className="group flex items-center gap-3 rounded-xl bg-white/[0.04] p-2 transition-colors hover:bg-white/[0.07]">
       <button
@@ -115,7 +117,10 @@ export function QueuePanel({
   const { settings } = useSettings();
   const queue = useQueue();
   const sleepAtEnd = useSleepAtEnd();
-  const [upcoming, setUpcoming] = useState<PlayEpisode[]>([]);
+  const [upcomingResult, setUpcomingResult] = useState<{
+    key: string;
+    episodes: PlayEpisode[];
+  } | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
 
@@ -137,24 +142,32 @@ export function QueuePanel({
     (currentMeta.type === "series" ||
       currentMeta.id.startsWith("tmdb:tv:") ||
       /^(kitsu|mal|anilist):/.test(currentMeta.id));
+  const upcomingKey =
+    queue.length === 0 && isSeriesCurrent && currentMeta && currentEpisode
+      ? `${currentMeta.id}:${currentEpisode.season}:${currentEpisode.episode}:${settings.tmdbKey}`
+      : null;
+  const upcoming =
+    upcomingKey != null && upcomingResult?.key === upcomingKey ? upcomingResult.episodes : [];
 
   useEffect(() => {
-    if (queue.length > 0 || !isSeriesCurrent || !currentMeta || !currentEpisode) {
-      setUpcoming([]);
-      return;
-    }
+    if (!upcomingKey || !currentMeta || !currentEpisode) return;
     let cancelled = false;
-    fetchUpcomingEpisodes(currentMeta, { season: currentEpisode.season, episode: currentEpisode.episode }, 8, {
-      tmdbKey: settings.tmdbKey,
-    })
+    fetchUpcomingEpisodes(
+      currentMeta,
+      { season: currentEpisode.season, episode: currentEpisode.episode },
+      8,
+      {
+        tmdbKey: settings.tmdbKey,
+      },
+    )
       .then((eps) => {
-        if (!cancelled) setUpcoming(eps);
+        if (!cancelled) setUpcomingResult({ key: upcomingKey, episodes: eps });
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [queue.length, isSeriesCurrent, currentMeta, currentEpisode, settings.tmdbKey]);
+  }, [upcomingKey, currentMeta, currentEpisode, settings.tmdbKey]);
 
   const cwList = useContinueWatching(currentMeta?.id);
   const totalMins = queue.reduce((sum, i) => sum + runtimeMinutes(i), 0);
@@ -196,7 +209,11 @@ export function QueuePanel({
                     </span>
                     <span className="text-[12px] text-white/45">{episodeLabel(ep)}</span>
                   </div>
-                  <Play size={16} className="shrink-0 text-white/40 group-hover:text-white" fill="currentColor" />
+                  <Play
+                    size={16}
+                    className="shrink-0 text-white/40 group-hover:text-white"
+                    fill="currentColor"
+                  />
                 </button>
               ))}
             </div>
@@ -235,7 +252,9 @@ export function QueuePanel({
             type="button"
             onClick={() => setSleepAtEnd(!sleepAtEnd)}
             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-semibold transition-colors ${
-              sleepAtEnd ? "bg-white text-black" : "bg-white/[0.08] text-white/70 ring-1 ring-white/12 hover:bg-white/15"
+              sleepAtEnd
+                ? "bg-white text-black"
+                : "bg-white/[0.08] text-white/70 ring-1 ring-white/12 hover:bg-white/15"
             }`}
           >
             <Moon size={15} strokeWidth={2.3} />
@@ -281,7 +300,9 @@ export function QueuePanel({
                 dragId === item.id ? "opacity-40" : ""
               } ${overId === item.id && dragId !== item.id ? "ring-2 ring-white/40" : ""}`}
             >
-              <span className="w-6 shrink-0 text-center text-[13px] font-bold text-white/35">{i + 1}</span>
+              <span className="w-6 shrink-0 text-center text-[13px] font-bold text-white/35">
+                {i + 1}
+              </span>
               <div className="h-14 w-24 shrink-0 overflow-hidden rounded-lg bg-white/[0.06]">
                 {(item.meta.background || item.meta.poster) && (
                   <img
@@ -293,17 +314,16 @@ export function QueuePanel({
                 )}
               </div>
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="line-clamp-1 text-[14.5px] font-semibold text-white">{item.meta.name}</span>
+                <span className="line-clamp-1 text-[14.5px] font-semibold text-white">
+                  {item.meta.name}
+                </span>
                 <span className="text-[12.5px] text-white/45">
                   {[epLabel, mins > 0 ? `${mins}m` : null].filter(Boolean).join(" · ")}
                 </span>
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  queueRemove(item.id);
-                  onPlay(item.meta, item.episode);
-                }}
+                onClick={() => onPlay(item.meta, item.episode)}
                 aria-label={t("Play")}
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform hover:scale-105"
               >

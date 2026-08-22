@@ -101,14 +101,23 @@ function HdrOverlayChrome() {
 
   useEffect(() => {
     let last = 0;
+    const onInput = () => {
+      void hdrOverlayEmitAction("hdr-stage://activity", {});
+    };
     const onMove = () => {
       const now = performance.now();
       if (now - last < 200) return;
       last = now;
-      void hdrOverlayEmitAction("hdr-stage://activity", {});
+      onInput();
     };
     window.addEventListener("pointermove", onMove);
-    return () => window.removeEventListener("pointermove", onMove);
+    window.addEventListener("pointerdown", onInput);
+    window.addEventListener("keydown", onInput);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerdown", onInput);
+      window.removeEventListener("keydown", onInput);
+    };
   }, []);
 
   if (!payload) return <div className="fixed inset-0" style={{ background: "transparent" }} />;

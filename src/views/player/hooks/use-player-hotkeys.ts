@@ -1,6 +1,5 @@
 import { useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
-import type { PlayEpisode } from "@/lib/view";
 import { useClipRecorder } from "./use-clip-recorder";
 import { useFrameGrab } from "./use-frame-grab";
 import { useGifRecorder } from "./use-gif-recorder";
@@ -24,9 +23,10 @@ export function usePlayerHotkeys(params: {
   togglePip: () => void;
   fullscreen: boolean;
   cycleSubtitles: () => void;
-  canChangeEpisode: boolean;
-  adjacent: { prev: PlayEpisode | null; next: PlayEpisode | null };
-  goToEpisode: (ep: PlayEpisode | null) => void;
+  playNext: () => void;
+  playPrevious: () => void;
+  hasNextEpisode: boolean;
+  hasPreviousEpisode: boolean;
   toggleSwitcher: () => void;
   toggleEpisodePanel: () => void;
   liveOverlay: ReturnType<typeof useLiveChannelOverlay>;
@@ -57,9 +57,10 @@ export function usePlayerHotkeys(params: {
     togglePip,
     fullscreen,
     cycleSubtitles,
-    canChangeEpisode,
-    adjacent,
-    goToEpisode,
+    playNext,
+    playPrevious,
+    hasNextEpisode,
+    hasPreviousEpisode,
     toggleSwitcher,
     toggleEpisodePanel,
     liveOverlay,
@@ -93,10 +94,10 @@ export function usePlayerHotkeys(params: {
     setShowStats,
     metaId,
     svpActive,
-    onNextEp: canChangeEpisode && adjacent.next ? () => goToEpisode(adjacent.next) : undefined,
-    onPrevEp: canChangeEpisode && adjacent.prev ? () => goToEpisode(adjacent.prev) : undefined,
-    hasNextEp: canChangeEpisode && !!adjacent.next,
-    hasPrevEp: canChangeEpisode && !!adjacent.prev,
+    onNextEp: hasNextEpisode ? playNext : undefined,
+    onPrevEp: hasPreviousEpisode ? playPrevious : undefined,
+    hasNextEp: hasNextEpisode,
+    hasPrevEp: hasPreviousEpisode,
     toggleSwitcher,
     toggleEpisodePanel,
     toggleGuide: () => {

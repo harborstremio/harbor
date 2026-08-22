@@ -309,6 +309,9 @@ export type Settings = {
   bandwidthMbps: number;
   nextEpisodeLeadSec: number;
   autoPlayNextEpisode: boolean;
+  queueDrivesNav: boolean;
+  stillWatching: boolean;
+  stillWatchingAfter: number;
   keyboardPauseShowsControls: boolean;
   hideWatchedInCatalogs: boolean;
   hideUnreleased: boolean;

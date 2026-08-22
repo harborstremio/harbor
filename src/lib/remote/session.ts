@@ -41,6 +41,8 @@ export type RemotePlaybackBinding = {
   hasNextEpisode?: boolean;
   /** Show the in-player volume HUD (same as wheel / hotkeys). */
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
+  /** Record a genuine remote interaction with the active player. */
+  onActivity?: () => void;
 };
 
 type StickyMedia = {
@@ -60,7 +62,10 @@ type StickyMedia = {
   canToggleSubtitles: boolean;
 };
 
-function subtitleFlags(b: RemotePlaybackBinding): { subtitlesOn: boolean; canToggleSubtitles: boolean } {
+function subtitleFlags(b: RemotePlaybackBinding): {
+  subtitlesOn: boolean;
+  canToggleSubtitles: boolean;
+} {
   const casting = !!b.castDevice;
   const tracks = b.snap.subtitleTracks ?? [];
   return {
@@ -279,9 +284,7 @@ export function buildRemoteSnapshot(positionSec?: number): RemoteSnapshot {
   const playing = casting
     ? b.castPlaying
     : status === "playing" || status === "loading" || status === "ready";
-  const pos = casting
-    ? b.castPositionSec || positionSec || 0
-    : (positionSec ?? b.snap.positionSec);
+  const pos = casting ? b.castPositionSec || positionSec || 0 : (positionSec ?? b.snap.positionSec);
   const target: RemoteTarget = casting
     ? {
         kind: "cast",
@@ -328,6 +331,9 @@ export function buildRemoteSnapshot(positionSec?: number): RemoteSnapshot {
 
 export async function dispatchRemoteCommand(command: RemoteCommand): Promise<void> {
   const b = binding;
+  if (command.action !== "ping" && command.action !== "castDiscover") {
+    b?.onActivity?.();
+  }
 
   switch (command.action) {
     case "ping":
