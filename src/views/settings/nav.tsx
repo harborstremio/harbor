@@ -4367,6 +4367,12 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     keywords: ["rtx hdr hotkey", "ctrl h", "nvidia video hdr", "hdr enhancement toggle"],
   },
   {
+    label: "Toggle RTX Super Resolution",
+    section: "hotkeys",
+    anchorTitle: "Player",
+    keywords: ["rtx vsr hotkey", "ctrl u", "nvidia super resolution", "video upscaling toggle"],
+  },
+  {
     label: "Seek back",
     section: "hotkeys",
     anchorTitle: "Player",

@@ -201,6 +201,7 @@ export type Settings = {
   keepSourceNextEpisode: boolean;
   playerHdrToSdr: boolean;
   playerRtxHdr: boolean;
+  playerRtxVsr: boolean;
   playerMacEdr: boolean;
   playerDisplayPanel: "auto" | "oled" | "lcd";
   playerMotionInterp: boolean;

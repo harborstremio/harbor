@@ -68,6 +68,7 @@ export type MpvOptions = {
   anime4k: boolean;
   hdrToSdr: boolean;
   rtxHdr?: boolean;
+  rtxVsr?: boolean;
   embed?: boolean;
   anime4kShaders?: string[];
   d3d11Flip?: boolean;
@@ -378,6 +379,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             anime4k: opts.anime4k,
             hdrToSdr,
             rtxHdr: opts.rtxHdr === true,
+            rtxVsr: opts.rtxVsr === true,
             embed: opts.embed === true,
             anime4kShaders: opts.anime4kShaders ?? [],
             d3d11Flip: opts.d3d11Flip === true,

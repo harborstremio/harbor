@@ -114,6 +114,7 @@ export function usePlayerBridge(params: {
         anime4k: anime4kOn,
         hdrToSdr: settings.playerHdrToSdr,
         rtxHdr: settings.playerRtxHdr && !settings.playerHdrToSdr && !svpOn,
+        rtxVsr: settings.playerRtxVsr && !svpOn,
         embed: embedActive,
         d3d11Flip: settings.playerD3d11Flip,
         anime4kShaders: anime4kShadersFor(

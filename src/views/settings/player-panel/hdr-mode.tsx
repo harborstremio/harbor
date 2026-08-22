@@ -1,6 +1,6 @@
 import { useSettings } from "@/lib/settings";
 import { isWindowsDesktop } from "@/lib/platform";
-import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
+import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
 import { useT } from "@/lib/i18n";
 import { DisplayPanelSelector } from "./display-panel-selector";
 
@@ -32,6 +32,7 @@ export function HdrModePicker() {
   const svpAlwaysActive =
     settings.playerSvp && settings.svpVpyPath.length > 0 && settings.svpScope === "all";
   const rtxHdrUnavailable = isRtxHdrBlocked(settings.playerHdrToSdr, svpAlwaysActive);
+  const rtxVsrUnavailable = isRtxVsrBlocked(svpAlwaysActive);
 
   const options: Array<{
     id: HdrMode;
@@ -146,6 +147,49 @@ export function HdrModePicker() {
             <span
               className={`absolute top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
                 settings.playerRtxHdr && !rtxHdrUnavailable
+                  ? "translate-x-[22px]"
+                  : "translate-x-0.5"
+              }`}
+            />
+          </span>
+        </button>
+      )}
+      {isWindowsDesktop() && (
+        <button
+          type="button"
+          disabled={rtxVsrUnavailable}
+          onClick={() => update({ playerRtxVsr: !settings.playerRtxVsr })}
+          className={`mt-1 flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-start transition-colors ${
+            rtxVsrUnavailable
+              ? "cursor-not-allowed border-edge-soft bg-canvas/20 opacity-50"
+              : settings.playerRtxVsr
+                ? "border-ink bg-elevated"
+                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
+          }`}
+        >
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="text-[15px] font-semibold text-ink">
+                {t("RTX Video Super Resolution")}
+              </span>
+              <span className="rounded-md bg-ink/10 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-ink-muted">
+                {t("Nvidia only")}
+              </span>
+            </div>
+            <span className="text-[12.5px] leading-snug text-ink-muted">
+              {t(
+                "Upscales SDR video with AI on an Nvidia RTX GPU (turn on RTX Video Super Resolution in the Nvidia app; needs GPU decode). Experimental. Unavailable while SVP is active for the current video.",
+              )}
+            </span>
+          </div>
+          <span
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+              settings.playerRtxVsr && !rtxVsrUnavailable ? "bg-ink" : "bg-edge"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
+                settings.playerRtxVsr && !rtxVsrUnavailable
                   ? "translate-x-[22px]"
                   : "translate-x-0.5"
               }`}
