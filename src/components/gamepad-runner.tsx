@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { tvHover } from "@/lib/keyboard-navigation";
+import { dispatchTvNav, tvHover } from "@/lib/keyboard-navigation";
 import { useLiveGamepad } from "@/lib/gamepad/live";
 import { useGamepad } from "@/lib/gamepad/use-gamepad";
 import { useSettings } from "@/lib/settings";
@@ -22,12 +22,16 @@ export function GamepadRunner() {
   const cursor = useRef<HTMLDivElement>(null);
   const position = useRef({ x: innerWidth / 2, y: innerHeight / 2 });
   const axes = useRef(live.axes);
+  const motion = useRef(settings);
   const active = useRef(false);
+  const lastMove = useRef(performance.now());
+  const lastRangeStep = useRef(0);
   const hovered = useRef<HTMLElement>(null);
   const hoverPath = useRef<HTMLElement[]>([]);
   const controllerField = useRef<TextField | null>(null);
   const [keyboard, setKeyboard] = useState<TextField | null>(null);
   axes.current = live.axes;
+  motion.current = settings;
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -53,12 +57,14 @@ export function GamepadRunner() {
     const tick = (now: number) => {
       const dt = Math.min((now - previous) / 1000, 0.05);
       previous = now;
-      const { ly, rx, ry } = axes.current;
+      const { lx, ly, rx, ry } = axes.current;
+      const settings = motion.current;
       const deadzone = settings.controllerDeadzone;
       const x = Math.abs(rx) < deadzone ? 0 : rx;
       const y = Math.abs(ry) < deadzone ? 0 : ry;
       if (x || y) {
         active.current = true;
+        lastMove.current = now;
         position.current.x = Math.max(0, Math.min(innerWidth, position.current.x + x * settings.controllerCursorSpeed * dt));
         position.current.y = Math.max(0, Math.min(innerHeight, position.current.y + y * settings.controllerCursorSpeed * dt));
         const hit = document.elementFromPoint(position.current.x, position.current.y) as HTMLElement | null;
@@ -86,18 +92,28 @@ export function GamepadRunner() {
           tvHover(hovered.current = target);
         }
       }
-      cursor.current?.style.setProperty("opacity", active.current && !(document.documentElement.hasAttribute("data-player-chrome-mounted") && !document.documentElement.hasAttribute("data-player-chrome-visible")) ? "1" : "0");
+      const idle = settings.controllerCursorHideIdle && now - lastMove.current >= settings.controllerCursorHideDelaySec * 1000;
+      if (idle && hoverPath.current.length) {
+        const hit = hoverPath.current[0];
+        for (const el of hoverPath.current) el.removeAttribute("data-gamepad-hover");
+        hoverPath.current = []; hovered.current = null; tvHover(null);
+        hit.dispatchEvent(new PointerEvent("pointerout", { bubbles: true })); hit.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+      }
+      cursor.current?.style.setProperty("opacity", active.current && !idle && !(document.documentElement.hasAttribute("data-player-chrome-mounted") && !document.documentElement.hasAttribute("data-player-chrome-visible")) ? "1" : "0");
       cursor.current?.style.setProperty("transform", `translate(${position.current.x}px,${position.current.y}px) translate(-50%,-50%)`);
       if (Math.abs(ly) >= deadzone) {
         let el = document.elementFromPoint(position.current.x, position.current.y) as HTMLElement | null;
         while (el && el !== document.body && (!/(auto|scroll)/.test(getComputedStyle(el).overflowY) || el.scrollHeight <= el.clientHeight)) el = el.parentElement;
         (el ?? document.scrollingElement)?.scrollBy({ top: ly * 600 * dt });
       }
+      if (Math.abs(lx) >= deadzone && now - lastRangeStep.current > 120 && document.activeElement?.hasAttribute("data-gamepad-adjusting")) {
+        lastRangeStep.current = now; dispatchTvNav(lx < 0 ? "left" : "right");
+      }
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(frame); window.removeEventListener("blur", refresh); };
-  }, [settings.controllerDeadzone, settings.controllerCursorSpeed]);
+  }, []);
 
   useEffect(() => {
     if (!live.buttons.south) return;
@@ -108,8 +124,21 @@ export function GamepadRunner() {
       return;
     }
     const target = document.elementFromPoint(position.current.x, position.current.y);
+    document.querySelectorAll('[data-gamepad-adjusting]').forEach((el) => el.removeAttribute("data-gamepad-adjusting"));
     const field = isTextField(target) ? target : selectedField;
     if (field) { setKeyboard(field); return; }
+    if (target?.closest("[data-settings]")) {
+      const range = target.closest<HTMLInputElement>('input[type="range"]');
+      if (range) {
+        range.setAttribute("data-gamepad-adjusting", ""); range.focus({ preventScroll: true });
+        return;
+      }
+      const select = target.closest<HTMLSelectElement>("select");
+      if (select) {
+        const options = [...select.options].filter((o) => !o.disabled), next = options[(options.indexOf(select.selectedOptions[0]) + 1) % options.length];
+        if (next) { Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value")?.set?.call(select, next.value); select.dispatchEvent(new Event("change", { bubbles: true })); } return;
+      }
+    }
     const seek = target?.closest<HTMLElement>("[data-player-seekbar]");
     if (seek) {
       seek.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: position.current.x, clientY: position.current.y }));

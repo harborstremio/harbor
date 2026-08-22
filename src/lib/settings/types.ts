@@ -142,6 +142,8 @@ export type Settings = {
   remoteControlEnabled: boolean;
   controllerSupportEnabled: boolean;
   controllerBackgroundInput: boolean;
+  controllerCursorHideIdle: boolean;
+  controllerCursorHideDelaySec: number;
   controllerDeadzone: number;
   controllerCursorSpeed: number;
   controllerKeyboardSize: number;

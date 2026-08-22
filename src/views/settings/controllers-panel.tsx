@@ -49,14 +49,30 @@ export function ControllersPanel() {
           onChange={(v) => update({ controllerSupportEnabled: v })}
         />
         {enabled && (
-          <ToggleRow
-            label={t("Keep controlling Harbor in the background")}
-            sub={t(
-              "Off by default, so your controller only drives Harbor while it is the focused window. Leave it off if you play games with the same controller.",
-            )}
-            value={settings.controllerBackgroundInput}
-            onChange={(v) => update({ controllerBackgroundInput: v })}
-          />
+          <>
+            <ToggleRow
+              label={t("Hide cursor when idle")}
+              sub={t("Hide the Harbor cursor without right-stick movement.")}
+              value={settings.controllerCursorHideIdle}
+              onChange={(v) => update({ controllerCursorHideIdle: v })}
+            />
+            {settings.controllerCursorHideIdle && <SliderRow
+              label={t("Cursor hide delay")}
+              sub={t("How long the Harbor cursor remains visible after movement.")}
+              min={1} max={10} step={1}
+              value={settings.controllerCursorHideDelaySec}
+              display={t("{n} seconds", { n: settings.controllerCursorHideDelaySec })}
+              onChange={(v) => update({ controllerCursorHideDelaySec: v })}
+            />}
+            <ToggleRow
+              label={t("Keep controlling Harbor in the background")}
+              sub={t(
+                "Off by default, so your controller only drives Harbor while it is the focused window. Leave it off if you play games with the same controller.",
+              )}
+              value={settings.controllerBackgroundInput}
+              onChange={(v) => update({ controllerBackgroundInput: v })}
+            />
+          </>
         )}
       </Section>
 

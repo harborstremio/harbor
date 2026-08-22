@@ -36,6 +36,14 @@ const TV_NAV_KEY: Record<Dir | "back", string> = {
 
 export function dispatchTvNav(action: Dir | "select" | "back" | "home"): void {
   if (typeof window === "undefined") return;
+  const range = document.activeElement instanceof HTMLInputElement && document.activeElement.type === "range" && document.activeElement.hasAttribute("data-gamepad-adjusting") ? document.activeElement : null;
+  if (range && (action === "left" || action === "right")) {
+    const step = +range.step || 1, value = Math.max(+range.min, Math.min(+range.max, +range.value + (action === "left" ? -step : step)));
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(range, String(value));
+    range.dispatchEvent(new Event("input", { bubbles: true })); range.dispatchEvent(new Event("change", { bubbles: true }));
+    return;
+  }
+  if (range && action !== "select") { range.removeAttribute("data-gamepad-adjusting"); range.blur(); }
   if (action === "home") {
     const homeNav = document.querySelector('[data-harbor-nav="home"]');
     if (homeNav instanceof HTMLElement) homeNav.click();
@@ -46,6 +54,7 @@ export function dispatchTvNav(action: Dir | "select" | "back" | "home"): void {
     if (active && !isEditable(active)) active.click();
     return;
   }
+  if (action === "back" && !window.dispatchEvent(new Event("harbor:local-back", { cancelable: true }))) return;
   const anchor = action !== "back" ? hoveredEl : null;
   const fromHover = !!anchor;
   if (anchor) {

@@ -92,6 +92,8 @@ export const DEFAULT: Settings = {
   remoteControlEnabled: false,
   controllerSupportEnabled: true,
   controllerBackgroundInput: false,
+  controllerCursorHideIdle: true,
+  controllerCursorHideDelaySec: 2,
   controllerDeadzone: 0.35,
   controllerCursorSpeed: 900,
   controllerKeyboardSize: 100,
