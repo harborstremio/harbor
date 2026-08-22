@@ -11,6 +11,7 @@ import {
   useDownloads,
   type DownloadItem,
 } from "@/lib/download/downloads-store";
+import { downloadPlaybackFields } from "@/lib/download/playback-context";
 
 function fmtBytes(n: number | null): string {
   if (n == null || n <= 0) return "";
@@ -131,7 +132,8 @@ function EmptyState() {
       <div className="flex flex-col gap-1.5">
         <p className="text-[15px] font-semibold text-ink">No downloads yet</p>
         <p className="max-w-[340px] text-[13.5px] leading-relaxed text-ink-muted">
-          Open any movie or show, hover an episode, and click the download icon. Pick the exact source you want and it saves here for offline watching.
+          Open any movie or show, hover an episode, and click the download icon. Pick the exact
+          source you want and it saves here for offline watching.
         </p>
       </div>
     </div>
@@ -140,7 +142,12 @@ function EmptyState() {
 
 function ShowGroup({ group }: { group: Extract<DownloadGroup, { kind: "show" }> }) {
   const { settings } = useSettings();
-  const poster = usePosterChain(settings.rpdbKey, group.metaId, group.poster ?? undefined, "series");
+  const poster = usePosterChain(
+    settings.rpdbKey,
+    group.metaId,
+    group.poster ?? undefined,
+    "series",
+  );
   const episodes = useMemo(
     () =>
       [...group.items].sort(
@@ -186,7 +193,8 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
   );
   const pct = Math.round(d.ratio * 100);
   const downloading = d.status === "downloading";
-  const playLocal = () =>
+  const playLocal = () => {
+    const playback = downloadPlaybackFields(d.playback, d.season, d.episode, d.path);
     openPlayer({
       meta: {
         id: d.metaId,
@@ -198,11 +206,9 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
       title: d.title,
       subtitle: d.subtitle ?? undefined,
       notWebReady: true,
-      episode:
-        d.season != null && d.episode != null
-          ? { season: d.season, episode: d.episode }
-          : undefined,
+      ...playback,
     });
+  };
   return (
     <li className="group flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-3 transition-colors hover:bg-elevated/70">
       <div
@@ -249,7 +255,9 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
                 </span>
               </>
             )}
-            {d.status === "error" && <span className="text-danger">Failed: {d.error ?? "download error"}</span>}
+            {d.status === "error" && (
+              <span className="text-danger">Failed: {d.error ?? "download error"}</span>
+            )}
             {d.status === "canceled" && <span className="text-ink-subtle">Canceled</span>}
             {d.status === "interrupted" && (
               <span className="text-amber-300/85">Interrupted: re-download to finish</span>
@@ -284,7 +292,15 @@ function DownloadRow({ d, compact = false }: { d: DownloadItem; compact?: boolea
   );
 }
 
-function RowBtn({ label, onClick, children }: { label: string; onClick: () => void; children: ReactNode }) {
+function RowBtn({
+  label,
+  onClick,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
     <button
       type="button"

@@ -53,10 +53,19 @@ export type PlayEpisode = {
   runtime?: number;
 };
 
+export type PlayerSubtitleHints = {
+  filename?: string;
+  release?: string | null;
+  source?: string | null;
+  resolution?: string | null;
+  size?: number | null;
+};
+
 export type PlayerSrc = {
   meta: Meta;
   imdbId?: string;
   imdbIdVerified?: boolean;
+  tmdbId?: number;
   episode?: PlayEpisode;
   url: string;
   title: string;
@@ -68,6 +77,7 @@ export type PlayerSrc = {
   autoFired?: boolean;
   resume?: boolean;
   startFromZero?: boolean;
+  subtitleHints?: PlayerSubtitleHints;
   streamRef?: PlayerStreamRef;
   liveProgram?: string;
   isLive?: boolean;

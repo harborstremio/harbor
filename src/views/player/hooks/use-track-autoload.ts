@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { langScore, pickBestTrack } from "@/lib/subtitles/language";
 import { searchSubtitles } from "@/lib/subtitles/search";
+import { playerSubtitleMetadataId, resolvePlayerSubtitleHints } from "@/lib/subtitles/player-hints";
 import { readPlayerPrefs, type PerShowPrefs } from "@/lib/player-prefs";
 import { tmdbImdbId } from "@/lib/providers/tmdb";
 import type { Addon } from "@/lib/addons";
@@ -41,7 +42,7 @@ export function useTrackAutoload(params: {
       setResolutionSettled(true);
       return;
     }
-    const raw = src.meta.id ?? "";
+    const raw = playerSubtitleMetadataId(src);
     if (raw.startsWith("tt")) {
       setResolvedImdbId(raw);
       setResolvedImdbVerified(true);
@@ -66,7 +67,7 @@ export function useTrackAutoload(params: {
     return () => {
       cancelled = true;
     };
-  }, [src.imdbId, src.imdbIdVerified, src.meta.id, settings.tmdbKey]);
+  }, [src.imdbId, src.imdbIdVerified, src.meta.id, src.meta.type, src.tmdbId, settings.tmdbKey]);
 
   const [userAddonsState, setUserAddonsState] = useState<{
     authKey: string | null;
@@ -112,19 +113,20 @@ export function useTrackAutoload(params: {
         episode: src.episode?.episode,
         langs,
       });
+      const subtitleHints = resolvePlayerSubtitleHints(src);
       const { videoHash, videoSize } = settings.subtitleAutoSync ? await resolveVideoHash(src) : {};
       if (videoHash) console.info(`[subs/autoload] moviehash ${videoHash} (${videoSize})`);
       const results = await searchSubtitles(
         {
           imdbId: searchImdbId,
-          stremioId: src.meta.id,
+          stremioId: playerSubtitleMetadataId(src),
           type: src.meta.type === "series" ? "series" : "movie",
           season: src.episode?.season,
           episode: src.episode?.episode,
           langs,
           videoHash,
           videoSize,
-          filename: src.streamRef?.parsedTitle ?? src.streamRef?.title ?? undefined,
+          filename: subtitleHints.filename,
         },
         {
           providers: {
@@ -135,9 +137,9 @@ export function useTrackAutoload(params: {
           addons: readyAddons ?? [],
           preferredLangs: langs,
           streamHints: {
-            release: src.streamRef?.title ?? src.streamRef?.parsedTitle ?? null,
-            source: src.streamRef?.source ?? null,
-            resolution: src.streamRef?.resolution ?? null,
+            release: subtitleHints.release,
+            source: subtitleHints.source,
+            resolution: subtitleHints.resolution,
           },
         },
       );
@@ -364,7 +366,7 @@ async function resolveVideoHash(
       invoke<{ hash: string; size: number }>("compute_moviehash", {
         url: src.url,
         headers: src.headers,
-        size: src.streamRef?.size ?? undefined,
+        size: resolvePlayerSubtitleHints(src).size ?? undefined,
       }),
       1800,
     );

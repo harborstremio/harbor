@@ -4,6 +4,11 @@ import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { languageName } from "@/lib/subtitles/language";
 import { searchSubtitles } from "@/lib/subtitles/search";
+import {
+  playerSubtitleMetadataId,
+  resolvePlayerSubtitleHints,
+  trustedPlayerImdbId,
+} from "@/lib/subtitles/player-hints";
 import type { SubResult } from "@/lib/subtitles/types";
 import { useSettings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
@@ -33,7 +38,7 @@ export function useSubtitleChoices(src: PlayerSrc) {
   const preferredLangs = useMemo(() => {
     const primary = settings.preferredSubLangs?.length
       ? settings.preferredSubLangs
-      : settings.preferredLanguages ?? [];
+      : (settings.preferredLanguages ?? []);
     const base = primary.length > 0 ? primary : ["English"];
     return isAnimeSrc(src) ? base : base.filter((l) => !isJapanese(l));
   }, [settings.preferredSubLangs, settings.preferredLanguages, src.meta.id]);
@@ -52,15 +57,16 @@ export function useSubtitleChoices(src: PlayerSrc) {
       }
       const enabled = settings.subProvidersEnabled ?? {};
       try {
+        const subtitleHints = resolvePlayerSubtitleHints(src);
         const r = await searchSubtitles(
           {
-            imdbId: src.imdbId ?? (src.meta.id?.startsWith("tt") ? src.meta.id : undefined),
-            stremioId: src.meta.id,
+            imdbId: trustedPlayerImdbId(src),
+            stremioId: playerSubtitleMetadataId(src),
             type: src.meta.type === "series" ? "series" : "movie",
             season: src.episode?.season,
             episode: src.episode?.episode,
             langs: preferredLangs,
-            filename: src.streamRef?.parsedTitle ?? src.streamRef?.title ?? undefined,
+            filename: subtitleHints.filename,
           },
           {
             providers: {
@@ -71,9 +77,9 @@ export function useSubtitleChoices(src: PlayerSrc) {
             addons,
             preferredLangs,
             streamHints: {
-              release: src.streamRef?.title ?? src.streamRef?.parsedTitle ?? null,
-              source: src.streamRef?.source ?? null,
-              resolution: src.streamRef?.resolution ?? null,
+              release: subtitleHints.release,
+              source: subtitleHints.source,
+              resolution: subtitleHints.resolution,
             },
           },
         );
