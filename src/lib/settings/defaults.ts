@@ -177,7 +177,7 @@ export const DEFAULT: Settings = {
   torrentsDisabled: false,
   torrentFullDownload: false,
   p2pAutoConsent: false,
-  streamCacheRetentionHours: 24,
+  streamCacheRetentionHours: 0,
   streamCacheMaxGb: 0,
   deleteWatchedDownloads: false,
   streamCacheDir: "",

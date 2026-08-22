@@ -57,7 +57,6 @@ fn engine() -> &'static Mutex<EngineState> {
 
 pub const LAN_SERVER_PORT: u16 = 11470;
 
-const CACHE_SWEEP_INITIAL_DELAY_SECS: u64 = 60;
 const CACHE_SWEEP_INTERVAL_SECS: u64 = 30 * 60;
 static CACHE_SWEEP_RUNNING: AtomicBool = AtomicBool::new(false);
 
@@ -85,14 +84,13 @@ fn spawn_cache_sweeper(app: AppHandle) -> CacheSweeper {
     let cancelled = Arc::new(AtomicBool::new(false));
     let cancelled_for_task = cancelled.clone();
     let task = tokio::spawn(async move {
-        tokio::time::sleep(Duration::from_secs(CACHE_SWEEP_INITIAL_DELAY_SECS)).await;
         loop {
             if cancelled_for_task.load(Ordering::Acquire) {
                 break;
             }
             let cfg = read_config(&app);
             if let Ok(dir) = engine_dir(&app, &cfg) {
-                let retention = cfg.retention_hours.unwrap_or(24);
+                let retention = cfg.retention_hours.unwrap_or(0);
                 let max_gb = cfg.max_gb.unwrap_or(0);
                 let started = std::time::Instant::now();
                 let cancelled_for_sweep = cancelled_for_task.clone();
