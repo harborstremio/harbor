@@ -676,7 +676,9 @@ export function PlayPicker({
       if (pendingPreselect) setPendingPreselect(null);
       else if (p2pConfirm) cancelP2p();
       else if (showAutoTransition) {
-        abortResolve(); setResolving(null); setAutoCancelled(true);
+        abortResolve();
+        setResolving(null);
+        setAutoCancelled(true);
       } else backToDetail();
     };
     window.addEventListener("harbor:local-back", onBack);

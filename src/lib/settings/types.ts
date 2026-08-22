@@ -286,7 +286,13 @@ export type Settings = {
   subStyle: "shadow" | "outline" | "box";
   subFontFamily: string;
   subBold: boolean;
-  customFonts: Array<{ id: string; name: string; format: string; family?: string; dataUrl?: string }>;
+  customFonts: Array<{
+    id: string;
+    name: string;
+    format: string;
+    family?: string;
+    dataUrl?: string;
+  }>;
   subBoxOpacity: number;
   subBoxColor: string;
   subOpacity: number;

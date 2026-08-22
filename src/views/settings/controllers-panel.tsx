@@ -56,14 +56,18 @@ export function ControllersPanel() {
               value={settings.controllerCursorHideIdle}
               onChange={(v) => update({ controllerCursorHideIdle: v })}
             />
-            {settings.controllerCursorHideIdle && <SliderRow
-              label={t("Cursor hide delay")}
-              sub={t("How long the Harbor cursor remains visible after movement.")}
-              min={1} max={10} step={1}
-              value={settings.controllerCursorHideDelaySec}
-              display={t("{n} seconds", { n: settings.controllerCursorHideDelaySec })}
-              onChange={(v) => update({ controllerCursorHideDelaySec: v })}
-            />}
+            {settings.controllerCursorHideIdle && (
+              <SliderRow
+                label={t("Cursor hide delay")}
+                sub={t("How long the Harbor cursor remains visible after movement.")}
+                min={1}
+                max={10}
+                step={1}
+                value={settings.controllerCursorHideDelaySec}
+                display={t("{n} seconds", { n: settings.controllerCursorHideDelaySec })}
+                onChange={(v) => update({ controllerCursorHideDelaySec: v })}
+              />
+            )}
             <ToggleRow
               label={t("Keep controlling Harbor in the background")}
               sub={t(
@@ -99,7 +103,9 @@ export function ControllersPanel() {
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-elevated text-ink ring-1 ring-edge-soft">
                   <Gamepad2 size={17} strokeWidth={1.9} />
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-ink">{pad.name}</span>
+                <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-ink">
+                  {pad.name}
+                </span>
                 <span className="flex items-center gap-1.5 text-[11.5px] font-medium text-accent">
                   <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                   {t("Connected")}
@@ -112,7 +118,9 @@ export function ControllersPanel() {
 
       <Section
         title={t("Button map")}
-        subtitle={t("How the buttons map in each context. This is a reference; the layout is fixed.")}
+        subtitle={t(
+          "How the buttons map in each context. This is a reference; the layout is fixed.",
+        )}
       >
         <div className="flex flex-col gap-6">
           <MapGroup heading={t("Browsing")} rows={BROWSE_MAP} />
@@ -128,7 +136,9 @@ export function ControllersPanel() {
       >
         <SliderRow
           label={t("Deadzone")}
-          sub={t("How far you push the stick before Harbor reacts. Raise it if the focus drifts on its own.")}
+          sub={t(
+            "How far you push the stick before Harbor reacts. Raise it if the focus drifts on its own.",
+          )}
           min={0.05}
           max={0.6}
           step={0.05}
@@ -181,11 +191,19 @@ export function ControllersPanel() {
   );
 }
 
-function MapGroup({ heading, rows }: { heading: string; rows: Array<{ control: string; action: string }> }) {
+function MapGroup({
+  heading,
+  rows,
+}: {
+  heading: string;
+  rows: Array<{ control: string; action: string }>;
+}) {
   const t = useT();
   return (
     <div className="flex flex-col gap-1.5">
-      <h4 className="px-1 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">{heading}</h4>
+      <h4 className="px-1 text-[10.5px] font-semibold uppercase tracking-[0.18em] text-ink-subtle">
+        {heading}
+      </h4>
       {rows.map((row) => (
         <div
           key={row.control + row.action}

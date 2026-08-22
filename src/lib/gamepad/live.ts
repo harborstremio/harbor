@@ -25,7 +25,11 @@ function emit(): void {
 
 export function setLiveButton(button: GpButton, pressed: boolean): void {
   if (!!state.buttons[button] === pressed) return;
-  state = { buttons: { ...state.buttons, [button]: pressed }, axes: state.axes, seq: state.seq + 1 };
+  state = {
+    buttons: { ...state.buttons, [button]: pressed },
+    axes: state.axes,
+    seq: state.seq + 1,
+  };
   emit();
 }
 
@@ -43,13 +47,13 @@ export function resetLiveGamepad(): void {
 }
 
 export function useLiveGamepad(): LiveGamepad {
-  return useSyncExternalStore(
-    subscribeLiveGamepad,
-    getLiveGamepad,
-    getLiveGamepad,
-  );
+  return useSyncExternalStore(subscribeLiveGamepad, getLiveGamepad, getLiveGamepad);
 }
 
 export function useLiveButtons(): LiveGamepad["buttons"] {
-  return useSyncExternalStore(subscribeLiveGamepad, () => state.buttons, () => EMPTY.buttons);
+  return useSyncExternalStore(
+    subscribeLiveGamepad,
+    () => state.buttons,
+    () => EMPTY.buttons,
+  );
 }

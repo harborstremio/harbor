@@ -14,37 +14,93 @@ import { useT } from "@/lib/i18n";
 
 const IS_WEB = typeof window !== "undefined" && !("__TAURI_INTERNALS__" in window);
 
-const BasicsPanel = lazy(() => import("./settings/basics-panel").then((m) => ({ default: m.BasicsPanel })));
-const AccountStub = lazy(() => import("./settings/account").then((m) => ({ default: m.AccountStub })));
-const LibraryPanel = lazy(() => import("./settings/library-panel").then((m) => ({ default: m.LibraryPanel })));
-const RelaySection = lazy(() => import("./settings/relay-section").then((m) => ({ default: m.RelaySection })));
-const StreamingSourcesPanel = lazy(() => import("./settings/streaming-sources-panel").then((m) => ({ default: m.StreamingSourcesPanel })));
-const StreamFiltersPanel = lazy(() => import("./settings/stream-filters-panel").then((m) => ({ default: m.StreamFiltersPanel })));
+const BasicsPanel = lazy(() =>
+  import("./settings/basics-panel").then((m) => ({ default: m.BasicsPanel })),
+);
+const AccountStub = lazy(() =>
+  import("./settings/account").then((m) => ({ default: m.AccountStub })),
+);
+const LibraryPanel = lazy(() =>
+  import("./settings/library-panel").then((m) => ({ default: m.LibraryPanel })),
+);
+const RelaySection = lazy(() =>
+  import("./settings/relay-section").then((m) => ({ default: m.RelaySection })),
+);
+const StreamingSourcesPanel = lazy(() =>
+  import("./settings/streaming-sources-panel").then((m) => ({ default: m.StreamingSourcesPanel })),
+);
+const StreamFiltersPanel = lazy(() =>
+  import("./settings/stream-filters-panel").then((m) => ({ default: m.StreamFiltersPanel })),
+);
 const P2PPanel = lazy(() => import("./settings/p2p-panel").then((m) => ({ default: m.P2PPanel })));
-const LanguagePanel = lazy(() => import("./settings/language-panel").then((m) => ({ default: m.LanguagePanel })));
-const SubSourcesPanel = lazy(() => import("./settings/sub-sources-panel").then((m) => ({ default: m.SubSourcesPanel })));
-const AutoSyncPanel = lazy(() => import("./settings/autosync-panel").then((m) => ({ default: m.AutoSyncPanel })));
-const QualityPanel = lazy(() => import("./settings/quality-panel").then((m) => ({ default: m.QualityPanel })));
+const LanguagePanel = lazy(() =>
+  import("./settings/language-panel").then((m) => ({ default: m.LanguagePanel })),
+);
+const SubSourcesPanel = lazy(() =>
+  import("./settings/sub-sources-panel").then((m) => ({ default: m.SubSourcesPanel })),
+);
+const AutoSyncPanel = lazy(() =>
+  import("./settings/autosync-panel").then((m) => ({ default: m.AutoSyncPanel })),
+);
+const QualityPanel = lazy(() =>
+  import("./settings/quality-panel").then((m) => ({ default: m.QualityPanel })),
+);
 const MpvPanel = lazy(() => import("./settings/mpv-panel").then((m) => ({ default: m.MpvPanel })));
-const AnimePanel = lazy(() => import("./settings/anime-panel").then((m) => ({ default: m.AnimePanel })));
-const ShadersPanel = lazy(() => import("./settings/shaders-panel").then((m) => ({ default: m.ShadersPanel })));
-const PlayerLayoutPanel = lazy(() => import("./settings/player-layout-panel").then((m) => ({ default: m.PlayerLayoutPanel })));
-const HotkeysPanel = lazy(() => import("./settings/hotkeys-panel").then((m) => ({ default: m.HotkeysPanel })));
-const ControllersPanel = lazy(() => import("./settings/controllers-panel").then((m) => ({ default: m.ControllersPanel })));
-const TraktPanel = lazy(() => import("./settings/trakt-panel").then((m) => ({ default: m.TraktPanel })));
-const AnilistPanel = lazy(() => import("./settings/anilist-panel").then((m) => ({ default: m.AnilistPanel })));
+const AnimePanel = lazy(() =>
+  import("./settings/anime-panel").then((m) => ({ default: m.AnimePanel })),
+);
+const ShadersPanel = lazy(() =>
+  import("./settings/shaders-panel").then((m) => ({ default: m.ShadersPanel })),
+);
+const PlayerLayoutPanel = lazy(() =>
+  import("./settings/player-layout-panel").then((m) => ({ default: m.PlayerLayoutPanel })),
+);
+const HotkeysPanel = lazy(() =>
+  import("./settings/hotkeys-panel").then((m) => ({ default: m.HotkeysPanel })),
+);
+const ControllersPanel = lazy(() =>
+  import("./settings/controllers-panel").then((m) => ({ default: m.ControllersPanel })),
+);
+const TraktPanel = lazy(() =>
+  import("./settings/trakt-panel").then((m) => ({ default: m.TraktPanel })),
+);
+const AnilistPanel = lazy(() =>
+  import("./settings/anilist-panel").then((m) => ({ default: m.AnilistPanel })),
+);
 const MalPanel = lazy(() => import("./settings/mal-panel").then((m) => ({ default: m.MalPanel })));
-const SimklPanel = lazy(() => import("./settings/simkl-panel").then((m) => ({ default: m.SimklPanel })));
-const LetterboxdPanel = lazy(() => import("./settings/letterboxd-panel").then((m) => ({ default: m.LetterboxdPanel })));
-const ThemePanel = lazy(() => import("./settings/theme-panel").then((m) => ({ default: m.ThemePanel })));
-const StreamBadgesPanel = lazy(() => import("./settings/stream-badges-panel").then((m) => ({ default: m.StreamBadgesPanel })));
-const AwardIconsPanel = lazy(() => import("./settings/award-icons-panel").then((m) => ({ default: m.AwardIconsPanel })));
-const WebhooksPanel = lazy(() => import("./settings/webhooks-panel").then((m) => ({ default: m.WebhooksPanel })));
-const BugReportPanel = lazy(() => import("./settings/bug-report-panel").then((m) => ({ default: m.BugReportPanel })));
-const SupportPanel = lazy(() => import("./settings/support-panel").then((m) => ({ default: m.SupportPanel })));
-const RemotesPanel = lazy(() => import("./settings/remotes-panel").then((m) => ({ default: m.RemotesPanel })));
-const StoragePanel = lazy(() => import("./settings/storage-panel").then((m) => ({ default: m.StoragePanel })));
-const AdvancedPanel = lazy(() => import("./settings/advanced-panel").then((m) => ({ default: m.AdvancedPanel })));
+const SimklPanel = lazy(() =>
+  import("./settings/simkl-panel").then((m) => ({ default: m.SimklPanel })),
+);
+const LetterboxdPanel = lazy(() =>
+  import("./settings/letterboxd-panel").then((m) => ({ default: m.LetterboxdPanel })),
+);
+const ThemePanel = lazy(() =>
+  import("./settings/theme-panel").then((m) => ({ default: m.ThemePanel })),
+);
+const StreamBadgesPanel = lazy(() =>
+  import("./settings/stream-badges-panel").then((m) => ({ default: m.StreamBadgesPanel })),
+);
+const AwardIconsPanel = lazy(() =>
+  import("./settings/award-icons-panel").then((m) => ({ default: m.AwardIconsPanel })),
+);
+const WebhooksPanel = lazy(() =>
+  import("./settings/webhooks-panel").then((m) => ({ default: m.WebhooksPanel })),
+);
+const BugReportPanel = lazy(() =>
+  import("./settings/bug-report-panel").then((m) => ({ default: m.BugReportPanel })),
+);
+const SupportPanel = lazy(() =>
+  import("./settings/support-panel").then((m) => ({ default: m.SupportPanel })),
+);
+const RemotesPanel = lazy(() =>
+  import("./settings/remotes-panel").then((m) => ({ default: m.RemotesPanel })),
+);
+const StoragePanel = lazy(() =>
+  import("./settings/storage-panel").then((m) => ({ default: m.StoragePanel })),
+);
+const AdvancedPanel = lazy(() =>
+  import("./settings/advanced-panel").then((m) => ({ default: m.AdvancedPanel })),
+);
 
 const SECTION_META: Record<SectionId, { label: string; sub: string }> = {
   basics: {
@@ -236,7 +292,10 @@ export function Settings() {
       let best: HTMLElement | null = null;
       for (const s of sections) {
         if (!(s.id.startsWith(target) || target.startsWith(s.id))) continue;
-        if (best == null || Math.abs(s.id.length - target.length) < Math.abs(best.id.length - target.length)) {
+        if (
+          best == null ||
+          Math.abs(s.id.length - target.length) < Math.abs(best.id.length - target.length)
+        ) {
           best = s;
         }
       }
@@ -274,8 +333,7 @@ export function Settings() {
     } else if (which === "rpdb") {
       if (trimmed) update({ rpdbKey: trimmed, showImdbBadge: false, showRtBadge: false });
       else update({ rpdbKey: trimmed });
-    }
-    else if (which === "fanart") update({ fanartKey: trimmed });
+    } else if (which === "fanart") update({ fanartKey: trimmed });
     else if (which === "tvdb") update({ tvdbKey: trimmed });
     else if (which === "rd") update({ rdKey: trimmed });
     else if (which === "tb") update({ tbKey: trimmed });
@@ -295,130 +353,129 @@ export function Settings() {
 
   return (
     <SettingsActiveContext.Provider value={{ setActive }}>
-    <div data-settings className="flex h-full bg-canvas">
-      <SettingsNav active={active} onChange={handleNav} />
-      <main
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto pt-28 pb-16"
-      >
-        <div
-          data-tauri-drag-region
-          className={wide ? "mx-auto flex w-full max-w-[1500px] flex-col gap-8 px-8" : "mx-auto flex max-w-3xl flex-col gap-10 px-12"}
-        >
-          {!wide && !(active === "relay" && relayMode !== "panel") && (
-            <header className="flex flex-col gap-2">
-              <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
-                {t(SECTION_META[active].label)}
-              </h1>
-              <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
-            </header>
-          )}
-
-          <Suspense
-            fallback={
-              <div
-                className="h-64 rounded-2xl border border-edge-soft bg-elevated/40"
-                aria-label={t("Loading settings")}
-              />
+      <div data-settings className="flex h-full bg-canvas">
+        <SettingsNav active={active} onChange={handleNav} />
+        <main ref={scrollRef} className="flex-1 overflow-y-auto pt-28 pb-16">
+          <div
+            data-tauri-drag-region
+            className={
+              wide
+                ? "mx-auto flex w-full max-w-[1500px] flex-col gap-8 px-8"
+                : "mx-auto flex max-w-3xl flex-col gap-10 px-12"
             }
           >
-          {active === "basics" && <BasicsPanel />}
+            {!wide && !(active === "relay" && relayMode !== "panel") && (
+              <header className="flex flex-col gap-2">
+                <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
+                  {t(SECTION_META[active].label)}
+                </h1>
+                <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
+              </header>
+            )}
 
-          {active === "account" && <AccountStub />}
+            <Suspense
+              fallback={
+                <div
+                  className="h-64 rounded-2xl border border-edge-soft bg-elevated/40"
+                  aria-label={t("Loading settings")}
+                />
+              }
+            >
+              {active === "basics" && <BasicsPanel />}
 
-          {active === "library" && (
-            <LibraryPanel
-              tmdbDraft={tmdbDraft}
-              omdbDraft={omdbDraft}
-              rpdbDraft={rpdbDraft}
-              fanartDraft={fanartDraft}
-              tvdbDraft={tvdbDraft}
-              setTmdbDraft={setTmdbDraft}
-              setOmdbDraft={setOmdbDraft}
-              setRpdbDraft={setRpdbDraft}
-              setFanartDraft={setFanartDraft}
-              setTvdbDraft={setTvdbDraft}
-              savedKey={savedKey}
-              saveKey={saveKey}
-            />
-          )}
+              {active === "account" && <AccountStub />}
 
-          {active === "relay" && (
-            <RelaySection mode={relayMode} onModeChange={setRelayMode} />
-          )}
+              {active === "library" && (
+                <LibraryPanel
+                  tmdbDraft={tmdbDraft}
+                  omdbDraft={omdbDraft}
+                  rpdbDraft={rpdbDraft}
+                  fanartDraft={fanartDraft}
+                  tvdbDraft={tvdbDraft}
+                  setTmdbDraft={setTmdbDraft}
+                  setOmdbDraft={setOmdbDraft}
+                  setRpdbDraft={setRpdbDraft}
+                  setFanartDraft={setFanartDraft}
+                  setTvdbDraft={setTvdbDraft}
+                  savedKey={savedKey}
+                  saveKey={saveKey}
+                />
+              )}
 
-          {active === "streaming" && (
-            <StreamingSourcesPanel
-              rdDraft={rdDraft}
-              tbDraft={tbDraft}
-              adDraft={adDraft}
-              pmDraft={pmDraft}
-              dlDraft={dlDraft}
-              setRdDraft={setRdDraft}
-              setTbDraft={setTbDraft}
-              setAdDraft={setAdDraft}
-              setPmDraft={setPmDraft}
-              setDlDraft={setDlDraft}
-              savedKey={savedKey}
-              saveKey={saveKey}
-            />
-          )}
+              {active === "relay" && <RelaySection mode={relayMode} onModeChange={setRelayMode} />}
 
-          {active === "streamFilters" && <StreamFiltersPanel />}
+              {active === "streaming" && (
+                <StreamingSourcesPanel
+                  rdDraft={rdDraft}
+                  tbDraft={tbDraft}
+                  adDraft={adDraft}
+                  pmDraft={pmDraft}
+                  dlDraft={dlDraft}
+                  setRdDraft={setRdDraft}
+                  setTbDraft={setTbDraft}
+                  setAdDraft={setAdDraft}
+                  setPmDraft={setPmDraft}
+                  setDlDraft={setDlDraft}
+                  savedKey={savedKey}
+                  saveKey={saveKey}
+                />
+              )}
 
-          {active === "p2p" && <P2PPanel />}
+              {active === "streamFilters" && <StreamFiltersPanel />}
 
-          {active === "language" && <LanguagePanel />}
+              {active === "p2p" && <P2PPanel />}
 
-          {active === "subSources" && <SubSourcesPanel />}
+              {active === "language" && <LanguagePanel />}
 
-          {active === "autoSync" && <AutoSyncPanel />}
+              {active === "subSources" && <SubSourcesPanel />}
 
-          {active === "player" && <QualityPanel />}
+              {active === "autoSync" && <AutoSyncPanel />}
 
-          {active === "mpv" && <MpvPanel />}
+              {active === "player" && <QualityPanel />}
 
-          {active === "anime" && <AnimePanel />}
+              {active === "mpv" && <MpvPanel />}
 
-          {active === "shaders" && <ShadersPanel />}
+              {active === "anime" && <AnimePanel />}
 
-          {active === "playerLayout" && <PlayerLayoutPanel />}
+              {active === "shaders" && <ShadersPanel />}
 
-          {active === "hotkeys" && <HotkeysPanel />}
+              {active === "playerLayout" && <PlayerLayoutPanel />}
 
-          {active === "controllers" && <ControllersPanel />}
+              {active === "hotkeys" && <HotkeysPanel />}
 
-          {active === "trakt" && <TraktPanel />}
+              {active === "controllers" && <ControllersPanel />}
 
-          {active === "anilist" && <AnilistPanel />}
+              {active === "trakt" && <TraktPanel />}
 
-          {active === "mal" && <MalPanel />}
+              {active === "anilist" && <AnilistPanel />}
 
-          {active === "simkl" && <SimklPanel />}
+              {active === "mal" && <MalPanel />}
 
-          {active === "letterboxd" && <LetterboxdPanel />}
+              {active === "simkl" && <SimklPanel />}
 
-          {active === "theme" && <ThemePanel />}
+              {active === "letterboxd" && <LetterboxdPanel />}
 
-          {active === "badges" && <StreamBadgesPanel />}
-          {active === "awardIcons" && <AwardIconsPanel />}
+              {active === "theme" && <ThemePanel />}
 
-          {active === "webhooks" && <WebhooksPanel />}
+              {active === "badges" && <StreamBadgesPanel />}
+              {active === "awardIcons" && <AwardIconsPanel />}
 
-          {active === "bug" && <BugReportPanel />}
-          {active === "support" && <SupportPanel />}
+              {active === "webhooks" && <WebhooksPanel />}
 
-          {active === "remotes" && <RemotesPanel />}
+              {active === "bug" && <BugReportPanel />}
+              {active === "support" && <SupportPanel />}
 
-          {active === "storage" && <StoragePanel />}
+              {active === "remotes" && <RemotesPanel />}
 
-          {active === "advanced" && <AdvancedPanel />}
-          </Suspense>
-        </div>
-      </main>
-      <BackToTop scrollRef={scrollRef} />
-      <SettingsJumpBar scrollRef={scrollRef} activeSection={active} />
-    </div>
+              {active === "storage" && <StoragePanel />}
+
+              {active === "advanced" && <AdvancedPanel />}
+            </Suspense>
+          </div>
+        </main>
+        <BackToTop scrollRef={scrollRef} />
+        <SettingsJumpBar scrollRef={scrollRef} activeSection={active} />
+      </div>
     </SettingsActiveContext.Provider>
   );
 }
