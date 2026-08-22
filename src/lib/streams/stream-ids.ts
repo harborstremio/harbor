@@ -28,8 +28,8 @@ export function buildStreamIds(
 
   if (episode?.kitsuStreamId) {
     push(episode.kitsuStreamId);
-  } else if (metaId.startsWith("kitsu:") && episode) {
-    push(`kitsu:${metaId.split(":")[1]}:${episode.episode}`);
+  } else if (/^(kitsu|mal|anilist|anidb):/.test(metaId) && episode) {
+    push(`${metaId.split(":")[0]}:${metaId.split(":")[1]}:${episode.episode}`);
   } else if ((metaId.startsWith("kitsu:") || metaId.startsWith("mal:")) && !episode) {
     push(metaId);
   } else if (metaId.startsWith("tt") && episode) {

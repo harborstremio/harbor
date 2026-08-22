@@ -53,6 +53,8 @@ import { buildTraktHomeRows } from "@/lib/trakt/home-rails";
 import { fetchWatchedKeySet } from "@/lib/trakt/history";
 import { recentlyPlayed, subscribePlayback, type WatchedSet } from "@/lib/playback-history";
 import { detectAnimeForCw, useDetectedAnimeVersion } from "@/lib/anime-detect";
+import { franchiseRoot, franchiseRootSync } from "@/lib/providers/anime-franchise-root";
+import { dedupeCwFranchises } from "@/lib/cw-list";
 import { buildSimklHomeRows } from "@/lib/simkl/home-rails";
 import {
   loadSimklWatchedMap,
@@ -118,6 +120,7 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
     onReady?.();
   }, [active, heroReady, onReady]);
   const [items, setItems] = useState<LibraryItem[]>([]);
+  const [cwRootVersion, setCwRootVersion] = useState(0);
   const cwVersion = useCwDismissVersion();
   const [tmdbProvidedByAddon, setTmdbProvidedByAddon] = useState(false);
   const [addonsTick, setAddonsTick] = useState(0);
@@ -534,8 +537,30 @@ export function Home({ active = true, onReady }: { active?: boolean; onReady?: (
       out.push(i);
       if (out.length >= 100) break;
     }
-    return out;
-  }, [items, simklCw, localCwVer, cwVersion, settings.animeOnlyInAnimeRoom, animeDetectVer]);
+    return dedupeCwFranchises(out, franchiseRootSync);
+  }, [
+    items,
+    simklCw,
+    localCwVer,
+    cwVersion,
+    cwRootVersion,
+    settings.animeOnlyInAnimeRoom,
+    animeDetectVer,
+  ]);
+  useEffect(() => {
+    let cancelled = false;
+    const ids = [...items, ...simklCw]
+      .filter((item) => isCwMember(item))
+      .map((item) => item._id)
+      .concat(listLocalCw().map((item) => item.id));
+    if (ids.length === 0 || ids.every((id) => franchiseRootSync(id))) return;
+    void Promise.allSettled(ids.map((id) => franchiseRoot(id))).then(() => {
+      if (!cancelled) setCwRootVersion((version) => version + 1);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [items, simklCw, localCwVer]);
   const resurfaceLibrary = useMemo(() => {
     const manual = manualWatchedLibraryItems();
     if (manual.length === 0) return items;

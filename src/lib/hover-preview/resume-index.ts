@@ -67,7 +67,7 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
       const fraction = minutes ? Math.min(1, last.ms / (minutes * 60000)) : null;
       if (fraction !== null && fraction >= FRESH_FRACTION) return null;
       return {
-        season: last.season,
+        season: last.displaySeason ?? last.season,
         episode: last.episode,
         fraction,
         remainingMs: minutes ? Math.max(0, minutes * 60000 - last.ms) : null,

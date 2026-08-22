@@ -68,10 +68,14 @@ export function useResumeAutosave(params: {
     if (sn.durationSec > 0 && sn.durationSec < STUB_MAX_SEC) return;
     const pos = getPlaybackPosition() || lastGoodPosRef.current;
     if (pos < MIN_POSITION_SEC) return;
+    const displaySeason =
+      s.episode?.imdbSeason != null && s.episode.imdbSeason >= 1 ? s.episode.imdbSeason : se;
+    const displayEpisode =
+      s.episode?.imdbEpisode != null && s.episode.imdbEpisode >= 1 ? s.episode.imdbEpisode : ep;
     const finished =
       (sn.durationSec > 0 && pos / sn.durationSec >= WATCHED_RATIO) || sn.status === "ended";
     lastSavedRef.current = pos * 1000;
-    saveResumeMs(id, pos * 1000, se, ep);
+    saveResumeMs(id, pos * 1000, se, ep, displaySeason, displayEpisode);
     if (isExternalPlaylistId(id)) return;
     if (s.streamRef) {
       savePlayback(id, { ...s.streamRef, url: s.url, title: s.meta.name }, se, ep);
@@ -103,8 +107,8 @@ export function useResumeAutosave(params: {
         name: s.meta.name,
         poster: s.meta.poster,
         background: s.meta.background,
-        season: se,
-        episode: ep,
+        season: displaySeason,
+        episode: displayEpisode,
         videoId: s.episode?.videoId,
         positionMs: Math.floor(pos * 1000),
         durationMs: Math.max(0, Math.floor(sn.durationSec * 1000)),

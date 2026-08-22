@@ -953,10 +953,21 @@ export function DetailView({
   const upcoming = !loading && isTitleUpcoming(detail, meta);
   const currentFranchiseId = animeCanonicalId ?? meta.id;
 
-  const lastPlay = useMemo(() => {
+  const lastPlay = useMemo<{
+    season: number;
+    episode: number;
+    displaySeason?: number;
+    displayEpisode?: number;
+  } | null>(() => {
     if (episodeHint) return episodeHint;
     if (isAnime) return lastPlayedEpisode(meta.id);
-    const candidates: Array<{ season: number; episode: number; t: number }> = [];
+    const candidates: Array<{
+      season: number;
+      episode: number;
+      t: number;
+      displaySeason?: number;
+      displayEpisode?: number;
+    }> = [];
     const ids = Array.from(
       new Set(
         [
@@ -979,7 +990,13 @@ export function DetailView({
       }
       const lp = lastPlayedEpisode(id);
       if (lp && lp.season >= 1 && lp.episode >= 1) {
-        candidates.push({ season: lp.season, episode: lp.episode, t: lp.t });
+        candidates.push({
+          season: lp.season,
+          episode: lp.episode,
+          t: lp.t,
+          displaySeason: lp.displaySeason,
+          displayEpisode: lp.displayEpisode,
+        });
       }
     }
     const st = libraryItem?.state;
@@ -1160,7 +1177,10 @@ export function DetailView({
     inSession && !liveContext
       ? t("Play Together")
       : isSeries && lastPlay
-        ? t("Resume S{s}:E{e}", { s: lastPlay.season, e: lastPlay.episode })
+        ? t("Resume S{s}:E{e}", {
+            s: lastPlay.displaySeason ?? lastPlay.season,
+            e: lastPlay.displayEpisode ?? lastPlay.episode,
+          })
         : t("Play");
 
   const heroPills = (

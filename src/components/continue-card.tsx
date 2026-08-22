@@ -25,6 +25,8 @@ import { fetchSeasonEpisodes } from "@/lib/series-episodes";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
+import { aniZipByAnidb, aniZipByAnilist, aniZipByKitsu, aniZipByMal } from "@/lib/providers/anizip";
+import { applyAniZipEpisodeMapping, formatCwEpisodeLabel } from "@/lib/cw-episode";
 
 type Props = {
   item: LibraryItem;
@@ -71,12 +73,6 @@ export const ContinueCard = memo(function ContinueCard({
       ? ep.episode
       : null;
 
-  const sub =
-    animeEp && Number.isFinite(animeEp) && animeEp > 0
-      ? `Ep ${animeEp}`
-      : ep
-        ? `S${ep.season}E${ep.episode}`
-        : "";
   const [logo, setLogo] = useState<string | undefined>();
   const [metaBg, setMetaBg] = useState<string | undefined>();
   const [hydratedMeta, setHydratedMeta] = useState<Meta | null>(null);
@@ -85,6 +81,15 @@ export const ContinueCard = memo(function ContinueCard({
   const [translatedTitle, setTranslatedTitle] = useState<string | null>(null);
   const [imgIdx, setImgIdx] = useState(0);
   const cardRef = useRef<HTMLButtonElement>(null);
+  const mappedEpisode =
+    kitsuVideo?.imdbSeason != null && kitsuVideo.imdbSeason >= 2 && kitsuVideo.imdbEpisode != null
+      ? { season: kitsuVideo.imdbSeason, episode: kitsuVideo.imdbEpisode }
+      : null;
+  const sub = formatCwEpisodeLabel({
+    mapped: mappedEpisode,
+    episode: ep,
+    animeEpisode: animeEp,
+  });
 
   const candidates = useMemo(() => {
     const thumb = upNext ? undefined : snapshot;
@@ -243,7 +248,7 @@ export const ContinueCard = memo(function ContinueCard({
     openMeta(meta, ep ? { episodeHint: ep } : undefined);
   };
 
-  const onPlay = (e: React.MouseEvent) => {
+  const onPlay = async (e: React.MouseEvent) => {
     e.stopPropagation();
     let episode: PlayEpisode | undefined = item.type === "series" && ep ? ep : undefined;
     if (!episode && kitsuThreeSeg) {
@@ -262,6 +267,22 @@ export const ContinueCard = memo(function ContinueCard({
       } else {
         const epNum = Number((item.state?.video_id ?? "").split(":")[2]);
         if (Number.isFinite(epNum) && epNum > 0) episode = { season: 1, episode: epNum };
+      }
+      if (episode && !kitsuVideo) {
+        const [scheme, rawId] = item._id.split(":");
+        const numericId = Number(rawId);
+        if (Number.isFinite(numericId)) {
+          const lookup =
+            scheme === "mal"
+              ? aniZipByMal
+              : scheme === "anilist"
+                ? aniZipByAnilist
+                : scheme === "anidb"
+                  ? aniZipByAnidb
+                  : aniZipByKitsu;
+          const mapping = await lookup(numericId).catch(() => null);
+          applyAniZipEpisodeMapping(episode, mapping);
+        }
       }
     }
     playLocalAware({

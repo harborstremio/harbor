@@ -7,6 +7,7 @@ import { Row } from "@/components/row";
 import { useT } from "@/lib/i18n";
 import { type LibraryItem } from "@/lib/stremio";
 import { isLibraryItemWatched } from "@/lib/trakt/library-key";
+import { cwRowKey } from "@/lib/cw-list";
 
 type Props = {
   signedIn: boolean;
@@ -18,6 +19,7 @@ type Props = {
 export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
   const t = useT();
   const [showAuth, setShowAuth] = useState(false);
+  const rowKey = cwRowKey(items);
 
   const signInButton = signedIn ? null : (
     <button
@@ -36,6 +38,7 @@ export function CWSection({ signedIn, items, watchedSet, onDismiss }: Props) {
     return (
       <>
         <Row
+          key={rowKey}
           title={t("Continue Watching")}
           min={260}
           shape="landscape"
