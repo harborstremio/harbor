@@ -9,7 +9,7 @@ import { useSettings } from "@/lib/settings";
 function hoverCss(rules: CSSRuleList): string {
   return Array.from(rules).map((rule) => rule instanceof CSSStyleRule && rule.selectorText.includes(":hover")
     ? `${rule.selectorText.replaceAll(":hover", "[data-gamepad-hover]")}{${rule.style.cssText}${hoverCss(rule.cssRules)}}`
-    : "cssRules" in rule ? `${rule.cssText.slice(0, rule.cssText.indexOf("{"))}{${hoverCss((rule as CSSGroupingRule).cssRules)}}` : "").join("");
+    : "cssRules" in rule ? `${rule.cssText.slice(0, rule.cssText.indexOf("{"))}{${hoverCss((rule as CSSGroupingRule).cssRules)}}` : "style" in rule ? (rule as CSSNestedDeclarations).style.cssText : "").join("");
 }
 
 type TextField = HTMLInputElement | HTMLTextAreaElement;

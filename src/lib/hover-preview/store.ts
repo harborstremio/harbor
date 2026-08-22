@@ -297,7 +297,7 @@ export function hoverPreviewLeave(el: HTMLElement): void {
 }
 
 export function hoverPreviewFocus(meta: Meta, cardEl: HTMLElement): void {
-  if (!cardEl.matches(":focus-visible")) return;
+  if (!cardEl.matches(":focus-visible, [data-gamepad-hover]")) return;
   const anchor = cardEl.querySelector<HTMLElement>("[data-preview-anchor]") ?? cardEl;
   hoverPreviewEnter(meta, anchor, 0);
 }
