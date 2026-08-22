@@ -670,6 +670,19 @@ export function PlayPicker({
       resolving != null);
   void terminalEmpty;
 
+  useEffect(() => {
+    const onBack = (e: Event) => {
+      e.preventDefault();
+      if (pendingPreselect) setPendingPreselect(null);
+      else if (p2pConfirm) cancelP2p();
+      else if (showAutoTransition) {
+        abortResolve(); setResolving(null); setAutoCancelled(true);
+      } else backToDetail();
+    };
+    window.addEventListener("harbor:local-back", onBack);
+    return () => window.removeEventListener("harbor:local-back", onBack);
+  }, [pendingPreselect, p2pConfirm, showAutoTransition, cancelP2p, abortResolve, backToDetail]);
+
   const pickerScrollKey = useMemo(() => {
     const attemptKey = typeof attempt === "number" ? `:a${attempt}` : "";
     return episode

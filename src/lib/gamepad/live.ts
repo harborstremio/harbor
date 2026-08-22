@@ -11,6 +11,14 @@ const EMPTY: LiveGamepad = { buttons: {}, axes: { lx: 0, ly: 0, rx: 0, ry: 0 }, 
 let state: LiveGamepad = EMPTY;
 const listeners = new Set<() => void>();
 
+export const getLiveGamepad = (): LiveGamepad => state;
+export const subscribeLiveGamepad = (listener: () => void): (() => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
+
 function emit(): void {
   for (const l of listeners) l();
 }
@@ -36,11 +44,12 @@ export function resetLiveGamepad(): void {
 
 export function useLiveGamepad(): LiveGamepad {
   return useSyncExternalStore(
-    (cb) => {
-      listeners.add(cb);
-      return () => listeners.delete(cb);
-    },
-    () => state,
-    () => state,
+    subscribeLiveGamepad,
+    getLiveGamepad,
+    getLiveGamepad,
   );
+}
+
+export function useLiveButtons(): LiveGamepad["buttons"] {
+  return useSyncExternalStore(subscribeLiveGamepad, () => state.buttons, () => EMPTY.buttons);
 }

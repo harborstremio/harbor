@@ -1094,6 +1094,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     <main
       ref={stageRef}
       data-harbor-player
+      data-gamepad-mousemove
       dir="ltr"
       className={`fixed inset-0 z-[100] overflow-hidden ${stageBg}`}
       style={cursorStyle}

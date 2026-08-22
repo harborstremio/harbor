@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { dispatchTvNav, tvHover } from "@/lib/keyboard-navigation";
-import { useLiveGamepad } from "@/lib/gamepad/live";
+import { getLiveGamepad, subscribeLiveGamepad, useLiveButtons } from "@/lib/gamepad/live";
 import { useGamepad } from "@/lib/gamepad/use-gamepad";
 import { useSettings } from "@/lib/settings";
 
 function hoverCss(rules: CSSRuleList): string {
   return Array.from(rules).map((rule) => rule instanceof CSSStyleRule && rule.selectorText.includes(":hover")
     ? `${rule.selectorText.replaceAll(":hover", "[data-gamepad-hover]")}{${rule.style.cssText}${hoverCss(rule.cssRules)}}`
-    : "cssRules" in rule ? `${rule.cssText.slice(0, rule.cssText.indexOf("{"))}{${hoverCss((rule as CSSGroupingRule).cssRules)}}` : "style" in rule ? (rule as CSSNestedDeclarations).style.cssText : "").join("");
+    : "cssRules" in rule && rule.type !== CSSRule.KEYFRAMES_RULE ? `${rule.cssText.slice(0, rule.cssText.indexOf("{"))}{${hoverCss((rule as CSSGroupingRule).cssRules)}}` : "style" in rule ? (rule as CSSNestedDeclarations).style.cssText : "").join("");
 }
 
 type TextField = HTMLInputElement | HTMLTextAreaElement;
@@ -17,11 +17,11 @@ const isTextField = (el: unknown): el is TextField => el instanceof HTMLTextArea
 
 export function GamepadRunner() {
   useGamepad();
-  const live = useLiveGamepad();
+  const buttons = useLiveButtons();
   const { settings } = useSettings();
   const cursor = useRef<HTMLDivElement>(null);
   const position = useRef({ x: innerWidth / 2, y: innerHeight / 2 });
-  const axes = useRef(live.axes);
+  const axes = useRef(getLiveGamepad().axes);
   const motion = useRef(settings);
   const active = useRef(false);
   const lastMove = useRef(performance.now());
@@ -29,32 +29,41 @@ export function GamepadRunner() {
   const hovered = useRef<HTMLElement>(null);
   const hoverPath = useRef<HTMLElement[]>([]);
   const controllerField = useRef<TextField | null>(null);
+  const wake = useRef<() => void>(() => {});
   const [keyboard, setKeyboard] = useState<TextField | null>(null);
-  axes.current = live.axes;
   motion.current = settings;
 
   useEffect(() => {
     const style = document.createElement("style");
     style.setAttribute("data-gamepad-hover-styles", "");
     document.head.appendChild(style);
+    let frame = 0;
     const apply = () => {
-      style.textContent = Array.from(document.styleSheets).filter((sheet) => sheet.ownerNode !== style).map((sheet) => {
+      const css = Array.from(document.styleSheets).filter((sheet) => sheet.ownerNode !== style).map((sheet) => {
         try { return hoverCss(sheet.cssRules); } catch { return ""; }
       }).join("");
+      if (style.textContent !== css) style.textContent = css;
     };
     apply();
-    const observer = new MutationObserver(apply);
+    const observer = new MutationObserver(() => { cancelAnimationFrame(frame); frame = requestAnimationFrame(apply); });
     observer.observe(document.head, { childList: true });
-    return () => { observer.disconnect(); style.remove(); };
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); style.remove(); };
   }, []);
 
   useEffect(() => {
     let frame = 0;
+    let idleTimer: number | null = null;
     let previous = performance.now();
     let refreshHover = false;
-    const refresh = () => { refreshHover = true; };
+    let tick: FrameRequestCallback;
+    const request = () => {
+      if (idleTimer !== null) { clearTimeout(idleTimer); idleTimer = null; }
+      if (!frame) { previous = performance.now(); frame = requestAnimationFrame(tick); }
+    };
+    const refresh = () => { refreshHover = true; request(); };
     window.addEventListener("blur", refresh);
-    const tick = (now: number) => {
+    tick = (now: number) => {
+      frame = 0;
       const dt = Math.min((now - previous) / 1000, 0.05);
       previous = now;
       const { lx, ly, rx, ry } = axes.current;
@@ -62,6 +71,7 @@ export function GamepadRunner() {
       const deadzone = settings.controllerDeadzone;
       const x = Math.abs(rx) < deadzone ? 0 : rx;
       const y = Math.abs(ry) < deadzone ? 0 : ry;
+      let moving = !!(x || y);
       if (x || y) {
         active.current = true;
         lastMove.current = now;
@@ -71,10 +81,14 @@ export function GamepadRunner() {
         if (refreshHover || hit !== hoverPath.current[0]) {
           refreshHover = false;
           const previousHit = hoverPath.current[0];
-          for (const el of hoverPath.current) el.removeAttribute("data-gamepad-hover");
-          hoverPath.current = [];
-          for (let el = hit; el; el = el.parentElement) hoverPath.current.push(el);
-          for (const el of hoverPath.current) el.setAttribute("data-gamepad-hover", "");
+          const nextPath: HTMLElement[] = [];
+          for (let el = hit; el; el = el.parentElement) nextPath.push(el);
+          let shared = 0;
+          while (shared < hoverPath.current.length && shared < nextPath.length && hoverPath.current[hoverPath.current.length - 1 - shared] === nextPath[nextPath.length - 1 - shared]) shared++;
+          for (let i = 0; i < hoverPath.current.length - shared; i++)
+            hoverPath.current[i].removeAttribute("data-gamepad-hover");
+          for (let i = 0; i < nextPath.length - shared; i++) nextPath[i].setAttribute("data-gamepad-hover", "");
+          hoverPath.current = nextPath;
           previousHit?.dispatchEvent(new PointerEvent("pointerout", { bubbles: true, relatedTarget: hit }));
           previousHit?.dispatchEvent(new PointerEvent("pointerleave", { relatedTarget: hit }));
           previousHit?.dispatchEvent(new MouseEvent("mouseout", { bubbles: true, relatedTarget: hit }));
@@ -84,13 +98,15 @@ export function GamepadRunner() {
           hit?.dispatchEvent(new MouseEvent("mouseover", { bubbles: true, relatedTarget: previousHit }));
           hit?.dispatchEvent(new MouseEvent("mouseenter", { relatedTarget: previousHit }));
         }
-        hit?.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: position.current.x, clientY: position.current.y }));
-        hit?.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientX: position.current.x, clientY: position.current.y }));
+        const pointerTarget = hit?.closest<HTMLElement>("[data-player-seekbar],[data-gamepad-pointermove]");
+        pointerTarget?.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: position.current.x, clientY: position.current.y }));
+        hit?.closest<HTMLElement>("[data-gamepad-mousemove]")?.dispatchEvent(new MouseEvent("mousemove", { bubbles: true, clientX: position.current.x, clientY: position.current.y }));
         const target = hit?.closest<HTMLElement>("a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex='-1']),[data-focusable='true']") ?? null;
         if (target && document.activeElement !== target) target.focus({ preventScroll: true });
         if (target !== hovered.current) {
           tvHover(hovered.current = target);
         }
+        cursor.current?.style.setProperty("transform", `translate(${position.current.x}px,${position.current.y}px) translate(-50%,-50%)`);
       }
       const idle = settings.controllerCursorHideIdle && now - lastMove.current >= settings.controllerCursorHideDelaySec * 1000;
       if (idle && hoverPath.current.length) {
@@ -99,24 +115,52 @@ export function GamepadRunner() {
         hoverPath.current = []; hovered.current = null; tvHover(null);
         hit.dispatchEvent(new PointerEvent("pointerout", { bubbles: true })); hit.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
       }
-      cursor.current?.style.setProperty("opacity", active.current && !idle && !(document.documentElement.hasAttribute("data-player-chrome-mounted") && !document.documentElement.hasAttribute("data-player-chrome-visible")) ? "1" : "0");
-      cursor.current?.style.setProperty("transform", `translate(${position.current.x}px,${position.current.y}px) translate(-50%,-50%)`);
+      const opacity = active.current && !idle && !(document.documentElement.hasAttribute("data-player-chrome-mounted") && !document.documentElement.hasAttribute("data-player-chrome-visible")) ? "1" : "0";
+      if (cursor.current && cursor.current.style.opacity !== opacity) cursor.current.style.opacity = opacity;
       if (Math.abs(ly) >= deadzone) {
+        moving = true;
         let el = document.elementFromPoint(position.current.x, position.current.y) as HTMLElement | null;
         while (el && el !== document.body && (!/(auto|scroll)/.test(getComputedStyle(el).overflowY) || el.scrollHeight <= el.clientHeight)) el = el.parentElement;
         (el ?? document.scrollingElement)?.scrollBy({ top: ly * 600 * dt });
       }
-      if (Math.abs(lx) >= deadzone && now - lastRangeStep.current > 120 && document.activeElement?.hasAttribute("data-gamepad-adjusting")) {
-        lastRangeStep.current = now; dispatchTvNav(lx < 0 ? "left" : "right");
+      if (Math.abs(lx) >= deadzone && document.activeElement?.hasAttribute("data-gamepad-adjusting")) {
+        moving = true;
+        if (now - lastRangeStep.current > 120) {
+          lastRangeStep.current = now; dispatchTvNav(lx < 0 ? "left" : "right");
+        }
       }
-      frame = requestAnimationFrame(tick);
+      if (moving) request();
+      else if (active.current && settings.controllerCursorHideIdle && !idle)
+        idleTimer = window.setTimeout(request, Math.max(0, settings.controllerCursorHideDelaySec * 1000 - (now - lastMove.current)));
     };
-    frame = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("blur", refresh); };
+    wake.current = request;
+    const observer = new MutationObserver(request);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-player-chrome-mounted", "data-player-chrome-visible"] });
+    return () => { wake.current = () => {}; observer.disconnect(); cancelAnimationFrame(frame); if (idleTimer !== null) clearTimeout(idleTimer); window.removeEventListener("blur", refresh); };
   }, []);
 
+  useEffect(
+    () =>
+      subscribeLiveGamepad(() => {
+        axes.current = getLiveGamepad().axes;
+        const { lx, ly, rx, ry } = axes.current;
+        const deadzone = motion.current.controllerDeadzone;
+        if (
+          Math.abs(rx) >= deadzone ||
+          Math.abs(ry) >= deadzone ||
+          Math.abs(ly) >= deadzone ||
+          (Math.abs(lx) >= deadzone &&
+            document.activeElement?.hasAttribute("data-gamepad-adjusting"))
+        )
+          wake.current();
+      }),
+    [],
+  );
+
+  useEffect(() => wake.current(), [settings.controllerDeadzone, settings.controllerCursorSpeed, settings.controllerCursorHideIdle, settings.controllerCursorHideDelaySec]);
+
   useEffect(() => {
-    if (!live.buttons.south) return;
+    if (!buttons.south) return;
     const selectedField = document.activeElement === controllerField.current ? controllerField.current : null;
     if (!active.current && !selectedField) return;
     if (keyboard && document.activeElement instanceof HTMLButtonElement && document.activeElement.closest("[data-controller-keyboard]")) {
@@ -130,7 +174,7 @@ export function GamepadRunner() {
     if (target?.closest("[data-settings]")) {
       const range = target.closest<HTMLInputElement>('input[type="range"]');
       if (range) {
-        range.setAttribute("data-gamepad-adjusting", ""); range.focus({ preventScroll: true });
+        range.setAttribute("data-gamepad-adjusting", ""); range.focus({ preventScroll: true }); wake.current();
         return;
       }
       const select = target.closest<HTMLSelectElement>("select");
@@ -152,15 +196,15 @@ export function GamepadRunner() {
     }
     const clickable = target?.closest<HTMLElement>("button,a,input,select,textarea,[role='button'],[tabindex]");
     (clickable ?? (target instanceof HTMLElement ? target : null))?.click();
-  }, [live.buttons.south]);
+  }, [buttons.south]);
 
   useEffect(() => {
-    if (live.buttons.west && keyboard) typeInto(keyboard, "Backspace");
-  }, [live.buttons.west, keyboard]);
+    if (buttons.west && keyboard) typeInto(keyboard, "Backspace");
+  }, [buttons.west, keyboard]);
 
   useEffect(() => {
-    if (live.buttons.north && keyboard) typeInto(keyboard, " ");
-  }, [live.buttons.north, keyboard]);
+    if (buttons.north && keyboard) typeInto(keyboard, " ");
+  }, [buttons.north, keyboard]);
 
   useEffect(() => {
     if (!keyboard) return;
@@ -178,9 +222,9 @@ export function GamepadRunner() {
   }, []);
 
   useEffect(() => {
-    if (live.buttons.west && !keyboard && document.documentElement.hasAttribute("data-player-chrome-mounted"))
+    if (buttons.west && !keyboard && document.documentElement.hasAttribute("data-player-chrome-mounted"))
       document.querySelector<HTMLElement>("[data-player-subtitles]")?.click();
-  }, [live.buttons.west, keyboard]);
+  }, [buttons.west, keyboard]);
 
   return createPortal(
     <>
