@@ -687,3 +687,91 @@ pub async fn torrent_engine_set_options(
 pub async fn torrent_engine_selftest(app: AppHandle) -> selftest::SelfTestResult {
     selftest::run(app).await
 }
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TorrentListItem {
+    pub info_hash: String,
+    pub name: String,
+    pub downloaded: u64,
+    pub total: u64,
+    pub download_speed: u64,
+    pub finished: bool,
+    pub paused: bool,
+    pub state: String,
+}
+
+#[tauri::command]
+pub fn torrent_engine_list() -> Vec<TorrentListItem> {
+    let Some(session) = current_session() else {
+        return Vec::new();
+    };
+    session.with_torrents(|torrents| {
+        torrents
+            .map(|(_id, handle)| {
+                let stats = handle.stats();
+                let info_hash = format!("{:?}", handle.info_hash());
+                let name = handle
+                    .with_metadata(|metadata| {
+                        metadata
+                            .file_infos
+                            .iter()
+                            .max_by_key(|file| file.len)
+                            .map(|file| {
+                                file.relative_filename
+                                    .file_name()
+                                    .map(|name| name.to_string_lossy().to_string())
+                                    .unwrap_or_else(|| {
+                                        file.relative_filename.to_string_lossy().to_string()
+                                    })
+                            })
+                    })
+                    .ok()
+                    .flatten()
+                    .unwrap_or_else(|| info_hash.clone());
+                let download_speed = stats
+                    .live
+                    .as_ref()
+                    .map(|live| (live.download_speed.mbps * 1024.0 * 1024.0) as u64)
+                    .unwrap_or(0);
+                let state = format!("{:?}", stats.state);
+                TorrentListItem {
+                    info_hash,
+                    name,
+                    downloaded: stats.progress_bytes,
+                    total: stats.total_bytes,
+                    download_speed,
+                    finished: stats.finished,
+                    paused: state.contains("Paused"),
+                    state,
+                }
+            })
+            .collect()
+    })
+}
+
+#[tauri::command]
+pub async fn torrent_engine_pause(info_hash: String) -> Result<(), String> {
+    let session = current_session().ok_or_else(|| "engine not ready".to_string())?;
+    let id = TorrentIdOrHash::parse(&info_hash).map_err(|error| error.to_string())?;
+    let handle = session
+        .get(id)
+        .ok_or_else(|| "torrent not found".to_string())?;
+    session
+        .pause(&handle)
+        .await
+        .map_err(|error| format!("{error:#}"))
+}
+
+#[tauri::command]
+pub async fn torrent_engine_resume(info_hash: String) -> Result<(), String> {
+    let session = current_session().ok_or_else(|| "engine not ready".to_string())?;
+    let id = TorrentIdOrHash::parse(&info_hash).map_err(|error| error.to_string())?;
+    let handle = session
+        .get(id)
+        .ok_or_else(|| "torrent not found".to_string())?;
+    session
+        .unpause(&handle)
+        .await
+        .map_err(|error| format!("{error:#}"))
+}

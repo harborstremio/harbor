@@ -82,6 +82,7 @@ import { effectiveBinding, eventToBinding, shouldHandleGlobalKeyboardEvent } fro
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import type { MetaType } from "@/lib/cinemeta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
+import { useAutoDownloadRunner } from "@/lib/auto-download/runner";
 import { Home } from "@/views/home";
 import { ParentalProvider } from "@/lib/parental";
 import { TraktProvider } from "@/lib/trakt/provider";
@@ -331,6 +332,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <TogetherLeaveForLiveModal />
                                                   <TogetherLocationPublisher />
                                                   <DiscordPresence />
+                                                  <AutoDownloadRunner />
                                                   <ContextMenu />
                                                   <WatchLocalModal />
                                                   <LocalEpisodesModal />
@@ -465,6 +467,11 @@ function TogetherLocationPublisher() {
 
 function DiscordPresence() {
   useDiscordPresence();
+  return null;
+}
+
+function AutoDownloadRunner() {
+  useAutoDownloadRunner();
   return null;
 }
 
@@ -1132,7 +1139,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
         {downloadsAlive && (
           <div className={layer(downloadsTop)}>
             <Suspense fallback={null}>
-              <DownloadsView />
+              <DownloadsView active={downloadsTop} />
             </Suspense>
           </div>
         )}

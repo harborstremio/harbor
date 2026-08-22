@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { scrollToDataEp } from "@/lib/episode-scroll";
 import { type FranchiseEntry } from "@/lib/providers/anime-detail";
@@ -20,6 +20,7 @@ import { SeasonArcPicker } from "./series-episodes/season-arc-picker";
 import { AnimeEpisodeStrip } from "./anime-episode-strip";
 import { EpisodeGridControls } from "./episode-grid-controls";
 import { EpisodeLayoutToggle } from "./episode-layout-toggle";
+import { EpisodeDownloadsMenu } from "./episode-downloads-menu";
 import { EpisodeSearch } from "./episode-search";
 import { AnimeRandomButton } from "./anime-random-button";
 import { EpisodeSearchToggle } from "./series-episodes/episode-search-controls";
@@ -286,6 +287,19 @@ export function AnimeEpisodes({
   }, [nextUpNum, episodes, meta.id, reveal, scrollRef]);
 
   const isOneOff = meta.type === "movie" || episodes.length <= 1;
+  const downloadEpisodes = useMemo(
+    () =>
+      displayEpisodes.map((e) => ({
+        season: e.seasonNumber || 1,
+        episode: e.number,
+        name: e.title || undefined,
+        kitsuStreamId: e.streamId,
+        imdbId: e.imdbId,
+        imdbSeason: e.imdbSeason,
+        imdbEpisode: e.imdbEpisode,
+      })),
+    [displayEpisodes],
+  );
   return (
     <div data-anime-episodes className="flex flex-col gap-6 scroll-mt-24">
       <div className="flex flex-col gap-4">
@@ -330,6 +344,7 @@ export function AnimeEpisodes({
                   : t("{n} episodes", { n: displayEpisodes.length })}
               </p>
             )}
+            {!isOneOff && <EpisodeDownloadsMenu meta={meta} episodes={downloadEpisodes} />}
             {!isOneOff && (
               <AnimeRandomButton episodes={displayEpisodes} metaForEp={routing.metaForEp} />
             )}

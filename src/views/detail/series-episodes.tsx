@@ -17,6 +17,7 @@ import { useSimkl } from "@/lib/simkl/provider";
 import { useT } from "@/lib/i18n";
 import { EpisodeGridControls } from "./episode-grid-controls";
 import { EpisodeLayoutToggle } from "./episode-layout-toggle";
+import { EpisodeDownloadsMenu } from "./episode-downloads-menu";
 import { EpisodeRow } from "./series-episode-row";
 import { EpisodeGridSkeleton } from "./episode-grid-skeleton";
 import { EpisodeStrip } from "./episode-strip";
@@ -246,6 +247,16 @@ export function SeriesEpisodes({
     settings,
   });
   const markSeason = useMarkSeason({ meta, active, enrichedEpisodes, simklConnected });
+  const downloadEpisodes = useMemo(
+    () =>
+      enrichedEpisodes.map((ep) => ({
+        season: ep.seasonNumber,
+        episode: ep.episodeNumber,
+        name: ep.name || undefined,
+        runtime: ep.runtime ?? undefined,
+      })),
+    [enrichedEpisodes],
+  );
 
   return (
     <div data-episodes className="flex scroll-mt-24 flex-col gap-6">
@@ -276,6 +287,7 @@ export function SeriesEpisodes({
           )}
         </div>
         <div className="flex items-center gap-2.5">
+          <EpisodeDownloadsMenu meta={meta} episodes={downloadEpisodes} />
           <RandomEpisodeButton meta={meta} seasons={seasons} />
           <EpisodeLayoutToggle
             value={settings.episodeLayout}

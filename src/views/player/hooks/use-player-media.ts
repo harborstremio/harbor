@@ -75,19 +75,20 @@ export function usePlayerMedia(params: {
   useEffect(() => {
     const hash = isLocalEngineUrl(src.url) ? (src.streamRef?.infoHash ?? null) : null;
     const prev = prevEngineHashRef.current;
+    const keepInBackground = settings.keepStreamDownloadsInBackground;
     const purge = () =>
       settings.streamCacheRetentionHours === 0 ||
       (settings.deleteWatchedDownloads && progressRef.current >= 0.9);
     if (prev && prev !== hash) {
       cancelTorrentRemoval(prev);
-      void torrentEngineRemove(prev, purge());
+      if (!keepInBackground) void torrentEngineRemove(prev, purge());
     }
     if (hash) cancelTorrentRemoval(hash);
     prevEngineHashRef.current = hash;
     return () => {
-      if (hash) scheduleTorrentRemoval(hash, purge());
+      if (hash && !keepInBackground) scheduleTorrentRemoval(hash, purge());
     };
-  }, [src.url, src.streamRef?.infoHash]);
+  }, [src.url, src.streamRef?.infoHash, settings.keepStreamDownloadsInBackground]);
 
   const volumeRestoredRef = useRef(false);
   useEffect(() => {

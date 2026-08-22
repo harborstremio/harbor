@@ -36,6 +36,17 @@ export type TorrentEngineStats = {
   state: string;
 };
 
+export type TorrentListItem = {
+  infoHash: string;
+  name: string;
+  downloaded: number;
+  total: number;
+  downloadSpeed: number;
+  finished: boolean;
+  paused: boolean;
+  state: string;
+};
+
 export type SelfTestStep = {
   label: string;
   ok: boolean;
@@ -102,6 +113,25 @@ export async function torrentEngineStats(
   }
 }
 
+export async function torrentEngineList(): Promise<TorrentListItem[]> {
+  if (!isTauri) return [];
+  try {
+    return await invoke<TorrentListItem[]>("torrent_engine_list");
+  } catch {
+    return [];
+  }
+}
+
+export async function torrentEnginePause(infoHash: string): Promise<void> {
+  if (!isTauri) return;
+  await invoke("torrent_engine_pause", { infoHash });
+}
+
+export async function torrentEngineResume(infoHash: string): Promise<void> {
+  if (!isTauri) return;
+  await invoke("torrent_engine_resume", { infoHash });
+}
+
 export async function torrentEngineRemove(infoHash: string, deleteFiles: boolean): Promise<void> {
   if (!isTauri) return;
   stopFullDownload(infoHash);
@@ -112,7 +142,11 @@ export async function torrentEngineRemove(infoHash: string, deleteFiles: boolean
 
 const pendingRemovals = new Map<string, number>();
 
-export function scheduleTorrentRemoval(infoHash: string, deleteFiles = false, delayMs = 1200): void {
+export function scheduleTorrentRemoval(
+  infoHash: string,
+  deleteFiles = false,
+  delayMs = 1200,
+): void {
   if (!isTauri) return;
   cancelTorrentRemoval(infoHash);
   const id = window.setTimeout(() => {
@@ -171,4 +205,3 @@ export async function torrentEngineSetOptions(
     console.warn("[engine] set options failed", e),
   );
 }
-

@@ -1,6 +1,25 @@
-import { Bookmark, BookmarkCheck, CheckCheck, ClipboardPaste, Copy, Download, EyeOff, Info, ListChecks, ListPlus, Maximize, Navigation, RotateCcw, Star, UserPlus, Wallpaper } from "lucide-react";
+import {
+  ArrowDownToLine,
+  Bookmark,
+  BookmarkCheck,
+  CheckCheck,
+  ClipboardPaste,
+  Copy,
+  Download,
+  EyeOff,
+  Info,
+  ListChecks,
+  ListPlus,
+  Maximize,
+  Navigation,
+  RotateCcw,
+  Star,
+  UserPlus,
+  Wallpaper,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useActiveAddon } from "@/lib/active-addon";
+import { toggleAutoDownload, useIsAutoDownloaded } from "@/lib/auto-download";
 import { useContextMenu, type ViewSummonable } from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
 import { usePlayerActions } from "@/lib/player-actions";
@@ -68,6 +87,7 @@ export function ContextMenu() {
   const isFav = useIsFavorite(targetMetaId);
   const { toggle: toggleLocalList } = useLocalWatchlist();
   const isLocal = useInLocalWatchlist(targetMetaId);
+  const isAutoDl = useIsAutoDownloaded(targetMetaId ?? "");
 
   const goToHost = () => {
     if (!hostLocation) return;
@@ -172,7 +192,13 @@ export function ContextMenu() {
       close();
     };
     const handleWatchlist = () => {
-      toggleWatchlist({ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster, imdbId: targetImdb });
+      toggleWatchlist({
+        id: meta.id,
+        type: meta.type,
+        name: meta.name,
+        poster: meta.poster,
+        imdbId: targetImdb,
+      });
       close();
     };
     const handleBring = () => {
@@ -189,13 +215,24 @@ export function ContextMenu() {
     };
     if (!playerActions) {
       items.push(
-        <Item key="details" icon={<Info size={14} strokeWidth={2} />} label="View details" onClick={handleDetails} />,
+        <Item
+          key="details"
+          icon={<Info size={14} strokeWidth={2} />}
+          label="View details"
+          onClick={handleDetails}
+        />,
       );
     }
     items.push(
       <Item
         key="watchlist"
-        icon={isWatchlisted ? <BookmarkCheck size={14} strokeWidth={2} /> : <Bookmark size={14} strokeWidth={2} />}
+        icon={
+          isWatchlisted ? (
+            <BookmarkCheck size={14} strokeWidth={2} />
+          ) : (
+            <Bookmark size={14} strokeWidth={2} />
+          )
+        }
         label={isWatchlisted ? "In watchlist" : "Add to watchlist"}
         onClick={handleWatchlist}
         accent={isWatchlisted}
@@ -216,7 +253,13 @@ export function ContextMenu() {
     items.push(
       <Item
         key="local-list"
-        icon={isLocal ? <ListChecks size={14} strokeWidth={2} /> : <ListPlus size={14} strokeWidth={2} />}
+        icon={
+          isLocal ? (
+            <ListChecks size={14} strokeWidth={2} />
+          ) : (
+            <ListPlus size={14} strokeWidth={2} />
+          )
+        }
         label={isLocal ? "In my list" : "Add to my list"}
         onClick={() => {
           toggleLocalList({ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster });
@@ -225,11 +268,31 @@ export function ContextMenu() {
         accent={isLocal}
       />,
     );
+    if (meta.type === "series" && !playerActions) {
+      items.push(
+        <Item
+          key="auto-download"
+          icon={<ArrowDownToLine size={14} strokeWidth={2} />}
+          label={isAutoDl ? "Auto-downloading" : "Auto-download new episodes"}
+          onClick={() => {
+            toggleAutoDownload(meta);
+            close();
+          }}
+          accent={isAutoDl}
+        />,
+      );
+    }
     if (!playerActions) {
       items.push(
         <Item
           key="watched"
-          icon={isWatched ? <EyeOff size={14} strokeWidth={2} /> : <CheckCheck size={14} strokeWidth={2} />}
+          icon={
+            isWatched ? (
+              <EyeOff size={14} strokeWidth={2} />
+            ) : (
+              <CheckCheck size={14} strokeWidth={2} />
+            )
+          }
           label={
             isWatched
               ? "Mark as unwatched"
@@ -513,15 +576,7 @@ function Item({
             : "text-ink hover:bg-raised"
       }`}
     >
-      <span
-        className={
-          disabled
-            ? "text-ink-subtle/40"
-            : accent
-              ? "text-accent"
-              : "text-ink-muted"
-        }
-      >
+      <span className={disabled ? "text-ink-subtle/40" : accent ? "text-accent" : "text-ink-muted"}>
         {icon}
       </span>
       {label}
