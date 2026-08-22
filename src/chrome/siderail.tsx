@@ -12,11 +12,22 @@ import { useT } from "@/lib/i18n";
 import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
-import { close, minimize, toggleMaximize } from "@/lib/window";
+import { close, minimize } from "@/lib/window";
+import { toggleWindowFullscreen } from "@/lib/fullscreen-state";
+import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
-const PRIMARY_IDS = new Set(["home", "discover", "movies", "shows", "kids", "anime", "live", "vod"]);
+const PRIMARY_IDS = new Set([
+  "home",
+  "discover",
+  "movies",
+  "shows",
+  "kids",
+  "anime",
+  "live",
+  "vod",
+]);
 
 export function SideRail() {
   const { view, setView, chromeHidden } = useView();
@@ -24,6 +35,7 @@ export function SideRail() {
   const { locked, unlock, hiddenTabs } = useParental();
   const { setOpen: setSearchOpen } = useSearch();
   const t = useT();
+  const fullscreen = useWindowFullscreen();
   const [pinFor, setPinFor] = useState<View | null>(null);
   const collapsed = settings.sidebarCollapsed;
 
@@ -65,7 +77,10 @@ export function SideRail() {
           <span
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 h-20"
-            style={{ background: "radial-gradient(120% 78% at 24% 4%, var(--color-accent-soft), transparent 66%)" }}
+            style={{
+              background:
+                "radial-gradient(120% 78% at 24% 4%, var(--color-accent-soft), transparent 66%)",
+            }}
           />
           <button
             type="button"
@@ -88,7 +103,13 @@ export function SideRail() {
         <div className="flex-1 overflow-y-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <nav className="flex flex-col gap-0.5">
             {primary.map((item) => (
-              <RailItem key={item.id} label={item.label} active={view === item.view} collapsed={collapsed} onClick={() => navigate(item)} />
+              <RailItem
+                key={item.id}
+                label={item.label}
+                active={view === item.view}
+                collapsed={collapsed}
+                onClick={() => navigate(item)}
+              />
             ))}
           </nav>
 
@@ -97,7 +118,13 @@ export function SideRail() {
               <GoldRule collapsed={collapsed} />
               <nav className="flex flex-col gap-0.5">
                 {secondary.map((item) => (
-                  <RailItem key={item.id} label={item.label} active={view === item.view} collapsed={collapsed} onClick={() => navigate(item)} />
+                  <RailItem
+                    key={item.id}
+                    label={item.label}
+                    active={view === item.view}
+                    collapsed={collapsed}
+                    onClick={() => navigate(item)}
+                  />
                 ))}
               </nav>
             </>
@@ -107,7 +134,13 @@ export function SideRail() {
             <>
               <GoldRule collapsed={collapsed} />
               <nav className="flex flex-col gap-0.5">
-                <RailItem key={settingsItem.id} label={settingsItem.label} active={view === settingsItem.view} collapsed={collapsed} onClick={() => setView(settingsItem.view)} />
+                <RailItem
+                  key={settingsItem.id}
+                  label={settingsItem.label}
+                  active={view === settingsItem.view}
+                  collapsed={collapsed}
+                  onClick={() => setView(settingsItem.view)}
+                />
               </nav>
             </>
           )}
@@ -117,9 +150,14 @@ export function SideRail() {
           <span
             aria-hidden
             className="absolute inset-x-0 top-0 h-px"
-            style={{ background: "linear-gradient(90deg, transparent, var(--color-accent-soft), transparent)" }}
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, var(--color-accent-soft), transparent)",
+            }}
           />
-          <div className={`flex items-center gap-1 ${collapsed ? "justify-center" : "justify-between"}`}>
+          <div
+            className={`flex items-center gap-1 ${collapsed ? "justify-center" : "justify-between"}`}
+          >
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -129,7 +167,9 @@ export function SideRail() {
               <Search size={15} strokeWidth={1.8} />
             </button>
             {!collapsed && <RecordingPill />}
-            {!collapsed && view !== "live" && <TogetherButton variant="ghost" popoverPlacement="above-left" />}
+            {!collapsed && view !== "live" && (
+              <TogetherButton variant="ghost" popoverPlacement="above-left" />
+            )}
           </div>
           <div className={`flex ${collapsed ? "justify-center" : ""}`}>
             <CollapseToggle collapsed={collapsed} />
@@ -140,11 +180,47 @@ export function SideRail() {
               <WinBtn onClick={minimize} label={t("chrome.minimize")}>
                 <path d="M3 6.5h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
               </WinBtn>
-              <WinBtn onClick={toggleMaximize} label={t("chrome.maximize")}>
-                <rect x="3" y="3" width="7" height="7" stroke="currentColor" strokeWidth="1.4" rx="1.2" />
+              <WinBtn
+                onClick={() => void toggleWindowFullscreen()}
+                label={fullscreen ? t("chrome.restore") : t("chrome.maximize")}
+              >
+                {fullscreen ? (
+                  <>
+                    <rect
+                      x="2.5"
+                      y="4.5"
+                      width="6"
+                      height="6"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      rx="1"
+                    />
+                    <path
+                      d="M5 4.5V3a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H9"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      fill="none"
+                    />
+                  </>
+                ) : (
+                  <rect
+                    x="3"
+                    y="3"
+                    width="7"
+                    height="7"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    rx="1.2"
+                  />
+                )}
               </WinBtn>
               <WinBtn onClick={close} label={t("common.close")}>
-                <path d="M3.5 3.5l6 6M9.5 3.5l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                <path
+                  d="M3.5 3.5l6 6M9.5 3.5l-6 6"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
               </WinBtn>
             </div>
           )}
@@ -216,7 +292,9 @@ function GoldRule({ collapsed }: { collapsed: boolean }) {
     <div
       aria-hidden
       className={`my-4 h-px ${collapsed ? "mx-3" : "mx-7"}`}
-      style={{ background: "linear-gradient(90deg, transparent, var(--color-accent-soft), transparent)" }}
+      style={{
+        background: "linear-gradient(90deg, transparent, var(--color-accent-soft), transparent)",
+      }}
     />
   );
 }
