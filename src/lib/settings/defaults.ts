@@ -286,6 +286,8 @@ export const DEFAULT: Settings = {
   spoilerHideDescriptions: true,
   spoilerSkipNext: true,
   streamBackdropBlur: true,
+  screensaver: false,
+  screensaverDelayMin: 5,
   songIdEnabled: false,
   songCardStyle: "cinematic",
   songCardDetails: true,

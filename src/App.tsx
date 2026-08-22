@@ -55,6 +55,7 @@ import { MalAvatarSync } from "@/components/mal/mal-avatar-sync";
 import { MalSyncToast } from "@/components/mal/mal-sync-toast";
 import { TogetherLeaveForLiveModal } from "@/components/together-leave-for-live-modal";
 import { ThemeBackdrop } from "@/components/theme-backdrop";
+import { ScreensaverRoot } from "@/components/screensaver/screensaver-root";
 import { TopRankModal } from "@/components/top-rank-modal";
 import { AuthProvider } from "@/lib/auth";
 import { ProfilesProvider, useProfiles } from "@/lib/profiles";
@@ -317,6 +318,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <ThemeBackdrop />
                                                   <WatchlistSync />
                                                   <Shell onReady={onReady} />
+                                                  <ScreensaverRoot />
                                                   <Suspense fallback={null}>
                                                     <OnboardingModal />
                                                   </Suspense>
