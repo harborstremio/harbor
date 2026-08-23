@@ -63,12 +63,20 @@ export function PickerHeader({
   meta: Meta;
   episode?: PlayEpisode;
 }) {
+  // Continuous anime (e.g. One Piece) numbers episodes absolutely (1169) while IMDb/TMDB
+  // assign a per-season pair (S23E14); when they diverge, present the absolute episode.
+  const continuousAnime =
+    episode != null &&
+    episode.imdbEpisode != null &&
+    episode.episode !== episode.imdbEpisode;
   return (
     <header className="flex flex-col gap-3">
       {episode ? (
         <>
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-            {meta.name} · Season {episode.imdbSeason ?? episode.season} · Episode {String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
+            {continuousAnime
+              ? `${meta.name} · Episode ${episode.episode}`
+              : `${meta.name} · Season ${episode.imdbSeason ?? episode.season} · Episode ${String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}`}
           </p>
           <h1 className="font-display text-[64px] font-medium leading-[0.96] tracking-tight text-ink">
             {episode.name || `Episode ${episode.episode}`}
