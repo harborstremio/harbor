@@ -7,6 +7,7 @@ import {
   normalizeSubBorderSize,
   stepSubBorderSize,
 } from "../src/lib/settings/border-size.ts";
+import { buildSubtitleOutline } from "../src/lib/player/subtitle-outline.ts";
 
 test("normalize keeps decimal half steps", () => {
   assert.equal(normalizeSubBorderSize(3.5), 3.5);
@@ -47,4 +48,12 @@ test("format trims floating point noise", () => {
   assert.equal(formatSubBorderSize(3.5), "3.5px");
   assert.equal(formatSubBorderSize(2), "2px");
   assert.equal(formatSubBorderSize(0.1 + 0.2), "0.3px");
+});
+
+test("HTML5 subtitle outlines preserve fractional radii", () => {
+  const integer = buildSubtitleOutline("#000000", 3);
+  const fractional = buildSubtitleOutline("#000000", 3.5);
+  assert.notEqual(fractional, integer);
+  assert.ok(fractional.split(", ").length > integer.split(", ").length);
+  assert.equal(buildSubtitleOutline("#000000", 3.5), fractional);
 });

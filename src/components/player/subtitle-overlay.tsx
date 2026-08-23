@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useActiveKid } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
+import { buildSubtitleOutline } from "@/lib/player/subtitle-outline";
 
 type Props = {
   text: string;
@@ -46,14 +47,14 @@ export const SubtitleOverlay = memo(function SubtitleOverlay({ text, startSec, s
     align === "left" ? "justify-start" : align === "right" ? "justify-end" : "justify-center";
 
   const borderSize = useMemo(
-    () => Math.max(1, Math.round((clamp(settings.subBorderSize, 1, 6) || 2) * responsive)),
+    () => Math.max(1, (clamp(settings.subBorderSize, 1, 6) || 2) * responsive),
     [settings.subBorderSize, responsive],
   );
   const borderColor = settings.subBorderColor || "#000000";
 
   const textShadow = useMemo(() => {
     if (style === "outline") {
-      return buildOutline(borderColor, borderSize);
+      return buildSubtitleOutline(borderColor, borderSize);
     } else if (style === "shadow") {
       return "0 1px 2px rgba(0,0,0,0.95), 0 2px 6px rgba(0,0,0,0.85), 0 0 18px rgba(0,0,0,0.55)";
     }
@@ -136,18 +137,6 @@ function fontFamilyFor(family: string | undefined): string {
     default:
       return '"Inter", -apple-system, system-ui, sans-serif';
   }
-}
-
-function buildOutline(color: string, size: number): string {
-  const offsets: [number, number][] = [];
-  for (let dx = -size; dx <= size; dx++) {
-    for (let dy = -size; dy <= size; dy++) {
-      const r = Math.sqrt(dx * dx + dy * dy);
-      if (r > size + 0.1 || r < 0.1) continue;
-      offsets.push([dx, dy]);
-    }
-  }
-  return offsets.map(([dx, dy]) => `${dx}px ${dy}px 0 ${color}`).join(", ");
 }
 
 function clamp(n: number, lo: number, hi: number): number {
