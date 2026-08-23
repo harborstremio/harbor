@@ -21,6 +21,9 @@ export function buildStreamIds(
   const mappedImdb =
     episode?.imdbSeason != null && episode?.imdbEpisode != null ? (episode.imdbId ?? imdbId) : null;
   const imdbEpAligned = !animeMeta || episode?.episode === episode?.imdbEpisode;
+  const continuousAnime =
+    animeMeta && episode?.imdbEpisode != null && episode?.episode != null &&
+    episode.episode !== episode.imdbEpisode;
   const courOffset =
     animeMeta &&
     episode?.imdbEpisode != null &&
@@ -59,6 +62,13 @@ export function buildStreamIds(
   }
 
   if (mappedImdb && mappedImdb.startsWith("tt") && !imdbEpAligned && courOffset) {
+    push(`${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
+  }
+
+  // Seasonal anime with real seasons (e.g. SAO S3E5): Kitsu reports a wrong/misleading season
+  // (S1E5), so add the IMDb season-aware id so addons scope to the correct season instead of
+  // returning every "episode 5" across all seasons. Skipped for continuous anime (One Piece).
+  if (animeMeta && !continuousAnime && mappedImdb && mappedImdb.startsWith("tt")) {
     push(`${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
   }
 
