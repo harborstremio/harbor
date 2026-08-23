@@ -73,7 +73,13 @@ export type PlayerSrc = {
   notWebReady?: boolean;
   isAnime?: boolean;
   subtitles?: Array<{ url: string; lang?: string; id?: string }>;
-  subtitlePreselect?: { off: boolean; url?: string; lang?: string; title?: string };
+  subtitlePreselect?: {
+    off: boolean;
+    url?: string;
+    lang?: string;
+    title?: string;
+    embedded?: { ffIndex: number; subIndex: number };
+  };
   attempt?: number;
   autoFired?: boolean;
   resume?: boolean;

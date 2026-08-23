@@ -10,6 +10,7 @@ export type TrackInfo = {
   codec?: string;
   channels?: string;
   channelCount?: number;
+  ffIndex?: number;
   title?: string;
   external?: boolean;
   externalFilename?: string;

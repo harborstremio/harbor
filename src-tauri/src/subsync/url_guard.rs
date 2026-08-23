@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 
 use std::collections::HashMap;
-use std::net::{Ipv4Addr, Ipv6Addr};
+use std::net::Ipv4Addr;
+use url::{Host, Url};
 
 const HOP_BY_HOP: &[&str] = &[
     "connection",
@@ -19,15 +20,6 @@ const HOP_BY_HOP: &[&str] = &[
 fn is_abs_path(url: &str) -> bool {
     let b = url.as_bytes();
     (b.len() > 2 && b[1] == b':' && (b[2] == b'/' || b[2] == b'\\')) || url.starts_with('/')
-}
-
-fn host_of(after_scheme: &str) -> String {
-    let authority = after_scheme.split(['/', '?', '#']).next().unwrap_or("");
-    let host_port = authority.rsplit('@').next().unwrap_or(authority);
-    if let Some(rest) = host_port.strip_prefix('[') {
-        return rest.split(']').next().unwrap_or("").to_string();
-    }
-    host_port.split(':').next().unwrap_or("").to_string()
 }
 
 fn check_v4(ip: Ipv4Addr, is_stream: bool) -> Result<(), String> {
@@ -52,45 +44,54 @@ pub fn validate_media_url(url: &str, allow_local: bool) -> Result<(), String> {
             Err("local-source-not-allowed".into())
         };
     }
-    let rest = lower
-        .strip_prefix("http://")
-        .or_else(|| lower.strip_prefix("https://"))
-        .ok_or("scheme-not-allowed")?;
-    let host = host_of(rest);
-    if host.is_empty() {
-        return Err("no-host".into());
+    let parsed = Url::parse(trimmed).map_err(|_| "invalid-url")?;
+    if !matches!(parsed.scheme(), "http" | "https") {
+        return Err("scheme-not-allowed".into());
     }
-    let is_stream = trimmed.contains("/stream/");
-    if let Ok(v4) = host.parse::<Ipv4Addr>() {
-        return check_v4(v4, is_stream);
+    let is_stream = parsed.path().starts_with("/stream/");
+    match parsed.host().ok_or("no-host")? {
+        Host::Ipv4(v4) => check_v4(v4, is_stream),
+        Host::Ipv6(v6) => {
+            if v6.is_loopback() {
+                return if is_stream {
+                    Ok(())
+                } else {
+                    Err("loopback-blocked".into())
+                };
+            }
+            if v6.is_unspecified() {
+                return Err("internal-ip-blocked".into());
+            }
+            let seg = v6.segments();
+            if (seg[0] & 0xffc0) == 0xfe80 || (seg[0] & 0xfe00) == 0xfc00 {
+                return Err("internal-ip-blocked".into());
+            }
+            let mapped = seg[0] == 0
+                && seg[1] == 0
+                && seg[2] == 0
+                && seg[3] == 0
+                && seg[4] == 0
+                && seg[5] == 0xffff;
+            if mapped {
+                let v4 = Ipv4Addr::new(
+                    (seg[6] >> 8) as u8,
+                    (seg[6] & 0xff) as u8,
+                    (seg[7] >> 8) as u8,
+                    (seg[7] & 0xff) as u8,
+                );
+                return check_v4(v4, is_stream);
+            }
+            Ok(())
+        }
+        Host::Domain(host) => {
+            let host = host.trim_end_matches('.');
+            if host == "localhost" || host.ends_with(".localhost") || host.ends_with(".local") {
+                Err("local-hostname-blocked".into())
+            } else {
+                Ok(())
+            }
+        }
     }
-    if let Ok(v6) = host.parse::<Ipv6Addr>() {
-        if v6.is_loopback() {
-            return if is_stream { Ok(()) } else { Err("loopback-blocked".into()) };
-        }
-        if v6.is_unspecified() {
-            return Err("internal-ip-blocked".into());
-        }
-        let seg = v6.segments();
-        if (seg[0] & 0xffc0) == 0xfe80 || (seg[0] & 0xfe00) == 0xfc00 {
-            return Err("internal-ip-blocked".into());
-        }
-        let mapped = seg[0] == 0 && seg[1] == 0 && seg[2] == 0 && seg[3] == 0 && seg[4] == 0 && seg[5] == 0xffff;
-        if mapped {
-            let v4 = Ipv4Addr::new(
-                (seg[6] >> 8) as u8,
-                (seg[6] & 0xff) as u8,
-                (seg[7] >> 8) as u8,
-                (seg[7] & 0xff) as u8,
-            );
-            return check_v4(v4, is_stream);
-        }
-        return Ok(());
-    }
-    if host == "localhost" || host.ends_with(".localhost") || host.ends_with(".local") {
-        return Err("local-hostname-blocked".into());
-    }
-    Ok(())
 }
 
 fn has_ctl(s: &str) -> bool {
@@ -113,7 +114,14 @@ pub fn user_agent(headers: &HashMap<String, String>) -> Option<String> {
     headers
         .iter()
         .find(|(k, _)| k.eq_ignore_ascii_case("user-agent"))
-        .map(|(_, v)| v.clone())
+        .and_then(|(_, value)| {
+            let trimmed = value.trim();
+            if trimmed.is_empty() || has_ctl(value) {
+                None
+            } else {
+                Some(value.clone())
+            }
+        })
 }
 
 pub fn safe_map_spec(spec: Option<&str>) -> String {
@@ -141,6 +149,9 @@ mod tests {
         assert!(validate_media_url("http://[fe80::1]/x", true).is_err());
         assert!(validate_media_url("http://[::1]:9000/admin", true).is_err());
         assert!(validate_media_url("http://127.0.0.1:9000/admin", true).is_err());
+        assert!(
+            validate_media_url("http://127.0.0.1:9000/admin?next=/stream/abc/0", true).is_err()
+        );
     }
 
     #[test]
@@ -173,6 +184,13 @@ mod tests {
         assert!(!blob.contains("evil"));
         assert!(!blob.contains("connection"));
         assert!(!blob.contains("user-agent"));
+    }
+
+    #[test]
+    fn user_agent_rejects_control_character_injection() {
+        let mut h = HashMap::new();
+        h.insert("User-Agent".into(), "Harbor\r\nX-Injected: yes".into());
+        assert_eq!(user_agent(&h), None);
     }
 
     #[test]

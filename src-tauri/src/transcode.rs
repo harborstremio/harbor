@@ -155,29 +155,154 @@ pub fn ffmpeg_present() -> bool {
     locate_ffmpeg().is_some()
 }
 
-pub fn locate_ffprobe() -> Option<std::path::PathBuf> {
-    let name = if cfg!(windows) { "ffprobe.exe" } else { "ffprobe" };
-    if let Some(ffmpeg) = locate_ffmpeg() {
-        if let Some(parent) = ffmpeg.parent() {
-            let candidate = parent.join(name);
-            if candidate.exists() {
-                return Some(candidate);
+fn ffprobe_sidecar_name() -> Option<String> {
+    let triple = if cfg!(all(target_arch = "x86_64", target_os = "windows")) {
+        "x86_64-pc-windows-msvc"
+    } else if cfg!(all(target_arch = "aarch64", target_os = "windows")) {
+        "aarch64-pc-windows-msvc"
+    } else if cfg!(all(target_arch = "x86_64", target_os = "macos")) {
+        "x86_64-apple-darwin"
+    } else if cfg!(all(target_arch = "aarch64", target_os = "macos")) {
+        "aarch64-apple-darwin"
+    } else if cfg!(all(target_arch = "x86_64", target_os = "linux")) {
+        "x86_64-unknown-linux-gnu"
+    } else if cfg!(all(target_arch = "aarch64", target_os = "linux")) {
+        "aarch64-unknown-linux-gnu"
+    } else {
+        return None;
+    };
+    let extension = if cfg!(windows) { ".exe" } else { "" };
+    Some(format!("ffprobe-{triple}{extension}"))
+}
+
+fn ffprobe_candidates(
+    current_exe: Option<&std::path::Path>,
+    path: Option<&std::ffi::OsStr>,
+) -> Vec<std::path::PathBuf> {
+    let name = if cfg!(windows) {
+        "ffprobe.exe"
+    } else {
+        "ffprobe"
+    };
+    let sidecar_name = ffprobe_sidecar_name();
+    let mut candidates = Vec::new();
+    if let Some(dir) = current_exe.and_then(std::path::Path::parent) {
+        candidates.push(dir.join(name));
+        if let Some(sidecar) = sidecar_name.as_deref() {
+            candidates.push(dir.join(sidecar));
+            for relative in ["../binaries", "../../binaries", "../../../binaries"] {
+                candidates.push(dir.join(relative).join(sidecar));
             }
         }
     }
-    let mut cmd = std::process::Command::new(name);
-    cmd.arg("-version")
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null());
-    #[cfg(windows)]
+    if let Ok(cwd) = std::env::current_dir() {
+        if let Some(sidecar) = sidecar_name.as_deref() {
+            candidates.push(cwd.join("src-tauri/binaries").join(sidecar));
+            candidates.push(cwd.join("binaries").join(sidecar));
+        }
+    }
+    if let Some(path) = path {
+        candidates.extend(std::env::split_paths(path).map(|dir| dir.join(name)));
+    }
+    if cfg!(windows) {
+        candidates.extend(
+            [
+                r"C:\ffmpeg\bin\ffprobe.exe",
+                r"C:\Program Files\ffmpeg\bin\ffprobe.exe",
+                r"C:\Program Files (x86)\ffmpeg\bin\ffprobe.exe",
+                r"C:\ProgramData\chocolatey\bin\ffprobe.exe",
+            ]
+            .into_iter()
+            .map(std::path::PathBuf::from),
+        );
+        if let Some(profile) = std::env::var_os("USERPROFILE") {
+            let profile = std::path::PathBuf::from(profile);
+            candidates.push(profile.join(r"scoop\shims\ffprobe.exe"));
+            candidates.push(profile.join(r"scoop\apps\ffmpeg\current\bin\ffprobe.exe"));
+        }
+        if let Some(local) = std::env::var_os("LOCALAPPDATA") {
+            let packages = std::path::PathBuf::from(local).join(r"Microsoft\WinGet\Packages");
+            if let Ok(entries) = std::fs::read_dir(packages) {
+                for entry in entries.flatten().filter(|entry| {
+                    entry
+                        .file_name()
+                        .to_string_lossy()
+                        .to_ascii_lowercase()
+                        .contains("ffmpeg")
+                }) {
+                    if let Ok(builds) = std::fs::read_dir(entry.path()) {
+                        candidates.extend(
+                            builds
+                                .flatten()
+                                .map(|build| build.path().join(r"bin\ffprobe.exe")),
+                        );
+                    }
+                }
+            }
+        }
+    } else if cfg!(target_os = "macos") {
+        candidates.extend(
+            [
+                "/opt/homebrew/bin/ffprobe",
+                "/usr/local/bin/ffprobe",
+                "/opt/local/bin/ffprobe",
+            ]
+            .into_iter()
+            .map(std::path::PathBuf::from),
+        );
+    } else if cfg!(target_os = "linux") {
+        candidates.extend(
+            crate::binary_lookup::linux_binary_candidates("ffprobe")
+                .into_iter()
+                .filter(|candidate| candidate.is_absolute()),
+        );
+    }
+    candidates
+}
+
+fn is_executable_file(path: &std::path::Path) -> bool {
+    if !path.is_file() {
+        return false;
+    }
+    #[cfg(unix)]
     {
-        use std::os::windows::process::CommandExt;
-        cmd.creation_flags(0x0800_0000);
+        use std::os::unix::fs::PermissionsExt;
+        return std::fs::metadata(path)
+            .map(|metadata| metadata.permissions().mode() & 0o111 != 0)
+            .unwrap_or(false);
     }
-    if matches!(cmd.status(), Ok(s) if s.success()) {
-        return Some(std::path::PathBuf::from(name));
+    #[cfg(not(unix))]
+    true
+}
+
+pub fn locate_ffprobe() -> Option<std::path::PathBuf> {
+    let current_exe = std::env::current_exe().ok();
+    ffprobe_candidates(current_exe.as_deref(), std::env::var_os("PATH").as_deref())
+        .into_iter()
+        .find(|candidate| is_executable_file(candidate))
+}
+
+#[cfg(test)]
+mod ffprobe_locator_tests {
+    use super::ffprobe_candidates;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn prefers_the_bundled_ffprobe_beside_the_current_executable() {
+        let executable = Path::new("app").join(if cfg!(windows) {
+            "harbor.exe"
+        } else {
+            "harbor"
+        });
+        let candidates = ffprobe_candidates(Some(&executable), None);
+        let expected = PathBuf::from("app").join(if cfg!(windows) {
+            "ffprobe.exe"
+        } else {
+            "ffprobe"
+        });
+
+        assert_eq!(candidates.first(), Some(&expected));
     }
-    None
 }
 
 #[derive(Default, Debug, Clone)]

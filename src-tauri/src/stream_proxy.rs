@@ -106,6 +106,19 @@ impl ProxyState {
         Ok(state)
     }
 
+    pub(crate) fn port(&self) -> u16 {
+        self.port
+    }
+
+    pub(crate) async fn has_session(&self, session_id: &str, playlist: bool) -> bool {
+        self.sessions
+            .read()
+            .await
+            .get(session_id)
+            .map(|session| !playlist || session.base_url.is_some())
+            .unwrap_or(false)
+    }
+
     pub async fn register(&self, args: RegisterArgs) -> RegisterResult {
         let id = Uuid::new_v4().to_string();
         if !args.transcode {

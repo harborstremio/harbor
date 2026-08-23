@@ -4,12 +4,13 @@ import { Flag } from "@/components/flag";
 import { useContextMenu } from "@/lib/context-menu";
 import { languageName } from "@/lib/subtitles/language";
 import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
-import type { SubResult } from "@/lib/subtitles/types";
+import { subtitleTrackLanguageLabel, subtitleTrackTitle } from "@/lib/subtitles/track-label";
 import { useT } from "@/lib/i18n";
 import type { PlayEpisode, PlayerSrc } from "@/lib/view";
 import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 import { BackdropLayer } from "./backdrop-layer";
 import { useSubtitleChoices } from "./hooks/use-subtitle-choices";
+import { buildPlayerSubtitleSelection, type SubtitleChoice } from "./subtitle-choice";
 
 type Selection = string | "off" | null;
 
@@ -24,7 +25,7 @@ export function SubtitleSelectStep({
 }) {
   const t = useT();
   const fs = useWindowFullscreen();
-  const { loading, error, results, groups, bestId } = useSubtitleChoices(src);
+  const { loading, error, choices, groups, bestKey } = useSubtitleChoices(src);
   const [selected, setSelected] = useState<Selection>(null);
   const [activeLang, setActiveLang] = useState<string>("all");
   const inited = useRef(false);
@@ -32,14 +33,14 @@ export function SubtitleSelectStep({
   useEffect(() => {
     if (loading || inited.current) return;
     inited.current = true;
-    if (bestId) {
-      setSelected(bestId);
-      const g = groups.find((gr) => gr.items.some((it) => it.id === bestId));
+    if (bestKey) {
+      setSelected(bestKey);
+      const g = groups.find((group) => group.items.some((item) => item.key === bestKey));
       setActiveLang(g?.langKey ?? "all");
     } else {
       setSelected("off");
     }
-  }, [loading, bestId, groups]);
+  }, [loading, bestKey, groups]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -50,30 +51,24 @@ export function SubtitleSelectStep({
   }, [onCancel]);
 
   const start = () => {
-    if (selected === "off") {
-      onStart({ ...src, subtitlePreselect: { off: true } });
-      return;
-    }
-    const r = results?.find((x) => x.id === selected);
-    if (r) {
-      onStart({
-        ...src,
-        subtitlePreselect: { off: false, url: r.url, lang: r.lang, title: r.title || languageName(r.lang) },
-      });
-      return;
-    }
-    onStart(src);
+    onStart(buildPlayerSubtitleSelection(src, selected, choices ?? [], languageName));
   };
 
   const visible =
-    activeLang === "all" ? results ?? [] : groups.find((g) => g.langKey === activeLang)?.items ?? [];
+    activeLang === "all"
+      ? (choices ?? [])
+      : (groups.find((g) => g.langKey === activeLang)?.items ?? []);
   const context = episodeContext(src.episode, src.meta.name);
-  const total = results?.length ?? 0;
+  const total = choices?.length ?? 0;
 
   return (
     <main className="absolute inset-0 z-50 flex flex-col overflow-hidden bg-canvas">
       <BackdropLayer src={src.episode?.still || src.meta.background || src.meta.poster} />
-      <div aria-hidden data-tauri-drag-region={fs ? "false" : "true"} className="absolute inset-x-0 top-0 z-10 h-20" />
+      <div
+        aria-hidden
+        data-tauri-drag-region={fs ? "false" : "true"}
+        className="absolute inset-x-0 top-0 z-10 h-20"
+      />
 
       <div className="relative mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-6 px-10 pb-10 pt-24">
         <header className="flex items-start gap-4">
@@ -88,7 +83,9 @@ export function SubtitleSelectStep({
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex items-center gap-2.5">
               <Captions size={22} strokeWidth={2} className="shrink-0 text-accent" />
-              <h1 className="text-[26px] font-semibold tracking-tight text-ink">{t("Choose subtitles")}</h1>
+              <h1 className="text-[26px] font-semibold tracking-tight text-ink">
+                {t("Choose subtitles")}
+              </h1>
             </div>
             {context && <p className="truncate text-[14px] text-ink-muted">{context}</p>}
           </div>
@@ -120,18 +117,24 @@ export function SubtitleSelectStep({
                     icon={<Flag language={g.langDisplay} size="sm" showLabel={false} />}
                     label={g.langDisplay}
                     count={g.items.length}
-                    dot={g.items.some((it) => it.id === selected)}
+                    dot={g.items.some((item) => item.key === selected)}
                   />
                 ))}
               </aside>
 
               <section className="flex min-h-0 min-w-0 flex-1 flex-col">
                 <div className="min-h-0 flex-1 overflow-y-auto p-3">
-                  <OffRow selected={selected === "off"} onPick={() => setSelected("off")} label={t("No subtitles")} />
+                  <OffRow
+                    selected={selected === "off"}
+                    onPick={() => setSelected("off")}
+                    label={t("No subtitles")}
+                  />
 
                   {error && total === 0 && (
                     <p className="px-4 py-6 text-[14px] text-ink-muted">
-                      {t("Couldn't load subtitles. You can start anyway and add one later in the player.")}
+                      {t(
+                        "Couldn't load subtitles. You can start anyway and add one later in the player.",
+                      )}
                     </p>
                   )}
                   {!error && total === 0 && (
@@ -142,13 +145,13 @@ export function SubtitleSelectStep({
 
                   {visible.length > 0 && (
                     <div className="mt-1 flex flex-col gap-1.5">
-                      {visible.map((r) => (
+                      {visible.map((choice) => (
                         <TrackRow
-                          key={r.id}
-                          result={r}
-                          selected={r.id === selected}
-                          isBest={r.id === bestId}
-                          onPick={() => setSelected(r.id)}
+                          key={choice.key}
+                          choice={choice}
+                          selected={choice.key === selected}
+                          isBest={choice.key === bestKey}
+                          onPick={() => setSelected(choice.key)}
                         />
                       ))}
                     </div>
@@ -207,7 +210,9 @@ function SidebarItem({
     <button
       onClick={onClick}
       className={`flex min-h-[44px] items-center gap-2.5 rounded-xl px-3 text-start text-[13.5px] transition-colors ${
-        active ? "bg-elevated text-ink ring-1 ring-edge" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
+        active
+          ? "bg-elevated text-ink ring-1 ring-edge"
+          : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
       }`}
     >
       {icon}
@@ -218,7 +223,15 @@ function SidebarItem({
   );
 }
 
-function OffRow({ selected, onPick, label }: { selected: boolean; onPick: () => void; label: string }) {
+function OffRow({
+  selected,
+  onPick,
+  label,
+}: {
+  selected: boolean;
+  onPick: () => void;
+  label: string;
+}) {
   return (
     <button
       onClick={onPick}
@@ -234,24 +247,35 @@ function OffRow({ selected, onPick, label }: { selected: boolean; onPick: () => 
 }
 
 function TrackRow({
-  result,
+  choice,
   selected,
   isBest,
   onPick,
 }: {
-  result: SubResult;
+  choice: SubtitleChoice;
   selected: boolean;
   isBest: boolean;
   onPick: () => void;
 }) {
   const t = useT();
   const { open } = useContextMenu();
-  const title = result.title || languageName(result.lang);
-  return (
-    <button
-      onClick={onPick}
-      onContextMenu={(e) =>
-        open(e, {
+  const result = choice.kind === "external" ? choice.result : null;
+  const track = choice.kind === "embedded" ? choice.track : null;
+  const title = result
+    ? result.title || languageName(result.lang)
+    : subtitleTrackTitle({
+        id: track ? String(track.subIndex + 1) : undefined,
+        lang: track?.lang,
+        title: track?.title,
+        codec: track?.codec,
+        external: false,
+      });
+  const langDisplay = result
+    ? languageName(result.lang)
+    : subtitleTrackLanguageLabel({ lang: track?.lang, external: false });
+  const onContextMenu = result
+    ? (event: React.MouseEvent<HTMLButtonElement>) =>
+        open(event, {
           kind: "subtitle",
           label: title,
           download: result.url
@@ -264,7 +288,11 @@ function TrackRow({
                 })
             : undefined,
         })
-      }
+    : undefined;
+  return (
+    <button
+      onClick={onPick}
+      onContextMenu={onContextMenu}
       className={`flex min-h-[56px] w-full items-center gap-3.5 rounded-2xl px-4 py-2.5 text-start transition-colors ${
         selected ? "bg-accent/12 ring-1 ring-accent/50" : "hover:bg-canvas/50"
       }`}
@@ -280,26 +308,33 @@ function TrackRow({
           )}
         </span>
         <span className="flex flex-wrap items-center gap-2 text-[12px] text-ink-subtle">
-          <span className="font-semibold capitalize text-ink-muted">{result.source}</span>
-          {result.format && (
+          <span className="font-semibold capitalize text-ink-muted">
+            {result ? result.source : t("Embedded")}
+          </span>
+          {(result?.format || track?.codec) && (
             <>
               <span aria-hidden>·</span>
-              <span className="uppercase">{result.format}</span>
+              <span className="uppercase">{result?.format ?? track?.codec}</span>
             </>
           )}
-          {result.hearingImpaired && (
+          {(result?.hearingImpaired || track?.isHearingImpaired) && (
             <span className="rounded bg-amber-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-200">
               {t("HI/SDH")}
             </span>
           )}
-          {result.forced && (
+          {(result?.forced || track?.isForced) && (
             <span className="rounded bg-sky-400/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-sky-200">
               {t("Forced")}
             </span>
           )}
+          {track?.isDefault && (
+            <span className="rounded bg-white/8 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">
+              {t("Default")}
+            </span>
+          )}
         </span>
       </div>
-      <Flag language={languageName(result.lang)} size="md" showLabel={false} />
+      <Flag language={langDisplay} size="md" showLabel={false} />
     </button>
   );
 }
@@ -323,12 +358,20 @@ function LoadingSkeleton() {
       <div className="flex flex-1">
         <div className="flex w-[190px] shrink-0 flex-col gap-1.5 border-e border-edge-soft bg-canvas/30 p-3">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-11 animate-pulse rounded-xl bg-elevated/60" style={{ opacity: 1 - i * 0.15 }} />
+            <div
+              key={i}
+              className="h-11 animate-pulse rounded-xl bg-elevated/60"
+              style={{ opacity: 1 - i * 0.15 }}
+            />
           ))}
         </div>
         <div className="flex flex-1 flex-col gap-2 p-3">
           {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-14 animate-pulse rounded-2xl bg-elevated/50" style={{ opacity: 1 - i * 0.12 }} />
+            <div
+              key={i}
+              className="h-14 animate-pulse rounded-2xl bg-elevated/50"
+              style={{ opacity: 1 - i * 0.12 }}
+            />
           ))}
         </div>
       </div>

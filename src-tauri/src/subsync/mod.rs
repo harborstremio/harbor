@@ -8,8 +8,12 @@ mod asr_match;
 pub mod scorer;
 pub mod torrent_sync;
 pub mod audio_tracks;
+pub mod subtitle_tracks;
 pub mod asr;
 pub mod fingerprint;
+
+#[cfg(test)]
+mod subtitle_tracks_tests;
 
 #[cfg(feature = "asr-whisper")]
 mod asr_whisper;

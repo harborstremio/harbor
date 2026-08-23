@@ -17,6 +17,13 @@ import { pickDesiredSubtitleTrack } from "@/lib/subtitles/track-selection";
 import { markAddedSub } from "@/lib/subtitles/added-subs";
 import { markImportedSub } from "@/lib/player/imported-subs";
 import { readRememberedSub, subtitleMediaKey } from "@/lib/subtitles/subtitle-memory";
+import {
+  applyEmbeddedSubtitlePreselect,
+  applySubtitleOffPreselect,
+  enforceStoredSubtitleOff,
+  shouldEnforceStoredSubtitleOff,
+  subtitlePreselectApplyKey,
+} from "@/lib/subtitles/embedded-preselect";
 
 export function useTrackAutoload(params: {
   bridgeRef: RefObject<PlayerBridge | null>;
@@ -122,7 +129,8 @@ export function useTrackAutoload(params: {
         setRefreshing(true);
         setLastAdded(null);
         clearLastAddedTimer();
-        void refetchRef.current()
+        void refetchRef
+          .current()
           .then((n) => setLastAdded(n))
           .catch(() => setLastAdded(0))
           .finally(() => {
@@ -166,12 +174,14 @@ export function useTrackAutoload(params: {
     publishSubtitleContext({ candidateIds, stremioId: src.meta.id ?? null });
     const animeIds = candidateIds.some((i) => i.startsWith("kitsu:") || i.startsWith("mal:"));
     const imdbEpAligned =
-      !animeIds || src.episode?.imdbEpisode == null || src.episode.episode === src.episode.imdbEpisode;
+      !animeIds ||
+      src.episode?.imdbEpisode == null ||
+      src.episode.episode === src.episode.imdbEpisode;
     const searchSeason = imdbEpAligned
-      ? src.episode?.imdbSeason ?? src.episode?.season
+      ? (src.episode?.imdbSeason ?? src.episode?.season)
       : src.episode?.season;
     const searchEpisode = imdbEpAligned
-      ? src.episode?.imdbEpisode ?? src.episode?.episode
+      ? (src.episode?.imdbEpisode ?? src.episode?.episode)
       : src.episode?.episode;
     autoSubLoadKeyRef.current = key;
     void (async () => {
@@ -182,9 +192,7 @@ export function useTrackAutoload(params: {
         episode: searchEpisode,
         langs,
       });
-      const { videoHash, videoSize } = settings.subtitleAutoSync
-        ? await resolveVideoHash(src)
-        : {};
+      const { videoHash, videoSize } = settings.subtitleAutoSync ? await resolveVideoHash(src) : {};
       if (videoHash) console.info(`[subs/autoload] moviehash ${videoHash} (${videoSize})`);
       const b = bridgeRef.current;
       if (!b || autoSubLoadKeyRef.current !== key) {
@@ -252,20 +260,48 @@ export function useTrackAutoload(params: {
   useEffect(() => {
     const choice = src.subtitlePreselect;
     if (!choice) return;
-    if (snap.audioTracks.length === 0 && snap.subtitleTracks.length === 0 && snap.durationSec === 0) return;
-    if (preselectAppliedRef.current === src.url) return;
-    preselectAppliedRef.current = src.url;
-    if (choice.off) {
-      if (snap.subtitleTracks.some((t) => t.selected)) bridgeRef.current?.setSubtitleTrack(null);
+    if (snap.audioTracks.length === 0 && snap.subtitleTracks.length === 0 && snap.durationSec === 0)
+      return;
+    const applyKey = subtitlePreselectApplyKey(src, choice);
+    if (preselectAppliedRef.current === applyKey) return;
+    if (!choice.off && choice.embedded) {
+      const bridge = bridgeRef.current;
+      if (!bridge) return;
+      const applied = applyEmbeddedSubtitlePreselect(
+        snap.subtitleTracks,
+        choice.embedded,
+        (runtimeId) => bridge.setSubtitleTrack(runtimeId),
+      );
+      if (!applied) return;
+      preselectAppliedRef.current = applyKey;
       return;
     }
+    if (choice.off) {
+      const applied = applySubtitleOffPreselect(snap.subtitleTracks, () =>
+        bridgeRef.current?.setSubtitleTrack(null),
+      );
+      if (!applied) return;
+      preselectAppliedRef.current = applyKey;
+      return;
+    }
+    preselectAppliedRef.current = applyKey;
     if (choice.url) {
       const url = choice.url;
       void bridgeRef.current?.addSubtitle(url, choice.lang, choice.title, true)?.then((ok) => {
         if (ok) markAddedSub(url);
       });
     }
-  }, [src.url, src.subtitlePreselect, snap.audioTracks.length, snap.subtitleTracks, snap.durationSec, bridgeRef]);
+  }, [
+    src.meta.id,
+    src.episode?.season,
+    src.episode?.episode,
+    src.url,
+    src.subtitlePreselect,
+    snap.audioTracks.length,
+    snap.subtitleTracks,
+    snap.durationSec,
+    bridgeRef,
+  ]);
   const subRestoreRef = useRef<string | null>(null);
   const subRestoreWaitRef = useRef<number | null>(null);
   const subRestoreLogRef = useRef<string | null>(null);
@@ -316,8 +352,7 @@ export function useTrackAutoload(params: {
         );
         if (cands.length === 0) return undefined;
         return (
-          cands.find((t) => !remembered.provider || t.provider === remembered.provider) ??
-          cands[0]
+          cands.find((t) => !remembered.provider || t.provider === remembered.provider) ?? cands[0]
         );
       };
       const existing = bySubId() ?? snap.subtitleTracks.find(sameSource) ?? byRelease();
@@ -344,11 +379,7 @@ export function useTrackAutoload(params: {
         console.info("[subs/restore] selecting remembered track", {
           id: existing.id,
           subId: existing.subId,
-          via: bySubId()
-            ? "subId"
-            : snap.subtitleTracks.find(sameSource)
-              ? "source"
-              : "release",
+          via: bySubId() ? "subId" : snap.subtitleTracks.find(sameSource) ? "source" : "release",
           url: existing.url,
           release: existing.release,
           title: existing.title,
@@ -468,7 +499,10 @@ export function useTrackAutoload(params: {
         }
       }
     }
-    const subsOff = subsOffFor(prefs, settings);
+    const subsOff = shouldEnforceStoredSubtitleOff(
+      src.subtitlePreselect,
+      subsOffFor(prefs, settings),
+    );
     if (subsOff) {
       if (snap.subtitleTracks.some((t) => t.selected)) bridgeRef.current?.setSubtitleTrack(null);
     } else if (
@@ -491,10 +525,10 @@ export function useTrackAutoload(params: {
           langScore(effAudio.lang ?? "", subLangs) >= 0;
         const want = nativeAudio
           ? (snap.subtitleTracks
-            .filter(isForcedTrack)
-            .sort(
-              (a, b) => langScore(b.lang ?? "", subLangs) - langScore(a.lang ?? "", subLangs),
-            )[0] ?? null)
+              .filter(isForcedTrack)
+              .sort(
+                (a, b) => langScore(b.lang ?? "", subLangs) - langScore(a.lang ?? "", subLangs),
+              )[0] ?? null)
           : pickDesiredSubtitleTrack(
               allow(snap.subtitleTracks),
               subLangs,
@@ -515,17 +549,29 @@ export function useTrackAutoload(params: {
         bridgeRef.current?.setRate(wanted);
       }
     }
-  }, [engine, src.url, src.meta.id, snap.audioTracks, snap.subtitleTracks, snap.rate, settings]);
+  }, [
+    engine,
+    src.url,
+    src.meta.id,
+    src.subtitlePreselect,
+    snap.audioTracks,
+    snap.subtitleTracks,
+    snap.rate,
+    settings,
+  ]);
 
   useEffect(() => {
     bridgeRef.current?.setSubDelay(readPlayerPrefs(src.meta.id)?.subDelaySec ?? 0);
   }, [src.url, src.meta.id]);
 
   useEffect(() => {
-    if (!subsOffFor(readPlayerPrefs(src.meta.id), settings)) return;
-    const selected = snap.subtitleTracks.find((t) => t.selected);
-    if (selected) bridgeRef.current?.setSubtitleTrack(null);
-  }, [src.meta.id, snap.subtitleTracks, settings]);
+    enforceStoredSubtitleOff(
+      src.subtitlePreselect,
+      subsOffFor(readPlayerPrefs(src.meta.id), settings),
+      snap.subtitleTracks,
+      () => bridgeRef.current?.setSubtitleTrack(null),
+    );
+  }, [src.meta.id, src.subtitlePreselect, snap.subtitleTracks, settings]);
 
   return { resolvedImdbId, resolvedImdbVerified, resolutionSettled };
 }
@@ -569,10 +615,7 @@ function isLoopback(url: string): boolean {
 }
 
 function raceTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
-  return Promise.race([
-    p,
-    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
-  ]);
+  return Promise.race([p, new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))]);
 }
 
 async function resolveVideoHash(

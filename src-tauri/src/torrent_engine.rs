@@ -210,6 +210,24 @@ fn current_port() -> Option<u16> {
     engine().lock().unwrap().port
 }
 
+pub(crate) fn owns_stream(port: u16, info_hash: &str, file_idx: usize) -> bool {
+    if current_port() != Some(port) {
+        return false;
+    }
+    let Some(session) = current_session() else {
+        return false;
+    };
+    let Ok(id) = TorrentIdOrHash::parse(info_hash) else {
+        return false;
+    };
+    let Some(handle) = session.get(id) else {
+        return false;
+    };
+    handle
+        .with_metadata(|metadata| file_idx < metadata.file_infos.len())
+        .unwrap_or(false)
+}
+
 #[derive(Serialize)]
 pub struct EngineStatusDto {
     ready: bool,

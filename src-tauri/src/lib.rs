@@ -695,6 +695,7 @@ pub fn run() {
             subsync::torrent_sync::torrent_sync_subtitle,
             subsync::torrent_sync::torrent_score_transform,
             subsync::audio_tracks::audio_probe_tracks,
+            subsync::subtitle_tracks::subtitle_probe_tracks,
             subsync::fingerprint::compute_chromaprint,
             subsync::asr::asr_transcribe_windows,
             subsync::asr::asr_verify,

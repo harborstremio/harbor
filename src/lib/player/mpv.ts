@@ -5,13 +5,13 @@ import { mpvFailureSnapshot } from "./mpv-failure";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { parseMpvTrackList, type ExternalTrackMetadata } from "./mpv-track-list";
 import {
   emptySnapshot,
   type PlayerBridge,
   type PlayerCapabilities,
   type PlayerSnapshot,
   type PlayerSource,
-  type TrackInfo,
 } from "./bridge";
 
 export type MpvProbe = {
@@ -122,7 +122,9 @@ async function applyHeaderProps(headers?: Record<string, string>): Promise<void>
     else fields.push(`${k}: ${v}`);
   }
   await invoke("mpv_set_property", { name: "user-agent", value: ua }).catch(() => {});
-  await invoke("mpv_set_property", { name: "http-header-fields", value: fields.join(",") }).catch(() => {});
+  await invoke("mpv_set_property", { name: "http-header-fields", value: fields.join(",") }).catch(
+    () => {},
+  );
 }
 
 export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
@@ -150,10 +152,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let suppressEndFileUntil = 0;
   let svpFilterFailed = false;
   let secondarySid: string | null = null;
-  const urlByExternalFilename = new Map<
-    string,
-    { url: string; release?: string; provider?: string; matchScore?: number; subId?: string }
-  >();
+  const urlByExternalFilename = new Map<string, ExternalTrackMetadata>();
 
   const handleSvpFilterFailure = () => {
     if (svpFilterFailed) return;
@@ -203,68 +202,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       if (name === "track-list" && Array.isArray(data)) {
         const list = data as Array<Record<string, unknown>>;
         pendingTracks["track-list"] = list;
-        const audio: TrackInfo[] = [];
-        const subs: TrackInfo[] = [];
-        for (const t of list) {
-          const type = String(t.type ?? "");
-          const id = String(t.id ?? "");
-          const lang = (t.lang ?? t.language) as string | undefined;
-          const title = t.title as string | undefined;
-          const codecDesc = (t["codec-desc"] as string | undefined) || (t.codec as string | undefined);
-          const channels = t["demux-channels"] as string | undefined;
-          const channelCount = typeof t["demux-channel-count"] === "number"
-            ? (t["demux-channel-count"] as number)
-            : undefined;
-          const external = t.external === true;
-          const externalFilename = t["external-filename"] as string | undefined;
-          const forced = t.forced === true;
-          const isDefault = t.default === true;
-          const hearingImpaired = t["hearing-impaired"] === true;
-          const mainSelection =
-            typeof t["main-selection"] === "number" ? (t["main-selection"] as number) : null;
-          const isSecondary =
-            type === "sub" &&
-            t.selected === true &&
-            (mainSelection === 1 || (mainSelection == null && id === secondarySid));
-          const selected = t.selected === true && !isSecondary;
-          const codec = codecDesc ? codecDesc.toUpperCase() : undefined;
-          const baseLabel = title || lang || `${type} ${id}`;
-          const tags: string[] = [];
-          if (codec) tags.push(codec);
-          if (type === "audio" && channels) tags.push(channels);
-          if (forced) tags.push("Forced");
-          if (hearingImpaired) tags.push("SDH");
-          if (external) tags.push("External");
-          const label = tags.length > 0 ? `${baseLabel} · ${tags.join(" · ")}` : baseLabel;
-          const extMeta =
-            external && externalFilename ? urlByExternalFilename.get(externalFilename) : undefined;
-          const info: TrackInfo = {
-            id,
-            label,
-            lang,
-            kind: type === "audio" ? "audio" : "subtitle",
-            selected,
-            codec,
-            channels,
-            channelCount,
-            title,
-            external,
-            externalFilename,
-            forced,
-            default: isDefault,
-            hearingImpaired,
-            secondary: isSecondary,
-            url: external && externalFilename ? extMeta?.url : undefined,
-            release: extMeta?.release,
-            provider: extMeta?.provider,
-            matchScore: extMeta?.matchScore,
-            subId: extMeta?.subId,
-          };
-          if (type === "audio") audio.push(info);
-          else if (type === "sub") subs.push(info);
-        }
-        snap.audioTracks = audio;
-        snap.subtitleTracks = subs;
+        const tracks = parseMpvTrackList(list, secondarySid, urlByExternalFilename);
+        snap.audioTracks = tracks.audioTracks;
+        snap.subtitleTracks = tracks.subtitleTracks;
       }
       if (name === "sub-delay" && typeof data === "number") snap.subDelaySec = data;
       if (name === "audio-delay" && typeof data === "number") snap.audioDelaySec = data;
@@ -376,7 +316,13 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             await applyHeaderProps(src.headers);
             const startAt =
               typeof src.startAtSec === "number" && src.startAtSec > 0 ? src.startAtSec : 0;
-            const cmd: Array<string | number> = ["loadfile", src.url, "replace", 0, `start=${startAt}`];
+            const cmd: Array<string | number> = [
+              "loadfile",
+              src.url,
+              "replace",
+              0,
+              `start=${startAt}`,
+            ];
             await invoke("mpv_command", { cmd });
             for (const s of src.subtitles ?? []) {
               try {
@@ -429,7 +375,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         });
         mpvStarted = true;
         if (opts.embed) {
-          await invoke("mpv_set_property", { name: "sub-visibility", value: false }).catch(() => {});
+          await invoke("mpv_set_property", { name: "sub-visibility", value: false }).catch(
+            () => {},
+          );
         }
         if (opts.embed && opts.getEmbedRect && geomKickHandler == null && !isLinuxDesktop()) {
           let lastRect: MpvRect | null = null;
@@ -572,7 +520,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     },
     setAnime4kShaders(shaders) {
       const sep = isWindowsDesktop() ? ";" : ":";
-      const value = shaders.filter(Boolean).map((s) => s.replace(/\\/g, "/")).join(sep);
+      const value = shaders
+        .filter(Boolean)
+        .map((s) => s.replace(/\\/g, "/"))
+        .join(sep);
       invoke("mpv_set_property", { name: "glsl-shaders", value }).catch((e) =>
         console.warn("[shaders] glsl-shaders apply failed", e),
       );
@@ -689,8 +640,12 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
     },
     setAbLoop(a, b) {
-      invoke("mpv_set_property", { name: "ab-loop-a", value: a == null ? "no" : a }).catch(() => {});
-      invoke("mpv_set_property", { name: "ab-loop-b", value: b == null ? "no" : b }).catch(() => {});
+      invoke("mpv_set_property", { name: "ab-loop-a", value: a == null ? "no" : a }).catch(
+        () => {},
+      );
+      invoke("mpv_set_property", { name: "ab-loop-b", value: b == null ? "no" : b }).catch(
+        () => {},
+      );
     },
     async requestPiP() {},
     async exitPiP() {},
