@@ -57,9 +57,8 @@ export async function fetchAddonStreams(
       continue;
     }
     for (const id of ids) {
-      const name = ids.length > 1 ? `${addon.manifest.name}[${idScheme(id)}]` : addon.manifest.name;
       namedTasks.push({
-        name,
+        name: addon.manifest.name,
         p: fetchOne(addon, req.type, id, signal, timeoutMs).then((ss) =>
           ss.map((s, idx) => ({ ...s, addonPriority: priority, addonReturnIdx: idx })),
         ),
@@ -111,20 +110,14 @@ function pickId(addon: Addon, type: string, ids: string[]): string | null {
   return null;
 }
 
-const ANIME_SCHEMES = ["kitsu", "mal", "anidb", "anilist"];
-
-function idScheme(id: string): string {
-  return id.startsWith("tt") ? "imdb" : id.split(":")[0];
-}
-
 function pickIds(addon: Addon, type: string, ids: string[]): string[] {
+  // Exactly one request per addon: dual-capable manifests used to be queried under both
+  // the anime id and its IMDb twin, doubling network load and returning near-duplicate
+  // streams. PREFIX_PRIORITY already ranks anime schemes above tt/tmdb, so anime metas
+  // resolve to their kitsu/mal id and everything else falls through to tt/tmdb.
   const sorted = [...ids].sort((a, b) => idPriority(a) - idPriority(b));
   const accepted = sorted.filter((id) => addonAcceptsId(addon, type, id));
-  if (accepted.length === 0) return [];
-  const animeId = accepted.find((id) => ANIME_SCHEMES.some((s) => id.startsWith(s)));
-  const ttId = accepted.find((id) => id.startsWith("tt"));
-  if (animeId && ttId) return [animeId, ttId];
-  return [accepted[0]];
+  return accepted.length > 0 ? [accepted[0]] : [];
 }
 
 function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
@@ -224,23 +217,48 @@ async function fetchOne(
 }
 
 function dedupeStreams(streams: Stream[]): Stream[] {
-  const seen = new Map<string, Stream>();
+  const byHash = new Map<string, Stream>();
+  const byIdent = new Map<string, Stream>();
+  const kept: Stream[] = [];
+  let dropped = 0;
+  const normTitle = (s: Stream) =>
+    `${(s.title ?? s.name ?? "").replace(/\s+/g, " ").trim().toLowerCase()}`;
   for (const s of streams) {
-    const baseKey = s.infoHash
-      ? `hash:${s.infoHash}:${s.fileIdx ?? ""}`
-      : `url:${s.url ?? s.title ?? s.name ?? Math.random().toString(36)}`;
-    const key = `${s.addonId}:${baseKey}`;
-    const prior = seen.get(key);
-    if (!prior) {
-      seen.set(key, s);
+    if (!s.infoHash) {
+      const fromUrl = s.url ? infoHashFromUrl(s.url) : null;
+      const recovered = fromUrl?.infoHash ?? infoHashFromSources(s.sources);
+      if (recovered) {
+        s.infoHash = recovered.toLowerCase();
+        if (s.fileIdx == null && fromUrl?.fileIdx != null) s.fileIdx = fromUrl.fileIdx;
+      }
+    }
+    const hk = s.infoHash ? `h:${s.infoHash}:${s.fileIdx ?? ""}` : null;
+    const title = normTitle(s);
+    const nk = title ? `n:${title}|${s.behaviorHints?.videoSize ?? ""}` : null;
+    const existing = (hk ? byHash.get(hk) : undefined) ?? (nk ? byIdent.get(nk) : undefined);
+    if (existing) {
+      dropped += 1;
+      if (dropped <= 3) {
+        console.info(
+          `[addons] dedupe drop #${dropped}: ${s.addonName} twin of ${existing.addonName} "${title}" [${hk ? "hash" : "name"}]`,
+        );
+      }
+      if (hk && !existing.infoHash) {
+        existing.infoHash = s.infoHash;
+        existing.fileIdx = s.fileIdx;
+      }
+      if (s.sources && s.sources.length > 0) {
+        const merged = new Set([...(existing.sources ?? []), ...s.sources]);
+        existing.sources = [...merged];
+      }
       continue;
     }
-    if (s.sources && s.sources.length > 0) {
-      const merged = new Set([...(prior.sources ?? []), ...s.sources]);
-      prior.sources = [...merged];
-    }
+    if (hk) byHash.set(hk, s);
+    if (nk) byIdent.set(nk, s);
+    kept.push(s);
   }
-  return [...seen.values()];
+  console.info(`[addons] dedupe: kept=${kept.length}, dropped=${dropped} (cross-addon twins)`);
+  return kept;
 }
 
 type RawStream = Omit<Stream, "addonId" | "addonName">;
