@@ -29,6 +29,7 @@ export function usePickHandler({
   imdbId,
   imdbIdVerified,
   episode,
+  settleEpisode,
   attempt,
   resume,
   debrids,
@@ -58,6 +59,7 @@ export function usePickHandler({
   imdbId?: string | null;
   imdbIdVerified?: boolean;
   episode?: PlayEpisode;
+  settleEpisode: () => Promise<PlayEpisode | undefined>;
   attempt?: number;
   resume?: boolean;
   debrids: DebridStore[];
@@ -265,6 +267,8 @@ export function usePickHandler({
         return;
       }
       if (intent === "download") {
+        const settledEpisode = await settleEpisode();
+        if (ac.signal.aborted) return;
         const label =
           [stream.resolution, stream.source].filter(Boolean).join(" ") ||
           stream.parsedTitle ||
@@ -274,7 +278,7 @@ export function usePickHandler({
           null;
         await enqueueDownload({
           meta,
-          episode,
+          episode: settledEpisode,
           streamLabel: label,
           url: r.data.url,
           headers: r.data.headers,
@@ -288,20 +292,24 @@ export function usePickHandler({
         setResolving(null);
         return;
       }
+      const settledEpisode = await settleEpisode();
+      if (ac.signal.aborted) return;
       if (inSession && canInvite && inviteSentRef.current == null) {
         claimHost(true);
-        sendInvite(buildPlayInvite(meta, episode));
-        inviteSentRef.current = `${meta.id}|${episode?.season ?? ""}|${episode?.episode ?? ""}`;
+        sendInvite(buildPlayInvite(meta, settledEpisode));
+        inviteSentRef.current = `${meta.id}|${settledEpisode?.season ?? ""}|${settledEpisode?.episode ?? ""}`;
       }
       openPlayer({
         meta,
         imdbId: imdbId ?? undefined,
         imdbIdVerified: imdbIdVerified === true,
-        episode,
+        episode: settledEpisode,
         url: playUrl,
-        title: episode ? episode.name || `Episode ${episode.episode}` : meta.name,
-        subtitle: episode
-          ? `${meta.name} · S${episode.imdbSeason ?? episode.season} · E${episode.imdbEpisode ?? episode.episode}`
+        title: settledEpisode
+          ? settledEpisode.name || `Episode ${settledEpisode.episode}`
+          : meta.name,
+        subtitle: settledEpisode
+          ? `${meta.name} · S${settledEpisode.imdbSeason ?? settledEpisode.season} · E${settledEpisode.imdbEpisode ?? settledEpisode.episode}`
           : meta.releaseInfo,
         notWebReady: r.data.notWebReady,
         subtitles: r.data.subtitles,
@@ -343,10 +351,15 @@ export function usePickHandler({
             .filter(([, v]) => v === true)
             .map(([k]) => k),
         };
-        savePlayback(meta.id, entry, episode?.season, episode?.episode);
-        if (seasonLock && episode) {
+        savePlayback(meta.id, entry, settledEpisode?.season, settledEpisode?.episode);
+        if (seasonLock && settledEpisode) {
           const animeId = /^(kitsu|mal|anilist|anidb):/.test(meta.id);
-          saveSeasonLock(meta.id, entry, animeId ? null : (episode.season ?? null), animeId);
+          saveSeasonLock(
+            meta.id,
+            entry,
+            animeId ? null : (settledEpisode.season ?? null),
+            animeId,
+          );
         }
       }
     } finally {

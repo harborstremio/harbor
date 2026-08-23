@@ -8,7 +8,7 @@ import "./_localstorage-stub.ts";
 import {
   aniZipLookupKey,
   applyAniZipEpisode,
-  needsAniZipSyncIds,
+  needsAniZipEpisodeLookup,
 } from "../src/lib/cw-anime-episode.ts";
 import { stripFranchiseSuffix } from "../src/lib/providers/jikan.ts";
 import { buildBody } from "../src/lib/simkl/scrobble-body.ts";
@@ -22,19 +22,31 @@ const MUSHOKU = {
 };
 
 test("a Continue Watching episode arrives without the ids the trackers need", () => {
-  assert.equal(needsAniZipSyncIds("kitsu:49002", { season: 1, episode: 6 }), true);
-  assert.equal(needsAniZipSyncIds("tt10329862", { season: 2, episode: 5 }), false);
+  assert.equal(needsAniZipEpisodeLookup("kitsu:49002", { season: 1, episode: 6 }), true);
+  assert.equal(needsAniZipEpisodeLookup("tt10329862", { season: 2, episode: 5 }), false);
   assert.equal(
-    needsAniZipSyncIds("kitsu:49002", {
+    needsAniZipEpisodeLookup("kitsu:49002", {
       season: 1,
       episode: 6,
+      name: "An Encounter",
       tvdbEpisodeId: 1,
       imdbSeason: 3,
       imdbEpisode: 6,
     }),
     false,
   );
-  assert.equal(needsAniZipSyncIds("kitsu:49002", undefined), false);
+  assert.equal(
+    needsAniZipEpisodeLookup("kitsu:49002", {
+      season: 1,
+      episode: 6,
+      tvdbEpisodeId: 1,
+      imdbSeason: 3,
+      imdbEpisode: 6,
+    }),
+    true,
+    "a missing title still needs enrichment even when synchronization ids are complete",
+  );
+  assert.equal(needsAniZipEpisodeLookup("kitsu:49002", undefined), false);
 });
 
 test("enrichment fills every id the trackers key on", () => {
@@ -115,16 +127,4 @@ test("an imdb id resolves to the same franchise root as its Kitsu id", () => {
   assert.match(src, /if \(id\.startsWith\("tt"\)\) \{/);
   assert.match(src, /parseKitsuId\(getAnimeCwId\(id\) \?\? ""\)/);
   assert.match(src, /return imdbToKitsu\(id\)\.catch\(\(\) => null\);/);
-});
-
-test("the Continue Watching card enriches before it hands the episode to the player", () => {
-  const src = readFileSync(new URL("../src/components/continue-card.tsx", import.meta.url), "utf8");
-  assert.match(src, /if \(needsAniZipSyncIds\(item\._id, episode\) && episode\) \{/);
-  assert.doesNotMatch(
-    src,
-    /if \(episode && episode\.tvdbEpisodeId == null\) \{/,
-    "enrichment must not be nested inside the !episode branch again",
-  );
-  assert.doesNotMatch(src, /imdbToKitsu/);
-  assert.match(src, /const animeId = getAnimeCwId\(item\._id\);/);
 });

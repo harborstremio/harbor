@@ -1,3 +1,4 @@
+import { isGenericEpisodeTitle, pickPreferredEpisodeTitle } from "../episode-title.ts";
 import { pickEpisodeTitle, pickLocalizedTitle, type AniZipMapping } from "@/lib/providers/anizip";
 import type { AnimeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
@@ -111,7 +112,7 @@ export function buildKitsuEpisodes(
       id: k?.id ?? v.episode,
       number: v.episode,
       seasonNumber: v.season ?? 1,
-      title: v.title || k?.title || `Episode ${v.episode}`,
+      title: pickPreferredEpisodeTitle(v.episode, v.title, k?.title) ?? `Episode ${v.episode}`,
       synopsis: v.overview ?? k?.synopsis ?? "",
       thumbnail: v.thumbnail ?? k?.thumbnail ?? null,
       airdate: v.released ?? k?.airdate ?? null,
@@ -135,6 +136,10 @@ export function mergeAniZipEpisodes(
   for (const ep of episodes) {
     const az = aniZip.episodes[String(ep.number)];
     if (!az) continue;
+    const enrichedTitle = pickEpisodeTitle(az);
+    if (enrichedTitle && isGenericEpisodeTitle(ep.title, ep.number)) {
+      ep.title = enrichedTitle;
+    }
     if (localized) {
       const localizedTitle = pickLocalizedTitle(az, opts?.lang);
       if (localizedTitle && !isGenericEpisodeName(localizedTitle) && isTextInLanguage(localizedTitle, opts?.lang)) {
@@ -203,6 +208,13 @@ export function mergeTvdbEpisodes(
     if (!tvdbEp) tvdbEp = tvdbByAbsolute.get(ep.number);
 
     if (tvdbEp) {
+      if (
+        tvdbEp.name &&
+        !isGenericEpisodeTitle(tvdbEp.name, tvdbEp.number) &&
+        isGenericEpisodeTitle(ep.title, ep.number)
+      ) {
+        ep.title = tvdbEp.name;
+      }
       if (tvdbEp.name && !isGenericEpisodeName(tvdbEp.name) && (localized || !ep.title || ep.title === `Episode ${ep.number}`)) {
         if (!localized || isTextInLanguage(tvdbEp.name, opts?.lang)) {
           ep.title = tvdbEp.name;

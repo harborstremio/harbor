@@ -1,9 +1,14 @@
 import { safeFetch } from "@/lib/safe-fetch";
+import type { AniZipEpisodeTitleFields } from "./anizip-episode-title.ts";
+import { aniZipCacheExpiresAt } from "./anizip-cache-policy.ts";
+
+export { pickEpisodeTitle } from "./anizip-episode-title.ts";
 
 const ENDPOINT = "https://api.ani.zip/mappings";
 const GAP_MS = 90;
 const NEG_TTL_MS = 120000;
-const cache = new Map<string, AniZipMapping | null>();
+type CacheEntry = { mapping: AniZipMapping | null; expiresAt: number | null };
+const cache = new Map<string, CacheEntry>();
 const negCache = new Map<string, number>();
 const inflight = new Map<string, Promise<AniZipMapping | null>>();
 
@@ -27,7 +32,7 @@ function throttled(url: string, ac: AbortController): Promise<Response> {
   return run;
 }
 
-export type AniZipEpisode = {
+export type AniZipEpisode = AniZipEpisodeTitleFields & {
   seasonNumber?: number;
   episodeNumber: number;
   absoluteEpisodeNumber?: number;
@@ -42,7 +47,6 @@ export type AniZipEpisode = {
   rating?: string;
   finaleType?: string;
   filler?: boolean;
-  titles?: Record<string, string>;
 };
 
 export type AniZipMapping = {
@@ -86,7 +90,11 @@ export async function aniZipByTmdbTv(tmdbId: number): Promise<AniZipMapping | nu
 const TIMEOUT_MS = 4000;
 
 async function get(query: string): Promise<AniZipMapping | null> {
-  if (cache.has(query)) return cache.get(query) ?? null;
+  const cached = cache.get(query);
+  if (cached) {
+    if (cached.expiresAt == null || Date.now() < cached.expiresAt) return cached.mapping;
+    cache.delete(query);
+  }
   const negAt = negCache.get(query);
   if (negAt != null && Date.now() - negAt < NEG_TTL_MS) return null;
   const existing = inflight.get(query);
@@ -96,12 +104,14 @@ async function get(query: string): Promise<AniZipMapping | null> {
     try {
       const res = await throttled(`${ENDPOINT}?${query}`, ac);
       if (!res.ok) {
-        if (res.status === 404) cache.set(query, null);
+        if (res.status === 404) {
+          cache.set(query, { mapping: null, expiresAt: aniZipCacheExpiresAt(null, Date.now()) });
+        }
         else negCache.set(query, Date.now());
         return null;
       }
       const json = (await res.json()) as AniZipMapping;
-      cache.set(query, json);
+      cache.set(query, { mapping: json, expiresAt: aniZipCacheExpiresAt(json, Date.now()) });
       negCache.delete(query);
       return json;
     } catch {
@@ -113,11 +123,6 @@ async function get(query: string): Promise<AniZipMapping | null> {
   })();
   inflight.set(query, p);
   return p;
-}
-
-export function pickEpisodeTitle(ep: AniZipEpisode | undefined): string | null {
-  if (!ep?.titles) return null;
-  return ep.titles.en ?? ep.titles["x-jat"] ?? ep.titles.ja ?? null;
 }
 
 export function pickLocalizedTitle(

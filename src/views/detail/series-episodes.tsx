@@ -12,6 +12,7 @@ import { useHiddenEpisodes } from "@/lib/hidden-episodes";
 import type { Meta } from "@/lib/cinemeta";
 import { getEpisodeProgress, resumeDefaultSeason } from "@/lib/episode-progress";
 import { scrollToDataEp } from "@/lib/episode-scroll";
+import { mergeSeriesEpisodeTitles } from "@/lib/episode-title";
 import { tmdbSeasonEpisodes, type Episode, type Season } from "@/lib/providers/tmdb";
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import type { OrderedEpisode } from "@/lib/providers/tvdb-order";
@@ -142,6 +143,7 @@ export function SeriesEpisodes({
     imdbId,
     tvdbKey: settings.tvdbKey,
     omdbKey: settings.omdbKey,
+    cinemetaVideos,
   });
   const tvdbStills = useSeriesTvdbStills(imdbId, enrichedBase.length, settings.tvdbSeasonType);
   const enrichedEpisodes = useMemo(() => {
@@ -244,6 +246,17 @@ export function SeriesEpisodes({
     : ordering
       ? ordering.bySeason.get(orderSeasonEff) ?? []
       : [];
+  const orderedEpsWithTitles = useMemo(
+    () =>
+      orderActive
+        ? mergeSeriesEpisodeTitles(orderedEpsRaw, {
+            tmdb: episodes,
+            tvdb: orderedEpsRaw,
+            cinemeta: cinemetaVideos,
+          })
+        : orderedEpsRaw,
+    [orderActive, orderedEpsRaw, episodes, cinemetaVideos],
+  );
   const orderedEps = useMemo(() => {
     // pickLocalizedText keys script tests by ISO-1 ("ko"), not TVDB codes ("kor").
     const lang = tmdbLanguageIso();
@@ -255,7 +268,7 @@ export function SeriesEpisodes({
         tmdbByKey.set(`${e.seasonNumber}:${e.episodeNumber}`, e);
       }
     }
-    return orderedEpsRaw.map((ep) => {
+    return orderedEpsWithTitles.map((ep) => {
       const tmdbEp = airedLike ? tmdbByKey.get(`${ep.seasonNumber}:${ep.episodeNumber}`) : undefined;
       const name =
         pickLocalizedText(
@@ -274,7 +287,7 @@ export function SeriesEpisodes({
       }
       return next;
     });
-  }, [orderedEpsRaw, imdbRatings, orderActive, orderSeasonEff, settings.tvdbSeasonType]);
+  }, [orderedEpsWithTitles, imdbRatings, orderActive, orderSeasonEff, settings.tvdbSeasonType]);
   const visibleOrderedEps = useMemo(
     () =>
       hideActive && hiddenSet.size > 0

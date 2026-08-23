@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Check, HardDrive, Heart, Layers, Pencil, Play, Plus, RotateCcw } from "lucide-react";
+import { waitForEpisodeTitles } from "@/lib/episode-title";
 import { animeDetails, type AnimeDetailExtras, type FranchiseEntry } from "@/lib/providers/anime-detail";
 import { isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
@@ -631,7 +632,13 @@ export function DetailView({
             }
             return null;
           }
-          setAnimeEpisodes(res.episodes);
+          void waitForEpisodeTitles(res.episodes, res.titleEnrichPromise)
+            .then((episodes) => {
+              if (!cancelled) setAnimeEpisodes([...episodes]);
+            })
+            .catch(() => {
+              if (!cancelled) setAnimeEpisodes([...res.episodes]);
+            });
           setFranchise([]);
           void res.franchisePromise
             .then((fr) => {

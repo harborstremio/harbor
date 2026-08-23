@@ -1,6 +1,7 @@
 import type { Episode, Season } from "@/lib/providers/tmdb";
 import { tvdbEpisodesByType, tvdbSeasonNames, tvdbSeriesByRemote, type TvdbEpisode } from "./tvdb";
-import { readOrderCache, writeOrderCache } from "./tvdb-order-cache";
+import { readOrderCacheEntry, writeOrderCache } from "./tvdb-order-cache";
+import { tvdbOrderMemoryExpiresAt } from "./tvdb-order-cache-policy.ts";
 
 export type OrderedEpisode = Episode & { nameEn?: string; overviewEn?: string };
 
@@ -22,7 +23,12 @@ export function seasonDateRange(eps: Episode[]): { from?: string; to?: string } 
   return { from, to };
 }
 
-const orderCache = new Map<string, TvdbOrder | null>();
+type MemoryOrderCacheEntry = {
+  order: TvdbOrder;
+  expiresAt: number | null;
+};
+
+const orderCache = new Map<string, MemoryOrderCacheEntry>();
 
 export async function fetchTvdbOrder(
   apiKey: string,
@@ -45,16 +51,27 @@ export async function fetchTvdbOrderBySeriesId(
   if (!seriesId) return null;
   const typeKey = lang ? `${seasonType}:${lang}` : seasonType;
   const cacheKey = `${seriesId}:${typeKey}`;
-  if (orderCache.has(cacheKey)) return orderCache.get(cacheKey) ?? null;
-  const persisted = readOrderCache(seriesId, typeKey);
+  const memory = orderCache.get(cacheKey);
+  if (memory) {
+    if (memory.expiresAt == null || Date.now() <= memory.expiresAt) return memory.order;
+    orderCache.delete(cacheKey);
+  }
+  const persisted = readOrderCacheEntry(seriesId, typeKey);
   if (persisted) {
-    orderCache.set(cacheKey, persisted);
-    return persisted;
+    orderCache.set(cacheKey, {
+      order: persisted.order,
+      expiresAt: tvdbOrderMemoryExpiresAt(persisted.order, persisted.cachedAt),
+    });
+    return persisted.order;
   }
   const result = await build(apiKey, seriesId, seasonType, lang).catch(() => null);
   if (result) {
-    orderCache.set(cacheKey, result);
-    writeOrderCache(seriesId, typeKey, result);
+    const cachedAt = Date.now();
+    orderCache.set(cacheKey, {
+      order: result,
+      expiresAt: tvdbOrderMemoryExpiresAt(result, cachedAt),
+    });
+    writeOrderCache(seriesId, typeKey, result, cachedAt);
   }
   return result;
 }

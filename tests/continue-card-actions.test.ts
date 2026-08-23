@@ -21,3 +21,24 @@ test("Continue Watching keeps source selection, direct play, and details as sepa
   );
   assert.match(continueCardSource, /onClick=\{onOpenDetails\}/);
 });
+
+test("Continue Watching resolves an ordinary episode title before either picker action", () => {
+  assert.match(continueCardSource, /const EPISODE_TITLE_CLICK_WAIT_MS = 900/);
+  assert.match(
+    continueCardSource,
+    /const resolveEpisode[\s\S]*?resolveEpisodeTitleOnDemand\([\s\S]*?loadSeasonEpisodes[\s\S]*?EPISODE_TITLE_CLICK_WAIT_MS/,
+  );
+  assert.match(
+    continueCardSource,
+    /const activateOnce = async[\s\S]*?await resolveEpisode\(\)[\s\S]*?await action\(episode\)/,
+  );
+});
+
+test("Continue Watching coalesces activation and drops stale async completions", () => {
+  assert.match(
+    continueCardSource,
+    /const activateOnce = async[\s\S]*?if \(activationRef\.current === key\) return;[\s\S]*?await resolveEpisode\(\)[\s\S]*?!mountedRef\.current \|\| activationItemKeyRef\.current !== key/,
+  );
+  assert.match(continueCardSource, /const onChooseSource = \(\) =>\s*activateOnce/);
+  assert.match(continueCardSource, /void activateOnce\(\(episode\) =>/);
+});

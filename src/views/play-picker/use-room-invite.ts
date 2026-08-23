@@ -9,6 +9,7 @@ import type { PlayEpisode } from "@/lib/view";
 export function useRoomInvite(params: {
   meta: Meta;
   episode?: PlayEpisode;
+  settleEpisode: () => Promise<PlayEpisode | undefined>;
   inSession: boolean;
   roomSnapshot: RoomSnapshot;
   clientId: string;
@@ -24,7 +25,19 @@ export function useRoomInvite(params: {
   hostSourceForMedia: SourceDescriptor | null;
   expectHostSource: boolean;
 } {
-  const { meta, episode, inSession, roomSnapshot, clientId, hostSource, lastInviteProto, wasInvitedTo, claimHost, sendInvite } = params;
+  const {
+    meta,
+    episode,
+    settleEpisode,
+    inSession,
+    roomSnapshot,
+    clientId,
+    hostSource,
+    lastInviteProto,
+    wasInvitedTo,
+    claimHost,
+    sendInvite,
+  } = params;
 
   const inviteKey = `${meta.id}|${episode?.season ?? ""}|${episode?.episode ?? ""}`;
   const foreignHost = !!roomSnapshot.hostClientId && roomSnapshot.hostClientId !== clientId;
@@ -34,10 +47,17 @@ export function useRoomInvite(params: {
   useEffect(() => {
     if (!canInvite) return;
     if (inviteSentRef.current === inviteKey) return;
-    inviteSentRef.current = inviteKey;
-    claimHost(true);
-    sendInvite(buildPlayInvite(meta, episode));
-  }, [canInvite, inviteKey, sendInvite, claimHost, meta, episode]);
+    let cancelled = false;
+    void settleEpisode().then((settledEpisode) => {
+      if (cancelled || inviteSentRef.current === inviteKey) return;
+      inviteSentRef.current = inviteKey;
+      claimHost(true);
+      sendInvite(buildPlayInvite(meta, settledEpisode));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [canInvite, inviteKey, sendInvite, claimHost, meta, episode, settleEpisode]);
 
   const isRoomGuest = inSession && foreignHost;
   const hostSourceForMedia =

@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import type { Meta } from "@/lib/cinemeta";
+import { mergeSeriesEpisodeTitles } from "@/lib/episode-title";
 import { pickLocalizedText } from "@/lib/localized-text";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
@@ -12,12 +14,14 @@ export function useEpisodeEnrich({
   imdbId,
   tvdbKey,
   omdbKey,
+  cinemetaVideos,
 }: {
   episodes: Episode[];
   active: number;
   imdbId: string | null;
   tvdbKey: string;
   omdbKey: string;
+  cinemetaVideos?: NonNullable<Meta["videos"]>;
 }): { episodes: Episode[]; imdbRatings: Map<string, number> } {
   const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(new Map());
   const [omdbBySeason, setOmdbBySeason] = useState<Map<number, Map<number, number>>>(new Map());
@@ -69,8 +73,15 @@ export function useEpisodeEnrich({
   const tvdbForSeason = tvdbBySeason.get(active);
   const omdbForSeason = omdbBySeason.get(active);
   const enriched = useMemo<Episode[]>(() => {
-    if (!tvdbForSeason && !omdbForSeason && harborImdb.size === 0) return episodes;
-    return episodes.map((ep): Episode => {
+    if (
+      !tvdbForSeason &&
+      !omdbForSeason &&
+      harborImdb.size === 0 &&
+      !cinemetaVideos?.length
+    ) {
+      return episodes;
+    }
+    const metadataEnriched = episodes.map((ep): Episode => {
       let next: Episode = ep;
       const tv = tvdbForSeason?.get(ep.episodeNumber);
       if (tv) {
@@ -97,6 +108,11 @@ export function useEpisodeEnrich({
       }
       return next;
     });
-  }, [episodes, tvdbForSeason, omdbForSeason, harborImdb, active]);
+    return mergeSeriesEpisodeTitles(metadataEnriched, {
+      tmdb: episodes,
+      tvdb: tvdbForSeason ? [...tvdbForSeason.values()] : undefined,
+      cinemeta: cinemetaVideos,
+    });
+  }, [episodes, tvdbForSeason, omdbForSeason, harborImdb, active, cinemetaVideos]);
   return { episodes: enriched, imdbRatings: harborImdb };
 }

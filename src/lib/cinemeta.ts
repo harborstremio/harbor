@@ -1,6 +1,33 @@
 import { safeFetch as fetch } from "@/lib/safe-fetch";
 
 const CINEMETA = "https://v3-cinemeta.strem.io";
+const META_CACHE_TTL_MS = 20_000;
+const META_CACHE_MAX_ENTRIES = 100;
+const CINEMETA_META_DEADLINE_MS = 8_000;
+
+type CachedMeta = { value: Meta | null; expiresAt: number };
+
+const metaCache = new Map<string, CachedMeta>();
+const metaInFlight = new Map<string, Promise<Meta | null>>();
+
+export function settleWithin<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timeout = setTimeout(
+      () => reject(new DOMException("Cinemeta request exceeded deadline", "TimeoutError")),
+      timeoutMs,
+    );
+    promise.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timeout);
+        reject(error);
+      },
+    );
+  });
+}
 
 export type MetaType = "movie" | "series" | "channel" | "tv" | "anime" | "other" | "manga";
 
@@ -90,14 +117,75 @@ export function cinemetaEnabled(): boolean {
   }
 }
 
+function metaCacheKey(type: "movie" | "series", id: string): string {
+  return `${type}:${id}`;
+}
+
+function pruneMetaCache(now = Date.now()): void {
+  for (const [key, entry] of metaCache) {
+    if (entry.expiresAt <= now) metaCache.delete(key);
+  }
+}
+
+function cachedMeta(key: string): Meta | null | undefined {
+  const entry = metaCache.get(key);
+  if (!entry) return undefined;
+  if (entry.expiresAt <= Date.now()) {
+    metaCache.delete(key);
+    return undefined;
+  }
+  return entry.value;
+}
+
+function cacheMeta(key: string, value: Meta | null): void {
+  pruneMetaCache();
+  while (metaCache.size >= META_CACHE_MAX_ENTRIES) {
+    const oldestKey = metaCache.keys().next().value;
+    if (!oldestKey) break;
+    metaCache.delete(oldestKey);
+  }
+  metaCache.set(key, { value, expiresAt: Date.now() + META_CACHE_TTL_MS });
+}
+
+async function requestMeta(type: "movie" | "series", id: string): Promise<Meta | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CINEMETA_META_DEADLINE_MS);
+  try {
+    const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`, { signal: controller.signal });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.meta ?? null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function meta(
   type: "movie" | "series",
   id: string,
   force = false,
 ): Promise<Meta | null> {
   if (!force && !cinemetaEnabled()) return null;
-  const res = await fetch(`${CINEMETA}/meta/${type}/${id}.json`);
-  if (!res.ok) return null;
-  const json = await res.json();
-  return json.meta ?? null;
+  const key = metaCacheKey(type, id);
+  if (!force) {
+    const cached = cachedMeta(key);
+    if (cached !== undefined) return cached;
+    const inFlight = metaInFlight.get(key);
+    if (inFlight) return inFlight;
+
+    const request = requestMeta(type, id).then((result) => {
+      cacheMeta(key, result);
+      return result;
+    });
+    metaInFlight.set(key, request);
+    try {
+      return await request;
+    } finally {
+      if (metaInFlight.get(key) === request) metaInFlight.delete(key);
+    }
+  }
+
+  const result = await requestMeta(type, id);
+  cacheMeta(key, result);
+  return result;
 }

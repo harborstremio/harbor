@@ -5,7 +5,7 @@ import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import { kitsuToTvdb, kitsuToImdb, externalToKitsu, kitsuToAnilist } from "@/lib/providers/anime-mapping";
 import { anilistFranchise, type AnilistFranchiseNode } from "@/lib/anilist/relations";
 import { anilistArtById, anilistRecommendations } from "@/lib/anilist/browse";
-import { enrichEpisodes } from "@/lib/providers/anime-episode-enrich";
+import { startEpisodeEnrichment } from "@/lib/providers/anime-episode-enrich";
 import { fanartMovie, fanartTv } from "@/lib/providers/fanart";
 import { fetchTvdbArtwork } from "@/lib/providers/tvdb-proxy";
 import { tvdbEpisodesByType, tvdbEpisodesAbsolute, tvdbLangFromIso1 } from "@/lib/providers/tvdb";
@@ -50,6 +50,7 @@ export type AnimeDetailResult = {
   imdbId?: string;
   franchisePromise: Promise<FranchiseEntry[]>;
   enrichPromise: Promise<KitsuEpisode[]>;
+  titleEnrichPromise: Promise<KitsuEpisode[]>;
   extrasPromise: Promise<AnimeDetailExtras>;
   heroBgPromise: Promise<string | undefined>;
   kitsuId: number;
@@ -115,6 +116,7 @@ const STUDIO_ROLE_RANK: Record<string, number> = {
 const FRANCHISE_ROLES = new Set(["sequel", "prequel", "parent_story"]);
 const FRANCHISE_MAX_DEPTH = 3;
 const SIDE_ENTRY_SUBTYPES = new Set(["ova", "ona", "special", "music"]);
+const TITLE_ENRICH_WAIT_MS = 2000;
 
 function makeFranchiseMeta(id: number, anime: import("./kitsu").KitsuAnimeDetail): Meta {
   return {
@@ -522,7 +524,14 @@ export async function animeDetails(
     lastAirDate: anime.endDate,
   };
 
-  const enrichPromise = enrichEpisodes(episodes, settings, kitsuId, seriesImdb)
+  const enrichment = startEpisodeEnrichment(episodes, settings, kitsuId, seriesImdb);
+  const titleEnrichPromise = Promise.race([
+    enrichment.titlePromise,
+    new Promise<void>((resolve) => setTimeout(resolve, TITLE_ENRICH_WAIT_MS)),
+  ])
+    .then(() => episodes)
+    .catch(() => episodes);
+  const enrichPromise = enrichment.completePromise
     .then(() => episodes)
     .catch(() => episodes);
 
@@ -652,6 +661,7 @@ export async function animeDetails(
     imdbId: seriesImdb ?? addonMeta?.imdb_id,
     franchisePromise,
     enrichPromise,
+    titleEnrichPromise,
     extrasPromise,
     heroBgPromise,
     kitsuId,
