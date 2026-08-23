@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { KeyRound, Loader2 } from "lucide-react";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { loginIdentity, registerIdentity } from "@/lib/account/identity";
+import { loginIdentity, registerIdentity, requestPasswordReset } from "@/lib/account/identity";
+import { useCapabilities } from "@/lib/account/capabilities";
 import { accountErrorMessage } from "@/lib/account/error-messages";
 import { PasswordField, TextField } from "./fields";
 import { AccountRecoverForm } from "./account-recover-form";
@@ -19,17 +20,38 @@ const USERNAME_RE = /^[a-zA-Z0-9_]{3,24}$/;
 
 export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) => void }) {
   const t = useT();
-  const [view, setView] = useState<"auth" | "recover">("auth");
+  const [view, setView] = useState<"auth" | "recover" | "forgot">("auth");
+  const [resetSent, setResetSent] = useState(false);
   const [mode, setMode] = useState<Mode>("register");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // Optional throughout. Never gates `ready`, so a blank address still registers.
+  const [email, setEmail] = useState("");
+  const [newsletter, setNewsletter] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Asked of the connected instance, not compiled in: one binary serves
+  // harbor.site and every self-hosted backend, and an instance with no mailer
+  // must not offer to send anything. Defaults to "no", so this is invisible
+  // until a server says otherwise.
+  const caps = useCapabilities();
   const trimmed = username.trim();
+  const trimmedEmail = email.trim();
+  // Intentionally forgiving: the server is the authority, and the verification
+  // mail either arrives or it does not. A strict regex here only rejects valid
+  // addresses.
+  // REQUIRED ONLY WHEN THE INSTANCE CAN SEND. If the backend reports no mail
+  // support, requiring an address here would make registration impossible --
+  // which is exactly what happens during the window where this ships before the
+  // server does.
+  const emailRequired = mode === "register" && caps.email;
+  const emailOk = emailRequired
+    ? /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail)
+    : trimmedEmail.length === 0 || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail);
   const usernameOk = USERNAME_RE.test(trimmed);
   const passwordOk = mode === "register" ? password.length >= 8 : password.length > 0;
-  const ready = usernameOk && passwordOk;
+  const ready = usernameOk && passwordOk && emailOk;
   const usernameHint =
     mode === "register" && trimmed.length > 0 && !usernameOk
       ? "3 to 24 letters, numbers, or underscores."
@@ -41,7 +63,12 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
     setError(null);
     try {
       if (mode === "register") {
-        const { recoveryCode } = await registerIdentity(trimmed, password);
+        const { recoveryCode } = await registerIdentity(
+          trimmed,
+          password,
+          caps.email && trimmedEmail ? trimmedEmail : undefined,
+          caps.newsletter.enabled ? (newsletter ?? caps.newsletter.defaultChecked) : false,
+        );
         onRecovery?.(recoveryCode);
       } else {
         await loginIdentity(trimmed, password);
@@ -54,6 +81,63 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
   };
 
   const active = MODES.find((m) => m.id === mode)!;
+
+  if (view === "forgot")
+    return (
+      <div className="flex flex-col gap-4">
+        <p className="text-[13px] leading-snug text-ink-muted">
+          {resetSent
+            ? /* Deliberately does not confirm whether the address exists. The
+                 server answers the same either way, because saying otherwise
+                 would make this an account-enumeration oracle. */
+              t("If that address is on file, we've sent a reset link. It's good for one hour.")
+            : t("Enter the email on your account and we'll send a reset link.")}
+        </p>
+        {!resetSent && (
+          <>
+            <TextField
+              label={t("Email")}
+              value={email}
+              onChange={setEmail}
+              placeholder={t("you@example.com")}
+              autoComplete="email"
+            />
+            <button
+              type="button"
+              disabled={busy || !trimmedEmail}
+              onClick={() => {
+                setBusy(true);
+                void requestPasswordReset(trimmedEmail)
+                  .catch(() => {})
+                  .finally(() => {
+                    // Always reports sent, matching the server. See above.
+                    setResetSent(true);
+                    setBusy(false);
+                  });
+              }}
+              className="flex h-11 items-center justify-center gap-2 rounded-[11px] bg-ink text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 disabled:opacity-40"
+            >
+              {busy && <Loader2 size={16} className="animate-spin" />}
+              {t("Send reset link")}
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={() => { setView("recover"); setResetSent(false); setError(null); }}
+          className="text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink"
+        >
+          {t("Use a recovery key instead")}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setView("auth"); setResetSent(false); }}
+          className="text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink"
+        >
+          {t("Back to sign in")}
+        </button>
+      </div>
+    );
 
   if (view === "recover") {
     return (
@@ -131,11 +215,42 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
             onEnter={submit}
           />
 
+          {mode === "register" && caps.email && (
+            <>
+              <TextField
+                label={emailRequired ? t("Email") : t("Email (optional)")}
+                value={email}
+                onChange={setEmail}
+                placeholder={t("you@example.com")}
+                hint={
+                  !emailOk && trimmedEmail.length > 0
+                    ? t("That doesn't look like an email address.")
+                    : t("We'll send a confirmation link. It also lets you reset your password if you lose your recovery key.")
+                }
+                tone={!emailOk && trimmedEmail.length > 0 ? "danger" : "muted"}
+                autoComplete="email"
+              />
+              {caps.newsletter.enabled && caps.newsletter.label && (
+                <label className="flex cursor-pointer items-start gap-2.5 text-[12.5px] leading-snug text-ink-subtle">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 size-3.5 shrink-0 accent-ink"
+                    checked={newsletter ?? caps.newsletter.defaultChecked}
+                    onChange={(e) => setNewsletter(e.target.checked)}
+                    disabled={!trimmedEmail}
+                  />
+                  {/* Operator-supplied. Never hardcode a label -- not every instance runs a list. */}
+                  <span>{caps.newsletter.label}</span>
+                </label>
+              )}
+            </>
+          )}
+
           {mode === "signin" && (
             <button
               type="button"
               onClick={() => {
-                setView("recover");
+                setView(caps.email ? "forgot" : "recover");
                 setError(null);
               }}
               className="-mt-1 self-end text-[12px] font-medium text-ink-subtle transition-colors hover:text-ink"
