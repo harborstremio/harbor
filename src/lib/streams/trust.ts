@@ -18,6 +18,11 @@ export type TrustOptions = {
   requirePreferredLanguage?: boolean;
   isAnime?: boolean;
   expectedTitles?: string[] | null;
+  // Continuous anime (One Piece) names an episode either absolutely or per-season (IMDb/TMDB).
+  altExpectedSeason?: number | null;
+  altExpectedEpisode?: number | null;
+  // True for continuous anime (season meaningless); false for seasonal anime (real seasons).
+  continuousAnime?: boolean;
 };
 
 export type Rejection = {
@@ -298,6 +303,31 @@ function checkOne(
     s.episode !== opts.expectedEpisode
   ) {
     return `episode-mismatch:${s.episode}-vs-${opts.expectedEpisode}`;
+  }
+
+  // Continuous anime (One Piece) number absolutely → accept abs episode OR per-season pair.
+  // Seasonal anime (SAO) have real seasons → strict season+episode. Fail-open on unparsed names/packs.
+  if (opts.isAnime && !s.seasonPack && s.episode != null) {
+    if (opts.continuousAnime) {
+      const absOk = opts.expectedEpisode != null && s.episode === opts.expectedEpisode;
+      const relOk =
+        opts.altExpectedSeason != null &&
+        opts.altExpectedEpisode != null &&
+        s.season === opts.altExpectedSeason &&
+        s.episode === opts.altExpectedEpisode;
+      if (!absOk && !relOk) {
+        const seasonPart = s.season != null ? `S${s.season}` : "S?";
+        return `episode-mismatch-anime:${seasonPart}E${s.episode} vs abs ${opts.expectedEpisode} / rel S${opts.altExpectedSeason}E${opts.altExpectedEpisode}`;
+      }
+    } else if (opts.expectedEpisode != null && s.episode !== opts.expectedEpisode) {
+      return `episode-mismatch-anime:S${s.season ?? "?"}E${s.episode}-vs-E${opts.expectedEpisode}`;
+    } else if (
+      opts.expectedSeason != null &&
+      s.season != null &&
+      s.season !== opts.expectedSeason
+    ) {
+      return `season-mismatch-anime:S${s.season}-vs-S${opts.expectedSeason}`;
+    }
   }
 
   if (s.scamScore >= 5 && !opts.allowCam && !olderCatalog) {

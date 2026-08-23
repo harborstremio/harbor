@@ -300,6 +300,13 @@ pub struct TrustOptions {
     pub expected_season: Option<i32>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub expected_episode: Option<i32>,
+    // Continuous anime legitimately names an episode either absolutely or per-season (IMDb/TMDB).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alt_expected_season: Option<i32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alt_expected_episode: Option<i32>,
+    #[serde(default)]
+    pub continuous_anime: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub release_date: Option<String>,
     #[serde(default)]

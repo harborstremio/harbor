@@ -64,10 +64,27 @@ export function buildEpisodePipelineInput(params: {
         ? "series"
         : "movie";
   const animeReq = streamIds.some((id) => id.startsWith("kitsu:") || id.startsWith("mal:"));
-  const imdbEpAligned =
-    !animeReq || episode?.imdbEpisode == null || episode.episode === episode.imdbEpisode;
-  const effSeason = imdbEpAligned ? (episode?.imdbSeason ?? episode?.season) : episode?.season;
-  const effEpisode = imdbEpAligned ? (episode?.imdbEpisode ?? episode?.episode) : episode?.episode;
+  // Continuous anime (One Piece) number episodes absolutely, so Kitsu's episode number diverges
+  // from the IMDb per-season number (1169 vs 14); season is meaningless there. Seasonal anime
+  // (SAO) have real seasons — Kitsu's season can be mislabeled, so the IMDb pair is authoritative.
+  const continuousAnime =
+    animeReq &&
+    episode?.imdbEpisode != null &&
+    episode?.episode != null &&
+    episode.episode !== episode.imdbEpisode;
+  const effSeason = continuousAnime
+    ? episode?.season ?? null
+    : episode?.imdbSeason ?? episode?.season;
+  const effEpisode = continuousAnime
+    ? episode?.episode ?? null
+    : episode?.imdbEpisode ?? episode?.episode;
+  const altPair =
+    animeReq &&
+    episode?.imdbSeason != null &&
+    episode?.imdbEpisode != null &&
+    (episode.imdbSeason !== effSeason || episode.imdbEpisode !== effEpisode)
+      ? { season: episode.imdbSeason, episode: episode.imdbEpisode }
+      : null;
   const prevGroup =
     episode && typeof effSeason === "number" && typeof effEpisode === "number" && effEpisode > 1
       ? readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined
@@ -98,6 +115,9 @@ export function buildEpisodePipelineInput(params: {
       expectedYear: parseInt(meta.releaseInfo ?? "", 10) || null,
       expectedSeason: effSeason ?? null,
       expectedEpisode: effEpisode ?? null,
+      altExpectedSeason: altPair?.season ?? null,
+      altExpectedEpisode: altPair?.episode ?? null,
+      continuousAnime,
       strict: strictMode,
       disabled: filterDisabled || addonNative || embedded.length > 0,
       preferredLanguages: settings.preferredLanguages,

@@ -420,6 +420,44 @@ fn check_one(
         }
     }
 
+    // Continuous anime (One Piece) number absolutely → accept abs episode OR per-season pair.
+    // Seasonal anime (SAO) have real seasons → strict season+episode. Fail-open on unparsed names/packs.
+    if opts.is_anime && !s.season_pack {
+        if let Some(episode) = s.episode {
+            if opts.continuous_anime {
+                let abs_ok = Some(episode) == opts.expected_episode;
+                let rel_ok = Some(episode) == opts.alt_expected_episode
+                    && s.season == opts.alt_expected_season;
+                if !abs_ok && !rel_ok {
+                    let season_part = s
+                        .season
+                        .map(|v| format!("S{v}"))
+                        .unwrap_or_else(|| "S?".to_string());
+                    return Some(format!(
+                        "episode-mismatch-anime:{season_part}E{episode} vs abs {} / rel S{}E{}",
+                        opts.expected_episode.unwrap_or_default(),
+                        opts.alt_expected_season.unwrap_or_default(),
+                        opts.alt_expected_episode.unwrap_or_default(),
+                    ));
+                }
+            } else if let Some(expected_episode) = opts.expected_episode {
+                if episode != expected_episode {
+                    return Some(format!(
+                        "episode-mismatch-anime:S{}E{episode}-vs-E{expected_episode}",
+                        s.season.map(|v| v.to_string()).unwrap_or_else(|| "?".to_string()),
+                    ));
+                }
+                if let (Some(expected_season), Some(season)) = (opts.expected_season, s.season) {
+                    if season != expected_season {
+                        return Some(format!(
+                            "season-mismatch-anime:S{season}-vs-S{expected_season}"
+                        ));
+                    }
+                }
+            }
+        }
+    }
+
     if s.scam_score >= 5 && !opts.allow_cam && !older_catalog {
         return Some(format!("scam-score-{}", s.scam_score));
     }
@@ -1197,6 +1235,239 @@ mod tests {
     fn title_matches_numbered_title_across_name_variants() {
         assert!(title_matches("Kaiju No. 8", "Kaijuu 8 Gou", None, Some(2024)));
         assert!(title_matches("Kaiju No. 8", "Kaiju No 8", None, Some(2024)));
+    }
+
+    fn anime_opts() -> TrustOptions {
+        TrustOptions {
+            strict: true,
+            kind: Some("series".into()),
+            is_anime: true,
+            continuous_anime: true,
+            expected_season: Some(1),
+            expected_episode: Some(1169),
+            alt_expected_season: Some(23),
+            alt_expected_episode: Some(14),
+            ..Default::default()
+        }
+    }
+
+    fn seasonal_anime_opts() -> TrustOptions {
+        TrustOptions {
+            strict: true,
+            kind: Some("series".into()),
+            is_anime: true,
+            expected_season: Some(3),
+            expected_episode: Some(5),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn anime_episode_check_runs_in_non_strict_mode() {
+        let opts = TrustOptions { strict: false, ..anime_opts() };
+        let mut wrong = base_stream();
+        wrong.season = Some(1);
+        wrong.episode = Some(1);
+        let r1 = apply_trust(vec![wrong], &opts);
+        assert_eq!(r1.keep.len(), 0);
+        assert!(r1.rejected[0].reason.starts_with("episode-mismatch-anime"));
+
+        let mut right = base_stream();
+        right.season = Some(23);
+        right.episode = Some(14);
+        let r2 = apply_trust(vec![right], &opts);
+        assert_eq!(r2.keep.len(), 1);
+    }
+
+    #[test]
+    fn anime_keeps_correct_relative_pair() {
+        let mut s = base_stream();
+        s.season = Some(23);
+        s.episode = Some(14);
+        let result = apply_trust(vec![s], &anime_opts());
+        assert_eq!(result.keep.len(), 1);
+        assert!(result.rejected.is_empty());
+    }
+
+    #[test]
+    fn anime_rejects_wrong_relative_episode() {
+        let mut s = base_stream();
+        s.season = Some(1);
+        s.episode = Some(1);
+        let result = apply_trust(vec![s], &anime_opts());
+        assert_eq!(result.keep.len(), 0);
+        assert!(result.rejected[0].reason.starts_with("episode-mismatch-anime"));
+    }
+
+    #[test]
+    fn anime_rejects_same_season_wrong_episode() {
+        let mut s = base_stream();
+        s.season = Some(23);
+        s.episode = Some(13);
+        let result = apply_trust(vec![s], &anime_opts());
+        assert_eq!(result.keep.len(), 0);
+        assert!(result.rejected[0].reason.starts_with("episode-mismatch-anime"));
+    }
+
+    #[test]
+    fn anime_pair_guard_rejects_relative_number_in_wrong_season() {
+        let mut s = base_stream();
+        s.season = Some(1);
+        s.episode = Some(14);
+        let result = apply_trust(vec![s], &anime_opts());
+        assert_eq!(result.keep.len(), 0);
+        assert!(result.rejected[0].reason.starts_with("episode-mismatch-anime"));
+    }
+
+    #[test]
+    fn anime_keeps_unparsed_absolute_release() {
+        let mut s = base_stream();
+        s.season = None;
+        s.episode = None;
+        let result = apply_trust(vec![s], &anime_opts());
+        assert_eq!(result.keep.len(), 1);
+        assert!(result.rejected.is_empty());
+    }
+
+    #[test]
+    fn anime_keeps_parsed_absolute_episode() {
+        let mut s = base_stream();
+        s.season = Some(1);
+        s.episode = Some(1169);
+        let result = apply_trust(vec![s], &anime_opts());
+        assert_eq!(result.keep.len(), 1);
+    }
+
+    #[test]
+    fn anime_continuous_rejects_wrong_episode_without_alt_pair() {
+        let opts = TrustOptions {
+            alt_expected_season: None,
+            alt_expected_episode: None,
+            ..anime_opts()
+        };
+        let mut s = base_stream();
+        s.season = Some(1);
+        s.episode = Some(1);
+        let result = apply_trust(vec![s], &opts);
+        assert_eq!(result.keep.len(), 0);
+        assert!(result.rejected[0].reason.starts_with("episode-mismatch-anime"));
+    }
+
+    #[test]
+    fn anime_seasonal_keeps_correct_season_and_episode() {
+        let mut s = base_stream();
+        s.season = Some(3);
+        s.episode = Some(5);
+        let result = apply_trust(vec![s], &seasonal_anime_opts());
+        assert_eq!(result.keep.len(), 1);
+        assert!(result.rejected.is_empty());
+    }
+
+    #[test]
+    fn anime_seasonal_rejects_wrong_season() {
+        let mut s = base_stream();
+        s.season = Some(1);
+        s.episode = Some(5);
+        let result = apply_trust(vec![s], &seasonal_anime_opts());
+        assert_eq!(result.keep.len(), 0);
+        assert!(result.rejected[0].reason.starts_with("season-mismatch-anime"));
+    }
+
+    #[test]
+    fn anime_seasonal_rejects_wrong_episode() {
+        let mut s = base_stream();
+        s.season = Some(3);
+        s.episode = Some(4);
+        let result = apply_trust(vec![s], &seasonal_anime_opts());
+        assert_eq!(result.keep.len(), 0);
+        assert!(result.rejected[0].reason.starts_with("episode-mismatch-anime"));
+    }
+
+    #[test]
+    fn anime_seasonal_keeps_unparsed_episode() {
+        let mut s = base_stream();
+        s.season = None;
+        s.episode = None;
+        let result = apply_trust(vec![s], &seasonal_anime_opts());
+        assert_eq!(result.keep.len(), 1);
+        assert!(result.rejected.is_empty());
+    }
+
+    #[test]
+    fn anime_seasonal_pack_and_fileidx_skip_check() {
+        let mut packed = base_stream();
+        packed.season_pack = true;
+        packed.season = Some(1);
+        packed.episode = Some(5);
+        let r1 = apply_trust(vec![packed], &seasonal_anime_opts());
+        assert_eq!(r1.keep.len(), 1);
+
+        let mut indexed = base_stream();
+        indexed.stream.file_idx = Some(1);
+        indexed.season = Some(1);
+        indexed.episode = Some(5);
+        let r2 = apply_trust(vec![indexed], &seasonal_anime_opts());
+        assert_eq!(r2.keep.len(), 0);
+        assert!(r2.rejected[0].reason.starts_with("season-mismatch-anime"));
+    }
+
+    #[test]
+    fn anime_season_pack_skips_episode_check() {
+        let mut packed = base_stream();
+        packed.season_pack = true;
+        packed.season = Some(5);
+        packed.episode = Some(99);
+        let r1 = apply_trust(vec![packed], &anime_opts());
+        assert_eq!(r1.keep.len(), 1);
+    }
+
+    #[test]
+    fn anime_checks_fileidx_stream_by_filename() {
+        let mut indexed = base_stream();
+        indexed.stream.file_idx = Some(0);
+        indexed.season = Some(7);
+        indexed.episode = Some(42);
+        let r1 = apply_trust(vec![indexed], &anime_opts());
+        assert_eq!(r1.keep.len(), 0);
+        assert!(r1.rejected[0].reason.starts_with("episode-mismatch-anime"));
+
+        let mut correct_indexed = base_stream();
+        correct_indexed.stream.file_idx = Some(3);
+        correct_indexed.season = Some(23);
+        correct_indexed.episode = Some(14);
+        let r2 = apply_trust(vec![correct_indexed], &anime_opts());
+        assert_eq!(r2.keep.len(), 1);
+
+        let mut absolute_indexed = base_stream();
+        absolute_indexed.stream.file_idx = Some(1);
+        absolute_indexed.season = None;
+        absolute_indexed.episode = Some(1169);
+        let r3 = apply_trust(vec![absolute_indexed], &anime_opts());
+        assert_eq!(r3.keep.len(), 1);
+    }
+
+    #[test]
+    fn non_anime_episode_check_ignores_alt_pair() {
+        let opts = TrustOptions {
+            strict: true,
+            kind: Some("series".into()),
+            expected_season: Some(2),
+            expected_episode: Some(5),
+            alt_expected_season: Some(3),
+            alt_expected_episode: Some(6),
+            ..Default::default()
+        };
+        let mut wrong_season = base_stream();
+        wrong_season.season = Some(3);
+        wrong_season.episode = Some(5);
+        let r1 = apply_trust(vec![wrong_season], &opts);
+        assert_eq!(r1.rejected[0].reason, "season-mismatch:3-vs-2");
+
+        let mut wrong_ep = base_stream();
+        wrong_ep.season = Some(2);
+        wrong_ep.episode = Some(6);
+        let r2 = apply_trust(vec![wrong_ep], &opts);
+        assert_eq!(r2.rejected[0].reason, "episode-mismatch:6-vs-5");
     }
 
     #[test]
