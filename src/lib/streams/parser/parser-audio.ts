@@ -25,7 +25,11 @@ export function parseAudio(text: string, ptt: DefaultParserResult): AudioInfo {
     }
   }
   const channelsMatch = text.match(CHANNELS_RX);
-  const channels = channelsMatch ? mapChannels(channelsMatch[1]) : ptt.channels ?? 2;
+  const channels = channelsMatch
+    ? mapChannels(channelsMatch[1])
+    : ptt.channels != null
+      ? mapChannelsNumber(ptt.channels)
+      : 2;
   const bitDepthMatch = text.match(BIT_DEPTH_RX);
   const bitDepth = bitDepthMatch ? Number(bitDepthMatch[1]) : ptt.bitdepth;
   return { codec, channels, bitDepth };
@@ -36,5 +40,16 @@ function mapChannels(label: string): number {
   if (label === "6.1") return 7;
   if (label === "5.1") return 6;
   if (label === "2.1") return 3;
+  return 2;
+}
+
+// parse-torrent-title returns channels as a float (5.1, 7.1, 2). Map it to the integer
+// channel-count that harbor-core's Rust AudioInfo.channels (u16) expects — mirrors the
+// Rust parser's map_channels, so the serialized stream survives deserialization.
+function mapChannelsNumber(v: number): number {
+  if (Math.abs(v - 7.1) < 0.05) return 8;
+  if (Math.abs(v - 6.1) < 0.05) return 7;
+  if (Math.abs(v - 5.1) < 0.05) return 6;
+  if (Math.abs(v - 2.1) < 0.05) return 3;
   return 2;
 }
