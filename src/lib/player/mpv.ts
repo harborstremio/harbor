@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { subtitleDownloadArgs } from "./subtitle-load";
 import { mpvFailureSnapshot } from "./mpv-failure";
+import { buildAudioFilterChain, type AudioProfileId } from "./audio-profiles";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
@@ -76,13 +77,6 @@ export type MpvOptions = {
   getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
 };
 
-const AUDIO_PROFILE_AF: Record<string, string> = {
-  bass: "lavfi=[bass=g=7:f=110:w=0.6]",
-  voice: "lavfi=[equalizer=f=300:t=q:w=1:g=-3,equalizer=f=2800:t=q:w=1:g=5]",
-  "bass-reduce": "lavfi=[bass=g=-8:f=110:w=0.6]",
-  night: "lavfi=[acompressor=ratio=3:threshold=-20dB:attack=20:release=300:makeup=4dB]",
-};
-
 const DEFAULT_UA = "VLC/3.0.20 LibVLC/3.0.20";
 
 async function applyHeaderProps(headers?: Record<string, string>): Promise<void> {
@@ -101,14 +95,11 @@ async function applyHeaderProps(headers?: Record<string, string>): Promise<void>
 export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let host: HTMLElement | null = null;
   let snap: PlayerSnapshot = { ...emptySnapshot };
-  let profileAf = "";
+  let audioProfile: AudioProfileId = "off";
   let hdrToSdr = mpvOptions?.hdrToSdr ?? true;
   const applyAudioFilters = () => {
-    const parts: string[] = [];
-    if (snap.audioNormalize) parts.push("dynaudnorm=f=500:g=31:p=0.9:m=4");
-    if (profileAf) parts.push(profileAf);
-    if (parts.length > 0) parts.push("lavfi=[alimiter=limit=0.97]");
-    invoke("mpv_command", { cmd: ["af", "set", parts.join(",")] }).catch(() => {});
+    const chain = buildAudioFilterChain(audioProfile, snap.audioNormalize);
+    invoke("mpv_command", { cmd: ["af", "set", chain] }).catch(() => {});
   };
   const listeners = new Set<(s: PlayerSnapshot) => void>();
   let unlistenEvent: UnlistenFn | null = null;
@@ -569,7 +560,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       emit();
     },
     setAudioProfile(profile) {
-      profileAf = AUDIO_PROFILE_AF[profile] ?? "";
+      audioProfile = profile;
       applyAudioFilters();
     },
     setHdrToSdr(on, oled) {

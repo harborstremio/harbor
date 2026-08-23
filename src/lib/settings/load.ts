@@ -10,6 +10,7 @@ import { sanitizeSeekStep } from "@/lib/seek-step";
 import { migrateModelId } from "@/lib/ai-models";
 import { resolveUiLanguage } from "@/lib/i18n";
 import { normalizePosterCardSettings } from "@/lib/poster-backdrop-expansion";
+import { resolveAudioProfileId } from "@/lib/player/audio-profiles";
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
 
@@ -163,6 +164,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       ...DEFAULT,
       ...parsed,
       ...posterCards,
+      audioProfile: resolveAudioProfileId(parsed.audioProfile),
       posterDockTransitionMs: sanitizePosterDockTransition(parsed.posterDockTransitionMs),
       uiLanguage: resolveUiLanguage(parsed.uiLanguage),
       streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
