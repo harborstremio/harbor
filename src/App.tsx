@@ -116,6 +116,7 @@ import { ThemeChromeBridge } from "@/components/theme-chrome-bridge";
 import type { MetaType } from "@/lib/cinemeta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
 import { useWatchShare } from "@/lib/social/watch-presence";
+import { useHungarianDomTranslation } from "@/lib/i18n/use-dom-translation";
 import { Home } from "@/views/home";
 import { ParentalProvider } from "@/lib/parental";
 import { TraktProvider } from "@/lib/trakt/provider";
@@ -314,6 +315,7 @@ function useIdleEvict(active: boolean, pin = false): boolean {
 }
 
 export function App({ onReady }: { onReady?: () => void }) {
+  useHungarianDomTranslation();
   return (
     <SettingsProvider>
       <ProfilesProvider>

@@ -1,4 +1,5 @@
 import { ChevronRight, Star } from "lucide-react";
+import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { Poster } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
@@ -6,6 +7,8 @@ import { usePosterChain } from "@/components/poster";
 import { findTopAward, awardSourceMeta, parseAwardYear } from "@/lib/anime-awards";
 import { resolveAwardIcon, useAwardPacks } from "@/lib/award-icons";
 import { useMobileRemote } from "./mobile-remote";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 type OpenDetail = (m: Meta) => void;
 
@@ -84,9 +87,15 @@ function useOpen(onOpenDetail?: OpenDetail) {
   return (meta: Meta) => (onOpenDetail ? onOpenDetail(meta) : openOnHost(meta));
 }
 
+function useDisplayMeta(meta: Meta): Meta {
+  const preferred = usePreferredMeta(meta);
+  return useMemo(() => mergePreferredMeta(meta, preferred), [meta, preferred]);
+}
+
 function RankTile({ meta, rank, onOpenDetail }: { meta: Meta; rank: number; onOpenDetail?: OpenDetail }) {
   const { settings } = useSettings();
   const open = useOpen(onOpenDetail);
+  const displayMeta = useDisplayMeta(meta);
   const { src, onError } = usePosterChain(
     settings.rpdbKey,
     meta.id,
@@ -96,7 +105,7 @@ function RankTile({ meta, rank, onOpenDetail }: { meta: Meta; rank: number; onOp
   return (
     <button
       type="button"
-      onClick={() => open(meta)}
+      onClick={() => open(displayMeta)}
       className="w-[150px] shrink-0 text-start transition-transform duration-150 active:scale-[0.97]"
     >
       <div className="relative w-full" style={{ aspectRatio: "150 / 176" }}>
@@ -116,7 +125,7 @@ function RankTile({ meta, rank, onOpenDetail }: { meta: Meta; rank: number; onOp
           <Poster src={src} onError={onError} seed={meta.id} ratio="portrait" lazy className="rounded-[12px]" />
         </div>
       </div>
-      <p className="mt-1.5 line-clamp-1 ps-[38%] text-[12px] font-medium text-ink-muted">{meta.name}</p>
+      <p className="mt-1.5 line-clamp-1 ps-[38%] text-[12px] font-medium text-ink-muted">{displayMeta.name}</p>
     </button>
   );
 }
@@ -124,6 +133,7 @@ function RankTile({ meta, rank, onOpenDetail }: { meta: Meta; rank: number; onOp
 export function PosterTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: OpenDetail }) {
   const { settings } = useSettings();
   const open = useOpen(onOpenDetail);
+  const displayMeta = useDisplayMeta(meta);
   const { src, onError } = usePosterChain(
     settings.rpdbKey,
     meta.id,
@@ -134,7 +144,7 @@ export function PosterTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: 
   return (
     <button
       type="button"
-      onClick={() => open(meta)}
+      onClick={() => open(displayMeta)}
       className="w-[124px] shrink-0 text-start transition-transform duration-150 active:scale-[0.96]"
     >
       <Poster src={src} onError={onError} seed={meta.id} ratio="portrait" lazy className="rounded-[14px]">
@@ -146,7 +156,7 @@ export function PosterTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: 
           </span>
         )}
       </Poster>
-      <p className="mt-1.5 line-clamp-2 text-[12.5px] font-medium leading-snug text-ink-muted">{meta.name}</p>
+      <p className="mt-1.5 line-clamp-2 text-[12.5px] font-medium leading-snug text-ink-muted">{displayMeta.name}</p>
     </button>
   );
 }
@@ -172,11 +182,12 @@ function AwardCorner({ award }: { award: ReturnType<typeof findTopAward> }) {
 
 function LandscapeTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: OpenDetail }) {
   const open = useOpen(onOpenDetail);
+  const displayMeta = useDisplayMeta(meta);
   const bg = meta.background ?? meta.poster;
   return (
     <button
       type="button"
-      onClick={() => open(meta)}
+      onClick={() => open(displayMeta)}
       className="w-[240px] shrink-0 text-start transition-transform duration-150 active:scale-[0.97]"
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[14px] bg-surface ring-1 ring-edge-soft/50">
@@ -184,7 +195,7 @@ function LandscapeTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail?: Open
           <img src={bg} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
         )}
       </div>
-      <p className="mt-1.5 line-clamp-1 text-[13px] font-medium text-ink-muted">{meta.name}</p>
+      <p className="mt-1.5 line-clamp-1 text-[13px] font-medium text-ink-muted">{displayMeta.name}</p>
     </button>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState, type RefObject } from "react";
 
 type Callback = (visible: boolean) => void;
 
-const subs = new WeakMap<Element, Callback>();
+const subs = new WeakMap<Element, Set<Callback>>();
 let observer: IntersectionObserver | null = null;
 
 function ensureObserver(): IntersectionObserver {
@@ -10,8 +10,9 @@ function ensureObserver(): IntersectionObserver {
   observer = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
-        const cb = subs.get(e.target);
-        if (cb) cb(e.isIntersecting);
+        const callbacks = subs.get(e.target);
+        if (!callbacks) continue;
+        for (const cb of [...callbacks]) cb(e.isIntersecting);
       }
     },
     { rootMargin: "100px" },
@@ -21,9 +22,21 @@ function ensureObserver(): IntersectionObserver {
 
 export function observe(el: Element, cb: Callback): () => void {
   const o = ensureObserver();
-  subs.set(el, cb);
-  o.observe(el);
+  let callbacks = subs.get(el);
+  if (!callbacks) {
+    callbacks = new Set<Callback>();
+    subs.set(el, callbacks);
+    o.observe(el);
+  }
+  callbacks.add(cb);
+  let active = true;
   return () => {
+    if (!active) return;
+    active = false;
+    const current = subs.get(el);
+    if (!current) return;
+    current.delete(cb);
+    if (current.size > 0) return;
     o.unobserve(el);
     subs.delete(el);
   };

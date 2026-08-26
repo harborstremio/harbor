@@ -1,4 +1,4 @@
-import { RotateCw } from "lucide-react";
+import { Languages, RotateCw } from "lucide-react";
 import { GitHubIcon } from "@/components/github-icon";
 import { useEffect, useState } from "react";
 import { Dropdown, type DropdownOption } from "@/components/dropdown";
@@ -16,6 +16,7 @@ import { ALL_LANGUAGE_NAMES } from "@/lib/subtitles/language";
 const IMAGE_LANG_OPTIONS = ["Original", ...ALL_LANGUAGE_NAMES];
 
 const TMDB_LANGUAGES: DropdownOption[] = [
+  { value: "hu-HU", label: "Magyar" },
   { value: "es-ES", label: "Español (España)" },
   { value: "es-MX", label: "Español (Latinoamérica)" },
   { value: "fr-FR", label: "Français" },
@@ -133,6 +134,10 @@ export function LanguagePanel() {
       title={t("Metadata language")}
       subtitle={t("Titles, overviews, and taglines from TMDB display in this language when a translation exists. Needs a TMDB key.")}
     >
+      <div className="mb-1 flex items-start gap-3 rounded-2xl border border-accent/20 bg-accent/5 px-4 py-3 text-[12.5px] leading-relaxed text-ink-muted">
+        <Languages size={17} className="mt-0.5 shrink-0 text-accent" />
+        <p>{t("This controls movie and series information only. Your Harbor menus stay in the display language chosen above.")}</p>
+      </div>
       <Dropdown
         value={langDraft}
         onChange={setLangDraft}

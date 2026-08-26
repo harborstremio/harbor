@@ -101,7 +101,7 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
                 mode === m.id ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
               }`}
             >
-              {m.label}
+            {t(m.label)}
             </button>
           ))}
         </div>
@@ -156,7 +156,7 @@ export function AccountAuthForm({ onRecovery }: { onRecovery?: (code: string) =>
             className="flex h-11 items-center justify-center gap-2 rounded-[11px] bg-ink text-[14px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
           >
             {busy && <Loader2 size={16} className="animate-spin" />}
-            {active.action}
+            {t(active.action)}
           </button>
 
           {mode === "register" && (

@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { sizeImageUrl } from "@/lib/img-size";
@@ -6,6 +6,8 @@ import { useContextMenu } from "@/lib/context-menu";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { usePosterChain } from "@/components/poster";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 const POS = {
   center: "inset-0 items-center justify-center text-center",
@@ -40,7 +42,9 @@ export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta;
   const { openMeta, openManga } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
-  const logo = useLogo(meta);
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = useMemo(() => mergePreferredMeta(meta, preferredMeta), [meta, preferredMeta]);
+  const logo = useLogo(displayMeta);
   const poster = usePosterChain(settings.rpdbKey, meta.id, meta.poster, meta.type === "series" ? "series" : "movie");
   const [artFailed, setArtFailed] = useState(false);
   const wide = !artFailed && meta.background && meta.background !== meta.poster ? meta.background : undefined;
@@ -51,15 +55,15 @@ export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta;
       openManga(meta.id);
       return;
     }
-    openMeta(meta);
+    openMeta(displayMeta);
   };
 
   return (
     <button
       type="button"
       onClick={open}
-      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
-      title={meta.name}
+      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta: displayMeta })}
+      title={displayMeta.name}
       className="group relative block aspect-[16/9] w-full overflow-hidden rounded-[16px] bg-elevated ring-1 ring-edge-soft transition-[box-shadow,--tw-ring-color] duration-200 ease-out hover:ring-edge hover:shadow-[0_10px_28px_-18px_rgba(0,0,0,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/70"
     >
       {wide ? (
@@ -101,14 +105,14 @@ export const TvCard = memo(function TvCard({ meta, kids = false }: { meta: Meta;
           {logo ? (
             <img
               src={logo}
-              alt={meta.name}
+              alt={displayMeta.name}
               draggable={false}
               loading="lazy"
               className="max-h-[34px] w-auto max-w-full self-start object-contain object-left [filter:drop-shadow(0_2px_8px_rgba(0,0,0,0.8))]"
             />
           ) : (
             <span className="line-clamp-2 text-[14.5px] font-semibold leading-tight text-ink [text-shadow:0_1px_8px_rgba(0,0,0,0.9)]">
-              {meta.name}
+              {displayMeta.name}
             </span>
           )}
           {!kids && meta.releaseInfo && (

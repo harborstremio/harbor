@@ -3,15 +3,19 @@ import type { Meta } from "@/lib/cinemeta";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { ResultPoster } from "./result-poster";
 import { useView } from "@/lib/view";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 function MetaRow({ m, onClose, index }: { m: Meta; onClose: () => void; index?: number }) {
   const { openMeta } = useView();
   const description = useLocalizedOverview(m);
+  const preferredMeta = usePreferredMeta(m);
+  const displayMeta = mergePreferredMeta(m, preferredMeta);
   const staggered = index != null;
   return (
     <button
       onClick={() => {
-        openMeta(m);
+        openMeta(displayMeta);
         onClose();
       }}
       style={staggered ? { animationDelay: `${Math.min(index, 8) * 55}ms` } : undefined}
@@ -23,7 +27,7 @@ function MetaRow({ m, onClose, index }: { m: Meta; onClose: () => void; index?: 
         <ResultPoster id={m.id} poster={m.poster} className="block h-full w-full" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="truncate text-[16px] font-semibold text-ink">{m.name}</span>
+        <span className="truncate text-[16px] font-semibold text-ink">{displayMeta.name}</span>
         <div className="flex items-center gap-2 text-[12.5px] text-ink-muted">
           {m.releaseInfo && <span>{m.releaseInfo}</span>}
           {m.releaseInfo && m.imdbRating && (

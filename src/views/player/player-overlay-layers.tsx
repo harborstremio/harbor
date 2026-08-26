@@ -272,6 +272,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         showWaiting={p.showWaiting}
         pendingResumeSec={p.pendingResumeSec}
         pendingSeekSec={p.pendingSeekSec}
+        skipSessionKey={`${p.src.meta.id ?? "unknown"}:${p.src.episode?.season ?? 0}:${p.src.episode?.episode ?? 0}:${p.adUrl}`}
         skipSegments={p.skipSegments}
         durationSec={p.snap.durationSec}
         hasNextEpisode={p.hasNextEpisode}

@@ -1,6 +1,6 @@
 {
   "name": "harbor",
-  "version": "0.9.117",
+  "version": "0.9.123",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -46,6 +46,7 @@
     "tailwindcss": "^4"
   },
   "devDependencies": {
+    "@huggingface/transformers": "^4.2.0",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4",
     "@tauri-apps/cli": "^2",

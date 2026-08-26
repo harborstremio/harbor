@@ -1,10 +1,13 @@
 import { Ghost, Heart, Info, MessageSquareWarning, ShieldAlert, Swords, Wine } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  advisoryCategoryLabel,
+  advisorySeverityRank,
+  normalizeContentAdvisories,
+} from "@/lib/content-advisory";
 import { useT } from "@/lib/i18n";
 
 export type Advisory = { category: string; severity: string };
-
-const SEV_RANK: Record<string, number> = { Mild: 1, Moderate: 2, Severe: 3 };
 
 const SEV_STYLE: Record<string, { text: string; bar: string }> = {
   Severe: { text: "text-red-300", bar: "bg-red-400" },
@@ -38,13 +41,7 @@ export function ContentAdvisoryToast({
   preview?: boolean;
 }) {
   const t = useT();
-  const rated = useMemo(
-    () =>
-      categories
-        .filter((c) => SEV_RANK[c.severity])
-        .sort((a, b) => (SEV_RANK[b.severity] ?? 0) - (SEV_RANK[a.severity] ?? 0)),
-    [categories],
-  );
+  const rated = useMemo(() => normalizeContentAdvisories(categories), [categories]);
   const [visible, setVisible] = useState(preview);
   const timerRef = useRef(0);
 
@@ -87,12 +84,12 @@ export function ContentAdvisoryToast({
         {rated.map((c) => {
           const { Icon, label } = metaFor(c.category);
           const style = SEV_STYLE[c.severity] ?? SEV_STYLE.Mild;
-          const rank = SEV_RANK[c.severity] ?? 1;
+          const rank = advisorySeverityRank(c.severity);
           return (
             <li key={c.category} className="flex items-center justify-between gap-3">
               <span className="flex items-center gap-2">
                 <Icon size={14} strokeWidth={2} className={style.text} />
-                <span className="text-[12.5px] text-ink">{t(label)}</span>
+                <span className="text-[12.5px] text-ink">{t(advisoryCategoryLabel(label))}</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="flex gap-[3px]">

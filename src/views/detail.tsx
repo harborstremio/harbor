@@ -19,6 +19,7 @@ import { Row } from "@/components/row";
 import { meta as fetchCinemetaMeta, narrowMediaType, isAddonNativeMeta, type Meta } from "@/lib/cinemeta";
 import { fetchAddonMeta } from "@/lib/addons";
 import { resolveMeta } from "@/lib/meta-resource";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 import { useMdblistScores } from "@/lib/providers/mdblist";
 import { lastPlayedEpisode, readResumeEntry, saveResumeMs } from "@/lib/resume";
 import { localCwEntry } from "@/lib/local-cw";
@@ -185,6 +186,7 @@ export function DetailView({
 }) {
   const t = useT();
   const { settings, update } = useSettings();
+  const preferredMeta = usePreferredMeta(meta);
   const contentDrag = useContentDrag();
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -782,8 +784,9 @@ export function DetailView({
     };
   }, [detail, isAnime, settings.tmdbKey, settings.region]);
 
-  const rawTitle = detail?.title ?? meta.name;
+  const rawTitle = preferredMeta?.name ?? detail?.title ?? meta.name;
   const title = isAnime ? stripFranchiseSuffix(rawTitle) : rawTitle;
+  const preferredVideos = preferredMeta?.videos?.length ? preferredMeta.videos : undefined;
   const listSeed: ListItemInput = {
     id: meta.id,
     type: meta.type,
@@ -791,7 +794,9 @@ export function DetailView({
     poster: meta.poster ?? detail?.poster,
   };
   const overview =
-    seasonArt?.description || (detail?.overview ?? (meta.id.startsWith("tmdb:") ? "" : meta.description) ?? "");
+    seasonArt?.description ||
+    preferredMeta?.description ||
+    (detail?.overview ?? (meta.id.startsWith("tmdb:") ? "" : meta.description) ?? "");
   const tagline = detail?.tagline ?? "";
   const pinnedLogo = useTitleLogo(meta.id);
   const animeArt = isAnime ? peekAnimeArt(meta.id) : undefined;
@@ -923,7 +928,7 @@ export function DetailView({
     releaseDate: detail?.releaseDate ?? meta.releaseDate,
     releaseInfo: detail?.year ?? meta.releaseInfo,
     behaviorHints: meta.behaviorHints ?? cinemetaFull?.behaviorHints,
-    videos: meta.videos ?? cinemetaFull?.videos,
+    videos: preferredVideos ?? meta.videos ?? cinemetaFull?.videos,
   };
 
   useEffect(() => {
@@ -1655,6 +1660,7 @@ export function DetailView({
             lastEpisodeAir={detail.lastEpisodeAir}
             scrollRef={scrollRef}
             cinemetaVideos={cinemetaFull?.videos}
+            preferredVideos={preferredVideos}
             stremioWatched={stremioWatched}
             resumeSeason={lastPlay?.season}
             resumeEpisode={lastPlay?.episode}
@@ -1671,7 +1677,7 @@ export function DetailView({
           (addonNative
             ? cinemetaFull.videos.length > 0
             : cinemetaFull.videos.some((v) => v.season != null && v.season > 0 && v.episode != null)) && (
-            <FadeInUp><CinemetaEpisodes meta={playMeta} videos={cinemetaFull.videos} stremioWatched={stremioWatched} /></FadeInUp>
+            <FadeInUp><CinemetaEpisodes meta={playMeta} videos={preferredVideos ?? cinemetaFull.videos} stremioWatched={stremioWatched} /></FadeInUp>
           )}
 
         {(() => {

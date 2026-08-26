@@ -4,7 +4,7 @@ import { setTrickplayState, trickplaySetUrl, trickplaySpawnEager, trickplayStop 
 
 export function useTrickplay({ url, enabled, isLive }: { url: string; enabled: boolean; isLive?: boolean }) {
   useEffect(() => {
-    if (!enabled || !url) {
+    if (!enabled || !url || isLive) {
       setTrickplayState({ active: false, bufferedOnly: false });
       return;
     }

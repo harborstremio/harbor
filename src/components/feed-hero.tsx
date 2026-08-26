@@ -5,6 +5,8 @@ import { useT } from "@/lib/i18n";
 import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 import { smartPlayEpisode } from "@/lib/smart-play";
 import { useView } from "@/lib/view";
 import { toggleWatchlist, useInWatchlist } from "@/lib/watchlist";
@@ -31,6 +33,8 @@ export function FeedHero({
   const t = useT();
   const meta = item.meta;
   const description = useLocalizedOverview(meta);
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const live = useLiveImdbRating(meta);
   const saved = useInWatchlist(meta.id, [resolvedImdb]);
@@ -72,7 +76,7 @@ export function FeedHero({
             </span>
             <button
               type="button"
-              onClick={() => openMeta(meta)}
+              onClick={() => openMeta(displayMeta)}
               aria-label={t("See details")}
               className="group relative grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink/90 transition-colors duration-200 ease-out hover:text-ink"
             >
@@ -110,7 +114,7 @@ export function FeedHero({
               )}
             </div>
             <h1 className="font-display text-[clamp(34px,4.2vw,52px)] font-medium leading-[1.05] tracking-tight text-ink drop-shadow-[0_2px_28px_rgba(0,0,0,0.55)] line-clamp-2 pb-[0.12em]">
-              {meta.name}
+              {displayMeta.name}
             </h1>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-ink/85">
             {meta.releaseInfo && <span>{meta.releaseInfo}</span>}
@@ -148,7 +152,7 @@ export function FeedHero({
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
             <button
               type="button"
-              onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
+              onClick={() => openPicker(displayMeta, smartPlayEpisode(displayMeta), { autoPlay: settings.instantPlay })}
               className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas shadow-[0_2px_10px_-4px_rgba(0,0,0,0.4)] transition-[background-color,transform,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:bg-ink/90 hover:shadow-[0_10px_26px_-10px_rgba(0,0,0,0.55)]"
             >
               <Play size={18} fill="currentColor" />

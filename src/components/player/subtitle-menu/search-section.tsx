@@ -185,7 +185,10 @@ export function SearchSection(props: SubtitleMenuProps) {
         type: tgt.type,
         season: tgt.season ?? undefined,
         episode: tgt.episode ?? undefined,
-        langs: settings.preferredSubLangs ?? [],
+        // The manual picker is an explorer: show every language and let its
+        // language sidebar narrow the list, while keeping preferred languages
+        // as the ranking signal below.
+        langs: [],
         candidateIds: playing?.candidateIds,
         stremioId: playing?.stremioId ?? undefined,
       };

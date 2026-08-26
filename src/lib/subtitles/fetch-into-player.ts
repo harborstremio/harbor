@@ -19,6 +19,8 @@ export type SubFetchParams = {
   settings: Settings;
   addons: Addon[];
   langs: string[];
+  /** Languages used to fetch the picker list. Empty requests every available language. */
+  searchLangs?: string[];
   searchImdbId: string | null | undefined;
   candidateIds: string[];
   season?: number;
@@ -119,7 +121,7 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
       type: p.src.meta.type === "series" ? "series" : "movie",
       season: p.season,
       episode: p.episode,
-      langs: p.langs,
+      langs: p.searchLangs ?? p.langs,
       videoHash: p.videoHash,
       videoSize: p.videoSize,
       filename: p.src.streamRef?.parsedTitle ?? p.src.streamRef?.title ?? undefined,

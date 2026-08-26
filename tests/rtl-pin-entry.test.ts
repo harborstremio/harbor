@@ -35,11 +35,12 @@ test("every numeric keypad stays left to right", () => {
 
 test("these are still the only numeric keypads in the app", () => {
   const found: string[] = [];
+  const sourceRoot = decodeURIComponent(at("src/").pathname);
   const walk = (dir: URL) => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       if (e.isDirectory()) walk(new URL(`${e.name}/`, dir));
       else if (e.name.endsWith(".tsx")) {
-        const rel = decodeURIComponent(new URL(e.name, dir).pathname).split("/harbor-beta/")[1];
+        const rel = `src/${decodeURIComponent(new URL(e.name, dir).pathname).slice(sourceRoot.length)}`;
         if (read(rel).includes('"1", "2", "3", "4", "5", "6", "7", "8", "9"')) found.push(rel);
       }
     }

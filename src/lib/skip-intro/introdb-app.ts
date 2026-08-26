@@ -19,6 +19,7 @@ const inflight = new Map<string, Promise<SkipSegment[]>>();
 
 function toSegment(raw: RawSeg | null | undefined, kind: SkipKind): SkipSegment | null {
   if (!raw) return null;
+  if (typeof raw.confidence === "number" && raw.confidence < 0.35) return null;
   const start = raw.start_ms;
   const end = raw.end_ms;
   if (typeof start !== "number" || typeof end !== "number" || end <= start) return null;

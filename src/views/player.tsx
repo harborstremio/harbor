@@ -643,8 +643,10 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     syncToastTimerRef.current = window.setTimeout(() => setSyncToast(null), kind === "error" ? 5000 : 3000);
   }, []);
   const handleEnterSync = useCallback(() => {
-    void textSync.enter(src.url, src.headers);
-  }, [textSync.enter, src.url, src.headers]);
+    void textSync.enter(src.url, src.headers).then((reason) => {
+      if (reason) showSyncToast("error", t("Could not read this subtitle track. Pick a different subtitle, then try again."));
+    });
+  }, [textSync.enter, src.url, src.headers, showSyncToast, t]);
 
   const volumeIndicatorTimerRef = useRef<number | null>(null);
   const [volumeIndicator, setVolumeIndicator] = useState<VolumeIndicatorState>({

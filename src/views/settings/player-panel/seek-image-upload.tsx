@@ -1,5 +1,6 @@
 import { AlertTriangle, Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
+import { useT } from "@/lib/i18n";
 
 const ACCEPTED_TYPES = "image/png,image/gif,image/webp,image/jpeg,image/svg+xml,.svg";
 const MAX_GIF_SIZE = 2 * 1024 * 1024;
@@ -26,6 +27,7 @@ export function SeekImageUpload({
   targetDim?: number;
   targetQuality?: number;
 }) {
+  const t = useT();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function SeekImageUpload({
       onSelect(result.url);
     } catch (e) {
       console.warn("[seek-image] processing failed", e);
-      setError("Couldn't read that image. Try a different file.");
+      setError(t("Couldn't read that image. Try a different file."));
     } finally {
       setBusy(false);
     }
@@ -86,7 +88,7 @@ export function SeekImageUpload({
         </div>
         <div className="flex flex-1 flex-col gap-1">
           <p className="text-[12.5px] font-medium text-ink">
-            {value ? "Custom image loaded" : emptyTitle}
+            {value ? t("Custom image loaded") : emptyTitle}
           </p>
           <p className="text-[11px] leading-snug text-ink-subtle">{hint}</p>
         </div>
@@ -97,7 +99,7 @@ export function SeekImageUpload({
           className="flex h-9 items-center gap-1.5 rounded-full bg-raised px-3 text-[12px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-wait disabled:opacity-60"
         >
           <Upload size={12} strokeWidth={2.2} />
-          {busy ? "Processing" : value ? "Replace" : "Upload"}
+          {busy ? t("Processing") : value ? t("Replace") : t("Upload")}
         </button>
         <button
           type="button"
@@ -107,7 +109,7 @@ export function SeekImageUpload({
           }}
           disabled={!value}
           className="flex h-9 w-9 items-center justify-center rounded-full bg-raised text-ink-muted transition-all duration-200 hover:bg-danger hover:text-white disabled:pointer-events-none disabled:scale-90 disabled:opacity-0"
-          aria-label="Remove image"
+          aria-label={t("Remove image")}
         >
           <X size={13} strokeWidth={2.2} />
         </button>

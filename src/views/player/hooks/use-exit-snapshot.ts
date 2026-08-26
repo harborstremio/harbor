@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, type RefObject } from "react";
 import { captureFrame, captureMpvFrame, saveSnapshot } from "@/lib/snapshots";
 import { useSettings } from "@/lib/settings";
 import { trickplayGet } from "@/lib/trickplay";
-import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import { getPlaybackPosition, getSeekHovering } from "@/lib/player/playback-clock";
 import type { PlayerStatus } from "@/lib/player/bridge";
 import type { PlayerSrc } from "@/lib/view";
 import { cloudWriteId } from "@/lib/stremio";
@@ -57,7 +57,7 @@ export function useExitSnapshot(params: {
       }
       const mpvImg = await captureMpvFrame(full);
       if (mpvImg) return mpvImg;
-      if (allowTrick && seek) return trickplayGet(getPlaybackPosition());
+      if (allowTrick && seek && !getSeekHovering()) return trickplayGet(getPlaybackPosition());
       return null;
     },
     [videoMountRef],

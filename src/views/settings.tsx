@@ -295,7 +295,7 @@ export function Settings() {
 
   return (
     <SettingsActiveContext.Provider value={{ setActive }}>
-    <div className="flex h-full bg-canvas">
+    <div data-settings-root className="flex h-full bg-canvas">
       <SettingsNav active={active} onChange={handleNav} />
       <main
         ref={scrollRef}

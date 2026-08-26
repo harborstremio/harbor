@@ -18,6 +18,7 @@ export const ToolsLayer = memo(function ToolsLayer({
   showWaiting,
   pendingResumeSec,
   pendingSeekSec,
+  skipSessionKey,
   skipSegments,
   durationSec,
   hasNextEpisode,
@@ -41,6 +42,7 @@ export const ToolsLayer = memo(function ToolsLayer({
   showWaiting: boolean;
   pendingResumeSec: number | null;
   pendingSeekSec: number | null;
+  skipSessionKey: string;
   skipSegments: SkipProps["skipSegments"];
   durationSec: number;
   hasNextEpisode: boolean;
@@ -62,6 +64,7 @@ export const ToolsLayer = memo(function ToolsLayer({
     <>
       {!pipMode && !drawMode && !showWaiting && pendingResumeSec == null && pendingSeekSec == null && (
         <SkipPillContainer
+          key={skipSessionKey}
           engine={engine}
           skipSegments={skipSegments}
           durationSec={durationSec}

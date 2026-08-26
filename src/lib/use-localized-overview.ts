@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
-import { narrowMediaType, type Meta } from "@/lib/cinemeta";
-import { useAuth } from "@/lib/auth";
-import { resolveMeta } from "@/lib/meta-resource";
-import { tmdbImdbId } from "@/lib/providers/tmdb";
+import type { Meta } from "@/lib/cinemeta";
 import { tmdbMetadataOverview } from "@/lib/providers/tmdb/tmdb-lite";
+import { tmdbIdFromImdb } from "@/lib/providers/tmdb/tmdb-imdb-resolve";
 import { useSettings } from "@/lib/settings";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 export function useLocalizedOverview(meta: Meta): string | undefined {
   const { settings } = useSettings();
-  const { authKey } = useAuth();
+  const preferredMeta = usePreferredMeta(meta);
   const isTmdb = meta.id.startsWith("tmdb:");
+  const shouldLocalize = Boolean(
+    settings.tmdbKey && settings.tmdbLanguage && settings.translateDescriptions,
+  );
   const [overview, setOverview] = useState<string | undefined>(
     isTmdb ? undefined : meta.description,
   );
@@ -18,31 +20,39 @@ export function useLocalizedOverview(meta: Meta): string | undefined {
     let alive = true;
 
     const load = async () => {
-      if (settings.preferCustomMetaAddon) {
-        let metadataId = meta.id;
-        if (isTmdb && settings.tmdbKey) {
-          metadataId = (await tmdbImdbId(settings.tmdbKey, meta.id).catch(() => null)) ?? meta.id;
-        }
-
-        const custom = await resolveMeta(authKey, narrowMediaType(meta.type), metadataId).catch(
-          () => null,
-        );
-
-        if (!alive) return;
-        if (custom?.addonOrigin && custom.description) {
-          setOverview(custom.description);
-          return;
-        }
+      if (!shouldLocalize) {
+        setOverview(preferredMeta?.description || meta.description);
+        return;
       }
 
-      if (!isTmdb || !settings.tmdbKey) {
-        setOverview(meta.description);
+      const tmdbId = isTmdb
+        ? meta.id
+        : meta.id.startsWith("tt")
+          ? await tmdbIdFromImdb(
+              settings.tmdbKey,
+              meta.id,
+              meta.type === "series" ? "series" : meta.type === "movie" ? "movie" : undefined,
+            )
+          : null;
+      if (!alive) return;
+      if (!tmdbId) {
+        setOverview(preferredMeta?.description || meta.description);
         return;
       }
 
       setOverview(undefined);
-      const localized = await tmdbMetadataOverview(settings.tmdbKey, meta.id).catch(() => null);
-      if (alive) setOverview(localized ?? meta.description);
+      const localized = await tmdbMetadataOverview(settings.tmdbKey, tmdbId).catch(() => null);
+      if (!alive) return;
+      if (localized) {
+        setOverview(localized);
+        return;
+      }
+      if (!isTmdb) {
+        setOverview(preferredMeta?.description || meta.description);
+        return;
+      }
+
+      setOverview(preferredMeta?.description || meta.description);
     };
 
     void load();
@@ -50,13 +60,14 @@ export function useLocalizedOverview(meta: Meta): string | undefined {
       alive = false;
     };
   }, [
-    authKey,
-    isTmdb,
     meta.description,
     meta.id,
     meta.type,
-    settings.preferCustomMetaAddon,
+    preferredMeta?.description,
     settings.tmdbKey,
+    settings.tmdbLanguage,
+    settings.translateDescriptions,
+    shouldLocalize,
   ]);
 
   return overview;

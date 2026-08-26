@@ -771,10 +771,14 @@ pub async fn mpv_start(
     );
 
     eprintln!("[harbor::mpv] loadfile {}", args.url);
-    mpv_argv_command(&*mpv_arc, &["loadfile", &args.url, "replace"]).map_err(|e| {
+    if let Err(e) = mpv_argv_command(&*mpv_arc, &["loadfile", &args.url, "replace"]) {
         eprintln!("[harbor::mpv] loadfile FAILED: {}", e);
-        format!("loadfile: {}", e)
-    })?;
+        // The event loop already owns a clone while startup is in progress.
+        // Explicitly quit here so a rejected initial URL cannot leave an
+        // untracked libmpv instance alive in the background.
+        let _ = mpv_arc.command("quit", &[]);
+        return Err(format!("loadfile: {}", e));
+    }
     eprintln!("[harbor::mpv] loadfile OK");
 
     *g = Some(MpvSession {
@@ -1868,6 +1872,46 @@ fn sub_cache_dir() -> PathBuf {
     dir
 }
 
+// Subtitle providers occasionally return a video, an error page, or a corrupt
+// archive in place of text. Keep that isolated from the player process and
+// avoid allocating unbounded memory while a subtitle is being selected.
+const MAX_SUBTITLE_DOWNLOAD_BYTES: usize = 12 * 1024 * 1024;
+const MAX_SUBTITLE_UNPACKED_BYTES: usize = 24 * 1024 * 1024;
+
+fn read_subtitle_limited(
+    reader: impl std::io::Read,
+    max_bytes: usize,
+) -> Result<Vec<u8>, String> {
+    use std::io::Read;
+
+    let mut limited = reader.take(max_bytes.saturating_add(1) as u64);
+    let mut out = Vec::with_capacity(max_bytes.min(64 * 1024));
+    limited
+        .read_to_end(&mut out)
+        .map_err(|e| format!("subtitle read: {}", e))?;
+    if out.len() > max_bytes {
+        return Err(format!("subtitle exceeds {} MiB", max_bytes / (1024 * 1024)));
+    }
+    Ok(out)
+}
+
+async fn read_subtitle_response_limited(mut response: reqwest::Response) -> Result<Vec<u8>, String> {
+    if response
+        .content_length()
+        .is_some_and(|size| size > MAX_SUBTITLE_DOWNLOAD_BYTES as u64)
+    {
+        return Err("subtitle exceeds 12 MiB".to_string());
+    }
+    let mut out = Vec::with_capacity(64 * 1024);
+    while let Some(chunk) = response.chunk().await.map_err(|e| format!("read: {}", e))? {
+        if out.len().saturating_add(chunk.len()) > MAX_SUBTITLE_DOWNLOAD_BYTES {
+            return Err("subtitle exceeds 12 MiB".to_string());
+        }
+        out.extend_from_slice(&chunk);
+    }
+    Ok(out)
+}
+
 fn subtitle_extension(
     url: &str,
     content_type: Option<&str>,
@@ -1932,12 +1976,14 @@ fn normalize_subtitle_bytes(
     text.trim_start_matches('\u{feff}').as_bytes().to_vec()
 }
 
-fn extract_subtitle_from_zip(bytes: &[u8]) -> Option<Vec<u8>> {
+fn extract_subtitle_from_zip(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
     const SUB_EXTS: &[&str] = &["srt", "ass", "ssa", "vtt", "sub"];
-    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes)).ok()?;
+    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes))
+        .map_err(|e| format!("zip: {}", e))?;
     let mut best: Option<(usize, u64)> = None;
+    let mut oversize_entry = false;
     for i in 0..archive.len() {
-        let entry = archive.by_index(i).ok()?;
+        let entry = archive.by_index(i).map_err(|e| format!("zip entry: {}", e))?;
         if entry.is_dir() {
             continue;
         }
@@ -1945,16 +1991,24 @@ fn extract_subtitle_from_zip(bytes: &[u8]) -> Option<Vec<u8>> {
         let ext = name.rsplit('.').next().unwrap_or("");
         if SUB_EXTS.contains(&ext) {
             let size = entry.size();
+            if size > MAX_SUBTITLE_UNPACKED_BYTES as u64 {
+                oversize_entry = true;
+                continue;
+            }
             if best.is_none_or(|(_, best_size)| size > best_size) {
                 best = Some((i, size));
             }
         }
     }
-    let (idx, _) = best?;
-    let mut file = archive.by_index(idx).ok()?;
-    let mut out = Vec::with_capacity(file.size() as usize);
-    std::io::Read::read_to_end(&mut file, &mut out).ok()?;
-    Some(out)
+    let Some((idx, _)) = best else {
+        return if oversize_entry {
+            Err("subtitle archive entry exceeds 24 MiB".to_string())
+        } else {
+            Ok(None)
+        };
+    };
+    let file = archive.by_index(idx).map_err(|e| format!("zip entry: {}", e))?;
+    read_subtitle_limited(file, MAX_SUBTITLE_UNPACKED_BYTES).map(Some)
 }
 
 fn prepare_subtitle_download(
@@ -1972,7 +2026,14 @@ fn prepare_subtitle_download(
 
 #[cfg(test)]
 mod subtitle_download_tests {
-    use super::{normalize_subtitle_bytes, prepare_subtitle_download, subtitle_extension};
+    use super::{
+        normalize_subtitle_bytes, prepare_subtitle_download, read_subtitle_limited, subtitle_extension,
+    };
+
+    #[test]
+    fn refuses_an_oversized_subtitle_body() {
+        assert!(read_subtitle_limited(&b"12345"[..], 4).is_err());
+    }
 
     #[test]
     fn uses_explicit_ass_format_when_download_url_has_no_extension() {
@@ -2068,7 +2129,6 @@ pub async fn sub_download(
     encoding: Option<String>,
     lang: Option<String>,
 ) -> Result<String, String> {
-    use std::io::Read;
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(15))
         .gzip(true)
@@ -2092,19 +2152,16 @@ pub async fn sub_download(
         .get(reqwest::header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_lowercase());
-    let raw = res.bytes().await.map_err(|e| format!("read: {}", e))?;
+    let raw = read_subtitle_response_limited(res).await?;
     let unpacked: Vec<u8> = if raw.len() >= 2 && raw[0] == 0x1f && raw[1] == 0x8b {
         let mut decoder = flate2::read::GzDecoder::new(&raw[..]);
-        let mut decoded = Vec::with_capacity(raw.len() * 4);
-        decoder
-            .read_to_end(&mut decoded)
-            .map_err(|e| format!("gunzip: {}", e))?;
-        decoded
+        read_subtitle_limited(&mut decoder, MAX_SUBTITLE_UNPACKED_BYTES)
+            .map_err(|e| format!("gunzip: {}", e))?
     } else {
-        raw.to_vec()
+        raw
     };
     let unpacked = if unpacked.len() >= 4 && &unpacked[..4] == b"PK\x03\x04" {
-        extract_subtitle_from_zip(&unpacked).unwrap_or(unpacked)
+        extract_subtitle_from_zip(&unpacked)?.unwrap_or(unpacked)
     } else {
         unpacked
     };

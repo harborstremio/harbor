@@ -147,6 +147,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let geomResizeObserver: ResizeObserver | null = null;
   let geomTauriUnlisten: Array<() => void> = [];
   let mpvStarted = false;
+  let loadedIsLive: boolean | null = null;
   let suppressEndFileUntil = 0;
   let svpFilterFailed = false;
   let secondarySid: string | null = null;
@@ -187,6 +188,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       const reason = String((raw as { reason?: unknown }).reason ?? "");
       snap = mpvFailureSnapshot(snap, reason);
       mpvStarted = false;
+      loadedIsLive = null;
       invoke("mpv_stop").catch(() => {});
       emit();
     } else if (raw.event === "property-change") {
@@ -275,7 +277,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       if (name === "dwidth" && typeof data === "number") snap.videoWidth = data;
       if (name === "dheight" && typeof data === "number") snap.videoHeight = data;
-      if (name === "video-params/gamma" && typeof data === "string" && data) snap.hdrGamma = data;
+      if (name === "video-params/gamma") snap.hdrGamma = typeof data === "string" ? data : "";
       if (name === "demuxer-cache-duration" && typeof data === "number") snap.bufferedSec = data;
       if (name === "paused-for-cache" && typeof data === "boolean") snap.buffering = data;
       if (name === "af") {
@@ -306,7 +308,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       emit();
     } else if (raw.event === "file-loaded") {
-      snap.status = "playing";
+      // `file-loaded` can arrive after a resume/room sync has already paused
+      // mpv. Do not let that late event make the React controls say "playing".
+      if (snap.status !== "paused") snap.status = "playing";
       snap.errorCode = null;
       snap.errorMessage = null;
       emit();
@@ -355,6 +359,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.durationSec = 0;
       snap.bufferedSec = 0;
       snap.buffering = false;
+      snap.chapters = [];
+      snap.videoWidth = 0;
+      snap.videoHeight = 0;
       snap.hdrGamma = "";
       pendingTracks = {};
       urlByExternalFilename.clear();
@@ -369,6 +376,16 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       try {
         const opts = mpvOptions ?? { anime4k: false, hdrToSdr: true };
+        const nextIsLive = src.isLive === true;
+        // Live and on-demand streams use materially different native mpv
+        // buffering/reconnect profiles. Recreate the backend session when
+        // switching class instead of inheriting the previous source's profile.
+        if (mpvStarted && loadedIsLive !== nextIsLive) {
+          suppressEndFileUntil = Date.now() + 1500;
+          await invoke("mpv_stop").catch(() => {});
+          mpvStarted = false;
+          loadedIsLive = null;
+        }
         if (mpvStarted) {
           try {
             suppressEndFileUntil = Date.now() + 1500;
@@ -402,10 +419,12 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
               }
             }
             window.dispatchEvent(new Event("harbor:mpv-refresh-geom"));
+            loadedIsLive = nextIsLive;
             return;
           } catch (err) {
             console.warn("[mpv] loadfile reload failed, falling back to recreate", err);
             mpvStarted = false;
+            loadedIsLive = null;
           }
         }
         await invoke("mpv_start", {
@@ -421,13 +440,14 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             anime4kShaders: opts.anime4kShaders ?? [],
             d3d11Flip: opts.d3d11Flip === true,
             macEdr: opts.macEdr === true,
-            isLive: src.isLive === true,
+            isLive: nextIsLive,
             fullDownload: opts.fullDownload === true,
             headers: src.headers ?? null,
             extraOptions: opts.extraOptions || undefined,
           },
         });
         mpvStarted = true;
+        loadedIsLive = nextIsLive;
         if (opts.embed) {
           await invoke("mpv_set_property", { name: "sub-visibility", value: false }).catch(() => {});
         }
@@ -748,6 +768,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       geomTauriUnlisten = [];
       mpvStarted = false;
+      loadedIsLive = null;
       invoke("mpv_stop").catch(() => {});
       if (unlistenEvent) {
         unlistenEvent();

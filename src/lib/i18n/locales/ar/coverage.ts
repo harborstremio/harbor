@@ -1,4 +1,6 @@
 const coverage: Record<string, string> = {
+  "Claim": "احجز",
+  "Click a swatch or drag": "انقر على عينة لون أو اسحب",
   "Play from": "التشغيل من",
   "end": "النهاية",
   "m:ss": "د:ث",

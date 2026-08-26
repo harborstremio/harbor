@@ -31,6 +31,8 @@ import {
   useTmdbVote,
 } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 import { useSimklCardScores, useSimklCardScoresByAnimeId } from "@/lib/simkl/ratings";
 import { simklRequest } from "@/lib/simkl/client";
 import { getLocalCache } from "@/lib/simkl/activities";
@@ -107,6 +109,18 @@ const PosterCard = memo(function PosterCard({
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
   const ref = useRef<HTMLButtonElement>(null);
+  const [preferredEnabled, setPreferredEnabled] = useState(false);
+  useEffect(() => {
+    setPreferredEnabled(false);
+    if (!settings.preferCustomMetaAddon) return;
+    const el = ref.current;
+    if (!el) return;
+    return observe(el, (visible) => {
+      if (visible) setPreferredEnabled(true);
+    });
+  }, [meta.id, settings.preferCustomMetaAddon]);
+  const preferredMeta = usePreferredMeta(meta, preferredEnabled);
+  const displayMeta = useMemo(() => mergePreferredMeta(meta, preferredMeta), [meta, preferredMeta]);
   const expandingCard = useExpandingCard({
     cardRef: ref,
     meta,
@@ -521,11 +535,11 @@ const PosterCard = memo(function PosterCard({
   return (
     <button
       ref={ref}
-      onClick={() => (meta.type === "manga" ? openManga(meta.id) : openMeta(meta, isAnimeCardId ? { exact: true } : undefined))}
-      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
+      onClick={() => (meta.type === "manga" ? openManga(meta.id) : openMeta(displayMeta, isAnimeCardId ? { exact: true } : undefined))}
+      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta: displayMeta })}
       onFocus={(e) => {
         expandingCard.onFocus();
-        if (!expandingCard.enabled) hoverPreviewFocus(meta, e.currentTarget);
+        if (!expandingCard.enabled) hoverPreviewFocus(displayMeta, e.currentTarget);
       }}
       onBlur={(e) => {
         expandingCard.onBlur();
@@ -542,7 +556,7 @@ const PosterCard = memo(function PosterCard({
         data-preview-anchor
         ref={tiltable ? tilt.ref : undefined}
         onPointerEnter={(e) => {
-          hoverPreviewEnter(meta, e.currentTarget, e.buttons);
+          hoverPreviewEnter(displayMeta, e.currentTarget, e.buttons);
           if (tiltable) tilt.onPointerEnter();
         }}
         onPointerMove={tiltable ? tilt.onPointerMove : undefined}
@@ -588,7 +602,7 @@ const PosterCard = memo(function PosterCard({
         {activeCustom ? (
           <CustomHoverOverlay
             config={activeCustom}
-            meta={meta}
+            meta={displayMeta}
             onPlay={() => {
               if (meta.isCollection) openMeta(meta);
               else if (meta.type === "manga") openManga(meta.id);
@@ -598,7 +612,7 @@ const PosterCard = memo(function PosterCard({
           />
         ) : inCardHover !== "none" ? (
           <CardHoverOverlay
-            meta={meta}
+            meta={displayMeta}
             style={inCardHover}
             onPlay={() => {
               if (meta.isCollection) openMeta(meta);
@@ -695,7 +709,7 @@ const PosterCard = memo(function PosterCard({
                 : "line-clamp-2 min-h-9 text-[13px] font-medium leading-snug text-ink"
             }
           >
-            {translatedTitle || meta.name}
+            {translatedTitle || displayMeta.name}
           </p>
         )}
     </button>

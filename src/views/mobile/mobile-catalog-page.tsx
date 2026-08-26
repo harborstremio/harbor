@@ -3,6 +3,8 @@ import { Star } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { Poster, usePosterChain } from "@/components/poster";
 import { useSettings } from "@/lib/settings";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 export const TMDB_PAGE_SIZE = 20;
 export const MAX_PAGE = 12;
@@ -113,6 +115,8 @@ export function MobileCatalogGrid({
 
 function GridPoster({ meta, onOpen }: { meta: Meta; onOpen: (m: Meta) => void }) {
   const { settings } = useSettings();
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const { src, onError } = usePosterChain(
     settings.rpdbKey,
     meta.id,
@@ -122,7 +126,7 @@ function GridPoster({ meta, onOpen }: { meta: Meta; onOpen: (m: Meta) => void })
   return (
     <button
       type="button"
-      onClick={() => onOpen(meta)}
+      onClick={() => onOpen(displayMeta)}
       className="text-start transition-transform duration-150 active:scale-[0.96]"
     >
       <Poster src={src} onError={onError} seed={meta.id} ratio="portrait" lazy className="rounded-[14px]">
@@ -134,7 +138,7 @@ function GridPoster({ meta, onOpen }: { meta: Meta; onOpen: (m: Meta) => void })
         )}
       </Poster>
       <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-muted">
-        {meta.name}
+        {displayMeta.name}
       </p>
     </button>
   );

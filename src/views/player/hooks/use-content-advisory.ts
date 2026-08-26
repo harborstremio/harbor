@@ -15,6 +15,10 @@ export function useContentAdvisory(
     setCategories([]);
     setPlayKey("");
     startedRef.current = "";
+  }, [enabled, srcKey]);
+
+  useEffect(() => {
+    setCategories([]);
     if (!enabled || !imdbId) return;
     let cancelled = false;
     harborImdbParental(imdbId)

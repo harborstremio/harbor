@@ -79,28 +79,35 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
     };
   }, [state.syncMode, state.points, state.nudge, state.segments, state.cues, constant]);
 
-  const enter = useCallback(async (sourceUrl: string | null, headers?: Record<string, string>) => {
+  const enter = useCallback(async (sourceUrl: string | null, headers?: Record<string, string>): Promise<string | null> => {
     const b = bridgeRef.current;
-    if (!b) return;
+    if (!b) return "player-unavailable";
     setState({ ...INITIAL, syncMode: "loading" });
     let baseOffset = 0;
     const unsub = b.subscribe((s) => {
       baseOffset = s.subDelaySec;
     });
     unsub();
-    const res = await getCuesAnySource(b, sourceUrl, headers);
-    if (!res.ok) {
-      setState({ ...INITIAL, error: res.reason });
-      return;
+    try {
+      const res = await getCuesAnySource(b, sourceUrl, headers);
+      if (!res.ok) {
+        setState({ ...INITIAL, error: res.reason });
+        return res.reason;
+      }
+      setState({
+        ...INITIAL,
+        syncMode: "active",
+        cues: res.source.cues,
+        baseOffset,
+        nudge: baseOffset,
+        sourceFormat: res.source.format,
+      });
+      return null;
+    } catch (e) {
+      const reason = e instanceof Error ? e.message : "subtitle-read-failed";
+      setState({ ...INITIAL, error: reason });
+      return reason;
     }
-    setState({
-      ...INITIAL,
-      syncMode: "active",
-      cues: res.source.cues,
-      baseOffset,
-      nudge: baseOffset,
-      sourceFormat: res.source.format,
-    });
   }, []);
 
   const syncFromHere = useCallback((cueIndex: number) => {

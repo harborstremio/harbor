@@ -4,6 +4,8 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { useHeroLogos } from "@/components/anime-hero/use-hero-logos";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 const AUTO_MS = 7000;
 const GUTTER = 16;
@@ -126,13 +128,15 @@ export function MobileFeatured({ items, onOpen }: { items: Meta[]; onOpen: (m: M
 }
 
 function FeaturedCard({ meta, logo, onOpen }: { meta: Meta; logo?: string; onOpen: (m: Meta) => void }) {
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const bg = upsize(meta.background) ?? meta.poster;
   const year = yearOf(meta);
   const badge = meta.providerBadge;
   return (
     <button
       type="button"
-      onClick={() => onOpen(meta)}
+      onClick={() => onOpen(displayMeta)}
       className="relative block aspect-[4/5] w-[86%] shrink-0 snap-start overflow-hidden rounded-[22px] bg-surface text-start ring-1 ring-edge-soft/50 transition-transform duration-150 active:scale-[0.98]"
     >
       {bg && (
@@ -157,14 +161,14 @@ function FeaturedCard({ meta, logo, onOpen }: { meta: Meta; logo?: string; onOpe
         {logo ? (
           <img
             src={logo}
-            alt={meta.name}
+            alt={displayMeta.name}
             loading="lazy"
             decoding="async"
             className="max-h-[64px] max-w-[80%] object-contain object-left drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)]"
           />
         ) : (
           <h3 className="font-display text-[26px] font-medium leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)]">
-            {meta.name}
+            {displayMeta.name}
           </h3>
         )}
         <div className="flex items-center gap-2.5 text-[12.5px] text-white/80">
@@ -177,8 +181,8 @@ function FeaturedCard({ meta, logo, onOpen }: { meta: Meta; logo?: string; onOpe
           )}
           {meta.genres?.[0] && <span className="text-white/65">{meta.genres[0]}</span>}
         </div>
-        {meta.description && (
-          <p className="line-clamp-2 max-w-[92%] text-[12.5px] leading-relaxed text-white/70">{meta.description}</p>
+        {displayMeta.description && (
+          <p className="line-clamp-2 max-w-[92%] text-[12.5px] leading-relaxed text-white/70">{displayMeta.description}</p>
         )}
       </div>
     </button>

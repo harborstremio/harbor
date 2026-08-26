@@ -17,6 +17,7 @@ function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean
   return (
     a.status !== b.status ||
     a.durationSec !== b.durationSec ||
+    a.buffering !== b.buffering ||
     a.volume !== b.volume ||
     a.muted !== b.muted ||
     a.rate !== b.rate ||
@@ -27,12 +28,14 @@ function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean
     a.audioDelaySec !== b.audioDelaySec ||
     a.subText !== b.subText ||
     a.subStartSec !== b.subStartSec ||
+    a.secondarySubText !== b.secondarySubText ||
     a.audioNormalize !== b.audioNormalize ||
     a.videoWidth !== b.videoWidth ||
     a.videoHeight !== b.videoHeight ||
     a.hdrGamma !== b.hdrGamma ||
     a.errorMessage !== b.errorMessage ||
-    a.errorCode !== b.errorCode
+    a.errorCode !== b.errorCode ||
+    a.noAudio !== b.noAudio
   );
 }
 

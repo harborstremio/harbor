@@ -4,6 +4,8 @@ import { useT } from "@/lib/i18n";
 import { tmdbLogo } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 export function KidsHero({ featured }: { featured: Meta[] }) {
   const t = useT();
@@ -48,7 +50,7 @@ export function KidsHero({ featured }: { featured: Meta[] }) {
           {cards.length === 0
             ? Array.from({ length: 5 }).map((_, i) => <KidsHeroSkeleton key={i} />)
             : cards.map((m, i) => (
-                <KidsHeroCard key={m.id} meta={m} index={i} onOpen={() => openMeta(m)} />
+                <KidsHeroCard key={m.id} meta={m} index={i} onOpen={(resolved) => openMeta(resolved)} />
               ))}
         </div>
       </div>
@@ -63,9 +65,11 @@ function KidsHeroCard({
 }: {
   meta: Meta;
   index: number;
-  onOpen: () => void;
+  onOpen: (meta: Meta) => void;
 }) {
   const { settings } = useSettings();
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const art = upsizeCard(meta.background) || meta.poster;
   const [logo, setLogo] = useState<string | undefined>(meta.logo);
   useEffect(() => {
@@ -88,14 +92,14 @@ function KidsHeroCard({
   return (
     <button
       type="button"
-      onClick={onOpen}
+      onClick={() => onOpen(displayMeta)}
       style={{ animationDelay: `${index * 70}ms` }}
       className="kids-card group relative h-[120px] min-w-0 max-w-[212px] flex-1 basis-[212px] overflow-hidden rounded-[22px] bg-surface shadow-[0_16px_40px_-14px_rgba(20,40,60,0.45)] ring-2 ring-white transition duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_24px_50px_-14px_rgba(20,40,60,0.55)] active:scale-[0.98]"
     >
       {art && (
         <img
           src={art}
-          alt={meta.name}
+          alt={displayMeta.name}
           draggable={false}
           className="absolute inset-0 h-full w-full object-cover"
         />
@@ -104,13 +108,13 @@ function KidsHeroCard({
       {logo ? (
         <img
           src={logo}
-          alt={meta.name}
+          alt={displayMeta.name}
           draggable={false}
           className="absolute inset-x-3 bottom-3 mx-auto max-h-11 w-auto max-w-[86%] object-contain drop-shadow-[0_2px_9px_rgba(0,0,0,0.75)]"
         />
       ) : (
         <span className="absolute inset-x-2.5 bottom-2.5 line-clamp-2 text-center font-display text-[15px] font-semibold leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
-          {meta.name}
+          {displayMeta.name}
         </span>
       )}
     </button>

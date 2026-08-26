@@ -13,6 +13,8 @@ import {
 import { useT } from "@/lib/i18n";
 import { useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 import { useView } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
 import { Poster, usePosterChain } from "./poster";
@@ -60,6 +62,8 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
   const { openMeta } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = useMemo(() => mergePreferredMeta(meta, preferredMeta), [meta, preferredMeta]);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const altIds = useMemo(() => [resolvedImdb], [resolvedImdb]);
   const inWatchlist = useInWatchlist(meta.id, altIds);
@@ -71,9 +75,9 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
   );
   return (
     <button
-      onClick={() => openMeta(meta)}
-      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
-      onFocus={(e) => hoverPreviewFocus(meta, e.currentTarget)}
+      onClick={() => openMeta(displayMeta)}
+      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta: displayMeta })}
+      onFocus={(e) => hoverPreviewFocus(displayMeta, e.currentTarget)}
       onBlur={(e) => hoverPreviewBlur(e.currentTarget)}
       className="group relative w-full min-w-0"
       data-no-card-ring
@@ -113,7 +117,7 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
       </span>
       <div
         data-preview-anchor
-        onPointerEnter={(e) => hoverPreviewEnter(meta, e.currentTarget, e.buttons)}
+        onPointerEnter={(e) => hoverPreviewEnter(displayMeta, e.currentTarget, e.buttons)}
         onPointerLeave={(e) => hoverPreviewLeave(e.currentTarget)}
         className="group/card absolute end-0 top-0 z-10 w-[60%] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover/card:will-change-transform motion-safe:group-hover/card:[transform:translate3d(0,-0.6rem,0)_scale(1.04)]"
       >
@@ -128,7 +132,7 @@ export const TopRankCard = memo(function TopRankCard({ meta, rank }: { meta: Met
         <AwardDot name={meta.name} year={parseAwardYear(meta.releaseInfo)} />
       </div>
       <p className="absolute top-[93cqw] end-0 w-[63%] truncate text-[12px] leading-[1.35] text-ink-subtle">
-        {meta.name}
+        {displayMeta.name}
       </p>
     </button>
   );
@@ -138,6 +142,8 @@ export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta:
   const { openMeta } = useView();
   const { open: openContextMenu } = useContextMenu();
   const { settings } = useSettings();
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = useMemo(() => mergePreferredMeta(meta, preferredMeta), [meta, preferredMeta]);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const altIds = useMemo(() => [resolvedImdb], [resolvedImdb]);
   const inWatchlist = useInWatchlist(meta.id, altIds);
@@ -149,9 +155,9 @@ export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta:
   );
   return (
     <button
-      onClick={() => openMeta(meta)}
-      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta })}
-      onFocus={(e) => hoverPreviewFocus(meta, e.currentTarget)}
+      onClick={() => openMeta(displayMeta)}
+      onContextMenu={(e) => openContextMenu(e, { kind: "meta", meta: displayMeta })}
+      onFocus={(e) => hoverPreviewFocus(displayMeta, e.currentTarget)}
       onBlur={(e) => hoverPreviewBlur(e.currentTarget)}
       className="group relative w-full min-w-0"
       data-no-card-ring
@@ -185,7 +191,7 @@ export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta:
       </span>
       <div
         data-preview-anchor
-        onPointerEnter={(e) => hoverPreviewEnter(meta, e.currentTarget, e.buttons)}
+        onPointerEnter={(e) => hoverPreviewEnter(displayMeta, e.currentTarget, e.buttons)}
         onPointerLeave={(e) => hoverPreviewLeave(e.currentTarget)}
         className="group/card absolute end-0 top-0 z-10 w-[60%] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0.24,1)] motion-safe:group-hover/card:will-change-transform motion-safe:group-hover/card:[transform:translate3d(0,-0.6rem,0)_scale(1.04)]"
       >
@@ -200,7 +206,7 @@ export const AnimeRankCard = memo(function AnimeRankCard({ meta, rank }: { meta:
         <AwardDot name={meta.name} year={parseAwardYear(meta.releaseInfo)} />
       </div>
       <p className="absolute top-[93cqw] end-0 w-[63%] truncate text-[12px] leading-[1.35] text-ink-subtle">
-        {meta.name}
+        {displayMeta.name}
       </p>
     </button>
   );

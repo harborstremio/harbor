@@ -107,7 +107,7 @@ test("Expanding Cards reflows the row and preserves card overlays", () => {
   assert.match(cardSource, /if \(!expandingCard\.enabled\) hoverPreviewFocus/);
   assert.match(
     cardSource,
-    /hoverPreviewEnter\(meta, e\.currentTarget, e\.buttons\)/,
+    /hoverPreviewEnter\(displayMeta, e\.currentTarget, e\.buttons\)/,
   );
 });
 
@@ -223,7 +223,7 @@ test("pointer hover never expands cards and keeps normal hover styles and previe
   assert.doesNotMatch(cardSource, /hoverPreviewEnabled \|\| expandingCard\.enabled/);
   assert.match(
     cardSource,
-    /hoverPreviewEnter\(meta, e\.currentTarget, e\.buttons\)/,
+    /hoverPreviewEnter\(displayMeta, e\.currentTarget, e\.buttons\)/,
   );
 });
 

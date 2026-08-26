@@ -587,7 +587,7 @@ export type Settings = {
   libraryHero: boolean;
   mangaEnabled: boolean;
   feedLocaleBias: boolean;
-  uiLanguage: "en" | "ar" | "pt" | "ru";
+  uiLanguage: "en" | "ar" | "hu" | "pt" | "ru";
   arabicWelcomeSeen: boolean;
   cropMode: string;
   customLists: CustomList[];
