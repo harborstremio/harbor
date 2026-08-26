@@ -11,6 +11,25 @@ import {
   type AudioMeta,
 } from "@/lib/social/profile-audio";
 
+const VOLUME_KEY = "harbor.profileAudioVolume.v1";
+
+function readSavedVolume(): number {
+  try {
+    const raw = localStorage.getItem(VOLUME_KEY);
+    if (raw != null) {
+      const v = Number(raw);
+      if (Number.isFinite(v) && v >= 0 && v <= 100) return v;
+    }
+  } catch {}
+  return 70;
+}
+
+function saveVolume(v: number): void {
+  try {
+    localStorage.setItem(VOLUME_KEY, String(v));
+  } catch {}
+}
+
 export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
   const t = useT();
   const { settings, update } = useSettings();
@@ -19,7 +38,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
   const [playing, setPlaying] = useState(false);
   const [started, setStarted] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(70);
+  const [volume, setVolume] = useState(readSavedVolume);
   const [barOpen, setBarOpen] = useState(false);
   const [mountMuted, setMountMuted] = useState(false);
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -72,6 +91,7 @@ export function ProfileAudioCard({ audioUrl }: { audioUrl?: string }) {
 
   const onVolumeDrag = (next: number) => {
     setVolume(next);
+    saveVolume(next);
     if (next > 0 && muted) setMuted(false);
   };
 
