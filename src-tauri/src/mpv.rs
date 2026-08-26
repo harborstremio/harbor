@@ -1141,6 +1141,179 @@ pub async fn mpv_get_property(state: State<'_, MpvState>, name: String) -> Resul
     })
 }
 
+/// A compact, read-only snapshot for the player information overlay.  Keeping
+/// these reads inside one Tauri command avoids a burst of separate IPC calls
+/// every second while the overlay is visible.
+#[derive(Debug, Default, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MpvPlaybackStats {
+    pub mpv_version: Option<String>,
+    pub video_bitrate: Option<f64>,
+    pub video_bitrate_average: Option<f64>,
+    pub audio_bitrate: Option<f64>,
+    pub audio_bitrate_average: Option<f64>,
+    pub decoder_frame_drops: Option<i64>,
+    pub output_frame_drops: Option<i64>,
+    pub source_fps: Option<f64>,
+    pub display_fps: Option<f64>,
+    pub container_fps: Option<f64>,
+    pub av_sync: Option<f64>,
+    pub video_codec: Option<String>,
+    pub video_codec_profile: Option<String>,
+    pub audio_codec: Option<String>,
+    pub audio_codec_profile: Option<String>,
+    pub audio_channels: Option<String>,
+    pub hwdec: Option<String>,
+    pub cache_ahead_sec: Option<f64>,
+    pub cache_speed: Option<f64>,
+    pub cache_buffering_percent: Option<f64>,
+    pub cached_bytes: Option<f64>,
+    pub video_width: Option<i64>,
+    pub video_height: Option<i64>,
+    pub video_pixel_format: Option<String>,
+    pub video_matrix: Option<String>,
+    pub video_primaries: Option<String>,
+    pub video_gamma: Option<String>,
+    pub video_max_luma: Option<f64>,
+    pub video_max_cll: Option<f64>,
+    pub video_max_fall: Option<f64>,
+    pub target_width: Option<i64>,
+    pub target_height: Option<i64>,
+    pub target_pixel_format: Option<String>,
+    pub target_matrix: Option<String>,
+    pub target_primaries: Option<String>,
+    pub target_gamma: Option<String>,
+    pub target_max_luma: Option<f64>,
+    pub current_vo: Option<String>,
+    pub gpu_context: Option<String>,
+    pub window_width: Option<i64>,
+    pub window_height: Option<i64>,
+}
+
+fn playback_stat_string(mpv: &Mpv, name: &str) -> Option<String> {
+    mpv.get_property::<String>(name)
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty() && value != "no" && value != "N/A")
+}
+
+fn playback_stat_number(mpv: &Mpv, name: &str) -> Option<f64> {
+    playback_stat_string(mpv, name)?.parse::<f64>().ok().filter(|value| value.is_finite())
+}
+
+fn playback_stat_int(mpv: &Mpv, name: &str) -> Option<i64> {
+    playback_stat_string(mpv, name)?.parse::<i64>().ok()
+}
+
+fn value_number(value: Option<&Value>) -> Option<f64> {
+    value.and_then(|item| {
+        item.as_f64().or_else(|| item.as_str()?.trim().parse::<f64>().ok())
+    })
+}
+
+fn selected_track_stats(mpv: &Mpv, kind: &str) -> (Option<String>, Option<String>, Option<String>, Option<f64>) {
+    let Ok(node) = mpv.get_property::<MpvNode>("track-list") else {
+        return (None, None, None, None);
+    };
+    let tracks = mpv_node_to_json(node);
+    let Some(track) = tracks.as_array().and_then(|items| {
+        items.iter().find(|item| {
+            item.get("type").and_then(Value::as_str) == Some(kind)
+                && item.get("selected").and_then(Value::as_bool) == Some(true)
+        })
+    }) else {
+        return (None, None, None, None);
+    };
+
+    let codec_profile = track
+        .get("codec-profile")
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned)
+        .filter(|value| !value.is_empty());
+    let channels = track
+        .get("demux-channels")
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned)
+        .filter(|value| !value.is_empty());
+    let codec = track
+        .get("codec")
+        .or_else(|| track.get("codec-desc"))
+        .and_then(Value::as_str)
+        .map(ToOwned::to_owned)
+        .filter(|value| !value.is_empty());
+    let average_bitrate = track
+        .get("metadata")
+        .and_then(Value::as_object)
+        .and_then(|metadata| value_number(metadata.get("BPS")));
+    (codec, codec_profile, channels, average_bitrate)
+}
+
+#[tauri::command]
+pub async fn mpv_playback_stats(state: State<'_, MpvState>) -> Result<MpvPlaybackStats, String> {
+    let mpv = {
+        let guard = state.inner.lock().await;
+        guard
+            .as_ref()
+            .map(|session| session.mpv.clone())
+            .ok_or_else(|| "mpv not started".to_string())?
+    };
+
+    let (video_track_codec, video_codec_profile, _, video_bitrate_average) =
+        selected_track_stats(&mpv, "video");
+    let (audio_track_codec, audio_codec_profile, audio_channels, audio_bitrate_average) =
+        selected_track_stats(&mpv, "audio");
+    let cached_bytes = mpv
+        .get_property::<MpvNode>("demuxer-cache-state")
+        .ok()
+        .map(mpv_node_to_json)
+        .and_then(|state| state.get("fw-bytes").cloned())
+        .and_then(|value| value_number(Some(&value)));
+
+    Ok(MpvPlaybackStats {
+        mpv_version: playback_stat_string(&mpv, "mpv-version"),
+        video_bitrate: playback_stat_number(&mpv, "video-bitrate"),
+        video_bitrate_average,
+        audio_bitrate: playback_stat_number(&mpv, "audio-bitrate"),
+        audio_bitrate_average,
+        decoder_frame_drops: playback_stat_int(&mpv, "decoder-frame-drop-count"),
+        output_frame_drops: playback_stat_int(&mpv, "frame-drop-count"),
+        source_fps: playback_stat_number(&mpv, "estimated-vf-fps"),
+        display_fps: playback_stat_number(&mpv, "display-fps"),
+        container_fps: playback_stat_number(&mpv, "container-fps"),
+        av_sync: playback_stat_number(&mpv, "avsync"),
+        video_codec: playback_stat_string(&mpv, "video-codec").or(video_track_codec),
+        video_codec_profile,
+        audio_codec: playback_stat_string(&mpv, "audio-codec-name").or(audio_track_codec),
+        audio_codec_profile,
+        audio_channels,
+        hwdec: playback_stat_string(&mpv, "hwdec-current"),
+        cache_ahead_sec: playback_stat_number(&mpv, "demuxer-cache-duration"),
+        cache_speed: playback_stat_number(&mpv, "cache-speed"),
+        cache_buffering_percent: playback_stat_number(&mpv, "cache-buffering-state"),
+        cached_bytes,
+        video_width: playback_stat_int(&mpv, "video-params/w"),
+        video_height: playback_stat_int(&mpv, "video-params/h"),
+        video_pixel_format: playback_stat_string(&mpv, "video-params/pixelformat"),
+        video_matrix: playback_stat_string(&mpv, "video-params/colormatrix"),
+        video_primaries: playback_stat_string(&mpv, "video-params/primaries"),
+        video_gamma: playback_stat_string(&mpv, "video-params/gamma"),
+        video_max_luma: playback_stat_number(&mpv, "video-params/max-luma"),
+        video_max_cll: playback_stat_number(&mpv, "video-params/max-cll"),
+        video_max_fall: playback_stat_number(&mpv, "video-params/max-fall"),
+        target_width: playback_stat_int(&mpv, "video-target-params/w"),
+        target_height: playback_stat_int(&mpv, "video-target-params/h"),
+        target_pixel_format: playback_stat_string(&mpv, "video-target-params/pixelformat"),
+        target_matrix: playback_stat_string(&mpv, "video-target-params/colormatrix"),
+        target_primaries: playback_stat_string(&mpv, "video-target-params/primaries"),
+        target_gamma: playback_stat_string(&mpv, "video-target-params/gamma"),
+        target_max_luma: playback_stat_number(&mpv, "video-target-params/max-luma"),
+        current_vo: playback_stat_string(&mpv, "current-vo"),
+        gpu_context: playback_stat_string(&mpv, "current-gpu-context"),
+        window_width: playback_stat_int(&mpv, "window-width"),
+        window_height: playback_stat_int(&mpv, "window-height"),
+    })
+}
+
 #[tauri::command]
 pub async fn mpv_set_geometry(
     app: AppHandle,
