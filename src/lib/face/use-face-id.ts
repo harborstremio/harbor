@@ -6,8 +6,15 @@ import { classify } from "./match";
 import type { CastEntry } from "@/lib/providers/tmdb";
 import type { GalleryEntry, WireFace } from "./match";
 
-const SCAN_MS = 800;
+// A screenshot plus MediaPipe detection and ONNX matching can contend with mpv
+// on lower-power machines. Four seconds keeps the result useful without turning
+// the feature into a second real-time video pipeline.
+const SCAN_MS = 4000;
 const SEEN_WINDOW_MS = 6000;
+
+function yieldToBrowser(): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, 0));
+}
 
 export type OnScreenPerson = {
   id: number;
@@ -63,8 +70,11 @@ export function useFaceId({ metaKey, cast, liveScan, isPaused, loadBitmap }: Arg
   const runScan = useMemo(() => {
     return async () => {
       if (inFlightRef.current || galleryRef.current.length === 0) return;
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
       inFlightRef.current = true;
       try {
+        await yieldToBrowser();
+        if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
         const bmp = await captureFaceFrame();
         if (!bmp) return;
         let faces: WireFace[];
@@ -131,10 +141,10 @@ export function useFaceId({ metaKey, cast, liveScan, isPaused, loadBitmap }: Arg
   }, [ready, metaKey, cast, loadBitmap, runScan]);
 
   useEffect(() => {
-    if (!ready || !liveScan) return;
+    if (!ready || !liveScan || isPaused) return;
     const t = setInterval(() => void runScan(), SCAN_MS);
     return () => clearInterval(t);
-  }, [ready, liveScan, runScan]);
+  }, [ready, liveScan, isPaused, runScan]);
 
   useEffect(() => {
     if (ready && liveScan && isPaused) void runScan();

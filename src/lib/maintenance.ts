@@ -121,17 +121,32 @@ export function startMaintenance(): () => void {
     runMaintenance(heapDelta() > AGGRESSIVE_HEAP_DELTA_MB);
   }, INTERVAL_MS);
 
-  const pressureInterval = window.setInterval(pollPressure, PRESSURE_POLL_MS);
+  let pressureInterval: number | null = null;
+  const startPressurePolling = () => {
+    if (pressureInterval != null || document.visibilityState === "hidden") return;
+    pollPressure();
+    pressureInterval = window.setInterval(pollPressure, PRESSURE_POLL_MS);
+  };
+  const stopPressurePolling = () => {
+    if (pressureInterval == null) return;
+    window.clearInterval(pressureInterval);
+    pressureInterval = null;
+  };
+  startPressurePolling();
   const stopNative = startNativeMemory();
   const unsubNative = subscribeNativeMemory(pollPressure);
 
   let hiddenTimer: number | null = null;
   const onVisibility = () => {
     if (document.visibilityState === "hidden") {
+      stopPressurePolling();
       hiddenTimer = window.setTimeout(() => runMaintenance(isMemoryPressureHigh()), HIDDEN_GRACE_MS);
-    } else if (hiddenTimer != null) {
-      window.clearTimeout(hiddenTimer);
-      hiddenTimer = null;
+    } else {
+      startPressurePolling();
+      if (hiddenTimer != null) {
+        window.clearTimeout(hiddenTimer);
+        hiddenTimer = null;
+      }
     }
   };
   document.addEventListener("visibilitychange", onVisibility);
@@ -139,7 +154,7 @@ export function startMaintenance(): () => void {
   return () => {
     started = false;
     window.clearInterval(interval);
-    window.clearInterval(pressureInterval);
+    stopPressurePolling();
     stopNative();
     unsubNative();
     if (hiddenTimer != null) window.clearTimeout(hiddenTimer);

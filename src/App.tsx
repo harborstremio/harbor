@@ -217,56 +217,38 @@ const OnboardingModal = lazy(() =>
   importOnboarding().then((m) => ({ default: m.OnboardingModal })),
 );
 
-function useViewPreloader(tmdbKey: string) {
+function useViewPreloader(tmdbKey: string, enabled: boolean) {
   const keyRef = useRef(tmdbKey);
   keyRef.current = tmdbKey;
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!enabled || typeof window === "undefined") return;
     let cancelled = false;
     const win = window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
     };
-    const schedule = (cb: () => void) =>
-      typeof win.requestIdleCallback === "function"
-        ? win.requestIdleCallback(cb, { timeout: 2500 })
-        : window.setTimeout(cb, 1200);
-    schedule(() => {
+    const warmCommonViews = () => {
       if (cancelled) return;
+      // These are the paths most often reached from the first screen. The
+      // rest stay genuinely lazy instead of importing almost the whole app.
       void importDetail();
       void importPlayPicker();
       void importPlayer();
       void importSettings();
-      void importAddons();
-      void importDiscover();
-      void importPerson();
-      void importPeople();
-      void importFilter();
-      void importCalendar();
-      void importMovies();
-      void importShows();
-      void importLive();
-      void importAnime();
-      void importQueue();
-      void importAward();
-      void importAnimeAward();
-      void importService();
-      void importMatchDetail();
-      void importOnboarding();
-      void importCatalogs();
-      void importLibrary();
-      void importCommunityCollections();
-      void importDownloads();
-      void importGrid();
-      void importWrapped();
-      void importKids();
       if (keyRef.current) {
         void import("@/lib/feed/pool").then((m) => m.getPool(keyRef.current)).catch(() => {});
       }
-    });
+    };
+    const idle = typeof win.requestIdleCallback === "function";
+    const handle = idle
+      ? win.requestIdleCallback!(warmCommonViews, { timeout: 2500 })
+      : window.setTimeout(warmCommonViews, 1200);
     return () => {
       cancelled = true;
+      if (idle) win.cancelIdleCallback?.(handle);
+      else window.clearTimeout(handle);
     };
-  }, []);
+  }, [enabled]);
 }
 
 const KEEP_ALIVE_MS = 1500;
@@ -447,7 +429,8 @@ function TogetherFloater() {
 }
 
 function AutoDownloadRunner() {
-  useAutoDownloadRunner();
+  const { settings } = useSettings();
+  useAutoDownloadRunner(settings.backgroundNetworkActivity);
   return null;
 }
 
@@ -723,7 +706,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
     layout === "nord" ||
     layout === "forest" ||
     layout === "stremio";
-  useViewPreloader(settings.tmdbKey);
+  useViewPreloader(settings.tmdbKey, settings.preloadViews);
 
   useEffect(() => {
     if (topKind === "home") return;

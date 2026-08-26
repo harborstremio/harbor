@@ -72,7 +72,30 @@ export function useHungarianDomTranslation(): void {
       }
     };
 
+    const isRelevantRoot = (root: Node): boolean => {
+      if (root instanceof Text) return isSettingsCopy(root);
+      if (!(root instanceof Element)) return false;
+      if (root.matches(SETTINGS_SELECTOR) || root.closest(SETTINGS_SELECTOR)) return true;
+      if (root.querySelector(SETTINGS_SELECTOR)) return true;
+      // A small number of settings modals use a body portal. Do not touch
+      // unrelated dialogs unless Settings is actually open.
+      return (
+        document.querySelector(SETTINGS_SELECTOR) != null &&
+        (root.matches('[role="dialog"]') || root.closest('[role="dialog"]') != null || root.querySelector('[role="dialog"]') != null)
+      );
+    };
+
     const translateTree = (root: Node) => {
+      // The old implementation walked every new node in the application. In
+      // Hungarian this made the player and animated pages pay for a legacy
+      // Settings-only translator. Limit the work to Settings and its portals.
+      if (root === document.body) {
+        for (const target of document.querySelectorAll<HTMLElement>(`${SETTINGS_SELECTOR}, [role="dialog"]`)) {
+          if (isRelevantRoot(target)) translateTree(target);
+        }
+        return;
+      }
+      if (!isRelevantRoot(root)) return;
       if (root instanceof Text) {
         translateText(root);
         return;
@@ -99,9 +122,9 @@ export function useHungarianDomTranslation(): void {
     observer.observe(document.body, {
       subtree: true,
       childList: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: [...TRANSLATABLE_ATTRIBUTES],
+      // Text and attributes inside Settings are handled when their containing
+      // subtree is mounted. Avoid a global observer for player progress and
+      // all other frequently changing UI.
     });
 
     return () => {

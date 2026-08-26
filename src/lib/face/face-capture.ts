@@ -1,4 +1,6 @@
-const DETECT_WIDTH = 960;
+// Recognition only needs a modest frame. The previous 960 px frame caused
+// unnecessary image decoding and CPU work next to native video playback.
+const DETECT_WIDTH = 640;
 
 export async function captureFaceFrame(): Promise<ImageBitmap | null> {
   const isTauri = typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);

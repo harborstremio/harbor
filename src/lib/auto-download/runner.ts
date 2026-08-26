@@ -208,13 +208,14 @@ export async function runAutoDownloadCheck(manual = false): Promise<boolean> {
   return true;
 }
 
-export function useAutoDownloadRunner(): void {
+export function useAutoDownloadRunner(allowBackground = true): void {
   useEffect(() => {
     let disposed = false;
     const kick = () => {
       if (disposed) return;
       nextRunAt = Date.now() + INTERVAL_MS;
       notifyState();
+      if (!allowBackground && document.visibilityState === "hidden") return;
       void runAutoDownloadCheck();
     };
     nextRunAt = Date.now() + FIRST_DELAY_MS;
@@ -228,5 +229,5 @@ export function useAutoDownloadRunner(): void {
       window.clearTimeout(first);
       window.clearInterval(interval);
     };
-  }, []);
+  }, [allowBackground]);
 }

@@ -7,7 +7,6 @@ import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
 import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
 import { useFaceId } from "@/lib/face/use-face-id";
-import { ensureFaceEngine } from "@/lib/face/face-engine";
 import { useXrayCast } from "@/lib/xray/use-xray-cast";
 import { TrailerOverlay } from "@/views/detail/trailer-overlay";
 import { XrayRail } from "./xray-rail";
@@ -42,11 +41,14 @@ export function XrayOverlay({
   const [trailer, setTrailer] = useState<{ ytId: string; name: string } | null>(null);
   const resumeRef = useRef(false);
   const active = settings.xrayEnabled && view !== "closed";
+  // Matching is meaningful only on the compact now-playing rail. Stop the
+  // expensive frame capture while the user is browsing the cast or a profile.
+  const liveScan = view === "rail" && settings.xrayLiveScan;
   const { cast, details } = useXrayCast(meta, active);
   const { people, ready, galleryReady, progress, error } = useFaceId({
     metaKey: meta.id,
     cast: cast ?? NO_CAST,
-    liveScan: active && settings.xrayLiveScan,
+    liveScan,
     isPaused,
     loadBitmap,
   });
@@ -83,7 +85,6 @@ export function XrayOverlay({
         <button
           type="button"
           onClick={() => setView("rail")}
-          onPointerEnter={() => void ensureFaceEngine().catch(() => {})}
           aria-label={t("X-Ray")}
           className="absolute left-4 top-20 z-20 flex h-9 items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 text-[12.5px] font-semibold text-white backdrop-blur-md transition-[background-color,transform] hover:bg-black/65 active:scale-[0.97] motion-reduce:active:scale-100"
         >
@@ -98,6 +99,7 @@ export function XrayOverlay({
           galleryReady={galleryReady}
           progress={progress}
           error={error}
+          liveScan={liveScan}
           needsTmdbKey={!settings.tmdbKey}
           onViewAll={() => setView("browser")}
           onClose={() => setView("closed")}

@@ -1,4 +1,5 @@
 import { Bookmark, RefreshCw } from "lucide-react";
+import { useEffect, useState } from "react";
 import { type Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
@@ -231,25 +232,58 @@ export function GroupedGrid<
   groups: Array<{ label: string; items: T[] }>;
   onRemove?: (stremioId: string) => void;
 }) {
-  const t = useT();
   return (
     <div className="flex flex-col gap-7">
       {groups.map((g) => (
-        <div key={g.label} className="flex flex-col gap-3">
-          <h3 className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink-subtle">
-            {t(g.label)} <span className="ms-1 text-ink-subtle/70">{g.items.length}</span>
-          </h3>
-          <Grid>
-            {g.items.map((it) => (
-              <WatchlistCard
-                key={it.key}
-                meta={it.meta}
-                onRemove={onRemove && it.stremioId ? () => onRemove(it.stremioId as string) : undefined}
-              />
-            ))}
-          </Grid>
-        </div>
+        <GroupedGridSection key={g.label} label={g.label} items={g.items} onRemove={onRemove} />
       ))}
+    </div>
+  );
+}
+
+const INITIAL_GROUP_CARDS = 72;
+const GROUP_CARD_STEP = 72;
+
+function GroupedGridSection<
+  T extends { meta: Meta; date: number | null; key: string; stremioId?: string },
+>({
+  label,
+  items,
+  onRemove,
+}: {
+  label: string;
+  items: T[];
+  onRemove?: (stremioId: string) => void;
+}) {
+  const t = useT();
+  const [visible, setVisible] = useState(INITIAL_GROUP_CARDS);
+  useEffect(() => setVisible((current) => Math.min(Math.max(INITIAL_GROUP_CARDS, current), items.length)), [items.length]);
+  const shown = items.slice(0, visible);
+  const remaining = items.length - shown.length;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink-subtle">
+        {t(label)} <span className="ms-1 text-ink-subtle/70">{items.length}</span>
+      </h3>
+      <Grid>
+        {shown.map((it) => (
+          <WatchlistCard
+            key={it.key}
+            meta={it.meta}
+            onRemove={onRemove && it.stremioId ? () => onRemove(it.stremioId as string) : undefined}
+          />
+        ))}
+      </Grid>
+      {remaining > 0 && (
+        <button
+          type="button"
+          onClick={() => setVisible((current) => Math.min(items.length, current + GROUP_CARD_STEP))}
+          className="self-center rounded-full border border-edge-soft bg-canvas/40 px-4 py-2 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:bg-raised hover:text-ink"
+        >
+          {t("Show {n} more", { n: Math.min(remaining, GROUP_CARD_STEP) })}
+        </button>
+      )}
     </div>
   );
 }

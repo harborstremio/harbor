@@ -35,6 +35,13 @@ function mergeLive(prev: ProfileSummary, next: ProfileSummary): ProfileSummary {
   return changed ? out : prev;
 }
 
+function keepIfEqual<T>(prev: T[], next: T[]): T[] {
+  if (prev.length !== next.length) return next;
+  for (let index = 0; index < prev.length; index++) {
+    if (JSON.stringify(prev[index]) !== JSON.stringify(next[index])) return next;
+  }
+  return prev;
+}
 
 export type ProfileBundle = {
   state: LoadState;
@@ -96,13 +103,27 @@ export function useProfile(handle: string): ProfileBundle {
   useEffect(() => {
     if (!handle || state !== "ready") return;
     const ac = new AbortController();
+    let syncing = false;
     const sync = () => {
-      if (document.visibilityState === "hidden") return;
-      void fetchSummary(handle, ac.signal)
-        .then((s) => !ac.signal.aborted && setSummary((prev) => (prev ? mergeLive(prev, s) : s)))
-        .catch(() => {});
-      void fetchFriends(handle, ac.signal).then((f) => !ac.signal.aborted && setFriends(f)).catch(() => {});
-      void fetchBadges(handle, ac.signal).then((b) => !ac.signal.aborted && setBadges(b)).catch(() => {});
+      if (document.visibilityState === "hidden" || syncing) return;
+      syncing = true;
+      void Promise.allSettled([
+        fetchSummary(handle, ac.signal),
+        fetchFriends(handle, ac.signal),
+        fetchBadges(handle, ac.signal),
+      ]).then(([summaryResult, friendsResult, badgesResult]) => {
+        syncing = false;
+        if (ac.signal.aborted) return;
+        if (summaryResult.status === "fulfilled") {
+          setSummary((prev) => (prev ? mergeLive(prev, summaryResult.value) : summaryResult.value));
+        }
+        if (friendsResult.status === "fulfilled") {
+          setFriends((prev) => keepIfEqual(prev, friendsResult.value));
+        }
+        if (badgesResult.status === "fulfilled") {
+          setBadges((prev) => keepIfEqual(prev, badgesResult.value));
+        }
+      });
     };
     const id = window.setInterval(sync, LIVE_INTERVAL_MS);
     const onVisible = () => {

@@ -7,8 +7,8 @@ import type { GalleryEntry } from "./match";
 const MODEL_VERSION = "sface-int8-v2";
 const CACHE_DIR = "xray/face-gallery";
 const TMDB_IMG = "https://image.tmdb.org/t/p/w185";
-const MAX_CAST = 40;
-const CONCURRENCY = 6;
+const MAX_CAST = 24;
+const CONCURRENCY = 1;
 
 type CacheShape = {
   version: string;
@@ -62,6 +62,10 @@ async function runPool<T>(items: T[], limit: number, fn: (item: T) => Promise<vo
   await Promise.all(workers);
 }
 
+function yieldToBrowser(): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, 0));
+}
+
 export async function buildGallery(
   key: string,
   cast: CastEntry[],
@@ -96,6 +100,10 @@ export async function buildGallery(
       onEntry?.(entry);
     } catch {
       /* skip this cast member */
+    } finally {
+      // Face detection is CPU-bound and runs on the renderer thread. Yield
+      // between portraits so opening X-Ray cannot starve player controls.
+      await yieldToBrowser();
     }
   });
   if (entries.length) {

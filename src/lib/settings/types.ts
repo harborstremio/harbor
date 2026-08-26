@@ -147,6 +147,8 @@ export type Settings = {
   controllerKeyboardSize: number;
   controllerRepeatMs: number;
   controllerInitialDelayMs: number;
+  preloadViews: boolean;
+  backgroundNetworkActivity: boolean;
   trailerQuality: "auto" | "360p" | "720p" | "1080p" | "best";
   detailTrailerAutoplay: boolean;
   heroBackdropCarousel: boolean;

@@ -17,6 +17,8 @@ let tier: RamTier = "high";
 let tierResolved = false;
 let timer: number | null = null;
 let intervalMs = 8000;
+const HIDDEN_INTERVAL_MS = 30000;
+let sampling = false;
 const listeners = new Set<() => void>();
 
 function classifyTier(totalPhysBytes: number): RamTier {
@@ -37,7 +39,8 @@ function classifyTier(totalPhysBytes: number): RamTier {
 }
 
 async function sample(): Promise<void> {
-  if (!isTauri) return;
+  if (!isTauri || sampling) return;
+  sampling = true;
   try {
     const m = await invoke<NativeMem>("harbor_process_memory");
     latest = {
@@ -55,20 +58,36 @@ async function sample(): Promise<void> {
         fn();
       } catch {}
     }
-  } catch {}
+  } catch {
+    // Sampling is best-effort; failing to read a process once must not stop the
+    // memory guard from recovering on the next interval.
+  } finally {
+    sampling = false;
+  }
 }
 
 export function startNativeMemory(): () => void {
   if (!isTauri || timer != null) return () => {};
-  void sample();
-  const tick = () => {
-    void sample();
-    timer = window.setTimeout(tick, intervalMs);
+  const arm = () => {
+    const delay = document.visibilityState === "hidden" ? HIDDEN_INTERVAL_MS : intervalMs;
+    timer = window.setTimeout(() => {
+      void sample();
+      arm();
+    }, delay);
   };
-  timer = window.setTimeout(tick, intervalMs);
+  const onVisibility = () => {
+    if (timer != null) window.clearTimeout(timer);
+    timer = null;
+    if (document.visibilityState === "visible") void sample();
+    arm();
+  };
+  void sample();
+  arm();
+  document.addEventListener("visibilitychange", onVisibility);
   return () => {
     if (timer != null) window.clearTimeout(timer);
     timer = null;
+    document.removeEventListener("visibilitychange", onVisibility);
   };
 }
 

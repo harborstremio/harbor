@@ -18,6 +18,19 @@ const TAG_SERIES = "Series";
 let poolCache: { date: number; key: string; items: FeedItem[] } | null = null;
 let poolInflight: { date: number; key: string; promise: Promise<FeedItem[]> } | null = null;
 
+async function settleQueries<T>(queries: Array<() => Promise<T>>, concurrency = 4): Promise<T[]> {
+  const results = new Array<T>(queries.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < queries.length) {
+      const index = next++;
+      results[index] = await queries[index]();
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, queries.length) }, worker));
+  return results;
+}
+
 export async function getPool(tmdbKey: string): Promise<FeedItem[]> {
   const today = dailySeed();
   if (poolCache && poolCache.date === today && poolCache.key === tmdbKey) {
@@ -49,24 +62,24 @@ export async function extendPool(tmdbKey: string, page: number): Promise<FeedIte
   const seed = dailySeed() + page;
   const genres = pickRandom(Object.keys(MOVIE_GENRES), 3, seed);
   const decades = pickRandom(DECADES, 2, seed + 1);
-  const queries: Array<Promise<FeedItem[]>> = [
-    tmdbTrending(tmdbKey, "movie", "week", page).then((m) => label(m, TAG_TRENDING, "trending_movies")),
-    tmdbTrending(tmdbKey, "tv", "week", page).then((m) => label(m, TAG_TRENDING, "trending_series")),
-    tmdbMovieRow(tmdbKey, "popular", "US", page).then((m) => label(m, TAG_TRENDING, "popular_movies")),
-    tmdbMovieRow(tmdbKey, "top_rated", "US", page + 2).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
-    tmdbSeriesRow(tmdbKey, "top_rated", page + 2).then((m) => label(m, TAG_SERIES, "top_rated_series")),
+  const queries: Array<() => Promise<FeedItem[]>> = [
+    () => tmdbTrending(tmdbKey, "movie", "week", page).then((m) => label(m, TAG_TRENDING, "trending_movies")),
+    () => tmdbTrending(tmdbKey, "tv", "week", page).then((m) => label(m, TAG_TRENDING, "trending_series")),
+    () => tmdbMovieRow(tmdbKey, "popular", "US", page).then((m) => label(m, TAG_TRENDING, "popular_movies")),
+    () => tmdbMovieRow(tmdbKey, "top_rated", "US", page + 2).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
+    () => tmdbSeriesRow(tmdbKey, "top_rated", page + 2).then((m) => label(m, TAG_SERIES, "top_rated_series")),
     ...genres.map((g) =>
-      tmdbDiscover(tmdbKey, "movie", { ...genreParams(g), page: String(page) }).then((m) =>
+      () => tmdbDiscover(tmdbKey, "movie", { ...genreParams(g), page: String(page) }).then((m) =>
         label(m, g, `genre_${g}`),
       ),
     ),
     ...decades.map((d) =>
-      tmdbDiscover(tmdbKey, "movie", { ...decadeParams(d.from, d.to), page: String(page) }).then((m) =>
+      () => tmdbDiscover(tmdbKey, "movie", { ...decadeParams(d.from, d.to), page: String(page) }).then((m) =>
         label(m, `From the ${d.label}`, `decade_${d.label}`),
       ),
     ),
   ];
-  const batches = await Promise.all(queries);
+  const batches = await settleQueries(queries);
   const merged: FeedItem[] = [];
   for (const b of batches) merged.push(...b);
   return finalize(merged, seed);
@@ -79,36 +92,36 @@ async function buildTmdbPool(key: string): Promise<FeedItem[]> {
   const decades = pickRandom(DECADES, 3, seed + 1);
   const languages = pickRandom(LANGUAGES, 2, seed + 2);
 
-  const queries: Array<Promise<FeedItem[]>> = [
-    tmdbTrending(key, "movie", "week", 1).then((m) => label(m, TAG_TRENDING, "trending_movies")),
-    tmdbTrending(key, "movie", "week", 2).then((m) => label(m, TAG_TRENDING, "trending_movies")),
-    tmdbTrending(key, "tv", "week", 1).then((m) => label(m, TAG_TRENDING, "trending_series")),
-    tmdbMovieRow(key, "top_rated", "US", 1).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
-    tmdbMovieRow(key, "top_rated", "US", 2).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
-    tmdbMovieRow(key, "top_rated", "US", 3).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
-    tmdbMovieRow(key, "popular", "US", 1).then((m) => label(m, TAG_TRENDING, "popular_movies")),
-    tmdbSeriesRow(key, "top_rated", 1).then((m) => label(m, TAG_SERIES, "top_rated_series")),
-    tmdbSeriesRow(key, "top_rated", 2).then((m) => label(m, TAG_SERIES, "top_rated_series")),
-    tmdbDiscover(key, "movie", hiddenGemParams("1")).then((m) => label(m, TAG_HIDDEN_GEM, "hidden_gems")),
-    tmdbDiscover(key, "movie", hiddenGemParams("2")).then((m) => label(m, TAG_HIDDEN_GEM, "hidden_gems")),
-    tmdbDiscover(key, "movie", acclaimedParams()).then((m) => label(m, TAG_ACCLAIMED, "acclaimed")),
-    tmdbDiscover(key, "movie", cultParams()).then((m) => label(m, TAG_CULT, "cult_classics")),
+  const queries: Array<() => Promise<FeedItem[]>> = [
+    () => tmdbTrending(key, "movie", "week", 1).then((m) => label(m, TAG_TRENDING, "trending_movies")),
+    () => tmdbTrending(key, "movie", "week", 2).then((m) => label(m, TAG_TRENDING, "trending_movies")),
+    () => tmdbTrending(key, "tv", "week", 1).then((m) => label(m, TAG_TRENDING, "trending_series")),
+    () => tmdbMovieRow(key, "top_rated", "US", 1).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
+    () => tmdbMovieRow(key, "top_rated", "US", 2).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
+    () => tmdbMovieRow(key, "top_rated", "US", 3).then((m) => label(m, TAG_TOP_RATED, "top_rated_movies")),
+    () => tmdbMovieRow(key, "popular", "US", 1).then((m) => label(m, TAG_TRENDING, "popular_movies")),
+    () => tmdbSeriesRow(key, "top_rated", 1).then((m) => label(m, TAG_SERIES, "top_rated_series")),
+    () => tmdbSeriesRow(key, "top_rated", 2).then((m) => label(m, TAG_SERIES, "top_rated_series")),
+    () => tmdbDiscover(key, "movie", hiddenGemParams("1")).then((m) => label(m, TAG_HIDDEN_GEM, "hidden_gems")),
+    () => tmdbDiscover(key, "movie", hiddenGemParams("2")).then((m) => label(m, TAG_HIDDEN_GEM, "hidden_gems")),
+    () => tmdbDiscover(key, "movie", acclaimedParams()).then((m) => label(m, TAG_ACCLAIMED, "acclaimed")),
+    () => tmdbDiscover(key, "movie", cultParams()).then((m) => label(m, TAG_CULT, "cult_classics")),
     ...genres.map((g) =>
-      tmdbDiscover(key, "movie", genreParams(g)).then((m) => label(m, g, `genre_${g}`)),
+      () => tmdbDiscover(key, "movie", genreParams(g)).then((m) => label(m, g, `genre_${g}`)),
     ),
     ...decades.map((d) =>
-      tmdbDiscover(key, "movie", decadeParams(d.from, d.to)).then((m) =>
+      () => tmdbDiscover(key, "movie", decadeParams(d.from, d.to)).then((m) =>
         label(m, `From the ${d.label}`, `decade_${d.label}`),
       ),
     ),
     ...languages.map((l) =>
-      tmdbDiscover(key, "movie", languageParams(l.code)).then((m) =>
+      () => tmdbDiscover(key, "movie", languageParams(l.code)).then((m) =>
         label(m, l.label, `lang_${l.code}`),
       ),
     ),
   ];
 
-  const batches = await Promise.all(queries);
+  const batches = await settleQueries(queries);
   const merged: FeedItem[] = [];
   for (const b of batches) merged.push(...b);
 
@@ -117,12 +130,12 @@ async function buildTmdbPool(key: string): Promise<FeedItem[]> {
 
 async function buildFallbackPool(): Promise<FeedItem[]> {
   const genres = ["Drama", "Comedy", "Action", "Crime", "Sci-Fi", "Thriller"];
-  const queries: Array<Promise<FeedItem[]>> = [
-    topMovies().then((m) => label(m, TAG_TRENDING, "cinemeta_top_movies")),
-    topSeries().then((m) => label(m, TAG_SERIES, "cinemeta_top_series")),
-    ...genres.map((g) => topMovies(g).then((m) => label(m, g, `cinemeta_genre_${g}`))),
+  const queries: Array<() => Promise<FeedItem[]>> = [
+    () => topMovies().then((m) => label(m, TAG_TRENDING, "cinemeta_top_movies")),
+    () => topSeries().then((m) => label(m, TAG_SERIES, "cinemeta_top_series")),
+    ...genres.map((g) => () => topMovies(g).then((m) => label(m, g, `cinemeta_genre_${g}`))),
   ];
-  const batches = await Promise.all(queries);
+  const batches = await settleQueries(queries);
   const merged: FeedItem[] = [];
   for (const b of batches) merged.push(...b);
   return finalize(merged, dailySeed());

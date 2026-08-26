@@ -97,6 +97,12 @@ export const DEFAULT: Settings = {
   controllerKeyboardSize: 100,
   controllerRepeatMs: 140,
   controllerInitialDelayMs: 400,
+  // Loading every route shortly after startup costs both memory and battery.
+  // Keep it opt-in for people who prefer instant navigation over a lighter idle app.
+  preloadViews: false,
+  // Scheduled downloads and webhooks may intentionally run while Harbor is hidden.
+  // This remains on by default so existing automation keeps its current behaviour.
+  backgroundNetworkActivity: true,
   trailerQuality: "auto",
   detailTrailerAutoplay: false,
   heroBackdropCarousel: false,
@@ -525,6 +531,6 @@ export const DEFAULT: Settings = {
   adReportAlwaysShow: false,
   adReportFirstSeen: false,
   xrayEnabled: false,
-  xrayLiveScan: true,
+  xrayLiveScan: false,
   auddApiKey: "",
 };

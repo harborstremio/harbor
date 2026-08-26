@@ -2,6 +2,7 @@ import {
   Check,
   Download,
   FlaskConical,
+  Gauge,
   Link2,
   Loader2,
   Lock,
@@ -46,7 +47,7 @@ import { BuildFeedback } from "./build-feedback";
 import { RollbackRow } from "./rollback-row";
 import { PrivacyRow } from "./privacy-row";
 import { TrayRow } from "./tray-row";
-import { Section } from "./shared";
+import { Section, ToggleRow } from "./shared";
 import { Signature } from "./signature";
 import { CustomCodeCard, DownloadsSection } from "./player-panel";
 import { DesktopOnlyBlock } from "./player-panel/internals";
@@ -107,6 +108,8 @@ export function AdvancedPanel() {
       >
         <PrivacyRow />
       </Section>
+
+      <PerformanceControls />
 
       {isTauri && (
         <Section
@@ -182,6 +185,38 @@ export function AdvancedPanel() {
 
       <Signature />
     </>
+  );
+}
+
+function PerformanceControls() {
+  const t = useT();
+  const { settings, update } = useSettings();
+  return (
+    <Section
+      title={t("Performance & resource use")}
+      subtitle={t(
+        "Choose whether Harbor favours the lightest idle footprint or warms up common pages and keeps optional automation active while hidden.",
+      )}
+    >
+      <ToggleRow
+        leading={<Gauge size={17} strokeWidth={2} />}
+        label={t("Warm up common pages after launch")}
+        sub={t(
+          "Preloads the player, source picker, details, and Settings when the app is idle. Leave this off for lower startup memory and battery use.",
+        )}
+        value={settings.preloadViews}
+        onChange={(preloadViews) => update({ preloadViews })}
+      />
+      <ToggleRow
+        leading={<Gauge size={17} strokeWidth={2} />}
+        label={t("Allow optional background checks")}
+        sub={t(
+          "Lets scheduled downloads and release webhooks check for updates while Harbor is hidden. Turn it off to keep background network activity to a minimum.",
+        )}
+        value={settings.backgroundNetworkActivity}
+        onChange={(backgroundNetworkActivity) => update({ backgroundNetworkActivity })}
+      />
+    </Section>
   );
 }
 

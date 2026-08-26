@@ -162,6 +162,20 @@ impl MpvState {
     }
 }
 
+/// Pause from an operating-system window event without depending on the webview
+/// being scheduled. `Some` indicates that mpv was queried successfully; the
+/// boolean says whether this call actually paused active playback.
+pub fn pause_for_background(state: &MpvState) -> Option<bool> {
+    let session = state.inner.try_lock().ok()?;
+    let mpv = session.as_ref()?.mpv.clone();
+    let paused = mpv.get_property::<bool>("pause").ok()?;
+    if paused {
+        return Some(false);
+    }
+    mpv.set_property("pause", "yes").ok()?;
+    Some(true)
+}
+
 const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     ("time-pos", 1, PropertyKind::Double),
     ("duration", 2, PropertyKind::Double),

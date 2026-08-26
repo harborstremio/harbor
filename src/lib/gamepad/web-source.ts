@@ -53,17 +53,15 @@ export function startWebGamepadSource(h: WebGamepadHandlers): () => void {
   const axisValue = new Map<string, number>();
   let padSignature = "";
   let raf = 0;
+  let discoveryTimer = 0;
   let stopped = false;
 
-  const poll = () => {
-    if (stopped) return;
-    raf = requestAnimationFrame(poll);
-
+  const poll = (): boolean => {
     let list: (Gamepad | null)[];
     try {
       list = navigator.getGamepads();
     } catch {
-      return;
+      return false;
     }
 
     const active: GamepadInfo[] = [];
@@ -96,11 +94,60 @@ export function startWebGamepadSource(h: WebGamepadHandlers): () => void {
       padSignature = signature;
       h.onPads(active);
     }
+    return active.length > 0;
   };
 
-  raf = requestAnimationFrame(poll);
+  // A requestAnimationFrame loop at 60 fps used to run forever, even with no
+  // controller connected. Poll slowly while waiting for one and switch to RAF
+  // only while an actual web gamepad is active.
+  const stopRaf = () => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+  };
+  const scheduleDiscovery = () => {
+    if (stopped || document.visibilityState === "hidden" || discoveryTimer) return;
+    discoveryTimer = window.setTimeout(() => {
+      discoveryTimer = 0;
+      scan();
+    }, 1500);
+  };
+  const frame = () => {
+    if (stopped || document.visibilityState === "hidden") {
+      stopRaf();
+      return;
+    }
+    if (poll()) raf = requestAnimationFrame(frame);
+    else {
+      raf = 0;
+      scheduleDiscovery();
+    }
+  };
+  const scan = () => {
+    if (stopped || document.visibilityState === "hidden") return;
+    if (poll()) {
+      stopRaf();
+      raf = requestAnimationFrame(frame);
+    } else scheduleDiscovery();
+  };
+  const onConnection = () => scan();
+  const onVisibility = () => {
+    if (document.visibilityState === "hidden") {
+      stopRaf();
+      if (discoveryTimer) window.clearTimeout(discoveryTimer);
+      discoveryTimer = 0;
+    } else scan();
+  };
+
+  window.addEventListener("gamepadconnected", onConnection);
+  window.addEventListener("gamepaddisconnected", onConnection);
+  document.addEventListener("visibilitychange", onVisibility);
+  scan();
   return () => {
     stopped = true;
-    cancelAnimationFrame(raf);
+    stopRaf();
+    if (discoveryTimer) window.clearTimeout(discoveryTimer);
+    window.removeEventListener("gamepadconnected", onConnection);
+    window.removeEventListener("gamepaddisconnected", onConnection);
+    document.removeEventListener("visibilitychange", onVisibility);
   };
 }

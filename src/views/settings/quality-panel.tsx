@@ -49,7 +49,7 @@ export function QualityPanel() {
 
       <Section
         title={t("X-Ray (experimental)")}
-        subtitle={t("Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and everything they have been in. On-device face matching to show who is on screen is coming next. Off by default.")}
+        subtitle={t("Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and filmography. Optional on-device face matching can identify who is on screen. Off by default.")}
       >
         <ToggleRow
           label={t("Enable X-Ray")}
@@ -60,7 +60,7 @@ export function QualityPanel() {
         {settings.xrayEnabled && (
           <ToggleRow
             label={t("Scan who is on screen while playing")}
-            sub={t("Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.")}
+            sub={t("Periodically match faces in the current frame against the cast. Nothing leaves your machine, but this can make playback stutter on lower-power laptops. Leave it off unless you need live matches.")}
             value={settings.xrayLiveScan}
             onChange={(v) => update({ xrayLiveScan: v })}
           />

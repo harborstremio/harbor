@@ -8,7 +8,9 @@ import type { WireFace } from "./match";
 
 ort.env.wasm.wasmPaths = { wasm: ortWasmUrl, mjs: ortMjsUrl };
 const canThread = typeof SharedArrayBuffer !== "undefined" && globalThis.crossOriginIsolated === true;
-ort.env.wasm.numThreads = canThread ? Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 2) - 1)) : 1;
+// This work shares a process with the player. Two workers are enough for the
+// occasional recognition pass and avoid monopolising laptop CPUs.
+ort.env.wasm.numThreads = canThread ? Math.max(1, Math.min(2, (navigator.hardwareConcurrency || 2) - 1)) : 1;
 ort.env.wasm.proxy = false;
 ort.env.wasm.simd = true;
 

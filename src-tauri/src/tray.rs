@@ -19,6 +19,10 @@ pub fn always_on_top_pref() -> bool {
     ALWAYS_ON_TOP.load(Ordering::Relaxed)
 }
 
+pub fn pause_when_minimized() -> bool {
+    PAUSE_MINIMIZED.load(Ordering::Relaxed)
+}
+
 #[derive(Serialize, Deserialize, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct TrayPrefs {
