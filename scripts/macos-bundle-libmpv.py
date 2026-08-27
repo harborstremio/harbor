@@ -193,7 +193,14 @@ def write_config(config_path: Path, frameworks: Iterable[Path]) -> None:
             "beforeBundleCommand": "python3 scripts/macos-bundle-libmpv.py finalize"
         },
         "bundle": {
-            "macOS": {"frameworks": [str(path.resolve()) for path in sorted(frameworks)]}
+            "macOS": {
+                "frameworks": [str(path.resolve()) for path in sorted(frameworks)],
+                # Apple Silicon requires a valid code signature even when Harbor
+                # does not have a Developer ID certificate in CI. Tauri's
+                # documented ad-hoc identity signs the complete app after the
+                # rewritten dylibs have been copied into Frameworks.
+                "signingIdentity": "-",
+            },
         },
     }
     config_path.parent.mkdir(parents=True, exist_ok=True)
