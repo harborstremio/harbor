@@ -10,6 +10,7 @@ import {
 import type { HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
 import { isRemovedBuiltinAvatar } from "./avatars/catalog";
+import { deleteProfileBgImage } from "./theme-storage";
 
 export const PROFILE_COLORS = [
   "#7dd3fc",
@@ -77,7 +78,10 @@ type ProfilesValue = {
     color: ProfileColor;
     kid?: KidConfig | null;
   }) => Profile;
-  updateProfile: (id: string, patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>) => void;
+  updateProfile: (
+    id: string,
+    patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>,
+  ) => void;
   deleteProfile: (id: string) => void;
   setPrimary: (id: string) => void;
 };
@@ -160,7 +164,10 @@ function readProfilePromptInterval(): ProfilePromptInterval {
   try {
     const raw = readLaunchSettingsRaw();
     if (!raw) return "launch";
-    const parsed = JSON.parse(raw) as { profilePromptInterval?: unknown; skipProfileScreen?: unknown };
+    const parsed = JSON.parse(raw) as {
+      profilePromptInterval?: unknown;
+      skipProfileScreen?: unknown;
+    };
     const v = parsed.profilePromptInterval;
     if (v === "launch" || v === "15m" || v === "30m" || v === "never") return v;
     return parsed.skipProfileScreen === true ? "never" : "launch";
@@ -203,21 +210,8 @@ function markProfileSelectedNow(): void {
   }
 }
 
-const PICKER_SESSION_KEY = "harbor.pickerShown";
-function launchPickerShownThisSession(): boolean {
-  try {
-    return sessionStorage.getItem(PICKER_SESSION_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-function markLaunchPickerShown(): void {
-  try {
-    sessionStorage.setItem(PICKER_SESSION_KEY, "1");
-  } catch {
-    /* ignore */
-  }
-}
+// Module-level on purpose: sessionStorage can survive across app launches in the webview, which suppressed this prompt.
+let pickerPromptShownThisRun = false;
 
 export function readActiveProfileIdentity(): {
   id: string;
@@ -295,11 +289,19 @@ function readState(): ProfilesState {
       if (p.isPrimary) {
         if (isPlaceholderName(p.name)) next.name = fallbackName;
         if (identity.color) next.color = identity.color;
-        if (p.avatar == null && identity.avatar != null && !identity.avatar.startsWith("/kids/avatars/")) {
+        if (
+          p.avatar == null &&
+          identity.avatar != null &&
+          !identity.avatar.startsWith("/kids/avatars/")
+        ) {
           next.avatar = identity.avatar;
         }
       }
-      if (next.kid == null && typeof next.avatar === "string" && next.avatar.startsWith("/kids/avatars/")) {
+      if (
+        next.kid == null &&
+        typeof next.avatar === "string" &&
+        next.avatar.startsWith("/kids/avatars/")
+      ) {
         next.avatar = null;
       }
       if (isRemovedBuiltinAvatar(next.avatar)) {
@@ -389,9 +391,9 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     const interval = readProfilePromptInterval();
     if (interval === "never") return false;
     if (interval === "launch") {
-      const shownThisSession = launchPickerShownThisSession();
-      markLaunchPickerShown();
-      return !shownThisSession;
+      const wasShown = pickerPromptShownThisRun;
+      pickerPromptShownThisRun = true;
+      return !wasShown;
     }
     return Date.now() - readLastProfileSelectAt() >= intervalMinutes(interval) * 60000;
   });
@@ -510,9 +512,25 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem(`harbor.simkl.cache.v2.${id}`);
         localStorage.removeItem(`harbor.anilist.synced.v1.${id}`);
         localStorage.removeItem(`harbor.mal.synced.v1.${id}`);
+        localStorage.removeItem(`harbor.moviewatched.v1.${id}`);
+        localStorage.removeItem(`harbor.watchedFlag.v1.${id}`);
+        localStorage.removeItem(`harbor.manualwatched.v1.${id}`);
+        localStorage.removeItem(`harbor.manualunwatched.v1.${id}`);
+        localStorage.removeItem(`harbor.manualwatched.meta.v1.${id}`);
+        localStorage.removeItem(`harbor.manualwatched.dismissed.v1.${id}`);
+        localStorage.removeItem(`harbor.manualunwatched.at.v1.${id}`);
+        localStorage.removeItem(`harbor.manualwatched.fromremote.v1.${id}`);
+        localStorage.removeItem(`harbor.watchevents.v1.${id}`);
+        localStorage.removeItem(`harbor.playback-history.v1.${id}`);
+        localStorage.removeItem(`harbor.watchlist.v1.${id}`);
+        localStorage.removeItem(`harbor.watchlist.aggregate.v1.${id}`);
+        localStorage.removeItem(`harbor.installed-addons.${id}`);
+        localStorage.removeItem(`harbor.addons.disabled.${id}`);
+        localStorage.removeItem(`harbor.stremio.freshwatched.v1.${id}`);
       } catch {
         /* ignore */
       }
+      void deleteProfileBgImage(id);
       setState((s) => {
         const profiles = s.profiles
           .filter((p) => p.id !== id)
@@ -600,12 +618,18 @@ export function profileInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function stremioSourceProfileId(
-  active: Profile | null,
-  profiles: Profile[],
-): string | null {
+export function stremioSourceProfileId(active: Profile | null, profiles: Profile[]): string | null {
   if (!active) return null;
   if (!active.shareStremioWith) return active.id;
   const exists = profiles.some((p) => p.id === active.shareStremioWith);
   return exists ? active.shareStremioWith : active.id;
+}
+
+export function sharesStremioStorage(
+  a: Profile | null | undefined,
+  b: Profile | null | undefined,
+  profiles: Profile[],
+): boolean {
+  if (!a || !b) return false;
+  return stremioSourceProfileId(a, profiles) === stremioSourceProfileId(b, profiles);
 }

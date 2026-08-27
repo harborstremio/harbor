@@ -1,7 +1,7 @@
 import { Bookmark, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Poster, usePosterChain } from "@/components/poster";
-import { narrowMediaType, type Meta } from "@/lib/cinemeta";
+import { hasEmbeddedStreams, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 import { useInWatchlist } from "@/lib/watchlist";
@@ -28,7 +28,8 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
     setPosterFailed(true);
   }, []);
   useEffect(() => {
-    if (meta.poster && meta.name && !posterFailed) {
+    const needsAddonHydration = !!meta.addonOrigin && !hasEmbeddedStreams(meta.videos);
+    if (meta.poster && meta.name && !posterFailed && !needsAddonHydration) {
       setHydrated(null);
       return;
     }
@@ -36,7 +37,12 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
     if (!el) return;
     let cancelled = false;
     const run = () => {
-      hydrateLibraryMeta(meta.id, narrowMediaType(meta.type), settings.tmdbKey ?? null)
+      hydrateLibraryMeta(
+        meta.id,
+        narrowMediaType(meta.type),
+        settings.tmdbKey ?? null,
+        meta.addonOrigin,
+      )
         .then((full) => {
           if (cancelled || !full) return;
           setHydrated(full);
@@ -57,8 +63,27 @@ export function WatchlistCard({ meta, onRemove }: { meta: Meta; onRemove?: () =>
       cancelled = true;
       io.disconnect();
     };
-  }, [meta.id, meta.type, meta.poster, meta.name, settings.tmdbKey, posterFailed]);
-  const display: Meta = hydrated ? { ...meta, ...hydrated, id: meta.id, type: meta.type } : meta;
+  }, [
+    meta.id,
+    meta.type,
+    meta.poster,
+    meta.name,
+    settings.tmdbKey,
+    posterFailed,
+    meta.addonOrigin?.id,
+    meta.addonOrigin?.base,
+    meta.videos?.length,
+  ]);
+  const display: Meta = hydrated
+    ? {
+        ...meta,
+        ...hydrated,
+        id: meta.id,
+        type: meta.type,
+        addonOrigin: meta.addonOrigin ?? hydrated.addonOrigin,
+        videos: hydrated.videos ?? meta.videos,
+      }
+    : meta;
   const open = () => openMeta(display);
   const poster = usePosterChain(
     settings.rpdbKey,

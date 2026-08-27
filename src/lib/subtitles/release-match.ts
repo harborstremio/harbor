@@ -6,17 +6,113 @@ export type ReleaseTags = {
   resolution: string | null;
   hdr: string[];
   edition: string[];
+  season: number | null;
+  episode: number | null;
+  episodeEnd: number | null;
   proper: boolean;
   repack: boolean;
 };
 
+export type SubtitleMatchConfidence = "exact" | "high" | "medium" | "low" | "incompatible";
+
+export function subtitleConfidenceRank(confidence: SubtitleMatchConfidence): number {
+  switch (confidence) {
+    case "exact":
+      return 5;
+    case "high":
+      return 4;
+    case "medium":
+      return 3;
+    case "low":
+      return 2;
+    case "incompatible":
+      return 0;
+  }
+}
+
+function clampPercent(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+/**
+ * Turns release evidence into a stable, absolute compatibility estimate.
+ * The confidence bands deliberately do not overlap, so a weak best result
+ * cannot look stronger than a well-supported source/cut match.
+ */
+export function releaseCompatibilityPercent(
+  confidence: SubtitleMatchConfidence,
+  score: number,
+): number {
+  const evidence = Math.max(0, score);
+  switch (confidence) {
+    case "exact":
+      return 100;
+    case "high":
+      return clampPercent(75 + (Math.min(evidence, 240) / 240) * 24, 75, 99);
+    case "medium":
+      return clampPercent(50 + (Math.min(evidence, 120) / 120) * 24, 50, 74);
+    case "low":
+      return clampPercent(20 + (Math.min(evidence, 100) / 100) * 29, 20, 49);
+    case "incompatible":
+      return clampPercent((Math.min(evidence, 100) / 100) * 19, 0, 19);
+  }
+}
+
 const KNOWN_GROUPS = [
-  "EVO", "RARBG", "YTS", "YIFY", "FGT", "PSA", "TBS", "GALAXYRG", "GALAXYTV", "MEGUSTA",
-  "ION10", "EZTV", "NTB", "FLUX", "TEPES", "KOGI", "SMURF", "RZEROX", "D3G", "TGX",
-  "SPARKS", "AMIABLE", "GECKOS", "DRONES", "CMRG", "PAHE", "QXR", "TIGOLE", "JOY",
-  "FRAMESTOR", "HDMANIACS", "WIKI", "DON", "EBP", "BLURANIUM", "3L", "BMF", "TRUFFLE",
-  "SICFOI", "PMTP", "KINGS", "CAKES", "SUCCESSFULCRAB", "ELITE", "TOMMY", "MZABI",
-  "PLAYWEB", "XEBEC", "SEV", "NOSIVID", "TVSMASH", "MINX", "EDITH", "TEAMHD",
+  "EVO",
+  "RARBG",
+  "YTS",
+  "YIFY",
+  "FGT",
+  "PSA",
+  "TBS",
+  "GALAXYRG",
+  "GALAXYTV",
+  "MEGUSTA",
+  "ION10",
+  "EZTV",
+  "NTB",
+  "FLUX",
+  "TEPES",
+  "KOGI",
+  "SMURF",
+  "RZEROX",
+  "D3G",
+  "TGX",
+  "SPARKS",
+  "AMIABLE",
+  "GECKOS",
+  "DRONES",
+  "CMRG",
+  "PAHE",
+  "QXR",
+  "TIGOLE",
+  "JOY",
+  "FRAMESTOR",
+  "HDMANIACS",
+  "WIKI",
+  "DON",
+  "EBP",
+  "BLURANIUM",
+  "3L",
+  "BMF",
+  "TRUFFLE",
+  "SICFOI",
+  "PMTP",
+  "KINGS",
+  "CAKES",
+  "SUCCESSFULCRAB",
+  "ELITE",
+  "TOMMY",
+  "MZABI",
+  "PLAYWEB",
+  "XEBEC",
+  "SEV",
+  "NOSIVID",
+  "TVSMASH",
+  "MINX",
+  "EDITH",
+  "TEAMHD",
 ];
 
 const SOURCE_PATTERNS: Array<[SourceClass, RegExp]> = [
@@ -68,7 +164,11 @@ export function detectGroup(text: string | null | undefined): string | null {
   const trailing = text.match(/[-.]([A-Za-z0-9]{3,20})(?:\.[a-z0-9]{2,4})?\s*$/);
   if (trailing) {
     const cand = trailing[1].toUpperCase();
-    if (!/^(MKV|MP4|AVI|SRT|ASS|SSA|VTT|1080P|720P|2160P|X264|X265|H264|H265|HEVC|AAC|DTS|DDP5|WEB)$/.test(cand)) {
+    if (
+      !/^(MKV|MP4|AVI|SRT|ASS|SSA|VTT|1080P|720P|2160P|X264|X265|H264|H265|HEVC|AAC|DTS|DDP5|WEB)$/.test(
+        cand,
+      )
+    ) {
       return cand;
     }
   }
@@ -85,15 +185,37 @@ export function parseRelease(text: string | null | undefined): ReleaseTags {
   const s = text ?? "";
   const res = s.match(/\b(2160p|1080p|720p|576p|480p)\b/i);
   const fourK = /\b(4k|uhd)\b/i.test(s) && !res;
+  const episode = parseEpisodeRange(s);
   return {
     group: detectGroup(s),
     source: detectSource(s),
     resolution: res ? res[1].toLowerCase() : fourK ? "2160p" : null,
     hdr: HDR_TAGS.filter(([, rx]) => rx.test(s)).map(([k]) => k),
     edition: EDITIONS.filter(([, rx]) => rx.test(s)).map(([k]) => k),
+    season: episode?.season ?? null,
+    episode: episode?.episode ?? null,
+    episodeEnd: episode?.episodeEnd ?? null,
     proper: /\bproper\b/i.test(s),
     repack: /\brepack\b/i.test(s),
   };
+}
+
+function parseEpisodeRange(
+  text: string,
+): { season: number; episode: number; episodeEnd: number } | null {
+  const standard = text.match(
+    /(?:^|[^a-z0-9])s(\d{1,2})[ ._-]*e(\d{1,3})(?:(?:[ ._-]*-?[ ._-]*e?)(\d{1,3}))?(?:[^a-z0-9]|$)/i,
+  );
+  const alternate = text.match(
+    /(?:^|[^a-z0-9])(\d{1,2})x(\d{1,3})(?:[ ._-]*-?[ ._-]*(\d{1,3}))?(?:[^a-z0-9]|$)/i,
+  );
+  const match = standard ?? alternate;
+  if (!match) return null;
+  const season = Number.parseInt(match[1], 10);
+  const episode = Number.parseInt(match[2], 10);
+  const parsedEnd = match[3] ? Number.parseInt(match[3], 10) : episode;
+  if (![season, episode, parsedEnd].every(Number.isSafeInteger)) return null;
+  return { season, episode, episodeEnd: Math.max(episode, parsedEnd) };
 }
 
 export function sourceAffinity(want: SourceClass | null, got: SourceClass | null): number {
@@ -102,12 +224,54 @@ export function sourceAffinity(want: SourceClass | null, got: SourceClass | null
   return COMPAT[want]?.[got] ?? 0;
 }
 
-export type AffinityResult = { score: number; reasons: string[] };
+export type AffinityResult = {
+  score: number;
+  reasons: string[];
+  /**
+   * Source family is a stronger timing signal than a release-group label.
+   * Keep fallbacks at rank 1 so a WEB-DL subtitle is still usable when no
+   * BluRay/REMUX candidate exists.
+   */
+  sourceRank: 1 | 2 | 3;
+  confidence: Exclude<SubtitleMatchConfidence, "exact">;
+};
+
+function sourceRank(want: SourceClass | null, got: SourceClass | null): 1 | 2 | 3 {
+  if (!want || !got) return 1;
+  const affinity = sourceAffinity(want, got);
+  if (affinity >= 1) return 3;
+  if (affinity >= 0.75) return 2;
+  return 1;
+}
 
 export function releaseAffinity(stream: ReleaseTags, subText: string): AffinityResult {
   const sub = parseRelease(subText);
   const reasons: string[] = [];
   let score = 0;
+  const matchSourceRank = sourceRank(stream.source, sub.source);
+  let incompatible = false;
+  let episodeMatch = false;
+  let editionMatch = false;
+
+  if (
+    stream.season != null &&
+    stream.episode != null &&
+    sub.season != null &&
+    sub.episode != null
+  ) {
+    const subEnd = sub.episodeEnd ?? sub.episode;
+    const sameEpisode =
+      stream.season === sub.season && stream.episode >= sub.episode && stream.episode <= subEnd;
+    if (sameEpisode) {
+      score += 80;
+      episodeMatch = true;
+      reasons.push(`S${stream.season}E${stream.episode} matches`);
+    } else {
+      score -= 300;
+      incompatible = true;
+      reasons.push(`subtitle is for S${sub.season}E${sub.episode}`);
+    }
+  }
 
   if (stream.group && sub.group && stream.group === sub.group) {
     score += 120;
@@ -119,11 +283,12 @@ export function releaseAffinity(stream: ReleaseTags, subText: string): AffinityR
     if (aff >= 1) {
       score += 45;
       reasons.push(`${sub.source} matches the stream`);
-    } else if (aff > 0) {
+    } else if (aff >= 0.75) {
       score += Math.round(45 * aff);
       reasons.push(`${sub.source} is close to ${stream.source}`);
     } else {
       score -= 30;
+      incompatible = true;
       reasons.push(`${sub.source} timing differs from ${stream.source}`);
     }
   } else if (stream.source && !sub.source) {
@@ -136,6 +301,7 @@ export function releaseAffinity(stream: ReleaseTags, subText: string): AffinityR
       reasons.push(`${sub.resolution}`);
     } else {
       score -= 4;
+      reasons.push(`subtitle is ${sub.resolution}, video is ${stream.resolution}`);
     }
   }
 
@@ -153,9 +319,11 @@ export function releaseAffinity(stream: ReleaseTags, subText: string): AffinityR
     const shared = subEd.filter((e) => streamEd.includes(e));
     if (shared.length) {
       score += 25;
+      editionMatch = true;
       reasons.push(`${shared[0]} edition`);
     } else {
       score -= 25;
+      incompatible = true;
       reasons.push(`different edition (${subEd[0]})`);
     }
   } else if (streamEd.length && !subEd.length) {
@@ -172,10 +340,21 @@ export function releaseAffinity(stream: ReleaseTags, subText: string): AffinityR
   }
   if (stream.repack === sub.repack && stream.repack) score += 4;
 
-  return { score, reasons };
+  const groupMatch = !!stream.group && !!sub.group && stream.group === sub.group;
+  const corroboratedSource = matchSourceRank === 3 && (episodeMatch || editionMatch);
+  const confidence: Exclude<SubtitleMatchConfidence, "exact"> = incompatible
+    ? "incompatible"
+    : groupMatch || corroboratedSource
+      ? "high"
+      : matchSourceRank >= 2
+        ? "medium"
+        : "low";
+
+  return { score, reasons, sourceRank: matchSourceRank, confidence };
 }
 
 export function describeTags(t: ReleaseTags): string {
-  const parts = [t.source, t.resolution, ...t.hdr, ...t.edition, t.group].filter(Boolean);
+  const episode = t.season != null && t.episode != null ? `S${t.season}E${t.episode}` : null;
+  const parts = [episode, t.source, t.resolution, ...t.hdr, ...t.edition, t.group].filter(Boolean);
   return parts.join(" ") || "unknown release";
 }

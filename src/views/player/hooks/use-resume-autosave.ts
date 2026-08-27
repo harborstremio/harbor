@@ -87,7 +87,7 @@ export function useResumeAutosave(params: {
     if (typeof cs === "number") setViewedSeason(id, cs);
     if (isExternalPlaylistId(id)) return;
     if (s.streamRef) {
-      savePlayback(id, { ...s.streamRef, url: s.url, title: s.meta.name }, cs, ep);
+      savePlayback(id, { ...s.streamRef, url: s.historyUrl ?? s.url, title: s.meta.name }, cs, ep);
     } else {
       savePlayback(id, { title: s.meta.name, parsedTitle: s.meta.name }, cs, ep);
     }

@@ -12,6 +12,7 @@ import {
   type SourceSubCandidate,
   type SubSource,
 } from "./sub-sources";
+import { resolveSubtitleDownloadUrl } from "./download-url";
 
 const BASE = "https://api.subsource.net/v1";
 
@@ -73,9 +74,10 @@ export const subsourceSource: SubSource = {
       dwarn(`[sub-src] subsource ${res.status}`);
       return null;
     }
-    const data = (await res.json().catch(() => null)) as
-      | { subtitles?: SubsourceRow[]; results?: SubsourceRow[] }
-      | null;
+    const data = (await res.json().catch(() => null)) as {
+      subtitles?: SubsourceRow[];
+      results?: SubsourceRow[];
+    } | null;
     const rows = Array.isArray(data?.subtitles)
       ? (data as { subtitles: SubsourceRow[] }).subtitles
       : Array.isArray(data?.results)
@@ -87,7 +89,7 @@ export const subsourceSource: SubSource = {
     dinfo(`[sub-src] subsource ${rows.length} rows`);
     return rows.map((r) => {
       const lang = normalizeLang(r.language ?? r.lang ?? "");
-      const url = r.downloadUrl ?? r.download ?? r.link ?? null;
+      const url = resolveSubtitleDownloadUrl(r.downloadUrl ?? r.download ?? r.link, `${BASE}/`);
       const epOk = series && r.season === q.season && r.episode === q.episode;
       return {
         provider: "subsource",

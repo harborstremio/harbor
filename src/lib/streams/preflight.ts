@@ -5,7 +5,7 @@ const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window
 const probeFetch: typeof fetch = isTauri ? (tauriHttpFetch as unknown as typeof fetch) : safeFetch;
 
 const MIN_REAL_SIZE_BYTES = 5 * 1024 * 1024;
-const PREFLIGHT_TIMEOUT_MS = 2500;
+const PREFLIGHT_TIMEOUT_MS = 1200;
 
 export type PreflightOk = { ok: true; sizeBytes: number | null };
 export type PreflightFail = {
@@ -30,42 +30,16 @@ export function preflightCheck(url: string, signal?: AbortSignal): Promise<Prefl
   if (pending) return pending;
   const p = run(url, signal).then((r) => {
     inflight.delete(url);
-    memo.set(url, r);
+    if (r.ok || r.reason === "stub") memo.set(url, r);
     return r;
   });
   inflight.set(url, p);
   return p;
 }
 
-const PROBE_ATTEMPTS = 3;
-const PROBE_RETRY_MS = 1000;
-
-function sleep(ms: number, signal?: AbortSignal): Promise<void> {
-  return new Promise((resolve) => {
-    const onAbort = () => {
-      window.clearTimeout(t);
-      resolve();
-    };
-    const t = window.setTimeout(() => {
-      signal?.removeEventListener("abort", onAbort);
-      resolve();
-    }, ms);
-    signal?.addEventListener("abort", onAbort, { once: true });
-  });
-}
-
 async function run(url: string, signal?: AbortSignal): Promise<PreflightResult> {
-  let last: PreflightResult | null = null;
-  for (let attempt = 0; attempt < PROBE_ATTEMPTS; attempt++) {
-    if (signal?.aborted) break;
-    const r = await probe(url, signal);
-    if (r.ok) return r;
-    if (r.reason === "stub" && r.sizeBytes != null && r.sizeBytes > 0) return r;
-    if (r.reason === "unreachable") return r;
-    last = r;
-    if (attempt < PROBE_ATTEMPTS - 1) await sleep(PROBE_RETRY_MS, signal);
-  }
-  return { ok: false, reason: "unreachable", sizeBytes: last?.sizeBytes ?? null };
+  if (signal?.aborted) return { ok: false, reason: "unreachable", sizeBytes: null };
+  return probe(url, signal);
 }
 
 async function probe(url: string, signal?: AbortSignal): Promise<PreflightResult> {

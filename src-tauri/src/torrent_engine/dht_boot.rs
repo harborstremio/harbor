@@ -35,7 +35,7 @@ pub fn node_count(dht: &Dht) -> usize {
     dht.stats().routing_table_size
 }
 
-fn info_hash_from_magnet(magnet: &str) -> Option<Id20> {
+pub(crate) fn info_hash_from_magnet(magnet: &str) -> Option<Id20> {
     let lower = magnet.to_ascii_lowercase();
     let start = lower.find("btih:")? + 5;
     let hex: String = lower[start..]

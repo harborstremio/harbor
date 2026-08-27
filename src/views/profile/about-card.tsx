@@ -2,6 +2,7 @@ import { Pencil, ScrollText } from "lucide-react";
 import { useMemo } from "react";
 import { useT } from "@/lib/i18n";
 import { renderBbcode } from "@/lib/social/bbcode";
+import { handleLinkOutActivation } from "@/lib/social/link-out-activation";
 import { openLinkOut } from "@/lib/social/link-out";
 import { SectionHeader } from "./section-header";
 
@@ -23,20 +24,17 @@ export function AboutCard({
   const copyFont = userFont ? { fontFamily: `"${userFont}", inherit` } : undefined;
 
   return (
-    <section aria-label={t("About")} className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft">
+    <section
+      aria-label={t("About")}
+      className="rounded-[14px] bg-surface p-5 ring-1 ring-edge-soft"
+    >
       {!hideTitle && <SectionHeader icon={<ScrollText size={20} />} label={t("About")} />}
       {html ? (
         <div
           className="max-w-none break-words text-[14px] leading-relaxed text-ink-muted [&_a]:break-words"
           style={copyFont}
-          onClick={(e) => {
-            const a = (e.target as HTMLElement).closest?.("a");
-            const href = a?.getAttribute("href");
-            if (a && href) {
-              e.preventDefault();
-              openLinkOut(href);
-            }
-          }}
+          onClick={(e) => handleLinkOutActivation(e, openLinkOut)}
+          onAuxClick={(e) => handleLinkOutActivation(e, openLinkOut)}
           dangerouslySetInnerHTML={{ __html: html }}
         />
       ) : isOwner ? (

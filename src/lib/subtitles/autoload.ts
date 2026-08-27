@@ -10,9 +10,8 @@ export function subtitleSearchImdbId(
 export function canStartSubtitleAutoload(input: {
   imdbId: string | null | undefined;
   mediaReady: boolean;
-  addons: unknown[] | null;
 }): boolean {
-  return !!input.imdbId && input.mediaReady && input.addons !== null;
+  return !!input.imdbId && input.mediaReady;
 }
 
 export function withSubtitleTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {

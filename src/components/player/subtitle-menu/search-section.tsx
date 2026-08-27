@@ -6,7 +6,7 @@ import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { languageName } from "@/lib/subtitles/language";
 import { HoverTooltip } from "@/components/hover-tooltip";
 import { searchSubtitles, type SearchOptions } from "@/lib/subtitles/search";
-import { providerLabel, releaseOf } from "@/lib/subtitles/provider-label";
+import { providerLabel, releaseOf, subtitleTitleOf } from "@/lib/subtitles/provider-label";
 import type { SubResult } from "@/lib/subtitles/types";
 import {
   bestCandidate,
@@ -37,17 +37,14 @@ function labelOf(t: TitleTarget): string {
 
 function isPlayingTarget(a: TitleTarget, b: TitleTarget): boolean {
   return (
-    a.imdbId === b.imdbId &&
-    a.title === b.title &&
-    a.season === b.season &&
-    a.episode === b.episode
+    a.imdbId === b.imdbId && a.title === b.title && a.season === b.season && a.episode === b.episode
   );
 }
 
 const searchCache = new Map<string, SubResult[]>();
 
-function cacheKey(tgt: TitleTarget): string {
-  return `${tgt.imdbId}|${tgt.type}|${tgt.title}|${tgt.season ?? ""}|${tgt.episode ?? ""}`;
+function cacheKey(tgt: TitleTarget, filename?: string | null): string {
+  return `${tgt.imdbId}|${tgt.type}|${tgt.title}|${tgt.season ?? ""}|${tgt.episode ?? ""}|${filename ?? ""}`;
 }
 
 type SavedSearchState = {
@@ -80,27 +77,35 @@ export function SearchSection(props: SubtitleMenuProps) {
   const { authKey } = useAuth();
   const playbackContext = useSubtitleContext();
 
-  const playingTarget = useMemo<TitleTarget>(
-    () => ({
+  const playingTarget = useMemo<TitleTarget>(() => {
+    // Context coords are authoritative when present; long-running anime
+    // intentionally carry no season (undefined beats the raw prop).
+    const hasCoords = playbackContext?.searchEpisode != null;
+    const s = hasCoords ? playbackContext!.searchSeason : (season ?? undefined);
+    const e = hasCoords ? playbackContext!.searchEpisode : (episode ?? undefined);
+    return {
       imdbId: metaImdbId ?? "",
-      type: season != null && episode != null ? "series" : "movie",
+      type: s != null && e != null ? "series" : "movie",
       title: metaTitle ?? "",
-      season: season ?? undefined,
-      episode: episode ?? undefined,
-    }),
-    [metaImdbId, metaTitle, season, episode],
-  );
+      season: s ?? undefined,
+      episode: e ?? undefined,
+    };
+  }, [metaImdbId, metaTitle, season, episode, playbackContext]);
 
   const playingKey = playingKeyOf(metaImdbId, metaTitle, season, episode);
-  const restorableRef = useRef(savedState && savedState.playingKey === playingKey ? savedState : null);
+  const restorableRef = useRef(
+    savedState && savedState.playingKey === playingKey ? savedState : null,
+  );
   const restorable = restorableRef.current;
 
   const [target, setTarget] = useState<TitleTarget>(restorable?.target ?? playingTarget);
   const [isOverride, setIsOverride] = useState(restorable?.isOverride ?? false);
   const [query, setQuery] = useState(
     restorable?.query ??
-      (metaTitle && season != null && episode != null
-        ? `${metaTitle} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`
+      (metaTitle && playingTarget.season != null && playingTarget.episode != null
+        ? `${metaTitle} S${String(playingTarget.season).padStart(2, "0")}E${String(
+            playingTarget.episode,
+          ).padStart(2, "0")}`
         : (metaTitle ?? "")),
   );
   const [suggestions, setSuggestions] = useState<TitleCandidate[]>([]);
@@ -111,7 +116,14 @@ export function SearchSection(props: SubtitleMenuProps) {
   const scrollTopRef = useRef(restorable?.scrollTop ?? 0);
   const scrollRestored = useRef(false);
   const [results, setResults] = useState<SubResult[] | null>(() =>
-    restorable ? (searchCache.get(cacheKey(restorable.target)) ?? null) : null,
+    restorable
+      ? (searchCache.get(
+          cacheKey(
+            restorable.target,
+            isPlayingTarget(restorable.target, playingTarget) ? playbackContext?.filename : null,
+          ),
+        ) ?? null)
+      : null,
   );
   const [loading, setLoading] = useState(false);
   const [hideHI, setHideHI] = useState(restorable?.hideHI ?? false);
@@ -120,8 +132,9 @@ export function SearchSection(props: SubtitleMenuProps) {
   const [filtersOpen, setFiltersOpen] = useState(restorable?.filtersOpen ?? true);
   const [addons, setAddons] = useState<Addon[] | null>(null);
   const [addonsLoading, setAddonsLoading] = useState(true);
-  const initialSearchDone = useRef(false);
+  const lastAutoSearchKey = useRef<string | null>(null);
   const searchSeq = useRef(0);
+  const coordsTouchedRef = useRef(false);
   const [pendingSources, setPendingSources] = useState(0);
 
   const latestStateRef = useRef<Omit<SavedSearchState, "scrollTop">>({
@@ -181,13 +194,14 @@ export function SearchSection(props: SubtitleMenuProps) {
       const playing = isPlayingTarget(tgt, playingTarget) ? playbackContext : null;
       const searchQuery = {
         imdbId: tgt.imdbId || undefined,
-        title: tgt.imdbId ? undefined : tgt.title || undefined,
+        title: tgt.title || undefined,
         type: tgt.type,
         season: tgt.season ?? undefined,
         episode: tgt.episode ?? undefined,
         langs: settings.preferredSubLangs ?? [],
         candidateIds: playing?.candidateIds,
         stremioId: playing?.stremioId ?? undefined,
+        filename: playing?.filename ?? undefined,
       };
       const searchOpts: SearchOptions = {
         providers: {
@@ -215,7 +229,7 @@ export function SearchSection(props: SubtitleMenuProps) {
       const r = await searchSubtitles(searchQuery, searchOpts);
       if (seq !== searchSeq.current) return;
       setResults(r);
-      searchCache.set(cacheKey(tgt), r);
+      searchCache.set(cacheKey(tgt, playing?.filename), r);
       setPendingSources(0);
     } finally {
       setLoading(false);
@@ -223,16 +237,29 @@ export function SearchSection(props: SubtitleMenuProps) {
   };
 
   useEffect(() => {
-    if (addons === null || addonsLoading || initialSearchDone.current) return;
+    if (!playbackContext || isOverride || coordsTouchedRef.current) return;
+    const s = playbackContext.searchSeason;
+    const e = playbackContext.searchEpisode;
+    if (s == null && e == null) return;
+    if (s === target.season && e === target.episode) return;
+    const next = { ...target, season: s, episode: e };
+    setTarget(next);
+  }, [playbackContext, isOverride, target]);
+
+  useEffect(() => {
+    if (addons === null || addonsLoading) return;
     if (!target.imdbId && !target.title) return;
-    initialSearchDone.current = true;
-    const cached = searchCache.get(cacheKey(target));
+    const playing = isPlayingTarget(target, playingTarget) ? playbackContext : null;
+    const key = cacheKey(target, playing?.filename);
+    if (lastAutoSearchKey.current === key) return;
+    lastAutoSearchKey.current = key;
+    const cached = searchCache.get(key);
     if (cached) {
       setResults(cached);
       return;
     }
     void run(target);
-  }, [addons, addonsLoading]);
+  }, [addons, addonsLoading, target, playingTarget, playbackContext]);
 
   useEffect(() => {
     if (!suggestOpen) return;
@@ -244,7 +271,7 @@ export function SearchSection(props: SubtitleMenuProps) {
     }
     setSuggestLoading(true);
     const id = window.setTimeout(() => {
-      searchTitleCandidates(query)
+      searchTitleCandidates(query, metaImdbId)
         .then((c) => setSuggestions(c.slice(0, 8)))
         .catch(() => setSuggestions([]))
         .finally(() => setSuggestLoading(false));
@@ -278,8 +305,8 @@ export function SearchSection(props: SubtitleMenuProps) {
     }
     setLoading(true);
     setResults(null);
-    const cands = await searchTitleCandidates(query).catch(() => []);
-    const best = bestCandidate(cands, parsed);
+    const cands = await searchTitleCandidates(query, metaImdbId).catch(() => []);
+    const best = bestCandidate(cands, parsed, metaImdbId);
     const next: TitleTarget = best
       ? {
           imdbId: best.imdbId,
@@ -302,6 +329,7 @@ export function SearchSection(props: SubtitleMenuProps) {
   };
 
   const changeEp = (patch: Partial<Pick<TitleTarget, "season" | "episode">>) => {
+    coordsTouchedRef.current = true;
     const next = { ...target, ...patch };
     setTarget(next);
     void run(next);
@@ -310,9 +338,12 @@ export function SearchSection(props: SubtitleMenuProps) {
   const clearOverride = () => {
     setTarget(playingTarget);
     setIsOverride(false);
+    coordsTouchedRef.current = false;
     setQuery(
-      metaTitle && season != null && episode != null
-        ? `${metaTitle} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`
+      metaTitle && playingTarget.season != null && playingTarget.episode != null
+        ? `${metaTitle} S${String(playingTarget.season).padStart(2, "0")}E${String(
+            playingTarget.episode,
+          ).padStart(2, "0")}`
         : (metaTitle ?? ""),
     );
     setSuggestOpen(false);
@@ -410,7 +441,11 @@ export function SearchSection(props: SubtitleMenuProps) {
           {loading ? <Loader2 size={13} className="animate-spin" /> : t("Search")}
         </button>
         {hasTargetBar && (
-          <HoverTooltip label={filtersOpen ? t("Hide filters") : t("Show filters")} side="bottom" align="end">
+          <HoverTooltip
+            label={filtersOpen ? t("Hide filters") : t("Show filters")}
+            side="bottom"
+            align="end"
+          >
             <button
               type="button"
               onClick={() => setFiltersOpen((v) => !v)}
@@ -494,11 +529,14 @@ export function SearchSection(props: SubtitleMenuProps) {
             items={items}
             defaultOpen={i === 0}
             onAdd={(r) =>
-              onAddSubtitle(r.url, r.lang, providerLabel(r), {
+              onAddSubtitle(r.url, r.lang, subtitleTitleOf(r), {
                 format: r.format,
                 encoding: r.encoding,
                 release: releaseOf(r),
                 provider: providerLabel(r),
+                fps: r.fps,
+                downloads: r.downloads,
+                author: r.author,
               })
             }
           />

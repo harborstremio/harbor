@@ -77,14 +77,8 @@ export function CollapsibleSection({
           </button>
         )}
       </div>
-      <div
-        className={`grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)] motion-reduce:transition-none ${
-          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <div className="flex flex-col gap-3 pt-0.5">{children}</div>
-        </div>
+      <div className={open ? "" : "hidden"}>
+        <div className="flex flex-col gap-3 pt-0.5">{children}</div>
       </div>
     </section>
   );

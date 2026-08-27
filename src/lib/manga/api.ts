@@ -13,6 +13,7 @@ import {
 } from "./sources/aggregate";
 import { suwayomiSourcesRevision } from "./sources/suwayomi/source-events";
 import { mangaLibraryRevision } from "./library-events";
+import { loadMangaLangFilter, mangaLangFilterRevision } from "./lang-filter";
 import type { MangaChapter, MangaProvider, MangaSummary } from "./types";
 
 export {
@@ -43,7 +44,6 @@ const TRIES = 2;
 const DISK_PREFIX = "harbor.manga.cache.v2.";
 const DISK_MAX_AGE = 7 * DAY;
 const POPULAR_DISK = { fresh: 30 * MIN, stale: 6 * HOUR };
-const TAGS_DISK = { fresh: 12 * HOUR, stale: 7 * DAY };
 
 function isEmpty(data: unknown): boolean {
   return data == null || (Array.isArray(data) && data.length === 0);
@@ -191,10 +191,10 @@ export function clearMangaCache(): void {
 
 export function popularManga(offset = 0, tagId?: string) {
   const tag = tagId ?? "";
-  return cached("pop", `${offset}|${tag}`, 5 * MIN, (p) => p.popular(offset, tagId), {
+  return cached("pop2", `${offset}|${tag}`, 5 * MIN, (p) => p.popular(offset, tagId), {
     tries: 3,
     timeout: 10_000,
-    disk: offset === 0 ? { key: `pop|${tag}`, ...POPULAR_DISK } : undefined,
+    disk: offset === 0 ? { key: `pop2|${tag}`, ...POPULAR_DISK } : undefined,
   });
 }
 
@@ -276,14 +276,14 @@ async function streamOrCall(
 export function popularMangaStream(offset: number, tagId: string | undefined, onChunk: Chunk) {
   const tag = tagId ?? "";
   return streamOrCall(
-    "pop",
+    "pop2",
     `${offset}|${tag}`,
     5 * MIN,
     (p) => p.popular(offset, tagId),
     {
       tries: 3,
       timeout: 10_000,
-      disk: offset === 0 ? { key: `pop|${tag}`, ...POPULAR_DISK } : undefined,
+      disk: offset === 0 ? { key: `pop2|${tag}`, ...POPULAR_DISK } : undefined,
     },
     onChunk,
   );
@@ -363,15 +363,15 @@ export function chapterPages(chapterId: string) {
 export function mangaTags() {
   const revision = suwayomiSourcesRevision();
   const lib = mangaLibraryRevision();
+  const langRev = mangaLangFilterRevision();
+  // Key by the selection itself (not just a counter) so entries stay valid across app restarts.
+  const langKey = encodeURIComponent(loadMangaLangFilter().slice().sort().join("+"));
   return cached(
     "tags",
-    `${revision}|${lib}`,
+    `${revision}|${lib}|${langRev}|${langKey}`,
     30 * MIN,
     (p) => (p.tags ? p.tags() : Promise.resolve([])),
-    {
-      tries: 1,
-      disk: { key: `tags|${revision}|${lib}`, ...TAGS_DISK },
-    },
+    { tries: 1 },
   );
 }
 

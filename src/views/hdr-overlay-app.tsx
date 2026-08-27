@@ -1,12 +1,15 @@
-import { Component, useEffect, useMemo, useRef, useState } from "react";
+import { Component, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AuthProvider } from "@/lib/auth";
 import { SettingsProvider } from "@/lib/settings";
 import { ShellLayer } from "./player/shell-layer";
 import { DragClickStage } from "./player/drag-click-stage";
 import { emptySnapshot, type PlayerSnapshot } from "@/lib/player/bridge";
 import { createForwardingMpvBridge } from "@/lib/player/mpv-forward";
+import { buildSubtitleTimingMediaKey } from "@/lib/player/subtitle-fps";
 import { hdrOverlayEmitAction, onHdrStageProps } from "@/lib/hdr-overlay";
 import type { PlayerSrc } from "@/lib/view";
+import { PlayerInteractionLockControls } from "@/components/player/player-interaction-lock";
+import { usePlayerInteractionBlocker } from "./player/hooks/use-player-interaction-lock";
 
 export type HdrStagePayload = {
   snap: PlayerSnapshot;
@@ -21,6 +24,10 @@ export type HdrStagePayload = {
   hasPrevEp: boolean;
   hasNextEp: boolean;
   pipMode: boolean;
+  screenLockEnabled: boolean;
+  screenLocked: boolean;
+  screenLockControlsVisible: boolean;
+  screenLockBinding: string;
 };
 
 function emitDead() {
@@ -70,13 +77,37 @@ function HdrOverlayChrome() {
   const bridgeRef = useRef(bridge);
   const snapRef = useRef<PlayerSnapshot>(emptySnapshot);
   const gotPayloadRef = useRef(false);
+  const toggleLock = useCallback(() => {
+    const event = payload?.screenLocked ? "hdr-stage://unlock" : "hdr-stage://lock";
+    void hdrOverlayEmitAction(event, {});
+  }, [payload?.screenLocked]);
+  const reportLockedActivity = useCallback(
+    () => void hdrOverlayEmitAction("hdr-stage://activity", {}),
+    [],
+  );
+
+  usePlayerInteractionBlocker({
+    enabled: payload?.screenLockEnabled ?? false,
+    locked: payload?.screenLocked ?? false,
+    binding: payload?.screenLockBinding ?? "ctrl+l",
+    onToggle: toggleLock,
+    onLockedActivity: reportLockedActivity,
+  });
 
   useEffect(() => {
     const un = onHdrStageProps<HdrStagePayload>((p) => {
       gotPayloadRef.current = true;
       setPayload(p);
       snapRef.current = p.snap;
-      bridge.pushSnapshot(p.snap);
+      bridge.pushSnapshot(
+        p.snap,
+        buildSubtitleTimingMediaKey({
+          sourceUrl: p.src.url,
+          mediaId: p.src.meta.id,
+          season: p.src.episode?.season,
+          episode: p.src.episode?.episode,
+        }),
+      );
     });
     void hdrOverlayEmitAction("hdr-stage://request", {});
     let tries = 0;
@@ -180,6 +211,14 @@ function HdrOverlayChrome() {
         episode={src.episode?.episode ?? null}
         download={download}
         sleep={undefined}
+      />
+      <PlayerInteractionLockControls
+        enabled={payload.screenLockEnabled}
+        locked={payload.screenLocked}
+        visible={payload.screenLocked ? payload.screenLockControlsVisible : payload.visible}
+        binding={payload.screenLockBinding}
+        onLock={() => act("hdr-stage://lock")}
+        onUnlock={() => act("hdr-stage://unlock")}
       />
     </div>
   );

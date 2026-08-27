@@ -4,12 +4,19 @@ import { HarborLoader } from "@/components/harbor-loader";
 import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
+import { invalidatePreparedDebridLink } from "@/lib/debrid/playback-preparation";
 import type { PanelCorner } from "@/lib/player-chrome";
 import { useSettings } from "@/lib/settings";
 import { spoilerMaskFor } from "@/lib/spoilers";
 import { registerStreamProxy } from "@/lib/stream-proxy";
+import { unregisterStreamProxy } from "@/lib/stream-proxy";
 import { preflightCheck } from "@/lib/streams/preflight";
 import { resolveStream } from "@/lib/streams/resolve";
+import {
+  beginPlaybackTrace,
+  finishPlaybackTrace,
+  markPlaybackTrace,
+} from "@/lib/perf/playback-trace";
 import type { ScoredStream } from "@/lib/streams/types";
 import { useView, type PlayEpisode } from "@/lib/view";
 import { useQueue } from "@/lib/queue";
@@ -114,6 +121,13 @@ export function EpisodePanel({
     if (!pickingFor || roomGuest) return;
     if (!stream.url && stream.externalUrl) return;
     const ep = pickingFor;
+    const playbackTraceId = beginPlaybackTrace(
+      stream.url ? "direct" : debrids.length > 0 ? "debrid" : "p2p",
+    );
+    let traceTransferred = false;
+    let proxySessionId: string | undefined;
+    let proxyTransferred = false;
+    markPlaybackTrace(playbackTraceId, "resolve-start");
     setResolvingFor(ep);
     try {
       const hint = { season: ep.season ?? null, episode: ep.episode ?? null };
@@ -129,21 +143,32 @@ export function EpisodePanel({
         setResolvingFor(null);
         return;
       }
+      markPlaybackTrace(playbackTraceId, "resolve-ready");
       let playUrl = r.data.url;
-      if (r.data.headers && Object.keys(r.data.headers).length > 0) {
+      const hasProxyHeaders = !!r.data.headers && Object.keys(r.data.headers).length > 0;
+      if (hasProxyHeaders) {
         try {
           const proxied = await registerStreamProxy(r.data.url, r.data.headers);
           playUrl = proxied.url;
+          proxySessionId = proxied.sessionId;
         } catch {
           setResolvingFor(null);
           return;
         }
       }
-      const skipPreflight = r.via === "p2p" || r.via === "direct";
+      const skipPreflight =
+        r.via === "p2p" ||
+        r.via === "direct" ||
+        r.via === "local-download" ||
+        r.readiness?.exactUrlValidated === true;
+      if (!skipPreflight) markPlaybackTrace(playbackTraceId, "preflight-start");
       const preflight = skipPreflight
         ? ({ ok: true } as const)
         : await preflightCheck(playUrl).catch(() => ({ ok: true }) as const);
+      if (!skipPreflight) markPlaybackTrace(playbackTraceId, "preflight-ready");
       if (!preflight.ok && preflight.reason === "stub") {
+        const preparedDebrid = debrids.find((debrid) => debrid.slug === r.via);
+        if (preparedDebrid) invalidatePreparedDebridLink(stream, preparedDebrid, hint);
         setResolvingFor(null);
         return;
       }
@@ -154,6 +179,9 @@ export function EpisodePanel({
         url: playUrl,
         title: stream.parsedTitle ?? stream.title ?? stream.name ?? meta.name,
         notWebReady: !stream.url && !!stream.infoHash,
+        playbackTraceId,
+        proxySessionId,
+        historyUrl: r.data.url,
         subtitles: [],
         streamRef: {
           infoHash: stream.infoHash ?? null,
@@ -166,9 +194,17 @@ export function EpisodePanel({
           size: stream.size ?? null,
         },
       });
+      markPlaybackTrace(playbackTraceId, "player-opened");
+      traceTransferred = true;
+      proxyTransferred = true;
       onClose();
     } catch {
       setResolvingFor(null);
+    } finally {
+      if (proxySessionId && !proxyTransferred) {
+        void unregisterStreamProxy(proxySessionId).catch(() => {});
+      }
+      if (!traceTransferred) finishPlaybackTrace(playbackTraceId, "failed");
     }
   };
   return (

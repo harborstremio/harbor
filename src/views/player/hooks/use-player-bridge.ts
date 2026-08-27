@@ -4,7 +4,11 @@ import { probeMpv } from "@/lib/player/mpv";
 import { mergeMpvOptions } from "@/lib/player/mpv-tuning";
 import { metaIsAnime } from "@/lib/player/anime-src";
 import { anime4kShadersFor, type Anime4kChoice } from "./use-anime4k";
-import { generalShaderChain, generalShaderKey, shaderCompanionOptions } from "@/lib/player/shader-chain";
+import {
+  generalShaderChain,
+  generalShaderKey,
+  shaderCompanionOptions,
+} from "@/lib/player/shader-chain";
 import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
 import { setPlaybackClock } from "@/lib/player/playback-clock";
@@ -16,6 +20,7 @@ import { pickBridge } from "../player-utils";
 function snapChangedIgnoringClock(a: PlayerSnapshot, b: PlayerSnapshot): boolean {
   return (
     a.status !== b.status ||
+    a.firstFrameReady !== b.firstFrameReady ||
     a.durationSec !== b.durationSec ||
     a.volume !== b.volume ||
     a.muted !== b.muted ||
@@ -83,7 +88,8 @@ export function usePlayerBridge(params: {
   }, [svpOn]);
   const isLiveLike =
     !!src.meta.id?.startsWith("iptv:") ||
-    (!!src.meta.type && !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+    (!!src.meta.type &&
+      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
   const chosenEngine =
     isLiveLike && !src.notWebReady ? "html5" : autoFallbackTried ? "mpv" : settings.playerEngine;
   const bridgeKey = `${chosenEngine}|${anime4kOn}|${embedActive}|${anime4kOn ? settings.playerAnime4kShaders.join(",") : ""}|${generalShaderKey(settings)}|${svpOn}|${svpOn ? settings.svpVpyPath : ""}`;
@@ -119,7 +125,11 @@ export function usePlayerBridge(params: {
         embed: embedActive,
         d3d11Flip: settings.playerD3d11Flip,
         anime4kShaders: [
-          ...anime4kShadersFor(settings, src, (settings.playerAnime4kOverride as Anime4kChoice) || "auto"),
+          ...anime4kShadersFor(
+            settings,
+            src,
+            (settings.playerAnime4kOverride as Anime4kChoice) || "auto",
+          ),
           ...generalShaderChain(settings),
         ],
         macEdr: false,

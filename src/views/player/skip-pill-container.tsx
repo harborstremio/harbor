@@ -86,25 +86,43 @@ export function SkipPillContainer({
     onSkip,
   ]);
 
-  const [autoHiddenKey, setAutoHiddenKey] = useState<string | null>(null);
   const [dismissedKeys, setDismissedKeys] = useState<Set<string>>(() => new Set());
+  const prevSkipKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
-    setAutoHiddenKey(null);
     setDismissedKeys(new Set());
+    prevSkipKeyRef.current = null;
   }, [skipSegments]);
+
   const buttonKey =
     realActiveSkip && settings.showSkipButton
       ? `${realActiveSkip.kind}:${Math.round(realActiveSkip.startSec)}:${Math.round(realActiveSkip.endSec)}`
       : null;
+
   useEffect(() => {
-    if (!buttonKey || settings.skipButtonHideSec <= 0) return;
-    const id = window.setTimeout(() => setAutoHiddenKey(buttonKey), settings.skipButtonHideSec * 1000);
-    return () => window.clearTimeout(id);
-  }, [buttonKey, settings.skipButtonHideSec]);
-  const skipHidden =
-    buttonKey != null && (buttonKey === autoHiddenKey || dismissedKeys.has(buttonKey));
+    // When playback leaves the active skip segment (e.g. user seeks back to the start of the video),
+    // clear the dismissed/hidden state so seeking back into the intro segment shows the Skip Intro prompt again!
+    if (prevSkipKeyRef.current && prevSkipKeyRef.current !== buttonKey) {
+      const old = prevSkipKeyRef.current;
+      setDismissedKeys((prev) => {
+        if (!prev.has(old)) return prev;
+        const next = new Set(prev);
+        next.delete(old);
+        return next;
+      });
+    }
+    prevSkipKeyRef.current = buttonKey;
+  }, [buttonKey]);
+
+  const skipHidden = buttonKey != null && dismissedKeys.has(buttonKey);
   const displaySkip = settings.showSkipButton && !skipHidden ? realActiveSkip : null;
   const activeSkip = displaySkip ?? syntheticOutro;
+
+  const activeKey =
+    buttonKey ??
+    (activeSkip
+      ? `${activeSkip.kind}:${Math.round(activeSkip.startSec)}:${Math.round(activeSkip.endSec)}`
+      : null);
 
   return (
     <SkipPill
@@ -116,15 +134,14 @@ export function SkipPillContainer({
       remainingSec={remainingSec}
       leadSec={leadSec}
       visible={visible}
+      countdownSec={settings.skipButtonHideSec}
       onSkip={() => {
         if (activeSkip) onSkip(activeSkip.endSec);
       }}
       onNextEpisode={onNextEpisode}
       onCancelAutoNext={onCancelAutoNext}
       onDismiss={
-        displaySkip && buttonKey
-          ? () => setDismissedKeys((prev) => new Set(prev).add(buttonKey))
-          : undefined
+        activeKey ? () => setDismissedKeys((prev) => new Set(prev).add(activeKey)) : undefined
       }
     />
   );

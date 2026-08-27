@@ -109,6 +109,10 @@ export function TextSyncList({
     }
   }, [activeIndex, following, searching, scrollToIndex]);
 
+  useEffect(() => {
+    setSelected(null);
+  }, [sectionMode]);
+
   const jumpToNow = () => {
     if (activeIndex == null) return;
     setFollowing(true);
@@ -117,8 +121,9 @@ export function TextSyncList({
 
   const handleRowClick = (i: number) => {
     if (sectionMode) {
-      if (rangeStart == null || rangeEnd != null) onRangeStart(i);
-      else onRangeEnd(i);
+      if (rangeStart == null) onRangeStart(i);
+      else if (rangeEnd == null) onRangeEnd(i);
+      else setSelected((prev) => (prev === i ? null : i));
       return;
     }
     setSelected((prev) => (prev === i ? null : i));
@@ -131,7 +136,7 @@ export function TextSyncList({
           const isActive = i === activeIndex;
           const inRange = lo != null && hi != null && i >= lo && i <= hi;
           const fixed = inSegment.has(i);
-          const isSelected = selected === i && !sectionMode;
+          const isSelected = selected === i;
           const isMatch = searching && cue.text.toLowerCase().includes(q);
           const pt = pointNum.get(cue.start);
           return (
@@ -142,7 +147,10 @@ export function TextSyncList({
               }}
             >
               <button
+                type="button"
                 onClick={() => handleRowClick(i)}
+                aria-current={isActive ? "true" : undefined}
+                aria-pressed={isSelected}
                 dir="auto"
                 className={`flex w-full items-start gap-4 border-b border-edge-soft/40 px-5 py-3.5 text-start transition-colors ${
                   isActive
@@ -170,8 +178,11 @@ export function TextSyncList({
                 </span>
                 <div className="mt-0.5 flex shrink-0 items-center gap-1.5">
                   {pt != null && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/25 text-[10px] font-bold text-accent ring-1 ring-accent/40">
-                      {pt}
+                    <span
+                      title={pt === 1 ? t("Aligned here") : t("Drift fixed")}
+                      className="flex h-5 items-center justify-center whitespace-nowrap rounded-full bg-accent/20 px-2 text-[10px] font-bold text-accent ring-1 ring-accent/35"
+                    >
+                      {pt === 1 ? t("Aligned") : t("Drift fixed")}
                     </span>
                   )}
                   {isActive ? (
@@ -186,6 +197,7 @@ export function TextSyncList({
               {isSelected && (
                 <div className="flex items-center gap-2.5 bg-elevated/50 px-5 py-3">
                   <button
+                    type="button"
                     onClick={() => {
                       onSyncHere(i);
                       setSelected(null);
@@ -193,9 +205,10 @@ export function TextSyncList({
                     className="flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-[13.5px] font-semibold text-canvas transition-transform active:scale-95"
                   >
                     <Check size={15} strokeWidth={2.6} />
-                    {t("Sync from here")}
+                    {t("Align to now")}
                   </button>
                   <button
+                    type="button"
                     onClick={() => onSeek(i)}
                     className="flex items-center gap-2 rounded-xl bg-raised px-4 py-2 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
                   >
@@ -210,6 +223,7 @@ export function TextSyncList({
       </div>
       {!following && !searching && activeIndex != null && (
         <button
+          type="button"
           onClick={jumpToNow}
           className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-accent px-4 py-2 text-[13px] font-semibold text-canvas shadow-[0_10px_28px_-6px_rgba(0,0,0,0.6)] transition-transform active:scale-95"
         >

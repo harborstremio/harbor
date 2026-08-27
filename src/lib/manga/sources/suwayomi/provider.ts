@@ -31,6 +31,7 @@ import {
 } from "./graphql";
 import { loadSources, pickTransport, sourceLang, withTransportFallback } from "./transport";
 import { registerServerPageHeaders } from "@/lib/manga/plugins/adapter";
+import { langFilterMatches, loadMangaLangFilter } from "@/lib/manga/lang-filter";
 
 const SEARCH_ALL_CONCURRENCY = 4;
 
@@ -107,8 +108,61 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
       .filter((m): m is MangaSummary => !!m);
   }
 
+  let popularCache: { key: string; at: number; items: MangaSummary[] } | null = null;
+  const POPULAR_CACHE_TTL = 5 * 60_000;
+  const POPULAR_PAGES = 3;
+  const POPULAR_SOURCE_CAP = 20;
+  const POPULAR_MAX_TOTAL = 150;
+
+  async function mergedPopular(): Promise<MangaSummary[]> {
+    const filter = loadMangaLangFilter();
+    const cacheKey = `${server.base}|${[...filter].sort().join("+")}`;
+    if (
+      popularCache &&
+      popularCache.key === cacheKey &&
+      Date.now() - popularCache.at < POPULAR_CACHE_TTL
+    ) {
+      return popularCache.items;
+    }
+    const t = await pickTransport(client);
+    const sources = (await loadSources(client, t))
+      .filter((s) => langFilterMatches(filter, s.lang))
+      .slice(0, POPULAR_SOURCE_CAP);
+    if (sources.length === 0) {
+      popularCache = { key: cacheKey, at: Date.now(), items: [] };
+      return [];
+    }
+    const seen = new Set<string>();
+    const out: MangaSummary[] = [];
+    let next = 0;
+    const worker = async () => {
+      while (next < sources.length) {
+        const source = sources[next++];
+        try {
+          let offset = 0;
+          for (let page = 0; page < POPULAR_PAGES; page++) {
+            const items = await browse(source.id, "popular", offset, "");
+            if (items.length === 0) break;
+            for (const m of items) {
+              if (seen.has(m.id)) continue;
+              seen.add(m.id);
+              out.push(m);
+            }
+            offset += items.length;
+            if (out.length >= POPULAR_MAX_TOTAL) return;
+          }
+        } catch {
+          /* skip source that fails to return popular */
+        }
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(4, sources.length) }, () => worker()));
+    popularCache = { key: cacheKey, at: Date.now(), items: out };
+    return out;
+  }
+
   async function popular(offset: number, tagId?: string): Promise<MangaSummary[]> {
-    if (!tagId) return offset > 0 ? [] : library();
+    if (!tagId) return offset > 0 ? [] : mergedPopular();
     return browse(tagId, "popular", offset, "");
   }
 
@@ -211,11 +265,19 @@ export function makeSuwayomiProvider(baseUrl: string, basicAuth?: string): Manga
 
   async function tags(): Promise<MangaTag[]> {
     const t = await pickTransport(client);
-    return (await loadSources(client, t)).map((s) => ({
-      id: s.id,
-      name: s.lang && s.lang !== "en" ? `${s.name} (${s.lang.toUpperCase()})` : s.name,
-      group: "Sources",
-    }));
+    const filter = loadMangaLangFilter();
+    return (await loadSources(client, t))
+      .filter((s) => langFilterMatches(filter, s.lang))
+      .map((s) => ({
+        id: s.id,
+        name:
+          s.lang.toLowerCase() === "localsourcelang"
+            ? "Local Source"
+            : s.lang && s.lang !== "en"
+              ? `${s.name} (${s.lang.toUpperCase()})`
+              : s.name,
+        group: "Sources",
+      }));
   }
 
   async function setLibrary(id: string, inLibrary: boolean): Promise<void> {

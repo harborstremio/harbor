@@ -11,6 +11,22 @@ import { parseKitsuId } from "./providers/kitsu";
 import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
+import { foreignAnimeProviderSeasons } from "./streams/anime-identity";
+
+async function filterForeignAnimeSeasons(
+  metaId: string,
+  imdbId: string | null,
+  nums: number[],
+): Promise<number[]> {
+  try {
+    const foreign = await foreignAnimeProviderSeasons(metaId, imdbId);
+    if (!foreign) return nums;
+    const out = nums.filter((n) => !foreign.has(n));
+    return out.length > 0 ? out : nums;
+  } catch {
+    return nums;
+  }
+}
 
 export function isAnimeId(id: string): boolean {
   return (
@@ -99,7 +115,8 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
         ep.imdbSeason = m.seasonNumber;
       }
       if (ep.imdbEpisode == null && m.episodeNumber != null) ep.imdbEpisode = m.episodeNumber;
-      if (ep.absoluteNumber == null && m.absoluteEpisodeNumber) ep.absoluteNumber = m.absoluteEpisodeNumber;
+      if (ep.absoluteNumber == null && m.absoluteEpisodeNumber)
+        ep.absoluteNumber = m.absoluteEpisodeNumber;
       if (ep.tvdbEpisodeId == null && m.tvdbId) ep.tvdbEpisodeId = m.tvdbId;
       const air = m.airDateUtc ?? m.airDate;
       if (air && (!ep.airDate || bogusAirdates)) ep.airDate = air;
@@ -170,7 +187,12 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
     const episode =
       typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null || season < 1) continue;
-    const ep: PlayEpisode = { season, episode, name: v.title || v.name || undefined, still: v.thumbnail };
+    const ep: PlayEpisode = {
+      season,
+      episode,
+      name: v.title || v.name || undefined,
+      still: v.thumbnail,
+    };
     const vid = (v as { id?: string }).id;
     if (vid && (vid.startsWith("kitsu:") || vid.startsWith("mal:"))) ep.kitsuStreamId = vid;
     else if (vid) ep.videoId = vid;
@@ -185,7 +207,11 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
 export async function fetchAdjacentEpisodes(
   meta: Meta,
   current: { season: number; episode: number },
-  opts: { tmdbKey: string; kitsuStreamId?: string; skip?: (season: number, episode: number) => boolean },
+  opts: {
+    tmdbKey: string;
+    kitsuStreamId?: string;
+    skip?: (season: number, episode: number) => boolean;
+  },
 ): Promise<Adjacent> {
   const animeSeries = animeSeriesFromStreamId(opts.kitsuStreamId);
   if (animeSeries) {
@@ -238,9 +264,7 @@ export async function fetchUpcomingEpisodes(
     let cursor = current.episode;
     while (out.length < count && season <= current.season + 3) {
       const eps = await tmdbSeason(opts.tmdbKey, tvId, season);
-      const start = season === current.season
-        ? eps.findIndex((e) => e.episode === cursor) + 1
-        : 0;
+      const start = season === current.season ? eps.findIndex((e) => e.episode === cursor) + 1 : 0;
       if (start < 0) break;
       for (let i = start; i < eps.length && out.length < count; i++) out.push(eps[i]);
       season += 1;
@@ -276,11 +300,7 @@ async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
   for (const v of raw) {
     const season = typeof v.season === "number" ? v.season : null;
     const episode =
-      typeof v.episode === "number"
-        ? v.episode
-        : typeof v.number === "number"
-          ? v.number
-          : null;
+      typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null) continue;
     if (season < 1) continue;
     eps.push({
@@ -322,12 +342,14 @@ function uniqueAnimeSeasons(eps: PlayEpisode[] | null): number[] {
 export async function fetchSeasonList(meta: Meta, opts: { tmdbKey: string }): Promise<number[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) {
-    return uniqueSeasons(await loadCinemetaEpisodes(meta.id));
+    const nums = uniqueSeasons(await loadCinemetaEpisodes(meta.id));
+    return filterForeignAnimeSeasons(meta.id, meta.id, nums);
   }
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
     const detail = await tmdbDetails(opts.tmdbKey, meta).catch(() => null);
     const nums = (detail?.seasons ?? []).map((s) => s.seasonNumber).filter((n) => n >= 1);
-    return [...new Set(nums)].sort((a, b) => a - b);
+    const deduped = [...new Set(nums)].sort((a, b) => a - b);
+    return filterForeignAnimeSeasons(meta.id, null, deduped);
   }
   return uniqueAnimeSeasons(await getNonStandardEpisodes(meta));
 }
@@ -351,7 +373,10 @@ export async function fetchSeasonEpisodes(
   return (eps ?? []).filter((e) => animeSeasonKey(e) === season);
 }
 
-export async function fetchEpisodeList(meta: Meta, opts: { tmdbKey: string }): Promise<PlayEpisode[]> {
+export async function fetchEpisodeList(
+  meta: Meta,
+  opts: { tmdbKey: string },
+): Promise<PlayEpisode[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) return (await loadCinemetaEpisodes(meta.id)) ?? [];
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {

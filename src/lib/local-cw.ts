@@ -27,10 +27,19 @@ function activeProfileId(): string {
   try {
     const raw = localStorage.getItem(PROFILES_KEY);
     if (!raw) return "";
-    const s = JSON.parse(raw) as { activeId?: string; profiles?: Array<{ id?: string; isPrimary?: boolean }> };
-    if (typeof s.activeId === "string" && s.activeId) return s.activeId;
-    const primary = s.profiles?.find((p) => p?.isPrimary);
-    return primary && typeof primary.id === "string" ? primary.id : "";
+    const s = JSON.parse(raw) as {
+      activeId?: string;
+      profiles?: Array<{ id?: string; isPrimary?: boolean; shareStremioWith?: string | null }>;
+    };
+    const profiles = Array.isArray(s.profiles) ? s.profiles : [];
+    const active = profiles.find((p) => p.id === s.activeId) ?? null;
+    const own = active?.id ?? profiles.find((p) => p?.isPrimary)?.id ?? "";
+    if (!own) return "";
+    if (active && typeof active.shareStremioWith === "string" && active.shareStremioWith) {
+      const shared = profiles.find((p) => p.id === active.shareStremioWith);
+      if (shared?.id) return shared.id;
+    }
+    return own;
   } catch {
     return "";
   }
@@ -39,7 +48,9 @@ function activeProfileId(): string {
 function primaryProfileId(): string {
   try {
     const raw = localStorage.getItem(PROFILES_KEY);
-    const s = raw ? (JSON.parse(raw) as { profiles?: Array<{ id?: string; isPrimary?: boolean }> }) : null;
+    const s = raw
+      ? (JSON.parse(raw) as { profiles?: Array<{ id?: string; isPrimary?: boolean }> })
+      : null;
     const primary = s?.profiles?.find((p) => p?.isPrimary);
     return (primary && typeof primary.id === "string" && primary.id) || activeProfileId();
   } catch {

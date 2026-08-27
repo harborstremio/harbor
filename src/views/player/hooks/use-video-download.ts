@@ -1,18 +1,14 @@
 import { downloadDir } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { randomUuid } from "@/lib/uuid";
 import {
-  buildDefaultFilename,
-  extensionFromUrl,
-} from "@/lib/download/filename";
-import {
-  startDownload,
-  type DownloadHandle,
-  type DownloadProgress,
-} from "@/lib/download/video-download";
+  cancelDownload,
+  enqueueDownload,
+  revealDownload,
+  useDownloads,
+} from "@/lib/download/downloads-store";
+import { buildDefaultFilename, extensionFromUrl } from "@/lib/download/filename";
 import { useSettings } from "@/lib/settings";
 import { isWindowsDesktop } from "@/lib/platform";
 import type { PlayEpisode } from "@/lib/view";
@@ -28,29 +24,55 @@ type Args = {
   url: string;
   meta: Meta;
   episode?: PlayEpisode;
+  headers?: Record<string, string>;
 };
 
-export function useVideoDownload({ url, meta, episode }: Args) {
+export function useVideoDownload({ url, meta, episode, headers }: Args) {
   const { settings } = useSettings();
-  const [status, setStatus] = useState<DownloadStatus>({ kind: "idle" });
-  const handleRef = useRef<DownloadHandle | null>(null);
-
-  useEffect(
-    () => () => {
-      handleRef.current?.abort();
-    },
-    [],
+  const downloads = useDownloads();
+  const [downloadId, setDownloadId] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const matchesSource = (item: (typeof downloads)[number]) =>
+    item.metaId === meta.id &&
+    item.url === url &&
+    item.season === (episode?.season ?? null) &&
+    item.episode === (episode?.episode ?? null);
+  const selected = downloadId ? downloads.find((item) => item.id === downloadId) : null;
+  const active = downloads.find(
+    (item) => matchesSource(item) && (item.status === "downloading" || item.status === "paused"),
   );
+  const current = selected?.status === "canceled" ? active : (selected ?? active);
+
+  const status: DownloadStatus = preparing
+    ? { kind: "preparing" }
+    : localError
+      ? { kind: "error", message: localError }
+      : current?.status === "done"
+        ? { kind: "done", path: current.path }
+        : current?.status === "downloading" || current?.status === "paused"
+          ? {
+              kind: "downloading",
+              ratio: current.ratio,
+              receivedBytes: current.receivedBytes,
+              totalBytes: current.totalBytes,
+            }
+          : current?.status === "error" || current?.status === "interrupted"
+            ? { kind: "error", message: current.error ?? "Download interrupted" }
+            : { kind: "idle" };
 
   const start = useCallback(async () => {
-    if (handleRef.current) return;
-    setStatus({ kind: "preparing" });
+    if (preparing || current?.status === "downloading" || current?.status === "paused") return;
+    setPreparing(true);
+    setLocalError(null);
     const defaultFilename = buildDefaultFilename(meta, episode, url);
     const ext = extensionFromUrl(url);
     const sep = isWindowsDesktop() ? "\\" : "/";
     const settingsDir = settings.downloadDir.trim();
     const dir = settingsDir || (await downloadDir().catch(() => "")) || "";
-    const defaultPath = dir ? `${dir}${dir.endsWith(sep) ? "" : sep}${defaultFilename}` : defaultFilename;
+    const defaultPath = dir
+      ? `${dir}${dir.endsWith(sep) ? "" : sep}${defaultFilename}`
+      : defaultFilename;
     let path: string | null = null;
     try {
       path = await save({
@@ -58,67 +80,42 @@ export function useVideoDownload({ url, meta, episode }: Args) {
         filters: [{ name: "Video", extensions: [ext, "mkv", "mp4", "webm"] }],
       });
     } catch (e) {
-      setStatus({
-        kind: "error",
-        message: e instanceof Error ? e.message : "Save dialog failed",
-      });
+      setLocalError(e instanceof Error ? e.message : "Save dialog failed");
+      setPreparing(false);
       return;
     }
     if (!path) {
-      setStatus({ kind: "idle" });
+      setPreparing(false);
       return;
     }
 
-    setStatus({ kind: "downloading", ratio: 0, receivedBytes: 0, totalBytes: null });
-    const id = randomUuid();
-    const handle = startDownload(id, url, path, (p: DownloadProgress) => {
-      setStatus({
-        kind: "downloading",
-        ratio: p.ratio,
-        receivedBytes: p.receivedBytes,
-        totalBytes: p.totalBytes,
+    try {
+      const id = await enqueueDownload({
+        meta,
+        episode,
+        url,
+        headers,
+        destinationPath: path,
       });
-    });
-    handleRef.current = handle;
-    handle.promise
-      .then(async () => {
-        setStatus({ kind: "done", path: path! });
-        try {
-          await revealItemInDir(path!);
-        } catch {
-          return;
-        }
-      })
-      .catch((e: unknown) => {
-        if (e instanceof Error && e.name === "AbortError") {
-          setStatus({ kind: "idle" });
-          return;
-        }
-        setStatus({
-          kind: "error",
-          message: e instanceof Error ? e.message : "Download failed",
-        });
-      })
-      .finally(() => {
-        handleRef.current = null;
-      });
-  }, [url, meta, episode, settings.downloadDir]);
+      setDownloadId(id);
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : "Download failed");
+    } finally {
+      setPreparing(false);
+    }
+  }, [current?.status, episode, headers, meta, preparing, settings.downloadDir, url]);
 
   const cancel = useCallback(() => {
-    handleRef.current?.abort();
-  }, []);
+    if (current) cancelDownload(current.id);
+  }, [current]);
 
   const reveal = useCallback(async () => {
-    if (status.kind !== "done") return;
-    try {
-      await revealItemInDir(status.path);
-    } catch {
-      return;
-    }
-  }, [status]);
+    if (current?.status === "done") await revealDownload(current.id);
+  }, [current]);
 
   const reset = useCallback(() => {
-    setStatus({ kind: "idle" });
+    setDownloadId(null);
+    setLocalError(null);
   }, []);
 
   return { status, start, cancel, reveal, reset };

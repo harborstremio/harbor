@@ -64,6 +64,9 @@ export type PlayEpisode = {
 
 export type PlayerSrc = {
   meta: Meta;
+  playbackTraceId?: string;
+  proxySessionId?: string;
+  historyUrl?: string;
   imdbId?: string;
   imdbIdVerified?: boolean;
   episode?: PlayEpisode;

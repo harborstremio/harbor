@@ -7,6 +7,8 @@ const appFill: Record<string, string> = {
   "Downloading speech model {pct}%": "Загрузка речевой модели {pct}%",
   "Downloading speech model": "Загрузка речевой модели",
   "Subtitles synced": "Субтитры синхронизированы",
+  "Subtitles already aligned": "Субтитры уже синхронизированы",
+  "Not enough dialogue to sync": "Недостаточно диалога для синхронизации",
   "Subtitles may be off": "Субтитры могут не совпадать",
   "Different subtitle version": "Другая версия субтитров",
   "Couldn't auto-sync": "Не удалось синхронизировать",
@@ -15,6 +17,25 @@ const appFill: Record<string, string> = {
   "Sync manually": "Синхронизировать вручную",
   "Adjusted timing by": "Тайминг сдвинут на",
   "Timing looks aligned": "Тайминг совпадает",
+  "Variable timing corrected": "Переменный тайминг исправлен",
+  Delay: "Задержка",
+  "Timing rate": "Скорость тайминга",
+  "No timing change was needed. This subtitle already matches the audio.":
+    "Тайминг менять не потребовалось. Эти субтитры уже совпадают со звуком.",
+  "Harbor couldn't analyze the audio for this source. Try again or adjust it manually.":
+    "Harbor не смог проанализировать звук этого источника. Повторите попытку или настройте вручную.",
+  "There isn't enough readable dialogue in this subtitle to measure its timing.":
+    "В субтитрах недостаточно читаемого диалога для измерения тайминга.",
+  "This subtitle appears to be for a different cut. Try another match.":
+    "Похоже, эти субтитры от другой версии. Попробуйте другое совпадение.",
+  "The timing checks disagreed, so Harbor left the subtitle unchanged.":
+    "Проверки тайминга дали разные результаты, поэтому Harbor не изменил субтитры.",
+  "The timing difference was too large to correct safely. Try another subtitle.":
+    "Разница в тайминге слишком велика для безопасного исправления. Попробуйте другие субтитры.",
+  "There wasn't enough matching dialogue to make a safe correction.":
+    "Недостаточно совпадающего диалога для безопасного исправления.",
+  "Harbor couldn't find a reliable timing correction for this subtitle.":
+    "Harbor не смог найти надёжное исправление тайминга для этих субтитров.",
   "Looks right": "Всё верно",
   "Still off": "Всё ещё не так",
   "This subtitle looks like a different version of the video.":
@@ -420,6 +441,7 @@ const appFill: Record<string, string> = {
   Characters: "Персонажи",
   "Characters · {n}": "Персонажи · {n}",
   "Related Anime": "Связанное аниме",
+  "Sequels & Prequels": "Сиквелы и приквелы",
   Adaptations: "Адаптации",
   Statistics: "Статистика",
   "Deletes every episode cached for this source": "Удаляет все серии в кэше для этого источника",

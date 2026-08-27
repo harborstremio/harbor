@@ -5,12 +5,14 @@ import {
   modalOverlayClose,
   modalOverlayEmitAction,
   modalOverlayGetPending,
+  modalOverlayRequestAction,
   onModalShow,
   onModalState,
   type ModalPayload,
 } from "@/lib/modal-overlay";
 import { AudioModal, type AudioModalState } from "@/components/popups/audio-modal";
 import { SubtitleModal, type SubtitleModalState } from "@/components/popups/subtitle-modal";
+import { markLimitReached } from "@/lib/subtitles/limit-signal";
 
 export function ModalOverlayApp() {
   useEffect(() => {
@@ -71,9 +73,20 @@ function ModalRouter() {
         onSelect={(id) => modalOverlayEmitAction("modal://subtitle/select", { id })}
         onSelectSecondary={(id) => modalOverlayEmitAction("modal://subtitle/secondary", { id })}
         onDelay={(sec) => modalOverlayEmitAction("modal://subtitle/delay", { sec })}
-        onAddSubtitle={(url, lang, title, metadata) =>
-          modalOverlayEmitAction("modal://subtitle/add", { url, lang, title, ...metadata })
-        }
+        onEnterSync={() => modalOverlayEmitAction("modal://subtitle/live-sync", {})}
+        onAddSubtitle={async (url, lang, title, metadata) => {
+          const result = await modalOverlayRequestAction<"ok" | "failed" | "limited">(
+            "modal://subtitle/add",
+            {
+              url,
+              lang,
+              title,
+              ...metadata,
+            },
+          );
+          if (result === "limited") markLimitReached(url);
+          return result === "ok";
+        }}
         onClose={close}
       />
     );

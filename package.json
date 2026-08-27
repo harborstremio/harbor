@@ -1,12 +1,14 @@
 {
   "name": "harbor",
-  "version": "0.9.117",
+  "version": "0.9.119",
   "private": true,
   "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b --pretty false",
+    "test": "node --experimental-loader ./scripts/node-test-loader.mjs --test tests/*.test.ts",
     "preview": "vite preview",
     "tauri": "tauri",
     "tauri:build:linux-system": "tauri build --config src-tauri/tauri.linux-system.conf.json",
@@ -21,7 +23,8 @@
   "dependencies": {
     "@mediapipe/tasks-vision": "0.10.35",
     "@tanstack/react-virtual": "^3.14.6",
-    "@tauri-apps/api": "^2",
+    "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
     "@tauri-apps/plugin-deep-link": "^2.4.9",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-fs": "^2.5.1",

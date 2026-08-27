@@ -8,6 +8,8 @@ export function narrowMediaType(t: MetaType | string | undefined): "movie" | "se
   return t === "series" ? "series" : "movie";
 }
 
+export type AddonOrigin = { id: string; name: string; logo?: string; base?: string };
+
 export type Meta = {
   id: string;
   type: MetaType;
@@ -33,7 +35,7 @@ export type Meta = {
   trailers?: Array<{ source: string; type?: string }>;
   trailerStreams?: Array<{ ytId?: string; title?: string }>;
   links?: Array<{ name: string; category: string; url: string }>;
-  addonOrigin?: { id: string; name: string; logo?: string; base?: string };
+  addonOrigin?: AddonOrigin;
   isCollection?: boolean;
   behaviorHints?: { defaultVideoId?: string | null };
   videos?: Array<{
@@ -51,6 +53,37 @@ export type Meta = {
     streams?: Array<Record<string, unknown>>;
   }>;
 };
+
+export function persistableAddonOrigin(origin: unknown): AddonOrigin | undefined {
+  if (!origin || typeof origin !== "object") return undefined;
+  const value = origin as { id?: unknown; name?: unknown; logo?: unknown };
+  if (typeof value.id !== "string" || !value.id) return undefined;
+  return {
+    id: value.id,
+    name: typeof value.name === "string" && value.name ? value.name : value.id,
+    logo: typeof value.logo === "string" ? value.logo : undefined,
+  };
+}
+
+export function hasEmbeddedStreams(videos: Meta["videos"]): boolean {
+  return videos?.some((v) => Array.isArray(v.streams) && v.streams.length > 0) === true;
+}
+
+export function persistableVideos(videos: unknown): Meta["videos"] {
+  if (!Array.isArray(videos) || videos.length === 0 || videos.length > 40) return undefined;
+  const safe = videos
+    .filter(
+      (video): video is NonNullable<Meta["videos"]>[number] => !!video && typeof video === "object",
+    )
+    .map(({ streams: _streams, ...video }) => video);
+  if (safe.length === 0) return undefined;
+  try {
+    if (JSON.stringify(safe).length > 64000) return undefined;
+  } catch {
+    return undefined;
+  }
+  return safe;
+}
 
 export function isAddonNativeMeta(meta: Meta): boolean {
   if (meta.type === "tv" || meta.type === "channel") return true;

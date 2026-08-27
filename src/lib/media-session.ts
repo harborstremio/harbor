@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
 
 const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -6,6 +7,7 @@ let lastState = "";
 let lastActionAt = 0;
 
 export function mediaKeyGate(): boolean {
+  if (isPlayerInteractionLocked()) return false;
   const now = Date.now();
   if (now - lastActionAt < 350) return false;
   lastActionAt = now;

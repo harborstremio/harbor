@@ -12,6 +12,7 @@ import {
   type SourceSubCandidate,
   type SubSource,
 } from "./sub-sources";
+import { resolveSubtitleDownloadUrl } from "./download-url";
 
 const BASE = "https://api.subdl.com/api/v1";
 const DL = "https://dl.subdl.com";
@@ -77,14 +78,16 @@ export const subdlSource: SubSource = {
       return null;
     }
     const data = (await res.json().catch(() => null)) as { subtitles?: SubdlRow[] } | null;
-    const rows = Array.isArray(data?.subtitles) ? (data as { subtitles: SubdlRow[] }).subtitles : [];
+    const rows = Array.isArray(data?.subtitles)
+      ? (data as { subtitles: SubdlRow[] }).subtitles
+      : [];
     const want = new Set(langs);
     const idConfirmed = Boolean(tt || q.tmdbId);
     const series = isSeries(q);
     dinfo(`[sub-src] subdl ${rows.length} rows`);
     return rows.map((r) => {
       const lang = normalizeLang(r.language ?? r.lang ?? "");
-      const url = r.url ? `${DL}${r.url}` : null;
+      const url = resolveSubtitleDownloadUrl(r.url, `${DL}/`);
       const epOk = series && r.season === q.season && r.episode === q.episode;
       return {
         provider: "subdl",

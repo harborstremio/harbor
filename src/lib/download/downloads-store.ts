@@ -7,6 +7,12 @@ import type { PlayEpisode } from "@/lib/view";
 import { buildDefaultFilename, sanitizeName } from "./filename";
 import { startDownload, type DownloadHandle } from "./video-download";
 import { isWindowsDesktop } from "@/lib/platform";
+import {
+  localEngineStreamRef,
+  pauseTorrentUsage,
+  releaseTorrentUsage,
+  retainTorrentUsage,
+} from "@/lib/torrent/local-engine";
 
 export type DownloadItem = {
   id: string;
@@ -18,6 +24,8 @@ export type DownloadItem = {
   episode: number | null;
   streamLabel: string | null;
   url: string;
+  torrentInfoHash?: string | null;
+  torrentFileIdx?: number | null;
   path: string;
   status: "downloading" | "paused" | "done" | "error" | "canceled" | "interrupted";
   receivedBytes: number;
@@ -34,6 +42,7 @@ type EnqueueArgs = {
   streamLabel?: string | null;
   url: string;
   headers?: Record<string, string> | null;
+  destinationPath?: string | null;
 };
 
 const items = new Map<string, DownloadItem>();
@@ -70,8 +79,7 @@ function hydrate() {
     if (!Array.isArray(arr)) return;
     for (const d of arr) {
       if (!d || typeof d.id !== "string" || typeof d.path !== "string") continue;
-      const status =
-        d.status === "downloading" || d.status === "paused" ? "interrupted" : d.status;
+      const status = d.status === "downloading" || d.status === "paused" ? "interrupted" : d.status;
       items.set(d.id, { ...d, status, bytesPerSec: 0 });
     }
     snapshot = [...items.values()].sort((a, b) => b.startedAt - a.startedAt);
@@ -136,6 +144,59 @@ function randomId(): string {
   return `${Date.now().toString(36)}${Math.floor(performance.now()).toString(36)}`;
 }
 
+function torrentOwnerId(id: string): string {
+  return `download:${id}`;
+}
+
+function retainDownloadTorrent(item: DownloadItem): void {
+  const engine = downloadTorrentRef(item);
+  if (engine) retainTorrentUsage(engine.infoHash, torrentOwnerId(item.id));
+}
+
+function releaseDownloadTorrent(item: DownloadItem): void {
+  const engine = downloadTorrentRef(item);
+  if (!engine) return;
+  // The destination file is now authoritative. Remove the temporary engine
+  // copy once no player or other intentional download is still using it.
+  releaseTorrentUsage(engine.infoHash, torrentOwnerId(item.id), { deleteFiles: true });
+}
+
+function downloadTorrentRef(item: DownloadItem) {
+  if (item.torrentInfoHash && item.torrentFileIdx != null) {
+    return { infoHash: item.torrentInfoHash.toLowerCase(), fileIdx: item.torrentFileIdx };
+  }
+  return localEngineStreamRef(item.url);
+}
+
+export async function completedTorrentDownloadFor(
+  infoHash: string,
+  fileIdx?: number,
+  hint?: { season?: number | null; episode?: number | null },
+): Promise<DownloadItem | null> {
+  const key = infoHash.trim().toLowerCase();
+  const candidates = [...items.values()]
+    .filter((item) => {
+      if (item.status !== "done") return false;
+      const ref = downloadTorrentRef(item);
+      return ref?.infoHash === key && (fileIdx == null || ref.fileIdx === fileIdx);
+    })
+    .sort((a, b) => b.startedAt - a.startedAt);
+  const episodeMatch =
+    hint?.season != null && hint.episode != null
+      ? candidates.find((item) => item.season === hint.season && item.episode === hint.episode)
+      : null;
+  const match =
+    fileIdx != null
+      ? (candidates[0] ?? null)
+      : hint?.season != null && hint.episode != null
+        ? (episodeMatch ?? null)
+        : candidates.length === 1
+          ? candidates[0]
+          : null;
+  if (!match) return null;
+  return (await exists(match.path).catch(() => false)) ? match : null;
+}
+
 export function activeDownloadFor(
   metaId: string,
   season?: number | null,
@@ -154,21 +215,34 @@ export function activeDownloadFor(
 }
 
 export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
-  const { meta, episode, streamLabel, url, headers } = args;
-  let dir = await resolveDir();
-  try {
-    const raw = localStorage.getItem("harbor.settings");
-    const settings = raw ? (JSON.parse(raw) as { downloadCreateFolders?: boolean }) : null;
-    if (settings?.downloadCreateFolders && dir) {
-      const folderName = sanitizeName(meta.name || "download");
-      dir = `${dir}${dir.endsWith(sep()) ? "" : sep()}${folderName}`;
-      await mkdir(dir, { recursive: true }).catch(() => {});
-    }
-  } catch {}
-  const filename = buildDefaultFilename(meta, episode, url, streamLabel);
-  const path = await uniquePath(
-    dir ? `${dir}${dir.endsWith(sep()) ? "" : sep()}${filename}` : filename,
+  const { meta, episode, streamLabel, url, headers, destinationPath } = args;
+  const existing = [...items.values()].find(
+    (item) =>
+      item.metaId === meta.id &&
+      item.url === url &&
+      item.season === (episode?.season ?? null) &&
+      item.episode === (episode?.episode ?? null) &&
+      (item.status === "downloading" || item.status === "paused"),
   );
+  if (existing) return existing.id;
+  const torrentRef = localEngineStreamRef(url);
+  let dir = "";
+  if (!destinationPath) {
+    dir = await resolveDir();
+    try {
+      const raw = localStorage.getItem("harbor.settings");
+      const settings = raw ? (JSON.parse(raw) as { downloadCreateFolders?: boolean }) : null;
+      if (settings?.downloadCreateFolders && dir) {
+        const folderName = sanitizeName(meta.name || "download");
+        dir = `${dir}${dir.endsWith(sep()) ? "" : sep()}${folderName}`;
+        await mkdir(dir, { recursive: true }).catch(() => {});
+      }
+    } catch {}
+  }
+  const filename = buildDefaultFilename(meta, episode, url, streamLabel);
+  const path =
+    destinationPath ??
+    (await uniquePath(dir ? `${dir}${dir.endsWith(sep()) ? "" : sep()}${filename}` : filename));
   const id = randomId();
   const item: DownloadItem = {
     id,
@@ -182,6 +256,8 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
     episode: episode?.episode ?? null,
     streamLabel: streamLabel ?? null,
     url,
+    torrentInfoHash: torrentRef?.infoHash ?? null,
+    torrentFileIdx: torrentRef?.fileIdx ?? null,
     path,
     status: "downloading",
     receivedBytes: 0,
@@ -202,6 +278,7 @@ export async function enqueueDownload(args: EnqueueArgs): Promise<string> {
 function beginDownload(id: string): void {
   const item = items.get(id);
   if (!item || handles.has(id)) return;
+  retainDownloadTorrent(item);
   speed.set(id, { bytes: item.receivedBytes, at: Date.now() });
   const handle = startDownload(
     id,
@@ -243,7 +320,11 @@ function beginDownload(id: string): void {
       if (handles.get(id) === handle) handles.delete(id);
       if (completions.get(id) === completion) completions.delete(id);
       speed.delete(id);
-      if (items.get(id)?.status !== "paused") requestHeaders.delete(id);
+      const current = items.get(id);
+      if (current?.status !== "paused") {
+        requestHeaders.delete(id);
+        if (current) releaseDownloadTorrent(current);
+      }
     });
   completions.set(id, completion);
 }
@@ -251,9 +332,11 @@ function beginDownload(id: string): void {
 export function cancelDownload(id: string): void {
   const item = items.get(id);
   if (!item || (item.status !== "downloading" && item.status !== "paused")) return;
+  const wasPaused = item.status === "paused";
   patch(id, { status: "canceled", bytesPerSec: 0 });
   requestHeaders.delete(id);
   handles.get(id)?.abort();
+  if (wasPaused) releaseDownloadTorrent(item);
 }
 
 export function pauseDownload(id: string): void {
@@ -262,6 +345,8 @@ export function pauseDownload(id: string): void {
   if (!item || item.status !== "downloading" || !handle) return;
   patch(id, { status: "paused", bytesPerSec: 0 });
   handle.abort();
+  const engine = downloadTorrentRef(item);
+  if (engine) pauseTorrentUsage(engine.infoHash, torrentOwnerId(id));
 }
 
 export async function resumeDownload(id: string): Promise<void> {
@@ -281,6 +366,7 @@ export function removeDownload(id: string): void {
   speed.delete(id);
   if (items.delete(id)) rebuild();
   if (item) {
+    releaseDownloadTorrent(item);
     void remove(item.path).catch(() => {});
     void remove(`${item.path}.part`).catch(() => {});
   }

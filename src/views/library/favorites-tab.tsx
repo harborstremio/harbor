@@ -13,7 +13,14 @@ import { Grid, WatchlistCard } from "./shared";
 const ANIME_ID = /^(kitsu|mal|anilist|anidb|simkl):/;
 
 function toMeta(e: MediaEntry): Meta {
-  return { id: e.id, type: e.type, name: e.name, poster: e.poster };
+  return {
+    id: e.id,
+    type: e.type,
+    name: e.name,
+    poster: e.poster,
+    addonOrigin: e.addonOrigin,
+    videos: e.videos,
+  };
 }
 
 export function FavoritesTab() {

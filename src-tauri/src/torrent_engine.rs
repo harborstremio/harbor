@@ -14,8 +14,8 @@ use std::time::Duration;
 use librqbit::api::TorrentIdOrHash;
 use librqbit::dht::{Dht, PersistentDhtConfig};
 use librqbit::{
-    AddTorrent, AddTorrentOptions, PeerConnectionOptions, Session, SessionOptions,
-    SessionPersistenceConfig,
+    AddTorrent, AddTorrentOptions, AddTorrentResponse, ManagedTorrent, PeerConnectionOptions,
+    Session, SessionOptions, SessionPersistenceConfig,
 };
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
@@ -59,6 +59,7 @@ pub const LAN_SERVER_PORT: u16 = 11470;
 
 const CACHE_SWEEP_INITIAL_DELAY_SECS: u64 = 60;
 const CACHE_SWEEP_INTERVAL_SECS: u64 = 30 * 60;
+const FILE_SELECTION_TIMEOUT_SECS: u64 = 12;
 static CACHE_SWEEP_RUNNING: AtomicBool = AtomicBool::new(false);
 
 struct CacheSweepGuard;
@@ -232,6 +233,7 @@ pub struct AddResult {
     info_hash: String,
     files: Vec<EngineFile>,
     stream_base: String,
+    already_managed: bool,
 }
 
 #[derive(Serialize)]
@@ -280,6 +282,57 @@ async fn new_session(
     .map_err(|e| format!("{e:#}"))
 }
 
+async fn pause_all_torrents(session: &Arc<Session>) {
+    let handles = session.with_torrents(|torrents| {
+        torrents
+            .map(|(_id, handle)| handle.clone())
+            .collect::<Vec<_>>()
+    });
+    for handle in handles {
+        if handle.is_paused() {
+            continue;
+        }
+        if let Err(error) = session.pause(&handle).await {
+            eprintln!("[torrent-engine] could not pause restored torrent: {error:#}");
+        }
+    }
+}
+
+fn mark_persisted_torrents_paused(dir: &std::path::Path) -> Result<usize, String> {
+    let path = dir.join("session.json");
+    let raw = match std::fs::read(&path) {
+        Ok(raw) => raw,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(0),
+        Err(error) => return Err(error.to_string()),
+    };
+    let mut value = serde_json::from_slice::<serde_json::Value>(&raw).map_err(|e| e.to_string())?;
+    let Some(torrents) = value.get_mut("torrents").and_then(|v| v.as_object_mut()) else {
+        return Ok(0);
+    };
+    let mut changed = 0usize;
+    for torrent in torrents.values_mut() {
+        let Some(record) = torrent.as_object_mut() else {
+            continue;
+        };
+        if record.get("is_paused").and_then(|v| v.as_bool()) == Some(true) {
+            continue;
+        }
+        record.insert("is_paused".to_string(), serde_json::Value::Bool(true));
+        changed += 1;
+    }
+    if changed == 0 {
+        return Ok(0);
+    }
+    let bytes = serde_json::to_vec(&value).map_err(|e| e.to_string())?;
+    let tmp = path.with_extension("json.harbor-pause.tmp");
+    std::fs::write(&tmp, bytes).map_err(|e| e.to_string())?;
+    if let Err(error) = std::fs::rename(&tmp, &path) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(error.to_string());
+    }
+    Ok(changed)
+}
+
 #[derive(serde::Serialize, serde::Deserialize, Default)]
 struct EngineConfig {
     dir: Option<String>,
@@ -316,6 +369,15 @@ async fn init(app: AppHandle) -> Result<(), String> {
     let cfg = read_config(&app);
     let dir = engine_dir(&app, &cfg)?;
     std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    match mark_persisted_torrents_paused(&dir) {
+        Ok(0) => {}
+        Ok(changed) => {
+            eprintln!("[torrent-engine] paused {changed} persisted torrent(s) before restore")
+        }
+        Err(error) => {
+            eprintln!("[torrent-engine] could not pre-pause persisted torrents: {error}")
+        }
+    }
     let (session, dht_tier) = match new_session(&dir, true, true, true).await {
         Ok(s) => (s, 1u8),
         Err(e1) => {
@@ -337,6 +399,9 @@ async fn init(app: AppHandle) -> Result<(), String> {
             }
         }
     };
+    // Persisted stream-cache torrents must never resume peer traffic merely
+    // because Harbor started. A real HTTP stream request resumes them on demand.
+    pause_all_torrents(&session).await;
     let side_dht = dht_boot::build().await;
     let listener = TcpListener::bind(SocketAddr::from(([127, 0, 0, 1], 0)))
         .await
@@ -402,7 +467,7 @@ pub fn ensure_started_on_setup(app: &AppHandle) {
     });
 }
 
-pub fn stop() {
+fn take_session_for_stop() -> Option<Arc<Session>> {
     let mut st = engine().lock().unwrap();
     if let Some(server) = st.server.take() {
         server.abort();
@@ -410,11 +475,29 @@ pub fn stop() {
     if let Some(sweeper) = st.sweeper.take() {
         sweeper.cancel();
     }
-    st.session = None;
+    let session = st.session.take();
     st.side_dht = None;
     st.port = None;
     st.dht_tier = 0;
     st.ready = false;
+    session
+}
+
+async fn finish_session_stop(session: Arc<Session>) {
+    pause_all_torrents(&session).await;
+    session.stop().await;
+}
+
+pub async fn stop_async() {
+    if let Some(session) = take_session_for_stop() {
+        finish_session_stop(session).await;
+    }
+}
+
+pub fn stop() {
+    if let Some(session) = take_session_for_stop() {
+        tauri::async_runtime::block_on(finish_session_stop(session));
+    }
 }
 
 #[tauri::command]
@@ -443,6 +526,83 @@ fn merge_trackers(trackers: Vec<String>) -> Vec<String> {
     trackers::merge_into(trackers)
 }
 
+async fn wait_for_torrent_initialization(
+    session: &Arc<Session>,
+    handle: &Arc<ManagedTorrent>,
+    discard_on_failure: bool,
+) -> Result<(), String> {
+    let result = match timeout(Duration::from_secs(45), handle.wait_until_initialized()).await {
+        Ok(Ok(())) => Ok(()),
+        Ok(Err(error)) => Err(format!("{error:#}")),
+        Err(_) => Err("torrent init timed out".to_string()),
+    };
+    if result.is_err() && discard_on_failure {
+        if let Err(error) = session
+            .delete(TorrentIdOrHash::Hash(handle.info_hash()), true)
+            .await
+        {
+            eprintln!("[torrent-engine] could not discard incomplete torrent: {error:#}");
+        }
+    }
+    result
+}
+
+async fn update_only_files_bounded(
+    session: &Arc<Session>,
+    handle: &Arc<ManagedTorrent>,
+    only: &HashSet<usize>,
+) -> Result<(), String> {
+    timeout(
+        Duration::from_secs(FILE_SELECTION_TIMEOUT_SECS),
+        session.update_only_files(handle, only),
+    )
+    .await
+    .map_err(|_| "torrent file selection timed out".to_string())?
+    .map_err(|error| format!("{error:#}"))
+}
+
+async fn add_result_from_handle(
+    session: &Arc<Session>,
+    handle: Arc<ManagedTorrent>,
+    already_managed: bool,
+    file_idx: Option<usize>,
+) -> Result<AddResult, String> {
+    wait_for_torrent_initialization(session, &handle, !already_managed).await?;
+    let files = handle
+        .with_metadata(|m| {
+            m.file_infos
+                .iter()
+                .enumerate()
+                .map(|(idx, fi)| EngineFile {
+                    idx,
+                    name: fi
+                        .relative_filename
+                        .file_name()
+                        .map(|s| s.to_string_lossy().to_string())
+                        .unwrap_or_else(|| fi.relative_filename.to_string_lossy().to_string()),
+                    length: fi.len,
+                })
+                .collect::<Vec<_>>()
+        })
+        .map_err(|e| format!("{e:#}"))?;
+    let narrow_idx = file_idx
+        .filter(|&i| i < files.len())
+        .or_else(|| files.iter().max_by_key(|f| f.length).map(|f| f.idx));
+    if let Some(idx) = narrow_idx {
+        let only: HashSet<usize> = HashSet::from([idx]);
+        if let Err(error) = update_only_files_bounded(session, &handle, &only).await {
+            eprintln!("[torrent-engine] initial file narrowing failed: {error}");
+        }
+    }
+    let port = current_port().ok_or_else(|| "engine port unavailable".to_string())?;
+    Ok(AddResult {
+        info_hash: format!("{:?}", handle.info_hash()),
+        files,
+        stream_base: format!("http://127.0.0.1:{port}/stream"),
+        already_managed,
+    })
+}
+
 #[tauri::command]
 pub async fn torrent_engine_add(
     app: AppHandle,
@@ -451,6 +611,11 @@ pub async fn torrent_engine_add(
     file_idx: Option<usize>,
 ) -> Result<AddResult, String> {
     let session = ensure_session(&app).await?;
+    if let Some(info_hash) = dht_boot::info_hash_from_magnet(&magnet) {
+        if let Some(handle) = session.get(TorrentIdOrHash::Hash(info_hash)) {
+            return add_result_from_handle(&session, handle, true, file_idx).await;
+        }
+    }
     let seed = match current_side_dht() {
         Some(d) => dht_boot::seed_peers(&d, magnet.as_str(), 40, Duration::from_secs(3)).await,
         None => Vec::new(),
@@ -479,46 +644,14 @@ pub async fn torrent_engine_add(
     .await
     .map_err(|_| "metadata timed out: no peers reached in 60s".to_string())?
     .map_err(|e| format!("{e:#}"))?;
-    let handle = added
-        .into_handle()
-        .ok_or_else(|| "torrent added as list-only".to_string())?;
-    let info_hash = format!("{:?}", handle.info_hash());
-    let files = handle
-        .with_metadata(|m| {
-            m.file_infos
-                .iter()
-                .enumerate()
-                .map(|(idx, fi)| EngineFile {
-                    idx,
-                    name: fi
-                        .relative_filename
-                        .file_name()
-                        .map(|s| s.to_string_lossy().to_string())
-                        .unwrap_or_else(|| fi.relative_filename.to_string_lossy().to_string()),
-                    length: fi.len,
-                })
-                .collect::<Vec<_>>()
-        })
-        .map_err(|e| format!("{e:#}"))?;
-    timeout(Duration::from_secs(45), handle.wait_until_initialized())
-        .await
-        .map_err(|_| "torrent init timed out".to_string())?
-        .map_err(|e| format!("{e:#}"))?;
-    let narrow_idx = file_idx
-        .filter(|&i| i < files.len())
-        .or_else(|| files.iter().max_by_key(|f| f.length).map(|f| f.idx));
-    if let Some(idx) = narrow_idx {
-        let only: HashSet<usize> = HashSet::from([idx]);
-        if let Err(e) = session.update_only_files(&handle, &only).await {
-            eprintln!("[torrent-engine] initial file narrowing failed: {e:#}");
+    let (handle, already_managed) = match added {
+        AddTorrentResponse::AlreadyManaged(_, handle) => (handle, true),
+        AddTorrentResponse::Added(_, handle) => (handle, false),
+        AddTorrentResponse::ListOnly(_) => {
+            return Err("torrent added as list-only".to_string());
         }
-    }
-    let port = current_port().ok_or_else(|| "engine port unavailable".to_string())?;
-    Ok(AddResult {
-        info_hash,
-        files,
-        stream_base: format!("http://127.0.0.1:{port}/stream"),
-    })
+    };
+    add_result_from_handle(&session, handle, already_managed, file_idx).await
 }
 
 fn build_magnet(hash: &str) -> String {
@@ -547,7 +680,7 @@ pub(crate) async fn ensure_added(
             };
             let opts = AddTorrentOptions {
                 overwrite: true,
-                paused: file_idx.is_none(),
+                paused: true,
                 only_files: file_idx.map(|i| vec![i]),
                 trackers: Some(merge_trackers(trackers)),
                 initial_peers: (!seed.is_empty()).then_some(seed),
@@ -566,13 +699,14 @@ pub(crate) async fn ensure_added(
             .await
             .map_err(|_| "metadata timed out: no peers reached in 60s".to_string())?
             .map_err(|e| format!("{e:#}"))?;
-            let h = added
-                .into_handle()
-                .ok_or_else(|| "torrent added as list-only".to_string())?;
-            timeout(Duration::from_secs(45), h.wait_until_initialized())
-                .await
-                .map_err(|_| "torrent init timed out".to_string())?
-                .map_err(|e| format!("{e:#}"))?;
+            let (h, already_managed) = match added {
+                AddTorrentResponse::AlreadyManaged(_, handle) => (handle, true),
+                AddTorrentResponse::Added(_, handle) => (handle, false),
+                AddTorrentResponse::ListOnly(_) => {
+                    return Err("torrent added as list-only".to_string());
+                }
+            };
+            wait_for_torrent_initialization(&session, &h, !already_managed).await?;
             h
         }
     };
@@ -596,8 +730,7 @@ pub(crate) async fn ensure_added(
         .map_err(|e| format!("{e:#}"))?;
     if let Some(idx) = file_idx.filter(|&i| i < files.len()) {
         let only: HashSet<usize> = HashSet::from([idx]);
-        let _ = session.update_only_files(&handle, &only).await;
-        let _ = session.unpause(&handle).await;
+        let _ = update_only_files_bounded(&session, &handle, &only).await;
     }
     Ok((info_hash, files))
 }
@@ -646,14 +779,7 @@ pub async fn torrent_engine_select(info_hash: String, file_idx: usize) -> Result
     let id = TorrentIdOrHash::parse(&info_hash).map_err(|e| e.to_string())?;
     let handle = session.get(id).ok_or_else(|| "no torrent".to_string())?;
     let only: HashSet<usize> = HashSet::from([file_idx]);
-    session
-        .update_only_files(&handle, &only)
-        .await
-        .map_err(|e| format!("{e:#}"))?;
-    session
-        .unpause(&handle)
-        .await
-        .map_err(|e| format!("{e:#}"))?;
+    update_only_files_bounded(&session, &handle, &only).await?;
     Ok(())
 }
 
@@ -712,7 +838,7 @@ pub async fn torrent_engine_remove(info_hash: String, delete_files: bool) -> Res
 
 #[tauri::command]
 pub async fn torrent_engine_restart(app: AppHandle) -> Result<EngineStatusDto, String> {
-    stop();
+    stop_async().await;
     tokio::time::sleep(Duration::from_millis(600)).await;
     init(app).await?;
     Ok(torrent_engine_status())
@@ -720,7 +846,7 @@ pub async fn torrent_engine_restart(app: AppHandle) -> Result<EngineStatusDto, S
 
 #[tauri::command]
 pub async fn torrent_engine_hard_reset(app: AppHandle) -> Result<EngineStatusDto, String> {
-    stop();
+    stop_async().await;
     tokio::time::sleep(Duration::from_millis(800)).await;
     let cfg = read_config(&app);
     if let Ok(dir) = engine_dir(&app, &cfg) {
@@ -752,7 +878,7 @@ pub async fn torrent_engine_set_options(
             .map_err(|e| e.to_string())?;
     }
     if restart {
-        stop();
+        stop_async().await;
         tokio::time::sleep(Duration::from_millis(600)).await;
         init(app).await?;
     }

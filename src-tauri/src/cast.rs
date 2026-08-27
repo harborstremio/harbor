@@ -520,6 +520,7 @@ pub async fn cast_load(
             url: url.clone(),
             headers: req_headers,
             transcode: do_transcode,
+            prebuffer_bytes: None,
             profile: effective_profile,
             target_host: Some(host.clone()),
             start_time_sec,

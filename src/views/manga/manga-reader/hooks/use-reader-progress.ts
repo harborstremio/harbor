@@ -22,7 +22,46 @@ type Args = {
 };
 
 export function useReaderProgress(a: Args): (page: number) => void {
-  const { pid, manga, chapter, label, total, currentPage, index, loading, failed, paged, book, settled, scrollRef } = a;
+  const {
+    pid,
+    manga,
+    chapter,
+    label,
+    total,
+    currentPage,
+    index,
+    loading,
+    failed,
+    paged,
+    book,
+    settled,
+    scrollRef,
+  } = a;
+
+  useEffect(() => {
+    if (loading || failed || total === 0 || !manga.title) return;
+    setMangaReading({
+      mangaId: manga.id,
+      title: manga.title,
+      cover: manga.cover,
+      chapter: chapter.chapter,
+      chapterLabel: label,
+      page: Math.min(currentPage + 1, total),
+      totalPages: total,
+    });
+  }, [
+    loading,
+    failed,
+    total,
+    currentPage,
+    index,
+    manga.id,
+    manga.title,
+    manga.cover,
+    chapter.id,
+    chapter.chapter,
+    label,
+  ]);
 
   useEffect(() => {
     if (book || !settled.current || loading || failed || total === 0 || !manga.title) return;
@@ -54,7 +93,24 @@ export function useReaderProgress(a: Args): (page: number) => void {
       });
     }, 700);
     return () => window.clearTimeout(t);
-  }, [currentPage, total, index, loading, failed, paged, book, pid, manga.id, manga.title, manga.cover, chapter.id, chapter.chapter, label, settled, scrollRef]);
+  }, [
+    currentPage,
+    total,
+    index,
+    loading,
+    failed,
+    paged,
+    book,
+    pid,
+    manga.id,
+    manga.title,
+    manga.cover,
+    chapter.id,
+    chapter.chapter,
+    label,
+    settled,
+    scrollRef,
+  ]);
 
   return (p: number) => {
     if (!manga.title || total === 0) return;

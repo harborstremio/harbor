@@ -16,27 +16,42 @@ import { useProxiedImageSrc } from "@/lib/remote-image-proxy";
 
 type Ratio = "portrait" | "landscape" | "wide";
 
-export function useLocalizedPoster(metaId: string): string | undefined {
+export function useLocalizedPoster(metaId: string): {
+  url: string | undefined;
+  localizing: boolean;
+} {
   const { settings } = useSettings();
   const [url, setUrl] = useState<string | undefined>(undefined);
+  const [localizing, setLocalizing] = useState<boolean>(() => {
+    const canResolve = metaId.startsWith("tmdb:") || metaId.startsWith("tt");
+    return !!settings.tmdbKey && canResolve && shouldLocalizePosters();
+  });
   useEffect(() => {
     setUrl(undefined);
     const canResolve = metaId.startsWith("tmdb:") || metaId.startsWith("tt");
-    if (!settings.tmdbKey || !canResolve || !shouldLocalizePosters()) return;
+    const active = !!settings.tmdbKey && canResolve && shouldLocalizePosters();
+    setLocalizing(active);
+    if (!active) return;
     let alive = true;
     void (async () => {
       const tmdbId = metaId.startsWith("tmdb:")
         ? metaId
         : await tmdbIdFromImdb(settings.tmdbKey, metaId);
-      if (!tmdbId) return;
+      if (!alive) return;
+      if (!tmdbId) {
+        setLocalizing(false);
+        return;
+      }
       const localized = await tmdbLocalizedPoster(settings.tmdbKey, tmdbId);
-      if (alive && localized) setUrl(localized);
+      if (!alive) return;
+      if (localized) setUrl(localized);
+      setLocalizing(false);
     })();
     return () => {
       alive = false;
     };
   }, [metaId, settings.tmdbKey]);
-  return url;
+  return { url, localizing };
 }
 
 export function useRpdbAltId(
@@ -112,21 +127,25 @@ export function usePosterChain(
 ) {
   const { altId, pending } = useRpdbAltId(rpdbKey, metaId, type);
   const { animeImdb, animeTvdb, animeTmdb } = useAnimeRpdbIds(rpdbKey, metaId);
-  const localized = useLocalizedPoster(metaId);
+  const { url: localized, localizing } = useLocalizedPoster(metaId);
   const pinned = useTitlePoster(metaId);
   const candidates = useMemo(() => {
     if (pending && !pinned) return [];
     const base = localized ?? metaPoster;
     const out: string[] = [];
     const seen = new Set<string>();
-    for (const u of [
-      pinned,
-      animeImdb ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb) : undefined,
-      animeTvdb ? rpdbPoster(rpdbKey, `tvdb:${animeTvdb}`, base) : undefined,
-      rpdbPoster(rpdbKey, metaId, base, altId),
-      localized,
-      metaPoster,
-    ]) {
+    // While the localized poster is being resolved, hold the artwork instead of flashing the
+    // original-language (e.g. Japanese) search poster, which then swaps to English once resolved.
+    const fallbacks = localizing
+      ? [pinned]
+      : [
+          animeImdb ? rpdbPoster(rpdbKey, animeImdb, base, animeTmdb) : undefined,
+          animeTvdb ? rpdbPoster(rpdbKey, `tvdb:${animeTvdb}`, base) : undefined,
+          rpdbPoster(rpdbKey, metaId, base, altId),
+          localized,
+          metaPoster,
+        ];
+    for (const u of [pinned, ...fallbacks]) {
       if (u && !seen.has(u)) {
         seen.add(u);
         out.push(u);
@@ -142,6 +161,7 @@ export function usePosterChain(
     animeTvdb,
     animeTmdb,
     localized,
+    localizing,
     pending,
     pinned,
   ]);

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { movieWatchedIds } from "@/lib/movie-watched";
 import { watchedFlagIds } from "@/lib/watched-flag";
+import { manualWatchedRawKeys } from "@/lib/manual-watched";
+import { playbackHistoryRawKeys } from "@/lib/playback-history";
+import { freshWatchedIds } from "@/lib/stremio-watched-sync";
 import { library, type LibraryItem } from "@/lib/stremio";
 import { stremioMovieWatched } from "@/lib/stremio-watched";
 import { authToken } from "@/lib/theme-auth";
@@ -28,7 +31,9 @@ export async function computeWatchedCount(authKey?: string | null): Promise<numb
   return bd ? bd.watched : null;
 }
 
-export async function computeWatchedBreakdown(authKey?: string | null): Promise<WatchedBreakdown | null> {
+export async function computeWatchedBreakdown(
+  authKey?: string | null,
+): Promise<WatchedBreakdown | null> {
   const movieIds = new Set<string>();
   const episodeKeys = new Set<string>();
   const allWatchedIds = new Set<string>();
@@ -41,7 +46,12 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
       for (const i of lib) {
         if (!i._id) continue;
         const st = i.state as Record<string, unknown> | undefined;
-        const watchTime = typeof st?.overallTimeWatched === "number" ? st.overallTimeWatched : typeof st?.timeWatched === "number" ? st.timeWatched : 0;
+        const watchTime =
+          typeof st?.overallTimeWatched === "number"
+            ? st.overallTimeWatched
+            : typeof st?.timeWatched === "number"
+              ? st.timeWatched
+              : 0;
         if (watchTime > 0) {
           totalWatchMs += watchTime;
         }
@@ -79,22 +89,15 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
 
   // 4. Include manual watched episodes (harbor.manualwatched.v1)
   try {
-    const raw = localStorage.getItem("harbor.manualwatched.v1");
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) {
-        for (const key of arr) {
-          if (typeof key !== "string") continue;
-          const parts = key.split("|");
-          const metaId = parts[0];
-          if (!metaId) continue;
-          allWatchedIds.add(metaId);
-          if (parts.length > 1) {
-            episodeKeys.add(key);
-          } else if (!movieIds.has(metaId)) {
-            movieIds.add(metaId);
-          }
-        }
+    for (const key of manualWatchedRawKeys()) {
+      const parts = key.split("|");
+      const metaId = parts[0];
+      if (!metaId) continue;
+      allWatchedIds.add(metaId);
+      if (parts.length > 1) {
+        episodeKeys.add(key);
+      } else if (!movieIds.has(metaId)) {
+        movieIds.add(metaId);
       }
     }
   } catch {
@@ -103,15 +106,9 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
 
   // 5. Include fresh watched episodes (harbor.stremio.freshwatched.v1)
   try {
-    const raw = localStorage.getItem("harbor.stremio.freshwatched.v1");
-    if (raw) {
-      const obj = JSON.parse(raw) as Record<string, { watched?: string | null }>;
-      if (obj && typeof obj === "object") {
-        for (const id of Object.keys(obj)) {
-          if (!id) continue;
-          allWatchedIds.add(id);
-        }
-      }
+    for (const id of freshWatchedIds()) {
+      if (!id) continue;
+      allWatchedIds.add(id);
     }
   } catch {
     // ignore
@@ -119,19 +116,15 @@ export async function computeWatchedBreakdown(authKey?: string | null): Promise<
 
   // 6. Include local playback history (harbor.playback-history.v1)
   try {
-    const raw = localStorage.getItem("harbor.playback-history.v1");
-    if (raw) {
-      const parsed = JSON.parse(raw) as Record<string, unknown>;
-      for (const key of Object.keys(parsed)) {
-        const parts = key.split("|");
-        const metaId = parts[0];
-        if (!metaId) continue;
-        allWatchedIds.add(metaId);
-        if (parts.length > 1) {
-          episodeKeys.add(`${metaId}:${parts[1]}`);
-        } else if (!episodeKeys.has(metaId)) {
-          movieIds.add(metaId);
-        }
+    for (const key of playbackHistoryRawKeys()) {
+      const parts = key.split("|");
+      const metaId = parts[0];
+      if (!metaId) continue;
+      allWatchedIds.add(metaId);
+      if (parts.length > 1) {
+        episodeKeys.add(`${metaId}:${parts[1]}`);
+      } else if (!episodeKeys.has(metaId)) {
+        movieIds.add(metaId);
       }
     }
   } catch {
@@ -186,8 +179,10 @@ export async function pushStats(
   if (typeof watched === "number" && watched >= 0) body.watched = watched;
   if (typeof mangaRead === "number" && mangaRead >= 0) body.mangaRead = mangaRead;
   if (typeof moviesWatched === "number" && moviesWatched >= 0) body.moviesWatched = moviesWatched;
-  if (typeof episodesWatched === "number" && episodesWatched >= 0) body.episodesWatched = episodesWatched;
-  if (typeof minutesWatched === "number" && minutesWatched >= 0) body.minutesWatched = minutesWatched;
+  if (typeof episodesWatched === "number" && episodesWatched >= 0)
+    body.episodesWatched = episodesWatched;
+  if (typeof minutesWatched === "number" && minutesWatched >= 0)
+    body.minutesWatched = minutesWatched;
   if (!Object.keys(body).length) return;
   try {
     await socialPost("/social/u/me/stats", body);
@@ -196,7 +191,10 @@ export async function pushStats(
   }
 }
 
-export async function syncProfileStats(authKey: string | null | undefined, mangaRead: number): Promise<void> {
+export async function syncProfileStats(
+  authKey: string | null | undefined,
+  mangaRead: number,
+): Promise<void> {
   const bd = await computeWatchedBreakdown(authKey);
   const watched = bd ? bd.watched : null;
   const movies = bd ? bd.moviesWatched : null;
@@ -206,7 +204,10 @@ export async function syncProfileStats(authKey: string | null | undefined, manga
   await pushStats(watched, mangaRead, movies, episodes, minutes);
 }
 
-export function useLibraryWatchedCount(authKey: string | null | undefined, enabled: boolean): number {
+export function useLibraryWatchedCount(
+  authKey: string | null | undefined,
+  enabled: boolean,
+): number {
   const bd = useLibraryWatchedBreakdown(authKey, enabled);
   return bd.watched;
 }

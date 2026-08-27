@@ -74,7 +74,9 @@ export function harborImdbTitleCached(tt: string): number | null | undefined {
   return titleCache.get(tt);
 }
 
-export async function harborImdbParental(tt: string): Promise<ParentalCategory[]> {
+export async function harborImdbParental(rawTt: string): Promise<ParentalCategory[]> {
+  const match = rawTt.match(/tt\d+/);
+  const tt = match ? match[0] : rawTt;
   if (!tt.startsWith("tt")) return [];
   const cached = parentalCache.get(tt);
   if (cached) return cached;

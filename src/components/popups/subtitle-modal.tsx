@@ -1,6 +1,12 @@
+import { useEffect } from "react";
 import { SubtitleMenuBody } from "@/components/player/subtitle-menu";
+import {
+  publishSubtitleContext,
+  type SubtitleContentContext,
+} from "@/components/player/subtitle-menu/subtitle-context-store";
 import type { TrackInfo } from "@/lib/player/bridge";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
+import { ResizableSubtitlePanel } from "@/components/player/subtitle-menu/resizable-panel";
 
 export type SubtitleModalState = {
   tracks: TrackInfo[];
@@ -12,6 +18,7 @@ export type SubtitleModalState = {
   season: number | null;
   episode: number | null;
   preferredLanguages: string[];
+  subtitleContext: SubtitleContentContext | null;
 };
 
 type Props = {
@@ -19,6 +26,7 @@ type Props = {
   onSelect: (id: string | null) => void;
   onSelectSecondary: (id: string | null) => void;
   onDelay: (sec: number) => void;
+  onEnterSync: () => void;
   onAddSubtitle: SubtitleAddHandler;
   onClose: () => void;
 };
@@ -28,9 +36,15 @@ export function SubtitleModal({
   onSelect,
   onSelectSecondary,
   onDelay,
+  onEnterSync,
   onAddSubtitle,
   onClose,
 }: Props) {
+  useEffect(() => {
+    publishSubtitleContext(state.subtitleContext);
+    return () => publishSubtitleContext(null);
+  }, [state.subtitleContext]);
+
   return (
     <div
       className="fixed inset-0 flex items-end justify-end"
@@ -39,27 +53,27 @@ export function SubtitleModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
-        className="m-2 mb-[84px] flex h-[460px] max-h-[calc(100vh-108px)] w-[560px] max-w-[calc(100vw-16px)] flex-col overflow-hidden rounded-2xl border border-edge bg-elevated shadow-[0_24px_60px_-15px_rgba(0,0,0,0.85)] backdrop-blur-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <SubtitleMenuBody
-          tracks={state.tracks}
-          selectedId={state.selectedId}
-          delaySec={state.delaySec}
-          onSelect={onSelect}
-          onSelectSecondary={onSelectSecondary}
-          onDelay={onDelay}
-          onAddSubtitle={onAddSubtitle}
-          metaImdbId={state.metaImdbId}
-          metaTitle={state.metaTitle}
-          metaReleaseDate={state.metaReleaseDate}
-          season={state.season}
-          episode={state.episode}
-          preferredLanguages={state.preferredLanguages}
-          onClose={onClose}
-        />
-      </div>
+      <ResizableSubtitlePanel className="mb-24 me-6">
+        <div className="flex min-h-0 flex-1 flex-col" onClick={(e) => e.stopPropagation()}>
+          <SubtitleMenuBody
+            tracks={state.tracks}
+            selectedId={state.selectedId}
+            delaySec={state.delaySec}
+            onSelect={onSelect}
+            onSelectSecondary={onSelectSecondary}
+            onDelay={onDelay}
+            onEnterSync={onEnterSync}
+            onAddSubtitle={onAddSubtitle}
+            metaImdbId={state.metaImdbId}
+            metaTitle={state.metaTitle}
+            metaReleaseDate={state.metaReleaseDate}
+            season={state.season}
+            episode={state.episode}
+            preferredLanguages={state.preferredLanguages}
+            onClose={onClose}
+          />
+        </div>
+      </ResizableSubtitlePanel>
     </div>
   );
 }

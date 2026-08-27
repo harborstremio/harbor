@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useProfiles } from "./profiles";
+import { persistableAddonOrigin, persistableVideos, type Meta } from "./cinemeta";
 
 export type MediaEntry = {
   id: string;
@@ -7,9 +8,18 @@ export type MediaEntry = {
   name: string;
   poster?: string;
   addedAt: number;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
 };
 
-export type MediaInput = { id: string; type?: string; name?: string; poster?: string };
+export type MediaInput = {
+  id: string;
+  type?: string;
+  name?: string;
+  poster?: string;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
+};
 
 export type MediaListStore = {
   ids: Set<string>;
@@ -44,6 +54,8 @@ function readMap(key: string): Map<string, MediaEntry> {
           name: typeof el.name === "string" ? el.name : "",
           poster: typeof el.poster === "string" ? el.poster : undefined,
           addedAt: typeof el.addedAt === "number" ? el.addedAt : 0,
+          addonOrigin: persistableAddonOrigin(el.addonOrigin),
+          videos: persistableVideos(el.videos),
         });
       }
     }
@@ -102,6 +114,8 @@ export function createMediaListStore(prefix: string) {
               name: input.name ?? "",
               poster: input.poster,
               addedAt: Date.now(),
+              addonOrigin: persistableAddonOrigin(input.addonOrigin),
+              videos: persistableVideos(input.videos),
             });
           }
           writeMap(keyFor(pid), next);
@@ -145,6 +159,8 @@ export function createMediaListStore(prefix: string) {
         name: input.name ?? "",
         poster: input.poster,
         addedAt: Date.now(),
+        addonOrigin: persistableAddonOrigin(input.addonOrigin),
+        videos: persistableVideos(input.videos),
       });
     } else {
       map.delete(input.id);

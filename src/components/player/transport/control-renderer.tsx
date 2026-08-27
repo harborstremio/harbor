@@ -1,12 +1,31 @@
 import { togglePictureBar } from "@/lib/player/picture-bar";
 import { t as translate } from "@/lib/i18n";
 import { StremioVolume } from "./stremio-volume";
-import { Camera, ChevronLeft, Info, Maximize, Minimize, PauseCircle, PictureInPicture2, PlayCircle, Replace, SlidersHorizontal, Tv } from "lucide-react";
+import {
+  Camera,
+  ChevronLeft,
+  Info,
+  Maximize,
+  Minimize,
+  PauseCircle,
+  PictureInPicture2,
+  PlayCircle,
+  Replace,
+  SlidersHorizontal,
+  Tv,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
-import { getCustomIcon, type ControlVariant, type CustomIconMap, type PlayerControlId, type TimeFormat, type VolumeStyle } from "@/lib/player-chrome";
+import {
+  getCustomIcon,
+  type ControlVariant,
+  type CustomIconMap,
+  type PlayerControlId,
+  type TimeFormat,
+  type VolumeStyle,
+} from "@/lib/player-chrome";
 import type { DownloadStatus } from "@/views/player/hooks/use-video-download";
 import { CustomIcon, renderCustomIconControl } from "./custom-icon-renderer";
 import { hdrFormatLabel, realQualityLabel } from "@/lib/player/resolution-label";
@@ -181,7 +200,11 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
               aria-label={t("Back")}
               className="pointer-events-auto flex h-full w-full items-center justify-center rounded-full bg-transparent text-white transition-colors hover:bg-white/[0.06]"
             >
-              {iconUrl ? <CustomIcon url={iconUrl} size={24} /> : <ChevronLeft size={26} strokeWidth={2.2} />}
+              {iconUrl ? (
+                <CustomIcon url={iconUrl} size={24} />
+              ) : (
+                <ChevronLeft size={26} strokeWidth={2.2} />
+              )}
             </button>
           </ThreeLiquidGlassSurface>
         </Tooltip>
@@ -243,7 +266,9 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
         );
       }
       return (
-        <div className="pointer-events-none flex flex-col items-start gap-0.5 text-start">{lines}</div>
+        <div className="pointer-events-none flex flex-col items-start gap-0.5 text-start">
+          {lines}
+        </div>
       );
     }
     case "local-time":
@@ -306,7 +331,13 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     }
     case "download": {
       if (ctx.mid || ctx.isLiveChannel) return null;
-      if (!ctx.download || !ctx.onDownloadStart || !ctx.onDownloadCancel || !ctx.onDownloadReveal || !ctx.onDownloadReset) {
+      if (
+        !ctx.download ||
+        !ctx.onDownloadStart ||
+        !ctx.onDownloadCancel ||
+        !ctx.onDownloadReveal ||
+        !ctx.onDownloadReset
+      ) {
         return null;
       }
       return (
@@ -439,6 +470,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       if (ctx.isLiveChannel && ctx.snap.subtitleTracks.length === 0) return null;
       return (
         <SubtitleMenu
+          engine={ctx.engine}
           tracks={ctx.snap.subtitleTracks}
           selectedId={ctx.snap.subtitleTracks.find((t) => t.selected)?.id ?? null}
           delaySec={ctx.snap.subDelaySec}
@@ -478,7 +510,8 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
       );
     }
     case "anime4k-menu": {
-      if (ctx.tight || ctx.engine === "html5" || !ctx.onAnime4kMode || !ctx.anime4kAvailable) return null;
+      if (ctx.tight || ctx.engine === "html5" || !ctx.onAnime4kMode || !ctx.anime4kAvailable)
+        return null;
       return (
         <Anime4kMenu
           mode={(ctx.anime4kMode as Anime4kChoice) ?? "auto"}
@@ -548,7 +581,11 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
     case "pip": {
       if (!ctx.capabilities.pictureInPicture) return null;
       return (
-        <BigButton onClick={ctx.onPiP} ariaLabel={t("Picture in Picture")} tooltip={t("Picture in Picture")}>
+        <BigButton
+          onClick={ctx.onPiP}
+          ariaLabel={t("Picture in Picture")}
+          tooltip={t("Picture in Picture")}
+        >
           <PictureInPicture2 size={22} strokeWidth={1.9} />
         </BigButton>
       );

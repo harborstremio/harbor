@@ -38,7 +38,10 @@ export function imageLangParam(originalLang?: string | null): string {
     .join(",");
 }
 
-export function imageLangRank(iso: string | null | undefined, originalLang?: string | null): number {
+export function imageLangRank(
+  iso: string | null | undefined,
+  originalLang?: string | null,
+): number {
   const order = effectiveOrder(originalLang);
   const idx = order.indexOf(iso ?? null);
   return idx === -1 ? -1 : order.length - idx;
@@ -55,5 +58,10 @@ export function pickedImageLangs(): string[] {
 
 export function shouldLocalizePosters(): boolean {
   const top = imageRequestLang();
-  return !!top && top !== "en";
+  if (!!top && top !== "en") return true;
+  // Posters should also follow the metadata language (search returns the original-language
+  // poster when the requested translation has none), falling back to English downstream.
+  const meta = loadStoredSettings().tmdbLanguage;
+  const base = (meta ?? "").split("-")[0]?.toLowerCase() ?? "";
+  return base !== "" && base !== "en";
 }

@@ -16,7 +16,7 @@ import {
 } from "@/lib/stremio";
 import { useHasNewEpisode } from "@/lib/new-episodes";
 import { Tooltip } from "@/views/detail/tooltip";
-import { useProfiles } from "@/lib/profiles";
+import { useProfiles, sharesStremioStorage } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useView, type PlayEpisode } from "@/lib/view";
 import { getWatchedBy } from "@/lib/watched-by";
@@ -55,7 +55,11 @@ export const ContinueCard = memo(function ContinueCard({
   const { profiles, activeProfile } = useProfiles();
   const watcherId = getWatchedBy(item._id);
   const watcher = watcherId ? profiles.find((p) => p.id === watcherId) : null;
-  const showWatcher = !!watcher && watcher.id !== activeProfile?.id;
+  const showWatcher =
+    !!watcher &&
+    !!activeProfile &&
+    watcher.id !== activeProfile.id &&
+    sharesStremioStorage(activeProfile, watcher, profiles);
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
   const { open: openContextMenu } = useContextMenu();
@@ -510,7 +514,9 @@ export const ContinueCard = memo(function ContinueCard({
               background:
                 "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
             }}
-            style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+            style={{
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+            }}
             className="pointer-events-none h-14 w-14 scale-95 rounded-full border border-white/[0.10] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
             contentClassName="flex h-full w-full"
           >
@@ -546,8 +552,8 @@ export const ContinueCard = memo(function ContinueCard({
       >
         {displayTitle}
       </button>
-      {onDismiss && (
-        settings.liquidGlass ? (
+      {onDismiss &&
+        (settings.liquidGlass ? (
           <div className="absolute end-0.5 top-0.5 z-10 flex h-11 w-11 items-center justify-center">
             <ThreeLiquidGlassSurface
               radius="9999px"
@@ -557,7 +563,9 @@ export const ContinueCard = memo(function ContinueCard({
                 background:
                   "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
               }}
-              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)" }}
+              style={{
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
+              }}
               className="pointer-events-none h-9 w-9 scale-95 rounded-full border border-white/[0.09] opacity-0 transition-[opacity,transform] duration-[120ms] group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100 focus-within:pointer-events-auto focus-within:scale-100 focus-within:opacity-100"
               contentClassName="flex h-full w-full"
             >
@@ -588,8 +596,7 @@ export const ContinueCard = memo(function ContinueCard({
               <X size={20} strokeWidth={2.4} />
             </span>
           </button>
-        )
-      )}
+        ))}
     </div>
   );
 });

@@ -17,7 +17,7 @@ import { filterTracksByPreferredLanguage } from "@/lib/subtitles/language";
 import { SearchSection } from "./search-section";
 import { VariantRow } from "./variant-row";
 import { MenuHeader } from "./menu-header";
-import { pickBestMatch } from "./best-match";
+import { pickBestMatch, rankByRelease } from "./best-match";
 import { useSubtitleSearch } from "./subtitle-search-store";
 import { Count, EmptyState, ImportBanner, Tab, ToggleChip } from "./menu-body-parts";
 import type { SubtitleMenuProps } from "./types";
@@ -102,10 +102,17 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   const pickSecondary = props.onSelectSecondary ?? setSecondarySub;
   const search = useSubtitleSearch();
 
-  const best = useMemo(
-    () => pickBestMatch(visibleVariants, search?.hints ?? null),
-    [visibleVariants, search],
+  const bestPool = allLangs ? languageTracks : (activeGroup?.variants ?? []);
+  const streamHints = search?.hints ?? null;
+  const rankedMatches = useMemo(
+    () => rankByRelease(bestPool, streamHints),
+    [bestPool, streamHints],
   );
+  const verdictByTrack = useMemo(
+    () => new Map(rankedMatches.map((match) => [match.track.id, match])),
+    [rankedMatches],
+  );
+  const best = useMemo(() => pickBestMatch(bestPool, streamHints), [bestPool, streamHints]);
   const betterMatch = best && best.track.id !== selectedId ? best : null;
 
   const applyBestMatch = () => {
@@ -141,10 +148,13 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <MenuHeader
+        engine={props.engine ?? "html5"}
         count={languageTracks.length}
         selectedTrack={selectedTrack}
+        hasSecondary={secondaryTrack != null}
         delaySec={delaySec}
         delayNonZero={delayNonZero}
+        onEnterSync={props.onEnterSync}
         onOpenStyleBar={onOpenStyleBar}
         onClose={onClose}
       />
@@ -325,6 +335,23 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
               </button>
             </p>
           )}
+          {search?.status === "idle" && search.lastAdded == null && totalExternal === 0 && (
+            <div
+              role="status"
+              className="flex shrink-0 items-center gap-3 border-b border-edge-soft px-3 py-2 text-[11.5px] text-ink-muted"
+            >
+              <span className="min-w-0 flex-1">
+                {tr("Only embedded subtitles are available right now.")}
+              </span>
+              <button
+                type="button"
+                onClick={() => search.refresh()}
+                className="shrink-0 rounded-full bg-elevated px-3 py-1.5 font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
+              >
+                {tr("Search all sources again")}
+              </button>
+            </div>
+          )}
 
           {searchOpen ? (
             <div className="flex min-h-0 flex-1 flex-col">
@@ -341,20 +368,26 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
                 </p>
               ) : (
                 <div className="flex flex-col gap-0.5 p-2">
-                  {visibleVariants.map((t) => (
-                    <VariantRow
-                      key={t.id}
-                      track={t}
-                      selected={t.id === selectedId}
-                      isSecondary={t.id === secondaryTrack?.id}
-                      onPick={() => {
-                        onSelect(t.id);
-                      }}
-                      onPickSecondary={() =>
-                        pickSecondary(t.id === secondaryTrack?.id ? null : t.id)
-                      }
-                    />
-                  ))}
+                  {visibleVariants.map((t, index) => {
+                    const verdict = verdictByTrack.get(t.id);
+                    return (
+                      <VariantRow
+                        key={t.id}
+                        track={t}
+                        rank={index + 1}
+                        compatibilityPercent={verdict?.compatibilityPercent}
+                        matchReasons={verdict?.reasons}
+                        selected={t.id === selectedId}
+                        isSecondary={t.id === secondaryTrack?.id}
+                        onPick={() => {
+                          onSelect(t.id);
+                        }}
+                        onPickSecondary={() =>
+                          pickSecondary(t.id === secondaryTrack?.id ? null : t.id)
+                        }
+                      />
+                    );
+                  })}
                   {search && (
                     <button
                       type="button"

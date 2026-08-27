@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Globe, Layers, SlidersHorizontal, Star, Tag } from "lucide-react";
+import { Check, ChevronDown, Globe, Layers, Settings, Star, Tag } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { mangaTags, type MangaTag } from "@/lib/manga/api";
@@ -13,13 +13,14 @@ import {
 } from "@/lib/manga/sources";
 import { subscribeSuwayomiSourcesChanged } from "@/lib/manga/sources/suwayomi/source-events";
 import { subscribeMangaLibraryChanged } from "@/lib/manga/library-events";
+import { subscribeMangaLangFilter } from "@/lib/manga/lang-filter";
 
 export const FAVORITES = "__favorites__";
 
-const TRIGGER =
+export const TRIGGER =
   "flex items-center gap-2 rounded-lg border border-edge-soft bg-elevated/40 px-3 py-2 text-[13px] text-ink transition-colors hover:bg-elevated/70";
 
-function useOutsideClose(open: boolean, close: () => void) {
+export function useOutsideClose(open: boolean, close: () => void) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -32,12 +33,11 @@ function useOutsideClose(open: boolean, close: () => void) {
   return ref;
 }
 
-export function SourceDropdown({ onManageSources }: { onManageSources: () => void }) {
+export function SourceDropdown() {
   const [open, setOpen] = useState(false);
   const [sources, setSources] = useState<MangaSource[]>(() => listMangaSources());
   const [activeId, setActiveIdState] = useState(() => activeMangaSourceId());
   const ref = useOutsideClose(open, () => setOpen(false));
-  const t = useT();
 
   useEffect(
     () =>
@@ -71,18 +71,6 @@ export function SourceDropdown({ onManageSources }: { onManageSources: () => voi
       </button>
       {open && (
         <div className="absolute z-30 mt-1.5 min-w-[220px] overflow-hidden rounded-lg border border-edge-soft bg-raised py-1 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)]">
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              onManageSources();
-            }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-start text-[13px] font-medium text-ink hover:bg-elevated/60"
-          >
-            <SlidersHorizontal size={14} className="text-ink-subtle" />
-            {t("Manage sources")}
-          </button>
-          <div className="my-1 border-t border-edge-soft/60" />
           {sources.map((s) => (
             <button
               key={s.id}
@@ -115,6 +103,27 @@ export function SourceDropdown({ onManageSources }: { onManageSources: () => voi
   );
 }
 
+export function ManageServersButton({
+  onClick,
+  className,
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={t("Manage Servers")}
+      title={t("Manage Servers")}
+      className={className ? `${TRIGGER} ${className}` : TRIGGER}
+    >
+      <Settings size={20} className="text-ink" />
+    </button>
+  );
+}
+
 export function TagDropdown({
   tagId,
   onSelect,
@@ -130,26 +139,31 @@ export function TagDropdown({
 
   useEffect(() => {
     let alive = true;
-    const load = () => {
+    const load = (opts?: { clear?: boolean }) => {
+      if (opts?.clear && alive) setTags([]);
       mangaTags()
         .then((list) => {
           if (alive) setTags(list);
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.warn("[manga] extension list refresh failed", err);
+        });
     };
     load();
-    const unsubSources = subscribeSuwayomiSourcesChanged(load);
-    const unsubLibrary = subscribeMangaLibraryChanged(load);
+    const unsubSources = subscribeSuwayomiSourcesChanged(() => load());
+    const unsubLibrary = subscribeMangaLibraryChanged(() => load());
+    const unsubLang = subscribeMangaLangFilter(() => load({ clear: true }));
     return () => {
       alive = false;
       unsubSources();
       unsubLibrary();
+      unsubLang();
     };
   }, []);
 
   const active = tags.find((t) => t.id === tagId);
   const sourceMode = tags.length > 0 && tags.every((tg) => tg.group === "Sources");
-  const allLabel = sourceMode ? "All sources" : "Categories";
+  const allLabel = sourceMode ? "All Extensions" : "All tags";
   const shown = useMemo(() => {
     const q = filter.trim().toLowerCase();
     const list = q ? tags.filter((t) => t.name.toLowerCase().includes(q)) : tags;

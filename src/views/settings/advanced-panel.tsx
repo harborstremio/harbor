@@ -83,7 +83,7 @@ export function AdvancedPanel() {
       <Section
         title={t("Backup & restore")}
         subtitle={t(
-          "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your Stremio sign-in.",
+          "Export your Harbor setup to a single file — pick exactly what goes in. Restore brings back only what the file contains. Your Stremio sign-in is always left out.",
         )}
       >
         <SettingsRecoverRow />

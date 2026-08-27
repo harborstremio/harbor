@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useDebridClients } from "@/lib/debrid/registry";
 import { useSettings } from "@/lib/settings";
-import { buildStreamIds } from "@/lib/streams/stream-ids";
+import { buildStreamIdsWithIdentity } from "@/lib/streams/anime-identity";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
 import { runPipeline } from "@/lib/streams/pipeline";
 import { buildPickerConfigHash, peekPickerCache, setPickerCache } from "@/lib/picker-cache";
@@ -29,7 +29,12 @@ export function useSwitcherRefresh(params: {
 
   const refresh = useCallback(async () => {
     if (!addons) return;
-    const streamIds = buildStreamIds(meta.id, episode, imdbId, meta.behaviorHints?.defaultVideoId);
+    const streamIds = await buildStreamIdsWithIdentity(
+      meta.id,
+      episode,
+      imdbId,
+      meta.behaviorHints?.defaultVideoId,
+    );
     if (streamIds.length === 0) return;
     const strictMode = settings.streamFilterLevel === "strict";
     const filterDisabled = settings.streamFilterLevel === "off";

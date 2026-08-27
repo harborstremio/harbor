@@ -5,6 +5,7 @@ import test from "node:test";
 import type { Settings } from "../src/lib/settings/types.ts";
 import { compileMpvOptions, svpMpvLines } from "../src/lib/player/mpv-tuning.ts";
 import { resolvePlaybackDownloadedFraction } from "../src/lib/player/playback-clock.ts";
+import { playbackStartupProfile } from "../src/lib/player/startup-profile.ts";
 
 test("only the P2P engine reports whole-file download progress", () => {
   assert.equal(
@@ -64,4 +65,14 @@ test("SVP uses a removable labeled VapourSynth filter", () => {
     "vf=@harbor-svp:vapoursynth=[/home/user/.local/share/harbor/svp/svp.vpy]",
   );
   assert.ok(options.includes("hwdec=auto-copy"));
+});
+
+test("high-bitrate releases receive a distinct startup profile", () => {
+  const standard = playbackStartupProfile({ resolution: "1080p", source: "WEB-DL", size: 4e9 });
+  const highResolution = playbackStartupProfile({ resolution: "4K", source: "BluRay" });
+  const largeRemux = playbackStartupProfile({ resolution: "1080p", source: "REMUX", size: 18e9 });
+
+  assert.equal(standard, "standard");
+  assert.equal(highResolution, "high-bitrate");
+  assert.equal(largeRemux, "high-bitrate");
 });

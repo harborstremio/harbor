@@ -1,5 +1,6 @@
 import {
   ArrowDownToLine,
+  ArrowLeft,
   Bookmark,
   BookmarkCheck,
   CheckCheck,
@@ -23,7 +24,11 @@ import { useActiveAddon } from "@/lib/active-addon";
 import { copyText } from "@/components/player/copy-link-button";
 import { magnetFromHash } from "@/lib/debrid/types";
 import { openUrl } from "@/lib/window";
-import { useContextMenu, type ViewSummonable } from "@/lib/context-menu";
+import {
+  useContextMenu,
+  type SubtitleContextDetails,
+  type ViewSummonable,
+} from "@/lib/context-menu";
 import { useT } from "@/lib/i18n";
 import { usePlayerActions } from "@/lib/player-actions";
 import { useTogether } from "@/lib/together/provider";
@@ -39,7 +44,17 @@ import { clearTitleBackdrop, getTitleBackdrop, setTitleBackdrop } from "@/lib/ti
 import { MyListSubmenu } from "./context-menu/my-list-submenu";
 
 const MENU_WIDTH = 220;
-const MENU_HEIGHT = 120;
+const SUBTITLE_MENU_WIDTH = 360;
+
+async function readClipboardText(): Promise<string> {
+  if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+    try {
+      const { readText } = await import("@tauri-apps/plugin-clipboard-manager");
+      return await readText();
+    } catch {}
+  }
+  return navigator.clipboard.readText();
+}
 
 function isEditableTarget(el: EventTarget | null): el is HTMLElement {
   if (!(el instanceof HTMLElement)) return false;
@@ -162,8 +177,11 @@ export function ContextMenu() {
 
   if (!state) return null;
 
-  const left = Math.min(state.pos.x, window.innerWidth - MENU_WIDTH - 8);
-  const top = Math.min(state.pos.y, window.innerHeight - MENU_HEIGHT - 8);
+  const subtitleDetails = state.target.kind === "subtitle" ? (state.target.details ?? null) : null;
+  const menuWidth = subtitleDetails ? SUBTITLE_MENU_WIDTH : MENU_WIDTH;
+  const estimatedHeight = subtitleDetails ? 460 : 120;
+  const left = Math.max(8, Math.min(state.pos.x, window.innerWidth - menuWidth - 8));
+  const top = Math.max(8, Math.min(state.pos.y, window.innerHeight - estimatedHeight - 8));
 
   const items: React.ReactNode[] = [];
 
@@ -193,6 +211,8 @@ export function ContextMenu() {
         name: meta.name,
         poster: meta.poster,
         imdbId: targetImdb,
+        addonOrigin: meta.addonOrigin,
+        videos: meta.videos,
       });
       close();
     };
@@ -239,7 +259,14 @@ export function ContextMenu() {
         icon={<Heart size={14} strokeWidth={2} fill={isFav ? "currentColor" : "none"} />}
         label={isFav ? "Favorited" : "Favorite"}
         onClick={() => {
-          toggleFavorite({ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster });
+          toggleFavorite({
+            id: meta.id,
+            type: meta.type,
+            name: meta.name,
+            poster: meta.poster,
+            addonOrigin: meta.addonOrigin,
+            videos: meta.videos,
+          });
           close();
         }}
         accent={isFav}
@@ -248,7 +275,14 @@ export function ContextMenu() {
     items.push(
       <MyListSubmenu
         key="local-list"
-        item={{ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster }}
+        item={{
+          id: meta.id,
+          type: meta.type,
+          name: meta.name,
+          poster: meta.poster,
+          addonOrigin: meta.addonOrigin,
+          videos: meta.videos,
+        }}
         onClose={close}
       />,
     );
@@ -449,7 +483,13 @@ export function ContextMenu() {
       );
     }
   } else if (state.target.kind === "subtitle") {
-    const { download } = state.target;
+    const { download, details } = state.target;
+    if (details) {
+      items.push(
+        <SubtitleDetailsCard key="subtitle-details" details={details} onBack={close} t={t} />,
+      );
+      items.push(<Separator key="subtitle-details-separator" />);
+    }
     items.push(
       <Item
         key="download-subtitle"
@@ -476,7 +516,7 @@ export function ContextMenu() {
     const handlePaste = async () => {
       if (!canPaste || !element) return;
       try {
-        const text = await navigator.clipboard.readText();
+        const text = await readClipboardText();
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           const start = element.selectionStart ?? element.value.length;
           const end = element.selectionEnd ?? element.value.length;
@@ -530,12 +570,98 @@ export function ContextMenu() {
       <div
         ref={ref}
         role="menu"
-        style={{ left, top, width: MENU_WIDTH }}
-        className="fixed z-[145] flex flex-col rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
+        aria-label={subtitleDetails ? t("Subtitle details") : undefined}
+        style={{ left, top, width: menuWidth, maxHeight: "calc(100vh - 16px)" }}
+        className="fixed z-[145] flex flex-col overflow-y-auto rounded-xl border border-edge bg-elevated p-1 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] animate-popover-in"
       >
         {items}
       </div>
     </>
+  );
+}
+
+function SubtitleDetailsCard({
+  details,
+  onBack,
+  t,
+}: {
+  details: SubtitleContextDetails;
+  onBack: () => void;
+  t: ReturnType<typeof useT>;
+}) {
+  const rows: Array<[string, string]> = [
+    [t("Language"), details.language],
+    [t("Source"), details.source],
+    [t("Provider"), details.provider ?? t("Not provided")],
+    [t("Format"), details.format ?? t("Not provided")],
+    [
+      t("Frame rate"),
+      details.fps != null
+        ? `${details.fps.toFixed(3).replace(/\.0+$/, "")} fps`
+        : t("Not provided"),
+    ],
+    [t("Quality"), details.quality ?? t("Not provided")],
+    [t("Author"), details.author ?? t("Not provided")],
+  ];
+  if (details.downloads != null) rows.push([t("Downloads"), details.downloads.toLocaleString()]);
+  if (details.compatibilityPercent != null) {
+    rows.push([t("Match estimate"), `${details.compatibilityPercent}%`]);
+  }
+
+  return (
+    <section role="presentation" className="px-3 pb-2 pt-2.5 text-ink">
+      <div className="mb-2.5 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label={t("Back")}
+          className="-ms-1 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-[11.5px] font-medium text-ink-muted transition-colors hover:bg-raised hover:text-ink focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <ArrowLeft aria-hidden size={14} className="dir-icon" />
+          {t("Back")}
+        </button>
+        <Info size={15} className="ms-auto shrink-0 text-accent" />
+        <h2 className="text-[13px] font-semibold">{t("Subtitle details")}</h2>
+      </div>
+      <dl className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-1.5 text-[11.5px] leading-5">
+        {rows.map(([label, value]) => (
+          <div key={label} className="contents">
+            <dt className="text-ink-subtle">{label}</dt>
+            <dd className="min-w-0 break-words text-ink-muted">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      {details.release && (
+        <div className="mt-2.5 border-t border-edge-soft/60 pt-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-subtle">
+            {t("Release")}
+          </p>
+          <p className="mt-1 break-words text-[11.5px] leading-5 text-ink-muted">
+            {details.release}
+          </p>
+        </div>
+      )}
+      {details.flags && details.flags.length > 0 && (
+        <p className="mt-2 text-[11px] text-ink-subtle">{details.flags.join(" · ")}</p>
+      )}
+      {details.matchReasons && details.matchReasons.length > 0 && (
+        <div className="mt-2.5 border-t border-edge-soft/60 pt-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-subtle">
+            {t("Match evidence")}
+          </p>
+          <ul className="mt-1 space-y-0.5 text-[11px] leading-4 text-ink-muted">
+            {details.matchReasons.slice(0, 4).map((reason) => (
+              <li key={reason}>• {t(reason)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {details.compatibilityPercent != null && (
+        <p className="mt-2.5 text-[10.5px] leading-4 text-ink-subtle">
+          {t("This is a metadata-based release estimate, not a measured timing score.")}
+        </p>
+      )}
+    </section>
   );
 }
 

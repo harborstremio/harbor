@@ -1,157 +1,235 @@
 const settingsFill: Record<string, string> = {
   "Your avatar, name, and handle across Harbor.": "Ваш аватар, имя и ник во всём Harbor.",
-  "Adds an \"Ask AI\" button to search, so you can type things like a plain-language request.": "Добавляет в поиск кнопку «Спросить ИИ», чтобы можно было писать запрос обычным языком.",
+  'Adds an "Ask AI" button to search, so you can type things like a plain-language request.':
+    "Добавляет в поиск кнопку «Спросить ИИ», чтобы можно было писать запрос обычным языком.",
   "Get a key at": "Получить ключ на",
-  "It only runs when you tap that button, so it never costs anything unless you ask.": "Запускается только по нажатию этой кнопки, поэтому ничего не тратится без вашего запроса.",
-  "Groq runs open-source models on its LPU hardware with a generous free tier; every model listed below runs on the free tier.": "Groq запускает модели с открытым исходным кодом на своём оборудовании LPU и даёт щедрый бесплатный тариф; все модели ниже работают на бесплатном тарифе.",
+  "It only runs when you tap that button, so it never costs anything unless you ask.":
+    "Запускается только по нажатию этой кнопки, поэтому ничего не тратится без вашего запроса.",
+  "Groq runs open-source models on its LPU hardware with a generous free tier; every model listed below runs on the free tier.":
+    "Groq запускает модели с открытым исходным кодом на своём оборудовании LPU и даёт щедрый бесплатный тариф; все модели ниже работают на бесплатном тарифе.",
   "Custom model id (optional)": "Свой id модели (необязательно)",
   "Use model": "Использовать модель",
-  "Any model id from console.groq.com/docs/models works here.": "Подойдёт любой id модели с console.groq.com/docs/models.",
-  "Any model id from openrouter.ai/models works here, including :free variants.": "Подойдёт любой id модели с openrouter.ai/models, включая варианты :free.",
-  ". Works without a key at low volume; add a key for higher quotas.": ". Работает без ключа при небольших объёмах; добавьте ключ для увеличения квот.",
-  "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \"Visual C++ Redistributable (x64)\" from Microsoft, then reopen Harbor.": "Файлы SVP на месте, но его движок VapourSynth не загружается ({err}). Обычно это устаревшая запись VapourSynth или отсутствие среды выполнения Microsoft VC++. Переустановите SVP или установите последний «Visual C++ Redistributable (x64)» от Microsoft, затем перезапустите Harbor.",
-  "Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.": "Плавное движение работает на встроенном движке mpv в настольном приложении Harbor. В браузере не действует.",
+  "Any model id from console.groq.com/docs/models works here.":
+    "Подойдёт любой id модели с console.groq.com/docs/models.",
+  "Any model id from openrouter.ai/models works here, including :free variants.":
+    "Подойдёт любой id модели с openrouter.ai/models, включая варианты :free.",
+  ". Works without a key at low volume; add a key for higher quotas.":
+    ". Работает без ключа при небольших объёмах; добавьте ключ для увеличения квот.",
+  "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \"Visual C++ Redistributable (x64)\" from Microsoft, then reopen Harbor.":
+    "Файлы SVP на месте, но его движок VapourSynth не загружается ({err}). Обычно это устаревшая запись VapourSynth или отсутствие среды выполнения Microsoft VC++. Переустановите SVP или установите последний «Visual C++ Redistributable (x64)» от Microsoft, затем перезапустите Harbor.",
+  "Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.":
+    "Плавное движение работает на встроенном движке mpv в настольном приложении Harbor. В браузере не действует.",
   "Subtitle auto-sync": "Автосинхронизация субтитров",
-  "Harbor times out-of-sync subtitles to the audio for you, on any external subtitle. It works on the mpv player and leaves embedded tracks alone, since those are already in sync.": "Harbor сам подгоняет под звук любые внешние субтитры, которые идут не в такт. Работает в плеере mpv; встроенные дорожки не трогает, они и так синхронны.",
+  "Harbor times out-of-sync subtitles to the audio for you, on any external subtitle. It works on the mpv player and leaves embedded tracks alone, since those are already in sync.":
+    "Harbor сам подгоняет под звук любые внешние субтитры, которые идут не в такт. Работает в плеере mpv; встроенные дорожки не трогает, они и так синхронны.",
   "Auto-sync subtitles": "Синхронизировать субтитры автоматически",
-  "When a subtitle runs early or late, Harbor measures the speech and corrects the timing on its own. Off by default.": "Если субтитры спешат или отстают, Harbor измеряет речь и сам исправляет тайминг. По умолчанию выключено.",
+  "When a subtitle runs early or late, Harbor measures the speech and corrects the timing on its own. Off by default.":
+    "Если субтитры спешат или отстают, Harbor измеряет речь и сам исправляет тайминг. По умолчанию выключено.",
   "Let structural tiers auto-apply": "Разрешить автоприменение структурных уровней",
-  "Identity matches from content hashing and the community database always apply on their own. Timing worked out from the audio only offers a fix until it has earned trust. Turn this on to let those audio-derived fixes apply automatically too.": "Точные совпадения по хешу содержимого и по базе сообщества применяются автоматически всегда. Тайминг, вычисленный из звука, только предлагает исправление, пока не заслужит доверия. Включите, чтобы такие исправления по звуку тоже применялись автоматически.",
+  "Identity matches from content hashing and the community database always apply on their own. Timing worked out from the audio only offers a fix until it has earned trust. Turn this on to let those audio-derived fixes apply automatically too.":
+    "Точные совпадения по хешу содержимого и по базе сообщества применяются автоматически всегда. Тайминг, вычисленный из звука, только предлагает исправление, пока не заслужит доверия. Включите, чтобы такие исправления по звуку тоже применялись автоматически.",
   "Drift monitor": "Контроль расхождения",
-  "Keeps watching through playback and gently re-nudges the timing if the subtitle slips out of sync partway through.": "Следит за воспроизведением и аккуратно поправляет тайминг, если субтитры сбиваются по ходу.",
+  "Keeps watching through playback and gently re-nudges the timing if the subtitle slips out of sync partway through.":
+    "Следит за воспроизведением и аккуратно поправляет тайминг, если субтитры сбиваются по ходу.",
   "Smart resync with speech recognition": "Умная пересинхронизация по распознаванию речи",
-  "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.": "Для самых сложных файлов и кнопки «Повторить» Harbor распознаёт немного речи прямо на устройстве и выравнивает субтитры по реальным словам. Нужна сборка с функцией asr-whisper; при первом использовании загружается небольшая модель.",
+  "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.":
+    "Для самых сложных файлов и кнопки «Повторить» Harbor распознаёт немного речи прямо на устройстве и выравнивает субтитры по реальным словам. Нужна сборка с функцией asr-whisper; при первом использовании загружается небольшая модель.",
   "Community sync": "Синхронизация сообщества",
-  "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.": "Хорошую поправку достаточно найти один раз. Harbor может делиться проверенными исправлениями, чтобы следующий человек с тем же файлом и субтитрами получил результат мгновенно. Записи привязаны к отпечаткам с солью, а не к вашим файлам или личным данным.",
+  "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.":
+    "Хорошую поправку достаточно найти один раз. Harbor может делиться проверенными исправлениями, чтобы следующий человек с тем же файлом и субтитрами получил результат мгновенно. Записи привязаны к отпечаткам с солью, а не к вашим файлам или личным данным.",
   "Use community corrections": "Использовать исправления сообщества",
-  "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.": "Сначала проверять общую базу. Если эти же субтитры уже кто-то синхронизировал, ваши встанут на место без анализа.",
+  "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.":
+    "Сначала проверять общую базу. Если эти же субтитры уже кто-то синхронизировал, ваши встанут на место без анализа.",
   "Community sync server": "Сервер синхронизации сообщества",
   "https://sync.harbor.site": "https://sync.harbor.site",
-  "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.": "Оставьте пустым, чтобы использовать сервер сообщества самого Harbor. Укажите URL, чтобы обращаться к своему серверу. Приватный режим ниже в любом случае отключает все обращения.",
+  "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.":
+    "Оставьте пустым, чтобы использовать сервер сообщества самого Harbor. Укажите URL, чтобы обращаться к своему серверу. Приватный режим ниже в любом случае отключает все обращения.",
   "Private mode": "Приватный режим",
-  "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.": "Никогда не обращаться к серверу сообщества ни в ту, ни в другую сторону. С этого устройства ничего не запрашивается и ничего не отправляется.",
-  "Harbor ships a neutral trophy for every award. Install an icon pack or upload your own image per award to make them yours. Packs are hosted by whoever makes them, so the artwork is theirs, not bundled with Harbor.": "Для каждой премии в Harbor есть нейтральный кубок. Установите набор значков или загрузите своё изображение для каждой премии. Наборы размещают их авторы, поэтому изображения принадлежат им и не входят в состав Harbor.",
+  "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.":
+    "Никогда не обращаться к серверу сообщества ни в ту, ни в другую сторону. С этого устройства ничего не запрашивается и ничего не отправляется.",
+  "Harbor ships a neutral trophy for every award. Install an icon pack or upload your own image per award to make them yours. Packs are hosted by whoever makes them, so the artwork is theirs, not bundled with Harbor.":
+    "Для каждой премии в Harbor есть нейтральный кубок. Установите набор значков или загрузите своё изображение для каждой премии. Наборы размещают их авторы, поэтому изображения принадлежат им и не входят в состав Harbor.",
   "View community award packs": "Посмотреть наборы премий сообщества",
-  "Icon packs and single-award art from the community": "Наборы значков и отдельные изображения премий от сообщества",
-  "Upload an image per award, or name your zip files after the ID shown under each one (tap to copy). Natural names work too, so best_soundtrack, movie_of_the_year, etc. still match.": "Загрузите изображение для каждой премии или назовите файлы в zip по ID, показанному под каждой из них (нажмите, чтобы скопировать). Обычные имена тоже подходят: best_soundtrack, movie_of_the_year и т. п. распознаются.",
-  "An award pack is a single JSON file plus the images it points to. Host both anywhere public (your own server, a GitHub repo, etc.) and share the JSON URL. Harbor only stores the URLs you install, never the images.": "Набор премий состоит из одного файла JSON и изображений, на которые он ссылается. Разместите и то и другое в любом публичном месте (свой сервер, репозиторий GitHub и т. п.) и поделитесь URL этого JSON. Harbor хранит только установленные URL, но не сами изображения.",
-  "Each key above is an award ID. Any key you omit falls back to the default trophy (or a lower-priority pack). The full list of IDs is every award shown in the grid above.": "Каждый ключ выше означает ID премии. Пропущенный ключ откатывается к стандартному кубку (или к набору с меньшим приоритетом). Полный список ID составляют все премии из сетки выше.",
-  "Name each image file after its award ID and put them in a .zip, then use \"Import a .zip pack\" above. No JSON, no hosting needed. Harbor matches each file to its award, stores it locally, resizes it, and skips anything it doesn't recognize.": "Назовите каждый файл изображения по ID его премии, сложите их в .zip и выберите «Импорт .zip-набора» выше. Ни JSON, ни хостинг не нужны. Harbor сопоставит каждый файл с премией, сохранит локально, изменит размер и пропустит всё, что не распознает.",
+  "Icon packs and single-award art from the community":
+    "Наборы значков и отдельные изображения премий от сообщества",
+  "Upload an image per award, or name your zip files after the ID shown under each one (tap to copy). Natural names work too, so best_soundtrack, movie_of_the_year, etc. still match.":
+    "Загрузите изображение для каждой премии или назовите файлы в zip по ID, показанному под каждой из них (нажмите, чтобы скопировать). Обычные имена тоже подходят: best_soundtrack, movie_of_the_year и т. п. распознаются.",
+  "An award pack is a single JSON file plus the images it points to. Host both anywhere public (your own server, a GitHub repo, etc.) and share the JSON URL. Harbor only stores the URLs you install, never the images.":
+    "Набор премий состоит из одного файла JSON и изображений, на которые он ссылается. Разместите и то и другое в любом публичном месте (свой сервер, репозиторий GitHub и т. п.) и поделитесь URL этого JSON. Harbor хранит только установленные URL, но не сами изображения.",
+  "Each key above is an award ID. Any key you omit falls back to the default trophy (or a lower-priority pack). The full list of IDs is every award shown in the grid above.":
+    "Каждый ключ выше означает ID премии. Пропущенный ключ откатывается к стандартному кубку (или к набору с меньшим приоритетом). Полный список ID составляют все премии из сетки выше.",
+  'Name each image file after its award ID and put them in a .zip, then use "Import a .zip pack" above. No JSON, no hosting needed. Harbor matches each file to its award, stores it locally, resizes it, and skips anything it doesn\'t recognize.':
+    "Назовите каждый файл изображения по ID его премии, сложите их в .zip и выберите «Импорт .zip-набора» выше. Ни JSON, ни хостинг не нужны. Harbor сопоставит каждый файл с премией, сохранит локально, изменит размер и пропустит всё, что не распознает.",
   "Watched badge": "Значок «Просмотрено»",
-  "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.": "Как группируются серии в сериалах и аниме. По умолчанию TVDB: он даёт порядок по аркам, DVD и абсолютную нумерацию, привычные фанатам аниме, и не требует ключа. TMDB оставляет обычный порядок выхода. В любом случае каждая серия так же воспроизводится и отмечается просмотренной.",
-  "Turns the season button into a full panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through Harbor's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.": "Превращает кнопку сезона в полноценную панель: вкладки порядка (по эфиру, DVD, абсолютный и любые другие, что есть у сериала) плюс таблица сезонов с датами выхода и числом серий. Для аниме включено по умолчанию через сервис TVDB от Harbor, ключ не нужен. Добавьте свой ключ TVDB, чтобы использовать это и для обычных сериалов.",
-  "When Esc would close the player, show a quick confirm first. You can tick \"Don't ask me again\" in that prompt to always leave on Esc.": "Когда Esc закрывает плеер, сначала показывать быстрое подтверждение. В этом окне можно отметить «Больше не спрашивать», чтобы Esc всегда закрывал плеер.",
+  "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.":
+    "Как группируются серии в сериалах и аниме. По умолчанию TVDB: он даёт порядок по аркам, DVD и абсолютную нумерацию, привычные фанатам аниме, и не требует ключа. TMDB оставляет обычный порядок выхода. В любом случае каждая серия так же воспроизводится и отмечается просмотренной.",
+  "Turns the season button into a full panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through Harbor's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.":
+    "Превращает кнопку сезона в полноценную панель: вкладки порядка (по эфиру, DVD, абсолютный и любые другие, что есть у сериала) плюс таблица сезонов с датами выхода и числом серий. Для аниме включено по умолчанию через сервис TVDB от Harbor, ключ не нужен. Добавьте свой ключ TVDB, чтобы использовать это и для обычных сериалов.",
+  'When Esc would close the player, show a quick confirm first. You can tick "Don\'t ask me again" in that prompt to always leave on Esc.':
+    "Когда Esc закрывает плеер, сначала показывать быстрое подтверждение. В этом окне можно отметить «Больше не спрашивать», чтобы Esc всегда закрывал плеер.",
   "Short seek (Shift + arrows)": "Короткая перемотка (Shift + стрелки)",
-  "A shorter jump on Shift plus the arrow keys, for nudging a few seconds at a time.": "Более короткий скачок по Shift со стрелками, чтобы сдвигать всего на несколько секунд.",
-  "Posters, logos, and title art load in the first available language from this list, falling back down the order. \"Original\" uses the title's own language. Put your main language first. Needs a TMDB key.": "Постеры, логотипы и оформление названий загружаются на первом доступном языке из этого списка, далее по порядку. «Оригинал» использует язык самого названия. Поставьте основной язык первым. Нужен ключ TMDB.",
-  "Keep Continue Watching private to each profile": "Свой «Продолжить просмотр» для каждого профиля",
-  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.": "Показывать «Продолжить просмотр» только для активного профиля. Каждый профиль видит лишь свой прогресс, поэтому ваши просмотры скрыты от других профилей этого аккаунта Stremio.",
+  "A shorter jump on Shift plus the arrow keys, for nudging a few seconds at a time.":
+    "Более короткий скачок по Shift со стрелками, чтобы сдвигать всего на несколько секунд.",
+  'Posters, logos, and title art load in the first available language from this list, falling back down the order. "Original" uses the title\'s own language. Put your main language first. Needs a TMDB key.':
+    "Постеры, логотипы и оформление названий загружаются на первом доступном языке из этого списка, далее по порядку. «Оригинал» использует язык самого названия. Поставьте основной язык первым. Нужен ключ TMDB.",
+  "Keep Continue Watching private to each profile":
+    "Свой «Продолжить просмотр» для каждого профиля",
+  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.":
+    "Показывать «Продолжить просмотр» только для активного профиля. Каждый профиль видит лишь свой прогресс, поэтому ваши просмотры скрыты от других профилей этого аккаунта Stremio.",
   "Show pages": "Страницы сериалов",
-  "How a show or movie detail page behaves when you open it.": "Как ведёт себя страница сериала или фильма при открытии.",
-  "When you reopen a show you were already browsing, jump straight back to your spot (usually the episode list) instead of starting at the top. The jump happens before the page shows, so there is no flash.": "При повторном открытии сериала, который вы уже листали, сразу возвращаться на прежнее место (обычно к списку серий), а не к началу страницы. Переход происходит до отрисовки, поэтому мигания нет.",
+  "How a show or movie detail page behaves when you open it.":
+    "Как ведёт себя страница сериала или фильма при открытии.",
+  "When you reopen a show you were already browsing, jump straight back to your spot (usually the episode list) instead of starting at the top. The jump happens before the page shows, so there is no flash.":
+    "При повторном открытии сериала, который вы уже листали, сразу возвращаться на прежнее место (обычно к списку серий), а не к началу страницы. Переход происходит до отрисовки, поэтому мигания нет.",
   "Hide and skip episodes": "Скрывать и пропускать серии",
-  "Adds a Hide option when you right-click an episode. Hidden episodes disappear from the list and are skipped by Up Next. A Show hidden toggle on each show lets you bring them back.": "Добавляет пункт «Скрыть» в меню по правому клику на серии. Скрытые серии исчезают из списка и пропускаются в «Далее». Переключатель «Показать скрытые» у каждого сериала вернёт их обратно.",
+  "Adds a Hide option when you right-click an episode. Hidden episodes disappear from the list and are skipped by Up Next. A Show hidden toggle on each show lets you bring them back.":
+    "Добавляет пункт «Скрыть» в меню по правому клику на серии. Скрытые серии исчезают из списка и пропускаются в «Далее». Переключатель «Показать скрытые» у каждого сериала вернёт их обратно.",
   "Poster shine on hover": "Блик на постере при наведении",
-  "A subtle tvOS style light sweep across a poster when you hover it. Off by default; the card lift stays either way.": "Лёгкий блик в стиле tvOS проходит по постеру при наведении. По умолчанию выключено; подъём карточки остаётся в любом случае.",
-  "Looking for Harbor in your browser, the phone remote, or the manga reader remote? They moved to the Remotes page.": "Ищете Harbor в браузере, пульт для телефона или пульт читалки манги? Они переехали на страницу «Пульты».",
+  "A subtle tvOS style light sweep across a poster when you hover it. Off by default; the card lift stays either way.":
+    "Лёгкий блик в стиле tvOS проходит по постеру при наведении. По умолчанию выключено; подъём карточки остаётся в любом случае.",
+  "Looking for Harbor in your browser, the phone remote, or the manga reader remote? They moved to the Remotes page.":
+    "Ищете Harbor в браузере, пульт для телефона или пульт читалки манги? Они переехали на страницу «Пульты».",
   "X-Ray (experimental)": "X-Ray (экспериментально)",
-  "Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and everything they have been in. On-device face matching to show who is on screen is coming next. Off by default.": "X-Ray в стиле Amazon: откройте актёрский состав во время просмотра и нажмите на любого, чтобы увидеть биографию и все его работы. Распознавание лиц на устройстве, показывающее, кто сейчас на экране, появится дальше. По умолчанию выключено.",
+  "Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and everything they have been in. On-device face matching to show who is on screen is coming next. Off by default.":
+    "X-Ray в стиле Amazon: откройте актёрский состав во время просмотра и нажмите на любого, чтобы увидеть биографию и все его работы. Распознавание лиц на устройстве, показывающее, кто сейчас на экране, появится дальше. По умолчанию выключено.",
   "Enable X-Ray": "Включить X-Ray",
-  "Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.": "Добавляет в плеер кнопку X-Ray: полный состав с фотографиями и переход к любому актёру. Для фото и фильмографии нужен ключ TMDB.",
+  "Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.":
+    "Добавляет в плеер кнопку X-Ray: полный состав с фотографиями и переход к любому актёру. Для фото и фильмографии нужен ключ TMDB.",
   "Scan who is on screen while playing": "Определять, кто на экране, во время воспроизведения",
-  "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.": "Периодически сопоставлять лица в текущем кадре с актёрским составом и показывать, кто сейчас на экране. Всё на устройстве, ничего не покидает ваш компьютер. Во время просмотра немного растёт нагрузка на CPU.",
+  "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.":
+    "Периодически сопоставлять лица в текущем кадре с актёрским составом и показывать, кто сейчас на экране. Всё на устройстве, ничего не покидает ваш компьютер. Во время просмотра немного растёт нагрузка на CPU.",
+  "Performance notice": "Предупреждение о производительности",
+  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
+    "Распознавание лиц в реальном времени загружает локальные модели ИИ и может заметно увеличить использование оперативной памяти, CPU и GPU во время воспроизведения. Отключите его, если Harbor замедляется или устройство нагревается.",
   "X-Ray needs a TMDB key": "Для X-Ray нужен ключ TMDB",
-  "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.": "X-Ray берёт актёрский состав и фотографии из TMDB. Без ключа TMDB сопоставлять не с чем. Добавьте бесплатный ключ в разделе «Библиотека и метаданные».",
+  "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.":
+    "X-Ray берёт актёрский состав и фотографии из TMDB. Без ключа TMDB сопоставлять не с чем. Добавьте бесплатный ключ в разделе «Библиотека и метаданные».",
   "Ask if you're still watching": "Спрашивать, смотрите ли вы ещё",
-  "After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.": "После нескольких серий подряд без каких-либо действий ставить на паузу и уточнять, здесь ли вы. По умолчанию выключено.",
+  "After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.":
+    "После нескольких серий подряд без каких-либо действий ставить на паузу и уточнять, здесь ли вы. По умолчанию выключено.",
   "After 2": "После 2",
   "After 3": "После 3",
   "After 4": "После 4",
   "After 5": "После 5",
-  "Remotes are served by the desktop app. Open these settings on your computer's Harbor to get the links.": "Пульты раздаёт настольное приложение. Откройте эти настройки в Harbor на компьютере, чтобы получить ссылки.",
+  "Remotes are served by the desktop app. Open these settings on your computer's Harbor to get the links.":
+    "Пульты раздаёт настольное приложение. Откройте эти настройки в Harbor на компьютере, чтобы получить ссылки.",
   "Harbor on other devices": "Harbor на других устройствах",
   "Serve Harbor on your network": "Раздавать Harbor в вашей сети",
-  "One switch powers everything on this page: the web app, the phone remote, and the manga reader remote.": "Один переключатель включает всё на этой странице: веб-приложение, пульт для телефона и пульт читалки манги.",
+  "One switch powers everything on this page: the web app, the phone remote, and the manga reader remote.":
+    "Один переключатель включает всё на этой странице: веб-приложение, пульт для телефона и пульт читалки манги.",
   "Phone remote": "Пульт для телефона",
-  "Turns your phone into a remote for this computer: play, pause, seek, volume, and casting, all from the couch. Open the Wi-Fi address on your phone's browser.": "Превращает телефон в пульт для этого компьютера: воспроизведение, пауза, перемотка, громкость и трансляция прямо с дивана. Откройте адрес Wi-Fi в браузере телефона.",
+  "Turns your phone into a remote for this computer: play, pause, seek, volume, and casting, all from the couch. Open the Wi-Fi address on your phone's browser.":
+    "Превращает телефон в пульт для этого компьютера: воспроизведение, пауза, перемотка, громкость и трансляция прямо с дивана. Откройте адрес Wi-Fi в браузере телефона.",
   "Manga reader remote": "Пульт читалки манги",
-  "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.": "Управляйте листалкой манги с телефона, читая на большом экране: перелистывание, масштаб и смена режимов. Читалка также показывает эту ссылку во время чтения.",
+  "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.":
+    "Управляйте листалкой манги с телефона, читая на большом экране: перелистывание, масштаб и смена режимов. Читалка также показывает эту ссылку во время чтения.",
   "Manga remote (this computer)": "Пульт манги (этот компьютер)",
   "Manga remote (Wi-Fi)": "Пульт манги (Wi-Fi)",
-  "Flip the switch above and the phone remote and manga reader remote addresses appear here.": "Включите переключатель выше, и здесь появятся адреса пульта для телефона и пульта читалки манги.",
-  "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.": "Проблемы с бета-версией? Выберите более раннюю сборку ниже и запустите её установщик поверх текущей копии. Библиотека, настройки и загрузки останутся на месте.",
-  "While beta updates are on, Harbor offers the newest build again on its next check. Turn beta updates off above to stay on an earlier one.": "Пока бета-обновления включены, при следующей проверке Harbor снова предложит новейшую сборку. Отключите бета-обновления выше, чтобы остаться на прежней.",
-  "Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.": "Шейдеры изображения работают на встроенном движке mpv в настольном приложении Harbor. В браузере не действуют.",
-  "Download the desktop app to use shaders.": "Скачайте настольное приложение, чтобы использовать шейдеры.",
+  "Flip the switch above and the phone remote and manga reader remote addresses appear here.":
+    "Включите переключатель выше, и здесь появятся адреса пульта для телефона и пульта читалки манги.",
+  "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.":
+    "Проблемы с бета-версией? Выберите более раннюю сборку ниже и запустите её установщик поверх текущей копии. Библиотека, настройки и загрузки останутся на месте.",
+  "While beta updates are on, Harbor offers the newest build again on its next check. Turn beta updates off above to stay on an earlier one.":
+    "Пока бета-обновления включены, при следующей проверке Harbor снова предложит новейшую сборку. Отключите бета-обновления выше, чтобы остаться на прежней.",
+  "Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.":
+    "Шейдеры изображения работают на встроенном движке mpv в настольном приложении Harbor. В браузере не действуют.",
+  "Download the desktop app to use shaders.":
+    "Скачайте настольное приложение, чтобы использовать шейдеры.",
   "More picture shaders": "Больше шейдеров изображения",
-  "Neural upscalers, sharpeners, and HDR tone-mapping ported for mpv. Each is hosted by its author, not bundled with Harbor. Download the ones you want; Harbor chains them in the right order and applies them in the player.": "Нейросетевые апскейлеры, повышение резкости и тональная компрессия HDR, портированные для mpv. Каждый размещает его автор, в состав Harbor они не входят. Скачайте нужные; Harbor выстроит их в правильном порядке и применит в плеере.",
-  "Cleared": "Очищено",
+  "Neural upscalers, sharpeners, and HDR tone-mapping ported for mpv. Each is hosted by its author, not bundled with Harbor. Download the ones you want; Harbor chains them in the right order and applies them in the player.":
+    "Нейросетевые апскейлеры, повышение резкости и тональная компрессия HDR, портированные для mpv. Каждый размещает его автор, в состав Harbor они не входят. Скачайте нужные; Harbor выстроит их в правильном порядке и применит в плеере.",
+  Cleared: "Очищено",
   "Sure?": "Точно?",
   "Storage overview": "Обзор хранилища",
-  "Everything Harbor saves lives on this computer. If space runs low, clear a cache below; Harbor rebuilds them as you browse.": "Всё, что сохраняет Harbor, лежит на этом компьютере. Если места мало, очистите кэш ниже; Harbor соберёт его заново по мере просмотра.",
+  "Everything Harbor saves lives on this computer. If space runs low, clear a cache below; Harbor rebuilds them as you browse.":
+    "Всё, что сохраняет Harbor, лежит на этом компьютере. Если места мало, очистите кэш ниже; Harbor соберёт его заново по мере просмотра.",
   "App storage": "Хранилище приложения",
   "{quota} available": "Доступно {quota}",
   "Settings storage": "Хранилище настроек",
   "Clear caches": "Очистить кэши",
-  "Safe to clear anytime. Nothing here touches your watch history, library, themes, or sign-ins.": "Очищать можно в любой момент. Это не затрагивает историю просмотров, библиотеку, темы и входы в аккаунты.",
+  "Safe to clear anytime. Nothing here touches your watch history, library, themes, or sign-ins.":
+    "Очищать можно в любой момент. Это не затрагивает историю просмотров, библиотеку, темы и входы в аккаунты.",
   "Stream picker cache": "Кэш выбора потоков",
-  "Remembered source lists per title. Clears stale results after changing addons or debrid.": "Сохранённые списки источников по названиям. Очистка убирает устаревшие результаты после смены дополнений или debrid.",
+  "Remembered source lists per title. Clears stale results after changing addons or debrid.":
+    "Сохранённые списки источников по названиям. Очистка убирает устаревшие результаты после смены дополнений или debrid.",
   "Manga browse cache": "Кэш каталога манги",
-  "Cached chapter lists and browse pages. Downloads stay untouched.": "Кэшированные списки глав и страницы каталога. Загрузки не затрагиваются.",
+  "Cached chapter lists and browse pages. Downloads stay untouched.":
+    "Кэшированные списки глав и страницы каталога. Загрузки не затрагиваются.",
   "Live TV caches": "Кэши прямого эфира",
-  "Parsed playlists, program guide, and series info. Re-downloads on next open.": "Разобранные плейлисты, телепрограмма и сведения о сериалах. Загрузятся заново при следующем открытии.",
+  "Parsed playlists, program guide, and series info. Re-downloads on next open.":
+    "Разобранные плейлисты, телепрограмма и сведения о сериалах. Загрузятся заново при следующем открытии.",
   "Dead stream marks": "Метки нерабочих потоков",
-  "Sources Harbor flagged as broken. Clear to give them another chance.": "Источники, помеченные Harbor как нерабочие. Очистите, чтобы дать им ещё шанс.",
+  "Sources Harbor flagged as broken. Clear to give them another chance.":
+    "Источники, помеченные Harbor как нерабочие. Очистите, чтобы дать им ещё шанс.",
   "Continue Watching suggestions cache": "Кэш подсказок «Продолжить просмотр»",
-  "Resurface picks for the home rail. Rebuilds overnight.": "Подборки для ряда на главной. Пересобираются ночью.",
-  "Downloaded themes are managed in Theme & appearance. Video and manga downloads are managed on the Downloads page.": "Скачанные темы настраиваются в разделе «Тема и оформление». Загрузки видео и манги управляются на странице «Загрузки».",
+  "Resurface picks for the home rail. Rebuilds overnight.":
+    "Подборки для ряда на главной. Пересобираются ночью.",
+  "Downloaded themes are managed in Theme & appearance. Video and manga downloads are managed on the Downloads page.":
+    "Скачанные темы настраиваются в разделе «Тема и оформление». Загрузки видео и манги управляются на странице «Загрузки».",
   "Pattern (e.g. \\bremux\\b)": "Шаблон (например, \\bremux\\b)",
   "Downloaded from community": "Скачано из сообщества",
-  "Badge art packs you installed from the community store. Remove one to put its badges back to default.": "Наборы изображений значков, установленные из магазина сообщества. Удалите набор, чтобы вернуть его значки к стандартным.",
+  "Badge art packs you installed from the community store. Remove one to put its badges back to default.":
+    "Наборы изображений значков, установленные из магазина сообщества. Удалите набор, чтобы вернуть его значки к стандартным.",
   "{n} badges": "Значков: {n}",
   "Pack removed, badges back to default": "Набор удалён, значки возвращены к стандартным",
   "Remove pack": "Удалить набор",
   "View community badge packs": "Посмотреть наборы значков сообщества",
-  "packs": "наборов",
-  "Any Stremio subtitle addons you have installed are searched here too.": "Установленные дополнения субтитров для Stremio тоже участвуют в поиске.",
-  "{count} installed. Add or remove them under Streaming sources.": "Установлено: {count}. Добавить или удалить их можно в разделе «Источники потоков».",
-  "None installed yet. Add Stremio subtitle addons under Streaming sources.": "Пока ничего не установлено. Добавьте дополнения субтитров для Stremio в разделе «Источники потоков».",
+  packs: "наборов",
+  "Any Stremio subtitle addons you have installed are searched here too.":
+    "Установленные дополнения субтитров для Stremio тоже участвуют в поиске.",
+  "{count} installed. Add or remove them under Streaming sources.":
+    "Установлено: {count}. Добавить или удалить их можно в разделе «Источники потоков».",
+  "None installed yet. Add Stremio subtitle addons under Streaming sources.":
+    "Пока ничего не установлено. Добавьте дополнения субтитров для Stremio в разделе «Источники потоков».",
   "Subtitle sources": "Источники субтитров",
-  "Harbor searches every source you enable at the same time, then merges and de-duplicates the results into one clean list. Turn a source off to stop pulling from it.": "Harbor ищет во всех включённых источниках одновременно, затем объединяет результаты в один список без дубликатов. Отключите источник, чтобы больше из него не брать.",
-  "OpenSubtitles": "OpenSubtitles",
-  "Harbor's built-in OpenSubtitles search, on by default. If you install an OpenSubtitles addon, this steps aside automatically so your results are never duplicated.": "Встроенный в Harbor поиск по OpenSubtitles, включён по умолчанию. Если установить дополнение OpenSubtitles, встроенный поиск автоматически уступит место, чтобы результаты не дублировались.",
-  "Wyzie": "Wyzie",
-  "A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.": "Быстрый индекс субтитров от сообщества. По умолчанию выключен; включите для лучшего покрытия новых и нишевых релизов.",
+  "Harbor searches every source you enable at the same time, then merges and de-duplicates the results into one clean list. Turn a source off to stop pulling from it.":
+    "Harbor ищет во всех включённых источниках одновременно, затем объединяет результаты в один список без дубликатов. Отключите источник, чтобы больше из него не брать.",
+  OpenSubtitles: "OpenSubtitles",
+  "Harbor's built-in OpenSubtitles search, on by default. If you install an OpenSubtitles addon, this steps aside automatically so your results are never duplicated.":
+    "Встроенный в Harbor поиск по OpenSubtitles, включён по умолчанию. Если установить дополнение OpenSubtitles, встроенный поиск автоматически уступит место, чтобы результаты не дублировались.",
+  Wyzie: "Wyzie",
+  "A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.":
+    "Быстрый индекс субтитров от сообщества. По умолчанию выключен; включите для лучшего покрытия новых и нишевых релизов.",
   "Subtitle addons": "Дополнения субтитров",
-  "SUBDL": "SUBDL",
-  "A large multi-language subtitle database. Off until you add your free SUBDL API key.": "Большая многоязычная база субтитров. Выключено, пока не добавлен бесплатный API-ключ SUBDL.",
+  SUBDL: "SUBDL",
+  "A large multi-language subtitle database. Off until you add your free SUBDL API key.":
+    "Большая многоязычная база субтитров. Выключено, пока не добавлен бесплатный API-ключ SUBDL.",
   "Paste your SUBDL API key": "Вставьте свой API-ключ SUBDL",
   "Get a free key at subdl.com": "Получить бесплатный ключ на subdl.com",
-  "Subsource": "Subsource",
-  "A community subtitle source. Off until you add your Subsource API key.": "Источник субтитров от сообщества. Выключено, пока не добавлен API-ключ Subsource.",
+  Subsource: "Subsource",
+  "A community subtitle source. Off until you add your Subsource API key.":
+    "Источник субтитров от сообщества. Выключено, пока не добавлен API-ключ Subsource.",
   "Paste your Subsource API key": "Вставьте свой API-ключ Subsource",
   "Get your key at subsource.net": "Получить ключ на subsource.net",
-  "Manage subtitle addons in Streaming sources": "Управление дополнениями субтитров в «Источниках потоков»",
-  "The languages above all obey your preferred subtitle language order, which lives in the Languages page.": "Все языки выше подчиняются вашему порядку предпочитаемых языков субтитров, который задаётся на странице «Языки».",
+  "Manage subtitle addons in Streaming sources":
+    "Управление дополнениями субтитров в «Источниках потоков»",
+  "The languages above all obey your preferred subtitle language order, which lives in the Languages page.":
+    "Все языки выше подчиняются вашему порядку предпочитаемых языков субтитров, который задаётся на странице «Языки».",
   "Open Languages": "Открыть «Языки»",
-  "Quality": "Качество",
-  "Maximum": "Максимум",
-  "Resolution posters are decoded at. High is sized to your screen with headroom and looks identical to full res while using far less memory; Balanced saves the most; Maximum keeps original resolution.": "Разрешение, в котором декодируются постеры. «Высокое» подгоняется под ваш экран с запасом и выглядит так же, как полное, но занимает намного меньше памяти; «Сбалансированное» экономит больше всего; «Максимум» сохраняет исходное разрешение.",
+  Quality: "Качество",
+  Maximum: "Максимум",
+  "Resolution posters are decoded at. High is sized to your screen with headroom and looks identical to full res while using far less memory; Balanced saves the most; Maximum keeps original resolution.":
+    "Разрешение, в котором декодируются постеры. «Высокое» подгоняется под ваш экран с запасом и выглядит так же, как полное, но занимает намного меньше памяти; «Сбалансированное» экономит больше всего; «Максимум» сохраняет исходное разрешение.",
   "Poster dock magnification": "Увеличение постеров как в доке",
-  "Gently magnify nearby posters as you move across a poster row, like a dock. Off by default.": "Плавно увеличивать соседние постеры при движении по ряду, как в доке. По умолчанию выключено.",
+  "Gently magnify nearby posters as you move across a poster row, like a dock. Off by default.":
+    "Плавно увеличивать соседние постеры при движении по ряду, как в доке. По умолчанию выключено.",
   "Liquid Glass": "Жидкое стекло",
   "Use liquid glass": "Использовать жидкое стекло",
-  "Use liquid glass for the search pill and row scroll arrows. The appearance settings below are shared by glass surfaces across Harbor.": "Использовать жидкое стекло для строки поиска и стрелок прокрутки рядов. Настройки вида ниже общие для всех стеклянных поверхностей в Harbor.",
+  "Use liquid glass for the search pill and row scroll arrows. The appearance settings below are shared by glass surfaces across Harbor.":
+    "Использовать жидкое стекло для строки поиска и стрелок прокрутки рядов. Настройки вида ниже общие для всех стеклянных поверхностей в Harbor.",
   "Enhanced liquid glass": "Улучшенное жидкое стекло",
-  "A richer glass treatment. May look better while using more graphics resources.": "Более насыщенный эффект стекла. Может выглядеть лучше, но сильнее нагружает графику.",
+  "A richer glass treatment. May look better while using more graphics resources.":
+    "Более насыщенный эффект стекла. Может выглядеть лучше, но сильнее нагружает графику.",
   "Glass opacity": "Непрозрачность стекла",
   "Glass blur": "Размытие стекла",
   "Glass tint": "Оттенок стекла",
   "Featured source": "Источник витрины",
-  "What fills the hero. Trending is a fresh top list from Harbor, refreshed through the day. Classic uses your own Home rows.": "Чем заполняется витрина. «В тренде»: свежий топ от Harbor, обновляется в течение дня. «Классика»: ваши собственные ряды на главной.",
-  "Classic": "Классика",
-  "Screensaver": "Заставка",
-  "When Harbor sits idle in the foreground, it drifts through cinematic backdrops with a clock and what's trending. Any movement or key brings you back. Off by default.": "Когда Harbor простаивает на переднем плане, он плавно листает кинематографичные фоны с часами и трендами. Любое движение или клавиша возвращают обратно. По умолчанию выключено.",
+  "What fills the hero. Trending is a fresh top list from Harbor, refreshed through the day. Classic uses your own Home rows.":
+    "Чем заполняется витрина. «В тренде»: свежий топ от Harbor, обновляется в течение дня. «Классика»: ваши собственные ряды на главной.",
+  Classic: "Классика",
+  Screensaver: "Заставка",
+  "When Harbor sits idle in the foreground, it drifts through cinematic backdrops with a clock and what's trending. Any movement or key brings you back. Off by default.":
+    "Когда Harbor простаивает на переднем плане, он плавно листает кинематографичные фоны с часами и трендами. Любое движение или клавиша возвращают обратно. По умолчанию выключено.",
   "Ambient screensaver": "Фоновая заставка",
   "Start after": "Запускать через",
   "3 min": "3 мин",
@@ -159,135 +237,192 @@ const settingsFill: Record<string, string> = {
   "10 min": "10 мин",
   "15 min": "15 мин",
   "Moving the window": "Перемещение окна",
-  "Choose where you can grab Harbor to drag it around your screen.": "Выберите, за какую область можно перетаскивать Harbor по экрану.",
+  "Choose where you can grab Harbor to drag it around your screen.":
+    "Выберите, за какую область можно перетаскивать Harbor по экрану.",
   "Native-style hybrid bar": "Гибридная панель в системном стиле",
-  "Turn off the native window title bar above to use Harbor's hybrid bar instead.": "Отключите системный заголовок окна выше, чтобы использовать гибридную панель Harbor.",
-  "Tuck clean, native-looking window buttons into the top corner, with hover labels. On macOS they become traffic-light dots. Blends into Harbor while feeling like your system's own title bar.": "Аккуратные кнопки окна в системном стиле в верхнем углу, с подсказками при наведении. В macOS это кружки-«светофор». Вписываются в Harbor, но ощущаются как системный заголовок окна.",
+  "Turn off the native window title bar above to use Harbor's hybrid bar instead.":
+    "Отключите системный заголовок окна выше, чтобы использовать гибридную панель Harbor.",
+  "Tuck clean, native-looking window buttons into the top corner, with hover labels. On macOS they become traffic-light dots. Blends into Harbor while feeling like your system's own title bar.":
+    "Аккуратные кнопки окна в системном стиле в верхнем углу, с подсказками при наведении. В macOS это кружки-«светофор». Вписываются в Harbor, но ощущаются как системный заголовок окна.",
   "Frost the top bar on scroll": "Матовая верхняя панель при прокрутке",
-  "As you scroll, the top bar frosts over the content beneath it. Off by default; it uses a blur, so leave it off on lower-end machines.": "При прокрутке верхняя панель матово размывает контент под собой. По умолчанию выключено: используется размытие, поэтому на слабых машинах лучше не включать.",
+  "As you scroll, the top bar frosts over the content beneath it. Off by default; it uses a blur, so leave it off on lower-end machines.":
+    "При прокрутке верхняя панель матово размывает контент под собой. По умолчанию выключено: используется размытие, поэтому на слабых машинах лучше не включать.",
   "Top-right controls": "Элементы управления справа вверху",
-  "The operating system draws native window controls, so Harbor cannot change their appearance.": "Системные кнопки окна отрисовывает операционная система, поэтому Harbor не может изменить их вид.",
-  "Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.": "Выберите вид кнопок «Совместный просмотр», свернуть, развернуть и закрыть. Жидкое стекло заменяет чистые прозрачные кнопки.",
+  "The operating system draws native window controls, so Harbor cannot change their appearance.":
+    "Системные кнопки окна отрисовывает операционная система, поэтому Harbor не может изменить их вид.",
+  "Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.":
+    "Выберите вид кнопок «Совместный просмотр», свернуть, развернуть и закрыть. Жидкое стекло заменяет чистые прозрачные кнопки.",
   "Clean transparent": "Чистые прозрачные",
   "Liquid glass": "Жидкое стекло",
-  "Filled": "С заливкой",
+  Filled: "С заливкой",
   "Drag the window from anywhere": "Перетаскивать окно за любое место",
-  "Move Harbor by dragging any empty space on a page, not just the top bar. Leave this off to keep clicks inside pages from nudging the window.": "Перемещайте Harbor, потянув за любое пустое место на странице, а не только за верхнюю панель. Оставьте выключенным, чтобы клики внутри страниц не сдвигали окно.",
+  "Move Harbor by dragging any empty space on a page, not just the top bar. Leave this off to keep clicks inside pages from nudging the window.":
+    "Перемещайте Harbor, потянув за любое пустое место на странице, а не только за верхнюю панель. Оставьте выключенным, чтобы клики внутри страниц не сдвигали окно.",
   "Stream priority": "Приоритет потоков",
-  "Results from addons higher in this list come first. If one finds nothing, the next fills in.": "Результаты дополнений, которые выше в этом списке, идут первыми. Если одно ничего не нашло, подключается следующее.",
+  "Results from addons higher in this list come first. If one finds nothing, the next fills in.":
+    "Результаты дополнений, которые выше в этом списке, идут первыми. Если одно ничего не нашло, подключается следующее.",
   "Following addon order": "По порядку дополнений",
   "Use addon order": "Использовать порядок дополнений",
   "Not installed": "Не установлено",
   "Remove from list": "Убрать из списка",
-  "Priority applies once you have two or more stream addons.": "Приоритет работает, когда установлено два или более дополнения с потоками.",
-  "{n} addons don't provide streams and aren't listed.": "{n} дополнений не предоставляют потоки и не показаны в списке.",
+  "Priority applies once you have two or more stream addons.":
+    "Приоритет работает, когда установлено два или более дополнения с потоками.",
+  "{n} addons don't provide streams and aren't listed.":
+    "{n} дополнений не предоставляют потоки и не показаны в списке.",
   "Moved {name} to position {n} of {total}": "{name} перемещено на позицию {n} из {total}",
-  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, like the Stremio and Vidi apps. Stream priority below decides which addon leads, in both modes.": "Ранжирование Harbor ставит первыми источники с лучшей оценкой. Порядок дополнений сохраняет результаты каждого дополнения в том порядке, в каком оно их вернуло, как в приложениях Stremio и Vidi. Приоритет потоков ниже определяет, какое дополнение идёт первым, в обоих режимах.",
-  "If a stream hasn't started playing in time (a dead source or an addon that's down), automatically try the next available stream. Off by default.": "Если поток не начал воспроизводиться вовремя (мёртвый источник или недоступное дополнение), автоматически пробовать следующий доступный поток. По умолчанию выключено.",
+  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, like the Stremio and Vidi apps. Stream priority below decides which addon leads, in both modes.":
+    "Ранжирование Harbor ставит первыми источники с лучшей оценкой. Порядок дополнений сохраняет результаты каждого дополнения в том порядке, в каком оно их вернуло, как в приложениях Stremio и Vidi. Приоритет потоков ниже определяет, какое дополнение идёт первым, в обоих режимах.",
+  "If a stream hasn't started playing in time (a dead source or an addon that's down), automatically try the next available stream. Off by default.":
+    "Если поток не начал воспроизводиться вовремя (мёртвый источник или недоступное дополнение), автоматически пробовать следующий доступный поток. По умолчанию выключено.",
   "How long to wait first": "Сколько ждать сначала",
-  "Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.": "Медленным дополнениям и P2P-источникам часто нужно больше 10 секунд на старт. Увеличьте значение, если потоки пропускаются, не успев запуститься.",
+  "Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.":
+    "Медленным дополнениям и P2P-источникам часто нужно больше 10 секунд на старт. Увеличьте значение, если потоки пропускаются, не успев запуститься.",
   "{n} sec": "{n} сек",
   "Only start the torrent engine when needed": "Запускать торрент-движок только при необходимости",
-  "Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.": "Обычно Harbor запускает торрент-движок при старте, чтобы первый P2P-поток подключался быстрее. Из-за этого узел DHT работает и обменивается данными с сетью, даже когда вы ничего не смотрите. Включите, если у вас лимитное или ограниченное подключение: тогда движок запустится при первом реальном воспроизведении торрента. Применится при следующем запуске.",
+  "Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.":
+    "Обычно Harbor запускает торрент-движок при старте, чтобы первый P2P-поток подключался быстрее. Из-за этого узел DHT работает и обменивается данными с сетью, даже когда вы ничего не смотрите. Включите, если у вас лимитное или ограниченное подключение: тогда движок запустится при первом реальном воспроизведении торрента. Применится при следующем запуске.",
   "What fullscreen does": "Что делает полноэкранный режим",
-  "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.": "Настоящий полноэкранный режим занимает весь экран и скрывает панель задач. Режим «Развернуть» заполняет экран, но оставляет панель задач и заголовок окна, поэтому можно переключаться между приложениями.",
+  "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
+    "Настоящий полноэкранный режим занимает весь экран и скрывает панель задач. Режим «Развернуть» заполняет экран, но оставляет панель задач и заголовок окна, поэтому можно переключаться между приложениями.",
   "True fullscreen": "Настоящий полноэкранный режим",
-  "Maximize": "Развернуть",
+  Maximize: "Развернуть",
   "Dual subtitles": "Двойные субтитры",
-  "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.": "Показывать одновременно вторые субтитры на другом языке. Удобно при изучении языка: оставьте изучаемый язык основными субтитрами, а родной укажите здесь.",
+  "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.":
+    "Показывать одновременно вторые субтитры на другом языке. Удобно при изучении языка: оставьте изучаемый язык основными субтитрами, а родной укажите здесь.",
   "Second subtitle language": "Язык вторых субтитров",
-  "Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.": "Harbor загружает их автоматически, если есть дорожка на этом языке. Вторую дорожку для одного видео также можно выбрать или убрать в меню субтитров в плеере.",
+  "Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.":
+    "Harbor загружает их автоматически, если есть дорожка на этом языке. Вторую дорожку для одного видео также можно выбрать или убрать в меню субтитров в плеере.",
   "Where it shows": "Где показывать",
   "Top of the screen": "Вверху экрана",
   "Above the main line": "Над основной строкой",
   "Second line size": "Размер второй строки",
   "Get your own": "Завести свой",
   "Trial for ${n}": "Пробный за ${n}",
-  "ElfHosted": "ElfHosted",
-  "Debridge is the part that finds you a working file. A TorBox and a Usenet account come with it, so you do not need to buy a debrid service separately. Already have Real-Debrid or AllDebrid? Plug it in instead.": "Debridge — это то, что находит вам рабочий файл. В комплекте идут аккаунты TorBox и Usenet, так что отдельно покупать debrid-сервис не нужно. Уже есть Real-Debrid или AllDebrid? Просто подключите его.",
+  ElfHosted: "ElfHosted",
+  "Debridge is the part that finds you a working file. A TorBox and a Usenet account come with it, so you do not need to buy a debrid service separately. Already have Real-Debrid or AllDebrid? Plug it in instead.":
+    "Debridge — это то, что находит вам рабочий файл. В комплекте идут аккаунты TorBox и Usenet, так что отдельно покупать debrid-сервис не нужно. Уже есть Real-Debrid или AllDebrid? Просто подключите его.",
   "No Docker, no server, nothing to configure.": "Без Docker, без сервера, настраивать нечего.",
   "${n} for {days} days": "${n} за {days} дней",
   "cancel anytime": "отмена в любой момент",
   "Rather not set any of this up?": "Не хотите всё это настраивать?",
   "Get {name} hosted, plus {n} more addons.": "Разместите {name} у нас и ещё {n} аддонов.",
-  "{n} addons run for you, with Debridge included: TorBox and Usenet accounts, so there is no debrid service to buy separately.": "{n} аддонов работают за вас, с Debridge: аккаунты TorBox и Usenet, отдельный debrid-сервис покупать не нужно.",
+  "{n} addons run for you, with Debridge included: TorBox and Usenet accounts, so there is no debrid service to buy separately.":
+    "{n} аддонов работают за вас, с Debridge: аккаунты TorBox и Usenet, отдельный debrid-сервис покупать не нужно.",
   "Try it for ${n}": "Попробовать за ${n}",
   "Hide this": "Скрыть",
-  "Includes Comet, MediaFusion, AIOStreams, StremThru, Jackettio and more, plus TorBox and Usenet accounts. No Docker, no server, no config.": "Включает Comet, MediaFusion, AIOStreams, StremThru, Jackettio и другие, плюс аккаунты TorBox и Usenet. Без Docker, без сервера, без настройки.",
+  "Includes Comet, MediaFusion, AIOStreams, StremThru, Jackettio and more, plus TorBox and Usenet accounts. No Docker, no server, no config.":
+    "Включает Comet, MediaFusion, AIOStreams, StremThru, Jackettio и другие, плюс аккаунты TorBox и Usenet. Без Docker, без сервера, без настройки.",
   "Support Harbor": "Поддержать Harbor",
   "Who keeps this running": "Кто всё это обеспечивает",
-  "Harbor's backend runs on ElfHosted. They took it on without being asked, and Harbor has never charged for anything.": "Бэкенд Harbor работает на ElfHosted. Они взялись за это, хотя их не просили, а Harbor никогда ни за что не брал денег.",
-  "If you want to put money somewhere and you use Harbor, an ElfHosted subscription is the most useful place for it. You get a managed instance, and the servers Harbor depends on stay paid for.": "Если вы пользуетесь Harbor и хотите куда-то вложить деньги, подписка ElfHosted — самое полезное место. Вы получаете управляемый экземпляр, а серверы, от которых зависит Harbor, остаются оплаченными.",
+  "Harbor's backend runs on ElfHosted. They took it on without being asked, and Harbor has never charged for anything.":
+    "Бэкенд Harbor работает на ElfHosted. Они взялись за это, хотя их не просили, а Harbor никогда ни за что не брал денег.",
+  "If you want to put money somewhere and you use Harbor, an ElfHosted subscription is the most useful place for it. You get a managed instance, and the servers Harbor depends on stay paid for.":
+    "Если вы пользуетесь Harbor и хотите куда-то вложить деньги, подписка ElfHosted — самое полезное место. Вы получаете управляемый экземпляр, а серверы, от которых зависит Harbor, остаются оплаченными.",
   "Browse ElfHosted": "Открыть ElfHosted",
   "One-off donation": "Разовое пожертвование",
   "Donating to Harbor": "Пожертвования Harbor",
-  "Short version: don't. Harbor takes no donations and no cut of anything on this page.": "Коротко: не надо. Harbor не принимает пожертвований и не получает ничего с того, что на этой странице.",
-  "People have offered plenty of times and the answer has stayed no. If you were going to send something, send it to ElfHosted above so the infrastructure stays up, or to one of the charities below. Both do more good than paying me would.": "Предлагали много раз, и ответ остаётся прежним — нет. Если хотите что-то отправить, отправьте это ElfHosted выше, чтобы инфраструктура продолжала работать, или одному из фондов ниже. И то и другое принесёт больше пользы, чем деньги мне.",
+  "Short version: don't. Harbor takes no donations and no cut of anything on this page.":
+    "Коротко: не надо. Harbor не принимает пожертвований и не получает ничего с того, что на этой странице.",
+  "People have offered plenty of times and the answer has stayed no. If you were going to send something, send it to ElfHosted above so the infrastructure stays up, or to one of the charities below. Both do more good than paying me would.":
+    "Предлагали много раз, и ответ остаётся прежним — нет. Если хотите что-то отправить, отправьте это ElfHosted выше, чтобы инфраструктура продолжала работать, или одному из фондов ниже. И то и другое принесёт больше пользы, чем деньги мне.",
   "If you would rather give it away": "Если хотите отдать их на благотворительность",
-  "No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.": "Никакого партнёрства, никаких реферальных ссылок, Harbor не получает от этого ничего. Это просто места, где деньги приносят больше пользы, чем здесь.",
-  "Insecticide-treated nets. One of the most cost-effective interventions measured.": "Обработанные инсектицидом сетки. Одно из самых эффективных по затратам вмешательств из измеренных.",
-  "Cash straight to people living in extreme poverty, no strings.": "Деньги напрямую людям в крайней бедности, без условий.",
+  "No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.":
+    "Никакого партнёрства, никаких реферальных ссылок, Harbor не получает от этого ничего. Это просто места, где деньги приносят больше пользы, чем здесь.",
+  "Insecticide-treated nets. One of the most cost-effective interventions measured.":
+    "Обработанные инсектицидом сетки. Одно из самых эффективных по затратам вмешательств из измеренных.",
+  "Cash straight to people living in extreme poverty, no strings.":
+    "Деньги напрямую людям в крайней бедности, без условий.",
   "Emergency medical care in crisis zones.": "Экстренная медицинская помощь в зонах кризиса.",
-  "Keeps the web's memory alive. Harbor would be poorer without it.": "Хранит память интернета. Без него Harbor был бы беднее.",
-  "Who pays for the servers, and where to put money if you want to.": "Кто платит за серверы и куда вложить деньги, если хотите.",
-  "Harbor's backend runs on ElfHosted. They run our servers at no cost to the community.": "Бэкенд Harbor работает на ElfHosted. Они содержат наши серверы бесплатно для сообщества.",
-  "Keeping Harbor's backend online costs real money, and ElfHosted covers it so the community does not have to. Becoming a subscriber is the best way to keep that going, and it is not a donation. You get proper infrastructure for your own setup, and Harbor stays funded at the same time.": "Поддержание бэкенда Harbor в сети стоит реальных денег, и ElfHosted берёт это на себя, чтобы сообществу не пришлось. Оформить подписку — лучший способ сохранить это, и это не пожертвование. Вы получаете полноценную инфраструктуру для собственной настройки, и при этом Harbor остаётся профинансированным.",
-  "Private Stremio add-ons with 10x the rate limits and built-in stream proxying, from $9 a month.": "Приватные аддоны Stremio с 10-кратными лимитами запросов и встроенным проксированием потоков, от $9 в месяц.",
-  "Managed Plex, Emby, or Jellyfin, running in minutes with no hardware and no Docker.": "Управляемые Plex, Emby или Jellyfin, запуск за минуты, без оборудования и без Docker.",
-  "Over 100 self-hosted apps: the *arr stack, debrid tools, books and audiobooks, and more.": "Более 100 самостоятельно размещаемых приложений: стек *arr, инструменты debrid, книги и аудиокниги и многое другое.",
-  "Daily backups, automatic updates, and monitoring, all handled for you.": "Ежедневные резервные копии, автоматические обновления и мониторинг — всё берут на себя.",
-  "Month to month, cancel anytime, and you can try the whole thing for $1 for a week.": "Помесячно, отмена в любой момент, а всё это можно попробовать за $1 на неделю.",
+  "Keeps the web's memory alive. Harbor would be poorer without it.":
+    "Хранит память интернета. Без него Harbor был бы беднее.",
+  "Who pays for the servers, and where to put money if you want to.":
+    "Кто платит за серверы и куда вложить деньги, если хотите.",
+  "Harbor's backend runs on ElfHosted. They run our servers at no cost to the community.":
+    "Бэкенд Harbor работает на ElfHosted. Они содержат наши серверы бесплатно для сообщества.",
+  "Keeping Harbor's backend online costs real money, and ElfHosted covers it so the community does not have to. Becoming a subscriber is the best way to keep that going, and it is not a donation. You get proper infrastructure for your own setup, and Harbor stays funded at the same time.":
+    "Поддержание бэкенда Harbor в сети стоит реальных денег, и ElfHosted берёт это на себя, чтобы сообществу не пришлось. Оформить подписку — лучший способ сохранить это, и это не пожертвование. Вы получаете полноценную инфраструктуру для собственной настройки, и при этом Harbor остаётся профинансированным.",
+  "Private Stremio add-ons with 10x the rate limits and built-in stream proxying, from $9 a month.":
+    "Приватные аддоны Stremio с 10-кратными лимитами запросов и встроенным проксированием потоков, от $9 в месяц.",
+  "Managed Plex, Emby, or Jellyfin, running in minutes with no hardware and no Docker.":
+    "Управляемые Plex, Emby или Jellyfin, запуск за минуты, без оборудования и без Docker.",
+  "Over 100 self-hosted apps: the *arr stack, debrid tools, books and audiobooks, and more.":
+    "Более 100 самостоятельно размещаемых приложений: стек *arr, инструменты debrid, книги и аудиокниги и многое другое.",
+  "Daily backups, automatic updates, and monitoring, all handled for you.":
+    "Ежедневные резервные копии, автоматические обновления и мониторинг — всё берут на себя.",
+  "Month to month, cancel anytime, and you can try the whole thing for $1 for a week.":
+    "Помесячно, отмена в любой момент, а всё это можно попробовать за $1 на неделю.",
   "See what you get": "Посмотреть, что вы получите",
-  "Short version: don't. Harbor takes no donations.": "Коротко: не нужно. Harbor не принимает пожертвования.",
-  "If you were going to send something, send it to ElfHosted above so the servers stay paid for, or to one of the charities below. Both do more good with it.": "Если вы собирались что-то отправить, отправьте это ElfHosted выше, чтобы серверы оставались оплаченными, или одной из благотворительных организаций ниже. И то, и другое принесёт больше пользы.",
+  "Short version: don't. Harbor takes no donations.":
+    "Коротко: не нужно. Harbor не принимает пожертвования.",
+  "If you were going to send something, send it to ElfHosted above so the servers stay paid for, or to one of the charities below. Both do more good with it.":
+    "Если вы собирались что-то отправить, отправьте это ElfHosted выше, чтобы серверы оставались оплаченными, или одной из благотворительных организаций ниже. И то, и другое принесёт больше пользы.",
   "Badges for giving": "Значки за поддержку",
-  "Give to any charity below or subscribe to ElfHosted, and the badge lands on your profile.": "Пожертвуйте любой организации ниже или оформите подписку ElfHosted — и значок появится в вашем профиле.",
-  "Charity": "Благотворительность",
+  "Give to any charity below or subscribe to ElfHosted, and the badge lands on your profile.":
+    "Пожертвуйте любой организации ниже или оформите подписку ElfHosted — и значок появится в вашем профиле.",
+  Charity: "Благотворительность",
   "For donating to a charity.": "За пожертвование благотворительной организации.",
   "Charity $100+": "Благотворительность $100+",
   "For giving more than $100 to charity.": "За пожертвование более $100 на благотворительность.",
   "For an active ElfHosted subscription.": "За активную подписку ElfHosted.",
-  "To get a Charity badge, forward your donation receipt or invoice to": "Чтобы получить значок «Благотворительность», перешлите чек или счёт о пожертвовании на",
-  "with your @handle in the body so we can match it to your account.": "указав в тексте письма ваш @handle, чтобы мы связали это с вашим аккаунтом.",
-  "Childhood cancer research and treatment. Families are never billed for care, travel, housing, or food.": "Исследования и лечение детского рака. Семьям никогда не выставляют счёт за лечение, дорогу, жильё или питание.",
-  "Funds research into less toxic, more targeted treatments for childhood cancer.": "Финансирует исследования менее токсичных и более точных методов лечения детского рака.",
-  "Defends privacy, free expression, and the open internet, in the courts and in the code.": "Защищает приватность, свободу слова и открытый интернет — в судах и в коде.",
-  "Emergency medical care in crisis zones, independent of politics.": "Экстренная медицинская помощь в кризисных зонах, независимо от политики.",
+  "To get a Charity badge, forward your donation receipt or invoice to":
+    "Чтобы получить значок «Благотворительность», перешлите чек или счёт о пожертвовании на",
+  "with your @handle in the body so we can match it to your account.":
+    "указав в тексте письма ваш @handle, чтобы мы связали это с вашим аккаунтом.",
+  "Childhood cancer research and treatment. Families are never billed for care, travel, housing, or food.":
+    "Исследования и лечение детского рака. Семьям никогда не выставляют счёт за лечение, дорогу, жильё или питание.",
+  "Funds research into less toxic, more targeted treatments for childhood cancer.":
+    "Финансирует исследования менее токсичных и более точных методов лечения детского рака.",
+  "Defends privacy, free expression, and the open internet, in the courts and in the code.":
+    "Защищает приватность, свободу слова и открытый интернет — в судах и в коде.",
+  "Emergency medical care in crisis zones, independent of politics.":
+    "Экстренная медицинская помощь в кризисных зонах, независимо от политики.",
   "Look any of them up on Charity Navigator": "Проверьте любую из них на Charity Navigator",
   "Built on Stremio": "Построено на Stremio",
-  "Harbor would not be possible without Stremio. It is the foundation everything here is built on.": "Harbor был бы невозможен без Stremio. Это основа, на которой построено всё здесь.",
-  "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.": "Harbor использует протокол аддонов Stremio, и вся экосистема аддонов выросла из их работы. Stremio финансируется своим сообществом, и те, кто вносит вклад, получают ранний доступ к экспериментальным функциям. Если можете, отправьте что-нибудь и им.",
+  "Harbor would not be possible without Stremio. It is the foundation everything here is built on.":
+    "Harbor был бы невозможен без Stremio. Это основа, на которой построено всё здесь.",
+  "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.":
+    "Harbor использует протокол аддонов Stremio, и вся экосистема аддонов выросла из их работы. Stremio финансируется своим сообществом, и те, кто вносит вклад, получают ранний доступ к экспериментальным функциям. Если можете, отправьте что-нибудь и им.",
   "Support Stremio": "Поддержать Stremio",
-  "Stremio Supporters get a special badge on their Harbor profile.": "Спонсоры Stremio получают особый значок в своём профиле Harbor.",
+  "Stremio Supporters get a special badge on their Harbor profile.":
+    "Спонсоры Stremio получают особый значок в своём профиле Harbor.",
   "Your own private {name}, bundled with Debridge": "Ваш личный {name}, в комплекте с Debridge",
-  "Who keeps the lights on, what Harbor is built on, and where to put money if you want to.": "Кто поддерживает серверы, на чём построен Harbor, и куда вложить деньги, если хотите.",
-  "If you were going to send something, send it to ElfHosted or Stremio above, or to one of the charities below. They all do more good with it.": "Если вы собирались что-то отправить, отправьте это ElfHosted или Stremio выше, или одной из благотворительных организаций ниже. Все они принесут больше пользы.",
-  "Support ElfHosted or Stremio, or give to any charity below, and the badge lands on your profile.": "Поддержите ElfHosted или Stremio, или пожертвуйте любой организации ниже — и значок появится в вашем профиле.",
+  "Who keeps the lights on, what Harbor is built on, and where to put money if you want to.":
+    "Кто поддерживает серверы, на чём построен Harbor, и куда вложить деньги, если хотите.",
+  "If you were going to send something, send it to ElfHosted or Stremio above, or to one of the charities below. They all do more good with it.":
+    "Если вы собирались что-то отправить, отправьте это ElfHosted или Stremio выше, или одной из благотворительных организаций ниже. Все они принесут больше пользы.",
+  "Support ElfHosted or Stremio, or give to any charity below, and the badge lands on your profile.":
+    "Поддержите ElfHosted или Stremio, или пожертвуйте любой организации ниже — и значок появится в вашем профиле.",
   "Fullscreen clock": "Часы в полноэкранном режиме",
-  "Keep your local time visible during fullscreen playback and choose how it looks.": "Держите местное время на виду во время полноэкранного просмотра и выберите его вид.",
+  "Keep your local time visible during fullscreen playback and choose how it looks.":
+    "Держите местное время на виду во время полноэкранного просмотра и выберите его вид.",
   "Show fullscreen clock": "Показывать часы в полноэкранном режиме",
-  "The clock appears with the player controls.": "Часы появляются вместе с элементами управления плеера.",
+  "The clock appears with the player controls.":
+    "Часы появляются вместе с элементами управления плеера.",
   "Clock format": "Формат часов",
   "12-hour": "12-часовой",
   "24-hour": "24-часовой",
   "Show seconds": "Показывать секунды",
   "Update the clock every second.": "Обновлять часы каждую секунду.",
   "Show estimated finish time": "Показывать примерное время окончания",
-  "Display the local time when the current video is expected to end.": "Показывает местное время, когда текущее видео должно закончиться.",
+  "Display the local time when the current video is expected to end.":
+    "Показывает местное время, когда текущее видео должно закончиться.",
   "Clock size": "Размер часов",
   "Clock style": "Стиль часов",
-  "Minimal": "Минимальный",
-  "Solid": "Сплошной",
-  "Accent": "Акцент",
+  Minimal: "Минимальный",
+  Solid: "Сплошной",
+  Accent: "Акцент",
   "Soft blur with a floating pill.": "Мягкое размытие в плавающей плашке.",
   "Time only, with a subtle shadow.": "Только время, с лёгкой тенью.",
   "High-contrast panel for busy scenes.": "Контрастная панель для насыщенных сцен.",
   "Uses your theme's accent color.": "Использует акцентный цвет вашей темы.",
   "Focused Card": "Выделенная карточка",
   "Expanding Cards": "Расширяющиеся карточки",
-  "Emphasize the selected card across the page while gently darkening and blurring the other cards.": "Выделяет выбранную карточку на странице, слегка затемняя и размывая остальные.",
-  "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.": "Расширяет карточки постеров при навигации с клавиатуры или пульта по рядам постеров, используя предзагруженные широкие изображения.",
-  "Add a TMDB key in Settings to identify the cast.": "Добавьте ключ TMDB в настройках, чтобы распознавать актёров.",
+  "Emphasize the selected card across the page while gently darkening and blurring the other cards.":
+    "Выделяет выбранную карточку на странице, слегка затемняя и размывая остальные.",
+  "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.":
+    "Расширяет карточки постеров при навигации с клавиатуры или пульта по рядам постеров, используя предзагруженные широкие изображения.",
+  "Add a TMDB key in Settings to identify the cast.":
+    "Добавьте ключ TMDB в настройках, чтобы распознавать актёров.",
   "No cast photos are available for this title.": "Для этого тайтла нет фотографий актёров.",
 };
 

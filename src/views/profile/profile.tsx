@@ -47,7 +47,6 @@ import { ProfileSkeleton } from "./profile-skeleton";
 import { ProfileEmpty, ProfileError, ProfilePrivate } from "./profile-states";
 import { MyListsShowcase } from "./my-lists-showcase";
 import { MyListsPicker } from "./my-lists-picker";
-import { LinkOutInterstitial } from "@/components/link-out-interstitial";
 import { ProfileViewAll } from "./profile-view-all";
 import { RecentActivity } from "./recent-activity";
 import { Showcase } from "./showcase";
@@ -330,7 +329,6 @@ export function ProfileView({
         onEdit={() => setEditing(true)}
         onPatch={patchSummary}
       />
-      <LinkOutInterstitial />
       <ScrollToTop targetRef={scrollRef} />
 
       <div className="mx-auto w-full max-w-6xl px-6 pb-16 lg:px-10">

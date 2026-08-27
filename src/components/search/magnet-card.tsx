@@ -11,6 +11,7 @@ import {
 } from "@/lib/torrent/stremio-stream";
 import {
   lastEngineAddError,
+  scheduleAbandonedTorrentRemoval,
   torrentEngineAdd,
   torrentEngineSelect,
   torrentEngineStatus,
@@ -42,7 +43,16 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
   const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<MagnetMatch | null>(null);
   const matchRef = useRef<MagnetMatch | null>(null);
+  const pendingEngineRef = useRef<string | null>(null);
   matchRef.current = match;
+
+  useEffect(
+    () => () => {
+      const infoHash = pendingEngineRef.current;
+      if (infoHash) scheduleAbandonedTorrentRemoval(infoHash, 0);
+    },
+    [],
+  );
 
   const dn = parsed?.name ?? null;
   const label = useMemo(() => cleanReleaseName(dn), [dn]);
@@ -70,12 +80,13 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
     );
   }
 
-  const startPlay = async (fileIdx: number | null, name?: string) => {
+  const startPlay = async (fileIdx: number | null, name?: string, engineOverride?: AddResult) => {
     let url: string;
-    if (engine) {
+    const activeEngine = engineOverride ?? engine;
+    if (activeEngine) {
       const idx = fileIdx ?? 0;
-      await torrentEngineSelect(engine.info_hash, idx);
-      url = `${engine.stream_base}/${engine.info_hash.toLowerCase()}/${idx}`;
+      await torrentEngineSelect(activeEngine.info_hash, idx);
+      url = `${activeEngine.stream_base}/${activeEngine.info_hash.toLowerCase()}/${idx}`;
     } else {
       url = buildTorrentStreamUrl({
         infoHash: parsed.infoHash,
@@ -85,7 +96,11 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       });
     }
     const m = matchRef.current;
-    const playMeta: Meta = m?.meta ?? { id: `magnet:${parsed.infoHash}`, type: "movie", name: label };
+    const playMeta: Meta = m?.meta ?? {
+      id: `magnet:${parsed.infoHash}`,
+      type: "movie",
+      name: label,
+    };
     const src: PlayerSrc = {
       meta: playMeta,
       url,
@@ -93,6 +108,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       subtitle: episodeLine(m),
       streamRef: { infoHash: parsed.infoHash, fileIdx: fileIdx ?? null },
     };
+    pendingEngineRef.current = null;
     onClose();
     openPlayer(src);
   };
@@ -144,6 +160,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       return;
     }
 
+    setEngine(null);
     const added = await torrentEngineAdd(raw, parsed.trackers);
     if (!added || added.files.length === 0) {
       setMode("error");
@@ -155,9 +172,14 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       );
       return;
     }
+    if (added.already_managed !== true) pendingEngineRef.current = added.info_hash;
     setEngine(added);
     const videos = added.files.filter(isVideoFile).sort((a, b) => b.length - a.length);
     if (videos.length === 0) {
+      if (pendingEngineRef.current) {
+        scheduleAbandonedTorrentRemoval(pendingEngineRef.current, 0);
+        pendingEngineRef.current = null;
+      }
       setMode("error");
       setError("No playable video file was found in this torrent.");
       return;
@@ -167,7 +189,7 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
       setMode("picking");
       return;
     }
-    void startPlay(videos[0].idx, videos[0].name);
+    void startPlay(videos[0].idx, videos[0].name, added);
   };
 
   const playButton = (
@@ -204,7 +226,9 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
           >
             <Play size={18} className="shrink-0 text-ink-muted" />
             <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{f.name}</span>
-            <span className="shrink-0 text-[12px] tabular-nums text-ink-subtle">{formatSize(f.length)}</span>
+            <span className="shrink-0 text-[12px] tabular-nums text-ink-subtle">
+              {formatSize(f.length)}
+            </span>
           </button>
         ))}
       </div>
@@ -216,7 +240,11 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
     return (
       <div className="flex items-center gap-4 rounded-2xl border border-edge-soft bg-elevated/60 px-4 py-3.5">
         <div className="h-[64px] w-[44px] shrink-0 overflow-hidden rounded-lg shadow-[0_6px_16px_-8px_rgba(0,0,0,0.55)] ring-1 ring-edge-soft">
-          <ResultPoster id={match.meta.id} poster={match.meta.poster} className="block h-full w-full" />
+          <ResultPoster
+            id={match.meta.id}
+            poster={match.meta.poster}
+            className="block h-full w-full"
+          />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="truncate text-[15px] font-semibold text-ink">{match.meta.name}</span>
@@ -234,7 +262,9 @@ export function MagnetCard({ raw, onClose }: { raw: string; onClose: () => void 
         <Magnet size={22} />
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">Torrent link</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+          Torrent link
+        </span>
         <span className="truncate text-[15px] font-semibold text-ink">{label}</span>
         <span className="truncate text-[12.5px] text-ink-subtle">
           {error ?? "Streams directly from peers over your own connection."}
@@ -252,7 +282,10 @@ function episodeLine(m: MagnetMatch | null): string | undefined {
 }
 
 function normTitle(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function pickBestMeta(list: Meta[], title: string, year: number | null): Meta | null {
@@ -312,7 +345,8 @@ function cleanReleaseName(dn: string | null): string {
   const title = (info.title ?? "").trim();
   if (title) {
     let line = title;
-    if (info.season != null && info.episode != null) line += ` · S${info.season} · E${info.episode}`;
+    if (info.season != null && info.episode != null)
+      line += ` · S${info.season} · E${info.episode}`;
     else if (info.year) line += ` · ${info.year}`;
     if (info.resolution) line += ` · ${info.resolution}`;
     return line;

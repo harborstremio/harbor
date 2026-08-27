@@ -96,6 +96,7 @@ import { SettingsProvider } from "@/lib/settings";
 import { SearchProvider, useSearch } from "@/lib/search-context";
 import { SearchOverlay } from "@/components/search/search-overlay";
 import { SearchHotkey } from "@/components/search/search-hotkey";
+import { LinkOutInterstitial } from "@/components/link-out-interstitial";
 import { TogetherProvider, useTogether } from "@/lib/together/provider";
 import { DvrProvider } from "@/lib/dvr/provider";
 import { FavoritesProvider } from "@/lib/iptv/favorites";
@@ -104,8 +105,17 @@ import { CharacterFavoritesProvider } from "@/lib/character-favorites";
 import { MangaFavoritesProvider } from "@/lib/manga-favorites";
 import { LocalWatchlistProvider } from "@/lib/local-watchlist";
 import { useSettings } from "@/lib/settings";
-import { torrentEngineSetOptions } from "@/lib/torrent/local-engine";
-import { effectiveBinding, eventToBinding, shouldHandleGlobalKeyboardEvent } from "@/lib/hotkeys";
+import {
+  flushPendingTorrentRemovals,
+  reconcilePendingTorrentRemovals,
+  torrentEngineSetOptions,
+} from "@/lib/torrent/local-engine";
+import {
+  effectiveBinding,
+  eventToBinding,
+  findHotkeyMatch,
+  shouldHandleGlobalKeyboardEvent,
+} from "@/lib/hotkeys";
 import { ViewProvider, useView, type Frame, type MetaFilter, type View } from "@/lib/view";
 import { requestOpenProfile, requestEditProfile } from "@/lib/social/open-profile";
 import { openNotificationCenter } from "@/lib/social/notification-open";
@@ -400,6 +410,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <CurfewGuard />
                                                   <SearchOverlay />
                                                   <SearchHotkey />
+                                                  <LinkOutInterstitial />
                                                   <EmbedViewportRoot />
                                                   <InstallerViewportRoot />
                                                   <UpdateRoot />
@@ -677,6 +688,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
     picker,
     player,
     setView,
+    openSettings,
     canGoBack,
     goBack,
     canGoForward,
@@ -883,6 +895,14 @@ function Shell({ onReady }: { onReady?: () => void }) {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
       const binding = eventToBinding(e);
       const overrides = settings.hotkeys ?? {};
+      const globalMatch = findHotkeyMatch(e, overrides, "Global");
+      if (
+        globalMatch &&
+        globalMatch !== "globalUiScaleUp" &&
+        globalMatch !== "globalUiScaleDown" &&
+        globalMatch !== "globalUiScaleReset"
+      )
+        return;
       const uiScaleUpCustom = "globalUiScaleUp" in overrides;
       const uiScaleDownCustom = "globalUiScaleDown" in overrides;
       const uiScaleResetCustom = "globalUiScaleReset" in overrides;
@@ -954,6 +974,20 @@ function Shell({ onReady }: { onReady?: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!shouldHandleGlobalKeyboardEvent(e)) return;
+      if (findHotkeyMatch(e, settings.hotkeys ?? {}, "Global") !== "globalSettingsOpen") return;
+      e.preventDefault();
+      if (player || document.querySelector('[data-harbor-multiview-active="true"]')) return;
+      e.stopPropagation();
+      if (e.repeat) return;
+      openSettings();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [openSettings, player, settings.hotkeys]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!shouldHandleGlobalKeyboardEvent(e)) return;
       if (e.repeat) return;
       if (e.key === "F11") {
         e.preventDefault();
@@ -966,11 +1000,19 @@ function Shell({ onReady }: { onReady?: () => void }) {
 
   useEffect(() => {
     if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
+    void reconcilePendingTorrentRemovals();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
     let unlisten: (() => void) | undefined;
     let cancelled = false;
     void import("@tauri-apps/api/event").then(({ listen }) =>
       listen("harbor://app-closing", async () => {
-        await flushCloudSync().catch(() => {});
+        await Promise.all([
+          flushCloudSync().catch(() => {}),
+          flushPendingTorrentRemovals().catch(() => {}),
+        ]);
         const { invoke } = await import("@tauri-apps/api/core");
         await invoke("harbor_flush_done").catch(() => {});
       }).then((rawUnlisten) => {
@@ -987,21 +1029,25 @@ function Shell({ onReady }: { onReady?: () => void }) {
 
   useEffect(() => {
     const w = window as unknown as { harbor?: Record<string, unknown> };
+    const tryViewMyProfile = () => {
+      const handle = currentAuthor()?.handle?.trim();
+      if (!handle) return false;
+      requestOpenProfile(handle);
+      return true;
+    };
     w.harbor = {
-      ...(w.harbor ?? {}),
+      ...w.harbor,
       navigate: (v: string) => setView(v as View),
       back: () => goBack(),
       search: () => setSearchOpen(true),
       openSettings: () => setView("settings"),
       openNotifications: () => openNotificationCenter(),
       openAccountMenu: (el?: unknown) => openAccountMenu(anchorFromElement(el)),
+      tryViewMyProfile,
       viewMyProfile: async () => {
-        let handle = currentAuthor()?.handle;
-        if (!handle) {
-          await fetchMe().catch(() => {});
-          handle = currentAuthor()?.handle;
-        }
-        if (handle) requestOpenProfile(handle);
+        if (tryViewMyProfile()) return;
+        await fetchMe().catch(() => {});
+        tryViewMyProfile();
       },
       unreadCount: () => getUnreadCount(),
       onUnread: (cb: (count: number) => void) =>
@@ -1249,23 +1295,35 @@ function Shell({ onReady }: { onReady?: () => void }) {
       {!settingsTop && !playerActive && !liveTop && !pickerTop && layout === "stremio" && (
         <StremioRail />
       )}
-      {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && <TopDock />}
-      {!settingsTop && !playerActive && !pickerTop && layout === "cinematic" && (
+      {!settingsTop && !playerActive && !pickerTop && layout === "topdock" && !immersive && (
+        <TopDock />
+      )}
+      {!settingsTop && !playerActive && !pickerTop && layout === "cinematic" && !immersive && (
         <CinematicOverlay />
       )}
-      {!settingsTop && !playerActive && !pickerTop && layout === "royal" && <RoyalTopbar />}
-      {!settingsTop && !playerActive && !pickerTop && layout === "rail" && <SideRail />}
-      {!playerActive && !pickerTop && layout === "minui" && <MinUIDock />}
-      {!playerActive && !pickerTop && layout === "topdock" && <FloatingBack offsetTop={92} />}
-      {!playerActive && !pickerTop && layout === "cinematic" && <FloatingBack offsetTop={92} />}
-      {!playerActive && !pickerTop && layout === "royal" && <FloatingBack offsetTop={92} />}
-      {!playerActive && !pickerTop && layout === "rail" && (
+      {!settingsTop && !playerActive && !pickerTop && layout === "royal" && !immersive && (
+        <RoyalTopbar />
+      )}
+      {!settingsTop && !playerActive && !pickerTop && layout === "rail" && !immersive && (
+        <SideRail />
+      )}
+      {!playerActive && !pickerTop && layout === "minui" && !immersive && <MinUIDock />}
+      {!playerActive && !pickerTop && layout === "topdock" && !immersive && (
+        <FloatingBack offsetTop={92} />
+      )}
+      {!playerActive && !pickerTop && layout === "cinematic" && !immersive && (
+        <FloatingBack offsetTop={92} />
+      )}
+      {!playerActive && !pickerTop && layout === "royal" && !immersive && (
+        <FloatingBack offsetTop={92} />
+      )}
+      {!playerActive && !pickerTop && layout === "rail" && !immersive && (
         <FloatingBack offsetLeft={settings.sidebarCollapsed ? 88 : 220} offsetTop={28} />
       )}
-      {!playerActive && !pickerTop && layout === "custom" && (
+      {!playerActive && !pickerTop && layout === "custom" && !immersive && (
         <FloatingBack offsetLeft={20} offsetTop={20} />
       )}
-      {!playerActive && !pickerTop && layout === "custom" && (
+      {!playerActive && !pickerTop && layout === "custom" && !immersive && (
         <div className="fixed end-3 top-3 z-[120]">
           <WindowControls />
         </div>
@@ -1600,10 +1658,12 @@ function Shell({ onReady }: { onReady?: () => void }) {
             <WindowControls />
           </div>
         )}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent"
-        />
+        {!immersive && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 z-30 h-24 bg-gradient-to-b from-canvas/85 via-canvas/40 to-transparent"
+          />
+        )}
         {!immersive &&
           (themeHasTopbar || (settingsTop && layout !== "minui" && layout !== "custom")) && (
             <Topbar />

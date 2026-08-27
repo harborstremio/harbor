@@ -4,6 +4,11 @@ import { dlog } from "@/lib/debug";
 import type { SubResult, SubSearchQuery } from "../types";
 import { isPlausibleLang, normalizeLang } from "../language";
 import { withSubtitleTimeout } from "../autoload";
+import {
+  inferSubtitleUpstreamProvider,
+  subtitleContextTitle,
+  subtitleFpsFromMetadata,
+} from "../provider-label";
 
 type RawAddonSub = {
   id?: string;
@@ -11,6 +16,13 @@ type RawAddonSub = {
   lang: string;
   m?: string;
   SubFormat?: string;
+  fps?: number | string;
+  author?: string;
+  uploader?: string;
+  provider?: string;
+  source?: string;
+  name?: string;
+  addon?: string;
 };
 
 function transportBase(transportUrl: string): string {
@@ -177,6 +189,7 @@ export async function searchAddons(
   );
 
   const out: SubResult[] = [];
+  const displayTitle = subtitleContextTitle(q);
   settled.forEach((subs, i) => {
     const addonName = targets[i].addon.manifest.name;
     for (let idx = 0; idx < subs.length; idx++) {
@@ -191,9 +204,20 @@ export async function searchAddons(
         url: s.url,
         lang: normalizeLang(s.lang),
         title: addonName,
+        displayTitle,
         source: "addon",
         format: (s.SubFormat?.toLowerCase() as SubResult["format"]) || undefined,
         release: s.m || undefined,
+        fps: subtitleFpsFromMetadata(s.fps, s.m),
+        author: s.author?.trim() || s.uploader?.trim() || undefined,
+        upstreamProvider: inferSubtitleUpstreamProvider(
+          s.provider,
+          s.source,
+          s.name,
+          s.addon,
+          s.id,
+          s.url,
+        ),
       });
     }
   });

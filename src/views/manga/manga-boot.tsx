@@ -63,7 +63,7 @@ export function MangaBootstrapError({
           onClick={onManageSources}
           className="inline-flex h-11 items-center rounded-xl border border-edge-soft bg-elevated/40 px-5 text-[14px] font-medium text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
         >
-          {t("Manage sources")}
+          {t("Manage Servers")}
         </button>
       </div>
     </main>

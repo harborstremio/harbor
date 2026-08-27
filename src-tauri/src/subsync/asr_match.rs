@@ -45,9 +45,10 @@ fn fold(c: char) -> char {
 }
 
 fn phonetic(n: &str) -> String {
+    let canonical = n.replace("ght", "t");
     let mut out = String::new();
     let mut prev = '\u{0}';
-    for (i, c) in n.chars().enumerate() {
+    for (i, c) in canonical.chars().enumerate() {
         let f = fold(c);
         if f == '0' && i > 0 {
             continue;

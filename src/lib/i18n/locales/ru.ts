@@ -1,5 +1,6 @@
 import gap from "./ru/gap";
 import coverage from "./ru/coverage";
+import uiFallback from "./ui-fallback";
 import chrome from "./ru/chrome";
 import common from "./ru/common";
 import catalog from "./ru/catalog";
@@ -31,6 +32,7 @@ import used from "./ru/used";
 
 const ru: Record<string, string> = {
   ...coverage,
+  ...uiFallback,
   ...gap,
   ...chrome,
   ...common,

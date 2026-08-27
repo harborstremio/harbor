@@ -1,4 +1,15 @@
 const player: Record<string, string> = {
+  "Content Advisory": "تصنيف المحتوى الإرشادي",
+  "Violence & Gore": "العنف والدموية",
+  "Sex & Nudity": "المحتوى الجنسي والعري",
+  Profanity: "الألفاظ النابية",
+  "Alcohol, Drugs & Smoking": "الكحول والمخدرات والتدخين",
+  "Frightening & Intense Scenes": "مشاهد مرعبة ومثيرة",
+  Severe: "شديد",
+  Moderate: "متوسط",
+  Mild: "خفيف",
+  None: "لا يوجد",
+  "Official age rating": "التصنيف العمري الرسمي",
   Play: "تشغيل",
   Pause: "إيقاف مؤقت",
   "Download Subtitle": "تحميل الترجمة",
@@ -433,6 +444,59 @@ const player: Record<string, string> = {
   "Next and Previous behavior": "سلوك زرّي التالي والسابق",
   "Next and Previous follow your queue": "التالي والسابق يتبعان قائمة انتظارك",
   "Next and Previous follow this show": "التالي والسابق يتبعان هذا المسلسل",
+  "Subtitle FPS": "معدل إطارات الترجمة",
+  "Automatic correction": "التصحيح التلقائي",
+  "Measure this subtitle against speech and correct delay and gradual drift together.":
+    "قِس هذه الترجمة مقابل الكلام وصحّح التأخير والانحراف التدريجي معًا.",
+  "Detect timing drift": "اكتشاف انحراف التوقيت",
+  "Timing analysis active": "تحليل التوقيت نشط",
+  "Automatic timing correction requires an external text subtitle.":
+    "يتطلب تصحيح التوقيت التلقائي ترجمة نصية خارجية.",
+  "Manual source FPS": "معدل إطارات المصدر يدويًا",
+  "Subtitle source FPS": "معدل إطارات مصدر الترجمة",
+  "Choose the frame rate the subtitle was authored for.":
+    "اختر معدل الإطارات الذي أُنشئت الترجمة على أساسه.",
+  "No correction (default)": "بلا تصحيح (الافتراضي)",
+  "Auto (match video)": "تلقائي (مطابقة الفيديو)",
+  "Custom...": "مخصص...",
+  "Custom subtitle FPS": "معدل إطارات مخصص للترجمة",
+  "Apply custom subtitle FPS": "تطبيق معدل الإطارات المخصص للترجمة",
+  "Video FPS": "معدل إطارات الفيديو",
+  "No correction": "بلا تصحيح",
+  "Couldn't apply subtitle FPS. Try again.": "تعذّر تطبيق معدل إطارات الترجمة. حاول مرة أخرى.",
+  "Enter an FPS from 1 to 240.": "أدخل معدل إطارات من 1 إلى 240.",
+  "Select a subtitle track first.": "اختر مسار ترجمة أولًا.",
+  "Subtitle FPS is only available with the libmpv player.":
+    "لا يتوفر تعديل معدل إطارات الترجمة إلا مع مشغل libmpv.",
+  "Subtitle FPS conversion is only available for text-based subtitles.":
+    "لا يتوفر تحويل معدل الإطارات إلا للترجمات النصية.",
+  "Subtitle FPS is unavailable while a secondary subtitle is active.":
+    "لا يتوفر تعديل معدل إطارات الترجمة أثناء تفعيل ترجمة ثانوية.",
+  "Video FPS is unavailable.": "معدل إطارات الفيديو غير متوفر.",
+  "Subtitle FPS is unavailable in this libmpv runtime.":
+    "معدل إطارات الترجمة غير متوفر في إصدار libmpv الحالي.",
+  "Turn off Auto Sync before changing subtitle FPS.":
+    "أوقف المزامنة التلقائية قبل تغيير معدل إطارات الترجمة.",
+  "Resize subtitle menu": "تغيير حجم قائمة الترجمة",
+  "Drag to resize. Use arrow keys to adjust, or Home to reset.":
+    "اسحب لتغيير الحجم. استخدم مفاتيح الأسهم للضبط، أو Home لإعادة التعيين.",
+  "Drag the corner to resize. Left and right change width; up and down change height; Home resets the size.":
+    "اسحب الزاوية لتغيير الحجم. يغيّر السهمان الأيسر والأيمن العرض؛ ويغيّر السهمان الأعلى والأسفل الارتفاع؛ ويعيد Home الحجم إلى الافتراضي.",
+  "Couldn't switch subtitles. Try again.": "تعذّر تبديل الترجمة. حاول مرة أخرى.",
+  "Subtitle details": "تفاصيل الترجمة",
+  "Open subtitle details": "فتح تفاصيل الترجمة",
+  Provider: "المزوّد",
+  Format: "التنسيق",
+  Quality: "الجودة",
+  Author: "الناشر",
+  Release: "الإصدار",
+  "Not provided": "غير متوفر",
+  "Match estimate": "تقدير التطابق",
+  "Match evidence": "أدلة التطابق",
+  "This is a metadata-based release estimate, not a measured timing score.":
+    "هذا تقدير مبني على بيانات الإصدار، وليس قياسًا لمزامنة التوقيت.",
+  "Couldn't save the synced subtitle. Try again.": "تعذّر حفظ الترجمة المتزامنة. حاول مرة أخرى.",
+  "Saving...": "جارٍ الحفظ...",
 };
 
 export default player;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSettings } from "@/lib/settings";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { headersFromChannel } from "@/lib/iptv/channel-headers";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
 import type { Meta } from "@/lib/cinemeta";
@@ -10,7 +10,7 @@ export function useLiveChannelOverlay(params: {
   replacePlayerSrc: (src: PlayerSrc) => void;
 }) {
   const { src, replacePlayerSrc } = params;
-  const { settings } = useSettings();
+  const playlists = usePlaylists();
   const [open, setOpen] = useState(false);
   const [group, setGroup] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -23,27 +23,27 @@ export function useLiveChannelOverlay(params: {
     const stripped = src.meta.id.replace(/^iptv:/, "");
     const playlistId = stripped.split("::")[0];
     if (!playlistId) return null;
-    const found = settings.iptvPlaylists.find((p) => p.id === playlistId);
+    const found = playlists.find((p) => p.id === playlistId);
     if (!found) return null;
     return { id: found.id, name: found.name, url: found.url, epgUrl: found.epgUrl };
-  }, [isLive, src.meta.id, settings.iptvPlaylists]);
+  }, [isLive, src.meta.id, playlists]);
 
   const activeSource: IptvPlaylistSource | null = useMemo(() => {
     if (!overrideSourceId) return playingSource;
-    const found = settings.iptvPlaylists.find((p) => p.id === overrideSourceId);
+    const found = playlists.find((p) => p.id === overrideSourceId);
     if (!found) return playingSource;
     return { id: found.id, name: found.name, url: found.url, epgUrl: found.epgUrl };
-  }, [overrideSourceId, playingSource, settings.iptvPlaylists]);
+  }, [overrideSourceId, playingSource, playlists]);
 
   const availableSources: IptvPlaylistSource[] = useMemo(
     () =>
-      settings.iptvPlaylists.map((p) => ({
+      playlists.map((p) => ({
         id: p.id,
         name: p.name,
         url: p.url,
         epgUrl: p.epgUrl,
       })),
-    [settings.iptvPlaylists],
+    [playlists],
   );
 
   const selectSource = useCallback((id: string) => {

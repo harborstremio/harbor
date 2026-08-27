@@ -160,13 +160,16 @@ export function LocalTab({ scrollRef }: { scrollRef?: RefObject<HTMLElement | nu
     [items],
   );
   const reviewCount = reviewGroups.length;
+  // Local files are one row per episode; count distinct shows/movies (as
+  // grouped for the grid) rather than the underlying file count.
+  const allGroups = useMemo(() => groupLocal(items), [items]);
   const counts = useMemo(
     () => ({
-      all: items.length,
-      movie: items.filter((i) => i.type === "movie").length,
-      series: items.filter((i) => i.type === "show").length,
+      all: allGroups.length,
+      movie: allGroups.filter((g) => g.kind === "movie").length,
+      series: allGroups.filter((g) => g.kind === "show").length,
     }),
-    [items],
+    [allGroups],
   );
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
