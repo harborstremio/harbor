@@ -13,7 +13,10 @@ fn main() {
         let libmpv = manifest.join("libmpv");
         if libmpv.join("mpv.lib").exists() {
             println!("cargo:rustc-link-search=native={}", libmpv.display());
-            println!("cargo:rerun-if-changed={}", libmpv.join("mpv.lib").display());
+            println!(
+                "cargo:rerun-if-changed={}",
+                libmpv.join("mpv.lib").display()
+            );
         }
         if !libmpv.join("libmpv-2.dll").exists() {
             println!("cargo:warning=libmpv-2.dll not found in src-tauri/libmpv. Run `pnpm run setup:libmpv` to fetch it (needed to run and bundle Harbor on Windows).");
@@ -40,16 +43,6 @@ fn main() {
         }
         println!("cargo:rustc-link-arg=-Wl,-rpath,@executable_path/../Frameworks");
         println!("cargo:rustc-link-arg=-Wl,-rpath,@loader_path/../Frameworks");
-        #[cfg(target_arch = "aarch64")]
-        {
-            println!("cargo:rustc-link-arg=-Wl,-rpath,/opt/homebrew/lib");
-            println!("cargo:rustc-link-arg=-Wl,-rpath,/opt/homebrew/opt/mpv/lib");
-        }
-        #[cfg(target_arch = "x86_64")]
-        {
-            println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/local/lib");
-            println!("cargo:rustc-link-arg=-Wl,-rpath,/usr/local/opt/mpv/lib");
-        }
     }
 
     if target_os == "linux" {

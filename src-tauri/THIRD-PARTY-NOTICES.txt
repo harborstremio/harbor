@@ -64,6 +64,8 @@ mpv / libmpv  (mpv.exe, libmpv)
              Windows:  shinchiro mpv-winbuild-cmake / build_libmpv
                        https://github.com/shinchiro/mpv-winbuild-cmake
                        binaries: https://sourceforge.net/projects/mpv-player-windows/
+             macOS:    Homebrew mpv formula
+                       https://formulae.brew.sh/formula/mpv
   Note:      GPL component. Corresponding Source offered below.
 
 
