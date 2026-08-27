@@ -7,6 +7,7 @@ import { freshWatchedIds } from "@/lib/stremio-watched-sync";
 import { library, type LibraryItem } from "@/lib/stremio";
 import { stremioMovieWatched } from "@/lib/stremio-watched";
 import { authToken } from "@/lib/theme-auth";
+import { seedWatchTimeBaseline, totalWatchTimeMs } from "@/lib/watch-time";
 import { socialPost } from "./client";
 
 export function isWatchedItem(i: LibraryItem): boolean {
@@ -157,7 +158,13 @@ export async function computeWatchedBreakdown(
     // ignore
   }
 
-  const minutesWatched = Math.floor(totalWatchMs / 60000);
+  // The ledger is the running total of media actually played. The sum above
+  // (library overallTimeWatched + resume positions) is the old heuristic; it
+  // seeds the ledger once so the number never drops, and stays as a floor for
+  // accounts whose Stremio library carries more history than this device.
+  const estimateMs = (movieIds.size * 120 + episodeKeys.size * 45) * 60000;
+  seedWatchTimeBaseline(totalWatchMs, estimateMs);
+  const minutesWatched = Math.floor(Math.max(totalWatchMs, totalWatchTimeMs()) / 60000);
 
   return {
     watched: allWatchedIds.size,

@@ -2,15 +2,15 @@ import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { socialPatch } from "@/lib/social/client";
 import { useT } from "@/lib/i18n";
-import { STAT_LABELS, STAT_ORDER, sanitizeStatLayout, type StatKey } from "@/lib/profile-card-layout";
+import {
+  STAT_LABELS,
+  STAT_ORDER,
+  sanitizeStatLayout,
+  watchMinutes,
+  type StatKey,
+} from "@/lib/profile-card-layout";
 import { compactNumber, formatWatchTime } from "./profile-bits";
 import type { ProfileCounts, ProfileSummary } from "./profile-types";
-
-function watchMinutes(counts: ProfileCounts): number {
-  if ((counts.minutesWatched ?? 0) > 0) return counts.minutesWatched ?? 0;
-  if ((counts.hoursWatched ?? 0) > 0) return counts.hoursWatched * 60;
-  return (counts.moviesWatched ?? 0) * 120 + (counts.episodesWatched ?? 0) * 45;
-}
 
 function watchLabel(minutes: number): string {
   const f = formatWatchTime(minutes);
