@@ -162,7 +162,8 @@ export async function computeWatchedBreakdown(
   // (library overallTimeWatched + resume positions) is the old heuristic; it
   // seeds the ledger once so the number never drops, and stays as a floor for
   // accounts whose Stremio library carries more history than this device.
-  seedWatchTimeBaseline(totalWatchMs);
+  const estimateMs = (movieIds.size * 120 + episodeKeys.size * 45) * 60000;
+  seedWatchTimeBaseline(totalWatchMs, estimateMs);
   const minutesWatched = Math.floor(Math.max(totalWatchMs, totalWatchTimeMs()) / 60000);
 
   return {

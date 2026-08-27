@@ -13,10 +13,13 @@ type Ledger = {
   // below what the profile already showed before this ledger existed.
   baseMs: number;
   seeded: boolean;
+  // Second one-shot raise to the movies/episodes estimate the profile pill
+  // used to show, so switching the pill to tracked time never lowers it.
+  estSeeded: boolean;
   t: number;
 };
 
-const EMPTY: Ledger = { ms: 0, baseMs: 0, seeded: false, t: 0 };
+const EMPTY: Ledger = { ms: 0, baseMs: 0, seeded: false, estSeeded: false, t: 0 };
 
 function read(): Ledger {
   try {
@@ -28,6 +31,7 @@ function read(): Ledger {
       baseMs:
         typeof p.baseMs === "number" && Number.isFinite(p.baseMs) && p.baseMs > 0 ? p.baseMs : 0,
       seeded: p.seeded === true,
+      estSeeded: p.estSeeded === true,
       t: typeof p.t === "number" ? p.t : 0,
     };
   } catch {
@@ -51,11 +55,22 @@ export function addWatchTimeMs(deltaMs: number): void {
   write(l);
 }
 
-export function seedWatchTimeBaseline(legacyMs: number): void {
+export function seedWatchTimeBaseline(legacyMs: number, estimateMs: number): void {
   const l = read();
-  if (l.seeded) return;
-  l.seeded = true;
-  l.baseMs = Number.isFinite(legacyMs) && legacyMs > 0 ? Math.floor(legacyMs) : 0;
+  const legacy = Number.isFinite(legacyMs) && legacyMs > 0 ? Math.floor(legacyMs) : 0;
+  const est = Number.isFinite(estimateMs) && estimateMs > 0 ? Math.floor(estimateMs) : 0;
+  let changed = false;
+  if (!l.seeded) {
+    l.seeded = true;
+    l.baseMs = Math.max(l.baseMs, legacy);
+    changed = true;
+  }
+  if (!l.estSeeded) {
+    l.estSeeded = true;
+    if (est > l.baseMs + l.ms) l.baseMs = est - l.ms;
+    changed = true;
+  }
+  if (!changed) return;
   l.t = Date.now();
   write(l);
 }
