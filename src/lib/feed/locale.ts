@@ -98,19 +98,11 @@ export function preferredLangCodes(settings: Settings): string[] {
   return [...out];
 }
 
-function alreadyLocalized(floor: Record<string, string>): boolean {
-  return "with_original_language" in floor || "with_origin_country" in floor;
-}
-
 export function localizeFloor(
   floor: Record<string, string>,
   settings: Settings,
   mediaType: "movie" | "tv",
 ): Record<string, string> {
-  if (!settings.feedLocaleBias) return floor;
-  if (alreadyLocalized(floor)) return floor;
-  const codes = preferredLangCodes(settings);
-  if (codes.length === 0) return floor;
   if (mediaType !== "movie" || !settings.region) return floor;
   return { ...floor, region: settings.region };
 }
