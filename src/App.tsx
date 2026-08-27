@@ -18,7 +18,11 @@ import { StremioRail } from "@/chrome/stremio-rail";
 import { TopDock } from "@/chrome/topdock";
 import { CinematicOverlay } from "@/chrome/cinematic-overlay";
 import { Topbar, TogetherButton } from "@/chrome/topbar";
-import { startMaintenance, subscribeMemoryPressure } from "@/lib/maintenance";
+import {
+  setMaintenancePlaybackActive,
+  startMaintenance,
+  subscribeMemoryPressure,
+} from "@/lib/maintenance";
 import { MiddleClickScroll } from "@/lib/use-middle-click-scroll";
 import { exitWindowFullscreenOnPlayerClose, toggleWindowFullscreen } from "@/lib/fullscreen-state";
 import { flushCloudSync } from "@/views/player/hooks/use-stremio-sync";
@@ -365,7 +369,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <RatingsSyncRunner />
                                                   <ActivitySyncRunner />
                                                   <AutoDownloadRunner />
-                                                  <RemindersRunner />
+                                                  <BackgroundReminderRunner />
                                                   <MangaTrackingRunner />
                                                   <RemoteHostMount />
                                                   <RemoteOpenBridge />
@@ -430,21 +434,42 @@ function TogetherFloater() {
 
 function AutoDownloadRunner() {
   const { settings } = useSettings();
-  useAutoDownloadRunner(settings.backgroundNetworkActivity);
+  const { player } = useView();
+  useAutoDownloadRunner(settings.backgroundNetworkActivity, !!player);
   return null;
 }
 
+function BackgroundReminderRunner() {
+  const { player } = useView();
+  return <RemindersRunner suspended={!!player} />;
+}
+
 function FeaturedListsSyncRunner() {
+  const { player } = useView();
+  return player ? null : <FeaturedListsSyncActive />;
+}
+
+function FeaturedListsSyncActive() {
   useFeaturedListsSync();
   return null;
 }
 
 function RatingsSyncRunner() {
+  const { player } = useView();
+  return player ? null : <RatingsSyncActive />;
+}
+
+function RatingsSyncActive() {
   useRatingsSync();
   return null;
 }
 
 function ActivitySyncRunner() {
+  const { player } = useView();
+  return player ? null : <ActivitySyncActive />;
+}
+
+function ActivitySyncActive() {
   useActivitySync();
   return null;
 }
@@ -496,7 +521,9 @@ const STATS_SYNC_MIN_GAP_MS = 120000;
 function StatsSyncRunner() {
   const { authKey } = useAuth();
   const { activeId } = useProfiles();
+  const { player } = useView();
   useEffect(() => {
+    if (player) return;
     if (!authToken()) return;
     const pid = activeId ?? "default";
     let last = 0;
@@ -518,7 +545,7 @@ function StatsSyncRunner() {
       window.clearInterval(every);
       window.removeEventListener("focus", onFocus);
     };
-  }, [authKey, activeId]);
+  }, [authKey, activeId, player]);
   return null;
 }
 
@@ -1091,7 +1118,11 @@ function Shell({ onReady }: { onReady?: () => void }) {
   }, [activeProfile?.id]);
 
   const playerActive = !!player;
-  useEffect(() => setNativeMemoryActive(playerActive), [playerActive]);
+  useEffect(() => {
+    setNativeMemoryActive(playerActive);
+    setMaintenancePlaybackActive(playerActive);
+    return () => setMaintenancePlaybackActive(false);
+  }, [playerActive]);
   useEffect(() => {
     if (!playerActive) void exitWindowFullscreenOnPlayerClose();
   }, [playerActive]);

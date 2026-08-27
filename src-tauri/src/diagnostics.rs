@@ -31,6 +31,7 @@ pub struct CollectResult {
 }
 
 struct ScrubRules {
+    authorization: Regex,
     bearer: Regex,
     storage_key: Regex,
     key_value: Regex,
@@ -45,13 +46,17 @@ struct ScrubRules {
 fn rules() -> &'static ScrubRules {
     static RULES: OnceLock<ScrubRules> = OnceLock::new();
     RULES.get_or_init(|| ScrubRules {
+        authorization: Regex::new(
+            r#"(?i)(authorization)("?\s*[:=]\s*"?)(?:(bearer|basic)\s+)?([^"'\s,;&}\)]+)"#,
+        )
+        .unwrap(),
         bearer: Regex::new(r"(?i)bearer\s+[A-Za-z0-9._~+/=\-]{8,}").unwrap(),
         storage_key: Regex::new(
             r#"(?i)(harbor\.(?:theme-session|session\.token|auth(?:\.[A-Za-z0-9_.-]+)?))("?\s*[:=]\s*"?)([^"'\s,;&}\)]+)"#,
         )
         .unwrap(),
         key_value: Regex::new(
-            r#"(?i)(authorization|auth[_-]?key|api[_-]?key|access[_-]?token|refresh[_-]?token|session[_-]?token|client[_-]?secret|secret|token|password|passwd|pwd)("?\s*[:=]\s*"?)([^"'\s,;&}\)]+)"#,
+            r#"(?i)(auth[_-]?key|api[_-]?key|access[_-]?token|refresh[_-]?token|session[_-]?token|client[_-]?secret|secret|token|password|passwd|pwd)("?\s*[:=]\s*"?)([^"'\s,;&}\)]+)"#,
         )
         .unwrap(),
         email: Regex::new(r"(?i)[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}").unwrap(),
@@ -66,25 +71,32 @@ fn rules() -> &'static ScrubRules {
 
 pub fn diagnostics_scrub(text: &str) -> String {
     let r = rules();
-    let step1 = r
+    let step1 = r.authorization.replace_all(text, |c: &regex::Captures| {
+        let scheme = c
+            .get(3)
+            .map(|value| format!("{} ", value.as_str()))
+            .unwrap_or_default();
+        format!("{}{}{}{}", &c[1], &c[2], scheme, REDACTED)
+    });
+    let step2 = r
         .bearer
-        .replace_all(text, |_: &regex::Captures| format!("Bearer {REDACTED}"));
-    let step2 = r.storage_key.replace_all(&step1, |c: &regex::Captures| {
+        .replace_all(&step1, |_: &regex::Captures| format!("Bearer {REDACTED}"));
+    let step3 = r.storage_key.replace_all(&step2, |c: &regex::Captures| {
         format!("{}{}{}", &c[1], &c[2], REDACTED)
     });
-    let step3 = r.key_value.replace_all(&step2, |c: &regex::Captures| {
+    let step4 = r.key_value.replace_all(&step3, |c: &regex::Captures| {
         format!("{}{}{}", &c[1], &c[2], REDACTED)
     });
-    let step4 = r.email.replace_all(&step3, "<email>");
-    let step5 = r
+    let step5 = r.email.replace_all(&step4, "<email>");
+    let step6 = r
         .user_path
-        .replace_all(&step4, |c: &regex::Captures| format!("{}<user>", &c[1]));
-    let step6 = r.ip_addr.replace_all(&step5, "<ip>");
-    let step7 = r
-        .path_seg
-        .replace_all(&step6, |c: &regex::Captures| format!("{}{}", &c[1], REDACTED));
-    let step8 = r.base64_token.replace_all(&step7, REDACTED);
-    r.long_token.replace_all(&step8, REDACTED).into_owned()
+        .replace_all(&step5, |c: &regex::Captures| format!("{}<user>", &c[1]));
+    let step7 = r.ip_addr.replace_all(&step6, "<ip>");
+    let step8 = r.path_seg.replace_all(&step7, |c: &regex::Captures| {
+        format!("{}{}", &c[1], REDACTED)
+    });
+    let step9 = r.base64_token.replace_all(&step8, REDACTED);
+    r.long_token.replace_all(&step9, REDACTED).into_owned()
 }
 
 fn read_text_capped(path: &Path, max_bytes: usize) -> Option<String> {
@@ -137,7 +149,11 @@ fn sanitize_id(id: &str) -> String {
     }
 }
 
-fn build_system_info(app: &AppHandle, input: &CollectInput, mem: &crate::proc_mem::ProcMem) -> String {
+fn build_system_info(
+    app: &AppHandle,
+    input: &CollectInput,
+    mem: &crate::proc_mem::ProcMem,
+) -> String {
     let version = app.package_info().version.to_string();
     format!(
         "Harbor Diagnostics\n\
@@ -174,8 +190,7 @@ fn add_member(
 ) -> Result<(), String> {
     let scrubbed = diagnostics_scrub(raw);
     zipw.start_file(name, opts).map_err(|e| e.to_string())?;
-    zipw
-        .write_all(scrubbed.as_bytes())
+    zipw.write_all(scrubbed.as_bytes())
         .map_err(|e| e.to_string())?;
     Ok(())
 }
@@ -200,8 +215,10 @@ pub async fn diagnostics_collect(
         .to_string();
     let system_info = build_system_info(&app, &input, &mem);
 
-    let temp_path: PathBuf =
-        std::env::temp_dir().join(format!("harbor-diag-{}.zip", sanitize_id(&input.request_id)));
+    let temp_path: PathBuf = std::env::temp_dir().join(format!(
+        "harbor-diag-{}.zip",
+        sanitize_id(&input.request_id)
+    ));
     let file = std::fs::File::create(&temp_path).map_err(|e| format!("create bundle: {e}"))?;
     let mut zipw = ZipWriter::new(file);
     let opts = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);

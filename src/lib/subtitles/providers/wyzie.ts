@@ -1,5 +1,5 @@
 import type { SubResult, SubSearchQuery } from "../types";
-import { normalizeLang } from "../language";
+import { normalizeLang, normalizeSubtitleLang } from "../language";
 
 const ENDPOINT = "https://sub.wyzie.io/search";
 
@@ -50,7 +50,7 @@ export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
   const out: SubResult[] = [];
   for (const r of arr) {
     if (!r.url) continue;
-    const lang = normalizeLang(r.language) || "en";
+    const lang = normalizeSubtitleLang(r.language);
     const fmt = (r.format || "").toLowerCase();
     out.push({
       id: `wyzie:${r.id ?? r.url}`,

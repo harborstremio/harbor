@@ -117,6 +117,15 @@ const core: Record<string, string> = {
 
 const settingsPages: Record<string, string> = {
   "Search settings": "Keresés a beállításokban",
+  "This Settings page": "Az oldal beállításai",
+  "These preferences apply only to the page you are viewing.": "Ezek a beállítások csak az éppen megnyitott oldalra vonatkoznak.",
+  "Keep at the top of its menu group": "Előresorolás a menücsoportban",
+  "Marks this page with a star and moves it before the other pages in the same group.": "Csillaggal jelöli ezt az oldalt, és a saját menücsoportjának elejére helyezi.",
+  "Compact page spacing": "Kompakt oldalközök",
+  "Fits more settings on screen by reducing card spacing without changing any feature.": "A kártyák térközének csökkentésével több beállítás fér el a képernyőn, a funkciók működése nem változik.",
+  "Show page introduction": "Oldalbevezető megjelenítése",
+  "Shows the short explanation below this page's title.": "Megjeleníti az oldal címe alatti rövid magyarázatot.",
+  "Favorite page": "Kedvenc oldal",
   "Get started": "Első lépések",
   "Account": "Fiók",
   "Library & metadata": "Könyvtár és metaadatok",
@@ -814,6 +823,120 @@ const reviewedUi: Record<string, string> = {
   "Auto-sync subtitles": "Feliratok automatikus szinkronizálása",
   "If a subtitle runs early or late, Harbor measures the speech and corrects the timing on its own. Off by default.":
     "Ha a felirat siet vagy késik, a Harbor a beszéd alapján automatikusan korrigálja az időzítést. Alapértelmezés szerint ki van kapcsolva.",
+
+  // Subtitle settings and the in-player picker, reviewed as one coherent UI.
+  "Subtitle addons": "Feliratkiegészítők",
+  "Subtitle appearance": "Feliratok megjelenése",
+  "Subtitle color {color}": "Feliratszín: {color}",
+  "Subtitle delay +0.1s": "Felirat késleltetése +0,1 mp",
+  "Subtitle delay −0.1s": "Felirat siettetése −0,1 mp",
+  "Subtitle indicator dot": "Aktív feliratot jelző pont",
+  "Subtitle languages": "Feliratnyelvek",
+  "Subtitle languages & autoload": "Feliratnyelvek és automatikus betöltés",
+  "Subtitle size": "Feliratméret",
+  "Subtitle sources": "Feliratforrások",
+  "Subtitle sources (OpenSubtitles, Wyzie, addons)":
+    "Feliratforrások (OpenSubtitles, Wyzie, kiegészítők)",
+  "Subtitle style": "Feliratstílus",
+  "Subtitle timing": "Felirat időzítése",
+  "Subtitle track": "Feliratsáv",
+  "Any Stremio subtitle addons you have installed are searched here too.":
+    "A Harbor a telepített Stremio-feliratkiegészítőkben is keres.",
+  "None installed yet. Add Stremio subtitle addons under Streaming sources.":
+    "Még nincs telepített feliratkiegészítő. A Streamforrásoknál adhatsz hozzá Stremio-kiegészítőket.",
+  "Manage subtitle addons in Streaming sources":
+    "Feliratkiegészítők kezelése a Streamforrásoknál",
+  "Loading subtitle addons…": "Feliratkiegészítők betöltése…",
+  "Harbor's built-in OpenSubtitles search, on by default. If you install an OpenSubtitles addon, this steps aside automatically so your results are never duplicated.":
+    "A Harbor beépített OpenSubtitles-keresője alapértelmezés szerint aktív. Ha OpenSubtitles-kiegészítőt telepítesz, a beépített kereső automatikusan kikapcsol, hogy ne kapj ismétlődő találatokat.",
+  "A community subtitle source. Off until you add your Subsource API key.":
+    "Közösségi feliratforrás. A Subsource API-kulcs megadásáig ki van kapcsolva.",
+  "A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.":
+    "Gyors közösségi felirat-adatbázis. Alapértelmezés szerint ki van kapcsolva; új vagy ritkább kiadásokhoz érdemes bekapcsolni.",
+  "A large multi-language subtitle database. Off until you add your free SUBDL API key.":
+    "Nagy, többnyelvű felirat-adatbázis. Az ingyenes SUBDL API-kulcs megadásáig ki van kapcsolva.",
+  "Added {count} more subtitles.": "További {count} felirat hozzáadva.",
+  "Choose subtitles": "Felirat kiválasztása",
+  "Choose subtitles before playback": "Felirat kiválasztása lejátszás előtt",
+  "After you pick a source, show a subtitle picker so you can set the exact track and language before the video starts. Off by default, Harbor keeps picking one for you automatically.":
+    "A forrás kiválasztása után jelenjen meg a feliratválasztó, így indulás előtt megadhatod a pontos sávot és nyelvet. Kikapcsolva a Harbor automatikusan választ.",
+  "Couldn't load subtitles. You can start anyway and add one later in the player.":
+    "A feliratok nem tölthetők be. A lejátszást így is elindíthatod, és később a lejátszóban adhatsz hozzá feliratot.",
+  "Couldn't load that subtitle file. Try another.":
+    "Ezt a feliratfájlt nem sikerült betölteni. Próbálj másikat.",
+  "No subtitles": "Felirat nélkül",
+  "No subtitles found yet. Try the search at the bottom.":
+    "Még nincs felirattalálat. Próbáld meg az alul található keresőt.",
+  "No subtitles found. Start anyway, Harbor keeps looking while you watch.":
+    "Nem található felirat. Indítsd el így is; a Harbor lejátszás közben tovább keres.",
+  "No subtitles found. Try another title above, or adjust the season and episode.":
+    "Nem található felirat. Próbálj másik címet, vagy módosítsd az évadot és az epizódot.",
+  "No new subtitles found beyond what is already listed.":
+    "A listán szereplőkön kívül nem található új felirat.",
+  "Subtitles haven't been published yet. Try search below or check back in a few days.":
+    "Ehhez még nem jelentek meg feliratok. Próbáld meg az alábbi keresőt, vagy nézz vissza néhány nap múlva.",
+  "Too new. Subtitles haven't been published yet.":
+    "A tartalom túl új; még nem jelentek meg hozzá feliratok.",
+  "Find more subtitles": "További feliratok keresése",
+  "Finding subtitles…": "Feliratok keresése…",
+  "Looking for subtitles…": "Feliratok keresése…",
+  "Searching every source for more subtitles…": "További feliratok keresése minden forrásban…",
+  "More subtitle options": "További feliratbeállítások",
+  "Download subtitle": "Felirat letöltése",
+  "Download Subtitle": "Felirat letöltése",
+  "Download subtitle to disk": "Felirat mentése lemezre",
+  "Download this subtitle": "Felirat letöltése",
+  "Local subtitle": "Helyi felirat",
+  "Prefer embedded subtitles": "Beágyazott feliratok előnyben részesítése",
+  "When the file ships its own subtitle track, keep it selected instead of switching to a downloaded one. Embedded tracks are usually the best synced.":
+    "Ha a fájl saját feliratsávot tartalmaz, maradjon az kiválasztva a letöltött felirat helyett. A beágyazott sávok időzítése általában pontosabb.",
+  "Upgrade subtitles when better ones load": "Váltás jobb feliratra, amikor betöltődik",
+  "Downloaded subtitles can arrive a moment after playback starts. Leave this off to keep whatever subtitle is already showing; turn it on to switch to the best language match as soon as it loads.":
+    "A letöltött feliratok röviddel a lejátszás indulása után érkezhetnek meg. Kikapcsolva a már látható felirat marad aktív; bekapcsolva a Harbor azonnal a legjobb nyelvi egyezésre vált.",
+  "Harbor still finds and loads subtitles so they're one click away in the player, it just won't turn them on automatically.":
+    "A Harbor továbbra is megkeresi és betölti a feliratokat, így egy kattintással elérhetők a lejátszóban, csak nem kapcsolja be őket automatikusan.",
+  "Start with subtitles off": "Lejátszás indítása kikapcsolt felirattal",
+  "Cycle subtitles": "Váltás a feliratsávok között",
+  "Cycle subtitles (alt)": "Váltás a feliratsávok között (alternatív)",
+  "Cycle through available subtitle tracks.": "Váltás az elérhető feliratsávok között.",
+  "Second subtitle language": "Második felirat nyelve",
+  "Dual subtitles": "Kettős felirat",
+  "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.":
+    "Egyszerre két különböző nyelvű feliratot jelenít meg. Nyelvtanuláshoz a tanult nyelv legyen az elsődleges, a saját nyelved pedig a második.",
+  "Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.":
+    "A Harbor automatikusan betölti, ha van ilyen nyelvű sáv. Az adott videónál a lejátszó feliratmenüjében is beállíthatod vagy kikapcsolhatod a második sávot.",
+  "Show as second subtitle": "Megjelenítés második feliratként",
+  "Stop showing as second subtitle": "Második felirat kikapcsolása",
+  "Normalize embedded subtitle size": "Beágyazott feliratok méretének egységesítése",
+  "Auto-adjusts styled (ASS) subtitles so dialogue stays the same size across files, while keeping their colors, fonts, and sign placement.":
+    "Automatikusan egységesíti a formázott ASS-feliratok párbeszédméretét, miközben megtartja a színeket, betűtípusokat és a táblák elhelyezését.",
+  "Force your look onto subtitles that carry their own styling.":
+    "A saját feliratstílusodat alkalmazza az önálló formázást tartalmazó feliratokra is.",
+  "Reset subtitle style to defaults": "Feliratstílus visszaállítása",
+  "How subtitles look during playback. Live preview below.":
+    "A feliratok megjelenése lejátszás közben. Alább élő előnézet látható.",
+  "Raise subtitles": "Feliratok feljebb helyezése",
+  "Lower subtitles": "Feliratok lejjebb helyezése",
+  "Shift subtitle timing earlier (Shift for fine steps).":
+    "A felirat időzítésének előrébb hozása (Shift: finom lépés).",
+  "Shift subtitle timing later (Shift for fine steps).":
+    "A felirat időzítésének késleltetése (Shift: finom lépés).",
+  "Select a subtitle track to sync": "Válassz szinkronizálandó feliratsávot",
+  "Needs an external subtitle": "Külső felirat szükséges",
+  "Could not read this subtitle track. Pick a different subtitle, then try again.":
+    "Ez a feliratsáv nem olvasható. Válassz másik feliratot, majd próbáld újra.",
+  "Couldn't line up these subtitles automatically.":
+    "A feliratot nem sikerült automatikusan a hanghoz igazítani.",
+  "Show subtitle sync indicator": "Felirateltolás jelzőjének megjelenítése",
+  "Show the current offset when you adjust subtitle timing with Z or X.":
+    "Megjeleníti az aktuális eltolást, amikor a Z vagy X billentyűvel módosítod a felirat időzítését.",
+  "Show subtitles in Picture-in-Picture": "Feliratok megjelenítése kép a képben módban",
+  "Hide subtitles when the player shrinks into the floating PiP window.":
+    "Elrejti a feliratokat, amikor a lejátszó lebegő kép a képben ablakra vált.",
+  "Subtitles are baked into the picture so they always show. Re-encodes the video.":
+    "A feliratot a képbe égeti, ezért mindig megjelenik. Ehhez a videót újra kell kódolni.",
+  "Subtitles may not appear on the TV.": "Előfordulhat, hogy a felirat nem jelenik meg a TV-n.",
+  "Subtitles may be off": "A felirat időzítése eltérhet",
 };
 
 const hu: Record<string, string> = {

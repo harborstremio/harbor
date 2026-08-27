@@ -19,6 +19,7 @@ let timer: number | null = null;
 let intervalMs = 8000;
 const HIDDEN_INTERVAL_MS = 30000;
 let sampling = false;
+let playbackActive = false;
 const listeners = new Set<() => void>();
 
 function classifyTier(totalPhysBytes: number): RamTier {
@@ -39,7 +40,9 @@ function classifyTier(totalPhysBytes: number): RamTier {
 }
 
 async function sample(): Promise<void> {
-  if (!isTauri || sampling) return;
+  // Walking the Windows process tree is useful for diagnostics but is not
+  // playback-critical. Never schedule that OS work while mpv is presenting.
+  if (!isTauri || sampling || playbackActive) return;
   sampling = true;
   try {
     const m = await invoke<NativeMem>("harbor_process_memory");
@@ -92,7 +95,11 @@ export function startNativeMemory(): () => void {
 }
 
 export function setNativeMemoryActive(active: boolean): void {
-  intervalMs = active ? 2500 : 8000;
+  playbackActive = active;
+  intervalMs = active ? 15000 : 8000;
+  // Refresh immediately after playback, when this diagnostic work can no
+  // longer interrupt frame presentation.
+  if (!active) void sample();
 }
 
 export function getNativeMem(): NativeMem {

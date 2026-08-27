@@ -1498,6 +1498,12 @@ export function SettingsNav({
     advanced: null,
   };
 
+  const isFavorite = (id: SectionId) =>
+    settings.settingsPagePreferences?.[id]?.favorite === true;
+
+  const favoriteFirst = (items: NavItem[]) =>
+    [...items].sort((a, b) => Number(isFavorite(b.id)) - Number(isFavorite(a.id)));
+
   const renderItem = ({ id, label, Icon }: NavItem) => {
     const isActive = id === active;
     const chip = status[id];
@@ -1525,6 +1531,20 @@ export function SettingsNav({
           <Icon size={20} strokeWidth={1.6} />
         </span>
         <span className="flex-1 truncate text-[14.5px] font-medium">{t(label)}</span>
+        {isFavorite(id) && (
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            aria-label={t("Favorite page")}
+            className="shrink-0 text-accent"
+          >
+            <path d="m12 2.7 2.77 5.62 6.2.9-4.48 4.37 1.06 6.17L12 16.84l-5.55 2.92 1.06-6.17-4.48-4.37 6.2-.9z" />
+          </svg>
+        )}
         {(chip || debridChipLocal) && (
           <span className="flex shrink-0 gap-1">
             {debridChipLocal && (
@@ -1666,7 +1686,7 @@ export function SettingsNav({
                 {t(group.heading)}
               </div>
             )}
-            {group.items.map(({ id, label, Icon }) => {
+            {favoriteFirst(group.items).map(({ id, label, Icon }) => {
               const isActive = id === active;
               const chip = status[id];
               const debridChip = id === "streaming" && debridKeys > 0 ? `${debridKeys}D` : null;
@@ -1693,6 +1713,20 @@ export function SettingsNav({
                     <Icon size={20} strokeWidth={1.6} />
                   </span>
                   <span className="flex-1 truncate text-[14.5px] font-medium">{t(label)}</span>
+                  {isFavorite(id) && (
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      aria-label={t("Favorite page")}
+                      className="shrink-0 text-accent"
+                    >
+                      <path d="m12 2.7 2.77 5.62 6.2.9-4.48 4.37 1.06 6.17L12 16.84l-5.55 2.92 1.06-6.17-4.48-4.37 6.2-.9z" />
+                    </svg>
+                  )}
                   {isNew(id) && (
                     <span className="flex shrink-0 items-center gap-1 rounded-full bg-accent/15 px-1.5 py-0.5 text-[9.5px] font-bold uppercase tracking-[0.12em] text-accent ring-1 ring-accent/30">
                       <span className="h-1 w-1 rounded-full bg-accent" />

@@ -5,6 +5,7 @@ import { writePlayerVolume } from "@/lib/player-volume";
 import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
+import { effectiveHdrToSdr } from "@/lib/player/hdr-output-policy";
 import { mediaKeyGate } from "@/lib/media-session";
 import { useSettings } from "@/lib/settings";
 import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
@@ -313,7 +314,7 @@ export function useKeyboardShortcuts(params: {
       if (match("playerRtxHdrToggle")) {
         e.preventDefault();
         if (e.repeat) return;
-        if (!isWindowsDesktop() || isRtxHdrBlocked(settings.playerHdrToSdr, svpActive)) return;
+        if (!isWindowsDesktop() || isRtxHdrBlocked(effectiveHdrToSdr(settings), svpActive)) return;
         if (bridgeRef.current?.capabilities().engine !== "mpv") return;
         update({ playerRtxHdr: !settings.playerRtxHdr });
         return;
@@ -494,7 +495,7 @@ export function useKeyboardShortcuts(params: {
       window.removeEventListener("blur", onBlur);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [closePlayer, togglePip, drawMode, snap.muted, snap.volume, snap.rate, snap.durationSec, snap.subDelaySec, overrides, seekBackStepSec, seekForwardStepSec, seekBackStepShortSec, seekForwardStepShortSec, seekTo, toggleSwitcher, toggleEpisodePanel, toggleGuide, toggleDvr, toggleSleep, onScreenshot, onGifRecord, onClipRecord, onToggleCrop, onPanscanUp, onPanscanDown, onPrevChannel, onToggleAnime4k, onAnime4kOn, onAnime4kOff, onFrameStep, onVolumeFeedback, settings.playerEscExitsFullscreen, settings.playerConfirmLeave, settings.playerVolumeSfx, settings.playerHdrToSdr, settings.playerRtxHdr, settings.playerRtxVsr, svpActive, update]);
+  }, [closePlayer, togglePip, drawMode, snap.muted, snap.volume, snap.rate, snap.durationSec, snap.subDelaySec, overrides, seekBackStepSec, seekForwardStepSec, seekBackStepShortSec, seekForwardStepShortSec, seekTo, toggleSwitcher, toggleEpisodePanel, toggleGuide, toggleDvr, toggleSleep, onScreenshot, onGifRecord, onClipRecord, onToggleCrop, onPanscanUp, onPanscanDown, onPrevChannel, onToggleAnime4k, onAnime4kOn, onAnime4kOff, onFrameStep, onVolumeFeedback, settings.playerEscExitsFullscreen, settings.playerConfirmLeave, settings.playerVolumeSfx, settings.playerHdrAuto, settings.playerHdrToSdr, settings.playerRtxHdr, settings.playerRtxVsr, svpActive, update]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;

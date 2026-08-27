@@ -41,6 +41,8 @@ test("trickplay avoids live streams and keeps its startup path responsive", () =
   assert.match(thumbs, /const SHADOW_STARTUP_CHECK_DELAY: Duration = Duration::from_millis\(40\);/);
   assert.match(thumbs, /cmd\.kill_on_drop\(true\);/);
   assert.match(snapshots, /allowTrick && seek && !getSeekHovering\(\)/);
+  assert.match(snapshots, /grabFrame\(false, true\)/);
+  assert.match(snapshots, /if \(status === "paused"\) void captureExitSnapshot\(\)/);
 });
 
 test("automatic skip and a dismissed pill survive late provider updates", () => {

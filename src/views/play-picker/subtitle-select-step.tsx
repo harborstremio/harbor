@@ -118,7 +118,7 @@ export function SubtitleSelectStep({
                     active={activeLang === g.langKey}
                     onClick={() => setActiveLang(g.langKey)}
                     icon={<Flag language={g.langDisplay} size="sm" showLabel={false} />}
-                    label={g.langDisplay}
+                    label={t(g.langDisplay)}
                     count={g.items.length}
                     dot={g.items.some((it) => it.id === selected)}
                   />

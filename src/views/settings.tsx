@@ -4,7 +4,12 @@ import type { RelayMode } from "./settings/relay-section";
 import type { DebridKey } from "./settings/streaming-sources-panel";
 import { SettingsNav } from "./settings/nav";
 import { SettingsJumpBar } from "./settings/jump-bar";
-import { SettingsActiveContext, type SectionId } from "./settings/shared";
+import {
+  SettingsActiveContext,
+  SettingsPageDisplayContext,
+  type SectionId,
+} from "./settings/shared";
+import { PagePreferences, pagePreference } from "./settings/page-preferences";
 import { useThemeLibraryOpen } from "./settings/theme-panel/library-open-store";
 import { BackToTop } from "@/components/back-to-top";
 import { resetOmdbBudget } from "@/lib/providers/omdb";
@@ -288,6 +293,21 @@ export function Settings() {
 
   const themeLibOpen = useThemeLibraryOpen();
   const wide = active === "theme" && themeLibOpen;
+  const activePagePreference = pagePreference(settings.settingsPagePreferences, active);
+
+  const updateActivePagePreference = (
+    patch: Partial<typeof activePagePreference>,
+  ) => {
+    update({
+      settingsPagePreferences: {
+        ...settings.settingsPagePreferences,
+        [active]: {
+          ...settings.settingsPagePreferences[active],
+          ...patch,
+        },
+      },
+    });
+  };
 
   useEffect(() => {
     if (themeLibOpen) scrollRef.current?.scrollTo({ top: 0 });
@@ -301,17 +321,33 @@ export function Settings() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto pt-28 pb-16"
       >
+        <SettingsPageDisplayContext.Provider value={{ compact: activePagePreference.compact }}>
         <div
           data-tauri-drag-region
-          className={wide ? "mx-auto flex w-full max-w-[1500px] flex-col gap-8 px-8" : "mx-auto flex max-w-3xl flex-col gap-10 px-12"}
+          className={
+            wide
+              ? "mx-auto flex w-full max-w-[1500px] flex-col gap-8 px-8"
+              : activePagePreference.compact
+                ? "mx-auto flex max-w-3xl flex-col gap-6 px-12"
+                : "mx-auto flex max-w-3xl flex-col gap-10 px-12"
+          }
         >
           {!wide && !(active === "relay" && relayMode !== "panel") && (
             <header className="flex flex-col gap-2">
               <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-tight text-ink">
                 {t(SECTION_META[active].label)}
               </h1>
-              <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
+              {activePagePreference.showIntro && (
+                <p className="text-[15px] text-ink-muted">{t(SECTION_META[active].sub)}</p>
+              )}
             </header>
+          )}
+
+          {!wide && !(active === "relay" && relayMode !== "panel") && (
+            <PagePreferences
+              value={activePagePreference}
+              onChange={updateActivePagePreference}
+            />
           )}
 
           <Suspense
@@ -415,6 +451,7 @@ export function Settings() {
           {active === "advanced" && <AdvancedPanel />}
           </Suspense>
         </div>
+        </SettingsPageDisplayContext.Provider>
       </main>
       <BackToTop scrollRef={scrollRef} />
       <SettingsJumpBar scrollRef={scrollRef} activeSection={active} />

@@ -42,6 +42,8 @@ export const SettingsActiveContext = createContext<{ setActive: (s: SectionId) =
   null,
 );
 
+export const SettingsPageDisplayContext = createContext({ compact: false });
+
 export function useSettingsActiveContext() {
   const v = useContext(SettingsActiveContext);
   if (!v) throw new Error("SettingsActiveContext missing");
@@ -82,13 +84,16 @@ export function Section({
   bare?: boolean;
   children: React.ReactNode;
 }) {
+  const { compact } = useContext(SettingsPageDisplayContext);
   return (
     <section
       id={settingsAnchor(title)}
       className={
         bare
           ? "scroll-mt-28"
-          : "scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
+          : compact
+            ? "scroll-mt-28 flex flex-col gap-3 rounded-2xl border border-edge-soft bg-elevated/40 p-5"
+            : "scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
       }
     >
       {!bare && (

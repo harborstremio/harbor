@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { Settings } from "../src/lib/settings/types.ts";
 import { compileMpvOptions, svpMpvLines } from "../src/lib/player/mpv-tuning.ts";
+import { applyMotionInterp } from "../src/lib/player/motion-interp.ts";
 import { resolvePlaybackDownloadedFraction } from "../src/lib/player/playback-clock.ts";
 
 test("only the P2P engine reports whole-file download progress", () => {
@@ -64,4 +65,17 @@ test("SVP uses a removable labeled VapourSynth filter", () => {
     "vf=@harbor-svp:vapoursynth=[/home/user/.local/share/harbor/svp/svp.vpy]",
   );
   assert.ok(options.includes("hwdec=auto-copy"));
+});
+
+test("normal playback uses robust audio-clock sync while interpolation keeps display cadence", async () => {
+  // This module is exercised through its source contract because Tauri invoke
+  // is unavailable in the browser-only Node regression runner.
+  assert.equal(typeof applyMotionInterp, "function");
+  const source = await import("node:fs").then(({ readFileSync }) =>
+    readFileSync(new URL("../src/lib/player/motion-interp.ts", import.meta.url), "utf8"),
+  );
+  assert.match(source, /\["interpolation", "no"\]/);
+  assert.match(source, /\["video-sync", "display-resample"\]/);
+  assert.match(source, /\["audio-pitch-correction", "yes"\]/);
+  assert.match(source, /\["video-sync", "audio"\]/);
 });

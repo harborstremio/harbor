@@ -88,6 +88,7 @@ export const DEFAULT: Settings = {
   playerTitleScale: 1,
   playerTitleSeriesFirst: false,
   uiScale: 1,
+  settingsPagePreferences: {},
   serveWebUi: false,
   remoteControlEnabled: false,
   controllerSupportEnabled: true,
@@ -198,7 +199,10 @@ export const DEFAULT: Settings = {
   seasonSourceLock: false,
   rememberLastStream: true,
   keepSourceNextEpisode: false,
-  playerHdrToSdr: true,
+  // gpu-next can read Windows display capabilities and map Dolby Vision/HDR
+  // to the active target. Keep forced SDR as an explicit compatibility mode.
+  playerHdrAuto: true,
+  playerHdrToSdr: false,
   playerRtxHdr: false,
   playerRtxVsr: false,
   playerMacEdr: false,
@@ -317,7 +321,9 @@ export const DEFAULT: Settings = {
   aiGroqKey: "",
   jinaKey: "",
   aiWebSearch: false,
-  playerD3d11Flip: true,
+  // Compatibility presentation is only for the rare bright-edge artifact.
+  // Keeping it off preserves the flip-model path needed for smooth 4K/HDR.
+  playerD3d11Flip: false,
   mpvExtraOptions: "",
   mpvQuality: "balanced",
   mpvHwdec: "auto",

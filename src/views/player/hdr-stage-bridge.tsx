@@ -1,5 +1,10 @@
 import { useEffect, useRef } from "react";
-import { hdrOverlayEmitProps } from "@/lib/hdr-overlay";
+import { hdrOverlayEmitClock, hdrOverlayEmitProps } from "@/lib/hdr-overlay";
+import {
+  getPlaybackBuffered,
+  getPlaybackPosition,
+  subscribePlaybackClock,
+} from "@/lib/player/playback-clock";
 import type { HdrStagePayload } from "../hdr-overlay-app";
 
 export type HdrStageHandlers = {
@@ -39,10 +44,23 @@ export function HdrStageBridge({
   }, [active, payload]);
 
   useEffect(() => {
-    if (!active) return;
-    const id = window.setInterval(() => void hdrOverlayEmitProps(payloadRef.current), 1000);
-    return () => window.clearInterval(id);
-  }, [active]);
+    if (!active || !payload.visible) return;
+    // Keep the transport clock live without resending and reconciling the
+    // complete transparent HDR control surface on every playback tick.
+    let frame = 0;
+    const publish = () => {
+      frame = 0;
+      void hdrOverlayEmitClock(getPlaybackPosition(), getPlaybackBuffered());
+    };
+    publish();
+    const unsubscribe = subscribePlaybackClock(() => {
+      if (!frame) frame = window.requestAnimationFrame(publish);
+    });
+    return () => {
+      unsubscribe();
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [active, payload.visible]);
 
   useEffect(() => {
     if (!active) return;

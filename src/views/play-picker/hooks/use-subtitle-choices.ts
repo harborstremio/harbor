@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
-import { languageName } from "@/lib/subtitles/language";
+import { langScore, languageName } from "@/lib/subtitles/language";
 import { searchSubtitles } from "@/lib/subtitles/search";
 import type { SubResult } from "@/lib/subtitles/types";
 import { useSettings } from "@/lib/settings";
@@ -74,7 +74,9 @@ export function useSubtitleChoices(src: PlayerSrc) {
             episode: imdbEpAligned
               ? src.episode?.imdbEpisode ?? src.episode?.episode
               : src.episode?.episode,
-            langs: preferredLangs,
+            // This screen is a picker, so request every available language.
+            // Preferences are still used below to rank and preselect safely.
+            langs: [],
             filename: src.streamRef?.parsedTitle ?? src.streamRef?.title ?? undefined,
           },
           {
@@ -125,7 +127,8 @@ export function useSubtitleChoices(src: PlayerSrc) {
     }));
   }, [results]);
 
-  const bestId = results && results.length > 0 ? results[0].id : null;
+  const bestId =
+    results?.find((result) => langScore(result.lang, preferredLangs) >= 0)?.id ?? null;
 
   return { loading, error, results, groups, bestId };
 }

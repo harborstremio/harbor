@@ -84,9 +84,13 @@ export function XrayOverlay({
       {visible && view === "closed" && (
         <button
           type="button"
-          onClick={() => setView("rail")}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            setView("rail");
+          }}
           aria-label={t("X-Ray")}
-          className="absolute left-4 top-20 z-20 flex h-9 items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 text-[12.5px] font-semibold text-white backdrop-blur-md transition-[background-color,transform] hover:bg-black/65 active:scale-[0.97] motion-reduce:active:scale-100"
+          className="pointer-events-auto absolute left-4 top-20 z-30 flex h-9 items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 text-[12.5px] font-semibold text-white backdrop-blur-md transition-[background-color,transform] hover:bg-black/65 active:scale-[0.97] motion-reduce:active:scale-100"
         >
           <ScanFace size={15} strokeWidth={2.2} className="text-accent" /> {t("X-Ray")}
         </button>

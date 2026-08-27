@@ -17,6 +17,32 @@ test("Hungarian locale localizes the content advisory UI", () => {
   assert.match(catalog, /"While you watch": "Nézés közben"/);
 });
 
+test("Hungarian subtitle UI uses reviewed, natural terminology", () => {
+  const catalog = readFileSync(new URL("../src/lib/i18n/locales/hu.ts", import.meta.url), "utf8");
+  for (const translation of [
+    '"Subtitle addons": "Feliratkiegészítők"',
+    '"Subtitle sources": "Feliratforrások"',
+    '"Subtitle track": "Feliratsáv"',
+    '"Loading subtitle addons…": "Feliratkiegészítők betöltése…"',
+    '"No subtitles": "Felirat nélkül"',
+    '"Prefer embedded subtitles": "Beágyazott feliratok előnyben részesítése"',
+  ]) {
+    assert.ok(catalog.includes(translation), `missing reviewed subtitle entry: ${translation}`);
+  }
+  assert.doesNotMatch(catalog, /"Subtitle(?: addons| sync| track)?": "Fordította:/);
+});
+
+test("Hungarian HDR controls use reviewed Dolby Vision terminology", () => {
+  const coverage = readFileSync(
+    new URL("../src/lib/i18n/locales/hu/coverage.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(coverage, /"Automatic HDR \/ Dolby Vision": "Automatikus HDR \/ Dolby Vision"/);
+  assert.match(coverage, /"Tonemap to SDR": "HDR átalakítása SDR-re"/);
+  assert.match(coverage, /"True HDR, separate window": "Valódi HDR, külön ablakban"/);
+  assert.doesNotMatch(coverage, /Tonap tonapap/);
+});
+
 test("Hungarian locale covers the reported settings and catalog screens", () => {
   const catalog = readFileSync(new URL("../src/lib/i18n/locales/hu.ts", import.meta.url), "utf8");
   for (const translation of [

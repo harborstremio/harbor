@@ -92,7 +92,7 @@ export function PlayerEnginePanel() {
                 label={t("HDR-to-SDR tonemapping")}
                 sub={t("Maps HDR sources to SDR using bt.2446a. Recommended on SDR displays.")}
                 value={settings.playerHdrToSdr}
-                onChange={(v) => update({ playerHdrToSdr: v })}
+                onChange={(v) => update({ playerHdrAuto: false, playerHdrToSdr: v })}
               />
               <DisplayPanelSelector />
             </>

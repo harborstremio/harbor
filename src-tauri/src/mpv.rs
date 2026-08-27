@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::ffi::CString;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -313,6 +313,7 @@ fn apply_pre_init(
     init: &MpvInitializer,
     args: &MpvStartArgs,
     embed_hwnd: Option<&str>,
+    cache_dir: Option<&Path>,
 ) -> Result<(), String> {
     // Property sets here are best-effort. Some builds of mpv (e.g. Flatpak's
     // meson build without Lua) omit optional properties like `osc`. Treat
@@ -325,7 +326,10 @@ fn apply_pre_init(
     set("title", "Harbor");
     set("audio-client-name", "Harbor");
     set("terminal", "no");
-    set("msg-level", "all=warn,vo=v,d3d11=v,gpu=v,win32=v");
+    // Verbose GPU/D3D logging can write thousands of lines while a video is
+    // running. Keep the always-on diagnostic log useful without adding disk
+    // I/O to the presentation path.
+    set("msg-level", "all=warn");
     let is_live = args.is_live.unwrap_or(false);
     set("ytdl", if is_live { "yes" } else { "no" });
     let mut user_agent = "VLC/3.0.20 LibVLC/3.0.20".to_string();
@@ -345,9 +349,8 @@ fn apply_pre_init(
     }
     let rtx = cfg!(windows) && args.rtx_hdr.unwrap_or(false);
     let rtx_vsr = cfg!(windows) && args.rtx_vsr.unwrap_or(false);
-    // RTX Video HDR and RTX Video Super Resolution both need native D3D11
-    // hardware frames for mpv's d3d11vpp filter.
-    let rtx_video = rtx || rtx_vsr;
+    // RTX Video HDR and RTX Video Super Resolution both use native D3D11
+    // hardware frames through mpv's d3d11vpp filter.
     let on_mac_embed = cfg!(target_os = "macos") && embed_hwnd.is_some();
     if on_mac_embed {
         set("hwdec", "videotoolbox-copy");
@@ -360,7 +363,9 @@ fn apply_pre_init(
             set("force-window", "yes");
         }
     } else if cfg!(windows) {
-        set("hwdec", if rtx_video { "d3d11va" } else { "auto-safe" });
+        // Prefer zero-copy D3D11 decoding for 4K HEVC/AV1 on Windows laptops,
+        // but retain mpv's safe fallback list for unsupported codecs/drivers.
+        set("hwdec", "d3d11va,auto-safe");
         set("force-window", "immediate");
     } else {
         set("hwdec", "auto-safe");
@@ -383,6 +388,16 @@ fn apply_pre_init(
     set("osd-level", "0");
     set("cursor-autohide", "200");
     set("volume-max", "600");
+    let full_download = args.full_download.unwrap_or(false);
+    set("cache-on-disk", if full_download { "yes" } else { "no" });
+    if full_download {
+        if let Some(path) = cache_dir.and_then(Path::to_str) {
+            // cache-dir is an initialization-only mpv option in current builds.
+            // Applying it after Mpv::with_initializer is rejected and leaves
+            // cache-on-disk repeatedly trying the invalid '-' path.
+            set("cache-dir", path);
+        }
+    }
     let _ = init.set_property("background-color", "#000000");
     let _ = init.set_property("background", "color");
     let _ = init.set_property("media-controls", "no");
@@ -411,21 +426,33 @@ fn apply_pre_init(
     let opt = |k: &str, v: &str| {
         let _ = init.set_property(k, v);
     };
-    if rtx {
+    #[cfg(windows)]
+    {
+        // Keep decode, rendering and presentation on D3D11. gpu-next uses the
+        // target display data reported by DXGI to reshape Dolby Vision and map
+        // HDR into the calibrated output instead of forcing a fixed peak.
         opt("gpu-api", "d3d11");
-        opt("target-colorspace-hint", "yes");
+        opt("gpu-context", "d3d11");
+        opt("target-colorspace-hint", "auto");
+        opt("target-colorspace-hint-mode", "target");
+        // Avoid an extra immediate render pass for peak detection. The
+        // one-frame delayed histogram is visually equivalent and substantially
+        // friendlier to integrated and hybrid laptop GPUs at 4K.
+        opt("allow-delayed-peak-detect", "yes");
+    }
+    if rtx {
         opt("target-peak", "10000");
     } else if args.hdr_to_sdr.unwrap_or(false) {
-        opt("tone-mapping", "spline");
+        opt("tone-mapping", "bt.2446a");
         opt("gamut-mapping-mode", "perceptual");
-        opt("hdr-compute-peak", "yes");
+        opt("hdr-compute-peak", "auto");
         opt("hdr-contrast-recovery", "0.30");
         opt("hdr-peak-percentile", "99.995");
         opt("dither-depth", "auto");
         opt("target-trc", "bt.1886");
         opt("target-prim", "bt.709");
         #[cfg(any(windows, target_os = "macos"))]
-        opt("target-colorspace-hint", "yes");
+        opt("target-colorspace-hint", "auto");
         // VSR still needs the D3D11 backend even while tonemapping HDR to SDR.
         #[cfg(windows)]
         if rtx_vsr {
@@ -434,10 +461,11 @@ fn apply_pre_init(
     } else {
         #[cfg(windows)]
         {
-            opt("target-colorspace-hint", "yes");
-            if embed_hwnd.is_some() || rtx_vsr {
-                opt("gpu-api", "d3d11");
-            }
+            // target mode lets libplacebo consume Dolby Vision scene metadata
+            // and output display-matched HDR/PQ (HDR10 signaling on Windows).
+            opt("tone-mapping", "auto");
+            opt("gamut-mapping-mode", "auto");
+            opt("hdr-compute-peak", "auto");
         }
         #[cfg(target_os = "macos")]
         {
@@ -573,12 +601,29 @@ pub async fn mpv_start(
     );
     let embed_hwnd_for_init = embed_hwnd.clone();
     let args_for_init = args.clone();
+    let cache_dir = if args.full_download.unwrap_or(false) {
+        app.path()
+            .app_cache_dir()
+            .ok()
+            .map(|base| base.join("mpv-cache"))
+    } else {
+        None
+    };
+    if let Some(path) = cache_dir.as_ref() {
+        let _ = std::fs::create_dir_all(path);
+    }
+    let cache_dir_for_init = cache_dir.clone();
     let init_err: Arc<std::sync::Mutex<Option<String>>> = Arc::new(std::sync::Mutex::new(None));
     let init_err_cap = init_err.clone();
 
     force_c_numeric_locale();
     let mpv = Mpv::with_initializer(move |init| {
-        if let Err(e) = apply_pre_init(&init, &args_for_init, embed_hwnd_for_init.as_deref()) {
+        if let Err(e) = apply_pre_init(
+            &init,
+            &args_for_init,
+            embed_hwnd_for_init.as_deref(),
+            cache_dir_for_init.as_deref(),
+        ) {
             eprintln!("[harbor::mpv] pre-init failed: {}", e);
             if let Ok(mut g) = init_err_cap.lock() {
                 *g = Some(e);
@@ -701,30 +746,39 @@ pub async fn mpv_start(
             "reconnect=1,reconnect_delay_max=5,reconnect_on_network_error=1",
         );
         let _ = mpv.set_property("demuxer-lavf-o", "http_seekable=0,http_persistent=0");
-        let _ = mpv.set_property("stream-buffer-size", "16MiB");
+        let _ = mpv.set_property("stream-buffer-size", "1MiB");
     } else {
         let full_dl = args.full_download.unwrap_or(false);
         let _ = mpv.set_property("cache", "yes");
-        let _ = mpv.set_property("cache-secs", if full_dl { "100000" } else { "300" });
+        let _ = mpv.set_property("cache-secs", if full_dl { "100000" } else { "180" });
         let _ = mpv.set_property("cache-pause", "yes");
-        let _ = mpv.set_property("demuxer-max-bytes", if full_dl { "48GiB" } else { "512MiB" });
-        let _ = mpv.set_property("demuxer-max-back-bytes", if full_dl { "48GiB" } else { "64MiB" });
-        let _ = mpv.set_property("demuxer-readahead-secs", if full_dl { "100000" } else { "300" });
-        if let Ok(base) = app.path().app_cache_dir() {
-            let dvr = base.join("mpv-cache");
-            let _ = std::fs::create_dir_all(&dvr);
-            if let Some(s) = dvr.to_str() {
-                let _ = mpv.set_property("cache-dir", s);
-            }
-        }
-        let _ = mpv.set_property("cache-on-disk", "yes");
+        // Normal streams start immediately. Explicit full-download mode keeps
+        // its requested initial reserve; after any later network underrun,
+        // cache-pause-wait prevents repeated micro-stalls.
+        let _ = mpv.set_property("cache-pause-initial", if full_dl { "yes" } else { "no" });
+        let _ = mpv.set_property("cache-pause-wait", if full_dl { "10" } else { "2" });
+        let _ = mpv.set_property(
+            "demuxer-max-bytes",
+            if full_dl { "48GiB" } else { "256MiB" },
+        );
+        let _ = mpv.set_property(
+            "demuxer-max-back-bytes",
+            if full_dl { "48GiB" } else { "32MiB" },
+        );
+        let _ = mpv.set_property(
+            "demuxer-readahead-secs",
+            if full_dl { "100000" } else { "180" },
+        );
         let _ = mpv.set_property("network-timeout", network_timeout_for(&args.url));
         let reconnect_opts = "reconnect=1,reconnect_streamed=1,reconnect_on_network_error=1,reconnect_on_http_error=429,reconnect_delay_max=10,reconnect_delay_total_max=60";
         match mpv.set_property("stream-lavf-o", reconnect_opts) {
             Ok(()) => eprintln!("[harbor::mpv] stream-lavf-o set {}", reconnect_opts),
             Err(e) => eprintln!("[harbor::mpv] stream-lavf-o rejected: {:?}", e),
         }
-        let _ = mpv.set_property("stream-buffer-size", "32MiB");
+        // This buffer is allocated per opened stream, including every external
+        // subtitle. A 32 MiB value multiplied memory use when many subtitles
+        // were loaded; the demuxer cache above is the correct readahead layer.
+        let _ = mpv.set_property("stream-buffer-size", "4MiB");
     }
     if want_embed {
         let _ = mpv.set_property("sub-visibility", "no");
@@ -780,7 +834,6 @@ pub async fn mpv_start(
         app.clone(),
         mpv_arc.clone(),
         event_ctx,
-        want_embed,
         args.mac_edr.unwrap_or(false),
     );
 
@@ -808,13 +861,6 @@ pub async fn mpv_start(
     #[cfg(not(windows))]
     let _ = embed_hwnd;
     Ok(())
-}
-
-#[cfg(windows)]
-fn reassert_hdr_colorspace(mpv: &Arc<Mpv>) {
-    let _ = mpv.set_property("target-peak", "10000");
-    std::thread::sleep(Duration::from_millis(60));
-    let _ = mpv.set_property("target-peak", "auto");
 }
 
 #[cfg(target_os = "macos")]
@@ -864,19 +910,9 @@ fn record_event_poll_success(backoff: &mut EventErrorBackoff) {
     backoff.reset();
 }
 
-fn spawn_event_loop(
-    app: AppHandle,
-    mpv_keepalive: Arc<Mpv>,
-    mut ctx: EventContext,
-    embedded: bool,
-    mac_edr: bool,
-) {
+fn spawn_event_loop(app: AppHandle, mpv_keepalive: Arc<Mpv>, mut ctx: EventContext, mac_edr: bool) {
     std::thread::spawn(move || {
         let mut last_timepos: Option<std::time::Instant> = None;
-        #[cfg(windows)]
-        let reassert_gen = Arc::new(std::sync::atomic::AtomicU64::new(0));
-        #[cfg(not(windows))]
-        let _ = embedded;
         #[cfg(not(target_os = "macos"))]
         let _ = mac_edr;
         let mut error_backoff = EventErrorBackoff::default();
@@ -901,39 +937,6 @@ fn spawn_event_loop(
                                 }
                             }
                             last_timepos = Some(now);
-                        }
-                    }
-                    #[cfg(windows)]
-                    if embedded {
-                        if let Event::PropertyChange { name, .. } = &event {
-                            if *name == "video-params/gamma" {
-                                let gen = reassert_gen
-                                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
-                                    + 1;
-                                let gen_arc = reassert_gen.clone();
-                                let mpv2 = mpv_keepalive.clone();
-                                let app3 = app.clone();
-                                std::thread::spawn(move || {
-                                    std::thread::sleep(Duration::from_millis(250));
-                                    if gen_arc.load(std::sync::atomic::Ordering::Relaxed) != gen {
-                                        return;
-                                    }
-                                    let gamma = mpv2
-                                        .get_property::<String>("video-params/gamma")
-                                        .unwrap_or_default();
-                                    if gamma != "pq" && gamma != "hlg" {
-                                        return;
-                                    }
-                                    let hdr = app3
-                                        .get_webview_window("main")
-                                        .and_then(|w| w.hwnd().ok())
-                                        .map(|h| monitor_hdr_active(h.0 as isize))
-                                        .unwrap_or(false);
-                                    if hdr {
-                                        reassert_hdr_colorspace(&mpv2);
-                                    }
-                                });
-                            }
                         }
                     }
                     #[cfg(target_os = "macos")]
@@ -1212,7 +1215,10 @@ fn playback_stat_string(mpv: &Mpv, name: &str) -> Option<String> {
 }
 
 fn playback_stat_number(mpv: &Mpv, name: &str) -> Option<f64> {
-    playback_stat_string(mpv, name)?.parse::<f64>().ok().filter(|value| value.is_finite())
+    playback_stat_string(mpv, name)?
+        .parse::<f64>()
+        .ok()
+        .filter(|value| value.is_finite())
 }
 
 fn playback_stat_int(mpv: &Mpv, name: &str) -> Option<i64> {
@@ -1221,11 +1227,15 @@ fn playback_stat_int(mpv: &Mpv, name: &str) -> Option<i64> {
 
 fn value_number(value: Option<&Value>) -> Option<f64> {
     value.and_then(|item| {
-        item.as_f64().or_else(|| item.as_str()?.trim().parse::<f64>().ok())
+        item.as_f64()
+            .or_else(|| item.as_str()?.trim().parse::<f64>().ok())
     })
 }
 
-fn selected_track_stats(mpv: &Mpv, kind: &str) -> (Option<String>, Option<String>, Option<String>, Option<f64>) {
+fn selected_track_stats(
+    mpv: &Mpv,
+    kind: &str,
+) -> (Option<String>, Option<String>, Option<String>, Option<f64>) {
     let Ok(node) = mpv.get_property::<MpvNode>("track-list") else {
         return (None, None, None, None);
     };
@@ -2065,10 +2075,7 @@ fn sub_cache_dir() -> PathBuf {
 const MAX_SUBTITLE_DOWNLOAD_BYTES: usize = 12 * 1024 * 1024;
 const MAX_SUBTITLE_UNPACKED_BYTES: usize = 24 * 1024 * 1024;
 
-fn read_subtitle_limited(
-    reader: impl std::io::Read,
-    max_bytes: usize,
-) -> Result<Vec<u8>, String> {
+fn read_subtitle_limited(reader: impl std::io::Read, max_bytes: usize) -> Result<Vec<u8>, String> {
     use std::io::Read;
 
     let mut limited = reader.take(max_bytes.saturating_add(1) as u64);
@@ -2077,12 +2084,17 @@ fn read_subtitle_limited(
         .read_to_end(&mut out)
         .map_err(|e| format!("subtitle read: {}", e))?;
     if out.len() > max_bytes {
-        return Err(format!("subtitle exceeds {} MiB", max_bytes / (1024 * 1024)));
+        return Err(format!(
+            "subtitle exceeds {} MiB",
+            max_bytes / (1024 * 1024)
+        ));
     }
     Ok(out)
 }
 
-async fn read_subtitle_response_limited(mut response: reqwest::Response) -> Result<Vec<u8>, String> {
+async fn read_subtitle_response_limited(
+    mut response: reqwest::Response,
+) -> Result<Vec<u8>, String> {
     if response
         .content_length()
         .is_some_and(|size| size > MAX_SUBTITLE_DOWNLOAD_BYTES as u64)
@@ -2165,12 +2177,14 @@ fn normalize_subtitle_bytes(
 
 fn extract_subtitle_from_zip(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
     const SUB_EXTS: &[&str] = &["srt", "ass", "ssa", "vtt", "sub"];
-    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(bytes))
-        .map_err(|e| format!("zip: {}", e))?;
+    let mut archive =
+        zip::ZipArchive::new(std::io::Cursor::new(bytes)).map_err(|e| format!("zip: {}", e))?;
     let mut best: Option<(usize, u64)> = None;
     let mut oversize_entry = false;
     for i in 0..archive.len() {
-        let entry = archive.by_index(i).map_err(|e| format!("zip entry: {}", e))?;
+        let entry = archive
+            .by_index(i)
+            .map_err(|e| format!("zip entry: {}", e))?;
         if entry.is_dir() {
             continue;
         }
@@ -2194,7 +2208,9 @@ fn extract_subtitle_from_zip(bytes: &[u8]) -> Result<Option<Vec<u8>>, String> {
             Ok(None)
         };
     };
-    let file = archive.by_index(idx).map_err(|e| format!("zip entry: {}", e))?;
+    let file = archive
+        .by_index(idx)
+        .map_err(|e| format!("zip entry: {}", e))?;
     read_subtitle_limited(file, MAX_SUBTITLE_UNPACKED_BYTES).map(Some)
 }
 
@@ -2214,7 +2230,8 @@ fn prepare_subtitle_download(
 #[cfg(test)]
 mod subtitle_download_tests {
     use super::{
-        normalize_subtitle_bytes, prepare_subtitle_download, read_subtitle_limited, subtitle_extension,
+        normalize_subtitle_bytes, prepare_subtitle_download, read_subtitle_limited,
+        subtitle_extension,
     };
 
     #[test]

@@ -1,4 +1,5 @@
 import type { Settings } from "@/lib/settings";
+import { effectiveHdrToSdr } from "@/lib/player/hdr-output-policy";
 
 const QUALITY_LINES: Record<Settings["mpvQuality"], string[]> = {
   balanced: [],
@@ -42,7 +43,7 @@ export function compileMpvOptions(s: Settings): string {
   }
   if (s.mpvDownmixStereo) lines.push("audio-channels=stereo");
   if (s.audioDevice && s.audioDevice !== "auto") lines.push(`audio-device=${s.audioDevice}`);
-  if (s.playerDisplayPanel === "oled" && s.playerHdrToSdr) lines.push("target-contrast=inf");
+  if (s.playerDisplayPanel === "oled" && effectiveHdrToSdr(s)) lines.push("target-contrast=inf");
   for (const [k, v] of Object.entries(s.mpvTweaks ?? {})) {
     if (v !== "" && v != null) lines.push(`${k}=${v}`);
   }

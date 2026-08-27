@@ -41,6 +41,26 @@ function sanitizePosterDockTransition(value: unknown): number {
   return Math.min(1500, Math.max(250, Math.round(value)));
 }
 
+function sanitizeSettingsPagePreferences(
+  value: unknown,
+): Settings["settingsPagePreferences"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const result: Settings["settingsPagePreferences"] = {};
+  for (const [section, rawPreference] of Object.entries(value)) {
+    if (!/^[a-zA-Z][a-zA-Z0-9]{0,47}$/.test(section)) continue;
+    if (!rawPreference || typeof rawPreference !== "object" || Array.isArray(rawPreference)) {
+      continue;
+    }
+    const raw = rawPreference as Record<string, unknown>;
+    const preference: Settings["settingsPagePreferences"][string] = {};
+    if (typeof raw.favorite === "boolean") preference.favorite = raw.favorite;
+    if (typeof raw.compact === "boolean") preference.compact = raw.compact;
+    if (typeof raw.showIntro === "boolean") preference.showIntro = raw.showIntro;
+    result[section] = preference;
+  }
+  return result;
+}
+
 function sanitizeTopbarAppearance(
   value: unknown,
   transparent: unknown,
@@ -149,6 +169,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _playlistsTabV1?: boolean;
       _smoothScrollOptIn?: boolean;
       _streamCacheCapV1?: boolean;
+      _d3d11FlipSafeDefaultV1?: boolean;
     };
     if (!parsed._animeRowsV1) {
       const prev = (parsed.animeRows ?? {}) as Partial<Settings["animeRows"]>;
@@ -246,6 +267,14 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       }
       parsed._streamCacheCapV1 = true;
     }
+    if (!parsed._d3d11FlipSafeDefaultV1) {
+      // This compatibility mode used to default to on even though it disables
+      // D3D11 flip-model presentation and its own UI warns about 4K/HDR
+      // slowdowns. Make the safe path the one-time default for existing
+      // profiles; users with the rare bright-edge artifact can opt in again.
+      parsed.playerD3d11Flip = false;
+      parsed._d3d11FlipSafeDefaultV1 = true;
+    }
     if (!parsed._playlistsTabV1) {
       const lists = parsed.iptvPlaylists;
       const hasVodSource =
@@ -265,6 +294,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       ...DEFAULT,
       ...parsed,
       ...posterCards,
+      settingsPagePreferences: sanitizeSettingsPagePreferences(parsed.settingsPagePreferences),
       topbarAppearance: sanitizeTopbarAppearance(
         parsed.topbarAppearance,
         parsed.transparentTopBar,

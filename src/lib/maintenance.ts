@@ -47,6 +47,11 @@ const PRESSURE_LOW_MB = 330;
 type PressureListener = (high: boolean) => void;
 const pressureListeners = new Set<PressureListener>();
 let pressureHigh = false;
+let playbackActive = false;
+
+export function setMaintenancePlaybackActive(active: boolean): void {
+  playbackActive = active;
+}
 
 function readHeapMB(): number | null {
   const mem = performance.memory;
@@ -76,7 +81,10 @@ function setPressure(high: boolean): void {
   }
   if (high) {
     runMaintenance(true);
-    pulseWebviewMemoryLow();
+    // Lowering WebView2's memory target can trigger a foreground purge. Defer
+    // that part until playback ends; cache eviction still runs above when real
+    // memory pressure is detected.
+    if (!playbackActive) pulseWebviewMemoryLow();
   }
 }
 
@@ -118,6 +126,7 @@ export function startMaintenance(): () => void {
   };
 
   const interval = window.setInterval(() => {
+    if (playbackActive) return;
     runMaintenance(heapDelta() > AGGRESSIVE_HEAP_DELTA_MB);
   }, INTERVAL_MS);
 

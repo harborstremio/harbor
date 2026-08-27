@@ -66,6 +66,12 @@ export type ProfileAudioMode = "auto" | "click" | "off";
 
 export type StreamPriorityEntry = { key: string; name: string };
 
+export type SettingsPagePreference = {
+  favorite?: boolean;
+  compact?: boolean;
+  showIntro?: boolean;
+};
+
 export type Settings = {
   soundTheme: "none" | "glass" | "modern" | "retro" | "cinematic";
   sfxVolume: number;
@@ -138,6 +144,7 @@ export type Settings = {
   playerTitleScale: number;
   playerTitleSeriesFirst: boolean;
   uiScale: number;
+  settingsPagePreferences: Record<string, SettingsPagePreference>;
   serveWebUi: boolean;
   remoteControlEnabled: boolean;
   controllerSupportEnabled: boolean;
@@ -239,6 +246,7 @@ export type Settings = {
   seasonSourceLock: boolean;
   rememberLastStream: boolean;
   keepSourceNextEpisode: boolean;
+  playerHdrAuto: boolean;
   playerHdrToSdr: boolean;
   playerRtxHdr: boolean;
   playerRtxVsr: boolean;

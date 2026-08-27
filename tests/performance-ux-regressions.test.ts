@@ -24,7 +24,7 @@ test("background telemetry and downloads avoid needless work while Harbor is hid
 
   assert.match(memory, /const HIDDEN_INTERVAL_MS = 30000/);
   assert.match(memory, /document\.visibilityState === "hidden" \? HIDDEN_INTERVAL_MS : intervalMs/);
-  assert.match(memory, /if \(!isTauri \|\| sampling\) return/);
+  assert.match(memory, /if \(!isTauri \|\| sampling \|\| playbackActive\) return/);
   assert.match(memory, /document\.addEventListener\("visibilitychange", onVisibility\)/);
   assert.match(torrents, /let inFlight = false/);
   assert.match(torrents, /document\.visibilityState !== "visible"/);

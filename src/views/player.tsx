@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveChromeTheme } from "@/lib/theme";
 import { useActiveKid } from "@/lib/profiles";
-import { type PlayerBridge } from "@/lib/player/bridge";
+import { type PlayerBridge, type PlayerSnapshot } from "@/lib/player/bridge";
 import { useDebridClients } from "@/lib/debrid/registry";
 import { useSettings } from "@/lib/settings";
 import { writePlayerVolume } from "@/lib/player-volume";
@@ -82,6 +82,7 @@ import { StillWatchingPrompt } from "./player/still-watching-prompt";
 import { SourceErrorCard } from "./player/source-error-card";
 import { LeaveConfirmModal } from "@/components/player/leave-confirm-modal";
 import { HdrStageBridge } from "./player/hdr-stage-bridge";
+import type { HdrStagePayload } from "./hdr-overlay-app";
 import { setSkipSegmentsView } from "@/lib/skip-intro/segment-store";
 import { markStreamDead, STUB_TTL_MS } from "@/lib/dead-streams";
 import type { VolumeIndicatorState } from "@/components/player/volume-indicator";
@@ -90,6 +91,30 @@ import { SFX } from "@/lib/sfx";
 import { useKeyboardNavigation } from "@/lib/keyboard-navigation";
 
 let hdrFallbackNoticeShown = false;
+
+function useHdrChromeSnapshot(snap: PlayerSnapshot): PlayerSnapshot {
+  const candidate = useMemo(
+    () => ({
+      ...snap,
+      // These high-frequency fields are either read from the playback clock
+      // by the transport or rendered natively by mpv in embedded HDR mode.
+      // Keeping them out of the cross-window payload prevents every subtitle
+      // cue from repainting a full-screen transparent WebView over 4K video.
+      positionSec: 0,
+      bufferedSec: 0,
+      subText: "",
+      subStartSec: 0,
+      secondarySubText: "",
+    }),
+    [snap],
+  );
+  const stableRef = useRef(candidate);
+  const keys = Object.keys(candidate) as Array<keyof PlayerSnapshot>;
+  if (keys.some((key) => stableRef.current[key] !== candidate[key])) {
+    stableRef.current = candidate;
+  }
+  return stableRef.current;
+}
 
 export function PlayerView({ src }: { src: PlayerSrc }) {
   const { setChromeHidden, topPath, openPicker, exitPlayback, replacePlayerSrc, exitPlayer } = useView();
@@ -145,12 +170,13 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const bridgeRef = useRef<PlayerBridge | null>(null);
   const selfFrameReadyRef = useRef(false);
   const { fullscreen, toggleFullscreen } = useFullscreen();
-  const { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive } = usePlayerBridge({
-    bridgeRef,
-    videoMountRef,
-    src,
-    settings,
-  });
+  const { snap, engine, bridgeReady, bridgeKey, embedActive, svpActive, hdrToSdr } =
+    usePlayerBridge({
+      bridgeRef,
+      videoMountRef,
+      src,
+      settings,
+    });
   const isP2pEngine =
     (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) &&
     !src.url.includes("/hlsv2/") &&
@@ -876,7 +902,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     embedActive,
     hdrGamma: snap.hdrGamma,
     playerHdrStage: settings.playerHdrStage,
-    playerHdrToSdr: settings.playerHdrToSdr,
+    playerHdrToSdr: hdrToSdr,
     onFallback: () => {
       if (hdrFallbackNoticeShown) return;
       hdrFallbackNoticeShown = true;
@@ -907,6 +933,37 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     : snap;
   if (showChrome) shellSnapRef.current = liveShellSnap;
   const shellSnap = showChrome ? liveShellSnap : shellSnapRef.current;
+  const hdrChromeSnap = useHdrChromeSnapshot(snap);
+  const hdrStagePayload = useMemo<HdrStagePayload>(
+    () => ({
+      snap: hdrChromeSnap,
+      src,
+      shellId: settings.playerShellId,
+      engine,
+      visible: showChrome,
+      fullscreen,
+      resolvedImdbId,
+      tmdbKey: settings.tmdbKey ?? null,
+      canChangeEpisode,
+      hasPrevEp: hasPrevEpisodeNow,
+      hasNextEp: hasNextEpisodeNow,
+      pipMode,
+    }),
+    [
+      hdrChromeSnap,
+      src,
+      settings.playerShellId,
+      settings.tmdbKey,
+      engine,
+      showChrome,
+      fullscreen,
+      resolvedImdbId,
+      canChangeEpisode,
+      hasPrevEpisodeNow,
+      hasNextEpisodeNow,
+      pipMode,
+    ],
+  );
   const volumeRef = useRef(snap.volume);
   useEffect(() => {
     volumeRef.current = snap.volume;
@@ -1140,20 +1197,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       <LeaveConfirmModal />
       <HdrStageBridge
         active={hdrStageRequested}
-        payload={{
-          snap,
-          src,
-          shellId: settings.playerShellId,
-          engine,
-          visible: showChrome,
-          fullscreen,
-          resolvedImdbId,
-          tmdbKey: settings.tmdbKey ?? null,
-          canChangeEpisode,
-          hasPrevEp: hasPrevEpisodeNow,
-          hasNextEp: hasNextEpisodeNow,
-          pipMode,
-        }}
+        payload={hdrStagePayload}
         handlers={{
           playPause: playPauseToggle,
           fullscreen: toggleFullscreen,

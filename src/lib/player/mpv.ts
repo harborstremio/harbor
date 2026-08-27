@@ -663,11 +663,12 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       hdrToSdr = on;
       const properties: Array<[string, string]> = on
         ? [
-            ["tone-mapping", "spline"],
+            ["tone-mapping", "bt.2446a"],
             ["gamut-mapping-mode", "perceptual"],
-            ["hdr-compute-peak", "yes"],
+            ["hdr-compute-peak", "auto"],
             ["hdr-contrast-recovery", "0.30"],
             ["hdr-peak-percentile", "99.995"],
+            ["allow-delayed-peak-detect", "yes"],
             ["dither-depth", "auto"],
             ["target-trc", "bt.1886"],
             ["target-prim", "bt.709"],
@@ -679,13 +680,17 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             ["hdr-compute-peak", "auto"],
             ["hdr-contrast-recovery", "0"],
             ["hdr-peak-percentile", "0"],
+            ["allow-delayed-peak-detect", "yes"],
             ["dither-depth", "auto"],
             ["target-trc", "auto"],
             ["target-prim", "auto"],
             ["target-contrast", "auto"],
           ];
       if (isWindowsDesktop() || isMacDesktop()) {
-        properties.push(["target-colorspace-hint", "yes"]);
+        properties.push(["target-colorspace-hint", "auto"]);
+      }
+      if (isWindowsDesktop()) {
+        properties.push(["target-colorspace-hint-mode", "target"]);
       }
       for (const [name, value] of properties) {
         void invoke("mpv_set_property", { name, value }).catch(() => {});

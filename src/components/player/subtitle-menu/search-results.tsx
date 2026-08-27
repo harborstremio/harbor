@@ -65,7 +65,7 @@ export function LangGroup({
         className="flex w-full select-none items-center gap-2 bg-canvas/40 px-4 py-2 text-start transition-colors hover:bg-canvas/60"
       >
         <Flag language={lang} size="sm" showLabel={false} />
-        <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">{lang}</span>
+        <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">{t(lang)}</span>
         <span className="text-[11px] tabular-nums text-ink-subtle">{items.length}</span>
         {open && pageCount > 1 && (
           <span className="ms-1 flex items-center gap-0.5">

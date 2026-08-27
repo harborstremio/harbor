@@ -123,8 +123,20 @@ pub async fn hdr_overlay_sync(app: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn hdr_overlay_emit_props(app: AppHandle, payload: serde_json::Value) -> Result<(), String> {
+pub async fn hdr_overlay_emit_props(
+    app: AppHandle,
+    payload: serde_json::Value,
+) -> Result<(), String> {
     let _ = app.emit_to(HDR_OVERLAY_LABEL, "hdr-stage://props", payload);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn hdr_overlay_emit_clock(
+    app: AppHandle,
+    payload: serde_json::Value,
+) -> Result<(), String> {
+    let _ = app.emit_to(HDR_OVERLAY_LABEL, "hdr-stage://clock", payload);
     Ok(())
 }
 

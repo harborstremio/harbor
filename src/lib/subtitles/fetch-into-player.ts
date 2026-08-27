@@ -142,9 +142,12 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
 
   if (!p.isActive()) return { added: 0, found: results.length, hints, selected: null };
 
-  const matches = results.filter((r) => langScore(r.lang ?? "", p.langs) >= 0);
   const skipUrls = p.skipUrls ?? new Set<string>();
-  const fresh = matches.filter((r) => !skipUrls.has(r.url));
+  // The preferred languages control automatic selection, not visibility.
+  // Load every returned language (including `und`) so the in-player picker
+  // does not silently hide tracks from community/translation addons.
+  const fresh = results.filter((r) => !skipUrls.has(r.url));
+  const preferredFresh = fresh.filter((r) => langScore(r.lang ?? "", p.langs) >= 0);
 
   const meta = (r: SubResult) => ({
     format: r.format,
@@ -158,7 +161,7 @@ export async function fetchSubtitlesIntoPlayer(p: SubFetchParams): Promise<SubFe
   let selected: SubResult | null = null;
   const consumed = new Set<SubResult>();
   if (!deep) {
-    selected = await loadFirstWorkingSubtitle(fresh, async (r) => {
+    selected = await loadFirstWorkingSubtitle(preferredFresh, async (r) => {
       if (!p.isActive()) return false;
       const ok = await p.bridge.addSubtitle(r.url, r.lang, providerLabel(r), false, meta(r));
       if (ok === true) markAddedSub(r.url);

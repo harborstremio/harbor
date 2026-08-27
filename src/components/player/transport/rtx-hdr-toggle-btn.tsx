@@ -2,6 +2,7 @@ import { MonitorUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked } from "@/lib/player/rtx-video-policy";
+import { effectiveHdrToSdr } from "@/lib/player/hdr-output-policy";
 import { isSvpActiveForMedia } from "@/lib/player/svp-policy";
 import { useSettings } from "@/lib/settings";
 import type { Meta } from "@/lib/cinemeta";
@@ -11,7 +12,7 @@ import { Tooltip } from "./tooltip";
 
 function useRtxHdr(meta: Meta | undefined) {
   const { settings, update } = useSettings();
-  const disabled = isRtxHdrBlocked(settings.playerHdrToSdr, isSvpActiveForMedia(settings, meta));
+  const disabled = isRtxHdrBlocked(effectiveHdrToSdr(settings), isSvpActiveForMedia(settings, meta));
   const active = settings.playerRtxHdr && !disabled;
   return { active, disabled, toggle: () => update({ playerRtxHdr: !settings.playerRtxHdr }) };
 }

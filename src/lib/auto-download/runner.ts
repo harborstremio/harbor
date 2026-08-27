@@ -208,8 +208,16 @@ export async function runAutoDownloadCheck(manual = false): Promise<boolean> {
   return true;
 }
 
-export function useAutoDownloadRunner(allowBackground = true): void {
+export function useAutoDownloadRunner(allowBackground = true, playbackActive = false): void {
   useEffect(() => {
+    // Library discovery can fan out into many metadata requests. Starting it
+    // shortly after a movie begins used to compete with the player's startup
+    // and buffering work. Resume the normal schedule when playback closes.
+    if (playbackActive) {
+      nextRunAt = null;
+      notifyState();
+      return;
+    }
     let disposed = false;
     const kick = () => {
       if (disposed) return;
@@ -229,5 +237,5 @@ export function useAutoDownloadRunner(allowBackground = true): void {
       window.clearTimeout(first);
       window.clearInterval(interval);
     };
-  }, [allowBackground]);
+  }, [allowBackground, playbackActive]);
 }

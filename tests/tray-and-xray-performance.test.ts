@@ -49,3 +49,91 @@ test("the X-Ray cast rail still works when live face scanning is disabled", () =
   assert.match(rail, /const canMatch = liveScan && !error && !emptyGallery/);
   assert.match(rail, /const status = !liveScan/);
 });
+
+test("X-Ray remains interactive on the separate embedded-HDR control surface", () => {
+  const overlay = read("src/components/player/xray/xray-overlay.tsx");
+  const hdrOverlay = read("src/views/hdr-overlay-app.tsx");
+  const hdrBridge = read("src/views/player/hdr-stage-bridge.tsx");
+  const player = read("src/views/player.tsx");
+
+  assert.match(overlay, /pointer-events-auto/);
+  assert.match(overlay, /event\.stopPropagation\(\)/);
+  assert.match(hdrOverlay, /<XrayOverlay/);
+  assert.match(hdrOverlay, /!payload\.pipMode/);
+  assert.match(hdrOverlay, /window\.setInterval\(ready, 4000\)/);
+  assert.doesNotMatch(hdrBridge, /setInterval\(\(\) => void hdrOverlayEmitProps/);
+  assert.match(hdrBridge, /subscribePlaybackClock/);
+  assert.match(hdrBridge, /hdrOverlayEmitClock/);
+  assert.match(hdrBridge, /!active \|\| !payload\.visible/);
+  assert.match(hdrOverlay, /onHdrStageClock/);
+  assert.match(hdrOverlay, /setPlaybackClock\(positionSec, bufferedSec\)/);
+  assert.match(player, /function useHdrChromeSnapshot/);
+  assert.match(player, /subText: ""/);
+  assert.match(player, /secondarySubText: ""/);
+});
+
+test("routine playback housekeeping never captures full mpv frames", () => {
+  const snapshots = read("src/views/player/hooks/use-exit-snapshot.ts");
+  const memory = read("src/views/player/hooks/use-webview-memory.ts");
+  const maintenance = read("src/lib/maintenance.ts");
+  const nativeMemory = read("src/lib/native-memory.ts");
+
+  assert.match(snapshots, /grabFrame\(false, true\)/);
+  assert.match(snapshots, /const PASSIVE_REFRESH_MS = 60000/);
+  assert.doesNotMatch(snapshots, /const CACHE_MS = 12000/);
+  assert.match(memory, /POST_PLAYBACK_MAINTENANCE_DELAY_MS/);
+  assert.doesNotMatch(memory, /setInterval\(\(\) => pulseWebviewMemoryLow/);
+  assert.match(maintenance, /if \(playbackActive\) return/);
+  assert.match(maintenance, /if \(!playbackActive\) pulseWebviewMemoryLow\(\)/);
+  assert.match(nativeMemory, /intervalMs = active \? 15000 : 8000/);
+});
+
+test("normal mpv playback avoids per-subtitle oversized buffers and disk cache retries", () => {
+  const mpv = read("src-tauri/src/mpv.rs");
+
+  assert.match(mpv, /set\("msg-level", "all=warn"\)/);
+  assert.match(mpv, /set\("cache-on-disk", if full_download \{ "yes" \} else \{ "no" \}\)/);
+  assert.match(mpv, /set\("cache-dir", path\)/);
+  assert.doesNotMatch(mpv, /mpv\.set_property\("cache-dir"/);
+  assert.match(mpv, /set_property\("stream-buffer-size", "4MiB"\)/);
+  assert.doesNotMatch(mpv, /set_property\("stream-buffer-size", "32MiB"\)/);
+  assert.match(mpv, /if full_dl \{ "yes" \} else \{ "no" \}/);
+  assert.match(mpv, /if full_dl \{ "10" \} else \{ "2" \}/);
+  assert.doesNotMatch(mpv, /fn reassert_hdr_colorspace/);
+  assert.doesNotMatch(mpv, /set_property\("target-peak", "10000"\)/);
+});
+
+test("the expensive D3D11 compatibility presenter is opt-in for new and existing profiles", () => {
+  const defaults = read("src/lib/settings/defaults.ts");
+  const load = read("src/lib/settings/load.ts");
+  const panel = read("src/views/settings/player-panel/engine-section.tsx");
+
+  assert.match(defaults, /playerD3d11Flip: false/);
+  assert.match(load, /_d3d11FlipSafeDefaultV1/);
+  assert.match(load, /parsed\.playerD3d11Flip = false/);
+  assert.match(panel, /4K playback can drop to a slideshow/);
+  assert.match(panel, /Leave OFF unless you see that line/);
+});
+
+test("background diagnostics and controller discovery do not busy-poll during playback", () => {
+  const nativeMemory = read("src/lib/native-memory.ts");
+  const procMem = read("src-tauri/src/proc_mem.rs");
+  const gamepad = read("src-tauri/src/gamepad.rs");
+  const autoDownloads = read("src/lib/auto-download/runner.ts");
+  const reminders = read("src/lib/reminders-runner.tsx");
+  const app = read("src/App.tsx");
+
+  assert.match(nativeMemory, /sampling \|\| playbackActive/);
+  assert.match(nativeMemory, /if \(!active\) void sample\(\)/);
+  assert.match(procMem, /spawn_blocking\(read\)/);
+  assert.match(gamepad, /next_event_blocking/);
+  assert.doesNotMatch(gamepad, /sleep\(Duration::from_millis\(8\)\)/);
+  assert.match(autoDownloads, /if \(playbackActive\)/);
+  assert.match(reminders, /if \(suspended\) return/);
+  assert.match(app, /useAutoDownloadRunner\(settings\.backgroundNetworkActivity, !!player\)/);
+  assert.match(app, /<RemindersRunner suspended=\{!!player\}/);
+  assert.match(app, /if \(player\) return/);
+  assert.match(app, /return player \? null : <ActivitySyncActive \/>/);
+  assert.match(app, /return player \? null : <RatingsSyncActive \/>/);
+  assert.match(app, /return player \? null : <FeaturedListsSyncActive \/>/);
+});

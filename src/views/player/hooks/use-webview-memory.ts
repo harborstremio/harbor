@@ -2,16 +2,22 @@ import { useEffect } from "react";
 import { pulseWebviewMemoryLow } from "@/lib/webview-memory";
 import { runMaintenance } from "@/lib/maintenance";
 
-const TRIM_INTERVAL_MS = 60000;
+const POST_PLAYBACK_MAINTENANCE_DELAY_MS = 1500;
+let pendingPostPlaybackMaintenance: number | null = null;
 
 export function useWebviewMemory(active: boolean) {
   useEffect(() => {
     if (!active) return;
-    const id = window.setInterval(() => pulseWebviewMemoryLow(), TRIM_INTERVAL_MS);
+    if (pendingPostPlaybackMaintenance != null) {
+      window.clearTimeout(pendingPostPlaybackMaintenance);
+      pendingPostPlaybackMaintenance = null;
+    }
     return () => {
-      window.clearInterval(id);
-      pulseWebviewMemoryLow();
-      runMaintenance(true);
+      pendingPostPlaybackMaintenance = window.setTimeout(() => {
+        pendingPostPlaybackMaintenance = null;
+        pulseWebviewMemoryLow();
+        runMaintenance(true);
+      }, POST_PLAYBACK_MAINTENANCE_DELAY_MS);
     };
   }, [active]);
 }
