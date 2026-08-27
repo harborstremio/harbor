@@ -101,7 +101,7 @@ jobs:
           TARGET="${{ matrix.platform.target }}"
           EXT=""
           if [[ "$TARGET" == *"windows"* ]]; then EXT=".exe"; fi
-          
+
           echo "Downloading yt-dlp..."
           if [[ "$TARGET" == *"windows"* ]]; then
             curl --retry 6 --retry-delay 4 --retry-all-errors -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}${EXT}"
