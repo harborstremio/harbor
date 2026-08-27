@@ -28,6 +28,7 @@ import type { PlayerSrc } from "@/lib/view";
 import { useExitSnapshot } from "./use-exit-snapshot";
 import { usePowerInhibit } from "./use-power-inhibit";
 import { useResumeAutosave } from "./use-resume-autosave";
+import { useWatchTime } from "./use-watch-time";
 import { useStremioSync } from "./use-stremio-sync";
 import { useSubDrop } from "./use-sub-drop";
 import { useSubStyleApply } from "./use-sub-style-apply";
@@ -295,6 +296,7 @@ export function usePlayerMedia(params: {
   ]);
 
   useResumeAutosave({ src, snap, season, episode, resolvedImdbId, resolvedImdbVerified });
+  useWatchTime(snap, `${src.meta.id}|${season ?? ""}|${episode ?? ""}`);
   useStremioSync({
     src,
     snap,
