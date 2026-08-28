@@ -209,6 +209,7 @@ export type Settings = {
   playerAnime4kIndicator: boolean;
   playerMpvEmbed: boolean;
   playerP2pChip: boolean;
+  playerAlwaysShowClock: boolean;
   showQualityInfo: boolean;
   stremioServerTranscode: boolean;
   directTorrentStream: boolean;

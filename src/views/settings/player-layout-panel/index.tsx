@@ -31,11 +31,7 @@ import {
 } from "@/lib/player-chrome-profiles";
 import { useSettings } from "@/lib/settings";
 import { resolveChromeTheme } from "@/lib/theme";
-import {
-  moveControlOrder,
-  moveControlSlot,
-  sameConfig,
-} from "./config-helpers";
+import { moveControlOrder, moveControlSlot, sameConfig } from "./config-helpers";
 import { EditorOverlay } from "./editor-overlay";
 import { OptionsSection } from "./options-section";
 import { EditLayoutCard, FooterBar, ThemeTabs } from "./panel-bars";
@@ -68,7 +64,10 @@ export function PlayerLayoutPanel() {
   const bumpProfiles = useCallback(() => setProfileVersion((v) => v + 1), []);
 
   const profiles = useMemo(() => listProfiles(theme), [theme, profileVersion]);
-  const activeProfileId = useMemo(() => getActiveProfile(theme)?.id ?? null, [theme, profileVersion]);
+  const activeProfileId = useMemo(
+    () => getActiveProfile(theme)?.id ?? null,
+    [theme, profileVersion],
+  );
 
   useEffect(() => {
     const next = readPlayerChromeConfig(theme);
@@ -126,9 +125,7 @@ export function PlayerLayoutPanel() {
     if (!selectedId) return;
     setDraft((cur) => ({
       ...cur,
-      controls: cur.controls.map((c) =>
-        c.id === selectedId ? { ...c, hidden: !c.hidden } : c,
-      ),
+      controls: cur.controls.map((c) => (c.id === selectedId ? { ...c, hidden: !c.hidden } : c)),
     }));
   }, [selectedId]);
 
@@ -172,21 +169,18 @@ export function PlayerLayoutPanel() {
     [],
   );
 
-  const setVariant = useCallback(
-    (id: PlayerControlId, variant: ControlVariant | null) => {
-      setDraft((cur) => ({
-        ...cur,
-        controls: cur.controls.map((c) => {
-          if (c.id !== id) return c;
-          const next: PlayerControlConfig = { ...c };
-          if (variant == null) delete next.variant;
-          else next.variant = variant;
-          return next;
-        }),
-      }));
-    },
-    [],
-  );
+  const setVariant = useCallback((id: PlayerControlId, variant: ControlVariant | null) => {
+    setDraft((cur) => ({
+      ...cur,
+      controls: cur.controls.map((c) => {
+        if (c.id !== id) return c;
+        const next: PlayerControlConfig = { ...c };
+        if (variant == null) delete next.variant;
+        else next.variant = variant;
+        return next;
+      }),
+    }));
+  }, []);
 
   const setPanelCorner = useCallback((id: PanelId, corner: PanelCorner) => {
     setDraft((cur) => {
@@ -226,7 +220,7 @@ export function PlayerLayoutPanel() {
     async (id: string) => {
       if (!sameConfig(draft, saved)) {
         const ok = await confirmDialog(
-          t("You have unsaved changes that will be lost when switching profiles. Continue?")
+          t("You have unsaved changes that will be lost when switching profiles. Continue?"),
         );
         if (!ok) return;
       }
@@ -380,14 +374,25 @@ export function PlayerLayoutPanel() {
 
       <ToggleRow
         label={t("Show P2P status chip")}
-        sub={t("Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.")}
+        sub={t(
+          "Peers, speed and progress while a torrent streams. Sits clear of the exit button, top left.",
+        )}
         value={settings.playerP2pChip}
         onChange={(v) => update({ playerP2pChip: v })}
       />
 
       <ToggleRow
+        label={t("Always show clock overlay")}
+        sub={t("Keep the time display visible in compact player windows instead of shrinking it.")}
+        value={settings.playerAlwaysShowClock}
+        onChange={(v) => update({ playerAlwaysShowClock: v })}
+      />
+
+      <ToggleRow
         label={t("Content advisory on start")}
-        sub={t("When a movie or episode starts, briefly show its IMDb parental guide (violence, profanity, substances, frightening scenes and more) with severity. Fades on its own.")}
+        sub={t(
+          "When a movie or episode starts, briefly show its IMDb parental guide (violence, profanity, substances, frightening scenes and more) with severity. Fades on its own.",
+        )}
         value={settings.contentAdvisoryToast}
         onChange={(v) => update({ contentAdvisoryToast: v })}
       />
@@ -414,7 +419,7 @@ export function PlayerLayoutPanel() {
           onClose={async () => {
             if (!sameConfig(draft, saved)) {
               const ok = await confirmDialog(
-                t("You have unsaved changes. Close the editor and discard them?")
+                t("You have unsaved changes. Close the editor and discard them?"),
               );
               if (!ok) return;
               setDraft(saved);
@@ -447,5 +452,3 @@ export function PlayerLayoutPanel() {
     </div>
   );
 }
-
-

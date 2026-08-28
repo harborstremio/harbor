@@ -361,6 +361,7 @@ export function Transport({
     timeFormat: chromeConfig.options.timeFormat,
     onCycleTimeFormat,
     volumeStyle: chromeConfig.options.volumeStyle,
+    alwaysShowClock: settings.playerAlwaysShowClock,
     seekBackStepSec: settings.seekBackStepSec,
     seekForwardStepSec: settings.seekForwardStepSec,
     title,

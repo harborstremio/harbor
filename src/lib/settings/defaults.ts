@@ -171,6 +171,7 @@ export const DEFAULT: Settings = {
   playerAnime4kIndicator: true,
   playerMpvEmbed: true,
   playerP2pChip: true,
+  playerAlwaysShowClock: false,
   showQualityInfo: false,
   stremioServerTranscode: false,
   directTorrentStream: true,

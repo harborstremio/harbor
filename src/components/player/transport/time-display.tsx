@@ -23,6 +23,7 @@ export function TimeStart({
   timeFormat,
   isLiveChannel,
   tight,
+  alwaysShowClock,
   active,
   stremio,
   onCycle,
@@ -31,6 +32,7 @@ export function TimeStart({
   timeFormat?: TimeFormat;
   isLiveChannel: boolean;
   tight?: boolean;
+  alwaysShowClock?: boolean;
   active: boolean;
   stremio?: boolean;
   onCycle?: () => void;
@@ -40,7 +42,8 @@ export function TimeStart({
   if (stremio) {
     const fmt: TimeFormat = timeFormat ?? "start-end";
     const positionText = fmtTime(positionSec);
-    const cls = "pointer-events-auto ms-2 shrink-0 font-medium tabular-nums text-[14px] text-white/90";
+    const cls =
+      "pointer-events-auto ms-2 shrink-0 font-medium tabular-nums text-[14px] text-white/90";
     const inner =
       fmt === "elapsed-only" ? (
         <>
@@ -71,9 +74,14 @@ export function TimeStart({
     }
     return <span className={cls}>{inner}</span>;
   }
-  if (tight) return null;
+  // In tight/compact windows, show a compact version instead of hiding
+  const isCompact = tight && !alwaysShowClock;
   return (
-    <span className="shrink-0 font-mono text-[13px] tabular-nums text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]">
+    <span
+      className={`shrink-0 font-mono tabular-nums text-white/85 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)] ${
+        isCompact ? "text-[11px]" : "text-[13px]"
+      }`}
+    >
       {fmtTime(positionSec)}
     </span>
   );
@@ -84,6 +92,7 @@ export function TimeEnd({
   timeFormat,
   isLiveChannel,
   tight,
+  alwaysShowClock,
   active,
   onCycle,
 }: {
@@ -91,18 +100,22 @@ export function TimeEnd({
   timeFormat?: TimeFormat;
   isLiveChannel: boolean;
   tight?: boolean;
+  alwaysShowClock?: boolean;
   active: boolean;
   onCycle?: () => void;
 }): ReactNode {
   const positionSec = usePlaybackPositionGated(active);
-  if (isLiveChannel || tight) return null;
+  if (isLiveChannel) return null;
   const fmt: TimeFormat = timeFormat ?? "start-end";
   if (fmt === "elapsed-only") return null;
   const duration = durationSec ?? 0;
   const text =
     fmt === "remaining" ? `-${fmtTime(Math.max(0, duration - positionSec))}` : fmtTime(duration);
-  const cls =
-    "inline-flex shrink-0 items-center font-mono text-[13px] tabular-nums text-white/65 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]";
+  // In tight/compact windows, show a compact version instead of hiding
+  const isCompact = tight && !alwaysShowClock;
+  const cls = isCompact
+    ? "inline-flex shrink-0 items-center font-mono text-[11px] tabular-nums text-white/55 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]"
+    : "inline-flex shrink-0 items-center font-mono text-[13px] tabular-nums text-white/65 drop-shadow-[0_1px_3px_rgba(0,0,0,0.7)]";
   if (onCycle) {
     return (
       <button
