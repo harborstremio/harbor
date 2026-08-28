@@ -168,7 +168,12 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
     const episode =
       typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null || season < 1) continue;
-    const ep: PlayEpisode = { season, episode, name: v.title || v.name || undefined, still: v.thumbnail };
+    const ep: PlayEpisode = {
+      season,
+      episode,
+      name: v.title || v.name || undefined,
+      still: v.thumbnail,
+    };
     const vid = (v as { id?: string }).id;
     if (vid && (vid.startsWith("kitsu:") || vid.startsWith("mal:"))) ep.kitsuStreamId = vid;
     else if (vid) ep.videoId = vid;
@@ -236,9 +241,7 @@ export async function fetchUpcomingEpisodes(
     let cursor = current.episode;
     while (out.length < count && season <= current.season + 3) {
       const eps = await tmdbSeason(opts.tmdbKey, tvId, season);
-      const start = season === current.season
-        ? eps.findIndex((e) => e.episode === cursor) + 1
-        : 0;
+      const start = season === current.season ? eps.findIndex((e) => e.episode === cursor) + 1 : 0;
       if (start < 0) break;
       for (let i = start; i < eps.length && out.length < count; i++) out.push(eps[i]);
       season += 1;
@@ -274,11 +277,7 @@ async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
   for (const v of raw) {
     const season = typeof v.season === "number" ? v.season : null;
     const episode =
-      typeof v.episode === "number"
-        ? v.episode
-        : typeof v.number === "number"
-          ? v.number
-          : null;
+      typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null) continue;
     if (season < 1) continue;
     eps.push({
@@ -348,7 +347,10 @@ export async function fetchSeasonEpisodes(
   return (eps ?? []).filter((e) => animeSeasonKey(e) === season);
 }
 
-export async function fetchEpisodeList(meta: Meta, opts: { tmdbKey: string }): Promise<PlayEpisode[]> {
+export async function fetchEpisodeList(
+  meta: Meta,
+  opts: { tmdbKey: string },
+): Promise<PlayEpisode[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) return (await loadCinemetaEpisodes(meta.id)) ?? [];
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
@@ -377,13 +379,32 @@ export function nextUnwatchedAfter(
   return null;
 }
 
-function computeAdjacent(eps: PlayEpisode[], current: { season: number; episode: number }): Adjacent {
+function computeAdjacent(
+  eps: PlayEpisode[],
+  current: { season: number; episode: number },
+): Adjacent {
   const idx = eps.findIndex((v) => v.season === current.season && v.episode === current.episode);
   if (idx === -1) return { prev: null, next: null };
-  return {
-    prev: idx > 0 ? eps[idx - 1] : null,
-    next: idx < eps.length - 1 ? eps[idx + 1] : null,
-  };
+  const now = Date.now();
+  let prev: PlayEpisode | null = null;
+  for (let i = idx - 1; i >= 0; i--) {
+    const ep = eps[i];
+    const t = ep.airDate ? Date.parse(ep.airDate) : NaN;
+    if (!ep.airDate || !Number.isFinite(t) || t <= now) {
+      prev = ep;
+      break;
+    }
+  }
+  let next: PlayEpisode | null = null;
+  for (let i = idx + 1; i < eps.length; i++) {
+    const ep = eps[i];
+    const t = ep.airDate ? Date.parse(ep.airDate) : NaN;
+    if (!ep.airDate || !Number.isFinite(t) || t <= now) {
+      next = ep;
+      break;
+    }
+  }
+  return { prev, next };
 }
 
 async function tmdbSeason(key: string, tvId: number, season: number): Promise<PlayEpisode[]> {
