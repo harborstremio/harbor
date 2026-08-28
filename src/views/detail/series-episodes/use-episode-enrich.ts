@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { Meta } from "@/lib/cinemeta";
 import { harborImdbEpisodes } from "@/lib/providers/harbor-imdb";
 import { omdbSeasonRatings } from "@/lib/providers/omdb";
 import type { Episode } from "@/lib/providers/tmdb";
@@ -10,14 +11,18 @@ export function useEpisodeEnrich({
   imdbId,
   tvdbKey,
   omdbKey,
+  cinemetaVideos,
 }: {
   episodes: Episode[];
   active: number;
   imdbId: string | null;
   tvdbKey: string;
   omdbKey: string;
+  cinemetaVideos?: NonNullable<Meta["videos"]>;
 }): Episode[] {
-  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(new Map());
+  const [tvdbBySeason, setTvdbBySeason] = useState<Map<number, Map<number, TvdbEpisode>>>(
+    new Map(),
+  );
   const [omdbBySeason, setOmdbBySeason] = useState<Map<number, Map<number, number>>>(new Map());
   const [harborImdb, setHarborImdb] = useState<Map<string, number>>(new Map());
 
@@ -67,7 +72,8 @@ export function useEpisodeEnrich({
   const tvdbForSeason = tvdbBySeason.get(active);
   const omdbForSeason = omdbBySeason.get(active);
   return useMemo<Episode[]>(() => {
-    if (!tvdbForSeason && !omdbForSeason && harborImdb.size === 0) return episodes;
+    if (!tvdbForSeason && !omdbForSeason && harborImdb.size === 0 && !cinemetaVideos)
+      return episodes;
     return episodes.map((ep): Episode => {
       let next: Episode = ep;
       const tv = tvdbForSeason?.get(ep.episodeNumber);
@@ -89,7 +95,24 @@ export function useEpisodeEnrich({
       if (imdbRating != null && imdbRating > 0) {
         next = { ...next, imdbRating };
       }
+      // Overlay preferred addon video fields onto fallback metadata
+      if (cinemetaVideos && cinemetaVideos.length > 0) {
+        const v = cinemetaVideos.find(
+          (cv) =>
+            cv.season === active &&
+            (cv.episode === ep.episodeNumber || cv.number === ep.episodeNumber),
+        );
+        if (v) {
+          next = {
+            ...next,
+            name: v.name || v.title || next.name,
+            overview: v.overview || v.description || next.overview,
+            stillUrl: v.thumbnail || next.stillUrl,
+            airDate: v.released || v.firstAired || next.airDate,
+          };
+        }
+      }
       return next;
     });
-  }, [episodes, tvdbForSeason, omdbForSeason, harborImdb, active]);
+  }, [episodes, tvdbForSeason, omdbForSeason, harborImdb, active, cinemetaVideos]);
 }
