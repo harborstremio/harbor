@@ -9,6 +9,7 @@ import { useProfiles } from "@/lib/profiles";
 import { recordWatchedBy } from "@/lib/watched-by";
 import { recordAnimeCwId } from "@/lib/anime-cw-ids";
 import type { PlayerSrc } from "@/lib/view";
+import { resumeLibraryGetOne } from "@/lib/player/resume-start";
 
 const ANIME_SCHEME = /^(kitsu|mal|anilist|anidb):/;
 
@@ -34,7 +35,15 @@ export function useStremioSync(params: {
   resolutionSettled: boolean;
   castActiveRef?: { current: boolean };
 }) {
-  const { src, snap, authKey, resolvedImdbId, resolvedImdbVerified, resolutionSettled, castActiveRef } = params;
+  const {
+    src,
+    snap,
+    authKey,
+    resolvedImdbId,
+    resolvedImdbVerified,
+    resolutionSettled,
+    castActiveRef,
+  } = params;
   const canonicalId = cloudWriteId(src.meta.id, resolvedImdbId, resolvedImdbVerified);
   const watcherProfileId = useProfiles().activeProfile?.id ?? null;
   useEffect(() => {
@@ -43,7 +52,11 @@ export function useStremioSync(params: {
     if (watchedId) recordWatchedBy(watchedId, watcherProfileId);
   }, [resolutionSettled, canonicalId, src.meta.id, watcherProfileId]);
   useEffect(() => {
-    if (ANIME_SCHEME.test(src.meta.id) && resolvedImdbVerified && resolvedImdbId?.startsWith("tt")) {
+    if (
+      ANIME_SCHEME.test(src.meta.id) &&
+      resolvedImdbVerified &&
+      resolvedImdbId?.startsWith("tt")
+    ) {
       recordAnimeCwId(resolvedImdbId, src.meta.id);
     }
   }, [resolvedImdbId, resolvedImdbVerified, src.meta.id]);
@@ -123,7 +136,7 @@ export function useStremioSync(params: {
     if (fetchedRef.current === canonicalId) return;
     fetchedRef.current = canonicalId;
     let cancelled = false;
-    void libraryGetOne(authKey, canonicalId).then((item) => {
+    void resumeLibraryGetOne(authKey, canonicalId).then((item) => {
       if (cancelled) return;
       baseItemRef.current = item;
     });
@@ -143,7 +156,13 @@ export function useStremioSync(params: {
   }, [authKey, canonicalId]);
 
   const writeWithFreshBase = async (isTerminal: boolean, withGet: boolean) => {
-    const { src: s, snap: sn, authKey: ak, canonicalId: liveCid, resolutionSettled: settled } = latestRef.current;
+    const {
+      src: s,
+      snap: sn,
+      authKey: ak,
+      canonicalId: liveCid,
+      resolutionSettled: settled,
+    } = latestRef.current;
     if (!ak || !settled || !loadResetSeenRef.current) return;
     const cid = sessionCidRef.current ?? liveCid;
     if (!cid) return;
@@ -156,7 +175,9 @@ export function useStremioSync(params: {
     const base = fresh ?? (baseItemRef.current?._id === cid ? baseItemRef.current : null);
     const remoteMs = (base?.state?.timeOffset ?? 0) as number;
     const remoteMtimeStr = String((base as { _mtime?: string } | null)?._mtime ?? "");
-    const remoteMtime = /^\d+$/.test(remoteMtimeStr) ? Number(remoteMtimeStr) : Date.parse(remoteMtimeStr);
+    const remoteMtime = /^\d+$/.test(remoteMtimeStr)
+      ? Number(remoteMtimeStr)
+      : Date.parse(remoteMtimeStr);
     const remoteVid =
       ((base?.state as Record<string, unknown> | undefined)?.video_id as string | undefined) ?? cid;
     const ourMs = Math.floor(pos * 1000);
@@ -179,7 +200,13 @@ export function useStremioSync(params: {
   };
 
   const writeFlushFast = (): Promise<void> => {
-    const { src: s, snap: sn, authKey: ak, canonicalId: liveCid, resolutionSettled: settled } = latestRef.current;
+    const {
+      src: s,
+      snap: sn,
+      authKey: ak,
+      canonicalId: liveCid,
+      resolutionSettled: settled,
+    } = latestRef.current;
     if (!ak || !settled || !loadResetSeenRef.current) return Promise.resolve();
     const cid = sessionCidRef.current ?? liveCid;
     if (!cid) return Promise.resolve();
@@ -209,7 +236,11 @@ export function useStremioSync(params: {
       if (!active || !loadResetSeenRef.current) return;
       const pos = getPlaybackPosition();
       if (pos < MIN_POSITION_SEC || sn.durationSec <= 0) return;
-      if (import.meta.env.DEV && Date.now() - sessionStartRef.current > 30000 && !wroteOnceRef.current) {
+      if (
+        import.meta.env.DEV &&
+        Date.now() - sessionStartRef.current > 30000 &&
+        !wroteOnceRef.current
+      ) {
         console.warn("[stremio-sync] playing >30s with zero successful cloud writes");
       }
       const ms = pos * 1000;
@@ -337,9 +368,12 @@ async function writeLibraryItem(
   const videoChanged = prevVideoId !== null && prevVideoId !== videoId;
   const prevTimesWatched = typeof baseState.timesWatched === "number" ? baseState.timesWatched : 0;
   const prevTimeWatched = typeof baseState.timeWatched === "number" ? baseState.timeWatched : 0;
-  const prevOverall = typeof baseState.overallTimeWatched === "number" ? baseState.overallTimeWatched : 0;
+  const prevOverall =
+    typeof baseState.overallTimeWatched === "number" ? baseState.overallTimeWatched : 0;
   const prevWatched =
-    typeof baseState.watched === "string" && baseState.watched.length > 0 ? baseState.watched : null;
+    typeof baseState.watched === "string" && baseState.watched.length > 0
+      ? baseState.watched
+      : null;
   const prevLastVidReleased =
     typeof baseState.lastVidReleased === "string" ? baseState.lastVidReleased : null;
   const prevFlagged = typeof baseState.flaggedWatched === "number" ? baseState.flaggedWatched : 0;
@@ -361,10 +395,10 @@ async function writeLibraryItem(
       const maxKey = vids.reduce((m, v) => Math.max(m, key(v.season ?? 1, v.episode ?? 0)), 0);
       const metaIsTt = src.meta.id.startsWith("tt");
       const curSeason = metaIsTt
-        ? src.episode.imdbSeason ?? src.episode.season
+        ? (src.episode.imdbSeason ?? src.episode.season)
         : src.episode.season;
       const curEpisode = metaIsTt
-        ? src.episode.imdbEpisode ?? src.episode.episode
+        ? (src.episode.imdbEpisode ?? src.episode.episode)
         : src.episode.episode;
       finaleDone = key(curSeason, curEpisode) >= maxKey;
     }
@@ -397,7 +431,8 @@ async function writeLibraryItem(
 
   const metaPoster =
     typeof src.meta.poster === "string" && src.meta.poster.length > 0 ? src.meta.poster : null;
-  const basePoster = typeof base?.poster === "string" && base.poster.length > 0 ? base.poster : null;
+  const basePoster =
+    typeof base?.poster === "string" && base.poster.length > 0 ? base.poster : null;
   const baseType = base?.type === "series" || base?.type === "movie" ? base.type : null;
   let removed = base ? base.removed === true : true;
   let temp = base ? base.temp === true : true;
@@ -408,7 +443,9 @@ async function writeLibraryItem(
     if (isSeries && !isAnimeWrite) {
       const baseMtimeRaw = (baseRecord as { _mtime?: unknown } | null)?._mtime;
       const baseMtime =
-        typeof baseMtimeRaw === "number" ? baseMtimeRaw : Date.parse(String(baseMtimeRaw ?? "")) || 0;
+        typeof baseMtimeRaw === "number"
+          ? baseMtimeRaw
+          : Date.parse(String(baseMtimeRaw ?? "")) || 0;
       let bestWatched = prevWatched;
       let bestMtime = Number.isFinite(baseMtime) ? baseMtime : 0;
       const cached = freshestWatched(canonicalId);
@@ -424,7 +461,10 @@ async function writeLibraryItem(
       {
         const strictGet = libraryGetOneStrict(authKey, canonicalId).catch(() => null);
         const fresh = isTerminal
-          ? await Promise.race([strictGet, new Promise<null>((r) => setTimeout(() => r(null), 400))])
+          ? await Promise.race([
+              strictGet,
+              new Promise<null>((r) => setTimeout(() => r(null), 400)),
+            ])
           : await strictGet;
         const fw = fresh?.state?.watched;
         if (typeof fw === "string" && fw.length > 0) {
@@ -441,7 +481,7 @@ async function writeLibraryItem(
     const item: StremioLibraryItem = {
       _id: canonicalId,
       name,
-      type: src.episode ? "series" : baseType ?? (isSeries ? "series" : "movie"),
+      type: src.episode ? "series" : (baseType ?? (isSeries ? "series" : "movie")),
       poster: metaPoster ?? basePoster,
       posterShape: pickPosterShape(baseRecord?.posterShape),
       removed,

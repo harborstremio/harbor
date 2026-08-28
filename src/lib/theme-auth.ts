@@ -65,6 +65,8 @@ export type Author = {
   handleChangeAvailableAt?: string | null;
   verified?: boolean;
   stremioLinked?: boolean;
+  discordLinkMethod?: string | null;
+  discordUsername?: string | null;
   badges?: AuthorBadge[];
 };
 
@@ -90,6 +92,8 @@ function toAuthor(u: RawUser): Author {
       typeof u.handleChangeAvailableAt === "string" ? u.handleChangeAvailableAt : null,
     verified: u.verified === true,
     stremioLinked: u.stremioLinked === true,
+    discordLinkMethod: typeof u.discordLinkMethod === "string" ? u.discordLinkMethod : null,
+    discordUsername: typeof u.discordUsername === "string" ? u.discordUsername : null,
     badges: Array.isArray(u.badges) ? u.badges : [],
   };
 }

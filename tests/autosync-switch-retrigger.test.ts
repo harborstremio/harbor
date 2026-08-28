@@ -20,12 +20,15 @@ test("a manual (forced) run always starts fresh, never a silent retry shortcut",
 
 test("a forced run tries hard immediately", () => {
   assert.match(hook, /await runDirect\(force\);/);
-  assert.ok(!/await runDirect\(false\);/.test(hook), "forced button press should not run the low-effort pass");
+  assert.ok(
+    !/await runDirect\(false\);/.test(hook),
+    "forced button press should not run the low-effort pass",
+  );
 });
 
-test("auto-fire happens once per source and language, not on every track switch", () => {
-  assert.match(hook, /firedRef = useRef<\{ url: string; langs: Set<string> \}>/);
+test("auto-fire happens once per media item and language, not on every track switch", () => {
+  assert.match(hook, /firedRef = useRef<\{ mediaKey: string; langs: Set<string> \}>/);
   assert.match(hook, /if \(!fired\.langs\.has\(lang\)\) \{/);
   assert.match(hook, /fired\.langs\.add\(lang\);/);
-  assert.match(hook, /if \(fired\.url !== url\) \{/);
+  assert.match(hook, /if \(fired\.mediaKey !== currentMediaKey\) \{/);
 });

@@ -19,13 +19,21 @@ type RawSub = {
   encoding?: string;
 };
 
-function buildId(q: SubSearchQuery): string | null {
-  if (!q.imdbId) return null;
-  let id = q.imdbId.startsWith("tt") ? q.imdbId : `tt${q.imdbId}`;
-  if (q.season != null && q.episode != null && !id.includes(":")) {
-    id = `${id}:${q.season}:${q.episode}`;
+/**
+ * Ids to query for one search. Long-running anime have no primary season
+ * (absolute episode only); OpenSubtitles indexes those as season 1 +
+ * absolute episode (One Piece E1100 → tt:1:1100) rather than TVDB/IMDb
+ * season splits.
+ */
+function scopedIds(q: SubSearchQuery): Array<{ id: string; type: "series" | "movie" }> {
+  const tt = q.imdbId!.startsWith("tt") ? q.imdbId! : `tt${q.imdbId!}`;
+  if (q.season != null && q.episode != null) {
+    return [{ id: `${tt}:${q.season}:${q.episode}`, type: "series" }];
   }
-  return id;
+  if (q.episode != null) {
+    return [{ id: `${tt}:1:${q.episode}`, type: "series" }];
+  }
+  return [{ id: tt, type: q.type === "series" ? "series" : "movie" }];
 }
 
 async function callEndpoint(base: string, type: string, id: string): Promise<RawSub[]> {
@@ -47,15 +55,15 @@ async function callEndpoint(base: string, type: string, id: string): Promise<Raw
 }
 
 export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResult[]> {
-  const id = buildId(q);
-  if (!id) {
+  if (!q.imdbId) {
     dinfo("[opensubtitles-v3] no imdbId, skipping");
     return [];
   }
-  const isEpisode = q.season != null && q.episode != null;
-  const type = isEpisode || id.includes(":") ? "series" : "movie";
+  const targets = scopedIds(q);
 
-  const results = await Promise.all(ENDPOINTS.map((base) => callEndpoint(base, type, id)));
+  const results = await Promise.all(
+    ENDPOINTS.flatMap((base) => targets.map((t) => callEndpoint(base, t.type, t.id))),
+  );
   const seen = new Set<string>();
   const merged: RawSub[] = [];
   for (const list of results) {

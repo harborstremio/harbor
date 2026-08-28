@@ -404,6 +404,61 @@ const player: Record<string, string> = {
   "Next and Previous behavior": "Comportamento de Próximo e Anterior",
   "Next and Previous follow your queue": "Próximo e Anterior seguem sua fila",
   "Next and Previous follow this show": "Próximo e Anterior seguem esta série",
+  "Subtitle FPS": "FPS da legenda",
+  "Automatic correction": "Correção automática",
+  "Measure this subtitle against speech and correct delay and gradual drift together.":
+    "Compare esta legenda com a fala e corrija em conjunto o atraso e o desvio gradual.",
+  "Detect timing drift": "Detetar desvio de tempo",
+  "Timing analysis active": "Análise de tempo ativa",
+  "Automatic timing correction requires an external text subtitle.":
+    "A correção automática de tempo requer uma legenda de texto externa.",
+  "Manual source FPS": "FPS de origem manual",
+  "Subtitle source FPS": "FPS de origem da legenda",
+  "Choose the frame rate the subtitle was authored for.":
+    "Escolha a taxa de fotogramas para a qual a legenda foi criada.",
+  "No correction (default)": "Sem correção (predefinição)",
+  "Auto (match video)": "Automático (igualar ao vídeo)",
+  "Custom...": "Personalizado...",
+  "Custom subtitle FPS": "FPS personalizado da legenda",
+  "Apply custom subtitle FPS": "Aplicar FPS personalizado da legenda",
+  "Video FPS": "FPS do vídeo",
+  "No correction": "Sem correção",
+  "Couldn't apply subtitle FPS. Try again.":
+    "Não foi possível aplicar o FPS da legenda. Tente novamente.",
+  "Enter an FPS from 1 to 240.": "Introduza uma taxa de FPS entre 1 e 240.",
+  "Select a subtitle track first.": "Selecione primeiro uma faixa de legendas.",
+  "Subtitle FPS is only available with the libmpv player.":
+    "O FPS da legenda só está disponível com o leitor libmpv.",
+  "Subtitle FPS conversion is only available for text-based subtitles.":
+    "A conversão de FPS só está disponível para legendas de texto.",
+  "Subtitle FPS is unavailable while a secondary subtitle is active.":
+    "O FPS da legenda não está disponível enquanto houver uma legenda secundária ativa.",
+  "Video FPS is unavailable.": "O FPS do vídeo não está disponível.",
+  "Subtitle FPS is unavailable in this libmpv runtime.":
+    "O FPS da legenda não está disponível nesta versão do libmpv.",
+  "Turn off Auto Sync before changing subtitle FPS.":
+    "Desative a sincronização automática antes de alterar o FPS da legenda.",
+  "Resize subtitle menu": "Redimensionar menu de legendas",
+  "Drag to resize. Use arrow keys to adjust, or Home to reset.":
+    "Arraste para redimensionar. Use as teclas de seta para ajustar ou Home para repor.",
+  "Drag the corner to resize. Left and right change width; up and down change height; Home resets the size.":
+    "Arraste o canto para redimensionar. Esquerda e direita alteram a largura; cima e baixo alteram a altura; Home repõe o tamanho.",
+  "Couldn't switch subtitles. Try again.": "Não foi possível mudar de legenda. Tente novamente.",
+  "Subtitle details": "Detalhes da legenda",
+  "Open subtitle details": "Abrir detalhes da legenda",
+  Provider: "Fornecedor",
+  Format: "Formato",
+  Quality: "Qualidade",
+  Author: "Autor",
+  Release: "Lançamento",
+  "Not provided": "Não fornecido",
+  "Match estimate": "Estimativa de correspondência",
+  "Match evidence": "Evidência de correspondência",
+  "This is a metadata-based release estimate, not a measured timing score.":
+    "Esta é uma estimativa baseada nos metadados do lançamento, não uma medição da sincronização.",
+  "Couldn't save the synced subtitle. Try again.":
+    "Não foi possível guardar a legenda sincronizada. Tente novamente.",
+  "Saving...": "A guardar...",
 };
 
 export default player;

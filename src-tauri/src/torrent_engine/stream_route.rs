@@ -157,6 +157,17 @@ async fn stream_file(
     let Some(handle) = session.get(id) else {
         return (StatusCode::NOT_FOUND, "no torrent").into_response();
     };
+    // Torrent selection resolves metadata only. Peer transfer starts when a
+    // player or an intentional download actually asks for stream bytes.
+    if handle.is_paused() {
+        if let Err(error) = session.unpause(&handle).await {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("could not start torrent: {error:#}"),
+            )
+                .into_response();
+        }
+    }
     let ct = handle
         .with_metadata(|m| m.file_infos.get(file_id).map(|fi| ct_for(&fi.relative_filename)))
         .ok()
@@ -167,17 +178,19 @@ async fn stream_file(
         Err(e) => return (StatusCode::NOT_FOUND, format!("{e:#}")).into_response(),
     };
     let len = stream.len();
-    let parsed = headers
-        .get(header::RANGE)
-        .and_then(|v| v.to_str().ok())
-        .and_then(parse_range);
+    let requested_range = headers.get(header::RANGE);
+    let parsed = requested_range
+        .and_then(|value| value.to_str().ok())
+        .map(|value| parse_range(value, len));
     let (status, start, end) = match parsed {
-        Some((s, e_opt)) => {
-            let e = e_opt.map(|x| x + 1).unwrap_or(len);
-            if e > len || e <= s {
-                return (StatusCode::RANGE_NOT_SATISFIABLE, "range not satisfiable").into_response();
+        Some(Ok((start, end))) => (StatusCode::PARTIAL_CONTENT, start, end),
+        Some(Err(())) => {
+            let mut response = (StatusCode::RANGE_NOT_SATISFIABLE, "range not satisfiable")
+                .into_response();
+            if let Ok(value) = HeaderValue::from_str(&format!("bytes */{len}")) {
+                response.headers_mut().insert(header::CONTENT_RANGE, value);
             }
-            (StatusCode::PARTIAL_CONTENT, s, e)
+            return response;
         }
         None => (StatusCode::OK, 0u64, len),
     };
@@ -205,15 +218,59 @@ async fn stream_file(
     (status, out, body).into_response()
 }
 
-fn parse_range(raw: &str) -> Option<(u64, Option<u64>)> {
-    let spec = raw.trim().strip_prefix("bytes=")?;
-    let (s, e) = spec.split_once('-')?;
-    let start: u64 = s.trim().parse().ok()?;
-    let end = e.trim();
-    if end.is_empty() {
-        Some((start, None))
-    } else {
-        Some((start, Some(end.parse().ok()?)))
+fn parse_range(raw: &str, len: u64) -> Result<(u64, u64), ()> {
+    let spec = raw.trim().strip_prefix("bytes=").ok_or(())?.trim();
+    if spec.contains(',') || len == 0 {
+        return Err(());
+    }
+    let (start_raw, end_raw) = spec.split_once('-').ok_or(())?;
+    let start_raw = start_raw.trim();
+    let end_raw = end_raw.trim();
+
+    if start_raw.is_empty() {
+        let suffix_len = end_raw.parse::<u64>().map_err(|_| ())?;
+        if suffix_len == 0 {
+            return Err(());
+        }
+        return Ok((len.saturating_sub(suffix_len), len));
+    }
+
+    let start = start_raw.parse::<u64>().map_err(|_| ())?;
+    if start >= len {
+        return Err(());
+    }
+    if end_raw.is_empty() {
+        return Ok((start, len));
+    }
+
+    let inclusive_end = end_raw.parse::<u64>().map_err(|_| ())?;
+    if inclusive_end < start {
+        return Err(());
+    }
+    Ok((start, inclusive_end.saturating_add(1).min(len)))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_range;
+
+    #[test]
+    fn parses_http_byte_ranges_used_by_media_players() {
+        assert_eq!(parse_range("bytes=0-499", 1_000), Ok((0, 500)));
+        assert_eq!(parse_range("bytes=500-", 1_000), Ok((500, 1_000)));
+        assert_eq!(parse_range("bytes=-500", 1_000), Ok((500, 1_000)));
+        assert_eq!(parse_range("bytes=-1500", 1_000), Ok((0, 1_000)));
+        assert_eq!(parse_range("bytes=900-2000", 1_000), Ok((900, 1_000)));
+    }
+
+    #[test]
+    fn rejects_invalid_or_unsatisfiable_http_byte_ranges() {
+        assert_eq!(parse_range("bytes=1000-", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=10-9", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=-0", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=0-1,4-5", 1_000), Err(()));
+        assert_eq!(parse_range("not-a-range", 1_000), Err(()));
+        assert_eq!(parse_range("bytes=0-", 0), Err(()));
     }
 }
 

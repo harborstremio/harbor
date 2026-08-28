@@ -92,9 +92,9 @@ pub fn diagnostics_scrub(text: &str) -> String {
         .user_path
         .replace_all(&step5, |c: &regex::Captures| format!("{}<user>", &c[1]));
     let step7 = r.ip_addr.replace_all(&step6, "<ip>");
-    let step8 = r.path_seg.replace_all(&step7, |c: &regex::Captures| {
-        format!("{}{}", &c[1], REDACTED)
-    });
+    let step8 = r
+        .path_seg
+        .replace_all(&step7, |c: &regex::Captures| format!("{}{}", &c[1], REDACTED));
     let step9 = r.base64_token.replace_all(&step8, REDACTED);
     r.long_token.replace_all(&step9, REDACTED).into_owned()
 }

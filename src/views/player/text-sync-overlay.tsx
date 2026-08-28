@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Loader2, RotateCcw, Scissors, Search, X } from "lucide-react";
 import { findActiveCue } from "@/lib/subtitles/parser";
-import { deltaFn } from "@/lib/subtitles/text-sync";
+import { applyLinear, deltaFn } from "@/lib/subtitles/text-sync";
 import { usePlaybackPosition } from "@/lib/player/playback-clock";
 import { useT } from "@/lib/i18n";
 import type { useTextSync } from "./hooks/use-text-sync";
@@ -22,7 +22,18 @@ export function TextSyncOverlay({
   const position = usePlaybackPosition();
   const [sectionMode, setSectionMode] = useState(false);
   const [query, setQuery] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const cues = api.cues;
+
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+    setSaveError(null);
+    const result = await api.save();
+    if (!result.ok) setSaveError(t("Couldn't save the synced subtitle. Try again."));
+    setSaving(false);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -35,41 +46,48 @@ export function TextSyncOverlay({
     return () => window.removeEventListener("keydown", onKey, true);
   }, [api]);
 
-  const activeIndex = useMemo(() => {
+  const correctedCues = useMemo(() => {
     if (!cues) return null;
-    const cue = findActiveCue(cues, position);
-    return cue ? cues.indexOf(cue) : null;
-  }, [cues, position]);
+    return applyLinear(cues, api.points, api.nudge, api.segments);
+  }, [cues, api.points, api.nudge, api.segments]);
+
+  const activeIndex = useMemo(() => {
+    if (!cues || !correctedCues) return null;
+    const cue = findActiveCue(correctedCues, position);
+    const index = cue ? correctedCues.indexOf(cue) : -1;
+    return index >= 0 ? index : null;
+  }, [cues, correctedCues, position]);
 
   if (api.syncMode === "idle") return null;
 
   const currentDelta = deltaFn(api.points, api.nudge)(position);
 
   const hint = sectionMode
-    ? t("Tap the first and last line of the section, then tap the line playing now and Sync from here.")
+    ? api.rangeStart == null
+      ? t("Tap the first line of the section you want to fix.")
+      : api.rangeEnd == null
+        ? t("Now tap the last line of that section.")
+        : t("Play until you hear a line inside this section, tap it, then choose Align to now.")
     : api.pointCount === 0
-      ? t("Find the line you hear right now, then Sync from here. Everything shifts to match.")
+      ? t("Play until you hear a line. Tap that same line below, then choose Align to now.")
       : api.pointCount === 1
-        ? t("Set. If the subtitles drift later on, play ahead and Sync from here again at a later line to fix the drift.")
-        : t("Drift correction is on (2 points). Fine-tune with the buttons, or fix a stray section.");
+        ? t("Timing is aligned. If it becomes early or late later, repeat this at another line.")
+        : t("Timing and drift are corrected. Check playback, then save.");
 
   return (
     <div className="pointer-events-none absolute inset-0 z-[70]">
       <aside
         role="dialog"
+        aria-modal="true"
         aria-label={t("Sync subtitles")}
         className="pointer-events-auto absolute end-0 top-0 flex h-full w-full max-w-[480px] flex-col overflow-hidden border-s border-edge-soft/70 bg-surface/85 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.85)] backdrop-blur-2xl duration-300 animate-in slide-in-from-right"
       >
         <header className="flex items-center justify-between gap-3 px-6 pb-4 pt-7">
-          <div className="min-w-0">
-            <p className="text-[10.5px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-              {t("Subtitle timing")}
-            </p>
-            <h2 className="mt-1 font-display text-[23px] font-semibold leading-tight text-ink">
-              {sectionMode ? t("Fix one section") : t("Sync to the audio")}
-            </h2>
-          </div>
+          <h2 className="min-w-0 font-display text-[23px] font-semibold leading-tight text-ink">
+            {sectionMode ? t("Fix one section") : t("Live sync")}
+          </h2>
           <button
+            type="button"
             aria-label={t("Close")}
             onClick={api.discard}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-elevated text-ink-muted transition-colors hover:bg-raised hover:text-ink"
@@ -79,16 +97,24 @@ export function TextSyncOverlay({
         </header>
 
         {api.syncMode === "loading" ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 py-20 text-ink-muted">
+          <div
+            role="status"
+            aria-live="polite"
+            className="flex flex-1 flex-col items-center justify-center gap-3 py-20 text-ink-muted"
+          >
             <Loader2 size={26} className="animate-spin" />
             <span className="text-[13.5px]">{t("Reading subtitles...")}</span>
           </div>
         ) : !cues ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 py-20 text-center">
+          <div
+            role="alert"
+            className="flex flex-1 flex-col items-center justify-center gap-4 px-8 py-20 text-center"
+          >
             <span className="text-[14px] leading-relaxed text-ink-muted">
               {t("Could not read this subtitle track. Pick a different subtitle, then try again.")}
             </span>
             <button
+              type="button"
               onClick={api.discard}
               className="rounded-full bg-elevated px-5 py-2.5 text-[13px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
             >
@@ -103,6 +129,7 @@ export function TextSyncOverlay({
               <div className="flex items-center gap-2.5 rounded-2xl bg-elevated px-3.5 ring-1 ring-edge-soft">
                 <Search size={16} className="shrink-0 text-ink-subtle" />
                 <input
+                  autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={t("Search a line by its words")}
@@ -110,6 +137,7 @@ export function TextSyncOverlay({
                 />
                 {query && (
                   <button
+                    type="button"
                     onClick={() => setQuery("")}
                     aria-label={t("Clear search")}
                     className="shrink-0 text-ink-subtle transition-colors hover:text-ink"
@@ -150,6 +178,7 @@ export function TextSyncOverlay({
                 <StepBtn label="+0.1" onClick={() => api.nudgeBy(0.1)} />
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setSectionMode((v) => !v);
                   api.clearRange();
@@ -161,12 +190,13 @@ export function TextSyncOverlay({
                 }`}
               >
                 <Scissors size={15} />
-                {t("Fix a section")}
+                {t("Fix one section")}
               </button>
             </div>
 
             {api.dirty && (
               <button
+                type="button"
                 onClick={api.reset}
                 className="flex items-center gap-1.5 border-t border-edge-soft/50 px-6 py-2.5 text-[12.5px] font-medium text-ink-subtle transition-colors hover:text-ink"
               >
@@ -177,20 +207,35 @@ export function TextSyncOverlay({
               </button>
             )}
 
+            {saveError && (
+              <p
+                role="alert"
+                className="border-t border-edge-soft/50 px-6 py-2.5 text-[12.5px] text-red-300"
+              >
+                {saveError}
+              </p>
+            )}
+
             <footer className="flex items-center gap-2.5 border-t border-edge-soft/60 px-5 py-4">
               <button
+                type="button"
                 onClick={onPlayPause}
                 className="flex h-12 flex-1 items-center justify-center rounded-2xl bg-elevated text-[14px] font-semibold text-ink ring-1 ring-edge-soft transition-colors hover:bg-raised"
               >
                 {playing ? t("Pause") : t("Play")}
               </button>
               <button
-                onClick={() => void api.save()}
-                disabled={!api.dirty}
+                type="button"
+                onClick={() => void handleSave()}
+                disabled={!api.dirty || saving}
                 className="flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-accent px-4 text-[14px] font-semibold text-canvas transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
               >
-                <Check size={16} strokeWidth={2.6} />
-                {t("Save")}
+                {saving ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Check size={16} strokeWidth={2.6} />
+                )}
+                {saving ? t("Saving...") : t("Save")}
               </button>
             </footer>
           </>
@@ -203,6 +248,7 @@ export function TextSyncOverlay({
 function StepBtn({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="flex h-11 w-12 items-center justify-center rounded-xl bg-elevated text-[14px] font-semibold tabular-nums text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink active:scale-95"
     >

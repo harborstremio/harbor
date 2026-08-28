@@ -20,6 +20,8 @@ const appFill: Record<string, string> = {
   "Downloading speech model {pct}%": "جارٍ تنزيل نموذج الكلام {pct}%",
   "Downloading speech model": "جارٍ تنزيل نموذج الكلام",
   "Subtitles synced": "تمت مزامنة الترجمة",
+  "Subtitles already aligned": "الترجمة متزامنة بالفعل",
+  "Not enough dialogue to sync": "لا يوجد حوار كافٍ للمزامنة",
   "Subtitles may be off": "قد تكون الترجمة غير متزامنة",
   "Different subtitle version": "نسخة ترجمة مختلفة",
   "Couldn't auto-sync": "تعذّرت المزامنة التلقائية",
@@ -29,6 +31,25 @@ const appFill: Record<string, string> = {
   Undo: "تراجع",
   "Adjusted timing by": "تم ضبط التوقيت بمقدار",
   "Timing looks aligned": "يبدو التوقيت متوافقًا",
+  "Variable timing corrected": "تم تصحيح التوقيت المتغيّر",
+  Delay: "التأخير",
+  "Timing rate": "معدل التوقيت",
+  "No timing change was needed. This subtitle already matches the audio.":
+    "لم يلزم تغيير التوقيت. هذه الترجمة متوافقة مع الصوت بالفعل.",
+  "Harbor couldn't analyze the audio for this source. Try again or adjust it manually.":
+    "تعذّر على Harbor تحليل صوت هذا المصدر. حاول مجددًا أو اضبطه يدويًا.",
+  "There isn't enough readable dialogue in this subtitle to measure its timing.":
+    "لا يوجد حوار مقروء كافٍ في هذه الترجمة لقياس توقيتها.",
+  "This subtitle appears to be for a different cut. Try another match.":
+    "يبدو أن هذه الترجمة تخص نسخة مختلفة. جرّب تطابقًا آخر.",
+  "The timing checks disagreed, so Harbor left the subtitle unchanged.":
+    "اختلفت نتائج فحوص التوقيت، لذلك ترك Harbor الترجمة دون تغيير.",
+  "The timing difference was too large to correct safely. Try another subtitle.":
+    "كان فرق التوقيت كبيرًا جدًا لتصحيحه بأمان. جرّب ترجمة أخرى.",
+  "There wasn't enough matching dialogue to make a safe correction.":
+    "لم يوجد حوار متطابق كافٍ لإجراء تصحيح آمن.",
+  "Harbor couldn't find a reliable timing correction for this subtitle.":
+    "لم يتمكن Harbor من إيجاد تصحيح توقيت موثوق لهذه الترجمة.",
   "Looks right": "يبدو صحيحًا",
   "Still off": "لا يزال غير متزامن",
   "This subtitle looks like a different version of the video.":
@@ -140,7 +161,7 @@ const appFill: Record<string, string> = {
   "Use it": "استخدامها",
   "Searching…": "جارٍ البحث…",
   "Not the one? Search every source again": "ليست المطلوبة؟ ابحث في كل المصادر مجددًا",
-  "Appearance": "المظهر",
+  Appearance: "المظهر",
   "Manual offset": "إزاحة يدوية",
   "Sync is unavailable right now.": "المزامنة غير متاحة حالياً.",
   "Couldn't line up these subtitles automatically.": "تعذّرت مزامنة هذه الترجمة تلقائياً.",
@@ -689,6 +710,7 @@ const appFill: Record<string, string> = {
   Characters: "الشخصيات",
   "Characters · {n}": "الشخصيات · {n}",
   "Related Anime": "أنمي ذو صلة",
+  "Sequels & Prequels": "الأجزاء اللاحقة والسابقة",
   Adaptations: "الاقتباسات",
   Awards: "الجوائز",
   "Awards & Recognition": "الجوائز والتقدير",
@@ -1243,48 +1265,53 @@ const appFill: Record<string, string> = {
   "Turn this off to take Cinemeta out entirely and use only your own metadata addons, such as AIOMetadata or AIOStreams. Cinemeta can go stale and show already released episodes as TBA. Leave it on unless you have a metadata addon installed, or titles will have no details.":
     "عطّل هذا لإزالة Cinemeta تمامًا واستخدام إضافات البيانات الخاصة بك فقط، مثل AIOMetadata أو AIOStreams. قد تصبح بيانات Cinemeta قديمة وتعرض حلقات صدرت بالفعل على أنها قريبًا. اتركه مفعّلًا ما لم تكن لديك إضافة بيانات مثبتة، وإلا فلن تظهر تفاصيل العناوين.",
   "Join Harbor": "انضم Harbor",
-  "One free account for your handle, themes, and sync.": "حساب مجاني واحد لاسم المستخدم، والسمات، والمزامنة.",
+  "One free account for your handle, themes, and sync.":
+    "حساب مجاني واحد لاسم المستخدم، والسمات، والمزامنة.",
   "Sign in to pick up where you left off.": "سجّل الدخول لاستكمال ما بدأته.",
   "At least 8 characters": "8 حروف على الاقل",
   "Your password": "كلمة المرور الخاصة بك",
-  "yourname": "الاسم الخاص بك",
+  yourname: "الاسم الخاص بك",
   "Forgot password ?": "هل نسيت كلمة المرور؟",
   "We'll show a one-time recovery key right after you sign up. Save it: it's the only way back in if you forget your password.":
-  "سنعرض لك مفتاح استعادة لمرة واحدة فور تسجيلك. احفظه: فهو السبيل الوحيد لاستعادة حسابك في حال نسيان كلمة المرور.",
+    "سنعرض لك مفتاح استعادة لمرة واحدة فور تسجيلك. احفظه: فهو السبيل الوحيد لاستعادة حسابك في حال نسيان كلمة المرور.",
   "Reset your password": "استعادة كلمة المرور الخاصة بك",
-  "Enter your username and the recovery key you saved. We'll set a new password and sign you in.": 
-  "أدخل اسم المستخدم ومفتاح الاسترداد الذي قمت بحفظه. سنقوم بتعيين كلمة مرور جديدة وتسجيل دخولك.",
+  "Enter your username and the recovery key you saved. We'll set a new password and sign you in.":
+    "أدخل اسم المستخدم ومفتاح الاسترداد الذي قمت بحفظه. سنقوم بتعيين كلمة مرور جديدة وتسجيل دخولك.",
   "New password": "كلمة مرور جديدة",
-  "The 20-character key from when you created your account. Paste it or type each block.": 
-  "أدخل المفتاح المكوَّن من 20 حرفًا الذي تم تزويدك به عند إنشاء حسابك، وذلك بلصقه أو بكتابة كل جزء منه.",
+  "The 20-character key from when you created your account. Paste it or type each block.":
+    "أدخل المفتاح المكوَّن من 20 حرفًا الذي تم تزويدك به عند إنشاء حسابك، وذلك بلصقه أو بكتابة كل جزء منه.",
   "Recovery key": "مفتاح الاسترداد",
-  "Paste": "الصق",
+  Paste: "الصق",
   "Signed in as {username}": "تم تسجيل الدخول ك{username}",
   "Signed in to your Harbor account": "تم تسجيل الدخول لحسابك في Harbor",
   "Claim your @handle": "احجز @المعرّف",
   "A name people can find you by across Harbor.": "اسم يمكن للآخرين العثور عليك به عبر Harbor.",
   "Sync everywhere": "مزامنة في كل مكان",
-  "Your themes, lists, and profile follow you to any device.": "تتم مزامنة السمات والقوائم وملفك الشخصي على جميع أجهزتك.",
+  "Your themes, lists, and profile follow you to any device.":
+    "تتم مزامنة السمات والقوائم وملفك الشخصي على جميع أجهزتك.",
   "Show off your taste": "اعرض ذوقك",
-  "A public profile with your stats, lists, badges, and custom styling.": "ملف شخصي عام يعرض إحصاءاتك وقوائمك وشاراتك وتخصيصاتك.",
+  "A public profile with your stats, lists, badges, and custom styling.":
+    "ملف شخصي عام يعرض إحصاءاتك وقوائمك وشاراتك وتخصيصاتك.",
   "Change your handle?": "تغيير المعرّف؟",
   "You are changing": "أنت تغيّر",
-  "to": "إلى",
-  "You will not be able to change it again for 14 days, and your old handle may be taken by someone else.": "لن تتمكن من تغييره مرة أخرى لمدة 14 يومًا، وقد يصبح معرّفك القديم متاحًا لشخص آخر.",
-  "Keep": "الاحتفاظ بـ",
+  to: "إلى",
+  "You will not be able to change it again for 14 days, and your old handle may be taken by someone else.":
+    "لن تتمكن من تغييره مرة أخرى لمدة 14 يومًا، وقد يصبح معرّفك القديم متاحًا لشخص آخر.",
+  Keep: "الاحتفاظ بـ",
   "Change handle": "تغيير المعرّف",
   "once every 14 days": "مرة كل 14 يومًا",
-  "soon": "قريبًا",
+  soon: "قريبًا",
   "Locked until": "مقفل حتى",
   "You can change your handle": "يمكنك تغيير المعرّف",
-  "yourhandle": "المعرف",
-  "Change": "تغيير",
-  "Claim": "حجز",
+  yourhandle: "المعرف",
+  Change: "تغيير",
+  Claim: "حجز",
   "so pick one you'll keep.": "لذا اختر معرفًا ستحتفظ به.",
   "after you claim it.": "بعد حجزه.",
-  "Handle": "المعرّف",
+  Handle: "المعرّف",
   "How people find you across Harbor.": "هكذا يعثر عليك الآخرون عبر Harbor.",
-  "Claim one so people can find you across Harbor.": "احجز معرفًا ليتمكن الآخرون من العثور عليك عبر Harbor.",
+  "Claim one so people can find you across Harbor.":
+    "احجز معرفًا ليتمكن الآخرون من العثور عليك عبر Harbor.",
   "Checking availability": "جارٍ التحقق من التوفر",
   "That handle is yours to claim.": "هذا المعرّف متاح للحجز.",
   "Sign in to Harbor to check availability.": "سجل الدخول إلى Harbor للتحقق من توفر المعرّف.",
@@ -1293,17 +1320,18 @@ const appFill: Record<string, string> = {
   "That handle is not valid.": "هذا المعرّف غير صالح.",
   "Ownership verified": "تم التحقق من الملكية",
   "Linked to a real Stremio account.": "مرتبط بحساب Stremio حقيقي.",
-  "Verified": "موثّق",
+  Verified: "موثّق",
   "Verify ownership": "التحقق من الملكية",
   "Confirm you own this Stremio account ({{email}}).": "أكد أنك تملك حساب Stremio هذا ({{email}}).",
   "Confirm you own your Stremio account.": "أكد أنك تملك حساب Stremio الخاص بك.",
   "Prove you own a real Stremio account.": "أثبت أنك تملك حساب Stremio حقيقيًا.",
   "Verifying...": "جارٍ التحقق...",
   "Verify with Stremio": "التحقق عبر Stremio",
-  "Open Harbor on desktop to verify ownership in your browser.": "افتح Harbor على سطح المكتب للتحقق من الملكية عبر المتصفح.",
+  "Open Harbor on desktop to verify ownership in your browser.":
+    "افتح Harbor على سطح المكتب للتحقق من الملكية عبر المتصفح.",
   "Use a different Stremio account": "استخدام حساب Stremio آخر",
-  "Opens Stremio in your browser. Works with email, Facebook, and Apple. Harbor never sees your password.": 
-  "يفتح Stremio في متصفحك. يدعم تسجيل الدخول بالبريد الإلكتروني وFacebook وApple. لا يرى Harbor كلمة مرورك أبدًا."
+  "Opens Stremio in your browser. Works with email, Facebook, and Apple. Harbor never sees your password.":
+    "يفتح Stremio في متصفحك. يدعم تسجيل الدخول بالبريد الإلكتروني وFacebook وApple. لا يرى Harbor كلمة مرورك أبدًا.",
 };
 
 export default appFill;

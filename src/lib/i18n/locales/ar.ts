@@ -1,4 +1,5 @@
 import coverage from "./ar/coverage";
+import uiFallback from "./ui-fallback";
 import addons from "./ar/addons";
 import awards from "./ar/awards";
 import catalog from "./ar/catalog";
@@ -28,6 +29,7 @@ import used from "./ar/used";
 
 const ar: Record<string, string> = {
   ...coverage,
+  ...uiFallback,
   ...chrome,
   ...common,
   ...catalog,

@@ -173,6 +173,7 @@ export type Settings = {
   keepFullscreenOnExit: boolean;
   fullscreenRestorePosition: boolean;
   contentAdvisoryToast: boolean;
+  contentAdvisoryTheme: "colored" | "monochrome";
   playerVolumeHud: boolean;
   playerVolumeHudPosition: "center" | "top" | "top-left" | "top-right";
   customPlaybackSpeeds: number[];
@@ -238,8 +239,10 @@ export type Settings = {
   playerShellId: string;
   playerChromeTheme: "auto" | "default" | "stremio";
   playerMenuBlack: boolean;
+  playerScreenLockEnabled: boolean;
   seekPreviewEnabled: boolean;
   instantPlay: boolean;
+  instantPlaybackPreparation: boolean;
   autoNextStreamOnStall: boolean;
   autoNextStreamOnStallSec: number;
   fullscreenMode: "fullscreen" | "maximized";
@@ -294,7 +297,13 @@ export type Settings = {
   subStyle: "shadow" | "outline" | "box";
   subFontFamily: string;
   subBold: boolean;
-  customFonts: Array<{ id: string; name: string; format: string; family?: string; dataUrl?: string }>;
+  customFonts: Array<{
+    id: string;
+    name: string;
+    format: string;
+    family?: string;
+    dataUrl?: string;
+  }>;
   subBoxOpacity: number;
   subBoxColor: string;
   subOpacity: number;
@@ -577,18 +586,6 @@ export type Settings = {
   downloadDir: string;
   downloadCreateFolders: boolean;
   stremioDeeplinkInstall: boolean;
-  iptvPlaylists: Array<{
-    id: string;
-    name: string;
-    url: string;
-    epgUrl?: string;
-    kind?: "m3u" | "xtream" | "epg";
-    xtream?: {
-      server: string;
-      username: string;
-      password: string;
-    };
-  }>;
   iptvLiveContainer: "ts" | "m3u8";
   iptvForceProxy: boolean;
   iptvEpgOffsetHours: number;

@@ -5,7 +5,7 @@ import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input"
 import type { EpisodeHint } from "@/lib/streams/episode-file";
 import { runPipeline } from "@/lib/streams/pipeline";
 import { resolveStream } from "@/lib/streams/resolve";
-import { buildStreamIds } from "@/lib/streams/stream-ids";
+import { buildStreamIdsWithIdentity } from "@/lib/streams/anime-identity";
 import type { Resolution, ScoredStream } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
 import { readSettings } from "./context";
@@ -62,7 +62,7 @@ export async function resolveBestDownload(
   opts: ResolveOptions,
 ): Promise<DownloadPick | null> {
   const imdbId = meta.id.startsWith("tt") ? meta.id : null;
-  const streamIds = buildStreamIds(meta.id, episode, imdbId);
+  const streamIds = await buildStreamIdsWithIdentity(meta.id, episode, imdbId);
   if (streamIds.length === 0) return null;
 
   const input = buildEpisodePipelineInput({
@@ -87,8 +87,18 @@ export async function resolveBestDownload(
   const cached = candidates.filter((s) => isCached(s, opts.debrids)).slice(0, MAX_CACHED_TRIES);
   for (const pick of cached) {
     if (opts.signal.aborted) return null;
-    const r = await resolveStream(pick, opts.debrids, opts.signal, false, false, hint, false);
-    if (r.ok && r.data.url) return { url: r.data.url, headers: r.data.headers, label: labelFor(pick) };
+    const r = await resolveStream(
+      pick,
+      opts.debrids,
+      opts.signal,
+      false,
+      false,
+      hint,
+      false,
+      false,
+    );
+    if (r.ok && r.data.url)
+      return { url: r.data.url, headers: r.data.headers, label: labelFor(pick) };
   }
 
   if (!opts.allowP2p) return null;
@@ -98,8 +108,9 @@ export async function resolveBestDownload(
     .slice(0, MAX_P2P_TRIES);
   for (const pick of p2p) {
     if (opts.signal.aborted) return null;
-    const r = await resolveStream(pick, opts.debrids, opts.signal, true, false, hint);
-    if (r.ok && r.data.url) return { url: r.data.url, headers: r.data.headers, label: labelFor(pick) };
+    const r = await resolveStream(pick, opts.debrids, opts.signal, true, false, hint, true, false);
+    if (r.ok && r.data.url)
+      return { url: r.data.url, headers: r.data.headers, label: labelFor(pick) };
   }
   return null;
 }

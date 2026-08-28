@@ -52,6 +52,7 @@ pub struct MpvStartArgs {
     pub mac_edr: Option<bool>,
     pub is_live: Option<bool>,
     pub full_download: Option<bool>,
+    pub startup_profile: Option<String>,
     pub headers: Option<HashMap<String, String>>,
     pub extra_options: Option<String>,
 }
@@ -196,6 +197,7 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     ("demuxer-cache-duration", 17, PropertyKind::Double),
     ("paused-for-cache", 18, PropertyKind::Flag),
     ("secondary-sub-text", 19, PropertyKind::String),
+    ("path", 20, PropertyKind::String),
 ];
 
 #[derive(Clone, Copy)]
@@ -552,6 +554,20 @@ fn network_timeout_for(url: &str) -> &'static str {
     }
 }
 
+fn source_kind(url: &str) -> &'static str {
+    if is_local_network_url(url) {
+        "local-http"
+    } else if url.starts_with("https://") {
+        "https"
+    } else if url.starts_with("http://") {
+        "http"
+    } else if url.starts_with("file://") || !url.contains("://") {
+        "local-file"
+    } else {
+        "other"
+    }
+}
+
 #[tauri::command]
 pub async fn mpv_start(
     app: AppHandle,
@@ -596,8 +612,10 @@ pub async fn mpv_start(
         None
     };
     eprintln!(
-        "[harbor::mpv] start url={} want_embed={} embed_hwnd={:?}",
-        args.url, want_embed, embed_hwnd
+        "[harbor::mpv] start source_kind={} want_embed={} embed_hwnd={:?}",
+        source_kind(&args.url),
+        want_embed,
+        embed_hwnd
     );
     let embed_hwnd_for_init = embed_hwnd.clone();
     let args_for_init = args.clone();
@@ -749,25 +767,59 @@ pub async fn mpv_start(
         let _ = mpv.set_property("stream-buffer-size", "1MiB");
     } else {
         let full_dl = args.full_download.unwrap_or(false);
+        let high_bitrate = args.startup_profile.as_deref() == Some("high-bitrate");
         let _ = mpv.set_property("cache", "yes");
-        let _ = mpv.set_property("cache-secs", if full_dl { "100000" } else { "180" });
+        let _ = mpv.set_property(
+            "cache-secs",
+            if full_dl {
+                "100000"
+            } else if high_bitrate {
+                "45"
+            } else {
+                "30"
+            },
+        );
         let _ = mpv.set_property("cache-pause", "yes");
-        // Normal streams start immediately. Explicit full-download mode keeps
-        // its requested initial reserve; after any later network underrun,
-        // cache-pause-wait prevents repeated micro-stalls.
-        let _ = mpv.set_property("cache-pause-initial", if full_dl { "yes" } else { "no" });
-        let _ = mpv.set_property("cache-pause-wait", if full_dl { "10" } else { "2" });
+        let _ = mpv.set_property("cache-pause-initial", "no");
+        let _ = mpv.set_property(
+            "cache-pause-wait",
+            if full_dl {
+                "10"
+            } else if high_bitrate {
+                "2"
+            } else {
+                "1"
+            },
+        );
         let _ = mpv.set_property(
             "demuxer-max-bytes",
-            if full_dl { "48GiB" } else { "256MiB" },
+            if full_dl {
+                "48GiB"
+            } else if high_bitrate {
+                "256MiB"
+            } else {
+                "128MiB"
+            },
         );
         let _ = mpv.set_property(
             "demuxer-max-back-bytes",
-            if full_dl { "48GiB" } else { "32MiB" },
+            if full_dl {
+                "48GiB"
+            } else if high_bitrate {
+                "64MiB"
+            } else {
+                "32MiB"
+            },
         );
         let _ = mpv.set_property(
             "demuxer-readahead-secs",
-            if full_dl { "100000" } else { "180" },
+            if full_dl {
+                "100000"
+            } else if high_bitrate {
+                "45"
+            } else {
+                "30"
+            },
         );
         let _ = mpv.set_property("network-timeout", network_timeout_for(&args.url));
         let reconnect_opts = "reconnect=1,reconnect_streamed=1,reconnect_on_network_error=1,reconnect_on_http_error=429,reconnect_delay_max=10,reconnect_delay_total_max=60";
@@ -780,6 +832,10 @@ pub async fn mpv_start(
         // were loaded; the demuxer cache above is the correct readahead layer.
         let _ = mpv.set_property("stream-buffer-size", "4MiB");
     }
+    // mpv may auto-select an embedded subtitle as soon as loadfile runs. Keep
+    // both subtitle slots empty until Harbor applies the user's language choice.
+    let _ = mpv.set_property("sid", "no");
+    let _ = mpv.set_property("secondary-sid", "no");
     if want_embed {
         let _ = mpv.set_property("sub-visibility", "no");
         let _ = mpv.set_property("secondary-sub-visibility", "no");
@@ -834,18 +890,22 @@ pub async fn mpv_start(
         app.clone(),
         mpv_arc.clone(),
         event_ctx,
+        want_embed,
         args.mac_edr.unwrap_or(false),
     );
 
-    eprintln!("[harbor::mpv] loadfile {}", args.url);
-    if let Err(e) = mpv_argv_command(&*mpv_arc, &["loadfile", &args.url, "replace"]) {
+    eprintln!(
+        "[harbor::mpv] loadfile source_kind={}",
+        source_kind(&args.url)
+    );
+    mpv_argv_command(&*mpv_arc, &["loadfile", &args.url, "replace"]).map_err(|e| {
         eprintln!("[harbor::mpv] loadfile FAILED: {}", e);
         // The event loop already owns a clone while startup is in progress.
         // Explicitly quit here so a rejected initial URL cannot leave an
         // untracked libmpv instance alive in the background.
         let _ = mpv_arc.command("quit", &[]);
-        return Err(format!("loadfile: {}", e));
-    }
+        format!("loadfile: {}", e)
+    })?;
     eprintln!("[harbor::mpv] loadfile OK");
 
     *g = Some(MpvSession {
@@ -861,6 +921,13 @@ pub async fn mpv_start(
     #[cfg(not(windows))]
     let _ = embed_hwnd;
     Ok(())
+}
+
+#[cfg(windows)]
+fn reassert_hdr_colorspace(mpv: &Arc<Mpv>) {
+    let _ = mpv.set_property("target-peak", "10000");
+    std::thread::sleep(Duration::from_millis(60));
+    let _ = mpv.set_property("target-peak", "auto");
 }
 
 #[cfg(target_os = "macos")]
@@ -910,9 +977,19 @@ fn record_event_poll_success(backoff: &mut EventErrorBackoff) {
     backoff.reset();
 }
 
-fn spawn_event_loop(app: AppHandle, mpv_keepalive: Arc<Mpv>, mut ctx: EventContext, mac_edr: bool) {
+fn spawn_event_loop(
+    app: AppHandle,
+    mpv_keepalive: Arc<Mpv>,
+    mut ctx: EventContext,
+    embedded: bool,
+    mac_edr: bool,
+) {
     std::thread::spawn(move || {
         let mut last_timepos: Option<std::time::Instant> = None;
+        #[cfg(windows)]
+        let reassert_gen = Arc::new(std::sync::atomic::AtomicU64::new(0));
+        #[cfg(not(windows))]
+        let _ = embedded;
         #[cfg(not(target_os = "macos"))]
         let _ = mac_edr;
         let mut error_backoff = EventErrorBackoff::default();
@@ -937,6 +1014,41 @@ fn spawn_event_loop(app: AppHandle, mpv_keepalive: Arc<Mpv>, mut ctx: EventConte
                                 }
                             }
                             last_timepos = Some(now);
+                        }
+                    }
+                    #[cfg(windows)]
+                    if embedded {
+                        if let Event::PropertyChange { name, .. } = &event {
+                            if *name == "video-params/gamma" {
+                                let generation = reassert_gen
+                                    .fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+                                    + 1;
+                                let generation_ref = reassert_gen.clone();
+                                let mpv2 = mpv_keepalive.clone();
+                                let app3 = app.clone();
+                                std::thread::spawn(move || {
+                                    std::thread::sleep(Duration::from_millis(250));
+                                    if generation_ref.load(std::sync::atomic::Ordering::Relaxed)
+                                        != generation
+                                    {
+                                        return;
+                                    }
+                                    let gamma = mpv2
+                                        .get_property::<String>("video-params/gamma")
+                                        .unwrap_or_default();
+                                    if gamma != "pq" && gamma != "hlg" {
+                                        return;
+                                    }
+                                    let hdr = app3
+                                        .get_webview_window("main")
+                                        .and_then(|w| w.hwnd().ok())
+                                        .map(|h| monitor_hdr_active(h.0 as isize))
+                                        .unwrap_or(false);
+                                    if hdr {
+                                        reassert_hdr_colorspace(&mpv2);
+                                    }
+                                });
+                            }
                         }
                     }
                     #[cfg(target_os = "macos")]
@@ -1961,7 +2073,9 @@ pub async fn mpv_screenshot_data_url(state: State<'_, MpvState>) -> Result<Strin
     let path_str = temp.to_string_lossy().to_string();
     let _ = mpv.set_property("screenshot-format", "jpg");
     let _ = mpv.set_property("screenshot-jpeg-quality", "72");
-    let _ = mpv.set_property("screenshot-sw", "no");
+    // X-Ray samples frequently. Software screenshots avoid reinitializing the
+    // live video renderer for every sample, which can retain large 4K surfaces.
+    let _ = mpv.set_property("screenshot-sw", "yes");
     mpv_argv_command(&mpv, &["screenshot-to-file", path_str.as_str(), "video"])
         .map_err(|e| format!("screenshot-to-file: {}", e))?;
     let mut waited = 0u64;
@@ -2426,6 +2540,58 @@ pub async fn mpv_stop(app: AppHandle, state: State<'_, MpvState>) -> Result<(), 
     Ok(())
 }
 
+#[tauri::command]
+pub async fn mpv_release_media(app: AppHandle, state: State<'_, MpvState>) -> Result<bool, String> {
+    #[cfg(windows)]
+    {
+        let (mpv, embedded) = {
+            let g = state.inner.lock().await;
+            let Some(session) = g.as_ref() else {
+                return Ok(false);
+            };
+            (session.mpv.clone(), session.embedded)
+        };
+        if !embedded {
+            return Ok(false);
+        }
+        mpv.command("stop", &[])
+            .map_err(|e| format!("stop retained mpv media: {e}"))?;
+        set_embedded_mpv_children_visible(&app, false)?;
+        return Ok(true);
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = app;
+        let _ = state;
+        Ok(false)
+    }
+}
+
+#[tauri::command]
+pub async fn mpv_restore_media_surface(
+    app: AppHandle,
+    state: State<'_, MpvState>,
+) -> Result<bool, String> {
+    #[cfg(windows)]
+    {
+        let embedded = {
+            let g = state.inner.lock().await;
+            g.as_ref().is_some_and(|session| session.embedded)
+        };
+        if !embedded {
+            return Ok(false);
+        }
+        set_embedded_mpv_children_visible(&app, true)?;
+        return Ok(true);
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = app;
+        let _ = state;
+        Ok(false)
+    }
+}
+
 #[cfg(windows)]
 fn get_main_hwnd_str(app: &AppHandle) -> Option<String> {
     let window = app.get_webview_window("main")?;
@@ -2502,6 +2668,56 @@ static MPV_POS_LAST_RECT: std::sync::Mutex<Option<(isize, i32, i32, u32, u32)>> 
 
 #[cfg(windows)]
 static MPV_HDR_STAGE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+#[cfg(windows)]
+fn set_embedded_mpv_children_visible(app: &AppHandle, visible: bool) -> Result<(), String> {
+    use windows::core::BOOL;
+    use windows::Win32::Foundation::{HWND, LPARAM};
+    use windows::Win32::UI::WindowsAndMessaging::{
+        EnumChildWindows, GetClassNameW, GetWindowTextW, SetWindowPos, HWND_BOTTOM, SWP_HIDEWINDOW,
+        SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW,
+    };
+
+    let window = app
+        .get_webview_window("main")
+        .ok_or_else(|| "main window missing".to_string())?;
+    let parent_hwnd = window.hwnd().map_err(|e| format!("hwnd: {e}"))?;
+    let mut children: Vec<isize> = Vec::new();
+    let children_ptr = &mut children as *mut Vec<isize>;
+
+    unsafe extern "system" fn enum_proc(hwnd: HWND, lparam: LPARAM) -> BOOL {
+        let mut class_buf = [0u16; 256];
+        let class_len = GetClassNameW(hwnd, &mut class_buf);
+        let class_name = String::from_utf16_lossy(&class_buf[..class_len as usize]);
+        let mut title_buf = [0u16; 256];
+        let title_len = GetWindowTextW(hwnd, &mut title_buf);
+        let title = String::from_utf16_lossy(&title_buf[..title_len as usize]);
+        let is_mpv = class_name == "mpv"
+            || class_name.starts_with("mpv ")
+            || (class_name.is_empty() && title.starts_with("Harbor"));
+        if is_mpv {
+            (*(lparam.0 as *mut Vec<isize>)).push(hwnd.0 as isize);
+        }
+        BOOL(1)
+    }
+
+    unsafe {
+        let _ = EnumChildWindows(
+            Some(parent_hwnd),
+            Some(enum_proc),
+            LPARAM(children_ptr as isize),
+        );
+        let flags = if visible {
+            SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW
+        } else {
+            SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_HIDEWINDOW
+        };
+        for child in children {
+            let _ = SetWindowPos(HWND(child as *mut _), Some(HWND_BOTTOM), 0, 0, 0, 0, flags);
+        }
+    }
+    Ok(())
+}
 
 #[cfg(windows)]
 fn position_embedded_mpv_child(app: &AppHandle, css: MpvGeometry) -> Result<(), String> {

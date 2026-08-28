@@ -1,162 +1,238 @@
 const settingsFill: Record<string, string> = {
-  "Your avatar, name, and handle across Harbor.": "صورتك الرمزية واسمك ومُعرِّفك في جميع أنحاء Harbor.",
-  "Adds an \"Ask AI\" button to search, so you can type things like a plain-language request.": "يضيف زر \"اسأل الذكاء الاصطناعي\" إلى البحث، لتكتب طلبك بلغة بسيطة ومباشرة.",
+  "Your avatar, name, and handle across Harbor.":
+    "صورتك الرمزية واسمك ومُعرِّفك في جميع أنحاء Harbor.",
+  'Adds an "Ask AI" button to search, so you can type things like a plain-language request.':
+    'يضيف زر "اسأل الذكاء الاصطناعي" إلى البحث، لتكتب طلبك بلغة بسيطة ومباشرة.',
   "Get a key at": "احصل على مفتاح من",
-  "It only runs when you tap that button, so it never costs anything unless you ask.": "لا يعمل إلا عند الضغط على ذلك الزر، لذا لن يكلّفك شيئًا أبدًا ما لم تطلب ذلك.",
-  "Groq runs open-source models on its LPU hardware with a generous free tier; every model listed below runs on the free tier.": "يشغّل Groq نماذج مفتوحة المصدر على عتاد LPU الخاص به مع باقة مجانية سخية؛ وكل النماذج المُدرَجة أدناه تعمل ضمن الباقة المجانية.",
+  "It only runs when you tap that button, so it never costs anything unless you ask.":
+    "لا يعمل إلا عند الضغط على ذلك الزر، لذا لن يكلّفك شيئًا أبدًا ما لم تطلب ذلك.",
+  "Groq runs open-source models on its LPU hardware with a generous free tier; every model listed below runs on the free tier.":
+    "يشغّل Groq نماذج مفتوحة المصدر على عتاد LPU الخاص به مع باقة مجانية سخية؛ وكل النماذج المُدرَجة أدناه تعمل ضمن الباقة المجانية.",
   "Custom model id (optional)": "معرّف نموذج مخصّص (اختياري)",
   "Use model": "استخدام النموذج",
-  "Any model id from console.groq.com/docs/models works here.": "أي معرّف نموذج من console.groq.com/docs/models يعمل هنا.",
-  "Any model id from openrouter.ai/models works here, including :free variants.": "أي معرّف نموذج من openrouter.ai/models يعمل هنا، بما في ذلك متغيّرات :free.",
-  ". Works without a key at low volume; add a key for higher quotas.": ". يعمل دون مفتاح عند الاستخدام المنخفض؛ أضِف مفتاحًا للحصول على حصص أعلى.",
-  "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \"Visual C++ Redistributable (x64)\" from Microsoft, then reopen Harbor.": "ملفات SVP موجودة هنا لكن يتعذّر تحميل محرّك VapourSynth الخاص به ({err}). يعني هذا عادةً وجود إدخال قديم لـ VapourSynth أو فقدان وقت تشغيل Microsoft VC++. أعِد تثبيت SVP، أو ثبّت أحدث إصدار من \"Visual C++ Redistributable (x64)\" من Microsoft، ثم أعِد فتح Harbor.",
-  "Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.": "تعمل الحركة السلسة على محرّك mpv المُضمَّن في تطبيق Harbor لسطح المكتب. ولا تأثير لها في المتصفّح.",
+  "Any model id from console.groq.com/docs/models works here.":
+    "أي معرّف نموذج من console.groq.com/docs/models يعمل هنا.",
+  "Any model id from openrouter.ai/models works here, including :free variants.":
+    "أي معرّف نموذج من openrouter.ai/models يعمل هنا، بما في ذلك متغيّرات :free.",
+  ". Works without a key at low volume; add a key for higher quotas.":
+    ". يعمل دون مفتاح عند الاستخدام المنخفض؛ أضِف مفتاحًا للحصول على حصص أعلى.",
+  "SVP's files are here but its VapourSynth engine won't load ({err}). This usually means a stale VapourSynth entry or a missing Microsoft VC++ runtime. Reinstall SVP, or install the latest \"Visual C++ Redistributable (x64)\" from Microsoft, then reopen Harbor.":
+    'ملفات SVP موجودة هنا لكن يتعذّر تحميل محرّك VapourSynth الخاص به ({err}). يعني هذا عادةً وجود إدخال قديم لـ VapourSynth أو فقدان وقت تشغيل Microsoft VC++. أعِد تثبيت SVP، أو ثبّت أحدث إصدار من "Visual C++ Redistributable (x64)" من Microsoft، ثم أعِد فتح Harbor.',
+  "Smooth motion runs on the bundled mpv engine in the Harbor desktop app. It has no effect in the browser.":
+    "تعمل الحركة السلسة على محرّك mpv المُضمَّن في تطبيق Harbor لسطح المكتب. ولا تأثير لها في المتصفّح.",
   "Subtitle auto-sync": "المزامنة التلقائية للترجمة",
-  "Harbor times out-of-sync subtitles to the audio for you, on any external subtitle. It works on the mpv player and leaves embedded tracks alone, since those are already in sync.": "يضبط Harbor توقيت الترجمات غير المتزامنة لتوافق الصوت نيابةً عنك، مع أي ترجمة خارجية. يعمل مع مشغّل mpv ويترك المسارات المُضمَّنة دون تغيير، لأنها متزامنة بالفعل.",
+  "Harbor times out-of-sync subtitles to the audio for you, on any external subtitle. It works on the mpv player and leaves embedded tracks alone, since those are already in sync.":
+    "يضبط Harbor توقيت الترجمات غير المتزامنة لتوافق الصوت نيابةً عنك، مع أي ترجمة خارجية. يعمل مع مشغّل mpv ويترك المسارات المُضمَّنة دون تغيير، لأنها متزامنة بالفعل.",
   "Auto-sync subtitles": "مزامنة الترجمات تلقائيًا",
-  "When a subtitle runs early or late, Harbor measures the speech and corrects the timing on its own. Off by default.": "عندما تظهر الترجمة مبكرة أو متأخرة، يقيس Harbor الكلام ويصحّح التوقيت من تلقاء نفسه. مُعطَّل افتراضيًا.",
+  "When a subtitle runs early or late, Harbor measures the speech and corrects the timing on its own. Off by default.":
+    "عندما تظهر الترجمة مبكرة أو متأخرة، يقيس Harbor الكلام ويصحّح التوقيت من تلقاء نفسه. مُعطَّل افتراضيًا.",
   "Let structural tiers auto-apply": "السماح بالتطبيق التلقائي للمستويات البنيوية",
-  "Identity matches from content hashing and the community database always apply on their own. Timing worked out from the audio only offers a fix until it has earned trust. Turn this on to let those audio-derived fixes apply automatically too.": "تُطبَّق مطابقات الهوية الناتجة عن تجزئة المحتوى وقاعدة بيانات المجتمع دائمًا من تلقاء نفسها. أما التوقيت المُستنتَج من الصوت فيقترح إصلاحًا فقط إلى أن يكتسب الثقة. فعّل هذا الخيار لتُطبَّق تلك الإصلاحات المستمدة من الصوت تلقائيًا أيضًا.",
+  "Identity matches from content hashing and the community database always apply on their own. Timing worked out from the audio only offers a fix until it has earned trust. Turn this on to let those audio-derived fixes apply automatically too.":
+    "تُطبَّق مطابقات الهوية الناتجة عن تجزئة المحتوى وقاعدة بيانات المجتمع دائمًا من تلقاء نفسها. أما التوقيت المُستنتَج من الصوت فيقترح إصلاحًا فقط إلى أن يكتسب الثقة. فعّل هذا الخيار لتُطبَّق تلك الإصلاحات المستمدة من الصوت تلقائيًا أيضًا.",
   "Drift monitor": "مراقب الانحراف",
-  "Keeps watching through playback and gently re-nudges the timing if the subtitle slips out of sync partway through.": "يواصل المراقبة طوال التشغيل ويعيد ضبط التوقيت بلطف إذا فقدت الترجمة تزامنها في منتصف الطريق.",
+  "Keeps watching through playback and gently re-nudges the timing if the subtitle slips out of sync partway through.":
+    "يواصل المراقبة طوال التشغيل ويعيد ضبط التوقيت بلطف إذا فقدت الترجمة تزامنها في منتصف الطريق.",
   "Smart resync with speech recognition": "إعادة مزامنة ذكية مع التعرّف على الكلام",
-  "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.": "بالنسبة إلى أصعب الملفات وزر إعادة المحاولة، يفرّغ Harbor القليل من الكلام على جهازك ويحاذي الترجمة مع الكلمات الفعلية. يتطلّب ذلك نسخة مبنيّة تتضمّن ميزة asr-whisper، ويُنزّل نموذجًا صغيرًا عند أول استخدام.",
+  "For the hardest files and the Try again button, Harbor transcribes a little speech on your device and lines the subtitle up to the actual words. Needs a build with the asr-whisper feature and downloads a small model the first time you use it.":
+    "بالنسبة إلى أصعب الملفات وزر إعادة المحاولة، يفرّغ Harbor القليل من الكلام على جهازك ويحاذي الترجمة مع الكلمات الفعلية. يتطلّب ذلك نسخة مبنيّة تتضمّن ميزة asr-whisper، ويُنزّل نموذجًا صغيرًا عند أول استخدام.",
   "Community sync": "مزامنة المجتمع",
-  "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.": "يكفي أن يُعثَر على التصحيح الجيّد مرّة واحدة فقط. يمكن لـ Harbor مشاركة الإصلاحات المُتحقَّق منها ليحصل الشخص التالي الذي لديه الملف والترجمة نفسهما على نتيجة فوريّة. تُفهرَس السجلّات ببصمات مُملَّحة، وليس بملفّاتك أو بأي شيء شخصي إطلاقًا.",
+  "A good correction only has to be found once. Harbor can share verified fixes so the next person with the same file and subtitle gets an instant result. Records are keyed by salted fingerprints, never your files or anything personal.":
+    "يكفي أن يُعثَر على التصحيح الجيّد مرّة واحدة فقط. يمكن لـ Harbor مشاركة الإصلاحات المُتحقَّق منها ليحصل الشخص التالي الذي لديه الملف والترجمة نفسهما على نتيجة فوريّة. تُفهرَس السجلّات ببصمات مُملَّحة، وليس بملفّاتك أو بأي شيء شخصي إطلاقًا.",
   "Use community corrections": "استخدام تصحيحات المجتمع",
-  "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.": "يتحقّق أولًا من قاعدة البيانات المشتركة. وعندما تكون هذه الترجمة بالتحديد قد تمّت مزامنتها من قِبل شخص آخر، تنضبط ترجمتك في مكانها دون أي تحليل.",
+  "Check the shared database first. When this exact subtitle has already been synced by someone else, yours snaps into place with no analysis.":
+    "يتحقّق أولًا من قاعدة البيانات المشتركة. وعندما تكون هذه الترجمة بالتحديد قد تمّت مزامنتها من قِبل شخص آخر، تنضبط ترجمتك في مكانها دون أي تحليل.",
   "Community sync server": "خادم مزامنة المجتمع",
   "https://sync.harbor.site": "https://sync.harbor.site",
-  "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.": "اتركه فارغًا لاستخدام خادم المجتمع الخاص بـ Harbor. أدخِل عنوان URL للإشارة إلى خادمك الخاص بدلًا من ذلك. ويوقف الوضع الخاص أدناه كل اتصال في كلتا الحالتين.",
+  "Leave blank to use Harbor's own community server. Enter a URL to point at your own server instead. Private mode below stops all contact either way.":
+    "اتركه فارغًا لاستخدام خادم المجتمع الخاص بـ Harbor. أدخِل عنوان URL للإشارة إلى خادمك الخاص بدلًا من ذلك. ويوقف الوضع الخاص أدناه كل اتصال في كلتا الحالتين.",
   "Private mode": "الوضع الخاص",
-  "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.": "لا يتّصل بخادم المجتمع في أيّ اتجاه على الإطلاق. لا يُجرى أي استعلام ولا تُرسَل أي مساهمة من هذا الجهاز.",
-  "Harbor ships a neutral trophy for every award. Install an icon pack or upload your own image per award to make them yours. Packs are hosted by whoever makes them, so the artwork is theirs, not bundled with Harbor.": "يأتي Harbor بكأس محايد لكل جائزة. ثبّت حزمة أيقونات أو ارفع صورتك الخاصة لكل جائزة لجعلها ملكك. تُستضاف الحزم من قِبل صانعيها، لذا فإنّ الأعمال الفنية ملكٌ لهم وليست مضمَّنة مع Harbor.",
+  "Never contact the community server in either direction. Nothing is looked up and nothing is contributed from this device.":
+    "لا يتّصل بخادم المجتمع في أيّ اتجاه على الإطلاق. لا يُجرى أي استعلام ولا تُرسَل أي مساهمة من هذا الجهاز.",
+  "Harbor ships a neutral trophy for every award. Install an icon pack or upload your own image per award to make them yours. Packs are hosted by whoever makes them, so the artwork is theirs, not bundled with Harbor.":
+    "يأتي Harbor بكأس محايد لكل جائزة. ثبّت حزمة أيقونات أو ارفع صورتك الخاصة لكل جائزة لجعلها ملكك. تُستضاف الحزم من قِبل صانعيها، لذا فإنّ الأعمال الفنية ملكٌ لهم وليست مضمَّنة مع Harbor.",
   "View community award packs": "عرض حزم جوائز المجتمع",
-  "Icon packs and single-award art from the community": "حزم أيقونات وأعمال فنية لجائزة واحدة من المجتمع",
-  "Upload an image per award, or name your zip files after the ID shown under each one (tap to copy). Natural names work too, so best_soundtrack, movie_of_the_year, etc. still match.": "ارفع صورة لكل جائزة، أو سمِّ ملفات zip الخاصة بك باسم المعرّف الظاهر أسفل كل واحدة (انقر للنسخ). تعمل الأسماء الطبيعية أيضًا، لذا فإنّ best_soundtrack وmovie_of_the_year وغيرها لا تزال مطابِقة.",
-  "An award pack is a single JSON file plus the images it points to. Host both anywhere public (your own server, a GitHub repo, etc.) and share the JSON URL. Harbor only stores the URLs you install, never the images.": "حزمة الجوائز هي ملف JSON واحد إضافةً إلى الصور التي يشير إليها. استضِف كليهما في أي مكان عام (خادمك الخاص، أو مستودع على GitHub، إلخ) وشارِك عنوان URL الخاص بملف JSON. لا يخزّن Harbor سوى عناوين URL التي تثبّتها، وليس الصور أبدًا.",
-  "Each key above is an award ID. Any key you omit falls back to the default trophy (or a lower-priority pack). The full list of IDs is every award shown in the grid above.": "كل مفتاح أعلاه هو معرّف جائزة. وأي مفتاح تحذفه يعود إلى الكأس الافتراضي (أو إلى حزمة ذات أولوية أقل). والقائمة الكاملة للمعرّفات هي كل جائزة معروضة في الشبكة أعلاه.",
-  "Name each image file after its award ID and put them in a .zip, then use \"Import a .zip pack\" above. No JSON, no hosting needed. Harbor matches each file to its award, stores it locally, resizes it, and skips anything it doesn't recognize.": "سمِّ كل ملف صورة باسم معرّف جائزته وضعها في ملف .zip، ثم استخدم \"استيراد حزمة .zip\" أعلاه. لا حاجة إلى JSON ولا إلى استضافة. يطابِق Harbor كل ملف بجائزته، ويخزّنه محليًا، ويعيد تحجيمه، ويتجاهل أي شيء لا يتعرّف عليه.",
+  "Icon packs and single-award art from the community":
+    "حزم أيقونات وأعمال فنية لجائزة واحدة من المجتمع",
+  "Upload an image per award, or name your zip files after the ID shown under each one (tap to copy). Natural names work too, so best_soundtrack, movie_of_the_year, etc. still match.":
+    "ارفع صورة لكل جائزة، أو سمِّ ملفات zip الخاصة بك باسم المعرّف الظاهر أسفل كل واحدة (انقر للنسخ). تعمل الأسماء الطبيعية أيضًا، لذا فإنّ best_soundtrack وmovie_of_the_year وغيرها لا تزال مطابِقة.",
+  "An award pack is a single JSON file plus the images it points to. Host both anywhere public (your own server, a GitHub repo, etc.) and share the JSON URL. Harbor only stores the URLs you install, never the images.":
+    "حزمة الجوائز هي ملف JSON واحد إضافةً إلى الصور التي يشير إليها. استضِف كليهما في أي مكان عام (خادمك الخاص، أو مستودع على GitHub، إلخ) وشارِك عنوان URL الخاص بملف JSON. لا يخزّن Harbor سوى عناوين URL التي تثبّتها، وليس الصور أبدًا.",
+  "Each key above is an award ID. Any key you omit falls back to the default trophy (or a lower-priority pack). The full list of IDs is every award shown in the grid above.":
+    "كل مفتاح أعلاه هو معرّف جائزة. وأي مفتاح تحذفه يعود إلى الكأس الافتراضي (أو إلى حزمة ذات أولوية أقل). والقائمة الكاملة للمعرّفات هي كل جائزة معروضة في الشبكة أعلاه.",
+  'Name each image file after its award ID and put them in a .zip, then use "Import a .zip pack" above. No JSON, no hosting needed. Harbor matches each file to its award, stores it locally, resizes it, and skips anything it doesn\'t recognize.':
+    'سمِّ كل ملف صورة باسم معرّف جائزته وضعها في ملف .zip، ثم استخدم "استيراد حزمة .zip" أعلاه. لا حاجة إلى JSON ولا إلى استضافة. يطابِق Harbor كل ملف بجائزته، ويخزّنه محليًا، ويعيد تحجيمه، ويتجاهل أي شيء لا يتعرّف عليه.',
   "Watched badge": "شارة المُشاهَد",
-  "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.": "كيفية تجميع الحلقات للمسلسلات والأنمي. TVDB هو الخيار الافتراضي: فهو يوفّر الترتيبات التي يتوقّعها محبّو الأنمي، أي ترتيب الأقواس القصصية وترتيب DVD والترتيب المطلق، دون الحاجة إلى مفتاح. أما TMDB فيحافظ على ترتيب البثّ العادي. في كلتا الحالتين، تظل كل حلقة تُشغَّل وتُعلَّم كمُشاهَدة بالطريقة نفسها.",
-  "Turns the season button into a full panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through Harbor's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.": "يحوّل زر الموسم إلى لوحة كاملة: علامات تبويب للترتيب (البث، DVD، المطلق، وأي ترتيب آخر متاح للمسلسل) بالإضافة إلى جدول للمواسم يعرض نطاقات تواريخ البث وعدد الحلقات. مُفعّل افتراضيًا للأنمي عبر خدمة TVDB من Harbor، دون الحاجة إلى مفتاح. أضف مفتاح TVDB الخاص بك لاستخدامه مع المسلسلات العادية أيضًا.",
-  "When Esc would close the player, show a quick confirm first. You can tick \"Don't ask me again\" in that prompt to always leave on Esc.": "عندما يؤدي الضغط على Esc إلى إغلاق المشغّل، يظهر تأكيد سريع أولًا. يمكنك تحديد \"عدم السؤال مجددًا\" في تلك الرسالة للخروج دائمًا عند الضغط على Esc.",
+  "How episodes are grouped for shows and anime. TVDB is the default: it gives the arc, DVD, and absolute orderings anime fans expect, with no key needed. TMDB keeps the plain aired order. Either way, every episode still plays and marks watched the same.":
+    "كيفية تجميع الحلقات للمسلسلات والأنمي. TVDB هو الخيار الافتراضي: فهو يوفّر الترتيبات التي يتوقّعها محبّو الأنمي، أي ترتيب الأقواس القصصية وترتيب DVD والترتيب المطلق، دون الحاجة إلى مفتاح. أما TMDB فيحافظ على ترتيب البثّ العادي. في كلتا الحالتين، تظل كل حلقة تُشغَّل وتُعلَّم كمُشاهَدة بالطريقة نفسها.",
+  "Turns the season button into a full panel: order tabs (Aired, DVD, Absolute, and any the show has) plus a season table with air-date ranges and episode counts. On by default for anime through Harbor's TVDB service, no key needed. Add your own TVDB key to use it for regular shows too.":
+    "يحوّل زر الموسم إلى لوحة كاملة: علامات تبويب للترتيب (البث، DVD، المطلق، وأي ترتيب آخر متاح للمسلسل) بالإضافة إلى جدول للمواسم يعرض نطاقات تواريخ البث وعدد الحلقات. مُفعّل افتراضيًا للأنمي عبر خدمة TVDB من Harbor، دون الحاجة إلى مفتاح. أضف مفتاح TVDB الخاص بك لاستخدامه مع المسلسلات العادية أيضًا.",
+  'When Esc would close the player, show a quick confirm first. You can tick "Don\'t ask me again" in that prompt to always leave on Esc.':
+    'عندما يؤدي الضغط على Esc إلى إغلاق المشغّل، يظهر تأكيد سريع أولًا. يمكنك تحديد "عدم السؤال مجددًا" في تلك الرسالة للخروج دائمًا عند الضغط على Esc.',
   "Short seek (Shift + arrows)": "قفزة قصيرة (Shift + الأسهم)",
-  "A shorter jump on Shift plus the arrow keys, for nudging a few seconds at a time.": "قفزة أقصر باستخدام Shift مع مفاتيح الأسهم، للتنقّل بضع ثوانٍ في كل مرة.",
-  "Posters, logos, and title art load in the first available language from this list, falling back down the order. \"Original\" uses the title's own language. Put your main language first. Needs a TMDB key.": "تُحمّل الملصقات والشعارات والصور الفنية للعنوان بأول لغة متاحة من هذه القائمة، مع الرجوع إلى اللغات التالية تباعًا حسب الترتيب. يستخدم خيار \"الأصلية\" لغة العنوان نفسه. ضع لغتك الرئيسية أولًا. يتطلب مفتاح TMDB.",
-  "Keep Continue Watching private to each profile": "إبقاء \"متابعة المشاهدة\" خاصة بكل ملف شخصي",
-  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.": "يعرض \"متابعة المشاهدة\" فقط للملف الشخصي النشط. يرى كل ملف شخصي تقدّمه الخاص فقط، لذا يبقى ما تشاهده مخفيًا عن الملفات الشخصية الأخرى التي تشارك حساب Stremio هذا.",
+  "A shorter jump on Shift plus the arrow keys, for nudging a few seconds at a time.":
+    "قفزة أقصر باستخدام Shift مع مفاتيح الأسهم، للتنقّل بضع ثوانٍ في كل مرة.",
+  'Posters, logos, and title art load in the first available language from this list, falling back down the order. "Original" uses the title\'s own language. Put your main language first. Needs a TMDB key.':
+    'تُحمّل الملصقات والشعارات والصور الفنية للعنوان بأول لغة متاحة من هذه القائمة، مع الرجوع إلى اللغات التالية تباعًا حسب الترتيب. يستخدم خيار "الأصلية" لغة العنوان نفسه. ضع لغتك الرئيسية أولًا. يتطلب مفتاح TMDB.',
+  "Keep Continue Watching private to each profile": 'إبقاء "متابعة المشاهدة" خاصة بكل ملف شخصي',
+  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this Stremio account.":
+    'يعرض "متابعة المشاهدة" فقط للملف الشخصي النشط. يرى كل ملف شخصي تقدّمه الخاص فقط، لذا يبقى ما تشاهده مخفيًا عن الملفات الشخصية الأخرى التي تشارك حساب Stremio هذا.',
   "Show pages": "صفحات المسلسلات",
-  "How a show or movie detail page behaves when you open it.": "كيفية تصرّف صفحة تفاصيل المسلسل أو الفيلم عند فتحها.",
-  "When you reopen a show you were already browsing, jump straight back to your spot (usually the episode list) instead of starting at the top. The jump happens before the page shows, so there is no flash.": "عند إعادة فتح مسلسل كنت تتصفّحه بالفعل، تعود مباشرة إلى موضعك (عادةً قائمة الحلقات) بدلًا من البدء من الأعلى. تحدث القفزة قبل ظهور الصفحة، لذا لا يوجد أي وميض.",
+  "How a show or movie detail page behaves when you open it.":
+    "كيفية تصرّف صفحة تفاصيل المسلسل أو الفيلم عند فتحها.",
+  "When you reopen a show you were already browsing, jump straight back to your spot (usually the episode list) instead of starting at the top. The jump happens before the page shows, so there is no flash.":
+    "عند إعادة فتح مسلسل كنت تتصفّحه بالفعل، تعود مباشرة إلى موضعك (عادةً قائمة الحلقات) بدلًا من البدء من الأعلى. تحدث القفزة قبل ظهور الصفحة، لذا لا يوجد أي وميض.",
   "Hide and skip episodes": "إخفاء الحلقات وتخطّيها",
-  "Adds a Hide option when you right-click an episode. Hidden episodes disappear from the list and are skipped by Up Next. A Show hidden toggle on each show lets you bring them back.": "يضيف خيار \"إخفاء\" عند النقر بزر الفأرة الأيمن على حلقة. تختفي الحلقات المخفية من القائمة ويتخطّاها \"التالي\". يتيح لك مفتاح \"إظهار المخفية\" في كل مسلسل استعادتها.",
+  "Adds a Hide option when you right-click an episode. Hidden episodes disappear from the list and are skipped by Up Next. A Show hidden toggle on each show lets you bring them back.":
+    'يضيف خيار "إخفاء" عند النقر بزر الفأرة الأيمن على حلقة. تختفي الحلقات المخفية من القائمة ويتخطّاها "التالي". يتيح لك مفتاح "إظهار المخفية" في كل مسلسل استعادتها.',
   "Poster shine on hover": "لمعان الملصق عند التمرير",
-  "A subtle tvOS style light sweep across a poster when you hover it. Off by default; the card lift stays either way.": "تمريرة ضوء خفيفة بأسلوب tvOS عبر الملصق عند التمرير عليه. مُعطّل افتراضيًا؛ ويبقى ارتفاع البطاقة في كلتا الحالتين.",
+  "A subtle tvOS style light sweep across a poster when you hover it. Off by default; the card lift stays either way.":
+    "تمريرة ضوء خفيفة بأسلوب tvOS عبر الملصق عند التمرير عليه. مُعطّل افتراضيًا؛ ويبقى ارتفاع البطاقة في كلتا الحالتين.",
   ", {hiddenCount} hidden": ", {hiddenCount} مخفية",
-  "Looking for Harbor in your browser, the phone remote, or the manga reader remote? They moved to the Remotes page.": "هل تبحث عن Harbor في متصفّحك، أو أداة التحكّم عن بُعد بالهاتف، أو أداة التحكّم عن بُعد بقارئ المانغا؟ لقد انتقلت إلى صفحة أدوات التحكّم عن بُعد.",
+  "Looking for Harbor in your browser, the phone remote, or the manga reader remote? They moved to the Remotes page.":
+    "هل تبحث عن Harbor في متصفّحك، أو أداة التحكّم عن بُعد بالهاتف، أو أداة التحكّم عن بُعد بقارئ المانغا؟ لقد انتقلت إلى صفحة أدوات التحكّم عن بُعد.",
   "X-Ray (experimental)": "X-Ray (تجريبي)",
-  "Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and everything they have been in. On-device face matching to show who is on screen is coming next. Off by default.": "X-Ray بأسلوب Amazon: افتح قائمة طاقم العمل أثناء المشاهدة وانقر على أي شخص لعرض سيرته وكل ما شارك فيه. وتأتي لاحقًا مطابقة الوجوه على الجهاز لإظهار مَن يظهر على الشاشة. مُعطّلة افتراضيًا.",
+  "Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and everything they have been in. On-device face matching to show who is on screen is coming next. Off by default.":
+    "X-Ray بأسلوب Amazon: افتح قائمة طاقم العمل أثناء المشاهدة وانقر على أي شخص لعرض سيرته وكل ما شارك فيه. وتأتي لاحقًا مطابقة الوجوه على الجهاز لإظهار مَن يظهر على الشاشة. مُعطّلة افتراضيًا.",
   "Enable X-Ray": "تفعيل X-Ray",
-  "Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.": "يضيف زر X-Ray في المشغّل لعرض طاقم العمل كاملًا مع الصور والانتقال إلى أي ممثل. يتطلب مفتاح TMDB للصور وقوائم الأعمال.",
+  "Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.":
+    "يضيف زر X-Ray في المشغّل لعرض طاقم العمل كاملًا مع الصور والانتقال إلى أي ممثل. يتطلب مفتاح TMDB للصور وقوائم الأعمال.",
   "Scan who is on screen while playing": "رصد مَن يظهر على الشاشة أثناء التشغيل",
-  "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.": "يطابق الوجوه في الإطار الحالي مع طاقم العمل بشكل دوري لعرض مَن يظهر على الشاشة الآن. تتم المعالجة محلياً على جهازك، ولا يغادره أي شيء. يستهلك قدراً أكبر قليلاً من المعالج أثناء التشغيل.",
+  "Periodically match faces in the current frame against the cast to show who is on screen now. On-device, nothing leaves your machine. Uses a little more CPU while playing.":
+    "يطابق الوجوه في الإطار الحالي مع طاقم العمل بشكل دوري لعرض مَن يظهر على الشاشة الآن. تتم المعالجة محلياً على جهازك، ولا يغادره أي شيء. يستهلك قدراً أكبر قليلاً من المعالج أثناء التشغيل.",
+  "Performance notice": "تنبيه حول الأداء",
+  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.":
+    "يحمّل مسح الوجوه المباشر نماذج ذكاء اصطناعي على جهازك، وقد يزيد بشكل ملحوظ من استهلاك الذاكرة والمعالج وبطاقة الرسوميات أثناء التشغيل. عطّله إذا أصبح Harbor بطيئاً أو ارتفعت حرارة جهازك.",
   "X-Ray needs a TMDB key": "يحتاج X-Ray إلى مفتاح TMDB",
-  "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.": "يقرأ X-Ray طاقم العمل وصورهم من TMDB. بدون مفتاح TMDB لا يوجد طاقم عمل للمطابقة معه. أضِف مفتاحك المجاني ضمن المكتبة والبيانات.",
+  "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.":
+    "يقرأ X-Ray طاقم العمل وصورهم من TMDB. بدون مفتاح TMDB لا يوجد طاقم عمل للمطابقة معه. أضِف مفتاحك المجاني ضمن المكتبة والبيانات.",
   "5s": "5 ث",
   "10s": "10 ث",
   "15s": "15 ث",
   "Ask if you're still watching": "السؤال إن كنت لا تزال تشاهد",
-  "After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.": "بعد تشغيل عدة حلقات تلقائياً بالتتابع دون أي تفاعل، يتوقف مؤقتاً للتأكد من وجودك قبل المتابعة. مُعطَّل افتراضياً.",
+  "After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.":
+    "بعد تشغيل عدة حلقات تلقائياً بالتتابع دون أي تفاعل، يتوقف مؤقتاً للتأكد من وجودك قبل المتابعة. مُعطَّل افتراضياً.",
   "After 2": "بعد 2",
   "After 3": "بعد 3",
   "After 4": "بعد 4",
   "After 5": "بعد 5",
-  "Remotes are served by the desktop app. Open these settings on your computer's Harbor to get the links.": "يوفّر تطبيق سطح المكتب أجهزة التحكم عن بُعد. افتح هذه الإعدادات في Harbor على حاسوبك للحصول على الروابط.",
+  "Remotes are served by the desktop app. Open these settings on your computer's Harbor to get the links.":
+    "يوفّر تطبيق سطح المكتب أجهزة التحكم عن بُعد. افتح هذه الإعدادات في Harbor على حاسوبك للحصول على الروابط.",
   "Harbor on other devices": "Harbor على الأجهزة الأخرى",
   "Serve Harbor on your network": "إتاحة Harbor على شبكتك",
-  "One switch powers everything on this page: the web app, the phone remote, and the manga reader remote.": "مفتاح واحد يشغّل كل شيء في هذه الصفحة: تطبيق الويب، وجهاز التحكم عبر الهاتف، وجهاز التحكم في قارئ المانغا.",
+  "One switch powers everything on this page: the web app, the phone remote, and the manga reader remote.":
+    "مفتاح واحد يشغّل كل شيء في هذه الصفحة: تطبيق الويب، وجهاز التحكم عبر الهاتف، وجهاز التحكم في قارئ المانغا.",
   "Phone remote": "جهاز تحكم عبر الهاتف",
-  "Turns your phone into a remote for this computer: play, pause, seek, volume, and casting, all from the couch. Open the Wi-Fi address on your phone's browser.": "يحوّل هاتفك إلى جهاز تحكم عن بُعد لهذا الحاسوب: التشغيل والإيقاف المؤقت والتنقل ومستوى الصوت والبث، كل ذلك من الأريكة. افتح عنوان Wi-Fi في متصفّح هاتفك.",
+  "Turns your phone into a remote for this computer: play, pause, seek, volume, and casting, all from the couch. Open the Wi-Fi address on your phone's browser.":
+    "يحوّل هاتفك إلى جهاز تحكم عن بُعد لهذا الحاسوب: التشغيل والإيقاف المؤقت والتنقل ومستوى الصوت والبث، كل ذلك من الأريكة. افتح عنوان Wi-Fi في متصفّح هاتفك.",
   "Manga reader remote": "جهاز تحكم في قارئ المانغا",
-  "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.": "تحكّم في دفتر تقليب المانجا من هاتفك أثناء القراءة على الشاشة الكبيرة: قلّب الصفحات، وكبّر، وبدّل الأوضاع. يعرض القارئ هذا الرابط أيضًا أثناء قراءتك.",
+  "Control the manga flipbook from your phone while reading on the big screen: turn pages, zoom, and switch modes. The reader also shows this link while you read.":
+    "تحكّم في دفتر تقليب المانجا من هاتفك أثناء القراءة على الشاشة الكبيرة: قلّب الصفحات، وكبّر، وبدّل الأوضاع. يعرض القارئ هذا الرابط أيضًا أثناء قراءتك.",
   "Manga remote (this computer)": "جهاز التحكم بالمانجا (هذا الحاسوب)",
   "Manga remote (Wi-Fi)": "جهاز التحكم بالمانجا (Wi-Fi)",
-  "Flip the switch above and the phone remote and manga reader remote addresses appear here.": "فعّل المفتاح أعلاه وستظهر هنا عناوين جهاز التحكم عبر الهاتف وجهاز التحكم بقارئ المانجا.",
-  "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.": "هل تواجه مشكلة في إصدار تجريبي؟ اختر إصدارًا أقدم أدناه وشغّل مثبّته فوق نسختك الحالية. تبقى مكتبتك وإعداداتك وتنزيلاتك جميعها كما هي.",
-  "While beta updates are on, Harbor offers the newest build again on its next check. Turn beta updates off above to stay on an earlier one.": "أثناء تفعيل التحديثات التجريبية، يعرض Harbor أحدث إصدار مجددًا عند فحصه التالي. عطّل التحديثات التجريبية أعلاه للبقاء على إصدار أقدم.",
-  "Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.": "تعمل تظليلات الصورة على محرّك mpv المضمّن في تطبيق Harbor لسطح المكتب. ولا تأثير لها في المتصفّح.",
+  "Flip the switch above and the phone remote and manga reader remote addresses appear here.":
+    "فعّل المفتاح أعلاه وستظهر هنا عناوين جهاز التحكم عبر الهاتف وجهاز التحكم بقارئ المانجا.",
+  "On a beta that's giving you trouble? Pick an earlier build below and run its installer over your current copy. Your library, settings, and downloads all stay put.":
+    "هل تواجه مشكلة في إصدار تجريبي؟ اختر إصدارًا أقدم أدناه وشغّل مثبّته فوق نسختك الحالية. تبقى مكتبتك وإعداداتك وتنزيلاتك جميعها كما هي.",
+  "While beta updates are on, Harbor offers the newest build again on its next check. Turn beta updates off above to stay on an earlier one.":
+    "أثناء تفعيل التحديثات التجريبية، يعرض Harbor أحدث إصدار مجددًا عند فحصه التالي. عطّل التحديثات التجريبية أعلاه للبقاء على إصدار أقدم.",
+  "Picture shaders run on the bundled mpv engine in the Harbor desktop app. They have no effect in the browser.":
+    "تعمل تظليلات الصورة على محرّك mpv المضمّن في تطبيق Harbor لسطح المكتب. ولا تأثير لها في المتصفّح.",
   "Download the desktop app to use shaders.": "نزّل تطبيق سطح المكتب لاستخدام التظليلات.",
   "More picture shaders": "المزيد من تظليلات الصورة",
-  "Neural upscalers, sharpeners, and HDR tone-mapping ported for mpv. Each is hosted by its author, not bundled with Harbor. Download the ones you want; Harbor chains them in the right order and applies them in the player.": "أدوات رفع الدقّة العصبية وأدوات زيادة الحدّة ومعالجة تدرّج ألوان HDR منقولة إلى mpv. كل منها مستضاف من مؤلّفه وغير مضمّن مع Harbor. نزّل ما تريده منها؛ يسلسلها Harbor بالترتيب الصحيح ويطبّقها في المشغّل.",
-  "Cleared": "تم المسح",
+  "Neural upscalers, sharpeners, and HDR tone-mapping ported for mpv. Each is hosted by its author, not bundled with Harbor. Download the ones you want; Harbor chains them in the right order and applies them in the player.":
+    "أدوات رفع الدقّة العصبية وأدوات زيادة الحدّة ومعالجة تدرّج ألوان HDR منقولة إلى mpv. كل منها مستضاف من مؤلّفه وغير مضمّن مع Harbor. نزّل ما تريده منها؛ يسلسلها Harbor بالترتيب الصحيح ويطبّقها في المشغّل.",
+  Cleared: "تم المسح",
   "Sure?": "هل أنت متأكد؟",
   "Storage overview": "نظرة عامة على التخزين",
-  "Everything Harbor saves lives on this computer. If space runs low, clear a cache below; Harbor rebuilds them as you browse.": "كل ما يحفظه Harbor يبقى على هذا الكمبيوتر. إذا قلّت المساحة، امسح إحدى الذواكر المؤقتة أدناه؛ ويعيد Harbor بناءها أثناء تصفّحك.",
+  "Everything Harbor saves lives on this computer. If space runs low, clear a cache below; Harbor rebuilds them as you browse.":
+    "كل ما يحفظه Harbor يبقى على هذا الكمبيوتر. إذا قلّت المساحة، امسح إحدى الذواكر المؤقتة أدناه؛ ويعيد Harbor بناءها أثناء تصفّحك.",
   "App storage": "تخزين التطبيق",
   "{quota} available": "{quota} متاح",
   "Settings storage": "تخزين الإعدادات",
   "Clear caches": "مسح الذواكر المؤقتة",
-  "Safe to clear anytime. Nothing here touches your watch history, library, themes, or sign-ins.": "آمن للمسح في أي وقت. لا شيء هنا يمسّ سجلّ المشاهدة أو المكتبة أو السمات أو تسجيلات الدخول.",
+  "Safe to clear anytime. Nothing here touches your watch history, library, themes, or sign-ins.":
+    "آمن للمسح في أي وقت. لا شيء هنا يمسّ سجلّ المشاهدة أو المكتبة أو السمات أو تسجيلات الدخول.",
   "Stream picker cache": "ذاكرة منتقي البثّ المؤقتة",
-  "Remembered source lists per title. Clears stale results after changing addons or debrid.": "قوائم المصادر المحفوظة لكل عنوان. تُمسح النتائج القديمة بعد تغيير الإضافات أو debrid.",
+  "Remembered source lists per title. Clears stale results after changing addons or debrid.":
+    "قوائم المصادر المحفوظة لكل عنوان. تُمسح النتائج القديمة بعد تغيير الإضافات أو debrid.",
   "Manga browse cache": "ذاكرة تصفّح المانجا المؤقتة",
-  "Cached chapter lists and browse pages. Downloads stay untouched.": "قوائم الفصول وصفحات التصفّح المخزّنة مؤقتًا. تبقى التنزيلات دون مساس.",
+  "Cached chapter lists and browse pages. Downloads stay untouched.":
+    "قوائم الفصول وصفحات التصفّح المخزّنة مؤقتًا. تبقى التنزيلات دون مساس.",
   "Live TV caches": "ذاكرة التخزين المؤقتة للتلفزيون المباشر",
-  "Parsed playlists, program guide, and series info. Re-downloads on next open.": "قوائم التشغيل المُحلَّلة ودليل البرامج ومعلومات المسلسلات. يُعاد تنزيلها عند الفتح التالي.",
+  "Parsed playlists, program guide, and series info. Re-downloads on next open.":
+    "قوائم التشغيل المُحلَّلة ودليل البرامج ومعلومات المسلسلات. يُعاد تنزيلها عند الفتح التالي.",
   "Dead stream marks": "علامات البث المُعطَّل",
-  "Sources Harbor flagged as broken. Clear to give them another chance.": "مصادر وسمها Harbor بأنها معطّلة. امسحها لمنحها فرصة أخرى.",
+  "Sources Harbor flagged as broken. Clear to give them another chance.":
+    "مصادر وسمها Harbor بأنها معطّلة. امسحها لمنحها فرصة أخرى.",
   "Continue Watching suggestions cache": "ذاكرة اقتراحات متابعة المشاهدة المؤقتة",
-  "Resurface picks for the home rail. Rebuilds overnight.": "يُعيد إظهار المختارات في الشريط الرئيسي. يُعاد بناؤها ليلًا.",
-  "Downloaded themes are managed in Theme & appearance. Video and manga downloads are managed on the Downloads page.": "تُدار السمات المُنزَّلة في السمة والمظهر. وتُدار تنزيلات الفيديو والمانجا في صفحة التنزيلات.",
+  "Resurface picks for the home rail. Rebuilds overnight.":
+    "يُعيد إظهار المختارات في الشريط الرئيسي. يُعاد بناؤها ليلًا.",
+  "Downloaded themes are managed in Theme & appearance. Video and manga downloads are managed on the Downloads page.":
+    "تُدار السمات المُنزَّلة في السمة والمظهر. وتُدار تنزيلات الفيديو والمانجا في صفحة التنزيلات.",
   "Pattern (e.g. \\bremux\\b)": "النمط (مثل \\bremux\\b)",
   "Downloaded from community": "المُنزَّلة من المجتمع",
-  "Badge art packs you installed from the community store. Remove one to put its badges back to default.": "حزم فنون الشارات التي ثبّتها من متجر المجتمع. أزِل واحدة لإعادة شاراتها إلى الوضع الافتراضي.",
+  "Badge art packs you installed from the community store. Remove one to put its badges back to default.":
+    "حزم فنون الشارات التي ثبّتها من متجر المجتمع. أزِل واحدة لإعادة شاراتها إلى الوضع الافتراضي.",
   "{n} badges": "{n} شارة",
   "Pack removed, badges back to default": "تمت إزالة الحزمة، وعادت الشارات إلى الوضع الافتراضي",
   "Remove pack": "إزالة الحزمة",
   "View community badge packs": "عرض حزم شارات المجتمع",
-  "packs": "حزم",
-  "Any Stremio subtitle addons you have installed are searched here too.": "يتم البحث هنا أيضًا في أي إضافات ترجمة من Stremio قمت بتثبيتها.",
-  "{count} installed. Add or remove them under Streaming sources.": "{count} مثبَّتة. أضِفها أو أزِلها ضمن مصادر البث.",
-  "None installed yet. Add Stremio subtitle addons under Streaming sources.": "لا توجد إضافات مثبّتة بعد. أضِف إضافات ترجمة Stremio ضمن مصادر البث.",
+  packs: "حزم",
+  "Any Stremio subtitle addons you have installed are searched here too.":
+    "يتم البحث هنا أيضًا في أي إضافات ترجمة من Stremio قمت بتثبيتها.",
+  "{count} installed. Add or remove them under Streaming sources.":
+    "{count} مثبَّتة. أضِفها أو أزِلها ضمن مصادر البث.",
+  "None installed yet. Add Stremio subtitle addons under Streaming sources.":
+    "لا توجد إضافات مثبّتة بعد. أضِف إضافات ترجمة Stremio ضمن مصادر البث.",
   "Subtitle sources": "مصادر الترجمة",
-  "Harbor searches every source you enable at the same time, then merges and de-duplicates the results into one clean list. Turn a source off to stop pulling from it.": "يبحث Harbor في كل مصدر تُفعّله في الوقت نفسه، ثم يدمج النتائج ويزيل المكرّر منها في قائمة واحدة مرتّبة. عطِّل أي مصدر لإيقاف جلب النتائج منه.",
-  "OpenSubtitles": "OpenSubtitles",
-  "Harbor's built-in OpenSubtitles search, on by default. If you install an OpenSubtitles addon, this steps aside automatically so your results are never duplicated.": "بحث OpenSubtitles المدمج في Harbor، مفعّل افتراضيًا. إذا ثبّتَ إضافة OpenSubtitles، يتنحّى هذا البحث تلقائيًا حتى لا تتكرّر نتائجك أبدًا.",
-  "Wyzie": "Wyzie",
-  "A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.": "فهرس ترجمة سريع من المجتمع. معطّل افتراضيًا؛ فعّله للحصول على تغطية إضافية للإصدارات الأحدث أو المتخصّصة.",
+  "Harbor searches every source you enable at the same time, then merges and de-duplicates the results into one clean list. Turn a source off to stop pulling from it.":
+    "يبحث Harbor في كل مصدر تُفعّله في الوقت نفسه، ثم يدمج النتائج ويزيل المكرّر منها في قائمة واحدة مرتّبة. عطِّل أي مصدر لإيقاف جلب النتائج منه.",
+  OpenSubtitles: "OpenSubtitles",
+  "Harbor's built-in OpenSubtitles search, on by default. If you install an OpenSubtitles addon, this steps aside automatically so your results are never duplicated.":
+    "بحث OpenSubtitles المدمج في Harbor، مفعّل افتراضيًا. إذا ثبّتَ إضافة OpenSubtitles، يتنحّى هذا البحث تلقائيًا حتى لا تتكرّر نتائجك أبدًا.",
+  Wyzie: "Wyzie",
+  "A fast community subtitle index. Off by default; turn it on for extra coverage on newer or niche releases.":
+    "فهرس ترجمة سريع من المجتمع. معطّل افتراضيًا؛ فعّله للحصول على تغطية إضافية للإصدارات الأحدث أو المتخصّصة.",
   "Subtitle addons": "إضافات الترجمة",
-  "SUBDL": "SUBDL",
-  "A large multi-language subtitle database. Off until you add your free SUBDL API key.": "قاعدة بيانات ترجمة كبيرة متعدّدة اللغات. معطّلة حتى تُضيف مفتاح API المجاني الخاص بـ SUBDL.",
+  SUBDL: "SUBDL",
+  "A large multi-language subtitle database. Off until you add your free SUBDL API key.":
+    "قاعدة بيانات ترجمة كبيرة متعدّدة اللغات. معطّلة حتى تُضيف مفتاح API المجاني الخاص بـ SUBDL.",
   "Paste your SUBDL API key": "الصِق مفتاح API الخاص بـ SUBDL",
   "Get a free key at subdl.com": "احصل على مفتاح مجاني من subdl.com",
-  "Subsource": "Subsource",
-  "A community subtitle source. Off until you add your Subsource API key.": "مصدر ترجمة من المجتمع. معطّل حتى تُضيف مفتاح API الخاص بـ Subsource.",
+  Subsource: "Subsource",
+  "A community subtitle source. Off until you add your Subsource API key.":
+    "مصدر ترجمة من المجتمع. معطّل حتى تُضيف مفتاح API الخاص بـ Subsource.",
   "Paste your Subsource API key": "الصِق مفتاح API الخاص بـ Subsource",
   "Get your key at subsource.net": "احصل على مفتاحك من subsource.net",
   "Manage subtitle addons in Streaming sources": "أدِر إضافات الترجمة في مصادر البث",
-  "The languages above all obey your preferred subtitle language order, which lives in the Languages page.": "تتبع جميع اللغات المذكورة أعلاه ترتيب لغات الترجمة المفضّل لديك، الموجود في صفحة اللغات.",
+  "The languages above all obey your preferred subtitle language order, which lives in the Languages page.":
+    "تتبع جميع اللغات المذكورة أعلاه ترتيب لغات الترجمة المفضّل لديك، الموجود في صفحة اللغات.",
   "Open Languages": "فتح اللغات",
-  "Quality": "الجودة",
-  "Maximum": "القصوى",
-  "Resolution posters are decoded at. High is sized to your screen with headroom and looks identical to full res while using far less memory; Balanced saves the most; Maximum keeps original resolution.": "الدقة التي يُفكّ بها ترميز الملصقات. «عالية» تُضبط على مقاس شاشتك مع هامش وتبدو مطابقة للدقة الكاملة مع استهلاك ذاكرة أقل بكثير؛ «متوازنة» هي الأكثر توفيرًا؛ «القصوى» تحافظ على الدقة الأصلية.",
+  Quality: "الجودة",
+  Maximum: "القصوى",
+  "Resolution posters are decoded at. High is sized to your screen with headroom and looks identical to full res while using far less memory; Balanced saves the most; Maximum keeps original resolution.":
+    "الدقة التي يُفكّ بها ترميز الملصقات. «عالية» تُضبط على مقاس شاشتك مع هامش وتبدو مطابقة للدقة الكاملة مع استهلاك ذاكرة أقل بكثير؛ «متوازنة» هي الأكثر توفيرًا؛ «القصوى» تحافظ على الدقة الأصلية.",
   "Poster dock magnification": "تكبير رصيف الملصقات",
-  "Gently magnify nearby posters as you move across a poster row, like a dock. Off by default.": "يكبّر الملصقات المجاورة بلطف أثناء تنقّلك عبر صف الملصقات، مثل الرصيف. معطّل افتراضيًا.",
+  "Gently magnify nearby posters as you move across a poster row, like a dock. Off by default.":
+    "يكبّر الملصقات المجاورة بلطف أثناء تنقّلك عبر صف الملصقات، مثل الرصيف. معطّل افتراضيًا.",
   "Liquid Glass": "الزجاج السائل",
   "Use liquid glass": "استخدم الزجاج السائل",
-  "Use liquid glass for the search pill and row scroll arrows. The appearance settings below are shared by glass surfaces across Harbor.": "استخدم الزجاج السائل لشريط البحث وأسهم تمرير الصفوف. إعدادات المظهر أدناه مشتركة بين أسطح الزجاج في Harbor.",
+  "Use liquid glass for the search pill and row scroll arrows. The appearance settings below are shared by glass surfaces across Harbor.":
+    "استخدم الزجاج السائل لشريط البحث وأسهم تمرير الصفوف. إعدادات المظهر أدناه مشتركة بين أسطح الزجاج في Harbor.",
   "Enhanced liquid glass": "زجاج سائل محسّن",
-  "A richer glass treatment. May look better while using more graphics resources.": "تأثير زجاجي أكثر ثراءً. قد يبدو أفضل لكنه يستهلك موارد رسومية أكثر.",
+  "A richer glass treatment. May look better while using more graphics resources.":
+    "تأثير زجاجي أكثر ثراءً. قد يبدو أفضل لكنه يستهلك موارد رسومية أكثر.",
   "Glass opacity": "عتامة الزجاج",
   "Glass blur": "تمويه الزجاج",
   "Glass tint": "صبغة الزجاج",
   "Featured source": "مصدر المحتوى المميّز",
-  "What fills the hero. Trending is a fresh top list from Harbor, refreshed through the day. Classic uses your own Home rows.": "ما يملأ الواجهة المميّزة. «الرائج» قائمة جديدة بأبرز العناوين من Harbor، تتجدّد على مدار اليوم. «الكلاسيكي» يستخدم صفوفك الخاصّة في الصفحة الرئيسية.",
-  "Trakt": "Trakt",
-  "Classic": "الكلاسيكي",
-  "Screensaver": "شاشة التوقّف",
-  "When Harbor sits idle in the foreground, it drifts through cinematic backdrops with a clock and what's trending. Any movement or key brings you back. Off by default.": "عندما يبقى Harbor خاملًا في المقدّمة، ينساب عبر خلفيّات سينمائية مع ساعة وما هو رائج. أي حركة أو ضغطة مفتاح تُعيدك. معطّل افتراضيًا.",
+  "What fills the hero. Trending is a fresh top list from Harbor, refreshed through the day. Classic uses your own Home rows.":
+    "ما يملأ الواجهة المميّزة. «الرائج» قائمة جديدة بأبرز العناوين من Harbor، تتجدّد على مدار اليوم. «الكلاسيكي» يستخدم صفوفك الخاصّة في الصفحة الرئيسية.",
+  Trakt: "Trakt",
+  Classic: "الكلاسيكي",
+  Screensaver: "شاشة التوقّف",
+  "When Harbor sits idle in the foreground, it drifts through cinematic backdrops with a clock and what's trending. Any movement or key brings you back. Off by default.":
+    "عندما يبقى Harbor خاملًا في المقدّمة، ينساب عبر خلفيّات سينمائية مع ساعة وما هو رائج. أي حركة أو ضغطة مفتاح تُعيدك. معطّل افتراضيًا.",
   "Ambient screensaver": "شاشة التوقّف المحيطية",
   "Start after": "البدء بعد",
   "3 min": "3 دقائق",
@@ -164,112 +240,162 @@ const settingsFill: Record<string, string> = {
   "10 min": "10 دقائق",
   "15 min": "15 دقيقة",
   "Moving the window": "تحريك النافذة",
-  "Choose where you can grab Harbor to drag it around your screen.": "اختر من أين يمكنك الإمساك بـ Harbor لسحبه عبر الشاشة.",
+  "Choose where you can grab Harbor to drag it around your screen.":
+    "اختر من أين يمكنك الإمساك بـ Harbor لسحبه عبر الشاشة.",
   "Native-style hybrid bar": "شريط هجين بأسلوب أصلي",
-  "Turn off the native window title bar above to use Harbor's hybrid bar instead.": "عطّل شريط عنوان النافذة الأصلي أعلاه لاستخدام شريط Harbor الهجين بدلاً منه.",
-  "Tuck clean, native-looking window buttons into the top corner, with hover labels. On macOS they become traffic-light dots. Blends into Harbor while feeling like your system's own title bar.": "يضع أزرار نافذة أنيقة بمظهر أصلي في الزاوية العلوية، مع تسميات تظهر عند التحويم. على macOS تتحول إلى نقاط إشارة المرور. يندمج مع Harbor بينما يبدو وكأنه شريط عنوان نظامك الخاص.",
+  "Turn off the native window title bar above to use Harbor's hybrid bar instead.":
+    "عطّل شريط عنوان النافذة الأصلي أعلاه لاستخدام شريط Harbor الهجين بدلاً منه.",
+  "Tuck clean, native-looking window buttons into the top corner, with hover labels. On macOS they become traffic-light dots. Blends into Harbor while feeling like your system's own title bar.":
+    "يضع أزرار نافذة أنيقة بمظهر أصلي في الزاوية العلوية، مع تسميات تظهر عند التحويم. على macOS تتحول إلى نقاط إشارة المرور. يندمج مع Harbor بينما يبدو وكأنه شريط عنوان نظامك الخاص.",
   "Frost the top bar on scroll": "تمويه الشريط العلوي عند التمرير",
-  "As you scroll, the top bar frosts over the content beneath it. Off by default; it uses a blur, so leave it off on lower-end machines.": "أثناء التمرير، يصبح الشريط العلوي ضبابيًا فوق المحتوى الموجود تحته. معطّل افتراضيًا؛ يستخدم التمويه، لذا اتركه معطّلاً على الأجهزة الأضعف.",
+  "As you scroll, the top bar frosts over the content beneath it. Off by default; it uses a blur, so leave it off on lower-end machines.":
+    "أثناء التمرير، يصبح الشريط العلوي ضبابيًا فوق المحتوى الموجود تحته. معطّل افتراضيًا؛ يستخدم التمويه، لذا اتركه معطّلاً على الأجهزة الأضعف.",
   "Top-right controls": "عناصر التحكم العلوية اليمنى",
-  "The operating system draws native window controls, so Harbor cannot change their appearance.": "يرسم نظام التشغيل عناصر التحكم الأصلية للنافذة، لذا لا يمكن لـ Harbor تغيير مظهرها.",
-  "Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.": "اختر مظهر «المشاهدة معًا» وأزرار التصغير والتكبير والإغلاق. يحل الزجاج السائل محل عناصر التحكم الشفافة النظيفة.",
+  "The operating system draws native window controls, so Harbor cannot change their appearance.":
+    "يرسم نظام التشغيل عناصر التحكم الأصلية للنافذة، لذا لا يمكن لـ Harbor تغيير مظهرها.",
+  "Choose how Watch Together and the minimize, maximize, and close buttons look. Liquid glass replaces the clean transparent controls.":
+    "اختر مظهر «المشاهدة معًا» وأزرار التصغير والتكبير والإغلاق. يحل الزجاج السائل محل عناصر التحكم الشفافة النظيفة.",
   "Clean transparent": "شفاف ونظيف",
   "Liquid glass": "الزجاج السائل",
-  "Filled": "ممتلئ",
+  Filled: "ممتلئ",
   "Drag the window from anywhere": "سحب النافذة من أي مكان",
-  "Move Harbor by dragging any empty space on a page, not just the top bar. Leave this off to keep clicks inside pages from nudging the window.": "حرّك Harbor بسحب أي مساحة فارغة في الصفحة، وليس الشريط العلوي فقط. اترك هذا معطّلاً لمنع النقرات داخل الصفحات من تحريك النافذة عن غير قصد.",
+  "Move Harbor by dragging any empty space on a page, not just the top bar. Leave this off to keep clicks inside pages from nudging the window.":
+    "حرّك Harbor بسحب أي مساحة فارغة في الصفحة، وليس الشريط العلوي فقط. اترك هذا معطّلاً لمنع النقرات داخل الصفحات من تحريك النافذة عن غير قصد.",
   "Stream priority": "أولوية البث",
-  "Results from addons higher in this list come first. If one finds nothing, the next fills in.": "تظهر نتائج الإضافات الأعلى في هذه القائمة أولًا. وإذا لم تجد إحداها شيئًا، تتولّى التالية.",
+  "Results from addons higher in this list come first. If one finds nothing, the next fills in.":
+    "تظهر نتائج الإضافات الأعلى في هذه القائمة أولًا. وإذا لم تجد إحداها شيئًا، تتولّى التالية.",
   "Following addon order": "يتبع ترتيب الإضافات",
   "Use addon order": "استخدام ترتيب الإضافات",
   "Not installed": "غير مثبّتة",
   "Remove from list": "إزالة من القائمة",
-  "Priority applies once you have two or more stream addons.": "تُطبَّق الأولوية عندما تمتلك إضافتَي بث أو أكثر.",
+  "Priority applies once you have two or more stream addons.":
+    "تُطبَّق الأولوية عندما تمتلك إضافتَي بث أو أكثر.",
   "{n} addons don't provide streams and aren't listed.": "{n} من الإضافات لا توفّر بثًا ولا تظهر هنا.",
   "Moved {name} to position {n} of {total}": "تم نقل {name} إلى الموضع {n} من {total}",
-  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, like the Stremio and Vidi apps. Stream priority below decides which addon leads, in both modes.": "يضع ترتيب Harbor المصادر الأعلى تقييمًا أولًا. ويحافظ ترتيب الإضافات على نتائج كل إضافة بالترتيب الذي أعادتها به، مثل تطبيقَي Stremio وVidi. وتحدّد أولوية البث أدناه أي إضافة تتصدّر، في كلا الوضعين.",
-  "If a stream hasn't started playing in time (a dead source or an addon that's down), automatically try the next available stream. Off by default.": "إذا لم يبدأ البثّ في الوقت المحدّد (مصدر ميّت أو إضافة معطّلة)، جرّب البثّ المتاح التالي تلقائيًا. مُعطّل افتراضيًا.",
+  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, like the Stremio and Vidi apps. Stream priority below decides which addon leads, in both modes.":
+    "يضع ترتيب Harbor المصادر الأعلى تقييمًا أولًا. ويحافظ ترتيب الإضافات على نتائج كل إضافة بالترتيب الذي أعادتها به، مثل تطبيقَي Stremio وVidi. وتحدّد أولوية البث أدناه أي إضافة تتصدّر، في كلا الوضعين.",
+  "If a stream hasn't started playing in time (a dead source or an addon that's down), automatically try the next available stream. Off by default.":
+    "إذا لم يبدأ البثّ في الوقت المحدّد (مصدر ميّت أو إضافة معطّلة)، جرّب البثّ المتاح التالي تلقائيًا. مُعطّل افتراضيًا.",
   "How long to wait first": "مدة الانتظار قبل التبديل",
-  "Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.": "غالبًا ما تحتاج الإضافات البطيئة ومصادر P2P إلى أكثر من 10 ثوانٍ لتبدأ. ارفع هذه القيمة إذا كان يتم تخطّي البثّ قبل أن تُتاح له فرصة كافية.",
+  "Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.":
+    "غالبًا ما تحتاج الإضافات البطيئة ومصادر P2P إلى أكثر من 10 ثوانٍ لتبدأ. ارفع هذه القيمة إذا كان يتم تخطّي البثّ قبل أن تُتاح له فرصة كافية.",
   "{n} sec": "{n} ثانية",
   "Only start the torrent engine when needed": "لا تُشغّل محرّك التورنت إلا عند الحاجة",
-  "Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.": "يبدأ Harbor عادةً محرّك التورنت عند الإقلاع ليتصل أول بثّ P2P أسرع، وهذا يُبقي عقدة DHT تعمل وتتواصل مع الشبكة حتى وأنت لا تشاهد شيئًا. فعّل هذا الخيار إذا كان اتصالك محدودًا أو محسوب الاستهلاك: عندها يبدأ المحرّك أول مرة تُشغّل فيها تورنت فعليًا. يسري عند الإقلاع التالي.",
+  "Harbor normally starts its torrent engine at launch so the first P2P stream connects faster. That keeps a DHT node running and talking to the network even when you are not watching anything. Turn this on if you are on a metered or limited connection: the engine then starts the first time you actually play a torrent. Takes effect next launch.":
+    "يبدأ Harbor عادةً محرّك التورنت عند الإقلاع ليتصل أول بثّ P2P أسرع، وهذا يُبقي عقدة DHT تعمل وتتواصل مع الشبكة حتى وأنت لا تشاهد شيئًا. فعّل هذا الخيار إذا كان اتصالك محدودًا أو محسوب الاستهلاك: عندها يبدأ المحرّك أول مرة تُشغّل فيها تورنت فعليًا. يسري عند الإقلاع التالي.",
   "What fullscreen does": "ما الذي يفعله ملء الشاشة",
-  "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.": "ملء الشاشة الحقيقي يغطّي الشاشة بالكامل ويُخفي شريط المهام. أما التكبير فيملأ الشاشة مع الإبقاء على شريط المهام وشريط العنوان، لتتمكّن من التنقّل بين التطبيقات.",
+  "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.":
+    "ملء الشاشة الحقيقي يغطّي الشاشة بالكامل ويُخفي شريط المهام. أما التكبير فيملأ الشاشة مع الإبقاء على شريط المهام وشريط العنوان، لتتمكّن من التنقّل بين التطبيقات.",
   "True fullscreen": "ملء شاشة حقيقي",
-  "Maximize": "تكبير",
+  Maximize: "تكبير",
   "Dual subtitles": "ترجمة مزدوجة",
-  "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.": "اعرض ترجمة ثانية بلغة أخرى في الوقت نفسه. مفيد عند تعلّم لغة جديدة: اجعل اللغة التي تتعلّمها هي الترجمة الأساسية، وضع لغتك الأم هنا.",
+  "Show a second subtitle in another language at the same time. Handy when you are learning a language: keep the one you are learning as your main subtitle, and put your own language here.":
+    "اعرض ترجمة ثانية بلغة أخرى في الوقت نفسه. مفيد عند تعلّم لغة جديدة: اجعل اللغة التي تتعلّمها هي الترجمة الأساسية، وضع لغتك الأم هنا.",
   "Second subtitle language": "لغة الترجمة الثانية",
-  "Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.": "يحمّلها Harbor تلقائيًا عند توفّر مسار بتلك اللغة. ويمكنك أيضًا تعيين المسار الثاني أو إزالته لفيديو واحد من قائمة الترجمات في المشغّل.",
+  "Harbor loads it automatically when a track in that language exists. You can also set or clear the second track for one video from the subtitle menu in the player.":
+    "يحمّلها Harbor تلقائيًا عند توفّر مسار بتلك اللغة. ويمكنك أيضًا تعيين المسار الثاني أو إزالته لفيديو واحد من قائمة الترجمات في المشغّل.",
   "Where it shows": "مكان ظهورها",
   "Top of the screen": "أعلى الشاشة",
   "Above the main line": "فوق السطر الأساسي",
   "Second line size": "حجم السطر الثاني",
   "Get your own": "احصل على نسختك",
   "Trial for ${n}": "جرّبه بـ ${n}",
-  "ElfHosted": "ElfHosted",
-  "Debridge is the part that finds you a working file. A TorBox and a Usenet account come with it, so you do not need to buy a debrid service separately. Already have Real-Debrid or AllDebrid? Plug it in instead.": "Debridge هو الجزء الذي يجد لك ملفًا يعمل. ويأتي معه حساب TorBox وحساب Usenet، فلا تحتاج إلى شراء خدمة debrid منفصلة. ولديك Real-Debrid أو AllDebrid؟ اربطه بدلًا من ذلك.",
+  ElfHosted: "ElfHosted",
+  "Debridge is the part that finds you a working file. A TorBox and a Usenet account come with it, so you do not need to buy a debrid service separately. Already have Real-Debrid or AllDebrid? Plug it in instead.":
+    "Debridge هو الجزء الذي يجد لك ملفًا يعمل. ويأتي معه حساب TorBox وحساب Usenet، فلا تحتاج إلى شراء خدمة debrid منفصلة. ولديك Real-Debrid أو AllDebrid؟ اربطه بدلًا من ذلك.",
   "No Docker, no server, nothing to configure.": "بلا Docker، بلا خادم، ولا شيء لإعداده.",
   "${n} for {days} days": "${n} لمدة {days} أيام",
   "cancel anytime": "ألغِ متى شئت",
   "Rather not set any of this up?": "تفضّل ألا تُعِدّ أيًّا من هذا؟",
   "Get {name} hosted, plus {n} more addons.": "احصل على {name} مُستضافًا، و{n} إضافة أخرى.",
-  "{n} addons run for you, with Debridge included: TorBox and Usenet accounts, so there is no debrid service to buy separately.": "{n} إضافة تعمل نيابةً عنك، مع Debridge: حسابا TorBox وUsenet، فلا توجد خدمة debrid تشتريها منفصلة.",
+  "{n} addons run for you, with Debridge included: TorBox and Usenet accounts, so there is no debrid service to buy separately.":
+    "{n} إضافة تعمل نيابةً عنك، مع Debridge: حسابا TorBox وUsenet، فلا توجد خدمة debrid تشتريها منفصلة.",
   "Try it for ${n}": "جرّبه بـ ${n}",
   "Hide this": "إخفاء",
-  "Includes Comet, MediaFusion, AIOStreams, StremThru, Jackettio and more, plus TorBox and Usenet accounts. No Docker, no server, no config.": "يشمل Comet وMediaFusion وAIOStreams وStremThru وJackettio وغيرها، إضافةً إلى حسابَي TorBox وUsenet. بلا Docker، بلا خادم، بلا إعدادات.",
+  "Includes Comet, MediaFusion, AIOStreams, StremThru, Jackettio and more, plus TorBox and Usenet accounts. No Docker, no server, no config.":
+    "يشمل Comet وMediaFusion وAIOStreams وStremThru وJackettio وغيرها، إضافةً إلى حسابَي TorBox وUsenet. بلا Docker، بلا خادم، بلا إعدادات.",
   "Support Harbor": "ادعم Harbor",
   "Who keeps this running": "من يُبقي هذا يعمل",
-  "Harbor's backend runs on ElfHosted. They took it on without being asked, and Harbor has never charged for anything.": "تعمل البنية الخلفية لـ Harbor على ElfHosted. تكفّلوا بها دون أن يُطلب منهم، ولم يتقاضَ Harbor يومًا مقابلًا عن أي شيء.",
-  "If you want to put money somewhere and you use Harbor, an ElfHosted subscription is the most useful place for it. You get a managed instance, and the servers Harbor depends on stay paid for.": "إذا أردت إنفاق مالك في مكان ما وأنت تستخدم Harbor، فاشتراك ElfHosted هو الأجدى. تحصل على نسخة مُدارة، وتبقى الخوادم التي يعتمد عليها Harbor مدفوعة.",
+  "Harbor's backend runs on ElfHosted. They took it on without being asked, and Harbor has never charged for anything.":
+    "تعمل البنية الخلفية لـ Harbor على ElfHosted. تكفّلوا بها دون أن يُطلب منهم، ولم يتقاضَ Harbor يومًا مقابلًا عن أي شيء.",
+  "If you want to put money somewhere and you use Harbor, an ElfHosted subscription is the most useful place for it. You get a managed instance, and the servers Harbor depends on stay paid for.":
+    "إذا أردت إنفاق مالك في مكان ما وأنت تستخدم Harbor، فاشتراك ElfHosted هو الأجدى. تحصل على نسخة مُدارة، وتبقى الخوادم التي يعتمد عليها Harbor مدفوعة.",
   "Browse ElfHosted": "تصفّح ElfHosted",
   "One-off donation": "تبرّع لمرة واحدة",
   "Donating to Harbor": "التبرّع لـ Harbor",
-  "Short version: don't. Harbor takes no donations and no cut of anything on this page.": "باختصار: لا تفعل. لا يقبل Harbor التبرّعات ولا يأخذ أي حصة مما في هذه الصفحة.",
-  "People have offered plenty of times and the answer has stayed no. If you were going to send something, send it to ElfHosted above so the infrastructure stays up, or to one of the charities below. Both do more good than paying me would.": "عرض الناس ذلك مرارًا وظلّت الإجابة لا. إن كنت ستُرسل شيئًا، فأرسله إلى ElfHosted أعلاه لتبقى البنية التحتية قائمة، أو إلى إحدى الجمعيات أدناه. كلاهما أنفع من أن تدفع لي.",
+  "Short version: don't. Harbor takes no donations and no cut of anything on this page.":
+    "باختصار: لا تفعل. لا يقبل Harbor التبرّعات ولا يأخذ أي حصة مما في هذه الصفحة.",
+  "People have offered plenty of times and the answer has stayed no. If you were going to send something, send it to ElfHosted above so the infrastructure stays up, or to one of the charities below. Both do more good than paying me would.":
+    "عرض الناس ذلك مرارًا وظلّت الإجابة لا. إن كنت ستُرسل شيئًا، فأرسله إلى ElfHosted أعلاه لتبقى البنية التحتية قائمة، أو إلى إحدى الجمعيات أدناه. كلاهما أنفع من أن تدفع لي.",
   "If you would rather give it away": "إن كنت تفضّل التبرّع به",
-  "No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.": "لا انتساب ولا روابط إحالة، ولا يحصل Harbor على شيء من هذه. هي فقط أماكن يُحدث فيها المال أثرًا أكبر مما هنا.",
-  "Insecticide-treated nets. One of the most cost-effective interventions measured.": "ناموسيات معالَجة بمبيد. من أكثر التدخّلات فعاليةً من حيث التكلفة وفق القياسات.",
-  "Cash straight to people living in extreme poverty, no strings.": "أموال تصل مباشرةً لمن يعيشون في فقر مدقع، دون شروط.",
+  "No affiliation, no referral links, and Harbor gets nothing from these. They are just places where money goes further than it does here.":
+    "لا انتساب ولا روابط إحالة، ولا يحصل Harbor على شيء من هذه. هي فقط أماكن يُحدث فيها المال أثرًا أكبر مما هنا.",
+  "Insecticide-treated nets. One of the most cost-effective interventions measured.":
+    "ناموسيات معالَجة بمبيد. من أكثر التدخّلات فعاليةً من حيث التكلفة وفق القياسات.",
+  "Cash straight to people living in extreme poverty, no strings.":
+    "أموال تصل مباشرةً لمن يعيشون في فقر مدقع، دون شروط.",
   "Emergency medical care in crisis zones.": "رعاية طبية طارئة في مناطق الأزمات.",
-  "Keeps the web's memory alive. Harbor would be poorer without it.": "يُبقي ذاكرة الإنترنت حيّة. وكان Harbor سيكون أفقر بدونها.",
-  "Who pays for the servers, and where to put money if you want to.": "من يدفع تكاليف الخوادم، وأين تضع أموالك إن أردت.",
-  "Harbor's backend runs on ElfHosted. They run our servers at no cost to the community.": "يعمل الخادم الخلفي لـ Harbor على ElfHosted. فهم يشغّلون خوادمنا دون أي تكلفة على المجتمع.",
-  "Keeping Harbor's backend online costs real money, and ElfHosted covers it so the community does not have to. Becoming a subscriber is the best way to keep that going, and it is not a donation. You get proper infrastructure for your own setup, and Harbor stays funded at the same time.": "إبقاء الخادم الخلفي لـ Harbor متصلاً يكلّف مالاً حقيقياً، وتتكفّل ElfHosted بذلك حتى لا يضطر المجتمع لتحمّله. الاشتراك هو أفضل طريقة لاستمرار ذلك، وهو ليس تبرعاً. فأنت تحصل على بنية تحتية حقيقية لإعداداتك الخاصة، ويبقى Harbor ممولاً في الوقت نفسه.",
-  "Private Stremio add-ons with 10x the rate limits and built-in stream proxying, from $9 a month.": "إضافات Stremio خاصة بحدود طلبات أعلى بعشرة أضعاف ووسيط بث مدمج، ابتداءً من 9$ شهرياً.",
-  "Managed Plex, Emby, or Jellyfin, running in minutes with no hardware and no Docker.": "خوادم Plex أو Emby أو Jellyfin مُدارة، تعمل خلال دقائق دون عتاد ودون Docker.",
-  "Over 100 self-hosted apps: the *arr stack, debrid tools, books and audiobooks, and more.": "أكثر من 100 تطبيق ذاتي الاستضافة: حزمة ‎*arr وأدوات debrid والكتب والكتب الصوتية والمزيد.",
-  "Daily backups, automatic updates, and monitoring, all handled for you.": "نسخ احتياطي يومي وتحديثات تلقائية ومراقبة، كل ذلك يُدار نيابةً عنك.",
-  "Month to month, cancel anytime, and you can try the whole thing for $1 for a week.": "شهرياً، وتلغي في أي وقت، ويمكنك تجربة كل ذلك مقابل 1$ لمدة أسبوع.",
+  "Keeps the web's memory alive. Harbor would be poorer without it.":
+    "يُبقي ذاكرة الإنترنت حيّة. وكان Harbor سيكون أفقر بدونها.",
+  "Who pays for the servers, and where to put money if you want to.":
+    "من يدفع تكاليف الخوادم، وأين تضع أموالك إن أردت.",
+  "Harbor's backend runs on ElfHosted. They run our servers at no cost to the community.":
+    "يعمل الخادم الخلفي لـ Harbor على ElfHosted. فهم يشغّلون خوادمنا دون أي تكلفة على المجتمع.",
+  "Keeping Harbor's backend online costs real money, and ElfHosted covers it so the community does not have to. Becoming a subscriber is the best way to keep that going, and it is not a donation. You get proper infrastructure for your own setup, and Harbor stays funded at the same time.":
+    "إبقاء الخادم الخلفي لـ Harbor متصلاً يكلّف مالاً حقيقياً، وتتكفّل ElfHosted بذلك حتى لا يضطر المجتمع لتحمّله. الاشتراك هو أفضل طريقة لاستمرار ذلك، وهو ليس تبرعاً. فأنت تحصل على بنية تحتية حقيقية لإعداداتك الخاصة، ويبقى Harbor ممولاً في الوقت نفسه.",
+  "Private Stremio add-ons with 10x the rate limits and built-in stream proxying, from $9 a month.":
+    "إضافات Stremio خاصة بحدود طلبات أعلى بعشرة أضعاف ووسيط بث مدمج، ابتداءً من 9$ شهرياً.",
+  "Managed Plex, Emby, or Jellyfin, running in minutes with no hardware and no Docker.":
+    "خوادم Plex أو Emby أو Jellyfin مُدارة، تعمل خلال دقائق دون عتاد ودون Docker.",
+  "Over 100 self-hosted apps: the *arr stack, debrid tools, books and audiobooks, and more.":
+    "أكثر من 100 تطبيق ذاتي الاستضافة: حزمة ‎*arr وأدوات debrid والكتب والكتب الصوتية والمزيد.",
+  "Daily backups, automatic updates, and monitoring, all handled for you.":
+    "نسخ احتياطي يومي وتحديثات تلقائية ومراقبة، كل ذلك يُدار نيابةً عنك.",
+  "Month to month, cancel anytime, and you can try the whole thing for $1 for a week.":
+    "شهرياً، وتلغي في أي وقت، ويمكنك تجربة كل ذلك مقابل 1$ لمدة أسبوع.",
   "See what you get": "شاهد ما ستحصل عليه",
   "Short version: don't. Harbor takes no donations.": "باختصار: لا تفعل. Harbor لا يقبل التبرعات.",
-  "If you were going to send something, send it to ElfHosted above so the servers stay paid for, or to one of the charities below. Both do more good with it.": "إن كنت تنوي إرسال شيء، فأرسله إلى ElfHosted أعلاه لإبقاء الخوادم مدفوعة، أو إلى إحدى الجمعيات الخيرية أدناه. كلاهما يصنع خيراً أكبر به.",
+  "If you were going to send something, send it to ElfHosted above so the servers stay paid for, or to one of the charities below. Both do more good with it.":
+    "إن كنت تنوي إرسال شيء، فأرسله إلى ElfHosted أعلاه لإبقاء الخوادم مدفوعة، أو إلى إحدى الجمعيات الخيرية أدناه. كلاهما يصنع خيراً أكبر به.",
   "Badges for giving": "شارات مقابل العطاء",
-  "Give to any charity below or subscribe to ElfHosted, and the badge lands on your profile.": "تبرّع لأي جمعية خيرية أدناه أو اشترك في ElfHosted، وستظهر الشارة في ملفك الشخصي.",
-  "Charity": "خيري",
+  "Give to any charity below or subscribe to ElfHosted, and the badge lands on your profile.":
+    "تبرّع لأي جمعية خيرية أدناه أو اشترك في ElfHosted، وستظهر الشارة في ملفك الشخصي.",
+  Charity: "خيري",
   "For donating to a charity.": "لتبرّعك لجمعية خيرية.",
   "Charity $100+": "خيري $100+",
   "For giving more than $100 to charity.": "لتبرّعك بأكثر من 100$ للأعمال الخيرية.",
   "For an active ElfHosted subscription.": "لاشتراك نشِط في ElfHosted.",
-  "To get a Charity badge, forward your donation receipt or invoice to": "للحصول على شارة الخير، أعد توجيه إيصال تبرّعك أو فاتورته إلى",
-  "with your @handle in the body so we can match it to your account.": "مع ذكر @handle الخاص بك في نص الرسالة حتى نتمكن من ربطها بحسابك.",
-  "Childhood cancer research and treatment. Families are never billed for care, travel, housing, or food.": "أبحاث وعلاج سرطان الأطفال. لا تُحاسَب العائلات أبداً على العلاج أو السفر أو السكن أو الطعام.",
-  "Funds research into less toxic, more targeted treatments for childhood cancer.": "تموّل أبحاثاً عن علاجات أقل سُمّية وأكثر استهدافاً لسرطان الأطفال.",
-  "Defends privacy, free expression, and the open internet, in the courts and in the code.": "تدافع عن الخصوصية وحرية التعبير والإنترنت المفتوح، في المحاكم وفي الشيفرة.",
-  "Emergency medical care in crisis zones, independent of politics.": "رعاية طبية طارئة في مناطق الأزمات، بمعزل عن السياسة.",
+  "To get a Charity badge, forward your donation receipt or invoice to":
+    "للحصول على شارة الخير، أعد توجيه إيصال تبرّعك أو فاتورته إلى",
+  "with your @handle in the body so we can match it to your account.":
+    "مع ذكر @handle الخاص بك في نص الرسالة حتى نتمكن من ربطها بحسابك.",
+  "Childhood cancer research and treatment. Families are never billed for care, travel, housing, or food.":
+    "أبحاث وعلاج سرطان الأطفال. لا تُحاسَب العائلات أبداً على العلاج أو السفر أو السكن أو الطعام.",
+  "Funds research into less toxic, more targeted treatments for childhood cancer.":
+    "تموّل أبحاثاً عن علاجات أقل سُمّية وأكثر استهدافاً لسرطان الأطفال.",
+  "Defends privacy, free expression, and the open internet, in the courts and in the code.":
+    "تدافع عن الخصوصية وحرية التعبير والإنترنت المفتوح، في المحاكم وفي الشيفرة.",
+  "Emergency medical care in crisis zones, independent of politics.":
+    "رعاية طبية طارئة في مناطق الأزمات، بمعزل عن السياسة.",
   "Look any of them up on Charity Navigator": "ابحث عن أيٍّ منها على Charity Navigator",
   "Built on Stremio": "مبني على Stremio",
-  "Harbor would not be possible without Stremio. It is the foundation everything here is built on.": "لم يكن Harbor ليصبح ممكناً لولا Stremio. فهو الأساس الذي بُني عليه كل شيء هنا.",
-  "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.": "يتحدث Harbor بروتوكول إضافات Stremio، وتنمو منظومة الإضافات بأكملها من عملهم. يُموَّل Stremio من مجتمعه، ومن يساهم يحصل على وصول مبكر إلى الميزات التجريبية. وإن كان بمقدورك، فأرسل لهم شيئاً أيضاً.",
+  "Harbor would not be possible without Stremio. It is the foundation everything here is built on.":
+    "لم يكن Harbor ليصبح ممكناً لولا Stremio. فهو الأساس الذي بُني عليه كل شيء هنا.",
+  "Harbor speaks Stremio's addon protocol, and the whole ecosystem of addons grows out of their work. Stremio is funded by its community, and supporters who chip in get early access to experimental features. If you have it to spare, send some their way too.":
+    "يتحدث Harbor بروتوكول إضافات Stremio، وتنمو منظومة الإضافات بأكملها من عملهم. يُموَّل Stremio من مجتمعه، ومن يساهم يحصل على وصول مبكر إلى الميزات التجريبية. وإن كان بمقدورك، فأرسل لهم شيئاً أيضاً.",
   "Support Stremio": "دعم Stremio",
-  "Stremio Supporters get a special badge on their Harbor profile.": "يحصل داعمو Stremio على شارة خاصة في ملفهم الشخصي على Harbor.",
+  "Stremio Supporters get a special badge on their Harbor profile.":
+    "يحصل داعمو Stremio على شارة خاصة في ملفهم الشخصي على Harbor.",
   "Your own private {name}, bundled with Debridge": "نسختك الخاصة من {name}، مع Debridge",
-  "Who keeps the lights on, what Harbor is built on, and where to put money if you want to.": "من يُبقي الخوادم تعمل، وعلى ماذا بُني Harbor، وأين تضع أموالك إن أردت.",
-  "If you were going to send something, send it to ElfHosted or Stremio above, or to one of the charities below. They all do more good with it.": "إن كنت تنوي إرسال شيء، فأرسله إلى ElfHosted أو Stremio أعلاه، أو إلى إحدى الجمعيات الخيرية أدناه. كلها تصنع خيراً أكبر به.",
-  "Support ElfHosted or Stremio, or give to any charity below, and the badge lands on your profile.": "ادعم ElfHosted أو Stremio، أو تبرّع لأي جمعية خيرية أدناه، وستظهر الشارة في ملفك الشخصي.",
+  "Who keeps the lights on, what Harbor is built on, and where to put money if you want to.":
+    "من يُبقي الخوادم تعمل، وعلى ماذا بُني Harbor، وأين تضع أموالك إن أردت.",
+  "If you were going to send something, send it to ElfHosted or Stremio above, or to one of the charities below. They all do more good with it.":
+    "إن كنت تنوي إرسال شيء، فأرسله إلى ElfHosted أو Stremio أعلاه، أو إلى إحدى الجمعيات الخيرية أدناه. كلها تصنع خيراً أكبر به.",
+  "Support ElfHosted or Stremio, or give to any charity below, and the badge lands on your profile.":
+    "ادعم ElfHosted أو Stremio، أو تبرّع لأي جمعية خيرية أدناه، وستظهر الشارة في ملفك الشخصي.",
   "Fullscreen clock": "ساعة ملء الشاشة",
-  "Keep your local time visible during fullscreen playback and choose how it looks.": "أبقِ التوقيت المحلي ظاهرًا أثناء التشغيل بملء الشاشة واختر شكله.",
+  "Keep your local time visible during fullscreen playback and choose how it looks.":
+    "أبقِ التوقيت المحلي ظاهرًا أثناء التشغيل بملء الشاشة واختر شكله.",
   "Show fullscreen clock": "إظهار ساعة ملء الشاشة",
   "The clock appears with the player controls.": "تظهر الساعة مع عناصر تحكم المشغل.",
   "Clock format": "تنسيق الساعة",
@@ -278,21 +404,25 @@ const settingsFill: Record<string, string> = {
   "Show seconds": "إظهار الثواني",
   "Update the clock every second.": "تحديث الساعة كل ثانية.",
   "Show estimated finish time": "إظهار وقت الانتهاء المتوقع",
-  "Display the local time when the current video is expected to end.": "عرض التوقيت المحلي المتوقع لانتهاء الفيديو الحالي.",
+  "Display the local time when the current video is expected to end.":
+    "عرض التوقيت المحلي المتوقع لانتهاء الفيديو الحالي.",
   "Clock size": "حجم الساعة",
   "Clock style": "نمط الساعة",
-  "Minimal": "بسيط",
-  "Solid": "صلب",
-  "Accent": "لون مميز",
+  Minimal: "بسيط",
+  Solid: "صلب",
+  Accent: "لون مميز",
   "Soft blur with a floating pill.": "ضبابية ناعمة داخل شارة عائمة.",
   "Time only, with a subtle shadow.": "الوقت فقط، مع ظل خفيف.",
   "High-contrast panel for busy scenes.": "لوحة عالية التباين للمشاهد المزدحمة.",
   "Uses your theme's accent color.": "يستخدم اللون المميز من سمتك.",
   "Focused Card": "البطاقة المركّزة",
   "Expanding Cards": "البطاقات المتوسّعة",
-  "Emphasize the selected card across the page while gently darkening and blurring the other cards.": "إبراز البطاقة المحددة في الصفحة مع تعتيم البطاقات الأخرى وتشويشها برفق.",
-  "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.": "توسيع بطاقات الملصقات أثناء التنقل بلوحة المفاتيح أو جهاز التحكم عبر صفوف الملصقات، باستخدام صور عريضة محمّلة مسبقًا.",
-  "Add a TMDB key in Settings to identify the cast.": "أضف مفتاح TMDB في الإعدادات للتعرّف على طاقم العمل.",
+  "Emphasize the selected card across the page while gently darkening and blurring the other cards.":
+    "إبراز البطاقة المحددة في الصفحة مع تعتيم البطاقات الأخرى وتشويشها برفق.",
+  "Expand poster cards during keyboard or remote navigation across poster rows, using preloaded wide artwork.":
+    "توسيع بطاقات الملصقات أثناء التنقل بلوحة المفاتيح أو جهاز التحكم عبر صفوف الملصقات، باستخدام صور عريضة محمّلة مسبقًا.",
+  "Add a TMDB key in Settings to identify the cast.":
+    "أضف مفتاح TMDB في الإعدادات للتعرّف على طاقم العمل.",
   "No cast photos are available for this title.": "لا تتوفر صور لطاقم العمل لهذا العنوان.",
 };
 

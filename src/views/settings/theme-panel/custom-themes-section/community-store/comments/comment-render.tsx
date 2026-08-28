@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { openUrl } from "@/lib/window";
+import { handleLinkOutActivation } from "@/lib/social/link-out-activation";
+import { openLinkOut } from "@/lib/social/link-out";
 import { useT } from "@/lib/i18n";
 import { segmentMentions } from "@/lib/social/mentions";
 import { MentionLink } from "@/views/profile/mention-link";
@@ -62,7 +63,10 @@ function render(nodes: CNode[]): React.ReactNode {
         );
       case "code":
         return (
-          <code key={i} className="rounded-[6px] bg-canvas/70 px-1.5 py-0.5 font-mono text-[12.5px] text-ink ring-1 ring-edge-soft">
+          <code
+            key={i}
+            className="rounded-[6px] bg-canvas/70 px-1.5 py-0.5 font-mono text-[12.5px] text-ink ring-1 ring-edge-soft"
+          >
             {render(n.children)}
           </code>
         );
@@ -78,16 +82,9 @@ function render(nodes: CNode[]): React.ReactNode {
             key={i}
             href={n.href}
             title={n.href}
-            target="_blank"
             rel="noreferrer noopener nofollow"
-            onClick={(e) => {
-              e.preventDefault();
-              openUrl(n.href);
-            }}
-            onAuxClick={(e) => {
-              e.preventDefault();
-              openUrl(n.href);
-            }}
+            onClick={(e) => handleLinkOutActivation(e, openLinkOut)}
+            onAuxClick={(e) => handleLinkOutActivation(e, openLinkOut)}
             className="break-all text-accent underline decoration-accent/40 underline-offset-2 transition-colors hover:decoration-accent"
           >
             {n.label}
@@ -112,5 +109,9 @@ function render(nodes: CNode[]): React.ReactNode {
 
 export function CommentBody({ text }: { text: string }) {
   const nodes = useMemo(() => parseComment(text), [text]);
-  return <div className="break-words text-[13.5px] leading-relaxed text-ink-muted [word-break:break-word]">{render(nodes)}</div>;
+  return (
+    <div className="break-words text-[13.5px] leading-relaxed text-ink-muted [word-break:break-word]">
+      {render(nodes)}
+    </div>
+  );
 }

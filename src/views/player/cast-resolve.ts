@@ -70,7 +70,7 @@ export async function resolveCompatibleCastUrl(
   const alt = pickBestCompatStream(candidates, caps);
   if (alt) {
     const ac = new AbortController();
-    const r = await resolveStream(alt, debrids, ac.signal, false);
+    const r = await resolveStream(alt, debrids, ac.signal, false, false, undefined, true, false);
     if (r.ok) {
       let url = r.data.url;
       if (r.data.headers && Object.keys(r.data.headers).length > 0) {

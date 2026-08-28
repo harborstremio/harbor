@@ -11,12 +11,20 @@ import type { ScoredStream } from "@/lib/streams/types";
 import { directStreamAvailable } from "@/lib/torrent/stremio-stream";
 import type { PlayEpisode } from "@/lib/view";
 import { EditionChip } from "./edition-chip";
-import { anyStreamCached, confirmationLabel, displayTitle, hasUncachedMarker, streamSummaryParts, torrentFilename } from "./picker-utils";
+import {
+  anyStreamCached,
+  confirmationLabel,
+  displayTitle,
+  hasUncachedMarker,
+  streamSummaryParts,
+  torrentFilename,
+} from "./picker-utils";
 import { PlayProvenance } from "./play-provenance";
 
 export function PrimaryCard({
   meta,
   episode,
+  absoluteEpisode,
   stream,
   debrids,
   addonLogo,
@@ -30,6 +38,7 @@ export function PrimaryCard({
 }: {
   meta: Meta;
   episode?: PlayEpisode;
+  absoluteEpisode?: number | null;
   stream: ScoredStream;
   debrids: ReturnType<typeof useDebridClients>;
   addonLogo: string | null;
@@ -56,7 +65,7 @@ export function PrimaryCard({
   const queueTarget = debrids.find((d) => d.queueCache);
   const canStream = !isCached && directStreamAvailable(stream);
   const summary = streamSummaryParts(stream);
-  const title = displayTitle(stream, meta.name, episode);
+  const title = displayTitle(stream, meta.name, episode, absoluteEpisode);
   const fname = settings.pickerShowFilename ? torrentFilename(stream) : "";
   const badges = settings.showQualityBadge ? streamBadges(stream) : [];
   const knownLanguages = stream.audioLanguages.filter((l) => l && l.toLowerCase() !== "unknown");
@@ -69,19 +78,16 @@ export function PrimaryCard({
     <section className="relative overflow-hidden rounded-[24px] bg-canvas/70">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ink/12 to-transparent" />
 
-      <div className={`grid gap-7 p-7 ${isLandscape ? "grid-cols-[320px_1fr] items-center" : "grid-cols-[224px_1fr]"}`}>
+      <div
+        className={`grid gap-7 p-7 ${isLandscape ? "grid-cols-[320px_1fr] items-center" : "grid-cols-[224px_1fr]"}`}
+      >
         <div
           className={`relative overflow-hidden rounded-[16px] bg-canvas/50 ring-1 ring-edge-soft/60 ${
             isLandscape ? "aspect-video self-center" : "aspect-[2/3]"
           }`}
         >
           {heroImage ? (
-            <img
-              src={heroImage}
-              alt=""
-              className="h-full w-full object-cover"
-              draggable={false}
-            />
+            <img src={heroImage} alt="" className="h-full w-full object-cover" draggable={false} />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-canvas to-elevated" />
           )}
@@ -147,9 +153,7 @@ export function PrimaryCard({
               </p>
             )}
             <HostMatchChip match={match} long />
-            <p className="break-all font-mono text-[15.5px] leading-relaxed text-ink">
-              {title}
-            </p>
+            <p className="break-all font-mono text-[15.5px] leading-relaxed text-ink">{title}</p>
             {fname && fname !== title && (
               <p className="break-all font-mono text-[12.5px] leading-relaxed text-ink-subtle/80">
                 {fname}
@@ -160,14 +164,22 @@ export function PrimaryCard({
               <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[13px] font-semibold uppercase tracking-[0.16em] text-ink-muted">
                 {summary.map((part, i) => (
                   <span key={`${part}-${i}`} className="flex items-center gap-3">
-                    {i > 0 && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle/40" />}
+                    {i > 0 && (
+                      <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle/40" />
+                    )}
                     <span>{part}</span>
                   </span>
                 ))}
               </div>
             )}
 
-            {(cachedDebrid || addonCached || queued || (debrids.length > 0 && !stream.url) || stream.remux || stream.releaseGroupNormalized || stream.edition) && (
+            {(cachedDebrid ||
+              addonCached ||
+              queued ||
+              (debrids.length > 0 && !stream.url) ||
+              stream.remux ||
+              stream.releaseGroupNormalized ||
+              stream.edition) && (
               <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
                 {libraryDebrids.length > 0 ? (
                   <span className="inline-flex items-center gap-1.5 text-[12.5px] font-semibold tracking-[0.04em] text-accent">
@@ -284,13 +296,14 @@ export function PrimaryCard({
                 Not cached
               </button>
             )}
-            <PlayProvenance stream={stream} debrids={debrids} isCached={isCached} addonLogo={addonLogo} />
+            <PlayProvenance
+              stream={stream}
+              debrids={debrids}
+              isCached={isCached}
+              addonLogo={addonLogo}
+            />
             {link && (
-              <CopyLinkButton
-                url={link}
-                size={15}
-                className="h-9 w-9 ring-1 ring-edge-soft/60"
-              />
+              <CopyLinkButton url={link} size={15} className="h-9 w-9 ring-1 ring-edge-soft/60" />
             )}
           </div>
         </div>

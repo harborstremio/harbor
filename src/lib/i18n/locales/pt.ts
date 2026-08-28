@@ -1,4 +1,5 @@
 import coverage from "./pt/coverage";
+import uiFallback from "./ui-fallback";
 import chrome from "./pt/chrome";
 import common from "./pt/common";
 import catalog from "./pt/catalog";
@@ -28,6 +29,7 @@ import used from "./pt/used";
 
 const pt: Record<string, string> = {
   ...coverage,
+  ...uiFallback,
   ...chrome,
   ...common,
   ...catalog,

@@ -8,6 +8,7 @@ import {
   type AniZipMapping,
 } from "@/lib/providers/anizip";
 import { kitsuMainTvSeries } from "@/lib/providers/kitsu";
+import { selectSiblingWindows, type AnimeListWindow } from "@/lib/streams/anime-identity-core";
 
 const SIDE_ENTRY_TYPES = new Set(["ova", "ona", "special", "music"]);
 
@@ -34,6 +35,8 @@ type ArmKitsuCache = Record<string, ArmKitsuEntry>;
 type AnidbMapCache = {
   tvdb: Record<string, number>;
   imdb: Record<string, string>;
+  byTvdb?: Record<string, AnimeListWindow[]>;
+  byImdb?: Record<string, AnimeListWindow[]>;
   t: number;
 };
 
@@ -116,9 +119,9 @@ export async function externalToKitsu(source: string, id: number): Promise<numbe
 
 let xmlInflight: Promise<AnidbMapCache> | null = null;
 
-async function loadAnidbMaps(): Promise<AnidbMapCache> {
+export async function loadAnidbMaps(): Promise<AnidbMapCache> {
   const cached = readJson<AnidbMapCache | null>(ANIDB_TVDB_KEY, null);
-  if (cached && Date.now() - cached.t < XML_TTL_MS) return cached;
+  if (cached && cached.byTvdb && Date.now() - cached.t < XML_TTL_MS) return cached;
   if (xmlInflight) return xmlInflight;
   xmlInflight = (async () => {
     try {
@@ -127,6 +130,8 @@ async function loadAnidbMaps(): Promise<AnidbMapCache> {
       const text = await r.text();
       const tvdb: Record<string, number> = {};
       const imdb: Record<string, string> = {};
+      const byTvdb: Record<string, AnimeListWindow[]> = {};
+      const byImdb: Record<string, AnimeListWindow[]> = {};
       const re = /<anime\b([^>]*)>/g;
       let m: RegExpExecArray | null;
       while ((m = re.exec(text)) !== null) {
@@ -135,17 +140,42 @@ async function loadAnidbMaps(): Promise<AnidbMapCache> {
         if (!anidbMatch) continue;
         const anidbId = anidbMatch[1];
         const tvdbMatch = /\btvdbid="([^"]+)"/.exec(attrs);
+        let tvdbId: number | null = null;
         if (tvdbMatch) {
           const tv = tvdbMatch[1];
           if (tv && tv !== "unknown" && tv !== "movie" && tv !== "tba" && tv !== "hentai") {
-            const tvdbId = Number(tv);
-            if (Number.isFinite(tvdbId) && !tvdb[anidbId]) tvdb[anidbId] = tvdbId;
+            const n = Number(tv);
+            if (Number.isFinite(n)) {
+              tvdbId = n;
+              if (!tvdb[anidbId]) tvdb[anidbId] = n;
+            }
           }
         }
         const imdbMatch = /\bimdbid="(tt\d+)"/.exec(attrs);
         if (imdbMatch && !imdb[anidbId]) imdb[anidbId] = imdbMatch[1];
+
+        // Season windows: which provider season of the shared series this
+        // AniDB entry occupies. Absolute entries ("a") are skipped here.
+        const seasonAttr =
+          /\bdefaulttvdbseason="(\d+)"/.exec(attrs) ?? /\btmdbseason="(\d+)"/.exec(attrs);
+        if (!seasonAttr) continue;
+        const season = Number(seasonAttr[1]);
+        if (!Number.isFinite(season)) continue;
+        const offsetAttr = /\bepisodeoffset="(-?\d+)"/.exec(attrs);
+        const windowEntry: AnimeListWindow = {
+          anidbId: Number(anidbId),
+          season,
+          offset: offsetAttr ? Number(offsetAttr[1]) : 0,
+        };
+        const imdbKey = imdbMatch?.[1];
+        if (tvdbId != null) {
+          (byTvdb[String(tvdbId)] ??= []).push(windowEntry);
+          if (imdbKey) (byImdb[imdbKey] ??= []).push(windowEntry);
+        } else if (imdbKey) {
+          (byImdb[imdbKey] ??= []).push(windowEntry);
+        }
       }
-      const out: AnidbMapCache = { tvdb, imdb, t: Date.now() };
+      const out: AnidbMapCache = { tvdb, imdb, byTvdb, byImdb, t: Date.now() };
       writeJson(ANIDB_TVDB_KEY, out);
       return out;
     } catch {
@@ -155,6 +185,17 @@ async function loadAnidbMaps(): Promise<AnidbMapCache> {
     }
   })();
   return xmlInflight;
+}
+
+export async function findSiblingAnidbEntries(
+  provider: "tvdb" | "imdb",
+  providerId: string,
+  season: number,
+  excludeAnidbId?: number | null,
+): Promise<number[]> {
+  const maps = await loadAnidbMaps();
+  const bucket = provider === "tvdb" ? maps.byTvdb?.[providerId] : maps.byImdb?.[providerId];
+  return selectSiblingWindows(bucket, season, excludeAnidbId);
 }
 
 export async function kitsuToTvdb(kitsuId: number): Promise<number | null> {
@@ -248,7 +289,8 @@ export async function imdbToKitsu(imdbId: string): Promise<number | null> {
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }
-  if (typeof az?.mappings?.anidb_id === "number") return externalToKitsu("anidb", az.mappings.anidb_id);
+  if (typeof az?.mappings?.anidb_id === "number")
+    return externalToKitsu("anidb", az.mappings.anidb_id);
   const maps = await loadAnidbMaps();
   if (!imdbAnidbIndex) {
     const idx: Record<string, number> = {};
@@ -268,7 +310,8 @@ export async function tmdbTvToKitsu(tmdbId: number): Promise<number | null> {
   if (typeof az?.mappings?.kitsu_id === "number") {
     return preferMainTv(az.mappings.kitsu_id, (az.mappings as { type?: string }).type);
   }
-  if (typeof az?.mappings?.anidb_id === "number") return externalToKitsu("anidb", az.mappings.anidb_id);
+  if (typeof az?.mappings?.anidb_id === "number")
+    return externalToKitsu("anidb", az.mappings.anidb_id);
   return null;
 }
 

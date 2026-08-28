@@ -31,6 +31,7 @@ const RETIRED_GEMINI = new Set([
 ]);
 import { DEFAULT, STORAGE_KEY } from "./defaults";
 import type { Settings } from "./types";
+import { adoptLegacyPlaylists, readPlaylists } from "@/lib/iptv/playlists-store";
 
 const HEX_RE = /^#[0-9a-f]{6}$/i;
 
@@ -156,6 +157,8 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       _pickerLayoutStremio?: boolean;
       _pickerLayoutStremioV2?: boolean;
       _stremioDeeplinkOnByDefault?: boolean;
+      _contentAdvisoryOnByDefaultV1?: boolean;
+      _skipButtonHideSecV2?: boolean;
       _anilistSyncOnV1?: boolean;
       _rememberLastStreamOnV1?: boolean;
       _streamSortAddonV1?: boolean;
@@ -197,6 +200,23 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
     if (!parsed._stremioDeeplinkOnByDefault) {
       parsed.stremioDeeplinkInstall = true;
       parsed._stremioDeeplinkOnByDefault = true;
+    }
+    if (!parsed._contentAdvisoryOnByDefaultV1) {
+      parsed.contentAdvisoryToast = true;
+      parsed._contentAdvisoryOnByDefaultV1 = true;
+    }
+    if (parsed.contentAdvisoryTheme !== "monochrome" && parsed.contentAdvisoryTheme !== "colored") {
+      parsed.contentAdvisoryTheme = "colored";
+    }
+    if (!parsed._skipButtonHideSecV2) {
+      if (
+        parsed.skipButtonHideSec === 10 ||
+        parsed.skipButtonHideSec === 20 ||
+        parsed.skipButtonHideSec == null
+      ) {
+        parsed.skipButtonHideSec = 14;
+      }
+      parsed._skipButtonHideSecV2 = true;
     }
     if (!parsed._anilistSyncOnV1) {
       parsed.anilistAutoSync = true;
@@ -276,11 +296,17 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       parsed._d3d11FlipSafeDefaultV1 = true;
     }
     if (!parsed._playlistsTabV1) {
-      const lists = parsed.iptvPlaylists;
-      const hasVodSource =
-        Array.isArray(lists) && lists.some((l) => l && (l as { kind?: string }).kind !== "epg");
+      const lists = readPlaylists();
+      const hasVodSource = Array.isArray(lists) && lists.some((l) => l?.kind !== "epg");
       if (hasVodSource) parsed.showPlaylistsTab = true;
       parsed._playlistsTabV1 = true;
+    }
+    // Playlists now live in their own store; adopt any stranded legacy field and
+    // only drop it once it has been persisted, so a failed write never loses data.
+    if ("iptvPlaylists" in parsed) {
+      if (adoptLegacyPlaylists(Array.isArray(parsed.iptvPlaylists) ? parsed.iptvPlaylists : [])) {
+        delete parsed.iptvPlaylists;
+      }
     }
     if (!parsed._navThemeRepairV1) {
       const nav = parsed.navCustomization as Partial<Settings["navCustomization"]> | undefined;
@@ -316,7 +342,7 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
           ? parsed.fullscreenClockShowEndTime
           : DEFAULT.fullscreenClockShowEndTime,
       fullscreenClockSizePx: sanitizeFullscreenClockSize(parsed.fullscreenClockSizePx),
-      streaming: { ...DEFAULT.streaming, ...(parsed.streaming ?? {}) },
+      streaming: { ...DEFAULT.streaming, ...parsed.streaming },
       subOffsetIndicatorEnabled:
         typeof parsed.subOffsetIndicatorEnabled === "boolean"
           ? parsed.subOffsetIndicatorEnabled
@@ -325,27 +351,27 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       subOffsetIndicatorSize: sanitizeSubtitleOffsetSize(parsed.subOffsetIndicatorSize),
       subProvidersEnabled: {
         ...DEFAULT.subProvidersEnabled,
-        ...(parsed.subProvidersEnabled ?? {}),
+        ...parsed.subProvidersEnabled,
       },
       hideContent: {
         ...DEFAULT.hideContent,
-        ...(parsed.hideContent ?? {}),
+        ...parsed.hideContent,
       },
       homeRows: {
         ...DEFAULT.homeRows,
-        ...(parsed.homeRows ?? {}),
+        ...parsed.homeRows,
       },
       navCustomization: {
         ...DEFAULT.navCustomization,
-        ...(parsed.navCustomization ?? {}),
+        ...parsed.navCustomization,
       },
       animeRows: {
         ...DEFAULT.animeRows,
-        ...(parsed.animeRows ?? {}),
+        ...parsed.animeRows,
       },
       letterboxd: {
         ...DEFAULT.letterboxd,
-        ...(parsed.letterboxd ?? {}),
+        ...parsed.letterboxd,
       },
       preferredSubLangs: (parsed.preferredSubLangs ?? DEFAULT.preferredSubLangs).map(languageName),
       preferredAudioLangs: (parsed.preferredAudioLangs ?? DEFAULT.preferredAudioLangs).map(
@@ -386,15 +412,15 @@ export function loadStoredSettings(rawKey: string = STORAGE_KEY): Settings {
       theme: sanitizeTheme(parsed.theme),
       webhooks: {
         ...DEFAULT.webhooks,
-        ...(parsed.webhooks ?? {}),
+        ...parsed.webhooks,
         sources: {
           ...DEFAULT.webhooks.sources,
-          ...(parsed.webhooks?.sources ?? {}),
+          ...parsed.webhooks?.sources,
         },
       },
       customCalendar: {
         ...DEFAULT.customCalendar,
-        ...(parsed.customCalendar ?? {}),
+        ...parsed.customCalendar,
         trackedPeople: Array.isArray(parsed.customCalendar?.trackedPeople)
           ? parsed.customCalendar.trackedPeople
           : [],

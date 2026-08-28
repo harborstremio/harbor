@@ -1,8 +1,23 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
 import { metaLooksAnime } from "@/lib/anime-detect";
 import { useParental } from "@/lib/parental";
-import { searchAll, searchAnime, searchCinemeta, searchLiveTvChannels, type SearchResults } from "@/lib/search";
+import {
+  searchAll,
+  searchAnime,
+  searchCinemeta,
+  searchLiveTvChannels,
+  type SearchResults,
+} from "@/lib/search";
 import { searchAddonCatalogs, searchAddonGroups, mergeMetas } from "@/lib/search-addons";
 import { searchAddonIndex } from "@/lib/search-addon-index";
 import { createSearchRequestGuard } from "@/lib/search-request-guard";
@@ -13,6 +28,7 @@ import { anilistCharacterSearch, type CharacterHit } from "@/lib/anilist/charact
 import { gatherCatalogAddons, type Addon } from "@/lib/addons";
 import { useAuth } from "@/lib/auth";
 import { useSettings } from "@/lib/settings";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { isMagnetInput, isDirectVideoUrl } from "@/lib/torrent/magnet";
 import { useView, type Frame } from "@/lib/view";
 
@@ -72,7 +88,11 @@ type TitledMeta = { name?: string; releaseInfo?: string };
 function dedupeByTitle<T extends TitledMeta>(list: T[]): T[] {
   const seen = new Map<string, T[]>();
   const out: T[] = [];
-  const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
   for (const m of list) {
     const key = norm(m.name ?? "");
     if (!key) {
@@ -98,21 +118,10 @@ function dedupeByTitle<T extends TitledMeta>(list: T[]): T[] {
 }
 
 function normShow(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
-}
-
-function sameShow(a: string, b: string): boolean {
-  const x = normShow(a);
-  return x.length > 0 && x === normShow(b);
-}
-
-function animeKindFromFormat(
-  format: string | null,
-  fallback: "movie" | "series",
-): "movie" | "series" {
-  const fmt = (format ?? "").toUpperCase();
-  if (!fmt) return fallback;
-  return fmt === "MOVIE" ? "movie" : "series";
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function loadRecent(): string[] {
@@ -122,9 +131,7 @@ function loadRecent(): string[] {
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return [];
     const all = arr.filter((x): x is string => typeof x === "string");
-    const clean = all
-      .filter((x) => !isMagnetInput(x) && !isDirectVideoUrl(x))
-      .slice(0, MAX_RECENT);
+    const clean = all.filter((x) => !isMagnetInput(x) && !isDirectVideoUrl(x)).slice(0, MAX_RECENT);
     if (clean.length !== all.length) {
       try {
         localStorage.setItem(RECENT_KEY, JSON.stringify(clean));
@@ -148,6 +155,7 @@ function saveRecent(items: string[]): void {
 
 export function SearchProvider({ children }: { children: ReactNode }) {
   const { settings } = useSettings();
+  const playlists = usePlaylists();
   const { authKey } = useAuth();
   const { hiddenTabs } = useParental();
   const [open, setOpen] = useState(false);
@@ -160,7 +168,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   const requestGuardRef = useRef(createSearchRequestGuard());
   const tmdbCacheRef = useRef<SearchCache<SearchResults | null>>(new Map());
   const animeCacheRef = useRef<SearchCache<Awaited<ReturnType<typeof searchAnime>>>>(new Map());
-  const cinemetaCacheRef = useRef<SearchCache<Awaited<ReturnType<typeof searchCinemeta>>>>(new Map());
+  const cinemetaCacheRef = useRef<SearchCache<Awaited<ReturnType<typeof searchCinemeta>>>>(
+    new Map(),
+  );
   const addonsRef = useRef<{ key: string | null; addons: Addon[] } | null>(null);
   const ensureAddons = useCallback(async (): Promise<Addon[]> => {
     if (addonsRef.current && addonsRef.current.key === authKey) return addonsRef.current.addons;
@@ -202,11 +212,11 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const animeAllowed = !hiddenTabs.anime && !settings.hideContent.anime;
     const mangaAllowed = settings.mangaEnabled && !settings.hideContent.manga;
     const franchiseAllowed = animeAllowed || mangaAllowed;
-    const liveTvAllowed = !hiddenTabs.liveTv && settings.iptvPlaylists.length > 0;
+    const liveTvAllowed = !hiddenTabs.liveTv && playlists.length > 0;
     debounceRef.current = window.setTimeout(() => {
       if (!requestGuardRef.current.isCurrent(id)) return;
       setStatus("loading");
-      const liveTv = liveTvAllowed ? searchLiveTvChannels(trimmed, settings.iptvPlaylists) : [];
+      const liveTv = liveTvAllowed ? searchLiveTvChannels(trimmed, playlists) : [];
       const guard = <T,>(p: Promise<T>, fallback: T): Promise<T> =>
         Promise.race([
           p.catch(() => fallback),
@@ -293,45 +303,29 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         const dropAnime = <T extends { id: string }>(list: T[]): T[] =>
           settings.hideContent.anime ? list.filter((m) => !metaLooksAnime(m)) : list;
         const mergedMovies = dropAnime(
-          dedupeByTitle(mergeMetas(mergeMetas(base.movies, acc.addon.movies), acc.cine.movies)).filter(notAnimeDupe),
+          dedupeByTitle(
+            mergeMetas(mergeMetas(base.movies, acc.addon.movies), acc.cine.movies),
+          ).filter(notAnimeDupe),
         );
         const mergedSeries = dropAnime(
-          dedupeByTitle(mergeMetas(mergeMetas(base.series, acc.addon.series), acc.cine.series)).filter(notAnimeDupe),
+          dedupeByTitle(
+            mergeMetas(mergeMetas(base.series, acc.addon.series), acc.cine.series),
+          ).filter(notAnimeDupe),
         );
         const shown = new Set<string>([...mergedMovies, ...mergedSeries].map((m) => m.id));
         const dedupedGroups = acc.groups
           .map((g) => ({ ...g, metas: dropAnime(g.metas.filter((m) => !shown.has(m.id))) }))
           .filter((g) => g.metas.length > 0);
-        const animeTop = acc.anime[0];
-        const animeTopKind: "movie" | "series" = animeTop
-          ? animeKindFromFormat(animeTop.format, base.topMatch?.kind ?? "series")
-          : "series";
-        const topMatch =
-          animeTop && base.topMatch && sameShow(base.topMatch.meta.name, animeTop.name)
-            ? {
-                kind: animeTopKind,
-                meta: {
-                  id: animeTop.kitsuId
-                    ? `kitsu:${animeTop.kitsuId}`
-                    : animeTop.malId
-                      ? `mal:${animeTop.malId}`
-                      : `anilist:${animeTop.anilistId}`,
-                  type: animeTopKind,
-                  name: animeTop.name,
-                  poster: animeTop.poster ?? base.topMatch.meta.poster,
-                  background: animeTop.background ?? undefined,
-                  description: animeTop.overview || undefined,
-                  releaseInfo: animeTop.year ?? undefined,
-                },
-                popularity: base.topMatch.popularity,
-                backdrop: animeTop.background ?? base.topMatch.backdrop,
-                overview: animeTop.overview || base.topMatch.overview,
-                voteAverage: base.topMatch.voteAverage,
-              }
-            : base.topMatch;
+        // Keep the top match as the localized TMDB entry. Replacing it with the anime
+        // (MAL/Kitsu) version changed its id and poster, which flickered the localized
+        // result to the English/MAL artwork once the anime search resolved.
+        const topMatch = base.topMatch;
         setResults({
           ...base,
-          topMatch: settings.hideContent.anime && topMatch && metaLooksAnime(topMatch.meta) ? null : topMatch,
+          topMatch:
+            settings.hideContent.anime && topMatch && metaLooksAnime(topMatch.meta)
+              ? null
+              : topMatch,
           movies: mergedMovies,
           series: mergedSeries,
           liveTv,
@@ -400,7 +394,21 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         debounceRef.current = null;
       }
     };
-  }, [query, aiHold, settings.tmdbKey, settings.tmdbLanguage, settings.translateTitles, settings.iptvPlaylists, excludeGenres, hiddenTabs.anime, settings.hideContent.anime, hiddenTabs.liveTv, settings.mangaEnabled, settings.hideContent.manga, authKey]);
+  }, [
+    query,
+    aiHold,
+    settings.tmdbKey,
+    settings.tmdbLanguage,
+    settings.translateTitles,
+    playlists,
+    excludeGenres,
+    hiddenTabs.anime,
+    settings.hideContent.anime,
+    hiddenTabs.liveTv,
+    settings.mangaEnabled,
+    settings.hideContent.manga,
+    authKey,
+  ]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -432,7 +440,10 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     if (!trimmed) return;
     if (isMagnetInput(trimmed) || isDirectVideoUrl(trimmed)) return;
     setRecent((prev) => {
-      const next = [trimmed, ...prev.filter((p) => p.toLowerCase() !== trimmed.toLowerCase())].slice(0, MAX_RECENT);
+      const next = [
+        trimmed,
+        ...prev.filter((p) => p.toLowerCase() !== trimmed.toLowerCase()),
+      ].slice(0, MAX_RECENT);
       saveRecent(next);
       return next;
     });
@@ -486,8 +497,34 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   }, [open]);
 
   const value = useMemo(
-    () => ({ open, setOpen, query, setQuery, results, status, recent, clear, closeForNavigation, recordRecent, removeRecent, clearRecent, setAiHold }),
-    [open, query, results, status, recent, setQuery, clear, closeForNavigation, recordRecent, removeRecent, clearRecent],
+    () => ({
+      open,
+      setOpen,
+      query,
+      setQuery,
+      results,
+      status,
+      recent,
+      clear,
+      closeForNavigation,
+      recordRecent,
+      removeRecent,
+      clearRecent,
+      setAiHold,
+    }),
+    [
+      open,
+      query,
+      results,
+      status,
+      recent,
+      setQuery,
+      clear,
+      closeForNavigation,
+      recordRecent,
+      removeRecent,
+      clearRecent,
+    ],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

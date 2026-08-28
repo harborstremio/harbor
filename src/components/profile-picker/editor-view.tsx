@@ -1,5 +1,16 @@
-import { Check, ChevronLeft, Crown, Loader2, Lock, Link2, ShieldCheck, Trash2, Unlock, User as UserIcon } from "lucide-react";
-import { useRef, useState } from "react";
+import {
+  Check,
+  ChevronLeft,
+  Crown,
+  Loader2,
+  Lock,
+  Link2,
+  ShieldCheck,
+  Trash2,
+  Unlock,
+  User as UserIcon,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import simklLogo from "@/assets/simkl.png";
 import { AddonsIcon } from "@/components/icons/addons-icon";
@@ -26,6 +37,15 @@ import {
   type Profile,
   type ProfileColor,
 } from "@/lib/profiles";
+import { emitListToast } from "@/components/lists/list-toast";
+import {
+  defaultSelectedAddonUrls,
+  importDomains,
+  summarizeSource,
+  type ImportAddonPreview,
+  type ImportDomain,
+  type ImportSourceSummary,
+} from "@/lib/profile-import";
 import { useT } from "@/lib/i18n";
 import { hashProfilePassword, verifyProfilePassword } from "@/lib/profile-password";
 import { fetchTraktAvatar } from "@/lib/trakt/profile";
@@ -62,8 +82,15 @@ export function EditorView({
   onCancel: () => void;
   onDone: () => void;
 }) {
-  const { profiles, activeProfile, createProfile, updateProfile, deleteProfile, selectProfile, setPrimary } =
-    useProfiles();
+  const {
+    profiles,
+    activeProfile,
+    createProfile,
+    updateProfile,
+    deleteProfile,
+    selectProfile,
+    setPrimary,
+  } = useProfiles();
   const { isConnected: traktConnected } = useTrakt();
   const { isConnected: anilistConnected, avatar: anilistAvatar } = useAnilist();
   const { isConnected: simklConnected } = useSimkl();
@@ -86,12 +113,23 @@ export function EditorView({
   const [avatarSource, setAvatarSource] = useState<
     "trakt" | "anilist" | "simkl" | "upload" | "builtin" | "removed" | null
   >(null);
-  const [color, setColor] = useState<ProfileColor>(
-    editing?.color ?? nextProfileColor(profiles),
-  );
+  const [color, setColor] = useState<ProfileColor>(editing?.color ?? nextProfileColor(profiles));
   const [shareWith, setShareWith] = useState<string | null>(
-    editing ? editing.shareStremioWith : primary?.id ?? null,
+    editing ? editing.shareStremioWith : (primary?.id ?? null),
   );
+  const [importSelection, setImportSelection] = useState<Record<ImportDomain, boolean>>({
+    settings: false,
+    addons: false,
+    watchlist: false,
+    favorites: false,
+    watched: false,
+    continueWatching: false,
+  });
+  const [selectedAddons, setSelectedAddons] = useState<Set<string>>(new Set());
+  const [sourceSummary, setSourceSummary] = useState<ImportSourceSummary | null>(null);
+  const [importExpanded, setImportExpanded] = useState(mode.kind === "create");
+  const [confirmingImport, setConfirmingImport] = useState(false);
+  const [confirmingShare, setConfirmingShare] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [confirmingPrimary, setConfirmingPrimary] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
@@ -111,6 +149,63 @@ export function EditorView({
   const isPrimary = editing?.isPrimary === true;
   const canShare = !isPrimary && !!primary && primary.id !== editing?.id;
   const locked = editing ? !!editing.passwordHash : draftPin != null;
+  const isCreate = mode.kind === "create";
+  const importPanelOpen = !isPrimary && canShare && !!primary && shareWith === null;
+  const importSourceId = !isPrimary && primary ? primary.id : null;
+  const importAnySelected = (Object.keys(importSelection) as ImportDomain[]).some(
+    (d) => importSelection[d],
+  );
+
+  useEffect(() => {
+    setSourceSummary(importSourceId ? summarizeSource(importSourceId) : null);
+  }, [importSourceId]);
+
+  const resetImportChoice = () => {
+    setImportSelection({
+      settings: false,
+      addons: false,
+      watchlist: false,
+      favorites: false,
+      watched: false,
+      continueWatching: false,
+    });
+    setSelectedAddons(new Set());
+  };
+
+  const toggleImportDomain = (domain: ImportDomain) => {
+    const turningOn = !importSelection[domain];
+    setImportSelection((prev) => ({ ...prev, [domain]: !prev[domain] }));
+    if (domain === "addons" && turningOn) {
+      setSelectedAddons(defaultSelectedAddonUrls(sourceSummary?.addons ?? []));
+    }
+  };
+
+  const toggleImportAddon = (transportUrl: string) => {
+    setSelectedAddons((prev) => {
+      const next = new Set(prev);
+      if (next.has(transportUrl)) next.delete(transportUrl);
+      else next.add(transportUrl);
+      return next;
+    });
+  };
+
+  const applyImportToExisting = () => {
+    if (!primary || !editing) return;
+    const list = (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d]);
+    if (list.length === 0) return;
+    importDomains(primary.id, editing.id, list, {
+      addonTransportUrls: list.includes("addons") ? [...selectedAddons] : null,
+    });
+    if (list.includes("settings") && editing.settingsLinked !== false) {
+      updateProfile(editing.id, { settingsLinked: false });
+    }
+    window.dispatchEvent(new Event("harbor:addons-changed"));
+    window.dispatchEvent(new Event("harbor:active-profile-changed"));
+    emitListToast(t("Data copied from {name}", { name: primary.name }));
+    resetImportChoice();
+    setConfirmingImport(false);
+    setImportExpanded(false);
+  };
 
   const onPickFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -213,6 +308,17 @@ export function EditorView({
       if (canShare && shareWith !== p.shareStremioWith) patch.shareStremioWith = shareWith;
       if (draftPin) patch.passwordHash = await hashProfilePassword(draftPin);
       if (anyTabLocked(draftLockedTabs)) patch.lockedTabs = draftLockedTabs;
+      const importList =
+        shareWith === null && primary
+          ? (Object.keys(importSelection) as ImportDomain[]).filter((d) => importSelection[d])
+          : [];
+      if (importList.length > 0 && primary) {
+        importDomains(primary.id, p.id, importList, {
+          addonTransportUrls: importList.includes("addons") ? [...selectedAddons] : null,
+        });
+        if (importList.includes("settings")) patch.settingsLinked = false;
+        emitListToast(t("Data copied from {name}", { name: primary.name }));
+      }
       if (Object.keys(patch).length > 0) updateProfile(p.id, patch);
       selectProfile(p.id);
     }
@@ -229,7 +335,9 @@ export function EditorView({
   if (subView.kind === "pin-set") {
     return (
       <PinEntry
-        title={editing ? t("Set a PIN for {name}", { name: trimmed || editing.name }) : t("Set a PIN")}
+        title={
+          editing ? t("Set a PIN for {name}", { name: trimmed || editing.name }) : t("Set a PIN")
+        }
         subtitle={t("Pick a 4-digit PIN. You'll be asked for it before this profile opens.")}
         mode="set"
         onBack={() => setSubView({ kind: "security" })}
@@ -388,7 +496,11 @@ export function EditorView({
                   {loadingAnilistAvatar ? (
                     <Loader2 size={12} className="animate-spin" />
                   ) : anilistAvatar ? (
-                    <img src={anilistAvatar} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />
+                    <img
+                      src={anilistAvatar}
+                      alt=""
+                      className="h-3.5 w-3.5 rounded-full object-cover"
+                    />
                   ) : (
                     <Link2 size={12} />
                   )}
@@ -479,18 +591,171 @@ export function EditorView({
           <div className="flex flex-col gap-1.5">
             <ShareOption
               active={shareWith === primary.id}
-              onClick={() => setShareWith(primary.id)}
+              onClick={() => {
+                if (!editing) {
+                  setShareWith(primary.id);
+                  resetImportChoice();
+                } else {
+                  setConfirmingShare(true);
+                }
+              }}
               icon={<Link2 size={14} strokeWidth={2.2} />}
               title={t("Share with {name}", { name: primary.name })}
               sub={t("Use the primary profile's Stremio library, watchlist, and addons.")}
             />
             <ShareOption
               active={shareWith === null}
-              onClick={() => setShareWith(null)}
+              onClick={() => {
+                setShareWith(null);
+                setConfirmingShare(false);
+                resetImportChoice();
+              }}
               icon={<UserIcon size={14} strokeWidth={2.2} />}
               title={t("Use a separate Stremio account")}
               sub={t("Sign in from the sidebar after saving. Library and addons stay separate.")}
             />
+            {confirmingShare && (
+              <div className="flex items-center gap-2 rounded-lg border border-edge-soft bg-canvas/40 px-3 py-2 text-[12px]">
+                <span className="min-w-0 flex-1 leading-snug text-ink-subtle">
+                  {t(
+                    "Switch to sharing? This profile will use {name}'s library, watchlist and addons. Its own data is kept but hidden until you switch back.",
+                    { name: primary.name },
+                  )}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingShare(false)}
+                  className="shrink-0 text-ink-muted transition-colors hover:text-ink"
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShareWith(primary.id);
+                    resetImportChoice();
+                    setConfirmingShare(false);
+                  }}
+                  className="shrink-0 rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30"
+                >
+                  {t("common.confirm")}
+                </button>
+              </div>
+            )}
+            {importPanelOpen && !importExpanded && (
+              <button
+                type="button"
+                onClick={() => setImportExpanded(true)}
+                className="h-9 self-start rounded-lg border border-edge-soft px-3 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-edge hover:text-ink"
+              >
+                {t("Import data from {name}", { name: primary.name })}
+              </button>
+            )}
+            {importPanelOpen && importExpanded && (
+              <div className="mt-1 flex flex-col gap-2 rounded-xl border border-edge-soft bg-canvas/40 p-3">
+                <span className="text-[12.5px] font-semibold text-ink">
+                  {t(isCreate ? "Start with data from {name}" : "Import data from {name}", {
+                    name: primary?.name ?? "",
+                  })}
+                </span>
+                <div className="flex flex-col gap-1">
+                  <ImportRow
+                    checked={importSelection.settings}
+                    label={t("Settings")}
+                    onClick={() => toggleImportDomain("settings")}
+                  />
+                  <ImportRow
+                    checked={importSelection.addons}
+                    label={t("Addons ({n})", { n: sourceSummary?.addons.length ?? 0 })}
+                    onClick={() => toggleImportDomain("addons")}
+                  />
+                  {importSelection.addons && (sourceSummary?.addons.length ?? 0) > 0 && (
+                    <div className="ms-6 flex flex-col gap-1">
+                      {(sourceSummary?.addons ?? []).map((addon: ImportAddonPreview) => (
+                        <ImportRow
+                          key={addon.transportUrl}
+                          compact
+                          checked={selectedAddons.has(addon.transportUrl)}
+                          label={addon.name}
+                          onClick={() => toggleImportAddon(addon.transportUrl)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <ImportRow
+                    checked={importSelection.watchlist}
+                    label={t("Watchlist ({n})", { n: sourceSummary?.watchlistCount ?? 0 })}
+                    onClick={() => toggleImportDomain("watchlist")}
+                  />
+                  <ImportRow
+                    checked={importSelection.favorites}
+                    label={t("Favorites ({n})", { n: sourceSummary?.favoriteCount ?? 0 })}
+                    onClick={() => toggleImportDomain("favorites")}
+                  />
+                  <ImportRow
+                    checked={importSelection.watched}
+                    label={t("Watched history")}
+                    onClick={() => toggleImportDomain("watched")}
+                  />
+                  <ImportRow
+                    checked={importSelection.continueWatching}
+                    label={t("Continue watching")}
+                    onClick={() => toggleImportDomain("continueWatching")}
+                  />
+                </div>
+                <p className="text-[11px] leading-snug text-ink-subtle">
+                  {t(
+                    isCreate
+                      ? "Copied once — afterwards this profile keeps its own copy. Nothing stays linked to Primary."
+                      : "Checking an area replaces this profile's current data in it.",
+                  )}
+                </p>
+                {!isCreate && (
+                  <div className="flex items-center justify-end gap-2 pt-1 text-[12px]">
+                    {!confirmingImport ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            resetImportChoice();
+                            setImportExpanded(false);
+                          }}
+                          className="text-ink-muted transition-colors hover:text-ink"
+                        >
+                          {t("common.cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!importAnySelected}
+                          onClick={() => setConfirmingImport(true)}
+                          className="rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
+                        >
+                          {t("Import")}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-ink-subtle">{t("Replace selected data?")}</span>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingImport(false)}
+                          className="text-ink-muted transition-colors hover:text-ink"
+                        >
+                          {t("common.cancel")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={applyImportToExisting}
+                          className="rounded-md bg-accent/20 px-2.5 py-1 font-semibold text-accent transition-colors hover:bg-accent/30"
+                        >
+                          {t("common.confirm")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -505,9 +770,13 @@ export function EditorView({
               <Crown size={16} strokeWidth={2.2} />
             </span>
             <div className="flex min-w-0 flex-1 flex-col">
-              <span className="text-[13px] font-semibold text-ink">{t("Make this the primary profile")}</span>
+              <span className="text-[13px] font-semibold text-ink">
+                {t("Make this the primary profile")}
+              </span>
               <span className="text-[11.5px] leading-snug text-ink-subtle">
-                {t("The primary manages profiles and can't be deleted. Transfer it here to delete the old one.")}
+                {t(
+                  "The primary manages profiles and can't be deleted. Transfer it here to delete the old one.",
+                )}
               </span>
             </div>
             {!confirmingPrimary ? (
@@ -554,9 +823,13 @@ export function EditorView({
                 <Crown size={16} strokeWidth={2.2} />
               </span>
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="text-[13px] font-semibold text-ink">{t("This is the primary profile")}</span>
+                <span className="text-[13px] font-semibold text-ink">
+                  {t("This is the primary profile")}
+                </span>
                 <span className="text-[11.5px] leading-snug text-ink-subtle">
-                  {t("It manages profiles and can't be deleted. Hand primary to another profile to delete this one.")}
+                  {t(
+                    "It manages profiles and can't be deleted. Hand primary to another profile to delete this one.",
+                  )}
                 </span>
               </div>
             </div>
@@ -578,7 +851,9 @@ export function EditorView({
                       type="button"
                       onClick={() => setTransferTarget(p.id)}
                       className={`flex items-center gap-2.5 rounded-lg border p-2 text-start transition-colors ${
-                        sel ? "border-accent bg-accent/10" : "border-edge-soft hover:border-edge hover:bg-elevated/40"
+                        sel
+                          ? "border-accent bg-accent/10"
+                          : "border-edge-soft hover:border-edge hover:bg-elevated/40"
                       }`}
                     >
                       <span
@@ -586,13 +861,22 @@ export function EditorView({
                         style={{ boxShadow: `0 0 0 2px ${p.color}` }}
                       >
                         {p.avatar ? (
-                          <img src={p.avatar} alt="" className="h-full w-full object-cover" draggable={false} />
+                          <img
+                            src={p.avatar}
+                            alt=""
+                            className="h-full w-full object-cover"
+                            draggable={false}
+                          />
                         ) : (
                           <CatAvatar className="h-full w-full" />
                         )}
                       </span>
-                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">{p.name}</span>
-                      {sel && <Check size={15} className="shrink-0 text-accent" strokeWidth={2.6} />}
+                      <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-ink">
+                        {p.name}
+                      </span>
+                      {sel && (
+                        <Check size={15} className="shrink-0 text-accent" strokeWidth={2.6} />
+                      )}
                     </button>
                   );
                 })}
@@ -635,8 +919,10 @@ export function EditorView({
           >
             {t("common.cancel")}
           </button>
-          {editing && !isPrimary && canEditAdvanced && (
-            !confirmingDelete ? (
+          {editing &&
+            !isPrimary &&
+            canEditAdvanced &&
+            (!confirmingDelete ? (
               <button
                 type="button"
                 onClick={() => setConfirmingDelete(true)}
@@ -666,8 +952,7 @@ export function EditorView({
                   {t("common.confirm")}
                 </button>
               </div>
-            )
-          )}
+            ))}
         </div>
         <button
           type="button"
@@ -752,7 +1037,11 @@ function SecurityRow({
           </span>
         </div>
       </div>
-      <ChevronLeft size={14} strokeWidth={2.2} className="rotate-180 rtl:rotate-0 text-ink-subtle" />
+      <ChevronLeft
+        size={14}
+        strokeWidth={2.2}
+        className="rotate-180 rtl:rotate-0 text-ink-subtle"
+      />
     </button>
   );
 }
@@ -881,10 +1170,47 @@ function SecurityView({
               </span>
             </div>
           </div>
-          <ChevronLeft size={14} strokeWidth={2.2} className="rotate-180 rtl:rotate-0 text-ink-subtle" />
+          <ChevronLeft
+            size={14}
+            strokeWidth={2.2}
+            className="rotate-180 rtl:rotate-0 text-ink-subtle"
+          />
         </button>
       </div>
     </div>
+  );
+}
+
+function ImportRow({
+  checked,
+  label,
+  compact,
+  onClick,
+}: {
+  checked: boolean;
+  label: string;
+  compact?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-center gap-2.5 rounded-lg border px-3 text-start transition-colors ${
+        checked
+          ? "border-ink/40 bg-canvas/60"
+          : "border-edge-soft hover:border-edge hover:bg-canvas/40"
+      } ${compact ? "py-1.5" : "py-2"}`}
+    >
+      <span
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+          checked ? "border-ink bg-ink text-canvas" : "border-edge"
+        }`}
+      >
+        {checked && <Check size={10} strokeWidth={3} />}
+      </span>
+      <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-ink">{label}</span>
+    </button>
   );
 }
 
@@ -960,7 +1286,7 @@ function TabsView({
   onSave: (next: HiddenTabs) => void;
 }) {
   const t = useT();
-  const [tabs, setTabs] = useState<HiddenTabs>({ ...DEFAULT_HIDDEN, ...(initial ?? {}) });
+  const [tabs, setTabs] = useState<HiddenTabs>({ ...DEFAULT_HIDDEN, ...initial });
   const toggle = (key: LockableTab) => setTabs((prev) => ({ ...prev, [key]: !prev[key] }));
   const count = Object.values(tabs).filter(Boolean).length;
   return (

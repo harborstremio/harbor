@@ -1,0 +1,156 @@
+{
+  "notes": {
+    "0.9.119": {
+      "title": "Harbor Beta 0.9.119",
+      "intro": "A large reliability and workflow update focused on playback, P2P downloads, subtitles, profiles, anime, Manga, Live TV, controller support, and safer external links. Every entry credits the contributor responsible for the work.",
+      "sections": [
+        {
+          "heading": "Playback and source handling",
+          "items": [
+            "Faster and more reliable preparation for debrid and direct sources while preserving provider fallback and URL validation — @Talal1011",
+            "Improved startup and source switching for large 4K Blu-ray remux sources — @Talal1011",
+            "The loading screen now follows the real first video frame and no longer flashes a frame from the previous title — @Talal1011",
+            "Improved recovery from black screens, failed sources, app focus changes, and paused or resumed playback — @Talal1011",
+            "Pause state is preserved across seek restarts, with keyframe seeking used for normal seek actions — @Talal1011",
+            "Continue Watching and next-episode playback keep the selected source when it remains compatible — @Talal1011",
+            "Streams that end prematurely retry the same source once before Harbor tries another candidate — @Thunderhawkk",
+            "Added an optional player interaction lock with a setting and configurable hotkey — @Talal1011",
+            "Locked playback now blocks player input, while inactive lock controls disappear automatically — @Talal1011",
+            "Player overlays remain independent when menus such as the subtitle panel are moved or resized — @Talal1011",
+            "Provider-specific errors retain Retry and Choose another source actions — @Talal1011",
+            "The top-right player window control now respects the selected fullscreen or maximize preference — @OwaisByte",
+            "Linux trailer playback now supports reliable loading, seeking, and compatible download formats — @pengunnn",
+            "Fullscreen playback now has the correct context-menu behavior — @Auramist",
+            "Skip Intro and Skip Outro pills now show an animated countdown that pauses while hovered — @O1Abdulrahman"
+          ]
+        },
+        {
+          "heading": "P2P streaming and downloads",
+          "items": [
+            "Playback, intentional downloads, and background streaming now have explicit torrent ownership — @Talal1011",
+            "Abandoned stream torrents are cleaned up after cancellation, failed connection, source switching, or player exit — @Talal1011",
+            "Cancelled stream jobs no longer silently resume from stale persisted sessions after Harbor restarts — @Talal1011",
+            "Streaming and downloading the same torrent reuse one local-engine job instead of creating duplicate data — @Talal1011",
+            "Completed intentional downloads can be reused when the same source is selected for playback — @Talal1011",
+            "Downloaded data remains available until its final intentional owner is cancelled — @Talal1011",
+            "Improved season-pack file selection and recovery from stalled Preparing or Connecting states — @Talal1011",
+            "Improved retry and cleanup behavior when a P2P source has no usable peers — @Talal1011",
+            "Local-engine activity reporting and pause, resume, cancel, clear, and restart controls are more reliable — @Talal1011"
+          ]
+        },
+        {
+          "heading": "Subtitles",
+          "items": [
+            "Automatic subtitle discovery keeps searching configured Stremio addons and Harbor providers instead of stopping after the first fallback track — @Talal1011",
+            "Automatic subtitle selection follows preferred languages while Find more subtitles still exposes the complete manual search — @Talal1011",
+            "Subtitle discovery is prioritized ahead of optional content-advisory work — @Talal1011",
+            "Prevented foreign embedded subtitles from flashing before preferred-language selection completes — @Talal1011",
+            "Improved provider labels, upstream source names, release names, numbering, author information, download metadata, and subtitle details — @Talal1011",
+            "Added native subtitle source-FPS controls with safer transition boundaries — @OwaisByte",
+            "External subtitles are ranked using release group, episode, edition, source family, resolution, and other real release evidence — @Talal1011",
+            "Generic addon names and video-derived fallback titles no longer create repeated or misleading compatibility scores — @Talal1011",
+            "Better match now requires strong release evidence and no longer promotes embedded tracks as the downloadable best match — @Talal1011",
+            "Selected subtitles are remembered for the same content and release, restored after temporary embedded fallback, and not reused after incompatible torrent or hash changes — @Talal1011",
+            "Improved SubDL and Subsource limits, result handling, rate-limit behavior, and manual addition — @Talal1011",
+            "Right-click Paste now correctly saves SubDL and Subsource API keys — @uddx7",
+            "Subtitle offset feedback and manual timing controls remain available alongside FPS correction — @Talal1011 and @OwaisByte",
+            "The subtitle menu is movable, independently resizable, and supports long-title handling — @Talal1011",
+            "Subtitle results have a keyboard-accessible details view with a Back action — @Talal1011",
+            "Live Sync provides simpler whole-track alignment, drift correction, and section correction controls — @Talal1011",
+            "Saved Live Sync corrections persist, keep the corrected track selected, and are restored for the same release — @Talal1011",
+            "Anime subtitle lookup now distinguishes long-running absolute numbering from seasonal TVDB numbering — @comet776"
+          ]
+        },
+        {
+          "heading": "X-Ray and content advisory",
+          "items": [
+            "X-Ray recognition work is moved away from the main interface path for more responsive cast detection — @Talal1011",
+            "Recognition cadence, image work, caches, and cleanup are bounded to reduce CPU and memory growth — @Talal1011",
+            "Packaged-app compatibility was improved without weakening Harbor's required security policy — @Talal1011",
+            "X-Ray resources are released when the overlay or player closes, with a clear memory-usage notice in settings — @Talal1011",
+            "Updated X-Ray cast presentation inside the player — @Talal1011",
+            "Content advisory now uses Common Sense Media age guidance and four clear severity categories — @O1Abdulrahman",
+            "Content advisory supports colored and monochrome presentation styles with a refined player layout — @O1Abdulrahman and @Talal1011"
+          ]
+        },
+        {
+          "heading": "Profiles, accounts, library, and recovery",
+          "items": [
+            "Discord can now be used for sign-up, sign-in, account linking, unlinking, and account recovery — @uddx7",
+            "Linked Discord accounts can join the Harbor server and receive recovery PINs through Discord — @uddx7",
+            "Improved Discord OAuth cancellation, listener restart, stale-state cleanup, and error handling — @uddx7",
+            "Sessions, addon keys, watched state, progress, library synchronization, and recovery data are isolated per Harbor profile — @Thunderhawkk",
+            "Addons and catalogs refresh correctly after switching profiles — @Thunderhawkk",
+            "Stale addon deep links no longer replay on a later launch — @Thunderhawkk",
+            "Custom profile backgrounds are stored independently for each profile — @uddx7 (omar)",
+            "Backup exports can include only selected sections, and restored service sign-ins are remapped safely to the active profile — @Thunderhawkk",
+            "Primary-profile data and favorites can be imported into separate profiles with confirmation for shared Stremio data — @Thunderhawkk and @Talal1011",
+            "Watched-by information appears only between profiles that intentionally share Stremio data — @Thunderhawkk",
+            "Improved backup restoration across profiles, installations, and storage-quota limits — @Thunderhawkk and @Talal1011",
+            "The configured Who's watching launch behavior is preserved — @Thunderhawkk",
+            "Profile song volume is remembered across navigation and app restarts — @Rayano79",
+            "Handle cooldown messaging now correctly reflects the 14-day limit — @uddx7",
+            "ElegantFin's top-right avatar now opens the signed-in user's profile with a safe drawer fallback — @OwaisByte",
+            "Local library filter counters now count grouped movies and shows instead of individual episode files — @uddx7",
+            "Saved items remember their originating addon and can fall back to alternate addon-declared stream types — @Thunderhawkk"
+          ]
+        },
+        {
+          "heading": "Anime",
+          "items": [
+            "Added an anime simulcast and dub calendar with local airing times and a dedicated sub or dub view — @Thunderhawkk",
+            "AniList calendar requests now load in parallel for substantially faster schedule results — @Thunderhawkk",
+            "Anime episode titles, descriptions, thumbnails, and release dates now receive stronger TVDB fallback data — @comet776",
+            "Anime metadata, posters, search results, and episode information consistently follow the selected metadata language — @Thunderhawkk",
+            "Metadata-language changes now have an explicit apply-and-reload flow with smarter title fallbacks — @Thunderhawkk",
+            "Fixed IMDb episode ratings and badges across later seasons, specials, and franchise entries — @comet776",
+            "Improved filler flags and fallback thumbnails for anime franchise episodes — @comet776",
+            "Improved specials and OVA resolution across TVDB, Kitsu, IMDb, and non-IMDb catalogs — @enginA912, @comet776, and @Talal1011",
+            "Preserved non-Latin OVA titles and fixed related fuzzy-mapping and memoization races — @comet776",
+            "Split-franchise seasons now route to their correct canonical Kitsu entries and reject wrong-episode streams earlier — @comet776",
+            "Long-running anime display continuous absolute episode numbers across picker surfaces — @comet776",
+            "Anime search now includes a Sequels and Prequels carousel and resolves orphan anime IDs more reliably — @comet776"
+          ]
+        },
+        {
+          "heading": "Manga and Suwayomi",
+          "items": [
+            "Improved Suwayomi extension and tag loading, installed-source browsing, sorting, and collapsible available-extension lists — @Talal1011",
+            "Universes can search installed sources more reliably and Manga favorites synchronize with the Suwayomi library — @Talal1011",
+            "Improved Manga download controls and remote or controller navigation — @Talal1011 and @capex122",
+            "All Extensions now shows collapsible Popular and Latest rails grouped by extension — @Thunderhawkk",
+            "Added persisted Manga language filtering across rails, extension selection, and cross-extension search — @Thunderhawkk",
+            "The Popular Manga feed now merges real Popular pages from the selected language sources — @Thunderhawkk",
+            "Added Manga browse filters, relative release times, deduplicated chapters, and source selection — @capex122"
+          ]
+        },
+        {
+          "heading": "Controllers, Live TV, and navigation",
+          "items": [
+            "Added a Harbor controller cursor with hover, click, scrolling, player, and seek-bar support — @capex122",
+            "Added a controller on-screen keyboard with D-pad navigation, language and numeric layouts, shortcuts, and size controls — @capex122",
+            "Controller input no longer controls Harbor while its window is unfocused unless background input is enabled — @Thunderhawkk",
+            "Live TV Multiview now supports fullscreen split view and hiding the application chrome — @O1Abdulrahman",
+            "Multiview tiles can be resized independently, aligned when desired, and restored from saved layouts — @O1Abdulrahman",
+            "Added a configurable Open settings shortcut with search discovery and translated descriptions — @OwaisByte",
+            "The search overlay stays closed after sidebar or logo navigation and restores only when returning to the original view with Back — @xjl9"
+          ]
+        },
+        {
+          "heading": "External links, security, and reliability",
+          "items": [
+            "External links across profiles, groups, BBCode, and Community Store comments now use one app-wide confirmation — @OwaisByte",
+            "The external-link confirmation owns keyboard, remote, mouse, Escape, and Back actions without navigating underneath it — @OwaisByte",
+            "Eligible HTTPS links can optionally open in a protected Harbor viewer with Reload, Open in browser, and Close controls — @OwaisByte",
+            "HTTP links remain browser-only, while embedded HTTPS pages use sandboxing, no referrer, and denied sensitive permissions — @OwaisByte",
+            "Updated Tauri to the patched runtime that fixes the isolated-WebView origin vulnerability — @OwaisByte",
+            "Addon requests can try other manifest-declared content types when the original type has no matching streams — @Thunderhawkk",
+            "Configured addons sharing one host are distinguished by both host and base path — @Talal1011",
+            "Authorization headers and other private diagnostic data receive stronger log redaction — @Talal1011",
+            "Expanded regression coverage and restored frontend quality tasks used by repository checks — @Talal1011 and contributors"
+          ]
+        }
+      ]
+    }
+  }
+}

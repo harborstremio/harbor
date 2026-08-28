@@ -1,7 +1,11 @@
 import { useEffect, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { anime4kChain, type Anime4kMode, type Anime4kTier } from "@/lib/player/anime4k-modes";
-import { generalShaderChain, generalShaderKey, shaderCompanionProps } from "@/lib/player/shader-chain";
+import {
+  generalShaderChain,
+  generalShaderKey,
+  shaderCompanionProps,
+} from "@/lib/player/shader-chain";
 import { useSettings, type Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
 
@@ -76,6 +80,7 @@ export function useAnime4k(
   const available = !!settings.playerAnime4kFolder;
   const dims: Anime4kDims = { srcWidth: videoWidth, displayWidth: screenWidthPx() };
   const generalKey = generalShaderKey(settings);
+  const mode = settings.playerAnime4kMode as Anime4kMode | undefined;
 
   const applyShaders = (c: Anime4kChoice) => {
     const chain = [...anime4kShadersFor(settings, src, c, dims), ...generalShaderChain(settings)];
@@ -86,7 +91,7 @@ export function useAnime4k(
   useEffect(() => {
     applyShaders(choice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [srcKey, videoWidth, generalKey]);
+  }, [srcKey, videoWidth, generalKey, mode]);
 
   const setMode = (c: string) => {
     update({ playerAnime4kOverride: c });

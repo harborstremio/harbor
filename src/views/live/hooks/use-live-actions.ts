@@ -8,7 +8,7 @@ import { buildM3u, suggestExportFilename } from "@/lib/iptv/export";
 import { findCurrent } from "@/lib/iptv/xmltv";
 import type { EpgIndex, EpgProgram, IptvChannel, IptvPlaylist } from "@/lib/iptv/types";
 import type { Meta } from "@/lib/cinemeta";
-import { useSettings } from "@/lib/settings";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { useView } from "@/lib/view";
 
 export function synthChannelMeta(ch: IptvChannel): Meta {
@@ -31,7 +31,7 @@ export function useLiveActions(params: {
 }) {
   const { epg, activeId, playlist } = params;
   const { openPlayer } = useView();
-  const { settings } = useSettings();
+  const playlists = usePlaylists();
 
   const handlePlay = useCallback(
     (ch: IptvChannel) => {
@@ -76,7 +76,7 @@ export function useLiveActions(params: {
   const exportPlaylist = useCallback(
     async (id: string) => {
       if (id !== activeId || !playlist) return;
-      const source = settings.iptvPlaylists.find((s) => s.id === id);
+      const source = playlists.find((s) => s.id === id);
       const filename = suggestExportFilename(source?.name ?? "playlist");
       try {
         const target = await saveDialog({
@@ -89,7 +89,7 @@ export function useLiveActions(params: {
         console.warn("[live] export playlist failed", e);
       }
     },
-    [activeId, playlist, settings.iptvPlaylists],
+    [activeId, playlist, playlists],
   );
 
   return { handlePlay, handlePlayCatchup, exportPlaylist };

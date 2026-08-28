@@ -1,10 +1,11 @@
 import type { Addon } from "@/lib/addons";
 import { dlog } from "@/lib/debug";
 import type { DebridStore } from "@/lib/debrid/types";
-import { fetchAddonStreams, type StreamRequest } from "./addons";
+import { fetchAddonStreams, type AddonProgress, type StreamRequest } from "./addons";
 import type { AddonRankFn } from "./addon-priority";
 import { applyStreamPriority } from "./priority-partition";
 import { enhanceAnimeStreams } from "./anitomy";
+import { partitionByExactAnimeEpisode } from "./anime-identity-core";
 import { fetchLibraryStreams, type LibraryQuery } from "./library";
 import { parseStream } from "./parser";
 import { applyTrust, type Rejection, type TrustOptions } from "./trust";
@@ -58,9 +59,34 @@ function finalizeWithRescue(
   const keep: ParsedStream[] = [...picker.all, ...rescued];
   const corpus = computeCorpusStats(keep, score);
   const scored = keep.map((s) => scoreStream(s, score, corpus));
-  const newPicker = rankAndPick(scored, score.activeDebrids, PREFER_AAC, score.respectAddonOrder === true);
+  const newPicker = rankAndPick(
+    scored,
+    score.activeDebrids,
+    PREFER_AAC,
+    score.respectAddonOrder === true,
+  );
   dlog(`[pipeline] early-leak rescue: restored ${rescued.size} corroborated high-res stream(s)`);
   return { picker: newPicker, rejected: rejected.filter((r) => !rescued.has(r.stream)) };
+}
+
+function applyAnimeEpisodeFilter(
+  parsed: ParsedStream[],
+  input: PipelineInput,
+): { kept: ParsedStream[]; extraRejected: Rejection[] } {
+  const expected = input.animeAbsoluteEpisode;
+  if (!input.isAnime || expected == null) return { kept: parsed, extraRejected: [] };
+  const validNums = new Set<number>([expected]);
+  for (const a of input.animeEpisodeAliases ?? []) {
+    if (Number.isFinite(a) && a >= 1) validNums.add(a);
+  }
+  const { keep, drop } = partitionByExactAnimeEpisode(parsed, validNums);
+  return {
+    kept: keep,
+    extraRejected: drop.map((stream) => ({
+      stream,
+      reason: `anime-episode-mismatch:${stream.episode}-vs-${expected}`,
+    })),
+  };
 }
 
 export type PipelineInput = {
@@ -71,9 +97,12 @@ export type PipelineInput = {
   trust?: TrustOptions;
   score: ScoreOptions;
   isAnime?: boolean;
+  animeAbsoluteEpisode?: number | null;
+  animeEpisodeAliases?: Set<number> | null;
   presetStreams?: Stream[];
   addonTimeoutMs?: number;
   addonRanks?: AddonRankFn | null;
+  forcedAddonBases?: Array<{ base: string; id: string }>;
 };
 
 export type DebridError = { slug: string; name: string; code: string };
@@ -89,24 +118,33 @@ export async function runPipeline(
   input: PipelineInput,
   signal: AbortSignal,
   onProgress?: (partial: PipelineResult) => void,
-  onAddonProgress?: (settled: number, total: number) => void,
+  onAddonProgress?: (progress: AddonProgress) => void,
 ): Promise<PipelineResult> {
   let library: Stream[] = [];
   let lastPartialAt = 0;
   const debridErrors: DebridError[] = [];
   const priorityActive = input.addonRanks != null;
 
-  const buildPartial = (addonStreams: Stream[]): PipelineResult => {
+  const buildPartial = async (addonStreams: Stream[]): Promise<PipelineResult> => {
     const merged = mergeAndDedupe(library, addonStreams);
-    const parsed = merged.map(parseStream);
+    const pre = merged.map(parseStream);
+    if (input.isAnime && input.animeAbsoluteEpisode != null) {
+      await enhanceAnimeStreams(pre);
+    }
+    const { kept: parsed, extraRejected } = applyAnimeEpisodeFilter(pre, input);
     const { keep, rejected } = applyTrust(parsed, input.trust ?? {});
     const corpus = computeCorpusStats(keep, input.score);
     const scored = keep.map((s) => scoreStream(s, input.score, corpus));
-    const picker = rankAndPick(scored, input.score.activeDebrids, PREFER_AAC, input.score.respectAddonOrder === true);
+    const picker = rankAndPick(
+      scored,
+      input.score.activeDebrids,
+      PREFER_AAC,
+      input.score.respectAddonOrder === true,
+    );
     const fin = finalizeWithRescue(picker, rejected, input.trust ?? {}, input.score);
     return {
       picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
-      rejected: fin.rejected,
+      rejected: [...fin.rejected, ...extraRejected],
       raw: { addon: addonStreams, library },
       debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
     };
@@ -117,11 +155,13 @@ export async function runPipeline(
     const now = performance.now();
     if (now - lastPartialAt < 250) return;
     lastPartialAt = now;
-    try {
-      onProgress(buildPartial(addonStreams));
-    } catch {
-      /* swallow */
-    }
+    void buildPartial(addonStreams)
+      .then((result) => {
+        if (!signal.aborted) onProgress(result);
+      })
+      .catch(() => {
+        /* swallow */
+      });
   };
 
   const presets = input.presetStreams ?? [];
@@ -132,16 +172,48 @@ export async function runPipeline(
     }),
     presets.length > 0
       ? Promise.resolve(presets)
-      : fetchAddonStreams(input.addons, input.request, signal, emitPartial, onAddonProgress, input.addonTimeoutMs, input.addonRanks),
+      : fetchAddonStreams(
+          input.addons,
+          input.request,
+          signal,
+          emitPartial,
+          onAddonProgress,
+          input.addonTimeoutMs,
+          input.addonRanks,
+          input.forcedAddonBases,
+        ),
   ]);
   if (librarySettled.status === "fulfilled") library = librarySettled.value;
   const addonStreams = addonSettled.status === "fulfilled" ? addonSettled.value : [];
   const merged = mergeAndDedupe(library, addonStreams);
 
-  const parsed = merged.map(parseStream);
+  const preParsed = merged.map(parseStream);
+  const verifiedCacheByHash = new Map<string, ParsedStream["cacheVerified"]>();
+  const markCacheVerified = (stream: ParsedStream, slug: DebridStore["slug"]) => {
+    if (!stream.infoHash) return;
+    const hash = stream.infoHash.toLowerCase();
+    stream.cacheVerified[slug] = true;
+    const byProvider = verifiedCacheByHash.get(hash) ?? {};
+    byProvider[slug] = true;
+    verifiedCacheByHash.set(hash, byProvider);
+  };
+  const restoreCacheVerification = (picker: RankedPicker) => {
+    for (const stream of picker.all) {
+      if (!stream.infoHash) continue;
+      const verified = verifiedCacheByHash.get(stream.infoHash.toLowerCase());
+      if (verified) stream.cacheVerified = { ...verified };
+    }
+  };
 
   if (input.isAnime) {
-    await enhanceAnimeStreams(parsed);
+    await enhanceAnimeStreams(preParsed);
+  }
+
+  const { kept: parsed, extraRejected: animeRejected } = applyAnimeEpisodeFilter(preParsed, input);
+  if (animeRejected.length > 0) {
+    dlog(
+      `[pipeline] anime episode filter: dropped ${animeRejected.length} stream(s) not matching ep ${input.animeAbsoluteEpisode}`,
+    );
   }
 
   const hashes = [
@@ -153,7 +225,9 @@ export async function runPipeline(
     ),
   ];
   if (hashes.length > 0 && input.debrids.length > 0 && !signal.aborted) {
-    dlog(`[pipeline] ${parsed.length} parsed streams · ${hashes.length} unique hashes · debrids: ${input.debrids.map((d) => d.name).join(", ")}`);
+    dlog(
+      `[pipeline] ${parsed.length} parsed streams · ${hashes.length} unique hashes · debrids: ${input.debrids.map((d) => d.name).join(", ")}`,
+    );
     const [cacheResults, libraryResults] = await Promise.all([
       Promise.allSettled(input.debrids.map((d) => d.cacheCheck(hashes, signal))),
       Promise.allSettled(input.debrids.map((d) => d.listLibrary(signal))),
@@ -167,6 +241,7 @@ export async function runPipeline(
         if (!p.infoHash) continue;
         if (r.value.data[p.infoHash.toLowerCase()]) {
           p.cached[slug] = true;
+          markCacheVerified(p, slug);
           hits++;
         }
       }
@@ -176,11 +251,19 @@ export async function runPipeline(
     for (let i = 0; i < input.debrids.length; i++) {
       const r = libraryResults[i];
       if (r.status === "rejected") {
-        debridErrors.push({ slug: input.debrids[i].slug, name: input.debrids[i].name, code: "network-error" });
+        debridErrors.push({
+          slug: input.debrids[i].slug,
+          name: input.debrids[i].name,
+          code: "network-error",
+        });
         continue;
       }
       if (!r.value.ok) {
-        debridErrors.push({ slug: input.debrids[i].slug, name: input.debrids[i].name, code: r.value.code });
+        debridErrors.push({
+          slug: input.debrids[i].slug,
+          name: input.debrids[i].name,
+          code: r.value.code,
+        });
         continue;
       }
       const slug = input.debrids[i].slug;
@@ -192,9 +275,12 @@ export async function runPipeline(
           if (!p.cached[slug]) hits++;
           p.cached[slug] = true;
           p.inLibrary[slug] = true;
+          markCacheVerified(p, slug);
         }
       }
-      dlog(`[pipeline] listLibrary cross-check on ${input.debrids[i].name}: ${hits} extra streams flagged cached (lib has ${libHashes.size} hashes)`);
+      dlog(
+        `[pipeline] listLibrary cross-check on ${input.debrids[i].name}: ${hits} extra streams flagged cached (lib has ${libHashes.size} hashes)`,
+      );
     }
 
     const totalCached = parsed.filter((p) => Object.values(p.cached).some(Boolean)).length;
@@ -210,12 +296,15 @@ export async function runPipeline(
         byReason.set(k, (byReason.get(k) ?? 0) + 1);
       }
       const summary = [...byReason.entries()].map(([k, n]) => `${k}=${n}`).join(", ");
-      dlog(`[pipeline] (core) trust kept ${core.picker.all.length}/${parsed.length} · rejected: ${summary}`);
+      dlog(
+        `[pipeline] (core) trust kept ${core.picker.all.length}/${parsed.length} · rejected: ${summary}`,
+      );
     }
     const fin = finalizeWithRescue(core.picker, core.rejected, input.trust ?? {}, input.score);
+    restoreCacheVerification(fin.picker);
     return {
       picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
-      rejected: fin.rejected,
+      rejected: [...fin.rejected, ...animeRejected],
       raw: { addon: addonStreams, library },
       debridErrors: debridErrors.length > 0 ? debridErrors : undefined,
     };
@@ -230,16 +319,24 @@ export async function runPipeline(
     const summary = [...byReason.entries()].map(([k, n]) => `${k}=${n}`).join(", ");
     dlog(`[pipeline] trust kept ${keep.length}/${parsed.length} · rejected: ${summary}`);
     for (const r of rejected.slice(0, 6)) {
-      dlog(`[pipeline]   reject ${r.reason} :: ${r.stream.parsedTitle ?? r.stream.title ?? r.stream.name ?? "?"}`);
+      dlog(
+        `[pipeline]   reject ${r.reason} :: ${r.stream.parsedTitle ?? r.stream.title ?? r.stream.name ?? "?"}`,
+      );
     }
   }
   const corpus = computeCorpusStats(keep, input.score);
   const scored = keep.map((s) => scoreStream(s, input.score, corpus));
-  const picker = rankAndPick(scored, input.score.activeDebrids, PREFER_AAC, input.score.respectAddonOrder === true);
+  const picker = rankAndPick(
+    scored,
+    input.score.activeDebrids,
+    PREFER_AAC,
+    input.score.respectAddonOrder === true,
+  );
   const fin = finalizeWithRescue(picker, rejected, input.trust ?? {}, input.score);
+  restoreCacheVerification(fin.picker);
   return {
     picker: applyStreamPriority(fin.picker, priorityActive, input.score.activeDebrids),
-    rejected: fin.rejected,
+    rejected: [...fin.rejected, ...animeRejected],
     raw: { addon: addonStreams, library },
   };
 }
@@ -249,7 +346,8 @@ async function runCorePipeline(
   trustOpts: TrustOptions,
   scoreOpts: ScoreOptions,
 ): Promise<{ picker: RankedPicker; rejected: Rejection[] } | null> {
-  const isTauri = typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
+  const isTauri =
+    typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
   if (!isTauri) return null;
   try {
     const { invoke } = await import("@tauri-apps/api/core");

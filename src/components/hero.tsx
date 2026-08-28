@@ -1,5 +1,15 @@
 import { memo, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Check, ChevronRight, Info, Play, Plus, RotateCcw, TrendingUp, Volume2, VolumeX } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  Info,
+  Play,
+  Plus,
+  RotateCcw,
+  TrendingUp,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import tmdbIcon from "@/assets/addon-logos/tmdb.png";
 import traktIcon from "@/assets/trakt.svg";
@@ -477,6 +487,8 @@ export const Hero = memo(function Hero({
                     name: meta.name,
                     poster: meta.poster,
                     imdbId: resolvedImdb,
+                    addonOrigin: meta.addonOrigin,
+                    videos: meta.videos,
                   });
                 }}
                 className={`flex h-12 items-center gap-2.5 ${actionRadius} border border-edge bg-canvas/55 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-colors duration-200 hover:border-ink-subtle hover:bg-canvas/75`}

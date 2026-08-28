@@ -1,7 +1,13 @@
 import { ArrowLeft, Layers, X } from "lucide-react";
 import { useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { MAX_ITEMS, removeFromList, reorderListItems, useList, type ListItem } from "@/lib/custom-lists";
+import {
+  MAX_ITEMS,
+  removeFromList,
+  reorderListItems,
+  useList,
+  type ListItem,
+} from "@/lib/custom-lists";
 import { relativeTime } from "@/lib/dates";
 import { useT } from "@/lib/i18n";
 import { PickCard } from "@/components/pick-card";
@@ -10,7 +16,14 @@ import { ListSettingsMenu } from "./list-detail/list-settings-menu";
 import { Grid } from "./shared";
 
 function itemToMeta(it: ListItem): Meta {
-  return { id: it.id, type: it.type, name: it.name, poster: it.poster };
+  return {
+    id: it.id,
+    type: it.type,
+    name: it.name,
+    poster: it.poster,
+    addonOrigin: it.addonOrigin,
+    videos: it.videos,
+  };
 }
 
 export function ListDetail({ listId, onBack }: { listId: string; onBack: () => void }) {
@@ -42,7 +55,12 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
       const el = cellRefs.current.get(it.id);
       if (!el) continue;
       const r = el.getBoundingClientRect();
-      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+      if (
+        e.clientX >= r.left &&
+        e.clientX <= r.right &&
+        e.clientY >= r.top &&
+        e.clientY <= r.bottom
+      ) {
         target = it.id;
         break;
       }
@@ -79,10 +97,13 @@ export function ListDetail({ listId, onBack }: { listId: string; onBack: () => v
 
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
-          <h1 className="font-display text-[34px] font-medium leading-[1.05] text-ink">{list.name}</h1>
+          <h1 className="font-display text-[34px] font-medium leading-[1.05] text-ink">
+            {list.name}
+          </h1>
           <p className="text-[12.5px] text-ink-muted">
             {t("{n} / {max} items", { n: list.items.length, max: MAX_ITEMS })}
-            {list.updatedAt > 0 && ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
+            {list.updatedAt > 0 &&
+              ` · ${t("Updated {when}", { when: relativeTime(list.updatedAt) })}`}
           </p>
         </div>
         <ListSettingsMenu list={list} onDeleted={onBack} />
@@ -140,7 +161,7 @@ function EmptyList() {
       <Layers size={26} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[15px] font-semibold text-ink">{t("Nothing here yet")}</h2>
       <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-        {t("Add titles with the search above, or hit \"Add to list\" on any movie or show's page.")}
+        {t('Add titles with the search above, or hit "Add to list" on any movie or show\'s page.')}
       </p>
     </div>
   );

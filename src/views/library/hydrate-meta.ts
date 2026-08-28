@@ -1,6 +1,9 @@
 import { type Meta } from "@/lib/cinemeta";
 import { lruSet } from "@/lib/cache";
 import { resolveMeta } from "@/lib/meta-resource";
+import { readLocalEntries } from "@/lib/watchlist";
+import { readActiveStremioAuthKey } from "@/lib/auth";
+import { addonBasesForOrigin, fetchAddonMeta, gatherCatalogAddons } from "@/lib/addons";
 
 const metaHydrateCache = new Map<string, Promise<Meta | null>>();
 
@@ -8,21 +11,31 @@ export async function hydrateLibraryMeta(
   id: string,
   type: "movie" | "series",
   tmdbKey: string | null,
+  origin?: Meta["addonOrigin"],
 ): Promise<Meta | null> {
-  const cacheKey = `${type}:${id}`;
+  const cacheKey = `${type}:${id}:${origin?.id ?? ""}`;
   const cached = metaHydrateCache.get(cacheKey);
   if (cached) return cached;
   const authKey = (() => {
     try {
-      const raw = localStorage.getItem("harbor.auth");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as { authKey?: string };
-      return parsed.authKey ?? null;
+      return readActiveStremioAuthKey();
     } catch {
       return null;
     }
   })();
   const p = (async () => {
+    if (origin) {
+      const addons = await gatherCatalogAddons(authKey).catch(() => []);
+      const bases = addonBasesForOrigin(addons, origin);
+      for (const base of bases) {
+        try {
+          const addonMeta = await fetchAddonMeta(base, type, id);
+          if (addonMeta) return addonMeta;
+        } catch {
+          /* try the next matching addon instance */
+        }
+      }
+    }
     if (id.startsWith("tmdb:") && tmdbKey) {
       const isTv = id.startsWith("tmdb:tv:") || id.startsWith("tmdb:series:");
       const tmdbType = isTv ? "tv" : "movie";
@@ -56,20 +69,7 @@ export async function hydrateLibraryMeta(
 
 export function loadLocalIds(): Set<string> {
   try {
-    const raw = localStorage.getItem("harbor.watchlist.v1");
-    if (!raw) return new Set();
-    const arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) return new Set();
-    const ids = arr
-      .map((el) =>
-        typeof el === "string"
-          ? el
-          : el && typeof el === "object" && typeof (el as { id?: unknown }).id === "string"
-            ? (el as { id: string }).id
-            : null,
-      )
-      .filter((v): v is string => typeof v === "string");
-    return new Set(ids);
+    return new Set(readLocalEntries().map((e) => e.id));
   } catch {
     return new Set();
   }

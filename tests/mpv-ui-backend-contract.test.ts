@@ -20,20 +20,20 @@ test("mpv clears source-specific media state and does not revive a paused player
 
   assert.match(source, /snap\.chapters = \[\];[\s\S]*snap\.videoWidth = 0;[\s\S]*snap\.videoHeight = 0;/);
   assert.match(source, /name === "video-params\/gamma"\) snap\.hdrGamma = typeof data === "string" \? data : ""/);
-  assert.match(source, /if \(snap\.status !== "paused"\) snap\.status = "playing";/);
+  assert.match(source, /snap\.status = observedPaused === true \? "paused" : "playing";/);
 });
 
 test("live and on-demand sources never share one mpv buffering profile", () => {
   const source = read("src/lib/player/mpv.ts");
 
-  assert.match(source, /let loadedIsLive: boolean \| null = null;/);
-  assert.match(source, /if \(mpvStarted && loadedIsLive !== nextIsLive\) \{[\s\S]*await invoke\("mpv_stop"\)[\s\S]*mpvStarted = false;/);
-  assert.match(source, /loadedIsLive = nextIsLive;/);
+  assert.match(source, /let currentIsLive: boolean \| null = null;/);
+  assert.match(source, /if \(mpvStarted && currentIsLive !== nextIsLive\) \{[\s\S]*await invoke\("mpv_stop"\)[\s\S]*mpvStarted = false;/);
+  assert.match(source, /currentIsLive = nextIsLive;/);
 });
 
 test("a rejected initial mpv load shuts down its untracked native instance", () => {
   const backend = read("src-tauri/src/mpv.rs");
 
-  assert.match(backend, /if let Err\(e\) = mpv_argv_command\(&\*mpv_arc, &\["loadfile", &args\.url, "replace"\]\) \{/);
+  assert.match(backend, /mpv_argv_command\(&\*mpv_arc, &\["loadfile", &args\.url, "replace"\]\)\.map_err\(\|e\| \{/);
   assert.match(backend, /let _ = mpv_arc\.command\("quit", &\[\]\);/);
 });

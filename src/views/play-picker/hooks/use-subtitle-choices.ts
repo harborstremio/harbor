@@ -3,7 +3,9 @@ import { useAuth } from "@/lib/auth";
 import type { Addon } from "@/lib/addons";
 import { gatherSubtitleAddons } from "@/lib/subtitles/addon-source";
 import { langScore, languageName } from "@/lib/subtitles/language";
+import { subtitleStreamDescriptor } from "@/lib/subtitles/provider-label";
 import { searchSubtitles } from "@/lib/subtitles/search";
+import { resolveAnimeSearchCoords } from "@/lib/subtitles/anime-numbering";
 import type { SubResult } from "@/lib/subtitles/types";
 import { useSettings } from "@/lib/settings";
 import { buildStreamIds } from "@/lib/streams/stream-ids";
@@ -34,7 +36,7 @@ export function useSubtitleChoices(src: PlayerSrc) {
   const preferredLangs = useMemo(() => {
     const primary = settings.preferredSubLangs?.length
       ? settings.preferredSubLangs
-      : settings.preferredLanguages ?? [];
+      : (settings.preferredLanguages ?? []);
     const base = primary.length > 0 ? primary : ["English"];
     return isAnimeSrc(src) ? base : base.filter((l) => !isJapanese(l));
   }, [settings.preferredSubLangs, settings.preferredLanguages, src.meta.id]);
@@ -60,24 +62,37 @@ export function useSubtitleChoices(src: PlayerSrc) {
       );
       const animeIds = candidateIds.some((i) => i.startsWith("kitsu:") || i.startsWith("mal:"));
       const imdbEpAligned =
-        !animeIds || src.episode?.imdbEpisode == null || src.episode.episode === src.episode.imdbEpisode;
+        !animeIds ||
+        src.episode?.imdbEpisode == null ||
+        src.episode.episode === src.episode.imdbEpisode;
       try {
+        const coords = await resolveAnimeSearchCoords({
+          isAnime: isAnimeSrc(src),
+          metaId: src.meta.id,
+          imdbId: src.imdbId ?? (src.meta.id?.startsWith("tt") ? src.meta.id : undefined),
+          imdbVerified: src.imdbIdVerified === true || !!src.meta.id?.startsWith("tt"),
+          episode: src.episode,
+        });
         const r = await searchSubtitles(
           {
             imdbId: src.imdbId ?? (src.meta.id?.startsWith("tt") ? src.meta.id : undefined),
             stremioId: src.meta.id,
             candidateIds,
             type: src.meta.type === "series" ? "series" : "movie",
-            season: imdbEpAligned
-              ? src.episode?.imdbSeason ?? src.episode?.season
-              : src.episode?.season,
-            episode: imdbEpAligned
-              ? src.episode?.imdbEpisode ?? src.episode?.episode
-              : src.episode?.episode,
+            season: coords
+              ? coords.season
+              : imdbEpAligned
+                ? (src.episode?.imdbSeason ?? src.episode?.season)
+                : src.episode?.season,
+            episode: coords
+              ? coords.episode
+              : imdbEpAligned
+                ? (src.episode?.imdbEpisode ?? src.episode?.episode)
+                : src.episode?.episode,
             // This screen is a picker, so request every available language.
             // Preferences are still used below to rank and preselect safely.
             langs: [],
-            filename: src.streamRef?.parsedTitle ?? src.streamRef?.title ?? undefined,
+            filename: subtitleStreamDescriptor(src.streamRef),
           },
           {
             timeoutMs: 7_000,

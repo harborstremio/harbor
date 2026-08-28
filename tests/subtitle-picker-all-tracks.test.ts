@@ -17,8 +17,9 @@ test("the subtitle picker loads and displays every available language", () => {
   assert.match(menu, /const languageTracks = tracks;/);
   assert.match(autoload, /searchLangs: \[\],/);
   assert.match(fetcher, /langs: p\.searchLangs \?\? p\.langs/);
-  assert.doesNotMatch(fetcher, /const matches = results\.filter/);
-  assert.match(fetcher, /const fresh = results\.filter/);
-  assert.match(fetcher, /loadFirstWorkingSubtitle\(preferredFresh/);
+  assert.doesNotMatch(fetcher, /rankedResults\(results\)[\s\S]{0,120}\.filter\(\(r\) => langScore/);
+  assert.match(fetcher, /const fresh = rankedFresh\(results\)/);
+  assert.match(fetcher, /langScore\(result\.lang \?\? "", p\.langs\) >= 0/);
+  assert.match(fetcher, /loadFirstWorkingSubtitle\(autoCandidates/);
   assert.match(search, /langs: \[\],/);
 });

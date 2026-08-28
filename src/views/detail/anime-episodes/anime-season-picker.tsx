@@ -1,7 +1,7 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { franchiseTags, type FranchiseEntry } from "@/lib/providers/anime-detail";
+import { franchiseTags, isFranchiseExtra, type FranchiseEntry } from "@/lib/providers/anime-detail";
 import { useT } from "@/lib/i18n";
 import { UpcomingBadge } from "../badges";
 
@@ -15,7 +15,12 @@ export function AnimeSeasonPicker({
   onSelectEntry: (entryId: string) => void;
 }) {
   const t = useT();
-  const [menu, setMenu] = useState<{ right: number; top?: number; bottom?: number; maxH: number } | null>(null);
+  const [menu, setMenu] = useState<{
+    right: number;
+    top?: number;
+    bottom?: number;
+    maxH: number;
+  } | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const open = menu != null;
@@ -64,7 +69,10 @@ export function AnimeSeasonPicker({
   if (!current) return null;
   const tags = franchiseTags(franchise);
   const positionLabel = tags[currentIdx]?.short ?? `S${currentIdx + 1}`;
-  const seasonIdxs = tags.map((tg, i) => (tg?.kind === "season" ? i : -1)).filter((i) => i >= 0);
+  // Extras never belong here; they render under Movies & Specials buckets.
+  const seasonIdxs = tags
+    .map((tg, i) => (tg?.kind === "season" && !isFranchiseExtra(franchise[i]) ? i : -1))
+    .filter((i) => i >= 0);
 
   const renderEntry = (i: number) => {
     const f = franchise[i];
@@ -80,10 +88,14 @@ export function AnimeSeasonPicker({
           isActive ? "bg-ink/10 text-ink" : "text-ink-muted hover:bg-elevated/60 hover:text-ink"
         }`}
       >
-        <span className="mt-0.5 font-mono text-[11px] text-ink-subtle">{tags[i]?.short ?? `S${i + 1}`}</span>
+        <span className="mt-0.5 font-mono text-[11px] text-ink-subtle">
+          {tags[i]?.short ?? `S${i + 1}`}
+        </span>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="flex items-center gap-2 text-[13.5px] font-medium">
-            <span className="truncate">{f.meta.name}</span>
+            <span title={f.meta.name} className="truncate">
+              {f.meta.name}
+            </span>
             {f.isUpcoming && <UpcomingBadge />}
           </span>
           <span className="text-[11.5px] text-ink-subtle">
@@ -109,7 +121,9 @@ export function AnimeSeasonPicker({
         className="flex h-10 items-center gap-2 rounded-full border border-edge-soft bg-elevated/70 ps-4 pe-3 text-[13.5px] font-medium text-ink transition-colors hover:bg-elevated"
       >
         <span className="font-mono text-[11.5px] text-ink-subtle">{positionLabel}</span>
-        <span className="max-w-[280px] truncate">{current.meta.name}</span>
+        <span title={current.meta.name} className="max-w-[280px] truncate">
+          {current.meta.name}
+        </span>
         {current.isUpcoming && <UpcomingBadge />}
         <ChevronDown
           size={15}
@@ -126,7 +140,6 @@ export function AnimeSeasonPicker({
           >
             <div className="overflow-y-auto" style={{ maxHeight: menu.maxH }}>
               {seasonIdxs.map(renderEntry)}
-
             </div>
           </div>,
           document.body,

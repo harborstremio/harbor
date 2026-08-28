@@ -1,5 +1,6 @@
 import type { SubCue } from "@/lib/subtitles/parser";
 import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
+import type { SubtitleMatchConfidence } from "@/lib/subtitles/release-match";
 
 export type TrackInfo = {
   id: string;
@@ -20,7 +21,12 @@ export type TrackInfo = {
   url?: string;
   release?: string;
   provider?: string;
+  fps?: number;
+  downloads?: number;
+  author?: string;
   matchScore?: number;
+  matchConfidence?: SubtitleMatchConfidence;
+  matchReasons?: string[];
   subId?: string;
 };
 
@@ -31,12 +37,15 @@ export type Chapter = {
 
 export type PlayerStatus = "idle" | "loading" | "ready" | "playing" | "paused" | "ended" | "error";
 
+export type PlayerSeekPrecision = "exact" | "keyframes";
+
 export type PlayerSnapshot = {
   status: PlayerStatus;
   positionSec: number;
   durationSec: number;
   bufferedSec: number;
   buffering: boolean;
+  firstFrameReady: boolean;
   volume: number;
   muted: boolean;
   rate: number;
@@ -59,6 +68,8 @@ export type PlayerSnapshot = {
 
 export type PlayerSource = {
   url: string;
+  traceId?: string;
+  startupProfile?: "standard" | "high-bitrate";
   subtitles?: { id?: string; url: string; lang?: string; m?: string }[];
   notWebReady?: boolean;
   startAtSec?: number;
@@ -72,7 +83,7 @@ export type PlayerBridge = {
   load: (src: PlayerSource) => Promise<void>;
   play: () => Promise<void>;
   pause: () => void;
-  seek: (sec: number) => void;
+  seek: (sec: number, precision?: PlayerSeekPrecision) => void;
   frameStep?: (dir: 1 | -1) => void;
   setVolume: (v: number) => void;
   setMuted: (m: boolean) => void;
@@ -130,6 +141,7 @@ export const emptySnapshot: PlayerSnapshot = {
   durationSec: 0,
   bufferedSec: 0,
   buffering: false,
+  firstFrameReady: false,
   volume: 1,
   muted: false,
   rate: 1,

@@ -1,5 +1,32 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
+
+export const HDR_OVERLAY_WINDOW_LABEL = "harbor-hdr-overlay";
+export const HDR_STAGE_SET_SUBTITLE_TRACK = "hdr-stage://set-subtitle-track";
+export const HDR_STAGE_SET_SECONDARY_SUBTITLE_TRACK = "hdr-stage://set-secondary-subtitle-track";
+export const HDR_STAGE_ADD_SUBTITLE = "hdr-stage://add-subtitle";
+export const HDR_STAGE_ADD_SUBTITLE_RESULT = "hdr-stage://add-subtitle-result";
+
+export type HdrStageSubtitleTrackRequest = {
+  mediaKey: string;
+  id: string | null;
+};
+
+export type HdrStageAddSubtitleRequest = {
+  requestId: string;
+  mediaKey: string;
+  url: string;
+  lang?: string;
+  title?: string;
+  select?: boolean;
+  metadata?: SubtitleLoadMetadata;
+};
+
+export type HdrStageAddSubtitleResult = {
+  requestId: string;
+  ok: boolean;
+};
 
 export async function hdrOverlayOpen(): Promise<void> {
   await invoke("hdr_overlay_open").catch(() => {});

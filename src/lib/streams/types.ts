@@ -27,15 +27,7 @@ export type Source =
   | "TC"
   | "SCR"
   | "Other";
-export type Tier =
-  | "4K_DV"
-  | "4K_HDR"
-  | "4K"
-  | "1080p_HDR"
-  | "1080p"
-  | "720p"
-  | "SD"
-  | "ROUGH";
+export type Tier = "4K_DV" | "4K_HDR" | "4K" | "1080p_HDR" | "1080p" | "720p" | "SD" | "ROUGH";
 export type DebridSlug = "rd" | "tb" | "ad" | "pm" | "dl";
 
 export type ProxyHeaders = {
@@ -111,6 +103,7 @@ export type ParsedStream = Stream & {
   size: number | null;
   seeders: number | null;
   cached: Partial<Record<DebridSlug, boolean>>;
+  cacheVerified: Partial<Record<DebridSlug, boolean>>;
   inLibrary: Partial<Record<DebridSlug, boolean>>;
   container: Container | null;
   releaseGroup: string | null;

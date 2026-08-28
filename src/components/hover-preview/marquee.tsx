@@ -82,8 +82,8 @@ function advisoryChip(category: string): { Icon: LucideIcon; label: string } {
 }
 
 function useAdvisory(imdbId: string | undefined): ParentalCategory[] {
-  const [cats, setCats] = useState<ParentalCategory[]>(
-    () => (imdbId ? harborImdbParentalCached(imdbId) ?? [] : []),
+  const [cats, setCats] = useState<ParentalCategory[]>(() =>
+    imdbId ? (harborImdbParentalCached(imdbId) ?? []) : [],
   );
   useEffect(() => {
     if (!imdbId) {
@@ -201,7 +201,7 @@ function MarqueeBlock({
 }) {
   const meta = data.meta;
   const alt = tmdbImdbCached(meta.id);
-  const imdb = meta.id.startsWith("tt") ? meta.id : alt ?? undefined;
+  const imdb = meta.id.startsWith("tt") ? meta.id : (alt ?? undefined);
   const altIds = useMemo(() => [alt ?? undefined], [alt]);
   const inList = useInWatchlist(meta.id, altIds);
   const [watched, setWatched] = useState(false);
@@ -238,6 +238,8 @@ function MarqueeBlock({
               name: meta.name,
               poster: meta.poster,
               imdbId: alt ?? undefined,
+              addonOrigin: meta.addonOrigin,
+              videos: meta.videos,
             });
           }}
         >

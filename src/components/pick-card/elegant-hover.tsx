@@ -68,7 +68,14 @@ export function ElegantHoverActions({
           title={inWatchlist ? t("Remove from watchlist") : t("Add to watchlist")}
           onClick={(e) =>
             act(e, () => {
-              toggleWatchlist({ id: meta.id, type: meta.type, name: meta.name, poster: meta.poster });
+              toggleWatchlist({
+                id: meta.id,
+                type: meta.type,
+                name: meta.name,
+                poster: meta.poster,
+                addonOrigin: meta.addonOrigin,
+                videos: meta.videos,
+              });
             })
           }
           className={`${btn} flex h-9 w-9 items-center justify-center rounded-full text-white transition-transform hover:scale-110`}

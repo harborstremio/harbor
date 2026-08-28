@@ -29,6 +29,7 @@ test("X-Ray leaves processor and renderer headroom during playback", () => {
   const capture = read("src/lib/face/face-capture.ts");
   const gallery = read("src/lib/face/cast-embeddings.ts");
   const engine = read("src/lib/face/face-engine.ts");
+  const workerEngine = read("src/lib/face/face-worker-engine.ts");
   const overlay = read("src/components/player/xray/xray-overlay.tsx");
 
   assert.match(scan, /const SCAN_MS = 4000/);
@@ -36,8 +37,10 @@ test("X-Ray leaves processor and renderer headroom during playback", () => {
   assert.match(scan, /document\.visibilityState !== "visible"/);
   assert.match(capture, /const DETECT_WIDTH = 640/);
   assert.match(gallery, /const MAX_CAST = 24/);
-  assert.match(gallery, /const CONCURRENCY = 1/);
-  assert.match(engine, /Math\.min\(2, \(navigator\.hardwareConcurrency \|\| 2\) - 1\)/);
+  assert.match(gallery, /const PRIMARY_CONCURRENCY = 1/);
+  assert.match(gallery, /const BACKGROUND_CONCURRENCY = 1/);
+  assert.match(engine, /new Worker/);
+  assert.match(workerEngine, /ort\.env\.wasm\.numThreads = 1/);
   assert.match(overlay, /const liveScan = view === "rail" && settings\.xrayLiveScan/);
   assert.doesNotMatch(overlay, /onPointerEnter=.*ensureFaceEngine/);
 });
@@ -97,10 +100,8 @@ test("normal mpv playback avoids per-subtitle oversized buffers and disk cache r
   assert.doesNotMatch(mpv, /mpv\.set_property\("cache-dir"/);
   assert.match(mpv, /set_property\("stream-buffer-size", "4MiB"\)/);
   assert.doesNotMatch(mpv, /set_property\("stream-buffer-size", "32MiB"\)/);
-  assert.match(mpv, /if full_dl \{ "yes" \} else \{ "no" \}/);
-  assert.match(mpv, /if full_dl \{ "10" \} else \{ "2" \}/);
-  assert.doesNotMatch(mpv, /fn reassert_hdr_colorspace/);
-  assert.doesNotMatch(mpv, /set_property\("target-peak", "10000"\)/);
+  assert.match(mpv, /set_property\("cache-pause-initial", "no"\)/);
+  assert.match(mpv, /if high_bitrate \{[\s\S]*"2"[\s\S]*\} else \{[\s\S]*"1"/);
 });
 
 test("the expensive D3D11 compatibility presenter is opt-in for new and existing profiles", () => {

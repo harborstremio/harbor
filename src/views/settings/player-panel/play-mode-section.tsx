@@ -27,12 +27,16 @@ export function PlayModePanel() {
     {
       id: "manual",
       label: t("Manual picker"),
-      sub: t("Hitting Play opens the source list so you can choose quality, debrid, and audio yourself."),
+      sub: t(
+        "Hitting Play opens the source list so you can choose quality, debrid, and audio yourself.",
+      ),
     },
     {
       id: "season",
       label: t("Lock to season server"),
-      sub: t("Pick a source once and Harbor keeps playing the rest of that season from the same release, no re-picking. Works best with a debrid season pack. For anime it locks the whole series to that release."),
+      sub: t(
+        "Pick a source once and Harbor keeps playing the rest of that season from the same release, no re-picking. Works best with a debrid season pack. For anime it locks the whole series to that release.",
+      ),
     },
   ];
 
@@ -74,6 +78,30 @@ export function PlayModePanel() {
       })}
       <button
         type="button"
+        id="set-instant-playback-preparation"
+        onClick={() => update({ instantPlaybackPreparation: !settings.instantPlaybackPreparation })}
+        className="mt-1 scroll-mt-28 flex items-start gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4 text-start transition-colors hover:border-edge hover:bg-canvas/60"
+      >
+        <span
+          className={`mt-0.5 flex h-6 w-10 shrink-0 items-center rounded-full p-0.5 transition-colors ${
+            settings.instantPlaybackPreparation ? "justify-end bg-accent" : "justify-start bg-edge"
+          }`}
+        >
+          <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Instant playback preparation")}
+          </span>
+          <span className="text-[12.5px] leading-snug text-ink-muted">
+            {t(
+              "Prepares up to two provider-confirmed cached debrid sources while the picker is open, so Play can start sooner. This may create or update transfers on your debrid account before you click Play. It never touches P2P or uncached sources, is rate-limited, and keeps prepared links in memory for two minutes only. Off by default.",
+            )}
+          </span>
+        </div>
+      </button>
+      <button
+        type="button"
         id="set-remember-last-stream"
         onClick={() => update({ rememberLastStream: !settings.rememberLastStream })}
         className="mt-1 scroll-mt-28 flex items-start gap-3.5 rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4 text-start transition-colors hover:border-edge hover:bg-canvas/60"
@@ -88,7 +116,9 @@ export function PlayModePanel() {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="text-[15px] font-semibold text-ink">{t("Remember last stream")}</span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you resume something you were watching, replay the exact stream you last used (same addon and source) instead of opening the picker again. Turn off to always choose fresh.")}
+            {t(
+              "When you resume something you were watching, replay the exact stream you last used (same addon and source) instead of opening the picker again. Turn off to always choose fresh.",
+            )}
           </span>
         </div>
       </button>
@@ -106,9 +136,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Auto-skip stalled streams")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Auto-skip stalled streams")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("If a stream hasn't started playing in time (a dead source or an addon that's down), automatically try the next available stream. Off by default.")}
+            {t(
+              "If a stream hasn't started playing in time (a dead source or an addon that's down), automatically try the next available stream. Off by default.",
+            )}
           </span>
         </div>
       </button>
@@ -116,7 +150,9 @@ export function PlayModePanel() {
         <div className="ms-1 flex flex-col gap-2.5 rounded-2xl border border-edge-soft bg-canvas/40 px-5 py-4">
           <span className="text-[13px] font-semibold text-ink">{t("How long to wait first")}</span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.")}
+            {t(
+              "Slow addons and P2P sources often need more than 10 seconds to start. Raise this if streams are being skipped before they get a fair chance.",
+            )}
           </span>
           <div className="flex flex-wrap gap-2 pt-0.5">
             {STALL_WAIT_OPTIONS.map((sec) => {
@@ -152,9 +188,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Ask to resume or start over")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Ask to resume or start over")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers items synced from Stremio or Trakt.")}
+            {t(
+              "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers items synced from Stremio or Trakt.",
+            )}
           </span>
         </div>
       </button>
@@ -171,9 +211,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Resume where you left off")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Resume where you left off")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("Pick up partly-watched episodes and movies at your saved spot. Anything watched past 80% always restarts. Turn this off to always start from the beginning, handy if you rewatch shows.")}
+            {t(
+              "Pick up partly-watched episodes and movies at your saved spot. Anything watched past 80% always restarts. Turn this off to always start from the beginning, handy if you rewatch shows.",
+            )}
           </span>
         </div>
       </button>
@@ -190,9 +234,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Keep same source on next episode")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Keep same source on next episode")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When auto-playing the next episode, keep the same release/source you were just watching instead of Harbor's top-ranked stream. Falls back to the best stream if that source isn't available.")}
+            {t(
+              "When auto-playing the next episode, keep the same release/source you were just watching instead of Harbor's top-ranked stream. Falls back to the best stream if that source isn't available.",
+            )}
           </span>
         </div>
       </button>
@@ -213,7 +261,9 @@ export function PlayModePanel() {
             {t("Download the whole file while streaming")}
           </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and torrent streams. Uses more disk and bandwidth; cleared when you switch or close.")}
+            {t(
+              "Buffers the whole file in the background as you watch, even while paused, so big remuxes pre-load and you can scrub a cached file with no re-buffering. Works for debrid and torrent streams. Uses more disk and bandwidth; cleared when you switch or close.",
+            )}
           </span>
         </div>
       </button>
@@ -230,9 +280,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Stay in fullscreen after closing the player")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Stay in fullscreen after closing the player")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you exit playback, keep the window fullscreen instead of dropping back to a window. Turn off to leave fullscreen automatically whenever the player closes.")}
+            {t(
+              "When you exit playback, keep the window fullscreen instead of dropping back to a window. Turn off to leave fullscreen automatically whenever the player closes.",
+            )}
           </span>
         </div>
       </button>
@@ -242,13 +296,17 @@ export function PlayModePanel() {
       >
         <span className="text-[15px] font-semibold text-ink">{t("What fullscreen does")}</span>
         <span className="text-[12.5px] leading-snug text-ink-muted">
-          {t("True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.")}
+          {t(
+            "True fullscreen covers the whole screen and hides the taskbar. Maximize fills the screen but keeps the taskbar and title bar, so you can still switch apps.",
+          )}
         </span>
         <div className="flex flex-wrap gap-2 pt-0.5">
-          {([
-            { id: "fullscreen", label: t("True fullscreen") },
-            { id: "maximized", label: t("Maximize") },
-          ] as const).map((m) => {
+          {(
+            [
+              { id: "fullscreen", label: t("True fullscreen") },
+              { id: "maximized", label: t("Maximize") },
+            ] as const
+          ).map((m) => {
             const on = (settings.fullscreenMode ?? "fullscreen") === m.id;
             return (
               <button
@@ -256,7 +314,9 @@ export function PlayModePanel() {
                 type="button"
                 onClick={() => update({ fullscreenMode: m.id })}
                 className={`flex h-10 items-center rounded-full px-5 text-[13px] font-semibold transition-colors ${
-                  on ? "bg-ink text-canvas" : "bg-elevated text-ink-muted ring-1 ring-edge-soft hover:text-ink"
+                  on
+                    ? "bg-ink text-canvas"
+                    : "bg-elevated text-ink-muted ring-1 ring-edge-soft hover:text-ink"
                 }`}
               >
                 {m.label}
@@ -278,9 +338,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Restore window position after fullscreen")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Restore window position after fullscreen")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("When you exit fullscreen, return the window to exactly where it was. Turn off to center it on screen instead.")}
+            {t(
+              "When you exit fullscreen, return the window to exactly where it was. Turn off to center it on screen instead.",
+            )}
           </span>
         </div>
       </button>
@@ -297,9 +361,13 @@ export function PlayModePanel() {
           <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.4)]" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="text-[15px] font-semibold text-ink">{t("Volume pop-up while watching")}</span>
+          <span className="text-[15px] font-semibold text-ink">
+            {t("Volume pop-up while watching")}
+          </span>
           <span className="text-[12.5px] leading-snug text-ink-muted">
-            {t("Show a quick volume overlay when you change volume with the player controls hidden, so keyboard and scroll wheel changes are always visible.")}
+            {t(
+              "Show a quick volume overlay when you change volume with the player controls hidden, so keyboard and scroll wheel changes are always visible.",
+            )}
           </span>
         </div>
       </button>

@@ -48,10 +48,10 @@ fn phonetic(n: &str) -> String {
     // Fold the common silent "gh" in -ight words before the coarse consonant
     // mapping, so ASR spellings such as "night" and "nite" can agree without
     // treating an initial pronounced g (for example "ghost") as silent.
-    let prepared = n.replace("igh", "i");
+    let canonical = n.replace("igh", "i").replace("ght", "t");
     let mut out = String::new();
     let mut prev = '\u{0}';
-    for (i, c) in prepared.chars().enumerate() {
+    for (i, c) in canonical.chars().enumerate() {
         let f = fold(c);
         if f == '0' && i > 0 {
             continue;

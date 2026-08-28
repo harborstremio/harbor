@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { setItemWithRecovery, freeStorageSpace } from "@/lib/storage-recovery";
 import { randomUuid } from "@/lib/uuid";
+import { persistableAddonOrigin, persistableVideos, type Meta } from "@/lib/cinemeta";
 
 const KEY = "harbor.customlists.v1";
 const PROFILES_KEY = "harbor.profiles.v1";
@@ -37,9 +38,18 @@ export type ListItem = {
   name: string;
   poster?: string;
   addedAt: number;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
 };
 
-export type ListItemInput = { id: string; type?: string; name?: string; poster?: string };
+export type ListItemInput = {
+  id: string;
+  type?: string;
+  name?: string;
+  poster?: string;
+  addonOrigin?: Meta["addonOrigin"];
+  videos?: Meta["videos"];
+};
 
 export type ListBgMode = "auto" | "custom";
 
@@ -79,6 +89,8 @@ function toItem(input: ListItemInput): ListItem {
     name: input.name ?? "",
     poster: input.poster,
     addedAt: Date.now(),
+    addonOrigin: persistableAddonOrigin(input.addonOrigin),
+    videos: persistableVideos(input.videos),
   };
 }
 
@@ -107,6 +119,8 @@ function read(): CustomList[] {
             name: typeof it.name === "string" ? it.name : "",
             poster: typeof it.poster === "string" ? it.poster : undefined,
             addedAt: typeof it.addedAt === "number" ? it.addedAt : 0,
+            addonOrigin: persistableAddonOrigin(it.addonOrigin),
+            videos: persistableVideos(it.videos),
           });
         }
       }
@@ -279,7 +293,7 @@ export function useCustomLists(): CustomList[] {
 
 export function useList(id: string | null): CustomList | null {
   const lists = useCustomLists();
-  return useMemo(() => (id ? lists.find((l) => l.id === id) ?? null : null), [lists, id]);
+  return useMemo(() => (id ? (lists.find((l) => l.id === id) ?? null) : null), [lists, id]);
 }
 
 export function useListsContaining(itemId: string | undefined): Set<string> {

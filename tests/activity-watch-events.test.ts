@@ -22,7 +22,10 @@ test("recent activity no longer derives only from the resume list", () => {
 });
 
 test("completion events are marked finished and keep the episode label", () => {
-  const block = feed.slice(feed.indexOf("input.watchEvents"), feed.indexOf("for (const c of input.cw)"));
+  const block = feed.slice(
+    feed.indexOf("input.watchEvents"),
+    feed.indexOf("for (const c of input.cw)"),
+  );
   assert.match(block, /kind: "finished"/);
   assert.match(block, /withAnime\(w\.id, w\.type\)/, "anime must still be typed as anime");
   assert.match(block, /S\$\{w\.season\} E\$\{w\.episode\}/);
@@ -30,7 +33,10 @@ test("completion events are marked finished and keep the episode label", () => {
 
 test("finishing playback records a watch event for every content type", () => {
   assert.match(autosave, /if \(finished\) \{\s*recordWatchEvent\(/);
-  const guard = autosave.slice(autosave.indexOf("if (finished) {"), autosave.indexOf("const animeLocal"));
+  const guard = autosave.slice(
+    autosave.indexOf("if (finished) {"),
+    autosave.indexOf("const animeLocal"),
+  );
   assert.doesNotMatch(guard, /meta\.type === "series" &&/, "must not be limited to one media type");
 });
 

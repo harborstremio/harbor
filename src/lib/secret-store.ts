@@ -12,8 +12,21 @@ let rustAvailable = false;
 let loaded = false;
 let persistTimer: number | null = null;
 
-function isSecretKey(key: string): boolean {
+export function isSecretKey(key: string): boolean {
   return SECRET_PREFIXES.some((p) => key === p || key.startsWith(`${p}.`));
+}
+
+/** Rewrites a session key so it targets a specific profile, used when restoring a backup. */
+export function secretKeyForProfile(key: string, profileId: string): string {
+  for (const prefix of SECRET_PREFIXES) {
+    if (key === prefix || key.startsWith(`${prefix}.`)) return `${prefix}.${profileId}`;
+  }
+  return key;
+}
+
+/** Snapshot of the Rust-persisted secret store, for backup/export use. */
+export function getAllSecrets(): Record<string, string> {
+  return { ...store };
 }
 
 async function persist(): Promise<void> {
@@ -31,6 +44,15 @@ function schedulePersist(): void {
     persistTimer = null;
     void persist();
   }, 200);
+}
+
+/** Flushes any pending secret writes immediately, for callers about to leave the page. */
+export async function flushSecrets(): Promise<void> {
+  if (persistTimer != null) {
+    window.clearTimeout(persistTimer);
+    persistTimer = null;
+  }
+  await persist();
 }
 
 export async function loadSecrets(): Promise<void> {

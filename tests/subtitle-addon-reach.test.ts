@@ -107,6 +107,10 @@ const subtitleModal = readFileSync(
   new URL("../src/components/popups/subtitle-modal.tsx", import.meta.url),
   "utf8",
 );
+const modalOverlayApp = readFileSync(
+  new URL("../src/views/modal-overlay-app.tsx", import.meta.url),
+  "utf8",
+);
 
 test("one slow subtitle addon cannot discard faster addon results", () => {
   assert.match(
@@ -151,8 +155,75 @@ test("automatic subtitle loading limits each visible language independently", ()
   assert.match(fetchIntoPlayer, /spreadBySourcePerLanguage\(/);
   assert.match(
     fetchIntoPlayer,
-    /spreadBySourcePerLanguage\(byPreferredLang, consumed, EXTRA_TRACKS_PER_LANGUAGE\)/,
+    /spreadBySourcePerLanguage\(eagerPool, consumed, EXTRA_TRACKS_PER_LANGUAGE\)/,
   );
+});
+
+test("automatic subtitle loading protects rate-limited built-in providers", () => {
+  assert.match(fetchIntoPlayer, /const BUILT_IN_EAGER_LIMIT_PER_LANGUAGE = 1/);
+  assert.match(fetchIntoPlayer, /function limitEagerProviderDownloads/);
+  assert.match(fetchIntoPlayer, /const eagerPool = limitEagerProviderDownloads/);
+  assert.match(fetchIntoPlayer, /spreadBySourcePerLanguage\(eagerPool, consumed/);
+});
+
+test("built-in providers keep their longer timeout budget", () => {
+  assert.match(fetchIntoPlayer, /const BUILT_IN_TIMEOUT_MS = 12_000/);
+  assert.match(search, /const extraTimeout = opts\.extra\.timeoutMs \?\? tmo/);
+  assert.match(search, /extraTimeout \+ 500/);
+});
+
+test("automatic subtitle loading consumes provider results progressively", () => {
+  assert.match(fetchIntoPlayer, /const PROGRESSIVE_TRACKS_PER_LANGUAGE = 35/);
+  assert.match(fetchIntoPlayer, /const SUBTITLE_ADD_CONCURRENCY = 4/);
+  assert.match(fetchIntoPlayer, /Array\.from\(/);
+  assert.match(fetchIntoPlayer, /onPartial: queuePartial/);
+  assert.match(fetchIntoPlayer, /await progressiveQueue/);
+});
+
+test("automatic core subtitle providers do not wait for addon inventory", () => {
+  const autoload = readFileSync(
+    new URL("../src/views/player/hooks/use-track-autoload.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(autoload, /stage === "core"/);
+  assert.match(autoload, /\{ addons: false \}/);
+  assert.match(autoload, /stage === "addons"/);
+  assert.match(autoload, /opensubtitles: false, wyzie: false, addons: true, extras: false/);
+  assert.match(autoload, /refreshing \|\| initialSearches > 0 \? "searching" : "idle"/);
+});
+
+test("Auto Sync moviehash enrichment never blocks progressive subtitle discovery", () => {
+  const autoload = readFileSync(
+    new URL("../src/views/player/hooks/use-track-autoload.ts", import.meta.url),
+    "utf8",
+  );
+  const searchStart = autoload.indexOf("const res = await fetchSubtitlesIntoPlayer({");
+  const hashMerge = autoload.indexOf("if (movieHashPromise)");
+  assert.ok(searchStart >= 0 && hashMerge > searchStart);
+  assert.doesNotMatch(
+    autoload.slice(searchStart, hashMerge),
+    /await resolveVideoHash\(src\)/,
+    "the initial provider search must start without waiting for remote moviehash reads",
+  );
+  assert.match(autoload, /\[subs\/autoload\] moviehash stage found/);
+});
+
+test("content advisory waits for playback readiness and subtitle discovery", () => {
+  const player = readFileSync(new URL("../src/views/player.tsx", import.meta.url), "utf8");
+  const advisory = readFileSync(
+    new URL("../src/views/player/hooks/use-content-advisory.ts", import.meta.url),
+    "utf8",
+  );
+  assert.match(player, /!subtitleSearchActive/);
+  assert.match(advisory, /if \(!enabled \|\| !ready \|\| !meta\) return/);
+  assert.match(advisory, /window\.setTimeout/);
+});
+
+test("the detached subtitle popup waits for the real add result", () => {
+  assert.match(modalOverlayApp, /modalOverlayRequestAction<"ok" \| "failed" \| "limited">/);
+  assert.match(modalOverlayApp, /if \(result === "limited"\) markLimitReached\(url\)/);
+  assert.match(subtitleMenu, /modalOverlayEmitResult\("modal:\/\/subtitle\/add-result"/);
+  assert.match(subtitleMenu, /wasLimitReached\(e\.payload\.url\)/);
 });
 
 test("the subtitle menu only keeps configured languages", () => {
@@ -169,14 +240,15 @@ test("the subtitle menu only keeps configured languages", () => {
 });
 
 test("the configured languages reach the separate subtitle popup", () => {
-  assert.match(subtitleMenu, /buildOverlayState\(propsRef\.current, preferredLanguages\)/);
+  assert.match(
+    subtitleMenu,
+    /buildOverlayState\(\s*propsRef\.current,\s*preferredLanguages,\s*subtitleContext,?\s*\)/,
+  );
   assert.match(subtitleModal, /preferredLanguages=\{state\.preferredLanguages\}/);
 });
 
-test("subtitle popup fills compact players while staying above the controls", () => {
-  assert.match(subtitleMenu, /fixed end-2 bottom-\[84px\]/);
-  assert.match(subtitleModal, /m-2 mb-\[84px\]/);
-  assert.match(subtitleMenu, /w-\[560px\] max-w-\[calc\(100vw-16px\)\]/);
-  assert.match(subtitleModal, /w-\[560px\] max-w-\[calc\(100vw-16px\)\]/);
+test("subtitle popups use the shared resizable panel above the controls", () => {
+  assert.match(subtitleMenu, /ResizableSubtitlePanel className="fixed end-6 bottom-24"/);
+  assert.match(subtitleModal, /ResizableSubtitlePanel className="mb-24 me-6"/);
   assert.doesNotMatch(subtitleModal, /me-\[120px\]/);
 });

@@ -1,5 +1,6 @@
 import type { SubResult, SubSearchQuery } from "../types";
 import { normalizeLang, normalizeSubtitleLang } from "../language";
+import { safeFetch } from "@/lib/safe-fetch";
 
 const ENDPOINT = "https://sub.wyzie.io/search";
 
@@ -17,6 +18,8 @@ type RawWyzie = {
   flagUrl?: string;
   fps?: number;
   downloads?: number;
+  author?: string;
+  uploader?: string;
 };
 
 export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
@@ -33,7 +36,7 @@ export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
   }
   let resp: Response;
   try {
-    resp = await fetch(`${ENDPOINT}?${params.toString()}`, {
+    resp = await safeFetch(`${ENDPOINT}?${params.toString()}`, {
       headers: { Accept: "application/json" },
     });
   } catch {
@@ -65,6 +68,7 @@ export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
       hearingImpaired: r.isHearingImpaired || r.hi || false,
       release: r.release,
       downloads: r.downloads,
+      author: r.author ?? r.uploader,
     });
   }
   return out;

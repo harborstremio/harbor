@@ -10,6 +10,7 @@ import { mediaKeyGate } from "@/lib/media-session";
 import { useSettings } from "@/lib/settings";
 import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
 import { getLeaveConfirm, openLeaveConfirm } from "@/lib/player/leave-confirm";
+import { isPlayerInteractionLocked } from "@/lib/player/interaction-lock";
 import { round2 } from "../player-utils";
 import { SFX } from "@/lib/sfx";
 
@@ -141,6 +142,10 @@ export function useKeyboardShortcuts(params: {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isPlayerInteractionLocked()) {
+        if (e.cancelable) e.preventDefault();
+        return;
+      }
       if (isTypingTarget(e)) return;
 
       const binding = eventToBinding(e);
@@ -256,7 +261,10 @@ export function useKeyboardShortcuts(params: {
       if (match("playerVolumeUp")) {
         e.preventDefault();
         const step = e.shiftKey ? 0.5 : 0.05;
-        const max = bridgeRef.current?.capabilities().engine === "mpv" ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2)) : 1;
+        const max =
+          bridgeRef.current?.capabilities().engine === "mpv"
+            ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2))
+            : 1;
         const next = Math.min(max, Math.max(0, snap.volume + step));
         bridgeRef.current?.setVolume(next);
         bridgeRef.current?.setMuted(false);
@@ -268,7 +276,10 @@ export function useKeyboardShortcuts(params: {
       if (match("playerVolumeDown")) {
         e.preventDefault();
         const step = e.shiftKey ? 0.5 : 0.05;
-        const max = bridgeRef.current?.capabilities().engine === "mpv" ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2)) : 1;
+        const max =
+          bridgeRef.current?.capabilities().engine === "mpv"
+            ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2))
+            : 1;
         const next = Math.min(max, Math.max(0, snap.volume - step));
         bridgeRef.current?.setVolume(next);
         bridgeRef.current?.setMuted(false);
@@ -480,6 +491,11 @@ export function useKeyboardShortcuts(params: {
     };
     const onKeyUp = (e: KeyboardEvent) => {
       const h = holdRef.current;
+      if (isPlayerInteractionLocked()) {
+        if (e.cancelable) e.preventDefault();
+        if (h.key != null && e.key === h.key) releaseHold();
+        return;
+      }
       if (h.key == null || e.key !== h.key) return;
       if (releaseHold() === "tap") playPauseToggle();
     };
@@ -495,7 +511,48 @@ export function useKeyboardShortcuts(params: {
       window.removeEventListener("blur", onBlur);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [closePlayer, togglePip, drawMode, snap.muted, snap.volume, snap.rate, snap.durationSec, snap.subDelaySec, overrides, seekBackStepSec, seekForwardStepSec, seekBackStepShortSec, seekForwardStepShortSec, seekTo, toggleSwitcher, toggleEpisodePanel, toggleGuide, toggleDvr, toggleSleep, onScreenshot, onGifRecord, onClipRecord, onToggleCrop, onPanscanUp, onPanscanDown, onPrevChannel, onToggleAnime4k, onAnime4kOn, onAnime4kOff, onFrameStep, onVolumeFeedback, settings.playerEscExitsFullscreen, settings.playerConfirmLeave, settings.playerVolumeSfx, settings.playerHdrAuto, settings.playerHdrToSdr, settings.playerRtxHdr, settings.playerRtxVsr, svpActive, update]);
+  }, [
+    closePlayer,
+    togglePip,
+    drawMode,
+    snap.muted,
+    snap.volume,
+    snap.rate,
+    snap.durationSec,
+    snap.subDelaySec,
+    overrides,
+    seekBackStepSec,
+    seekForwardStepSec,
+    seekBackStepShortSec,
+    seekForwardStepShortSec,
+    seekTo,
+    toggleSwitcher,
+    toggleEpisodePanel,
+    toggleGuide,
+    toggleDvr,
+    toggleSleep,
+    onScreenshot,
+    onGifRecord,
+    onClipRecord,
+    onToggleCrop,
+    onPanscanUp,
+    onPanscanDown,
+    onPrevChannel,
+    onToggleAnime4k,
+    onAnime4kOn,
+    onAnime4kOff,
+    onFrameStep,
+    onVolumeFeedback,
+    settings.playerEscExitsFullscreen,
+    settings.playerConfirmLeave,
+    settings.playerVolumeSfx,
+    settings.playerHdrAuto,
+    settings.playerHdrToSdr,
+    settings.playerRtxHdr,
+    settings.playerRtxVsr,
+    svpActive,
+    update,
+  ]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;

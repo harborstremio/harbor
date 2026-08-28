@@ -6,7 +6,9 @@ import type { Meta } from "@/lib/cinemeta";
 import { useSearch } from "@/lib/search-context";
 import { useView } from "@/lib/view";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
+import { metaLooksAnime } from "@/lib/anime-detect";
 import { AnimeRow } from "./anime-row";
+import { AnimeRelations } from "./anime-relations";
 import { MangaRow } from "./manga-row";
 import { CharacterGroup } from "./character-group";
 import { EmptyState } from "./empty-state";
@@ -33,7 +35,18 @@ import { useExitPresence } from "@/lib/use-exit-presence";
 import { isMagnetInput, isDirectVideoUrl } from "@/lib/torrent/magnet";
 
 export function SearchOverlay() {
-  const { open, setOpen, query, setQuery, results, status, clear, closeForNavigation, recordRecent, setAiHold } = useSearch();
+  const {
+    open,
+    setOpen,
+    query,
+    setQuery,
+    results,
+    status,
+    clear,
+    closeForNavigation,
+    recordRecent,
+    setAiHold,
+  } = useSearch();
   const inputRef = useRef<HTMLInputElement>(null);
   const { openFilter, openMeta, openPerson } = useView();
   const [explore, setExplore] = useState<ExploreFrame[]>([]);
@@ -157,6 +170,12 @@ export function SearchOverlay() {
 
   const trimmed = query.trim();
   const personMatch = matchPersonForQuery(currentResults?.people, trimmed);
+  const topMatchIsAnime =
+    !personMatch &&
+    !!currentResults?.topMatch &&
+    currentResults.anime.length > 0 &&
+    metaLooksAnime(currentResults.topMatch.meta);
+  const topAnime = topMatchIsAnime && currentResults ? currentResults.anime[0] : null;
   const magnetInput = !!trimmed && isMagnetInput(trimmed);
   const urlInput = !!trimmed && !magnetInput && isDirectVideoUrl(trimmed);
   const directInput = magnetInput || urlInput;
@@ -185,219 +204,272 @@ export function SearchOverlay() {
             closing ? "harbor-search-panel-out" : "harbor-search-panel-in"
           }`}
         >
-        <div className="flex shrink-0 items-center gap-3 border-b border-edge-soft/60 px-6">
-          <Search
-            size={22}
-            className={`shrink-0 transition-colors ${aiMode ? "text-accent" : "text-ink-muted"}`}
-            strokeWidth={1.9}
-          />
-          <div className="relative flex-1">
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && e.shiftKey) {
-                  if (!query.trim()) return;
-                  e.preventDefault();
-                  if (!aiMode) setAiMode(true);
-                  setAiRunSignal((n) => n + 1);
-                  return;
-                }
-                if (e.key !== "Enter") return;
-                if (aiMode) {
-                  if (query.trim()) {
-                    e.preventDefault();
-                    setAiRunSignal((n) => n + 1);
-                  }
-                  return;
-                }
-                if (personMatch) {
-                  e.preventDefault();
-                  pushExplore({ kind: "person", id: personMatch.id, name: personMatch.name });
-                  return;
-                }
-                if (currentResults?.topMatch) {
-                  e.preventDefault();
-                  const meta = currentResults.topMatch.meta;
-                  commit();
-                  openMeta(meta);
-                }
-              }}
-              placeholder={aiMode ? "" : t("Search movies, shows, people, genres, years...")}
-              className="h-16 w-full bg-transparent text-[20px] text-ink placeholder:text-ink-subtle focus:outline-none sm:text-[22px]"
-              spellCheck={false}
-              autoComplete="off"
-              data-tv-text-auto="true"
+          <div className="flex shrink-0 items-center gap-3 border-b border-edge-soft/60 px-6">
+            <Search
+              size={22}
+              className={`shrink-0 transition-colors ${aiMode ? "text-accent" : "text-ink-muted"}`}
+              strokeWidth={1.9}
             />
-            {aiMode && (
-              <AiExampleHint
-                hidden={query.trim().length > 0}
-                examples={SEARCH_EXAMPLES}
-                prefix=""
-                sizeClass="text-[20px] sm:text-[22px]"
+            <div className="relative flex-1">
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.shiftKey) {
+                    if (!query.trim()) return;
+                    e.preventDefault();
+                    if (!aiMode) setAiMode(true);
+                    setAiRunSignal((n) => n + 1);
+                    return;
+                  }
+                  if (e.key !== "Enter") return;
+                  if (aiMode) {
+                    if (query.trim()) {
+                      e.preventDefault();
+                      setAiRunSignal((n) => n + 1);
+                    }
+                    return;
+                  }
+                  if (personMatch) {
+                    e.preventDefault();
+                    pushExplore({ kind: "person", id: personMatch.id, name: personMatch.name });
+                    return;
+                  }
+                  if (currentResults?.topMatch) {
+                    e.preventDefault();
+                    const meta = currentResults.topMatch.meta;
+                    commit();
+                    openMeta(meta);
+                  }
+                }}
+                placeholder={aiMode ? "" : t("Search movies, shows, people, genres, years...")}
+                className="h-16 w-full bg-transparent text-[20px] text-ink placeholder:text-ink-subtle focus:outline-none sm:text-[22px]"
+                spellCheck={false}
+                autoComplete="off"
+                data-tv-text-auto="true"
+              />
+              {aiMode && (
+                <AiExampleHint
+                  hidden={query.trim().length > 0}
+                  examples={SEARCH_EXAMPLES}
+                  prefix=""
+                  sizeClass="text-[20px] sm:text-[22px]"
+                />
+              )}
+            </div>
+            {status === "loading" && (
+              <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />
+            )}
+            <Hint />
+            {(settings.aiSearchKey.trim() || settings.aiGroqKey.trim()) && (
+              <AiModeButton
+                active={aiMode}
+                currentModel={settings.aiSearchModel}
+                onToggle={() => setAiMode((v) => !v)}
+                onSelectModel={(id) => {
+                  update({ aiSearchModel: id, aiSearchProvider: providerTabFor(id) });
+                  setAiMode(true);
+                }}
               />
             )}
+            {query && (
+              <button
+                type="button"
+                aria-label={t("Clear")}
+                onClick={clear}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-ink-subtle transition-[color,background-color,transform] duration-150 hover:bg-canvas/60 hover:text-ink active:scale-90"
+              >
+                <X size={18} strokeWidth={2.2} />
+              </button>
+            )}
           </div>
-          {status === "loading" && <Loader2 size={18} className="shrink-0 animate-spin text-ink-subtle" />}
-          <Hint />
-          {(settings.aiSearchKey.trim() || settings.aiGroqKey.trim()) && (
-            <AiModeButton
-              active={aiMode}
-              currentModel={settings.aiSearchModel}
-              onToggle={() => setAiMode((v) => !v)}
-              onSelectModel={(id) => {
-                update({ aiSearchModel: id, aiSearchProvider: providerTabFor(id) });
-                setAiMode(true);
-              }}
-            />
-          )}
-          {query && (
-            <button
-              type="button"
-              aria-label={t("Clear")}
-              onClick={clear}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-subtle transition-[color,background-color,transform] duration-150 hover:bg-canvas/60 hover:text-ink active:scale-90"
-            >
-              <X size={18} strokeWidth={2.2} />
-            </button>
-          )}
-        </div>
 
-        <div className="relative isolate min-h-0 overflow-x-hidden overflow-y-auto px-7 py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {explore.length > 0 ? (
-            <ExplorePane
-              key={explore.length}
-              frame={explore[explore.length - 1]}
-              depth={explore.length}
-              tmdbKey={settings.tmdbKey}
-              onBack={() => setExplore((s) => s.slice(0, -1))}
-              onOpenPerson={(id, name) => pushExplore({ kind: "person", id, name })}
-              onOpenTitle={(m) => pushExplore({ kind: "title", meta: m })}
-              onOpenDetail={exploreOpenDetail}
-              onOpenPersonDetail={(id) => {
-                commit();
-                openPerson(id);
-              }}
-            />
-          ) : (
-            <>
-          {!trimmed && (
-            <div className="harbor-search-section">
-              <EmptyState onClose={close} onOpenGuide={() => setGuideOpen(true)} />
-            </div>
-          )}
-
-          {magnetInput && (
-            <div className="harbor-search-section mb-5">
-              <MagnetCard raw={trimmed} onClose={commit} />
-            </div>
-          )}
-
-          {urlInput && (
-            <div className="harbor-search-section mb-5">
-              <UrlCard raw={trimmed} onClose={commit} />
-            </div>
-          )}
-
-          {trimmed && !directInput && !aiMode && currentResults?.intent && (
-            <button
-              onClick={onIntent}
-              className="harbor-search-section mb-5 flex h-14 w-full items-center gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-5 text-start transition-colors hover:bg-accent/15"
-            >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/20 text-accent">
-                {currentResults.intent.kind === "year" ? (
-                  <CalendarRange size={16} strokeWidth={2.1} />
-                ) : (
-                  <Tag size={16} strokeWidth={2.1} />
-                )}
-              </span>
-              <span className="flex flex-col">
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
-                  {t("Browse")}
-                </span>
-                <span className="text-[15px] font-semibold text-ink">{currentResults.intent.label}</span>
-              </span>
-              <CornerDownLeft size={15} className="ms-auto text-ink-subtle" />
-            </button>
-          )}
-
-          {tmdbUnavailable && !directInput && !aiActive && !aiMode && (
-            <div className="harbor-search-section mb-5 rounded-2xl border border-edge-soft bg-elevated/60 px-5 py-4 text-[13px] text-ink-muted">
-              {hasResults
-                ? t("TMDB is temporarily unavailable, so these results may be incomplete.")
-                : t("TMDB is temporarily unavailable. Try your search again shortly.")}
-            </div>
-          )}
-
-          {trimmed && !directInput && (
-            <AiSearchSection query={trimmed} aiMode={aiMode} onClose={commit} onActive={setAiActive} runSignal={aiRunSignal} />
-          )}
-
-          {trimmed && !directInput && hasResults && !aiActive && !aiMode && currentResults && (
-            <div className="harbor-search-section flex flex-col gap-6 pb-2">
-              {personMatch ? (
-                <PersonTopMatch
-                  person={personMatch}
-                  onClose={commit}
-                  onOpenPerson={(p) => pushExplore({ kind: "person", id: p.id, name: p.name })}
-                />
-              ) : (
-                currentResults.topMatch && (
-                  <TopMatch
-                    match={currentResults.topMatch}
-                    onClose={commit}
-                    collection={(() => {
-                      const hit = collectionForTitle(currentResults.topMatch.meta.name, collectionHits);
-                      return hit
-                        ? {
-                            name: hit.name,
-                            onOpen: () =>
-                              pushExplore({ kind: "collection", id: hit.id, name: hit.name, image: hit.image }),
-                          }
-                        : undefined;
-                    })()}
-                  />
-                )
-              )}
-              <LiveTvRow items={currentResults.liveTv} onClose={commit} />
-              <AddonHits hits={currentResults.addons} onClose={commit} />
-              <PeopleRow
-                people={personMatch ? currentResults.people.filter((p) => p.id !== personMatch.id) : currentResults.people}
-                onClose={commit}
-                onOpenPerson={(p) => pushExplore({ kind: "person", id: p.id, name: p.name })}
+          <div className="relative isolate min-h-0 overflow-x-hidden overflow-y-auto px-7 py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {explore.length > 0 ? (
+              <ExplorePane
+                key={explore.length}
+                frame={explore[explore.length - 1]}
+                depth={explore.length}
+                tmdbKey={settings.tmdbKey}
+                onBack={() => setExplore((s) => s.slice(0, -1))}
+                onOpenPerson={(id, name) => pushExplore({ kind: "person", id, name })}
+                onOpenTitle={(m) => pushExplore({ kind: "title", meta: m })}
+                onOpenDetail={exploreOpenDetail}
+                onOpenPersonDetail={(id) => {
+                  commit();
+                  openPerson(id);
+                }}
               />
-              <div className="grid gap-8 lg:grid-cols-2">
-                <MetaList title={t("Movies")} items={currentResults.movies} onClose={commit} />
-                <MetaList title={t("Series")} items={currentResults.series} onClose={commit} />
-              </div>
-              {collectionHits.length > 0 && (
-                <CollectionHitsRow
-                  hits={collectionHits}
-                  onOpen={(h) => pushExplore({ kind: "collection", id: h.id, name: h.name, image: h.image })}
-                />
-              )}
-              <AnimeRow items={currentResults.anime} onClose={commit} />
-              <MangaRow items={currentResults.manga} onClose={commit} />
-              <CharacterGroup items={currentResults.characters} onClose={commit} />
-              <AddonResults groups={currentResults.addonGroups} onClose={commit} />
-            </div>
-          )}
+            ) : (
+              <>
+                {!trimmed && (
+                  <div className="harbor-search-section">
+                    <EmptyState onClose={close} onOpenGuide={() => setGuideOpen(true)} />
+                  </div>
+                )}
 
-          {noResults && !directInput && !aiActive && !aiMode && (
-            <div className="harbor-search-section flex flex-col items-center gap-3 py-12 text-center">
-              <span className="text-[17px] font-semibold text-ink">{t("No matches for \"{query}\"", { query: trimmed })}</span>
-              <span className="max-w-[44ch] text-[14px] text-ink-muted">
-                {t("Try a different spelling, a person's name, a year like \"1972\", or a genre like \"Horror\".")}
-              </span>
-            </div>
-          )}
+                {magnetInput && (
+                  <div className="harbor-search-section mb-5">
+                    <MagnetCard raw={trimmed} onClose={commit} />
+                  </div>
+                )}
 
-          {trimmed && !directInput && !aiMode && !results && status !== "done" && <LoadingRows />}
-            </>
-          )}
-        </div>
+                {urlInput && (
+                  <div className="harbor-search-section mb-5">
+                    <UrlCard raw={trimmed} onClose={commit} />
+                  </div>
+                )}
+
+                {trimmed && !directInput && !aiMode && currentResults?.intent && (
+                  <button
+                    onClick={onIntent}
+                    className="harbor-search-section mb-5 flex h-14 w-full items-center gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-5 text-start transition-colors hover:bg-accent/15"
+                  >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/20 text-accent">
+                      {currentResults.intent.kind === "year" ? (
+                        <CalendarRange size={16} strokeWidth={2.1} />
+                      ) : (
+                        <Tag size={16} strokeWidth={2.1} />
+                      )}
+                    </span>
+                    <span className="flex flex-col">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+                        {t("Browse")}
+                      </span>
+                      <span className="text-[15px] font-semibold text-ink">
+                        {currentResults.intent.label}
+                      </span>
+                    </span>
+                    <CornerDownLeft size={15} className="ms-auto text-ink-subtle" />
+                  </button>
+                )}
+
+                {tmdbUnavailable && !directInput && !aiActive && !aiMode && (
+                  <div className="harbor-search-section mb-5 rounded-2xl border border-edge-soft bg-elevated/60 px-5 py-4 text-[13px] text-ink-muted">
+                    {hasResults
+                      ? t("TMDB is temporarily unavailable, so these results may be incomplete.")
+                      : t("TMDB is temporarily unavailable. Try your search again shortly.")}
+                  </div>
+                )}
+
+                {trimmed && !directInput && (
+                  <AiSearchSection
+                    query={trimmed}
+                    aiMode={aiMode}
+                    onClose={commit}
+                    onActive={setAiActive}
+                    runSignal={aiRunSignal}
+                  />
+                )}
+
+                {trimmed &&
+                  !directInput &&
+                  hasResults &&
+                  !aiActive &&
+                  !aiMode &&
+                  currentResults && (
+                    <div className="harbor-search-section flex flex-col gap-6 pb-2">
+                      {personMatch ? (
+                        <PersonTopMatch
+                          person={personMatch}
+                          onClose={commit}
+                          onOpenPerson={(p) =>
+                            pushExplore({ kind: "person", id: p.id, name: p.name })
+                          }
+                        />
+                      ) : (
+                        currentResults.topMatch && (
+                          <TopMatch
+                            match={currentResults.topMatch}
+                            onClose={commit}
+                            collection={(() => {
+                              const hit = collectionForTitle(
+                                currentResults.topMatch.meta.name,
+                                collectionHits,
+                              );
+                              return hit
+                                ? {
+                                    name: hit.name,
+                                    onOpen: () =>
+                                      pushExplore({
+                                        kind: "collection",
+                                        id: hit.id,
+                                        name: hit.name,
+                                        image: hit.image,
+                                      }),
+                                  }
+                                : undefined;
+                            })()}
+                          />
+                        )
+                      )}
+                      {topAnime && <AnimeRelations anime={topAnime} onClose={commit} />}
+                      <LiveTvRow items={currentResults.liveTv} onClose={commit} />
+                      <AddonHits hits={currentResults.addons} onClose={commit} />
+                      <PeopleRow
+                        people={
+                          personMatch
+                            ? currentResults.people.filter((p) => p.id !== personMatch.id)
+                            : currentResults.people
+                        }
+                        onClose={commit}
+                        onOpenPerson={(p) =>
+                          pushExplore({ kind: "person", id: p.id, name: p.name })
+                        }
+                      />
+                      <div className="grid gap-8 lg:grid-cols-2">
+                        <MetaList
+                          title={t("Movies")}
+                          items={currentResults.movies}
+                          onClose={commit}
+                        />
+                        <MetaList
+                          title={t("Series")}
+                          items={currentResults.series}
+                          onClose={commit}
+                        />
+                      </div>
+                      {collectionHits.length > 0 && (
+                        <CollectionHitsRow
+                          hits={collectionHits}
+                          onOpen={(h) =>
+                            pushExplore({
+                              kind: "collection",
+                              id: h.id,
+                              name: h.name,
+                              image: h.image,
+                            })
+                          }
+                        />
+                      )}
+                      <AnimeRow items={currentResults.anime} onClose={commit} />
+                      <MangaRow items={currentResults.manga} onClose={commit} />
+                      <CharacterGroup items={currentResults.characters} onClose={commit} />
+                      <AddonResults groups={currentResults.addonGroups} onClose={commit} />
+                    </div>
+                  )}
+
+                {noResults && !directInput && !aiActive && !aiMode && (
+                  <div className="harbor-search-section flex flex-col items-center gap-3 py-12 text-center">
+                    <span className="text-[17px] font-semibold text-ink">
+                      {t('No matches for "{query}"', { query: trimmed })}
+                    </span>
+                    <span className="max-w-[44ch] text-[14px] text-ink-muted">
+                      {t(
+                        'Try a different spelling, a person\'s name, a year like "1972", or a genre like "Horror".',
+                      )}
+                    </span>
+                  </div>
+                )}
+
+                {trimmed && !directInput && !aiMode && !results && status !== "done" && (
+                  <LoadingRows />
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
       {guideOpen && <GuideModal onClose={() => setGuideOpen(false)} />}

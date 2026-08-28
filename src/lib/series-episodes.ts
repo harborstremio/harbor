@@ -4,13 +4,29 @@ import { safeFetch as fetch } from "@/lib/safe-fetch";
 import type { Meta } from "./cinemeta";
 import type { PlayEpisode } from "./view";
 import { tmdbDetails, tmdbSeasonEpisodes } from "./providers/tmdb";
-import { preferCustomMeta, resolveMeta } from "./meta-resource";
+import { resolveMeta } from "./meta-resource";
 import { animeKitsuMeta } from "./providers/anime-kitsu-addon";
 import { externalToKitsu, kitsuToAnilist } from "./providers/anime-mapping";
 import { parseKitsuId } from "./providers/kitsu";
 import { aniZipByAnilist, aniZipByKitsu, pickEpisodeTitle } from "./providers/anizip";
 import { fetchTvdbProxyImages, pickTvdbImage } from "./providers/tvdb-proxy";
 import { franchiseRoot } from "./providers/anime-franchise-root";
+import { foreignAnimeProviderSeasons } from "./streams/anime-identity";
+
+async function filterForeignAnimeSeasons(
+  metaId: string,
+  imdbId: string | null,
+  nums: number[],
+): Promise<number[]> {
+  try {
+    const foreign = await foreignAnimeProviderSeasons(metaId, imdbId);
+    if (!foreign) return nums;
+    const out = nums.filter((n) => !foreign.has(n));
+    return out.length > 0 ? out : nums;
+  } catch {
+    return nums;
+  }
+}
 
 export function isAnimeId(id: string): boolean {
   return (
@@ -99,7 +115,8 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
         ep.imdbSeason = m.seasonNumber;
       }
       if (ep.imdbEpisode == null && m.episodeNumber != null) ep.imdbEpisode = m.episodeNumber;
-      if (ep.absoluteNumber == null && m.absoluteEpisodeNumber) ep.absoluteNumber = m.absoluteEpisodeNumber;
+      if (ep.absoluteNumber == null && m.absoluteEpisodeNumber)
+        ep.absoluteNumber = m.absoluteEpisodeNumber;
       if (ep.tvdbEpisodeId == null && m.tvdbId) ep.tvdbEpisodeId = m.tvdbId;
       const air = m.airDateUtc ?? m.airDate;
       if (air && (!ep.airDate || bogusAirdates)) ep.airDate = air;
@@ -161,8 +178,7 @@ function readAuthKey(): string | null {
 }
 
 async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
-  const cacheKey = `${preferCustomMeta() ? "custom" : "default"}:${id}`;
-  if (addonEpsCache.has(cacheKey)) return addonEpsCache.get(cacheKey)!;
+  if (addonEpsCache.has(id)) return addonEpsCache.get(id)!;
   const m = await resolveMeta(readAuthKey(), "series", id).catch(() => null);
   const raw = m?.videos ?? [];
   const eps: PlayEpisode[] = [];
@@ -174,10 +190,8 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
     const ep: PlayEpisode = {
       season,
       episode,
-      name: v.name || v.title || undefined,
+      name: v.title || v.name || undefined,
       still: v.thumbnail,
-      overview: v.overview || v.description || undefined,
-      airDate: v.released || v.firstAired,
     };
     const vid = (v as { id?: string }).id;
     if (vid && (vid.startsWith("kitsu:") || vid.startsWith("mal:"))) ep.kitsuStreamId = vid;
@@ -186,14 +200,18 @@ async function getAddonEpisodes(id: string): Promise<PlayEpisode[] | null> {
   }
   if (eps.length === 0) return null;
   eps.sort((a, b) => a.season - b.season || a.episode - b.episode);
-  lruSet(addonEpsCache, cacheKey, eps, SEASON_CACHE_MAX);
+  lruSet(addonEpsCache, id, eps, SEASON_CACHE_MAX);
   return eps;
 }
 
 export async function fetchAdjacentEpisodes(
   meta: Meta,
   current: { season: number; episode: number },
-  opts: { tmdbKey: string; kitsuStreamId?: string; skip?: (season: number, episode: number) => boolean },
+  opts: {
+    tmdbKey: string;
+    kitsuStreamId?: string;
+    skip?: (season: number, episode: number) => boolean;
+  },
 ): Promise<Adjacent> {
   const animeSeries = animeSeriesFromStreamId(opts.kitsuStreamId);
   if (animeSeries) {
@@ -206,7 +224,7 @@ export async function fetchAdjacentEpisodes(
   if (meta.id.startsWith("tt")) {
     const key = `${meta.id}:${current.season}:${current.episode}`;
     if (ttCache.has(key)) return ttCache.get(key)!;
-    const eps = (await getAddonEpisodes(meta.id)) ?? (await loadCinemetaEpisodes(meta.id));
+    const eps = await loadCinemetaEpisodes(meta.id);
     if (!eps) return { prev: null, next: null };
     const result = computeAdjacent(eps, current, opts.skip);
     lruSet(ttCache, key, result, TT_CACHE_MAX);
@@ -232,7 +250,7 @@ export async function fetchUpcomingEpisodes(
 ): Promise<PlayEpisode[]> {
   if ((meta.type !== "series" && !isAnimeId(meta.id)) || count <= 0) return [];
   if (meta.id.startsWith("tt")) {
-    const eps = (await getAddonEpisodes(meta.id)) ?? (await loadCinemetaEpisodes(meta.id));
+    const eps = await loadCinemetaEpisodes(meta.id);
     if (!eps) return [];
     const idx = eps.findIndex((v) => v.season === current.season && v.episode === current.episode);
     if (idx === -1) return eps.slice(0, count);
@@ -246,9 +264,7 @@ export async function fetchUpcomingEpisodes(
     let cursor = current.episode;
     while (out.length < count && season <= current.season + 3) {
       const eps = await tmdbSeason(opts.tmdbKey, tvId, season);
-      const start = season === current.season
-        ? eps.findIndex((e) => e.episode === cursor) + 1
-        : 0;
+      const start = season === current.season ? eps.findIndex((e) => e.episode === cursor) + 1 : 0;
       if (start < 0) break;
       for (let i = start; i < eps.length && out.length < count; i++) out.push(eps[i]);
       season += 1;
@@ -284,11 +300,7 @@ async function loadCinemetaEpisodes(id: string): Promise<PlayEpisode[] | null> {
   for (const v of raw) {
     const season = typeof v.season === "number" ? v.season : null;
     const episode =
-      typeof v.episode === "number"
-        ? v.episode
-        : typeof v.number === "number"
-          ? v.number
-          : null;
+      typeof v.episode === "number" ? v.episode : typeof v.number === "number" ? v.number : null;
     if (season == null || episode == null) continue;
     if (season < 1) continue;
     eps.push({
@@ -330,12 +342,14 @@ function uniqueAnimeSeasons(eps: PlayEpisode[] | null): number[] {
 export async function fetchSeasonList(meta: Meta, opts: { tmdbKey: string }): Promise<number[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
   if (meta.id.startsWith("tt")) {
-    return uniqueSeasons((await getAddonEpisodes(meta.id)) ?? (await loadCinemetaEpisodes(meta.id)));
+    const nums = uniqueSeasons(await loadCinemetaEpisodes(meta.id));
+    return filterForeignAnimeSeasons(meta.id, meta.id, nums);
   }
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
     const detail = await tmdbDetails(opts.tmdbKey, meta).catch(() => null);
     const nums = (detail?.seasons ?? []).map((s) => s.seasonNumber).filter((n) => n >= 1);
-    return [...new Set(nums)].sort((a, b) => a - b);
+    const deduped = [...new Set(nums)].sort((a, b) => a - b);
+    return filterForeignAnimeSeasons(meta.id, null, deduped);
   }
   return uniqueAnimeSeasons(await getNonStandardEpisodes(meta));
 }
@@ -347,7 +361,7 @@ export async function fetchSeasonEpisodes(
 ): Promise<PlayEpisode[]> {
   if ((meta.type !== "series" && !isAnimeId(meta.id)) || season < 1) return [];
   if (meta.id.startsWith("tt")) {
-    const eps = (await getAddonEpisodes(meta.id)) ?? (await loadCinemetaEpisodes(meta.id));
+    const eps = await loadCinemetaEpisodes(meta.id);
     return (eps ?? []).filter((e) => e.season === season);
   }
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
@@ -359,11 +373,12 @@ export async function fetchSeasonEpisodes(
   return (eps ?? []).filter((e) => animeSeasonKey(e) === season);
 }
 
-export async function fetchEpisodeList(meta: Meta, opts: { tmdbKey: string }): Promise<PlayEpisode[]> {
+export async function fetchEpisodeList(
+  meta: Meta,
+  opts: { tmdbKey: string },
+): Promise<PlayEpisode[]> {
   if (meta.type !== "series" && !isAnimeId(meta.id)) return [];
-  if (meta.id.startsWith("tt")) {
-    return (await getAddonEpisodes(meta.id)) ?? (await loadCinemetaEpisodes(meta.id)) ?? [];
-  }
+  if (meta.id.startsWith("tt")) return (await loadCinemetaEpisodes(meta.id)) ?? [];
   if (meta.id.startsWith("tmdb:tv:") && opts.tmdbKey) {
     const seasons = await fetchSeasonList(meta, opts);
     const all: PlayEpisode[] = [];

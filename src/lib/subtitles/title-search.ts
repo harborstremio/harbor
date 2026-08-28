@@ -1,4 +1,5 @@
 import { searchCinemeta } from "@/lib/search";
+import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import type { Meta } from "@/lib/cinemeta";
 
 export type TitleCandidate = {
@@ -41,7 +42,10 @@ export function parseTitleQuery(raw: string): ParsedQuery {
     year = y[1];
     s = s.replace(YEAR_RX, " ");
   }
-  const title = s.replace(/[()[\]{}]/g, " ").replace(/\s+/g, " ").trim();
+  const title = s
+    .replace(/[()[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   return { title, year, season, episode };
 }
 
@@ -64,13 +68,20 @@ function toCandidate(m: Meta): TitleCandidate | null {
 
 const cache = new Map<string, TitleCandidate[]>();
 
-export async function searchTitleCandidates(query: string): Promise<TitleCandidate[]> {
+export async function searchTitleCandidates(
+  query: string,
+  preferImdbId?: string | null,
+): Promise<TitleCandidate[]> {
   const parsed = parseTitleQuery(query);
   const key = parsed.title.toLowerCase();
   if (key.length < 2) return [];
   const cached = cache.get(key);
-  if (cached) return rankCandidates(cached, parsed);
-  const { movies, series } = await searchCinemeta(parsed.title);
+  if (cached) return rankCandidates(cached, parsed, preferImdbId);
+  // Franchise suffixes ("… World- Season 2 Part 2") pollute the catalog
+  // search and can rank re-edits/side entries above the actual series.
+  const { movies, series } = await searchCinemeta(
+    stripFranchiseSuffix(parsed.title) || parsed.title,
+  );
   const seen = new Set<string>();
   const list: TitleCandidate[] = [];
   for (const m of [...series, ...movies]) {
@@ -80,11 +91,20 @@ export async function searchTitleCandidates(query: string): Promise<TitleCandida
     list.push(c);
   }
   cache.set(key, list);
-  return rankCandidates(list, parsed);
+  return rankCandidates(list, parsed, preferImdbId);
 }
 
-function scoreCandidate(c: TitleCandidate, parsed: ParsedQuery, wantSeries: boolean, titleLc: string): number {
+function scoreCandidate(
+  c: TitleCandidate,
+  parsed: ParsedQuery,
+  wantSeries: boolean,
+  titleLc: string,
+  preferImdbId?: string | null,
+): number {
   let s = 0;
+  // Prefer the playing entry on junk-title searches, but stay below the
+  // name-match floor (+100) so an explicitly typed title still wins.
+  if (preferImdbId && c.imdbId === preferImdbId) s += 90;
   const nameLc = c.name.toLowerCase();
   if (nameLc === titleLc) s += 100;
   else if (nameLc.startsWith(titleLc)) s += 50;
@@ -95,14 +115,24 @@ function scoreCandidate(c: TitleCandidate, parsed: ParsedQuery, wantSeries: bool
   return s;
 }
 
-export function rankCandidates(list: TitleCandidate[], parsed: ParsedQuery): TitleCandidate[] {
+export function rankCandidates(
+  list: TitleCandidate[],
+  parsed: ParsedQuery,
+  preferImdbId?: string | null,
+): TitleCandidate[] {
   const wantSeries = parsed.season != null;
   const titleLc = parsed.title.toLowerCase();
   return [...list].sort(
-    (a, b) => scoreCandidate(b, parsed, wantSeries, titleLc) - scoreCandidate(a, parsed, wantSeries, titleLc),
+    (a, b) =>
+      scoreCandidate(b, parsed, wantSeries, titleLc, preferImdbId) -
+      scoreCandidate(a, parsed, wantSeries, titleLc, preferImdbId),
   );
 }
 
-export function bestCandidate(list: TitleCandidate[], parsed: ParsedQuery): TitleCandidate | null {
-  return rankCandidates(list, parsed)[0] ?? null;
+export function bestCandidate(
+  list: TitleCandidate[],
+  parsed: ParsedQuery,
+  preferImdbId?: string | null,
+): TitleCandidate | null {
+  return rankCandidates(list, parsed, preferImdbId)[0] ?? null;
 }

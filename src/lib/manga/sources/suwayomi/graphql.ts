@@ -1,6 +1,7 @@
 import {
   imageUrl,
   isDigits,
+  toDateIso,
   type BrowseKind,
   type SuwayomiClient,
   type SuwayomiExtension,
@@ -50,7 +51,7 @@ export async function gqlAbout(
 export async function gqlSources(client: SuwayomiClient): Promise<SuwayomiSource[]> {
   const data = await gql(
     client,
-    `query { sources { nodes { id name lang iconUrl supportsLatest isNsfw } } }`,
+    `query { sources { nodes { id name lang iconUrl supportsLatest isNsfw isLocal } } }`,
   );
   const nodes = data?.sources?.nodes;
   if (!Array.isArray(nodes)) return [];
@@ -68,6 +69,7 @@ export async function gqlSources(client: SuwayomiClient): Promise<SuwayomiSource
           : undefined,
       supportsLatest: !!s.supportsLatest,
       isNsfw: !!s.isNsfw,
+      isLocal: !!s.isLocal,
     }));
 }
 
@@ -129,7 +131,7 @@ function mapGqlChapters(chapters: any[]): RestChapter[] {
         chapterNumber: Number.isFinite(cn) && cn >= 0 ? cn : null,
         name: ch.name || undefined,
         scanlator: ch.scanlator || undefined,
-        uploadDate: ch.uploadDate != null ? String(ch.uploadDate) : undefined,
+        uploadDate: toDateIso(ch.uploadDate),
         pageCount: Number.isFinite(pc) && pc >= 0 ? pc : 0,
         downloaded: !!ch.isDownloaded,
         isRead: ch.isRead === true,

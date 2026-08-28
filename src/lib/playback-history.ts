@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import type { AddonProgress } from "./streams/addons";
 
 export type PlaybackEntry = {
   infoHash?: string | null;
@@ -16,11 +17,67 @@ export type PlaybackEntry = {
   savedAt: number;
 };
 
-const STORAGE_KEY = "harbor.playback-history.v1";
+const STORAGE_KEY_PREFIX = "harbor.playback-history.v1.";
+const LEGACY_STORAGE_KEY = "harbor.playback-history.v1";
+const PROFILES_KEY = "harbor.profiles.v1";
 const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 200;
 
 const listeners = new Set<() => void>();
+
+function activeProfileId(): string {
+  try {
+    const raw = localStorage.getItem(PROFILES_KEY);
+    if (!raw) return "";
+    const s = JSON.parse(raw) as {
+      activeId?: string;
+      profiles?: Array<{ id?: string; isPrimary?: boolean; shareStremioWith?: string | null }>;
+    };
+    const profiles = Array.isArray(s.profiles) ? s.profiles : [];
+    const active = profiles.find((p) => p.id === s.activeId) ?? null;
+    const own = active?.id ?? profiles.find((p) => p?.isPrimary)?.id ?? "";
+    if (!own) return "";
+    if (active && typeof active.shareStremioWith === "string" && active.shareStremioWith) {
+      const shared = profiles.find((p) => p.id === active.shareStremioWith);
+      if (shared?.id) return shared.id;
+    }
+    return own;
+  } catch {
+    return "";
+  }
+}
+
+function primaryProfileId(): string {
+  try {
+    const raw = localStorage.getItem(PROFILES_KEY);
+    const s = raw
+      ? (JSON.parse(raw) as { profiles?: Array<{ id?: string; isPrimary?: boolean }> })
+      : null;
+    const primary = s?.profiles?.find((p) => p?.isPrimary);
+    return (primary && typeof primary.id === "string" && primary.id) || activeProfileId();
+  } catch {
+    return activeProfileId();
+  }
+}
+
+function storeKey(): string {
+  const id = activeProfileId();
+  return id ? STORAGE_KEY_PREFIX + id : LEGACY_STORAGE_KEY;
+}
+
+function migrateLegacy(): void {
+  try {
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!legacy) return;
+    const pid = primaryProfileId();
+    if (!pid) return;
+    const perKey = STORAGE_KEY_PREFIX + pid;
+    if (!localStorage.getItem(perKey)) localStorage.setItem(perKey, legacy);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+  } catch {
+    /* noop */
+  }
+}
 
 export function subscribePlayback(fn: () => void): () => void {
   listeners.add(fn);
@@ -37,8 +94,9 @@ function entryKey(metaId: string, season?: number, episode?: number): string {
 }
 
 function readAll(): Record<string, PlaybackEntry> {
+  migrateLegacy();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storeKey());
     if (!raw) return {};
     const parsed = JSON.parse(raw) as Record<string, PlaybackEntry>;
     const now = Date.now();
@@ -61,15 +119,27 @@ function writeAll(map: Record<string, PlaybackEntry>): void {
       const sorted = Object.entries(map).sort((a, b) => b[1].savedAt - a[1].savedAt);
       map = Object.fromEntries(sorted.slice(0, MAX_ENTRIES));
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+    localStorage.setItem(storeKey(), JSON.stringify(map));
   } catch (e) {
     if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
       try {
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(storeKey());
       } catch {}
     }
   }
   listeners.forEach((l) => l());
+}
+
+export function playbackHistoryRawKeys(): string[] {
+  migrateLegacy();
+  try {
+    const raw = localStorage.getItem(storeKey());
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Record<string, PlaybackEntry>;
+    return Object.keys(parsed);
+  } catch {
+    return [];
+  }
 }
 
 export function savePlayback(
@@ -147,7 +217,10 @@ export type WatchedSet = { ids: Set<string>; titles: Set<string> };
 
 export function watchTitleKey(name: string | null | undefined): string {
   if (!name) return "";
-  return name.toLowerCase().replace(/\(\d{4}\)/g, "").replace(/[^a-z0-9]+/g, "");
+  return name
+    .toLowerCase()
+    .replace(/\(\d{4}\)/g, "")
+    .replace(/[^a-z0-9]+/g, "");
 }
 
 export function recentlyPlayed(): WatchedSet {
@@ -172,7 +245,12 @@ export function useWatchedCount(): number {
   );
 }
 
-export function playbackEntries(): Array<{ metaId: string; savedAt: number; title?: string; parsedTitle?: string }> {
+export function playbackEntries(): Array<{
+  metaId: string;
+  savedAt: number;
+  title?: string;
+  parsedTitle?: string;
+}> {
   const out: Array<{ metaId: string; savedAt: number; title?: string; parsedTitle?: string }> = [];
   for (const [key, entry] of Object.entries(readAll())) {
     const metaId = key.split("|")[0];
@@ -216,4 +294,16 @@ export function streamMatchesSource(
   return (
     !!e.addonId && s.addonId === e.addonId && e.resolution === s.resolution && e.source === s.source
   );
+}
+
+export function preferredSourceAddonPending(
+  entry: PlaybackEntry | null,
+  sourceMatched: boolean,
+  pipelineDone: boolean,
+  progress: AddonProgress,
+): boolean {
+  const addonId = entry?.addonId;
+  if (!addonId || sourceMatched || pipelineDone) return false;
+  if (!progress.queriedAddonIds.includes(addonId)) return false;
+  return !progress.settledAddonIds.includes(addonId);
 }

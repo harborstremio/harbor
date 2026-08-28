@@ -1,5 +1,6 @@
 import en from "./en";
 import coverage from "./hu/coverage";
+import recent from "./hu/recent";
 import stremioHungarian from "./hu/stremio";
 
 // Strings without a reviewed Hungarian equivalent deliberately inherit English. This
@@ -942,6 +943,7 @@ const reviewedUi: Record<string, string> = {
 const hu: Record<string, string> = {
   ...en,
   ...coverage,
+  ...recent,
   ...core,
   ...settingsPages,
   ...catalogPages,

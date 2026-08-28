@@ -4,10 +4,23 @@ import type { SubResult, SubSearchQuery } from "./types";
 import { searchWyzie } from "./providers/wyzie";
 import { searchAddons } from "./providers/addons";
 import { searchOpenSubtitlesV3 } from "./providers/opensubtitles-v3";
-import { searchExtraSubSources, toSubResult, type ProviderCtx } from "./autosync/sub-sources";
+import {
+  pickSources,
+  searchExtraSubSources,
+  toSubResult,
+  type ProviderCtx,
+} from "./autosync/sub-sources";
 import { langScore, normalizeLang } from "./language";
-import { detectSource, parseRelease, releaseAffinity, type ReleaseTags } from "./release-match";
+import {
+  releaseAffinity,
+  subtitleConfidenceRank,
+  type SubtitleMatchConfidence,
+} from "./release-match";
+import { streamTagsOf, type StreamHints } from "./stream-hints";
 import { SUBTITLE_PROVIDER_TIMEOUT_MS, withSubtitleTimeout } from "./autoload";
+
+export { streamTagsOf } from "./stream-hints";
+export type { StreamHints } from "./stream-hints";
 
 export type SearchOptions = {
   onPartial?: (results: SubResult[], stillFetching: number) => void;
@@ -17,13 +30,6 @@ export type SearchOptions = {
   preferredLangs: string[];
   streamHints?: StreamHints;
   extra?: ProviderCtx;
-};
-
-export type StreamHints = {
-  release?: string | null;
-  source?: string | null;
-  resolution?: string | null;
-  preferHearingImpaired?: boolean;
 };
 
 export async function searchSubtitles(
@@ -56,15 +62,19 @@ export async function searchSubtitles(
       name: "addons",
       p: searchAddons(opts.addons, q, tmo),
     });
-  if (opts.extra)
-    tasks.push({
-      name: "extra-sources",
-      p: withSubtitleTimeout(
-        searchExtraSubSources(q, opts.extra).then((a) => a.all.map(toSubResult)),
-        tmo,
-        [],
-      ),
-    });
+  if (opts.extra) {
+    const extraTimeout = opts.extra.timeoutMs ?? tmo;
+    for (const source of pickSources(q, opts.extra)) {
+      tasks.push({
+        name: `extra:${source.id}`,
+        p: withSubtitleTimeout(
+          searchExtraSubSources(q, opts.extra, [source]).then((a) => a.all.map(toSubResult)),
+          extraTimeout + 500,
+          [],
+        ),
+      });
+    }
+  }
   const all: SubResult[] = [];
   let pending = tasks.length;
   const emit = () => {
@@ -93,23 +103,6 @@ export async function searchSubtitles(
   return ranked;
 }
 
-export function streamTagsOf(hints: StreamHints): ReleaseTags {
-  const parsed = parseRelease(hints.release);
-  return {
-    ...parsed,
-    source: detectSource(hints.source) ?? parsed.source,
-    resolution: normalizeResolution(hints.resolution) ?? parsed.resolution,
-  };
-}
-
-function normalizeResolution(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  const s = raw.toLowerCase();
-  if (s === "4k" || s === "uhd" || s.includes("2160")) return "2160p";
-  const m = s.match(/(2160|1080|720|576|480)/);
-  return m ? `${m[1]}p` : null;
-}
-
 export function subtitleText(r: SubResult): string {
   return `${r.release ?? ""} ${r.title ?? ""} ${r.url ?? ""}`;
 }
@@ -117,21 +110,57 @@ export function subtitleText(r: SubResult): string {
 export function streamMatchDetail(
   r: SubResult,
   hints: StreamHints | undefined,
-): { score: number; reasons: string[] } {
-  if (!hints) return { score: 0, reasons: [] };
-  const { score, reasons } = releaseAffinity(streamTagsOf(hints), subtitleText(r));
+): {
+  score: number;
+  reasons: string[];
+  sourceRank: 1 | 2 | 3;
+  exactHash: boolean;
+  confidence: SubtitleMatchConfidence;
+} {
+  if (!hints) {
+    return { score: 0, reasons: [], sourceRank: 1, exactHash: false, confidence: "low" };
+  }
+  const { score, reasons, sourceRank, confidence } = releaseAffinity(
+    streamTagsOf(hints),
+    subtitleText(r),
+  );
   let total = score;
   const out = [...reasons];
-  if (r.hash === "moviehash") {
+  const exactHash = r.hash === "moviehash";
+  if (exactHash) {
     total += 200;
     out.unshift("exact file match");
   }
   if (r.hearingImpaired && !hints.preferHearingImpaired) total -= 25;
-  return { score: total, reasons: out };
+  return {
+    score: total,
+    reasons: out,
+    sourceRank,
+    exactHash,
+    confidence: exactHash ? "exact" : confidence,
+  };
 }
 
 export function streamMatchScore(r: SubResult, hints: StreamHints | undefined): number {
   return streamMatchDetail(r, hints).score;
+}
+
+export function compareSubtitleMatch(
+  a: SubResult,
+  b: SubResult,
+  hints: StreamHints | undefined,
+): number {
+  const aMatch = streamMatchDetail(a, hints);
+  const bMatch = streamMatchDetail(b, hints);
+  if (aMatch.exactHash !== bMatch.exactHash) return aMatch.exactHash ? -1 : 1;
+  const confidence =
+    subtitleConfidenceRank(bMatch.confidence) - subtitleConfidenceRank(aMatch.confidence);
+  if (confidence !== 0) return confidence;
+  if (aMatch.sourceRank !== bMatch.sourceRank) return bMatch.sourceRank - aMatch.sourceRank;
+  if (aMatch.score !== bMatch.score) return bMatch.score - aMatch.score;
+  const downloads = (b.downloads ?? 0) - (a.downloads ?? 0);
+  if (downloads !== 0) return downloads;
+  return (a.title || "").localeCompare(b.title || "");
 }
 
 function sourcePriority(source: SubResult["source"]): number {
@@ -188,13 +217,7 @@ function interleaveBySource(
       const la = langScore(a.lang, preferred);
       const lb = langScore(b.lang, preferred);
       if (la !== lb) return lb - la;
-      const sa = streamMatchScore(a, hints);
-      const sb = streamMatchScore(b, hints);
-      if (sa !== sb) return sb - sa;
-      const da = a.downloads ?? 0;
-      const db = b.downloads ?? 0;
-      if (da !== db) return db - da;
-      return (a.title || "").localeCompare(b.title || "");
+      return compareSubtitleMatch(a, b, hints);
     });
   }
   const sourceOrder = [...buckets.keys()].sort(
@@ -202,6 +225,18 @@ function interleaveBySource(
   );
   const out: SubResult[] = [];
   const seen = new Set<SubResult>();
+  const compare = (a: SubResult, b: SubResult) => {
+    const la = langScore(a.lang, preferred);
+    const lb = langScore(b.lang, preferred);
+    if (la !== lb) return lb - la;
+    return compareSubtitleMatch(a, b, hints);
+  };
+  const preferredResults = list.filter((r) => langScore(r.lang, preferred) > 0);
+  const best = [...(preferredResults.length > 0 ? preferredResults : list)].sort(compare)[0];
+  if (best) {
+    seen.add(best);
+    out.push(best);
+  }
   const drain = (predicate: (r: SubResult) => boolean) => {
     let depth = 0;
     let more = true;

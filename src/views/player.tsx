@@ -89,6 +89,10 @@ import type { VolumeIndicatorState } from "@/components/player/volume-indicator"
 import type { ToastInfo } from "@/views/addons/addons-types";
 import { SFX } from "@/lib/sfx";
 import { useKeyboardNavigation } from "@/lib/keyboard-navigation";
+import { subtitleStreamKey } from "@/lib/subtitles/subtitle-memory";
+import { SUBTITLE_FPS_TRANSITION_FAILED_EVENT } from "@/lib/player/subtitle-fps";
+import { PlayerInteractionLockControls } from "@/components/player/player-interaction-lock";
+import { usePlayerInteractionLock } from "./player/hooks/use-player-interaction-lock";
 
 let hdrFallbackNoticeShown = false;
 
@@ -117,7 +121,8 @@ function useHdrChromeSnapshot(snap: PlayerSnapshot): PlayerSnapshot {
 }
 
 export function PlayerView({ src }: { src: PlayerSrc }) {
-  const { setChromeHidden, topPath, openPicker, exitPlayback, replacePlayerSrc, exitPlayer } = useView();
+  const { setChromeHidden, topPath, openPicker, exitPlayback, replacePlayerSrc, exitPlayer } =
+    useView();
   const { settings, update } = useSettings();
   const isKid = useActiveKid() != null;
   const t = useT();
@@ -133,14 +138,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       delete root.dataset.playerBlack;
     };
   }, [settings.playerMenuBlack]);
-  const {
-    avatarsCorner,
-    chatCorner,
-    episodesCorner,
-    avatarsHidden,
-    chatHidden,
-    episodesHidden,
-  } = useChromeConfig(chromeTheme);
+  const { avatarsCorner, chatCorner, episodesCorner, avatarsHidden, chatHidden, episodesHidden } =
+    useChromeConfig(chromeTheme);
   const { authKey } = useAuth();
   const debrids = useDebridClients();
   const {
@@ -204,11 +203,23 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     } else {
       setPlaybackDownloaded(0);
     }
-  }, [engineStats?.streamProgress, engineStats?.streamLen, src.url, isP2pEngine, src.isLive, src.meta.id, snap.positionSec, snap.bufferedSec, snap.durationSec]);
+  }, [
+    engineStats?.streamProgress,
+    engineStats?.streamLen,
+    src.url,
+    isP2pEngine,
+    src.isLive,
+    src.meta.id,
+    snap.positionSec,
+    snap.bufferedSec,
+    snap.durationSec,
+  ]);
   const shellSnapRef = useRef(snap);
   const snapRef = useRef(snap);
   snapRef.current = snap;
-  const [foreignNotice, setForeignNotice] = useState<{ title: string | null; from: string } | null>(null);
+  const [foreignNotice, setForeignNotice] = useState<{ title: string | null; from: string } | null>(
+    null,
+  );
   const [hasStarted, setHasStarted] = useState(false);
   const cast = usePlayerCast({ src, debrids, snapRef, bridgeRef, settings });
   const [now, setNow] = useState(() => Date.now());
@@ -273,13 +284,23 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     sendDraw,
   });
 
-  const { chromeVisible, wakeChrome, hideForResume, setAnyMenuOpen, cursorStyle } = useChromeVisibility({
-    playing,
-    drawMode,
-    pipMode,
-    setChromeHidden,
-    keyboardPauseShowsControls: settings.keyboardPauseShowsControls,
-  });
+  const { chromeVisible, wakeChrome, hideForResume, setAnyMenuOpen, cursorStyle } =
+    useChromeVisibility({
+      playing,
+      drawMode,
+      pipMode,
+      setChromeHidden,
+      keyboardPauseShowsControls: settings.keyboardPauseShowsControls,
+    });
+  const {
+    enabled: screenLockEnabled,
+    locked: screenLocked,
+    controlsVisible: screenLockControlsVisible,
+    binding: screenLockBinding,
+    lock: lockScreen,
+    unlock: unlockScreen,
+    wakeControls: wakeScreenLockControls,
+  } = usePlayerInteractionLock();
 
   const { adjacent, swappingEp, goToEpisode } = useEpisodeNavigation({
     src,
@@ -373,8 +394,39 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const clip = useClipRecorder({ src });
   const svpToast = useSvpGuard(settings.playerSvp && !!settings.svpVpyPath);
 
-  const { resolvedImdbId, subAssNative, captureExitSnapshot, download, subDropToast } = usePlayerMedia({
+  const {
+    streamCheckOpen,
+    setStreamCheckOpen,
+    switcherOpen,
+    setSwitcherOpen,
+    swapResolvingKey,
+    liveUrl,
+    liveHistoryUrl,
+    liveStreamRef,
+    pickAnother,
+    onSwitchStream,
+  } = useStreamSwitcher({
+    bridgeRef,
     src,
+    snap,
+    debrids,
+  });
+  const activeMediaSrc = useMemo(
+    () =>
+      liveUrl === src.url && liveStreamRef === src.streamRef
+        ? src
+        : { ...src, url: liveUrl, historyUrl: liveHistoryUrl, streamRef: liveStreamRef },
+    [src, liveUrl, liveHistoryUrl, liveStreamRef],
+  );
+  const {
+    resolvedImdbId,
+    subtitleSearchActive,
+    subAssNative,
+    captureExitSnapshot,
+    download,
+    subDropToast,
+  } = usePlayerMedia({
+    src: activeMediaSrc,
     snap,
     engine,
     settings,
@@ -392,27 +444,11 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
 
   const contentAdvisory = useContentAdvisory(
     settings.contentAdvisoryToast,
-    resolvedImdbId,
+    (snap.status === "playing" || snap.status === "paused") && !subtitleSearchActive,
+    resolvedImdbId ?? src.imdbId ?? (src.meta.id.startsWith("tt") ? src.meta.id : null),
     src.url,
-    playing,
+    src.meta,
   );
-
-  const {
-    streamCheckOpen,
-    setStreamCheckOpen,
-    switcherOpen,
-    setSwitcherOpen,
-    swapResolvingKey,
-    liveUrl,
-    liveStreamRef,
-    pickAnother,
-    onSwitchStream,
-  } = useStreamSwitcher({
-    bridgeRef,
-    src,
-    snap,
-    debrids,
-  });
   const { hostSourceRef } = useHostSource({
     inRoom,
     isHost,
@@ -435,7 +471,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   const isLiveLike =
     liveOverlay.isLive ||
     !!src.meta.id?.startsWith("iptv:") ||
-    (!!src.meta.type && !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
+    (!!src.meta.type &&
+      !["movie", "series", "anime"].includes(String(src.meta.type).toLowerCase()));
   const { hasNextEpisodeNow, hasPrevEpisodeNow, playNext, playPrev, playNextRef, playPrevRef } =
     useQueueNav({
       src,
@@ -460,7 +497,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   });
 
   const { closePlayer, onStubEject } = usePlayerExit({
-    src,
+    src: activeMediaSrc,
     season,
     episode,
     bridgeRef,
@@ -492,7 +529,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
   useKeyboardNavigation({
     // TV focus navigation intentionally owns arrows and Space while enabled.
     // Keep it opt-in so standard player hotkeys remain the default.
-    enabled: settings.tvNavigation && settings.playerTvNavigation,
+    enabled: settings.tvNavigation && settings.playerTvNavigation && !screenLocked,
     wrap: true,
     arrows: chromeVisible && !pipMode,
     onBack: () => {
@@ -597,7 +634,9 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     isSeriesPlayback || (settings.queueDrivesNav && queue.length > 0 && !isLiveLike);
 
   const showHeaderWarning =
-    src.notWebReady === true && engine === "html5" && (snap.status === "error" || snap.status === "loading");
+    src.notWebReady === true &&
+    engine === "html5" &&
+    (snap.status === "error" || snap.status === "loading");
   const [noAudioDismissed, setNoAudioDismissed] = useState(false);
   useEffect(() => {
     setNoAudioDismissed(false);
@@ -644,30 +683,47 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     mediaKey: `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`,
   });
 
-  const { rememberSubChoice, cycleSubtitles, playPauseToggle, seekStep, seekTo } = usePlaybackControls({
-    bridgeRef,
-    snapRef,
-    metaId: src.meta.id,
-    mediaKey: `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`,
-    inRoom,
-    isHost,
-    hasStarted,
-    canControl,
-    castDevice: cast.castDevice,
-    startHost: lobby.startHost,
-    togglePlayCast: cast.togglePlayCast,
-    seekCast: cast.seekCast,
-    sendCommand,
-  });
+  const { rememberSubChoice, cycleSubtitles, playPauseToggle, seekStep, seekTo } =
+    usePlaybackControls({
+      bridgeRef,
+      snapRef,
+      metaId: src.meta.id,
+      mediaKey: `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`,
+      subtitleStreamKey: subtitleStreamKey(activeMediaSrc.streamRef),
+      inRoom,
+      isHost,
+      hasStarted,
+      canControl,
+      castDevice: cast.castDevice,
+      startHost: lobby.startHost,
+      togglePlayCast: cast.togglePlayCast,
+      seekCast: cast.seekCast,
+      sendCommand,
+    });
 
-  const textSync = useTextSync(bridgeRef.current, src.meta.id);
+  const textSync = useTextSync(bridgeRef.current, src.meta.id, rememberSubChoice);
   const [syncToast, setSyncToast] = useState<ToastInfo | null>(null);
   const syncToastTimerRef = useRef<number | null>(null);
   const showSyncToast = useCallback((kind: "ok" | "error", text: string) => {
     if (syncToastTimerRef.current != null) window.clearTimeout(syncToastTimerRef.current);
     setSyncToast({ kind, text });
-    syncToastTimerRef.current = window.setTimeout(() => setSyncToast(null), kind === "error" ? 5000 : 3000);
+    syncToastTimerRef.current = window.setTimeout(
+      () => setSyncToast(null),
+      kind === "error" ? 5000 : 3000,
+    );
   }, []);
+  useEffect(() => {
+    const onSubtitleFpsTransitionFailed = () => {
+      showSyncToast("error", t("Couldn't switch subtitles. Try again."));
+    };
+    window.addEventListener(SUBTITLE_FPS_TRANSITION_FAILED_EVENT, onSubtitleFpsTransitionFailed);
+    return () => {
+      window.removeEventListener(
+        SUBTITLE_FPS_TRANSITION_FAILED_EVENT,
+        onSubtitleFpsTransitionFailed,
+      );
+    };
+  }, [showSyncToast, t]);
   const handleEnterSync = useCallback(() => {
     void textSync.enter(src.url, src.headers).then((reason) => {
       if (reason) showSyncToast("error", t("Could not read this subtitle track. Pick a different subtitle, then try again."));
@@ -757,9 +813,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
 
   useEffect(() => {
     const ep = src.episode;
-    const subtitle = ep
-      ? `S${ep.season} E${ep.episode}${ep.name ? ` · ${ep.name}` : ""}`
-      : "";
+    const subtitle = ep ? `S${ep.season} E${ep.episode}${ep.name ? ` · ${ep.name}` : ""}` : "";
     updateMediaControls(playing, src.meta.name, subtitle);
   }, [playing, src.meta.name, src.episode]);
   useEffect(() => () => clearMediaControls(), []);
@@ -927,7 +981,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     swapResolvingKey,
   });
   const [loaderShowing, setLoaderShowing] = useState(false);
-  const showChrome = !loaderActive && !loaderShowing && (chromeVisible || drawMode);
+  const showChrome =
+    !screenLocked && !loaderActive && !loaderShowing && (chromeVisible || drawMode);
   const liveShellSnap = cast.castDevice
     ? { ...snap, status: (cast.castPlaying ? "playing" : "paused") as typeof snap.status }
     : snap;
@@ -948,6 +1003,10 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       hasPrevEp: hasPrevEpisodeNow,
       hasNextEp: hasNextEpisodeNow,
       pipMode,
+      screenLocked,
+      screenLockEnabled,
+      screenLockControlsVisible,
+      screenLockBinding,
     }),
     [
       hdrChromeSnap,
@@ -962,25 +1021,32 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       hasPrevEpisodeNow,
       hasNextEpisodeNow,
       pipMode,
+      screenLocked,
+      screenLockEnabled,
+      screenLockControlsVisible,
+      screenLockBinding,
     ],
   );
   const volumeRef = useRef(snap.volume);
   useEffect(() => {
     volumeRef.current = snap.volume;
   }, [snap.volume]);
-  const onVolumeWheel = useCallback((deltaY: number) => {
-    const dir = deltaY < 0 ? 1 : -1;
-    const boost = !isKid && bridgeRef.current?.capabilities().engine === "mpv";
-    const max = boost ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2)) : 1;
-    const next = Math.min(max, Math.max(0, volumeRef.current + dir * 0.05));
-    volumeRef.current = next;
-    bridgeRef.current?.setVolume(next);
-    bridgeRef.current?.setMuted(false);
-    writePlayerVolume({ volume: next, muted: false });
+  const onVolumeWheel = useCallback(
+    (deltaY: number) => {
+      const dir = deltaY < 0 ? 1 : -1;
+      const boost = !isKid && bridgeRef.current?.capabilities().engine === "mpv";
+      const max = boost ? Math.max(1, Math.min(6, settings.volumeBoostMax || 2)) : 1;
+      const next = Math.min(max, Math.max(0, volumeRef.current + dir * 0.05));
+      volumeRef.current = next;
+      bridgeRef.current?.setVolume(next);
+      bridgeRef.current?.setMuted(false);
+      writePlayerVolume({ volume: next, muted: false });
 
-    if (settings.playerVolumeSfx) SFX.volumeChange(dir > 0);
-    showVolumeFeedback(next, false);
-  }, [showVolumeFeedback, isKid, settings.playerVolumeSfx, settings.volumeBoostMax]);
+      if (settings.playerVolumeSfx) SFX.volumeChange(dir > 0);
+      showVolumeFeedback(next, false);
+    },
+    [showVolumeFeedback, isKid, settings.playerVolumeSfx, settings.volumeBoostMax],
+  );
 
   const onLoaderRetry = useCallback(() => {
     const b = bridgeRef.current;
@@ -1131,7 +1197,14 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     episodePanelOpen,
     setEpisodePanelOpen,
     upNextButtonVisible:
-      showEpisodePanel && chromeVisible && !episodePanelOpen && !switcherOpen && !pipMode && !drawMode && !episodesHidden && !roomGuest,
+      showEpisodePanel &&
+      chromeVisible &&
+      !episodePanelOpen &&
+      !switcherOpen &&
+      !pipMode &&
+      !drawMode &&
+      !episodesHidden &&
+      !roomGuest,
     episodesCorner,
     episodesHidden,
     roomGuest,
@@ -1155,7 +1228,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
       data-harbor-player
       dir="ltr"
       className={`fixed inset-0 z-[100] overflow-hidden ${stageBg}`}
-      style={cursorStyle}
+      style={screenLocked ? { cursor: "default" } : cursorStyle}
       onMouseMove={wakeChrome}
       onMouseEnter={wakeChrome}
     >
@@ -1171,11 +1244,23 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
         }}
       />
       {!hdrStageActive && <PlayerOverlayLayers {...overlayProps} />}
+      {!hdrStageActive && (
+        <PlayerInteractionLockControls
+          enabled={screenLockEnabled}
+          locked={screenLocked}
+          visible={screenLocked ? screenLockControlsVisible : showChrome}
+          binding={screenLockBinding}
+          onLock={lockScreen}
+          onUnlock={unlockScreen}
+        />
+      )}
       {stillPrompt && (
         <StillWatchingPrompt
           show={src.meta.name ?? ""}
           nextLabel={
-            src.meta.type === "series" ? `S${stillPrompt.season} E${stillPrompt.episode}` : undefined
+            src.meta.type === "series"
+              ? `S${stillPrompt.season} E${stillPrompt.episode}`
+              : undefined
           }
           onContinue={continueWatching}
           onExit={stopWatching}
@@ -1204,6 +1289,11 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           seek: seekTo,
           seekStep,
           rememberSub: rememberSubChoice,
+          setSubtitleTrack: (id) => bridgeRef.current?.setSubtitleTrack(id),
+          setSecondarySubtitleTrack: (id) => bridgeRef.current?.setSecondarySubtitleTrack(id),
+          addSubtitle: (url, lang, title, select, metadata) =>
+            bridgeRef.current?.addSubtitle(url, lang, title, select, metadata) ??
+            Promise.resolve(false),
           pip: togglePipMode,
           cast: () => cast.openCastMenu(null),
           back: closePlayer,
@@ -1212,7 +1302,12 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           pickAnother: pickAnotherOrGuide,
           screenshot: () => frameGrab.trigger(),
           menuOpen: setAnyMenuOpen,
-          activity: wakeChrome,
+          activity: () => {
+            wakeChrome();
+            if (screenLocked) wakeScreenLockControls();
+          },
+          lock: lockScreen,
+          unlock: unlockScreen,
         }}
       />
     </main>

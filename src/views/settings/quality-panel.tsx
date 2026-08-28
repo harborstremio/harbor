@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { useSettings } from "@/lib/settings";
 import { listMpvAudioDevices, type MpvAudioDevice } from "@/lib/player/mpv";
 import { PlayModePanel, PlayerEnginePanel } from "./player-panel";
@@ -23,14 +24,18 @@ export function QualityPanel() {
     <>
       <Section
         title={t("Play button behavior")}
-        subtitle={t("Choose what happens when you hit Play on a title. Manual gives you full control over quality and source.")}
+        subtitle={t(
+          "Choose what happens when you hit Play on a title. Manual gives you full control over quality and source.",
+        )}
       >
         <PlayModePanel />
       </Section>
 
       <Section
         title={t("Player engine")}
-        subtitle={t("HTML5 plays everything WebView2 supports. mpv handles TrueHD, DTS-HD, AV1, weird containers, and HDR. Auto picks based on the source.")}
+        subtitle={t(
+          "HTML5 plays everything WebView2 supports. mpv handles TrueHD, DTS-HD, AV1, weird containers, and HDR. Auto picks based on the source.",
+        )}
       >
         <PlayerEnginePanel />
       </Section>
@@ -41,7 +46,9 @@ export function QualityPanel() {
       >
         <ToggleRow
           label={t("Show stream quality under the title")}
-          sub={t("Displays the resolution, HDR format and audio (e.g. 4K · Dolby Vision · TrueHD 7.1) under the movie or episode title while playing. Off by default.")}
+          sub={t(
+            "Displays the resolution, HDR format and audio (e.g. 4K · Dolby Vision · TrueHD 7.1) under the movie or episode title while playing. Off by default.",
+          )}
           value={settings.showQualityInfo}
           onChange={(v) => update({ showQualityInfo: v })}
         />
@@ -49,21 +56,42 @@ export function QualityPanel() {
 
       <Section
         title={t("X-Ray (experimental)")}
-        subtitle={t("Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and filmography. Optional on-device face matching can identify who is on screen. Off by default.")}
+        subtitle={t(
+          "Amazon-style X-Ray: open the cast while you watch and tap anyone for their bio and filmography. Optional on-device face matching can identify who is on screen. Off by default.",
+        )}
       >
         <ToggleRow
           label={t("Enable X-Ray")}
-          sub={t("Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.")}
+          sub={t(
+            "Adds an X-Ray button in the player to see the full cast with photos and tap through to any actor. Needs a TMDB key for photos and filmographies.",
+          )}
           value={settings.xrayEnabled}
           onChange={(v) => update({ xrayEnabled: v })}
         />
         {settings.xrayEnabled && (
           <ToggleRow
             label={t("Scan who is on screen while playing")}
-            sub={t("Periodically match faces in the current frame against the cast. Nothing leaves your machine, but this can make playback stutter on lower-power laptops. Leave it off unless you need live matches.")}
+            sub={t(
+              "Periodically match faces in the current frame against the cast. Nothing leaves your machine, but this can make playback stutter on lower-power laptops. Leave it off unless you need live matches.",
+            )}
             value={settings.xrayLiveScan}
             onChange={(v) => update({ xrayLiveScan: v })}
           />
+        )}
+        {settings.xrayEnabled && settings.xrayLiveScan && (
+          <div className="flex items-start gap-2.5 rounded-xl border border-amber-400/35 bg-amber-400/10 px-3.5 py-3 text-start">
+            <AlertTriangle size={14} strokeWidth={2.2} className="mt-0.5 shrink-0 text-amber-300" />
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="text-[12.5px] font-semibold text-amber-200">
+                {t("Performance notice")}
+              </span>
+              <span className="text-[12px] leading-relaxed text-amber-200/85">
+                {t(
+                  "Live face scanning loads on-device AI models and can significantly increase RAM, CPU, and GPU usage while playback is active. Turn it off if Harbor slows down or your device gets hot.",
+                )}
+              </span>
+            </div>
+          </div>
         )}
         {settings.xrayEnabled && !settings.tmdbKey.trim() && (
           <button
@@ -71,11 +99,17 @@ export function QualityPanel() {
             onClick={() => setActive("library")}
             className="flex items-start gap-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-start transition-colors hover:bg-amber-400/15"
           >
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[12px] font-bold text-amber-300">!</span>
+            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber-400/20 text-[12px] font-bold text-amber-300">
+              !
+            </span>
             <div className="flex min-w-0 flex-col gap-0.5">
-              <span className="text-[13px] font-semibold text-amber-200">{t("X-Ray needs a TMDB key")}</span>
+              <span className="text-[13px] font-semibold text-amber-200">
+                {t("X-Ray needs a TMDB key")}
+              </span>
               <span className="text-[12px] leading-relaxed text-amber-200/85">
-                {t("X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.")}
+                {t(
+                  "X-Ray reads the cast and their photos from TMDB. Without a TMDB key there is no cast to match against. Add your free key under Library & metadata.",
+                )}
               </span>
             </div>
           </button>
@@ -84,7 +118,9 @@ export function QualityPanel() {
 
       <Section
         title={t("Aspect ratio")}
-        subtitle={t("Default picture shape on the mpv engine. Fit keeps the source as-is with any black bars; the rest stretch or crop to fill, handy for old 4:3 shows on a widescreen TV.")}
+        subtitle={t(
+          "Default picture shape on the mpv engine. Fit keeps the source as-is with any black bars; the rest stretch or crop to fill, handy for old 4:3 shows on a widescreen TV.",
+        )}
       >
         <Segmented
           value={settings.cropMode}
@@ -92,7 +128,9 @@ export function QualityPanel() {
           onChange={(v) => update({ cropMode: v })}
         />
         <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-          {t("Want to change the ratio mid-playback? The live aspect button is hidden by default to keep the player tidy.")}{" "}
+          {t(
+            "Want to change the ratio mid-playback? The live aspect button is hidden by default to keep the player tidy.",
+          )}{" "}
           <button
             type="button"
             onClick={() => setActive("playerLayout")}
@@ -105,7 +143,9 @@ export function QualityPanel() {
 
       <Section
         title={t("Audio")}
-        subtitle={t("Shape the sound without touching your system EQ. Applies on the mpv engine; the HTML5 engine plays audio untouched.")}
+        subtitle={t(
+          "Shape the sound without touching your system EQ. Applies on the mpv engine; the HTML5 engine plays audio untouched.",
+        )}
       >
         <ToggleRow
           label={t("Normalize loudness")}
@@ -115,7 +155,9 @@ export function QualityPanel() {
         />
         <ToggleRow
           label={t("Mix surround sound down to stereo")}
-          sub={t("Turn on if you watch on a laptop or headphones and dialogue feels too quiet next to the effects. Leave off if you have a real surround setup or a soundbar.")}
+          sub={t(
+            "Turn on if you watch on a laptop or headphones and dialogue feels too quiet next to the effects. Leave off if you have a real surround setup or a soundbar.",
+          )}
           value={settings.mpvDownmixStereo}
           onChange={(v) => update({ mpvDownmixStereo: v })}
         />
@@ -132,7 +174,9 @@ export function QualityPanel() {
             onChange={(v) => update({ audioProfile: v })}
           />
           <p className="mt-2.5 text-[12.5px] leading-relaxed text-ink-subtle">
-            {t("Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.")}
+            {t(
+              "Night mode gently compresses loud moments for late-night watching. Profiles take effect when the next track loads and stack with the normalizer.",
+            )}
           </p>
         </div>
         <Segmented
@@ -140,24 +184,32 @@ export function QualityPanel() {
           options={VOLUME_BOOST_OPTIONS}
           onChange={(v) => update({ volumeBoostMax: Number(v) })}
           label={t("Maximum volume boost")}
-          sub={t("How far you can boost past 100 percent on the volume bar. Higher settings can get very loud.")}
+          sub={t(
+            "How far you can boost past 100 percent on the volume bar. Higher settings can get very loud.",
+          )}
         />
         <AudioOutputRow />
       </Section>
 
       <Section
         title={t("Skip intros & credits")}
-        subtitle={t("Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.")}
+        subtitle={t(
+          "Harbor finds intro and credits timing from AniSkip, TheIntroDB, and the file's own chapters, then shows a Skip button at the right moment.",
+        )}
       >
         <ToggleRow
           label={t("Show the Skip button")}
-          sub={t("Show a Skip Intro / Skip Credits button when Harbor detects one. Turn this off to never show it. You can also tap the X on the button to dismiss a wrong one for the rest of the episode.")}
+          sub={t(
+            "Show a Skip Intro / Skip Credits button when Harbor detects one. Turn this off to never show it. You can also tap the X on the button to dismiss a wrong one for the rest of the episode.",
+          )}
           value={settings.showSkipButton}
           onChange={(v) => update({ showSkipButton: v })}
         />
         <ToggleRow
           label={t("Auto-skip intros")}
-          sub={t("Jump past openings automatically the moment one starts. The Skip button still shows either way, and seeking back into an intro replays it without skipping again.")}
+          sub={t(
+            "Jump past openings automatically the moment one starts. The Skip button still shows either way, and seeking back into an intro replays it without skipping again.",
+          )}
           value={settings.autoSkipIntro}
           onChange={(v) => update({ autoSkipIntro: v })}
         />
@@ -169,26 +221,33 @@ export function QualityPanel() {
         />
         <ToggleRow
           label={t("Auto-skip credit outros")}
-          sub={t("Automatically skip ending credits and trigger the next episode countdown immediately.")}
+          sub={t(
+            "Automatically skip ending credits and trigger the next episode countdown immediately.",
+          )}
           value={settings.autoSkipOutro}
           onChange={(v) => update({ autoSkipOutro: v })}
         />
         {settings.showSkipButton && (
           <div className="flex flex-col gap-2">
-            <span className="text-[13.5px] font-medium text-ink">{t("Auto-hide the Skip button after")}</span>
+            <span className="text-[13.5px] font-medium text-ink">
+              {t("Auto-hide the Skip button after")}
+            </span>
             <Segmented
               value={String(settings.skipButtonHideSec)}
               options={[
                 { value: "0", label: t("Off") },
                 { value: "5", label: t("5s") },
                 { value: "10", label: t("10s") },
-                { value: "15", label: t("15s") },
+                { value: "14", label: t("14s") },
+                { value: "20", label: t("20s") },
                 { value: "30", label: t("30s") },
               ]}
               onChange={(v) => update({ skipButtonHideSec: Number(v) })}
             />
             <span className="text-[12.5px] leading-relaxed text-ink-subtle">
-              {t("Hides the button on its own after a few seconds so a wrong one doesn't sit there the whole episode.")}
+              {t(
+                "Hides the button on its own after a few seconds so a wrong one doesn't sit there the whole episode.",
+              )}
             </span>
           </div>
         )}
@@ -196,7 +255,9 @@ export function QualityPanel() {
 
       <Section
         title={t("Next episode prompt")}
-        subtitle={t("When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.")}
+        subtitle={t(
+          "When the Up Next pill appears before an episode ends. Auto scales to the episode length, so short episodes stop prompting so early. Off hides it.",
+        )}
       >
         <Segmented
           value={nextEpLeadKey(settings.nextEpisodeLeadSec)}
@@ -207,14 +268,18 @@ export function QualityPanel() {
         />
         <ToggleRow
           label={t("Auto-play next episode")}
-          sub={t("When an episode ends, automatically start the next one. Off lets the episode finish and stop.")}
+          sub={t(
+            "When an episode ends, automatically start the next one. Off lets the episode finish and stop.",
+          )}
           value={settings.autoPlayNextEpisode}
           onChange={(v) => update({ autoPlayNextEpisode: v })}
         />
         {settings.autoPlayNextEpisode && (
           <ToggleRow
             label={t("Ask if you're still watching")}
-            sub={t("After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.")}
+            sub={t(
+              "After several episodes auto-play in a row with no input, pause and check you're still there before continuing. Off by default.",
+            )}
             value={settings.stillWatching}
             onChange={(v) => update({ stillWatching: v })}
           />
@@ -233,19 +298,25 @@ export function QualityPanel() {
         )}
         <ToggleRow
           label={t("Queue drives Next/Previous")}
-          sub={t("After the current show's episodes, Next flows into your queue. Off keeps Next/Previous within the current show only.")}
+          sub={t(
+            "After the current show's episodes, Next flows into your queue. Off keeps Next/Previous within the current show only.",
+          )}
           value={settings.queueDrivesNav}
           onChange={(v) => update({ queueDrivesNav: v })}
         />
         <ToggleRow
           label={t("Show controls when pausing with keyboard")}
-          sub={t("Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.")}
+          sub={t(
+            "Show the player controls when you pause or resume using the keyboard. Turn off to keep them hidden so they don't cover subtitles.",
+          )}
           value={settings.keyboardPauseShowsControls}
           onChange={(v) => update({ keyboardPauseShowsControls: v })}
         />
         <ToggleRow
           label={t("Sleep timer in the top bar")}
-          sub={t("Adds a timer button next to Downloads. Set a time or episode limit from anywhere; playback pauses when it runs out.")}
+          sub={t(
+            "Adds a timer button next to Downloads. Set a time or episode limit from anywhere; playback pauses when it runs out.",
+          )}
           value={settings.navbarSleepTimer}
           onChange={(v) => update({ navbarSleepTimer: v })}
         />
@@ -286,7 +357,9 @@ function AudioOutputRow() {
         <span className="text-[12px] leading-relaxed text-ink-subtle">
           {loading
             ? t("Detecting devices...")
-            : t("Send audio to specific speakers, headphones or a receiver. System default follows Windows.")}
+            : t(
+                "Send audio to specific speakers, headphones or a receiver. System default follows Windows.",
+              )}
         </span>
       </div>
       <select

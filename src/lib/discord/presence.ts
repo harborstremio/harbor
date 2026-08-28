@@ -1,4 +1,5 @@
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import type { MangaReadingState } from "@/lib/manga-reading-state";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -54,6 +55,7 @@ let config: DiscordConfig = {
   showPartyJoin: true,
 };
 let playback: PlaybackPresence | null = null;
+let reading: MangaReadingState = null;
 let browse: BrowsePresence | null = null;
 let party: PartyPresence | null = null;
 let lastEnabledSent: boolean | null = null;
@@ -106,6 +108,28 @@ function computeBase(): Base {
         paused: playback.paused,
       },
       key: `play:${playback.title}|${state ?? ""}|${playback.paused}|${playback.posterUrl ?? ""}|${live ? "ts" : "nots"}`,
+    };
+  }
+  if (reading) {
+    if (config.hideTitle) {
+      return {
+        payload: {
+          details: "Reading something",
+          state: reading.page > 0 ? `Page ${reading.page}/${reading.totalPages}` : undefined,
+          posterUrl: HARBOR_LOGO,
+        },
+        key: `read:hide:${reading.page}/${reading.totalPages}`,
+      };
+    }
+    const state = `${reading.chapterLabel}, page ${reading.page}/${reading.totalPages}`;
+    return {
+      payload: {
+        details: reading.title,
+        state,
+        posterUrl: (config.showPoster && reading.cover) || HARBOR_LOGO,
+        largeText: reading.title,
+      },
+      key: `read:${reading.title}|${state}|${reading.cover ?? ""}`,
     };
   }
   if (browse && config.showWhenBrowsing) {
@@ -214,6 +238,11 @@ export function setPlaybackPresence(p: PlaybackPresence | null): void {
   playback = p;
   schedule();
   emitActivity();
+}
+
+export function setReadingPresence(r: MangaReadingState): void {
+  reading = r;
+  schedule();
 }
 
 export function setBrowsePresence(b: BrowsePresence | null): void {

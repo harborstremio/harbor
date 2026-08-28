@@ -291,7 +291,14 @@ function mergeWatchlist(
     if (nameKey && byKey.has(nameKey)) continue;
     byKey.set(nameKey ?? `local:${e.id}`, {
       key: e.id,
-      meta: { id: e.id, type: e.type, name: e.name || e.id, poster: e.poster },
+      meta: {
+        id: e.id,
+        type: e.type,
+        name: e.name || e.id,
+        poster: e.poster,
+        addonOrigin: e.addonOrigin,
+        videos: e.videos,
+      },
       date: e.addedAt || null,
     });
   }

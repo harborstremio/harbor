@@ -1,6 +1,6 @@
 import type { Meta } from "@/lib/cinemeta";
 import type { DebridStore } from "@/lib/debrid/types";
-import { resolveStream } from "@/lib/streams/resolve";
+import { resolveStream, shouldPreferP2pDownload } from "@/lib/streams/resolve";
 import type { ScoredStream } from "@/lib/streams/types";
 import type { PlayEpisode } from "@/lib/view";
 import { activeDownloadFor, enqueueDownload } from "@/lib/download/downloads-store";
@@ -58,22 +58,32 @@ export async function downloadSeasonFromPack({
   const result: SeasonDownloadResult = { total: targets.length, queued: 0, failed: 0 };
   if (targets.length === 0 || signal.aborted) return result;
   const packStream = streamForSeasonPackEpisode(stream);
-  const limit = limiter(MAX_CONCURRENT);
+  const preferP2p = shouldPreferP2pDownload(packStream);
+  const limit = limiter(preferP2p ? 1 : MAX_CONCURRENT);
+  let p2pSetupFailed = false;
   await Promise.all(
     targets.map((ep) =>
       limit(async () => {
         if (signal.aborted) return;
+        if (preferP2p && p2pSetupFailed) {
+          result.failed += 1;
+          return;
+        }
         const resolved = await resolveStream(
           packStream,
           debrids,
           signal,
           true,
-          false,
+          preferP2p,
           { season: ep.season ?? null, episode: ep.episode ?? null },
           true,
+          false,
         ).catch(() => null);
         if (!resolved?.ok || signal.aborted) {
-          if (!signal.aborted) result.failed += 1;
+          if (!signal.aborted) {
+            if (preferP2p) p2pSetupFailed = true;
+            result.failed += 1;
+          }
           return;
         }
         if (resolved.data.filename && !seasonPackFileMatchesEpisode(resolved.data.filename, ep)) {

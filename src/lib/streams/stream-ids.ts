@@ -77,5 +77,24 @@ export function buildStreamIds(
     push(`${mappedImdb}:${episode!.imdbSeason}:${episode!.imdbEpisode}`);
   }
 
+  // Split-franchise children (e.g. Bleach TYBW) have entry-relative numbering
+  // that runs ahead of the provider's within-cour numbering and a kitsu season
+  // (1) that differs from the provider season — neither courOffset nor
+  // synthSeason catches them, so emit the provider pair explicitly.
+  if (
+    animeMeta &&
+    episode != null &&
+    episode.kitsuStreamId == null &&
+    mappedImdb != null &&
+    mappedImdb.startsWith("tt") &&
+    episode.imdbSeason != null &&
+    episode.imdbSeason >= 1 &&
+    episode.imdbEpisode != null &&
+    episode.imdbEpisode >= 1 &&
+    (episode.season !== episode.imdbSeason || episode.episode !== episode.imdbEpisode)
+  ) {
+    push(`${mappedImdb}:${episode.imdbSeason}:${episode.imdbEpisode}`);
+  }
+
   return out;
 }

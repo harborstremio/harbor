@@ -1,3 +1,6 @@
+import type { SubtitleMatchConfidence } from "./release-match";
+import type { PlayerStreamRef } from "@/lib/view";
+
 const STORAGE_KEY = "harbor.subtitle.memory.v1";
 const MAX_ENTRIES = 500;
 
@@ -14,6 +17,8 @@ export type RememberedSub = {
   format?: SubtitleFormat;
   encoding?: string;
   matchScore?: number;
+  matchConfidence?: SubtitleMatchConfidence;
+  streamKey?: string;
   imported?: boolean;
   updatedAt: number;
 };
@@ -30,6 +35,8 @@ export type SubChoiceInput = {
   format?: SubtitleFormat;
   encoding?: string;
   matchScore?: number;
+  matchConfidence?: SubtitleMatchConfidence;
+  streamKey?: string;
   imported?: boolean;
   source?: string;
 };
@@ -43,6 +50,42 @@ export function subtitleMediaKey(
   episode?: number | null,
 ): string {
   return `${metaId ?? ""}|${season ?? ""}|${episode ?? ""}`;
+}
+
+function stablePart(value: string | null | undefined): string {
+  return (value ?? "").trim().toLowerCase().replace(/\s+/g, " ").slice(0, 180);
+}
+
+/**
+ * Identifies the selected release without persisting signed playback URLs.
+ * The same torrent through another debrid provider intentionally shares a key.
+ */
+export function subtitleStreamKey(
+  streamRef: PlayerStreamRef | null | undefined,
+): string | undefined {
+  if (!streamRef) return undefined;
+  const hash = stablePart(streamRef.infoHash);
+  if (hash) return `torrent:${hash}:${streamRef.fileIdx ?? ""}`;
+  const parts = [
+    stablePart(streamRef.addonId),
+    stablePart(streamRef.releaseGroup),
+    stablePart(streamRef.parsedTitle ?? streamRef.title),
+    stablePart(streamRef.source),
+    stablePart(streamRef.resolution),
+    streamRef.size && streamRef.size > 0 ? String(streamRef.size) : "",
+  ];
+  return parts.some(Boolean) ? `release:${parts.join("|")}` : undefined;
+}
+
+export function rememberedSubAppliesToStream(
+  remembered: RememberedSub | null | undefined,
+  streamRef: PlayerStreamRef | null | undefined,
+): boolean {
+  if (!remembered) return false;
+  if (!remembered.source) return true;
+  const currentStreamKey = subtitleStreamKey(streamRef);
+  if (!currentStreamKey) return true;
+  return remembered.streamKey === currentStreamKey;
 }
 
 function loadStore(): Store {
@@ -65,9 +108,7 @@ function persistStore(): void {
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
-  } catch {
-    
-  }
+  } catch {}
 }
 
 export function readRememberedSub(key: string): RememberedSub | null {
@@ -75,10 +116,7 @@ export function readRememberedSub(key: string): RememberedSub | null {
   return loadStore()[key] ?? null;
 }
 
-export function writeRememberedSub(
-  key: string,
-  sub: Omit<RememberedSub, "updatedAt">,
-): void {
+export function writeRememberedSub(key: string, sub: Omit<RememberedSub, "updatedAt">): void {
   if (!key) return;
   const store = loadStore();
   store[key] = { ...sub, updatedAt: Date.now() };
@@ -93,15 +131,12 @@ export function clearRememberedSub(key: string): void {
   persistStore();
 }
 
-
-export function rememberedFromChoice(
-  choice: SubChoiceInput,
-): Omit<RememberedSub, "updatedAt"> {
+export function rememberedFromChoice(choice: SubChoiceInput): Omit<RememberedSub, "updatedAt"> {
   const resolvedSource =
     choice.source ??
-    (choice.url ? lookupSubtitleOrigin(choice.url) ?? choice.url : undefined) ??
+    (choice.url ? (lookupSubtitleOrigin(choice.url) ?? choice.url) : undefined) ??
     (choice.externalFilename
-      ? lookupSubtitleOrigin(choice.externalFilename) ?? choice.externalFilename
+      ? (lookupSubtitleOrigin(choice.externalFilename) ?? choice.externalFilename)
       : undefined);
   const source = choice.external || choice.imported ? resolvedSource : undefined;
   return {
@@ -114,16 +149,15 @@ export function rememberedFromChoice(
     format: choice.format,
     encoding: choice.encoding,
     matchScore: choice.matchScore,
+    matchConfidence: choice.matchConfidence,
+    streamKey: choice.streamKey,
     imported: choice.imported === true || undefined,
   };
 }
 
 const originByResolvedUrl = new Map<string, string>();
 
-export function noteSubtitleOrigin(
-  resolvedUrl: string,
-  originalSource: string,
-): void {
+export function noteSubtitleOrigin(resolvedUrl: string, originalSource: string): void {
   if (!resolvedUrl || !originalSource) return;
   originByResolvedUrl.set(resolvedUrl, originalSource);
 }

@@ -55,6 +55,7 @@ const PRUNABLE_PREFIXES = [
   "harbor.manga.cache.v2.",
   "harbor.manga.art.",
   "harbor.tvdbo.",
+  "harbor.playback-history.v1.",
 ];
 
 function isPrunable(key: string): boolean {
@@ -157,7 +158,7 @@ function bindCriticalFlush(): void {
   flushBound = true;
   const flush = () => {
     if (pendingCritical.size === 0) return;
-    for (const [k, v] of [...pendingCritical]) {
+    for (const [k, v] of pendingCritical) {
       if (setItemWithRecovery(k, v)) pendingCritical.delete(k);
     }
   };
@@ -183,12 +184,11 @@ const PROACTIVE_PER_KEY_THRESHOLD = 256 * 1024;
 const PROACTIVE_TOTAL_THRESHOLD = 3.5 * 1024 * 1024;
 
 const DEAD_CACHE_PREFIXES = ["harbor.picker-cache."];
-const VERSIONED_CACHE_PREFIXES = [
-  "harbor.awards.wikidata",
-  "harbor.anime_awards.metas",
-];
+const VERSIONED_CACHE_PREFIXES = ["harbor.awards.wikidata", "harbor.anime_awards.metas"];
 
-const LRU_PREFIX_CAPS: Array<{ prefix: string; keep: number }> = [{ prefix: "harbor.tvdbo.", keep: 24 }];
+const LRU_PREFIX_CAPS: Array<{ prefix: string; keep: number }> = [
+  { prefix: "harbor.tvdbo.", keep: 24 },
+];
 
 function capLruPrefixes(): void {
   for (const { prefix, keep } of LRU_PREFIX_CAPS) {
@@ -244,6 +244,8 @@ export function proactiveStorageCleanup(): void {
   }
   if (total > PROACTIVE_TOTAL_THRESHOLD) {
     const r = freeStorageSpace();
-    console.info(`[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`);
+    console.info(
+      `[storage] proactive total cleanup: ${r.pruned.length} caches, ${r.freedBytes} bytes`,
+    );
   }
 }

@@ -118,9 +118,7 @@ function toInfo(r: RawSeries): MangaUpdatesInfo | null {
     authors: (r.authors ?? [])
       .filter((a) => a.name)
       .map((a) => ({ name: a.name as string, role: a.type ?? "Author" })),
-    publishers: (r.publishers ?? [])
-      .map((p) => p.publisher_name)
-      .filter((p): p is string => !!p),
+    publishers: (r.publishers ?? []).map((p) => p.publisher_name).filter((p): p is string => !!p),
     animeStart: r.anime?.start ?? undefined,
     animeEnd: r.anime?.end ?? undefined,
     related: (r.related_series ?? [])
@@ -227,4 +225,23 @@ export async function mangaUpdatesFor(title?: string): Promise<MangaUpdatesInfo 
   } catch {
     return null;
   }
+}
+
+export async function mangaUpdatesTop(limit = 30): Promise<MangaUpdatesInfo[]> {
+  const res = await gate(() =>
+    safeFetch(`${BASE}/series/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderby: "rating",
+        order: "desc",
+        perpage: Math.min(limit, 100),
+      }),
+    }),
+  );
+  if (!res.ok) return [];
+  const j = (await res.json()) as { results?: SearchHit[] };
+  return (j.results ?? [])
+    .map((h) => (h.record ? toInfo(h.record) : null))
+    .filter((i): i is MangaUpdatesInfo => !!i);
 }

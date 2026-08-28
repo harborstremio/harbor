@@ -7,15 +7,51 @@ const INVISIBLE_RE = /[\u061C\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206
 const LI = "\uE000";
 
 const COLOR_NAMES = new Set([
-  "red", "orange", "yellow", "green", "teal", "cyan", "blue", "indigo", "violet",
-  "purple", "pink", "magenta", "brown", "gray", "grey", "black", "white", "gold",
-  "silver", "crimson", "coral", "salmon", "lime", "olive", "navy", "maroon",
+  "red",
+  "orange",
+  "yellow",
+  "green",
+  "teal",
+  "cyan",
+  "blue",
+  "indigo",
+  "violet",
+  "purple",
+  "pink",
+  "magenta",
+  "brown",
+  "gray",
+  "grey",
+  "black",
+  "white",
+  "gold",
+  "silver",
+  "crimson",
+  "coral",
+  "salmon",
+  "lime",
+  "olive",
+  "navy",
+  "maroon",
 ]);
 
 const SPAM_HOSTS = new Set([
-  "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "buff.ly", "is.gd",
-  "cutt.ly", "rebrand.ly", "shorturl.at", "rb.gy", "adf.ly", "grabify.link",
-  "iplogger.org", "iplogger.com", "blasze.tk",
+  "bit.ly",
+  "tinyurl.com",
+  "t.co",
+  "goo.gl",
+  "ow.ly",
+  "buff.ly",
+  "is.gd",
+  "cutt.ly",
+  "rebrand.ly",
+  "shorturl.at",
+  "rb.gy",
+  "adf.ly",
+  "grabify.link",
+  "iplogger.org",
+  "iplogger.com",
+  "blasze.tk",
 ]);
 
 const SIZE_EM = ["0.85", "0.85", "1", "1.15", "1.4", "1.7", "2.1", "2.6"];
@@ -136,7 +172,8 @@ function ytEmbedSrc(id: string): string {
     iv_load_policy: "3",
   });
   const proto = typeof window !== "undefined" ? (window.location?.protocol ?? "") : "";
-  if (/^https?:$/.test(proto) && window.location?.origin) params.set("origin", window.location.origin);
+  if (/^https?:$/.test(proto) && window.location?.origin)
+    params.set("origin", window.location.origin);
   return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
 }
 
@@ -223,7 +260,8 @@ function embedHtml(tag: string, raw: string): string | null {
   return null;
 }
 
-const HEAD_STYLE = "margin:14px 0 6px;font-weight:700;font-size:1.25em;line-height:1.3;color:var(--color-ink)";
+const HEAD_STYLE =
+  "margin:14px 0 6px;font-weight:700;font-size:1.25em;line-height:1.3;color:var(--color-ink)";
 const QUOTE_STYLE =
   "margin:10px 0;padding:6px 0 6px 14px;border-left:3px solid var(--color-edge);color:var(--color-ink-muted)";
 const CODE_STYLE =
@@ -233,7 +271,10 @@ const LIST_STYLE = "margin:8px 0;padding-inline-start:22px;list-style:disc";
 const LINK_STYLE = "color:var(--color-accent);text-decoration:underline";
 
 function trimBr(s: string): string {
-  return s.replace(/^(?:<br\/>)+/, "").replace(/(?:<br\/>)+$/, "").trim();
+  return s
+    .replace(/^(?:<br\/>)+/, "")
+    .replace(/(?:<br\/>)+$/, "")
+    .trim();
 }
 
 const BARE_URL_RE = /https?:\/\/[^\s<>"']+/gi;
@@ -253,7 +294,7 @@ function linkifyEscaped(s: string, mentions?: ReadonlySet<string>): string {
     }
     const href = linkUrl(raw);
     out += href
-      ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer nofollow" style="${LINK_STYLE}">${esc(raw)}</a>${esc(trail)}`
+      ? `<a href="${esc(href)}" rel="noopener noreferrer nofollow" style="${LINK_STYLE}">${esc(raw)}</a>${esc(trail)}`
       : esc(m[0]);
     last = m.index + m[0].length;
   }
@@ -267,7 +308,11 @@ function wrapList(inner: string): string {
     .map((p) => trimBr(p))
     .filter(Boolean);
   if (!items.length) return "";
-  return `<ul style="${LIST_STYLE}">` + items.map((i) => `<li style="margin:2px 0">${i}</li>`).join("") + `</ul>`;
+  return (
+    `<ul style="${LIST_STYLE}">` +
+    items.map((i) => `<li style="margin:2px 0">${i}</li>`).join("") +
+    `</ul>`
+  );
 }
 
 function finalize(f: Frame, addEmbed: () => boolean): { html: string; raw: string } {
@@ -297,14 +342,16 @@ function finalize(f: Frame, addEmbed: () => boolean): { html: string; raw: strin
     }
     case "size": {
       const n = f.arg != null ? Math.max(1, Math.min(7, Math.round(Number(f.arg)))) : NaN;
-      return wrap(Number.isFinite(n) ? `<span style="font-size:${SIZE_EM[n]}em">${inner}</span>` : inner);
+      return wrap(
+        Number.isFinite(n) ? `<span style="font-size:${SIZE_EM[n]}em">${inner}</span>` : inner,
+      );
     }
     case "url": {
       const href = linkUrl((f.arg != null ? f.arg : raw).trim());
       if (!href) return wrap(inner);
       const label = f.arg != null ? inner || esc(href) : esc(href);
       return wrap(
-        `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer nofollow" style="${LINK_STYLE}">${label}</a>`,
+        `<a href="${esc(href)}" rel="noopener noreferrer nofollow" style="${LINK_STYLE}">${label}</a>`,
       );
     }
     case "img":

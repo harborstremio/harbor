@@ -3,7 +3,11 @@ import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import { readdirSync, readFileSync } from "node:fs";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
+import { relative } from "node:path";
+// @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
+// @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
+import { fileURLToPath } from "node:url";
 
 const at = (p: string) => new URL(`../${p}`, import.meta.url);
 const read = (p: string) => readFileSync(at(p), "utf8");
@@ -35,12 +39,14 @@ test("every numeric keypad stays left to right", () => {
 
 test("these are still the only numeric keypads in the app", () => {
   const found: string[] = [];
-  const sourceRoot = decodeURIComponent(at("src/").pathname);
   const walk = (dir: URL) => {
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       if (e.isDirectory()) walk(new URL(`${e.name}/`, dir));
       else if (e.name.endsWith(".tsx")) {
-        const rel = `src/${decodeURIComponent(new URL(e.name, dir).pathname).slice(sourceRoot.length)}`;
+        const rel = relative(fileURLToPath(at("")), fileURLToPath(new URL(e.name, dir))).replaceAll(
+          "\\",
+          "/",
+        );
         if (read(rel).includes('"1", "2", "3", "4", "5", "6", "7", "8", "9"')) found.push(rel);
       }
     }

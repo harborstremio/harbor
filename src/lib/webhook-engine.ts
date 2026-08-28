@@ -16,6 +16,7 @@ import {
 import { getCachedPlaylist } from "./iptv/store";
 import { fetchAndParseXmltv, indexProgramsByChannel } from "./iptv/xmltv";
 import { computeTvgIdCounts, epgProgramsForChannel } from "./iptv/epg-resolver";
+import { readPlaylists } from "./iptv/playlists-store";
 import type { Settings, WebhookTrigger } from "./settings";
 import { getSession as getTraktSession } from "./trakt/session";
 
@@ -145,7 +146,12 @@ function loadIptvFavorites(): Set<string> {
     const parsed = JSON.parse(raw) as Record<string, { id?: string } | unknown>;
     const ids = new Set<string>();
     for (const v of Object.values(parsed)) {
-      if (v && typeof v === "object" && "id" in v && typeof (v as { id?: string }).id === "string") {
+      if (
+        v &&
+        typeof v === "object" &&
+        "id" in v &&
+        typeof (v as { id?: string }).id === "string"
+      ) {
         ids.add((v as { id: string }).id);
       }
     }
@@ -156,12 +162,11 @@ function loadIptvFavorites(): Set<string> {
 }
 
 async function fetchLiveTvEvents(
-  settings: Settings,
   leadMinutes: number,
   favoritesOnly: boolean,
   channelIds: string[] | null,
 ): Promise<CalendarItem[]> {
-  const playlists = settings.iptvPlaylists.filter((p) => (p.kind ?? "m3u") !== "epg");
+  const playlists = readPlaylists().filter((p) => (p.kind ?? "m3u") !== "epg");
   if (playlists.length === 0) return [];
   const now = Date.now();
   const cutoff = now + leadMinutes * 60_000;
@@ -245,7 +250,12 @@ function ruleBaselineKey(ruleId: string): string {
 
 type ChannelResult = { kind: string; ok: boolean; status: number; error: string | null };
 
-function commit(state: LastFiredState, abortReason: string, results: ChannelResult[], totalFired: number) {
+function commit(
+  state: LastFiredState,
+  abortReason: string,
+  results: ChannelResult[],
+  totalFired: number,
+) {
   if (saveLastFiredState(state)) return null;
   console.warn(`[webhook] state persist failed, aborting ${abortReason} to prevent spam`);
   return { fired: totalFired, channels: results };
@@ -280,7 +290,7 @@ export async function runWebhookTick(
     const rows = await sourceFor(source);
     const typed = applyContentTypeFilter(rows, settings.webhooks);
     const fireable = typed.filter((i) => inFutureWindow(i, todayISO, fireEnd));
-    for (const channel of (["discord", "telegram"] as const)) {
+    for (const channel of ["discord", "telegram"] as const) {
       const url = channel === "discord" ? discordUrl : telegramUrl;
       if (!url) continue;
 
@@ -312,7 +322,6 @@ export async function runWebhookTick(
     let candidates: CalendarItem[] = [];
     if (rule.trigger.event === "liveTvEvent") {
       candidates = await fetchLiveTvEvents(
-        settings,
         rule.trigger.leadMinutes ?? 15,
         rule.trigger.favoritesOnly !== false,
         rule.trigger.channelIds ?? null,
@@ -344,8 +353,9 @@ export async function runWebhookTick(
 
     const newMatched = matched.filter((i) => !state[ruleKey(rule.id, i)]);
     if (newMatched.length === 0) continue;
-    const targets = (["discord", "telegram"] as const)
-      .filter((c) => rule.channels[c] && (c === "discord" ? discordUrl : telegramUrl));
+    const targets = (["discord", "telegram"] as const).filter(
+      (c) => rule.channels[c] && (c === "discord" ? discordUrl : telegramUrl),
+    );
     if (targets.length === 0) continue;
     for (const item of newMatched) state[ruleKey(rule.id, item)] = todayISO;
     const aborted = commit(state, "rule fire", channelResults, totalFired);

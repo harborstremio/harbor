@@ -150,6 +150,16 @@ pub async fn modal_overlay_emit_action(
 }
 
 #[tauri::command]
+pub async fn modal_overlay_emit_result(
+    app: AppHandle,
+    event: String,
+    payload: Value,
+) -> Result<(), String> {
+    let _ = app.emit_to(OVERLAY_LABEL, &event, payload);
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn modal_overlay_sync(app: AppHandle) -> Result<(), String> {
     let main = app
         .get_webview_window("main")

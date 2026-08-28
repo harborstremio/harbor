@@ -50,7 +50,7 @@ export function BrowseError({
           onClick={onManageSources}
           className="mt-1 inline-flex h-11 items-center rounded-xl border border-edge-soft bg-elevated/40 px-5 text-[14px] font-medium text-ink-muted transition-colors hover:bg-elevated/70 hover:text-ink"
         >
-          {t("Manage sources")}
+          {t("Manage Servers")}
         </button>
       </div>
     </div>
@@ -69,7 +69,9 @@ export function BrowseEmpty({
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-24 text-center">
         <p className="text-[14px] font-medium text-ink-muted">{t("No favorites yet")}</p>
-        <p className="text-[12.5px] text-ink-subtle">{t("Tap the star on any manga to save it here.")}</p>
+        <p className="text-[12.5px] text-ink-subtle">
+          {t("Tap the star on any manga to save it here.")}
+        </p>
       </div>
     );
   }
@@ -77,7 +79,9 @@ export function BrowseEmpty({
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-24 text-center">
         <p className="text-[14px] font-medium text-ink-muted">{t("No manga found")}</p>
-        <p className="text-[12.5px] text-ink-subtle">{t("Try a different title or clear your filters.")}</p>
+        <p className="text-[12.5px] text-ink-subtle">
+          {t("Try a different title or clear your filters.")}
+        </p>
       </div>
     );
   }

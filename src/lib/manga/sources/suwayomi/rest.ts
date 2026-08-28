@@ -1,5 +1,6 @@
 import {
   imageUrl,
+  toDateIso,
   type BrowseKind,
   type SuwayomiClient,
   type SuwayomiExtension,
@@ -57,6 +58,7 @@ export async function restSources(client: SuwayomiClient): Promise<SuwayomiSourc
       iconUrl: typeof s.iconUrl === "string" ? client.server.base + s.iconUrl : undefined,
       supportsLatest: !!s.supportsLatest,
       isNsfw: !!s.isNsfw,
+      isLocal: !!s.isLocal,
     }));
 }
 
@@ -153,7 +155,7 @@ export async function restChapters(
         chapterNumber: Number.isFinite(cn) && cn >= 0 ? cn : null,
         name: ch.name || undefined,
         scanlator: ch.scanlator || undefined,
-        uploadDate: ch.uploadDate != null ? String(ch.uploadDate) : undefined,
+        uploadDate: toDateIso(ch.uploadDate),
         pageCount: Number.isFinite(Number(ch.pageCount)) ? Number(ch.pageCount) : 0,
         downloaded: !!ch.downloaded,
         isRead: ch.read === true,
