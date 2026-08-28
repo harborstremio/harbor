@@ -87,7 +87,8 @@
           "openssl-libs",
           "ca-certificates"
         ]
-      }
+      },
+      "categories": ["AudioVideo", "Video", "Player"]
     },
     "macOS": {
       "minimumSystemVersion": "11.0"
