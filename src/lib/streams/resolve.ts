@@ -5,6 +5,8 @@ import { magnetFromHash, type DebridResult, type DebridStore, type DirectLink } 
 import { lastEngineAddError, torrentEngineAdd, torrentEngineSelect } from "@/lib/torrent/local-engine";
 import { fullDownloadEnabled, startFullDownload } from "@/lib/torrent/full-download";
 import {
+  buildTorrentStreamUrl,
+  createAndListFiles,
   directTorrentEnabled,
   engineP2pEligible,
   isVideoFile,
@@ -12,6 +14,7 @@ import {
   trackersFromSources,
   type TorrentFile,
 } from "@/lib/torrent/stremio-stream";
+import { remoteStreamServerUrl } from "@/lib/stremio-server";
 import type { ParsedStream, ScoredStream } from "./types";
 import { matchEpisodeFileIndex, type EpisodeHint } from "./episode-file";
 
@@ -275,7 +278,57 @@ async function tryTorrentEngine(
   stream: ParsedStream | ScoredStream,
   hint?: EpisodeHint,
 ): Promise<DirectLink | null> {
+  if (remoteStreamServerUrl()) {
+    return tryRemoteStream(stream, hint);
+  }
   return tryLocalEngine(stream, hint);
+}
+
+async function tryRemoteStream(
+  stream: ParsedStream | ScoredStream,
+  hint?: EpisodeHint,
+): Promise<DirectLink | null> {
+  if (!stream.infoHash) return null;
+  const trackers = trackersFromSources(stream.sources);
+  const season = hint?.season ?? stream.season;
+  const episode = hint?.episode ?? stream.episode;
+  const seriesInfo =
+    season != null && episode != null ? { season, episode } : null;
+  const created = await createAndListFiles(
+    stream.infoHash,
+    trackers,
+    seriesInfo,
+    15000,
+  );
+  if (!created || created.files.length === 0) return null;
+  let chosenIdx = stream.fileIdx;
+  if (chosenIdx == null || chosenIdx < 0) {
+    if (created.guessedFileIdx != null && created.guessedFileIdx >= 0) {
+      chosenIdx = created.guessedFileIdx;
+    } else {
+      chosenIdx = selectEngineFileIdx(created.files, season, episode);
+    }
+  }
+  const filename =
+    stream.behaviorHints?.filename ?? stream.behaviorHints?.fileName ?? null;
+  const url = buildTorrentStreamUrl({
+    infoHash: stream.infoHash,
+    fileIdx: chosenIdx,
+    sources: stream.sources,
+    trackers,
+    filename,
+  });
+  return {
+    url,
+    fileIdx: chosenIdx,
+    filename: filename ?? undefined,
+    notWebReady: stream.behaviorHints?.notWebReady,
+    subtitles: stream.subtitles?.map((s) => ({
+      url: s.url,
+      lang: s.lang,
+      id: s.id,
+    })),
+  };
 }
 
 function engineFailureCode(): string {
