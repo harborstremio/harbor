@@ -5,6 +5,11 @@ export function buildStreamIds(
   episode: PlayEpisode | undefined,
   imdbId: string | null,
   defaultVideoId?: string | null,
+  videos?: ReadonlyArray<{
+    season?: number | null;
+    episode?: number | null;
+    number?: number | null;
+  }>,
 ): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
@@ -50,6 +55,27 @@ export function buildStreamIds(
   if (imdbId && imdbId.startsWith("tt")) {
     if (!episode) push(imdbId);
     else if (!animeMeta) push(`${imdbId}:${episode.season}:${episode.episode}`);
+  }
+
+  // When doing a season-level request (no episode) and we have video metadata,
+  // also emit individual episode-level IDs so addons that don't provide season
+  // packs can still return streams for individual episodes. The pipeline
+  // deduplicates by infoHash/URL so adding both levels is harmless.
+  // Capped at 50 to avoid excessive requests for very long series.
+  if (!episode && videos) {
+    let added = 0;
+    for (const v of videos) {
+      if (added >= 50) break;
+      const season = v.season;
+      const ep = v.episode ?? v.number;
+      if (season == null || ep == null) continue;
+      // For kitsu meta, episode IDs are kitsu:{id}:{ep} (no season)
+      const epId = metaId.startsWith("kitsu:")
+        ? `kitsu:${metaId.split(":")[1]}:${ep}`
+        : `${metaId}:${season}:${ep}`;
+      push(epId);
+      added++;
+    }
   }
 
   return out;
