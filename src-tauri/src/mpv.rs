@@ -696,7 +696,13 @@ pub async fn mpv_start(
         }
     }
     let _ = mpv.set_property("sub-font-provider", "auto");
-    let _ = mpv.set_property("sub-font", "Noto Sans JP");
+    // Use a generic sans-serif font family so the system renders Latin, CJK,
+    // Arabic, and other scripts through the platform's native font fallback.
+    // "Noto Sans JP" was previously the default, but it only covers Japanese
+    // glyphs and caused Arabic/other non-CJK text to show disconnected letters
+    // because libass could not always find a suitable fallback font.
+    let _ = mpv.set_property("sub-font", "sans-serif");
+    let _ = mpv.set_property("sub-ass-shaper", "complex");
     let _ = mpv.set_property("embeddedfonts", "yes");
 
     if let Some(subs) = &args.subtitles {
