@@ -88,6 +88,7 @@ export const DEFAULT: Settings = {
   playerTitleScale: 1,
   playerTitleSeriesFirst: false,
   uiScale: 1,
+  settingsPagePreferences: {},
   serveWebUi: false,
   remoteControlEnabled: false,
   controllerSupportEnabled: true,
@@ -97,6 +98,12 @@ export const DEFAULT: Settings = {
   controllerKeyboardSize: 100,
   controllerRepeatMs: 140,
   controllerInitialDelayMs: 400,
+  // Loading every route shortly after startup costs both memory and battery.
+  // Keep it opt-in for people who prefer instant navigation over a lighter idle app.
+  preloadViews: false,
+  // Scheduled downloads and webhooks may intentionally run while Harbor is hidden.
+  // This remains on by default so existing automation keeps its current behaviour.
+  backgroundNetworkActivity: true,
   trailerQuality: "auto",
   detailTrailerAutoplay: false,
   heroBackdropCarousel: false,
@@ -195,7 +202,10 @@ export const DEFAULT: Settings = {
   seasonSourceLock: false,
   rememberLastStream: true,
   keepSourceNextEpisode: false,
-  playerHdrToSdr: true,
+  // gpu-next can read Windows display capabilities and map Dolby Vision/HDR
+  // to the active target. Keep forced SDR as an explicit compatibility mode.
+  playerHdrAuto: true,
+  playerHdrToSdr: false,
   playerRtxHdr: false,
   playerRtxVsr: false,
   playerMacEdr: false,
@@ -314,7 +324,9 @@ export const DEFAULT: Settings = {
   aiGroqKey: "",
   jinaKey: "",
   aiWebSearch: false,
-  playerD3d11Flip: true,
+  // Compatibility presentation is only for the rare bright-edge artifact.
+  // Keeping it off preserves the flip-model path needed for smooth 4K/HDR.
+  playerD3d11Flip: false,
   mpvExtraOptions: "",
   mpvQuality: "balanced",
   mpvHwdec: "auto",
@@ -527,6 +539,6 @@ export const DEFAULT: Settings = {
   adReportAlwaysShow: false,
   adReportFirstSeen: false,
   xrayEnabled: false,
-  xrayLiveScan: true,
+  xrayLiveScan: false,
   auddApiKey: "",
 };

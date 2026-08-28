@@ -314,10 +314,19 @@ fn run(app: AppHandle) {
     seed(&gilrs);
     let mut dpad: HashMap<u32, DpadLatch> = HashMap::new();
     loop {
+        // gilrs can wait on the native input event instead of waking this
+        // thread 125 times a second forever. Events still wake it immediately,
+        // while the timeout lets app-level enable/focus state settle promptly.
+        // This matters on laptops where the old 8 ms poll kept package power
+        // states shallow and could contend with video presentation.
+        if let Some(Event { id, event, .. }) =
+            gilrs.next_event_blocking(Some(Duration::from_millis(100)))
+        {
+            handle_event(&app, &gilrs, id, event, &mut dpad);
+        }
         while let Some(Event { id, event, .. }) = gilrs.next_event() {
             handle_event(&app, &gilrs, id, event, &mut dpad);
         }
-        std::thread::sleep(Duration::from_millis(8));
     }
 }
 

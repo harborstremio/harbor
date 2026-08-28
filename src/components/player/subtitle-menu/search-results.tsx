@@ -81,7 +81,7 @@ export function LangGroup({
       >
         <Flag language={lang} size="sm" showLabel={false} />
         <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
-          {lang}
+          {t(lang)}
         </span>
         <span className="text-[11px] tabular-nums text-ink-subtle">{items.length}</span>
         {open && pageCount > 1 && (

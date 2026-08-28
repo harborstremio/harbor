@@ -149,7 +149,7 @@ export function VariantRow({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[10.5px] text-ink-subtle">
-            <span className="font-semibold uppercase tracking-[0.1em]">{langName}</span>
+            <span className="font-semibold uppercase tracking-[0.1em]">{tr(langName)}</span>
             <span aria-hidden>·</span>
             <span className={isImported ? "font-semibold text-accent" : ""}>{detailSource}</span>
             {codec && (

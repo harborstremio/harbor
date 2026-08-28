@@ -5,10 +5,26 @@ import { loadInstalled } from "./addon-store";
 
 const ADDON_TIMEOUT_MS = 4000;
 
-function preferCustomMeta(): boolean {
+export function preferCustomMeta(): boolean {
   try {
-    const raw = localStorage.getItem("harbor.settings");
-    return raw ? JSON.parse(raw).preferCustomMetaAddon === true : false;
+    const profileState = JSON.parse(localStorage.getItem("harbor.profiles.v1") ?? "null") as {
+      activeId?: string | null;
+      profiles?: Array<{ id: string; settingsLinked?: boolean }>;
+    } | null;
+    const activeId = profileState?.activeId ?? "default";
+    const activeProfile = profileState?.profiles?.find((profile) => profile.id === activeId);
+    const preferredKey =
+      activeProfile?.settingsLinked === false
+        ? `harbor.settings.${activeId}`
+        : "harbor.settings.shared";
+
+    for (const key of [preferredKey, "harbor.settings.shared", "harbor.settings"]) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const value = (JSON.parse(raw) as { preferCustomMetaAddon?: unknown }).preferCustomMetaAddon;
+      if (typeof value === "boolean") return value;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -62,10 +78,21 @@ export async function resolveMeta(
   }
 
   if (preferCustomMeta()) {
+    let firstAny: Meta | null = null;
+    let firstAddon: Addon | null = null;
     for (const { a, p } of addonRaces) {
       const result = await p;
       if (result && result.poster) return withOrigin(result, a);
+      if (result && !firstAny) {
+        firstAny = result;
+        firstAddon = a;
+      }
     }
+    // Metadata-only addons commonly localize names, descriptions and episode
+    // videos while intentionally leaving artwork to Cinemeta/TMDB. Requiring a
+    // poster here silently discarded those valid responses and made catalog
+    // cards and episode lists fall back to English.
+    if (firstAny && firstAddon) return withOrigin(firstAny, firstAddon);
     return (await cinemetaPromise) ?? null;
   }
 

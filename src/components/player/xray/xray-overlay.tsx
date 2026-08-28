@@ -44,11 +44,14 @@ export function XrayOverlay({
   const [trailer, setTrailer] = useState<{ ytId: string; name: string } | null>(null);
   const resumeRef = useRef(false);
   const active = settings.xrayEnabled && view !== "closed";
+  // Matching is meaningful only on the compact now-playing rail. Stop the
+  // expensive frame capture while the user is browsing the cast or a profile.
+  const liveScan = view === "rail" && settings.xrayLiveScan;
   const { cast, details } = useXrayCast(meta, active);
   const { people, ready, galleryReady, progress, error } = useFaceId({
     metaKey: meta.id,
     cast: cast ?? NO_CAST,
-    liveScan: active && settings.xrayLiveScan && pageVisible,
+    liveScan: liveScan && pageVisible,
     isPaused,
     loadBitmap,
   });
@@ -84,9 +87,13 @@ export function XrayOverlay({
       {visible && view === "closed" && (
         <button
           type="button"
-          onClick={() => setView("rail")}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.stopPropagation();
+            setView("rail");
+          }}
           aria-label={t("X-Ray")}
-          className="absolute left-4 top-20 z-20 flex h-9 items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 text-[12.5px] font-semibold text-white backdrop-blur-md transition-[background-color,transform] hover:bg-black/65 active:scale-[0.97] motion-reduce:active:scale-100"
+          className="pointer-events-auto absolute left-4 top-20 z-30 flex h-9 items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 text-[12.5px] font-semibold text-white backdrop-blur-md transition-[background-color,transform] hover:bg-black/65 active:scale-[0.97] motion-reduce:active:scale-100"
         >
           <ScanFace size={15} strokeWidth={2.2} className="text-accent" /> {t("X-Ray")}
         </button>
@@ -99,6 +106,7 @@ export function XrayOverlay({
           galleryReady={galleryReady}
           progress={progress}
           error={error}
+          liveScan={liveScan}
           needsTmdbKey={!settings.tmdbKey}
           onViewAll={() => setView("browser")}
           onClose={() => setView("closed")}

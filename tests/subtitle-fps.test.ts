@@ -418,8 +418,8 @@ test("Auto Sync status applies only to its current media and subtitle track", ()
 test("the feature reuses Playback Stats FPS properties and only writes mpv sub-fps", () => {
   const stats = read("src/components/player/stats-overlay.tsx");
   const properties = read("src/lib/player/mpv-properties.ts");
-  assert.match(stats, /"estimated-vf-fps"/);
-  assert.match(stats, /"container-fps"/);
+  assert.match(stats, /sourceFps: number \| null/);
+  assert.match(stats, /containerFps: number \| null/);
   assert.match(properties, /"estimated-vf-fps"/);
   assert.match(properties, /"container-fps"/);
   assert.match(properties, /readMpvBoolean\("idle-active"\)/);

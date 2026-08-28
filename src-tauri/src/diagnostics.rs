@@ -31,8 +31,8 @@ pub struct CollectResult {
 }
 
 struct ScrubRules {
-    bearer: Regex,
     authorization: Regex,
+    bearer: Regex,
     storage_key: Regex,
     key_value: Regex,
     email: Regex,
@@ -46,11 +46,11 @@ struct ScrubRules {
 fn rules() -> &'static ScrubRules {
     static RULES: OnceLock<ScrubRules> = OnceLock::new();
     RULES.get_or_init(|| ScrubRules {
-        bearer: Regex::new(r"(?i)bearer\s+[A-Za-z0-9._~+/=\-]{8,}").unwrap(),
         authorization: Regex::new(
-            r#"(?i)(authorization"?\s*[:=]\s*"?)(bearer\s+|basic\s+)?([^"'\s,;&}\)]+)"#,
+            r#"(?i)(authorization)("?\s*[:=]\s*"?)(?:(bearer|basic)\s+)?([^"'\s,;&}\)]+)"#,
         )
         .unwrap(),
+        bearer: Regex::new(r"(?i)bearer\s+[A-Za-z0-9._~+/=\-]{8,}").unwrap(),
         storage_key: Regex::new(
             r#"(?i)(harbor\.(?:theme-session|session\.token|auth(?:\.[A-Za-z0-9_.-]+)?))("?\s*[:=]\s*"?)([^"'\s,;&}\)]+)"#,
         )
@@ -71,12 +71,16 @@ fn rules() -> &'static ScrubRules {
 
 pub fn diagnostics_scrub(text: &str) -> String {
     let r = rules();
-    let step1 = r
-        .bearer
-        .replace_all(text, |_: &regex::Captures| format!("Bearer {REDACTED}"));
-    let step2 = r.authorization.replace_all(&step1, |c: &regex::Captures| {
-        format!("{}{}{}", &c[1], &c[2], REDACTED)
+    let step1 = r.authorization.replace_all(text, |c: &regex::Captures| {
+        let scheme = c
+            .get(3)
+            .map(|value| format!("{} ", value.as_str()))
+            .unwrap_or_default();
+        format!("{}{}{}{}", &c[1], &c[2], scheme, REDACTED)
     });
+    let step2 = r
+        .bearer
+        .replace_all(&step1, |_: &regex::Captures| format!("Bearer {REDACTED}"));
     let step3 = r.storage_key.replace_all(&step2, |c: &regex::Captures| {
         format!("{}{}{}", &c[1], &c[2], REDACTED)
     });
@@ -145,7 +149,11 @@ fn sanitize_id(id: &str) -> String {
     }
 }
 
-fn build_system_info(app: &AppHandle, input: &CollectInput, mem: &crate::proc_mem::ProcMem) -> String {
+fn build_system_info(
+    app: &AppHandle,
+    input: &CollectInput,
+    mem: &crate::proc_mem::ProcMem,
+) -> String {
     let version = app.package_info().version.to_string();
     format!(
         "Harbor Diagnostics\n\
@@ -182,8 +190,7 @@ fn add_member(
 ) -> Result<(), String> {
     let scrubbed = diagnostics_scrub(raw);
     zipw.start_file(name, opts).map_err(|e| e.to_string())?;
-    zipw
-        .write_all(scrubbed.as_bytes())
+    zipw.write_all(scrubbed.as_bytes())
         .map_err(|e| e.to_string())?;
     Ok(())
 }
@@ -208,8 +215,10 @@ pub async fn diagnostics_collect(
         .to_string();
     let system_info = build_system_info(&app, &input, &mem);
 
-    let temp_path: PathBuf =
-        std::env::temp_dir().join(format!("harbor-diag-{}.zip", sanitize_id(&input.request_id)));
+    let temp_path: PathBuf = std::env::temp_dir().join(format!(
+        "harbor-diag-{}.zip",
+        sanitize_id(&input.request_id)
+    ));
     let file = std::fs::File::create(&temp_path).map_err(|e| format!("create bundle: {e}"))?;
     let mut zipw = ZipWriter::new(file);
     let opts = SimpleFileOptions::default().compression_method(CompressionMethod::Deflated);

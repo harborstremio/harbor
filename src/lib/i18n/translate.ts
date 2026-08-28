@@ -1,5 +1,6 @@
 import en from "./locales/en";
 import ar from "./locales/ar";
+import hu from "./locales/hu";
 import pt from "./locales/pt";
 import ru from "./locales/ru";
 import { getUiLanguage, useUiLanguage } from "./store";
@@ -7,7 +8,7 @@ import { isRtl, LANGUAGES, type UiLanguage } from "./languages";
 
 type Vars = Record<string, string | number>;
 
-const catalogs: Record<UiLanguage, Record<string, string>> = { en, ar, pt, ru };
+const catalogs: Record<UiLanguage, Record<string, string>> = { en, ar, hu, pt, ru };
 
 export type PluralForm = "one" | "few" | "many";
 

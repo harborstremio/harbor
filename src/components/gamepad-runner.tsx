@@ -4,6 +4,7 @@ import { HarborMark } from "@/components/icons/harbor-mark";
 import { tvHover } from "@/lib/keyboard-navigation";
 import { useLiveGamepad } from "@/lib/gamepad/live";
 import { useGamepad } from "@/lib/gamepad/use-gamepad";
+import { useGamepads } from "@/lib/gamepad/store";
 import { useSettings } from "@/lib/settings";
 
 function hoverCss(rules: CSSRuleList): string {
@@ -18,6 +19,7 @@ const isTextField = (el: unknown): el is TextField => el instanceof HTMLTextArea
 export function GamepadRunner() {
   useGamepad();
   const live = useLiveGamepad();
+  const gamepads = useGamepads();
   const { settings } = useSettings();
   const cursor = useRef<HTMLDivElement>(null);
   const position = useRef({ x: innerWidth / 2, y: innerHeight / 2 });
@@ -30,6 +32,7 @@ export function GamepadRunner() {
   axes.current = live.axes;
 
   useEffect(() => {
+    if (!settings.controllerSupportEnabled || gamepads.length === 0) return;
     const style = document.createElement("style");
     style.setAttribute("data-gamepad-hover-styles", "");
     document.head.appendChild(style);
@@ -42,9 +45,14 @@ export function GamepadRunner() {
     const observer = new MutationObserver(apply);
     observer.observe(document.head, { childList: true });
     return () => { observer.disconnect(); style.remove(); };
-  }, []);
+  }, [gamepads.length, settings.controllerSupportEnabled]);
 
   useEffect(() => {
+    if (!settings.controllerSupportEnabled || gamepads.length === 0) {
+      active.current = false;
+      cursor.current?.style.setProperty("opacity", "0");
+      return;
+    }
     let frame = 0;
     let previous = performance.now();
     let refreshHover = false;
@@ -93,11 +101,29 @@ export function GamepadRunner() {
         while (el && el !== document.body && (!/(auto|scroll)/.test(getComputedStyle(el).overflowY) || el.scrollHeight <= el.clientHeight)) el = el.parentElement;
         (el ?? document.scrollingElement)?.scrollBy({ top: ly * 600 * dt });
       }
+      if (document.visibilityState === "visible") frame = requestAnimationFrame(tick);
+    };
+    const start = () => {
+      if (document.visibilityState !== "visible" || frame) return;
+      previous = performance.now();
       frame = requestAnimationFrame(tick);
     };
-    frame = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("blur", refresh); };
-  }, [settings.controllerDeadzone, settings.controllerCursorSpeed]);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        if (frame) cancelAnimationFrame(frame);
+        frame = 0;
+        cursor.current?.style.setProperty("opacity", "0");
+      } else start();
+    };
+    window.addEventListener("blur", refresh);
+    document.addEventListener("visibilitychange", onVisibility);
+    start();
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("blur", refresh);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [gamepads.length, settings.controllerDeadzone, settings.controllerCursorSpeed, settings.controllerSupportEnabled]);
 
   useEffect(() => {
     if (!live.buttons.south) return;
@@ -152,6 +178,8 @@ export function GamepadRunner() {
     if (live.buttons.west && !keyboard && document.documentElement.hasAttribute("data-player-chrome-mounted"))
       document.querySelector<HTMLElement>("[data-player-subtitles]")?.click();
   }, [live.buttons.west, keyboard]);
+
+  if (!settings.controllerSupportEnabled) return null;
 
   return createPortal(
     <>

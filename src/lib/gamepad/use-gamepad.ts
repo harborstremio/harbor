@@ -84,8 +84,8 @@ export function useGamepad(): void {
   const backgroundInput = settings.controllerBackgroundInput;
 
   useEffect(() => {
-    void invoke("gamepad_set_background_input", { allowed: backgroundInput }).catch(() => {});
-  }, [backgroundInput]);
+    void invoke("gamepad_set_background_input", { allowed: enabled && backgroundInput }).catch(() => {});
+  }, [backgroundInput, enabled]);
 
   const cfgRef = useRef({
     repeatMs: settings.controllerRepeatMs,

@@ -9,6 +9,7 @@ type Props = {
   galleryReady: boolean;
   progress: { done: number; total: number };
   error: string | null;
+  liveScan: boolean;
   needsTmdbKey?: boolean;
   onViewAll: () => void;
   onClose: () => void;
@@ -21,17 +22,22 @@ export function XrayRail({
   galleryReady,
   progress,
   error,
+  liveScan,
   needsTmdbKey,
   onViewAll,
   onClose,
 }: Props) {
   const t = useT();
 
-  const emptyGallery = galleryReady && progress.total === 0;
-  const canMatch = !error && !emptyGallery;
+  const emptyGallery = liveScan && galleryReady && progress.total === 0;
+  const canMatch = liveScan && !error && !emptyGallery;
   const fallback = people.length === 0 && !canMatch && (castPeople?.length ?? 0) > 0;
   const list = people.length > 0 ? people : fallback ? (castPeople ?? []) : [];
-  const status = error
+  const status = !liveScan
+    ? list.length === 0
+      ? t("Reading the cast")
+      : null
+    : error
     ? `${t("X-Ray unavailable")} — ${error}`
     : !ready
       ? t("Warming up")

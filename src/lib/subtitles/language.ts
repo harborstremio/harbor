@@ -246,12 +246,33 @@ const NAME_TO_CODE: Record<string, string> = (() => {
   m["jp"] = "ja";
   m["mandarin"] = "zh";
   m["cantonese"] = "zh";
+  // A few common native names turn up in community addon responses instead
+  // of an ISO code or the English language name.
+  m["magyar"] = "hu";
+  m["angol"] = "en";
   return m;
 })();
+
+const UNDETERMINED_LANGS = new Set([
+  "",
+  "und",
+  "unknown",
+  "unspecified",
+  "unclassified",
+  "none",
+  "null",
+  "n/a",
+  "na",
+  "other",
+  "auto",
+  "translation",
+  "translated",
+]);
 
 export function normalizeLang(input?: string | null): string {
   if (!input) return "";
   const raw = input.trim().toLowerCase();
+  if (raw === "multiple" || raw === "mixed" || raw === "multilingual") return "multi";
   if (LATAM_ALIASES.has(raw)) return "es-419";
   if (BRAZIL_ALIASES.has(raw)) return "pt-br";
   if (raw.length === 2) return raw;
@@ -269,6 +290,8 @@ export function normalizeLang(input?: string | null): string {
 
 export function languageName(code: string): string {
   const n = normalizeLang(code);
+  if (!n || UNDETERMINED_LANGS.has(n)) return "Unknown";
+  if (n === "multi") return "Multi";
   return NAMES[n] || code.toUpperCase();
 }
 
@@ -280,6 +303,40 @@ export function isPlausibleLang(raw: string | undefined | null): boolean {
   const s = raw.trim();
   if (!s || s.length > 24) return false;
   return !IMPLAUSIBLE_LANG_PATTERN.test(s);
+}
+
+/**
+ * Normalize provider metadata without ever losing an otherwise valid
+ * subtitle. Community addons are allowed to omit `lang` or return labels such
+ * as "translation". Those tracks belong in the picker as undetermined (`und`)
+ * instead of being discarded or guessed as English.
+ */
+export function normalizeSubtitleLang(raw: string | undefined | null): string {
+  if (!isPlausibleLang(raw)) return "und";
+  const normalized = normalizeLang(raw);
+  if (UNDETERMINED_LANGS.has(normalized)) return "und";
+  if (
+    normalized === "multi" ||
+    normalized in NAMES ||
+    /^[a-z]{2,3}(?:-[a-z0-9]{2,3})?$/.test(normalized)
+  ) {
+    return normalized;
+  }
+
+  // Some translation addons put prose in the language field, for example
+  // "Fordítás: magyar". Recognise a language name inside that label while
+  // treating unrelated tool/action labels as undetermined.
+  const words = ` ${raw!
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()} `;
+  const aliases = Object.entries(NAME_TO_CODE).sort(([a], [b]) => b.length - a.length);
+  for (const [alias, code] of aliases) {
+    const needle = ` ${alias.replace(/[^\p{L}\p{N}]+/gu, " ").trim()} `;
+    if (needle.trim() && words.includes(needle)) return code;
+  }
+  return "und";
 }
 
 export function langScore(lang: string, preferred: string[]): number {

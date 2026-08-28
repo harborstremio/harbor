@@ -15,7 +15,9 @@ import {
 const ARTWORK_CACHE_MAX = 300;
 const prepared = new Map<string, string>();
 const inflight = new Map<string, Promise<string | undefined>>();
-const decoded = new Set<string>();
+// A decoded image is kept only as a short-lived hint. Keeping every artwork
+// URL ever seen made a long browsing session grow indefinitely.
+const decoded = new Map<string, true>();
 const decoding = new Map<string, { image: HTMLImageElement; promise: Promise<boolean> }>();
 const failed = new Set<string>();
 const urgent = new Set<string>();
@@ -48,6 +50,16 @@ function rememberPrepared(key: string, url: string): void {
     const oldest = prepared.keys().next().value;
     if (typeof oldest !== "string") break;
     prepared.delete(oldest);
+  }
+}
+
+function rememberDecoded(url: string): void {
+  decoded.delete(url);
+  decoded.set(url, true);
+  while (decoded.size > ARTWORK_CACHE_MAX) {
+    const oldest = decoded.keys().next().value;
+    if (typeof oldest !== "string") break;
+    decoded.delete(oldest);
   }
 }
 
@@ -156,7 +168,7 @@ async function loadWideArtwork(
     image.onload = () => {
       const finish = () => {
         const suitable = isSuitableWideArtworkSize(image.naturalWidth, image.naturalHeight);
-        if (suitable) decoded.add(url);
+        if (suitable) rememberDecoded(url);
         resolve(suitable);
       };
       if (typeof image.decode === "function") void image.decode().then(finish, finish);

@@ -1,10 +1,25 @@
 import { lruSet } from "@/lib/cache";
 import { registerEvictable } from "@/lib/maintenance";
 import { HARBOR_API_BASE } from "@/lib/config/endpoints";
+import { parseImdbParentsGuideResponse } from "@/lib/content-advisory";
 
 const BASE = `${HARBOR_API_BASE}/api/imdb`;
+const IMDB_GRAPHQL = "https://api.graphql.imdb.com/";
 
 export type ParentalCategory = { category: string; severity: string };
+
+const IMDB_PARENTS_GUIDE_QUERY = `
+  query HarborParentsGuide($id: ID!) {
+    title(id: $id) {
+      parentsGuide {
+        categories {
+          category { text }
+          severity { text }
+        }
+      }
+    }
+  }
+`;
 
 const titleCache = new Map<string, number | null>();
 const parentalCache = new Map<string, ParentalCategory[]>();
@@ -94,6 +109,33 @@ export async function harborImdbParental(rawTt: string): Promise<ParentalCategor
           }
         }
       }
+      if (out.length > 0) {
+        parentalCache.set(tt, out);
+        parentalInflight.delete(tt);
+        return out;
+      }
+    } catch {
+      // The desktop fallback below is intentionally independent of Harbor's API.
+    }
+
+    try {
+      const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+      const request = isTauri
+        ? (await import("@tauri-apps/plugin-http")).fetch
+        : fetch;
+      const res = await request(IMDB_GRAPHQL, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "x-imdb-client-name": "imdb-web-next",
+        },
+        body: JSON.stringify({
+          operationName: "HarborParentsGuide",
+          query: IMDB_PARENTS_GUIDE_QUERY,
+          variables: { id: tt },
+        }),
+      });
+      const out = res.ok ? parseImdbParentsGuideResponse(await res.json()) : [];
       parentalCache.set(tt, out);
       return out;
     } catch {

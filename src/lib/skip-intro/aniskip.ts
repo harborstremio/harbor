@@ -29,6 +29,7 @@ function scheduleCacheWrite() {
 }
 
 const segmentCache = new Map<string, SkipSegment[]>();
+const warmSegmentCache = new Map<string, SkipSegment[]>();
 const inflight = new Map<string, Promise<SkipSegment[]>>();
 
 export async function kitsuToMal(kitsuId: number): Promise<number | null> {
@@ -82,7 +83,13 @@ export function fetchAniSkipSegments(
   episode: number,
   episodeLengthSec = 0,
 ): Promise<SkipSegment[]> {
-  const key = `${malId}:${episode}:${Math.round(episodeLengthSec)}`;
+  const baseKey = `${malId}:${episode}`;
+  const normalizedLength = Math.round(episodeLengthSec);
+  if (normalizedLength > 0) {
+    const warm = warmSegmentCache.get(baseKey);
+    if (warm) return Promise.resolve(warm);
+  }
+  const key = `${baseKey}:${normalizedLength}`;
   const hit = segmentCache.get(key);
   if (hit) return Promise.resolve(hit);
   const pending = inflight.get(key);
@@ -119,6 +126,7 @@ export function fetchAniSkipSegments(
     }
     segments.sort((a, b) => a.startSec - b.startSec);
     segmentCache.set(key, segments);
+    if (normalizedLength <= 0 && segments.length > 0) warmSegmentCache.set(baseKey, segments);
     return segments;
   })()
     .catch((): SkipSegment[] => [])

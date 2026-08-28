@@ -17,6 +17,11 @@ import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import type { OrderedEpisode } from "@/lib/providers/tvdb-order";
 import { pickLocalizedText } from "@/lib/localized-text";
 import { useSettings } from "@/lib/settings";
+import {
+  preferredEpisodeName,
+  preferredEpisodeOverview,
+  preferredEpisodeVideo,
+} from "@/lib/preferred-meta";
 import { effectiveOrderProvider, tvdbPanelEnabled } from "@/lib/settings/episode-order";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useSimkl } from "@/lib/simkl/provider";
@@ -49,6 +54,7 @@ export function SeriesEpisodes({
   lastEpisodeAir,
   scrollRef,
   cinemetaVideos,
+  preferredVideos,
   stremioWatched,
   resumeSeason,
   resumeEpisode,
@@ -60,6 +66,7 @@ export function SeriesEpisodes({
   lastEpisodeAir?: { seasonNumber: number; airDate: string | null };
   scrollRef: React.RefObject<HTMLElement | null>;
   cinemetaVideos?: NonNullable<Meta["videos"]>;
+  preferredVideos?: NonNullable<Meta["videos"]>;
   stremioWatched?: Set<string>;
   resumeSeason?: number;
   resumeEpisode?: number;
@@ -143,15 +150,24 @@ export function SeriesEpisodes({
     tvdbKey: settings.tvdbKey,
     omdbKey: settings.omdbKey,
   });
+  const episodeVideos = preferredVideos?.length ? preferredVideos : cinemetaVideos;
   const tvdbStills = useSeriesTvdbStills(imdbId, enrichedBase.length, settings.tvdbSeasonType);
   const enrichedEpisodes = useMemo(() => {
-    if (Object.keys(tvdbStills).length === 0) return enrichedBase;
     return enrichedBase.map((ep) => {
-      if (ep.stillPath || ep.stillUrl) return ep;
-      const img = tvdbStills[`s${ep.seasonNumber}e${ep.episodeNumber}`] ?? tvdbStills[`abs${ep.episodeNumber}`];
-      return img ? { ...ep, stillUrl: img } : ep;
+      const preferred = preferredEpisodeVideo(preferredVideos, ep.seasonNumber, ep.episodeNumber);
+      const image =
+        !ep.stillPath && !ep.stillUrl
+          ? tvdbStills[`s${ep.seasonNumber}e${ep.episodeNumber}`] ??
+            tvdbStills[`abs${ep.episodeNumber}`]
+          : undefined;
+      return {
+        ...ep,
+        name: preferredEpisodeName(preferred) ?? ep.name,
+        overview: preferredEpisodeOverview(preferred) ?? ep.overview,
+        stillUrl: preferred?.thumbnail || ep.stillUrl || image,
+      };
     });
-  }, [enrichedBase, tvdbStills]);
+  }, [enrichedBase, preferredVideos, tvdbStills]);
 
   const hiddenSet = useHiddenEpisodes(meta.id);
   const hideActive = settings.episodeHiding && !showHidden;
@@ -267,14 +283,19 @@ export function SeriesEpisodes({
           [{ text: ep.overview }, { text: ep.overviewEn ?? "" }, { text: tmdbEp?.overview ?? "" }],
           { lang },
         ) ?? ep.overview;
-      let next = { ...ep, name, overview };
+      const preferred = preferredEpisodeVideo(preferredVideos, ep.seasonNumber, ep.episodeNumber);
+      let next = {
+        ...ep,
+        name: preferredEpisodeName(preferred) ?? name,
+        overview: preferredEpisodeOverview(preferred) ?? overview,
+      };
       if (ep.imdbRating == null) {
         const r = imdbRatings.get(`${ep.seasonNumber}:${ep.episodeNumber}`);
         if (r != null && r > 0) next = { ...next, imdbRating: r };
       }
       return next;
     });
-  }, [orderedEpsRaw, imdbRatings, orderActive, orderSeasonEff, settings.tvdbSeasonType]);
+  }, [orderedEpsRaw, imdbRatings, orderActive, orderSeasonEff, preferredVideos, settings.tvdbSeasonType]);
   const visibleOrderedEps = useMemo(
     () =>
       hideActive && hiddenSet.size > 0
@@ -391,9 +412,9 @@ export function SeriesEpisodes({
       {!aiMode && searchOpen && <EpisodeSearchBar value={epSearch} onChange={setEpSearch} />}
 
       {aiMode ? (
-        <EpisodeAiMode meta={meta} videos={cinemetaVideos} imdbId={imdbId} onExit={() => setAiMode(false)} />
+        <EpisodeAiMode meta={meta} videos={episodeVideos} imdbId={imdbId} onExit={() => setAiMode(false)} />
       ) : searching ? (
-        <CrossSeasonResults meta={meta} videos={cinemetaVideos} query={epSearch} imdbId={imdbId} />
+        <CrossSeasonResults meta={meta} videos={episodeVideos} query={epSearch} imdbId={imdbId} />
       ) : (
       <>
 
@@ -406,7 +427,7 @@ export function SeriesEpisodes({
           traktWatched={traktWatched}
           stremioWatched={stremioWatched}
           simklWatched={simklWatched}
-          cinemetaVideos={cinemetaVideos}
+          cinemetaVideos={episodeVideos}
           seriesImdbId={imdbId}
           onContextMenu={openWatchedMenu}
         />
@@ -424,7 +445,7 @@ export function SeriesEpisodes({
       {!altActive && loading && <EpisodeGridSkeleton />}
 
       {!altActive && !loading && enrichedEpisodes.length === 0 && (
-        <CinemetaFallback meta={meta} videos={cinemetaVideos} season={active} />
+        <CinemetaFallback meta={meta} videos={episodeVideos} season={active} />
       )}
 
       {!altActive && !loading && enrichedEpisodes.length > 0 && (
@@ -434,7 +455,7 @@ export function SeriesEpisodes({
               layout={settings.episodeLayout === "grid" ? "grid" : "strip"}
               meta={meta}
               seriesImdbId={imdbId}
-              cinemetaVideos={cinemetaVideos}
+              cinemetaVideos={episodeVideos}
               episodes={visibleEpisodes}
               progressFor={(ep) =>
                 getEpisodeProgress(
@@ -469,7 +490,7 @@ export function SeriesEpisodes({
                       (v) => v.season === ep.seasonNumber && v.episode === ep.episodeNumber,
                     )?.thumbnail
                   }
-                  cinemetaVideos={cinemetaVideos}
+                  cinemetaVideos={episodeVideos}
                   seriesImdbId={imdbId}
                   progress={progressByEp.get(ep.episodeNumber)!}
                   spoiler={spoilerFor(ep.episodeNumber)}

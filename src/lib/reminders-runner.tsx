@@ -83,7 +83,7 @@ async function checkAll(tmdbKey: string, t: Tfn): Promise<void> {
   }
 }
 
-export function RemindersRunner() {
+export function RemindersRunner({ suspended = false }: { suspended?: boolean }) {
   const t = useT();
   const { settings } = useSettings();
   const keyRef = useRef(settings.tmdbKey);
@@ -92,6 +92,7 @@ export function RemindersRunner() {
   tRef.current = t;
 
   useEffect(() => {
+    if (suspended) return;
     const run = () => {
       if (listReminders().length === 0) return;
       void checkAll(keyRef.current, tRef.current);
@@ -102,7 +103,7 @@ export function RemindersRunner() {
       window.clearTimeout(first);
       window.clearInterval(iv);
     };
-  }, []);
+  }, [suspended]);
 
   return null;
 }

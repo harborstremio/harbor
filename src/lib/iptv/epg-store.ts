@@ -2,12 +2,23 @@ import { fetchAndParseXmltv, indexProgramsByChannel } from "./xmltv";
 import type { EpgChannelMeta, EpgIndex, EpgProgram } from "./types";
 
 const TTL_MS = 60 * 60 * 1000;
+const MAX_CACHED_PLAYLISTS = 3;
 
 const cache = new Map<string, EpgIndex>();
 const inflight = new Map<string, Promise<EpgIndex>>();
 const listeners = new Set<() => void>();
 
 let notifyScheduled = false;
+
+function rememberEpg(playlistId: string, index: EpgIndex): void {
+  cache.delete(playlistId);
+  cache.set(playlistId, index);
+  while (cache.size > MAX_CACHED_PLAYLISTS) {
+    const oldest = cache.keys().next().value;
+    if (typeof oldest !== "string") break;
+    cache.delete(oldest);
+  }
+}
 function notify() {
   if (notifyScheduled) return;
   notifyScheduled = true;
@@ -25,7 +36,9 @@ export function subscribeEpg(fn: () => void): () => void {
 }
 
 export function getCachedEpg(playlistId: string): EpgIndex | null {
-  return cache.get(playlistId) ?? null;
+  const value = cache.get(playlistId) ?? null;
+  if (value) rememberEpg(playlistId, value);
+  return value;
 }
 
 export function clearEpg(playlistId?: string) {
@@ -70,12 +83,12 @@ export async function loadEpg(params: {
       touched.add(p.channelTvgId);
     }
     for (const id of touched) byChannel.get(id)!.sort((a, b) => a.startMs - b.startMs);
-    cache.set(playlistId, { byChannel, channelMeta, fetchedAt: Date.now() });
+    rememberEpg(playlistId, { byChannel, channelMeta, fetchedAt: Date.now() });
     notify();
   };
   const promise: Promise<EpgIndex> = doFetchWithFallback(urls, onProgress).then((idx) => {
     if (inflight.get(playlistId) === promise) {
-      cache.set(playlistId, idx);
+      rememberEpg(playlistId, idx);
       notify();
     }
     return idx;

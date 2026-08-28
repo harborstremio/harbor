@@ -35,6 +35,8 @@ import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { useSettings } from "@/lib/settings";
 import { useTitleLogo } from "@/lib/title-logo";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
 import { useView } from "@/lib/view";
 import { useProfiles } from "@/lib/profiles";
@@ -76,6 +78,8 @@ export const Hero = memo(function Hero({
   const { pickerOpen: profilePickerOpen } = useProfiles();
   const t = useT();
   const description = useLocalizedOverview(meta);
+  const preferredMeta = usePreferredMeta(meta, active);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const inWatchlist = useInWatchlist(meta.id, [resolvedImdb]);
   const [bgUrl, setBgUrl] = useState<string | undefined>(meta.background);
@@ -296,7 +300,7 @@ export const Hero = memo(function Hero({
   return (
     <section
       ref={sectionRef}
-      onClick={() => openMeta({ ...meta, logo: logo ?? meta.logo })}
+      onClick={() => openMeta({ ...displayMeta, logo: logo ?? displayMeta.logo })}
       className={`harbor-hero-stage group relative cursor-pointer overflow-hidden bg-canvas ${full ? "h-[78vh] min-h-[640px] rounded-none" : "h-[560px] rounded-[28px]"}`}
       style={{ isolation: "isolate" }}
     >
@@ -415,7 +419,7 @@ export const Hero = memo(function Hero({
             </div>
           )}
           <HeroTitlePlate
-            name={meta.name}
+            name={displayMeta.name}
             logo={logo}
             loaded={logoLoaded}
             resolved={logoResolved}

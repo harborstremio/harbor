@@ -311,7 +311,10 @@ fn read() -> ProcMem {
 pub async fn harbor_process_memory() -> ProcMem {
     #[cfg(windows)]
     {
-        read()
+        // Toolhelp process enumeration and working-set queries are blocking OS
+        // calls. Keep them off Tauri's shared async executor so a diagnostic
+        // sample cannot delay unrelated commands.
+        tokio::task::spawn_blocking(read).await.unwrap_or_default()
     }
     #[cfg(target_os = "linux")]
     {

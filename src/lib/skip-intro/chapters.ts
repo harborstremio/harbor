@@ -6,6 +6,7 @@ const INTRO_PATTERNS = [
   /\bintro\b/i,
   /\bopening\s*credits\b/i,
   /\btheme\s*song\b/i,
+  /\b(bevezető|főcím|nyitány)\b/i,
 ];
 
 const OUTRO_PATTERNS = [
@@ -14,9 +15,10 @@ const OUTRO_PATTERNS = [
   /\bend\s*credits?\b/i,
   /\bclosing\s*credits?\b/i,
   /\bcredits?\b/i,
+  /\b(vége\s*főcím|végefőcím|záró\s*stáblista|stáblista)\b/i,
 ];
 
-const RECAP_PATTERNS = [/\b(recap|previously)\b/i];
+const RECAP_PATTERNS = [/\b(recap|previously)\b/i, /\b(összefoglaló|előző\s*részek\s*tartalmából)\b/i];
 
 function classify(title: string): SkipKind | null {
   if (!title) return null;

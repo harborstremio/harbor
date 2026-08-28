@@ -40,6 +40,7 @@ export function regionFromNavigator(): string | null {
   if (lang === "es") return "ES";
   if (lang === "ru") return "RU";
   if (lang === "pt") return "PT";
+  if (lang === "hu") return "HU";
   return null;
 }
 

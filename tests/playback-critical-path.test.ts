@@ -106,7 +106,7 @@ test("startup buffering is staged and adapts without lowering media quality", ()
   assert.match(startupProfile, /HIGH_BITRATE_MIN_BYTES = 12 \* 1024 \* 1024 \* 1024/);
   assert.match(startupProfile, /2160p\?|4320p\?|4k\|8k\|uhd\|remux/);
   assert.match(nativeMpv, /startup_profile: Option<String>/);
-  assert.match(nativeMpv, /if high_bitrate \{ "32MiB" \} else \{ "16MiB" \}/);
+  assert.match(nativeMpv, /set_property\("stream-buffer-size", "4MiB"\)/);
   assert.match(mpv, /phase === "startup"/);
   assert.match(mpv, /\["demuxer-max-bytes", highBitrate \? "256MiB" : "128MiB"\]/);
   assert.match(mpv, /\["demuxer-max-bytes", highBitrate \? "768MiB" : "512MiB"\]/);

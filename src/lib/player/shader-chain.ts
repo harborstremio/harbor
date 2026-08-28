@@ -1,4 +1,5 @@
 import type { Settings } from "@/lib/settings";
+import { effectiveHdrToSdr } from "@/lib/player/hdr-output-policy";
 import { SHADER_CATALOG, STAGE_ORDER, type ShaderCatalogEntry } from "./shader-catalog";
 
 function selectedFiles(entry: ShaderCatalogEntry, variant?: string): string[] {
@@ -14,7 +15,7 @@ function normDir(dir: string): string {
 function conflictBlocked(entry: ShaderCatalogEntry, settings: Settings): boolean {
   if (!entry.conflictsWith) return false;
   return entry.conflictsWith.some((c) => {
-    if (c === "hdrToSdr") return settings.playerHdrToSdr;
+    if (c === "hdrToSdr") return effectiveHdrToSdr(settings);
     if (c === "rtxHdr") return settings.playerRtxHdr;
     return false;
   });

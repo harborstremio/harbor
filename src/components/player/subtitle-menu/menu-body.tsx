@@ -9,11 +9,10 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Flag } from "@/components/flag";
-import { hasImportedSubTitle, markImportedSub, useImportedSubs } from "@/lib/player/imported-subs";
+import { markImportedSub } from "@/lib/player/imported-subs";
 import { setSecondarySub } from "@/lib/player/secondary-sub";
 import { useT } from "@/lib/i18n";
 import { HoverTooltip } from "@/components/hover-tooltip";
-import { filterTracksByPreferredLanguage } from "@/lib/subtitles/language";
 import { SearchSection } from "./search-section";
 import { VariantRow } from "./variant-row";
 import { MenuHeader } from "./menu-header";
@@ -31,18 +30,9 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
   const tr = useT();
   const { tracks, selectedId, onSelect, onClose, delaySec, metaReleaseDate, onOpenStyleBar } =
     props;
-  const preferredLanguages = props.preferredLanguages ?? [];
-  const importedTitles = useImportedSubs();
-  const languageTracks = useMemo(() => {
-    const filtered = filterTracksByPreferredLanguage(tracks, preferredLanguages);
-
-    const keep = new Set(filtered);
-    for (const t of tracks) {
-      const isImported = hasImportedSubTitle(t.title) || importedTitles.has(t.title ?? "");
-      if (isImported || t.id === props.selectedId || t.secondary) keep.add(t);
-    }
-    return tracks.filter((t) => keep.has(t));
-  }, [tracks, preferredLanguages, importedTitles, props.selectedId]);
+  // Preferred languages choose the automatic track. Once the picker is open,
+  // every loaded subtitle remains selectable instead of being silently hidden.
+  const languageTracks = tracks;
   const groups = useMemo(() => groupByLang(languageTracks), [languageTracks]);
   const [searchSettled, setSearchSettled] = useState(false);
   const [activeLang, setActiveLang] = useState<string | null>(null);
@@ -193,7 +183,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
                   {tr("2nd")}
                 </span>
                 <span className="truncate text-[11px] font-medium text-ink">
-                  {subtitleTrackLanguageLabel(secondaryTrack)}
+                  {tr(subtitleTrackLanguageLabel(secondaryTrack))}
                 </span>
               </div>
               <button
@@ -248,7 +238,7 @@ export function MenuBody(props: SubtitleMenuProps & { onClose: () => void }) {
                 }`}
               >
                 <Flag language={g.langDisplay} size="sm" showLabel={false} />
-                <span className="flex-1 truncate font-medium">{g.langDisplay}</span>
+                <span className="flex-1 truncate font-medium">{tr(g.langDisplay)}</span>
                 {hasSelected && <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />}
                 <span className="text-[10.5px] tabular-nums text-ink-subtle">
                   {g.variants.length}

@@ -100,7 +100,7 @@ export function HandleClaimCard({ author }: { author: Author }) {
             disabled={!canClaim}
             className="flex h-8 items-center rounded-lg bg-ink px-3 text-[12.5px] font-semibold text-canvas transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:opacity-35 disabled:active:scale-100"
           >
-            {busy ? <Loader2 size={14} className="animate-spin" /> : hasCustom ? "Change" : "Claim"}
+            {busy ? <Loader2 size={14} className="animate-spin" /> : hasCustom ? t("Change") : t("Claim")}
           </button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { writePlayerVolume } from "@/lib/player-volume";
 import { effectiveBinding, eventToBinding, isTypingTarget, type HotkeyId } from "@/lib/hotkeys";
 import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
+import { effectiveHdrToSdr } from "@/lib/player/hdr-output-policy";
 import { mediaKeyGate } from "@/lib/media-session";
 import { useSettings } from "@/lib/settings";
 import { isAnyFullscreen, exitAnyFullscreen } from "@/lib/fullscreen-state";
@@ -324,7 +325,7 @@ export function useKeyboardShortcuts(params: {
       if (match("playerRtxHdrToggle")) {
         e.preventDefault();
         if (e.repeat) return;
-        if (!isWindowsDesktop() || isRtxHdrBlocked(settings.playerHdrToSdr, svpActive)) return;
+        if (!isWindowsDesktop() || isRtxHdrBlocked(effectiveHdrToSdr(settings), svpActive)) return;
         if (bridgeRef.current?.capabilities().engine !== "mpv") return;
         update({ playerRtxHdr: !settings.playerRtxHdr });
         return;
@@ -545,6 +546,7 @@ export function useKeyboardShortcuts(params: {
     settings.playerEscExitsFullscreen,
     settings.playerConfirmLeave,
     settings.playerVolumeSfx,
+    settings.playerHdrAuto,
     settings.playerHdrToSdr,
     settings.playerRtxHdr,
     settings.playerRtxVsr,

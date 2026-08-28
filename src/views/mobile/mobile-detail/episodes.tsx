@@ -14,6 +14,11 @@ import { useMobileRemote } from "../mobile-remote";
 import { HIDE_SCROLL, prefersReducedMotion, stillFrom, tmdbTvId, type Ep, type SeasonOption } from "./data";
 import { Line, SectionTitle } from "./ui";
 import { OrderStyleSwitch, type OrderOption } from "./order-switch";
+import {
+  preferredEpisodeName,
+  preferredEpisodeOverview,
+  preferredEpisodeVideo,
+} from "@/lib/preferred-meta";
 
 type SeasonEntry = SeasonOption & { badge?: string };
 
@@ -132,15 +137,18 @@ export function EpisodeSection({
 
   const episodes = useMemo<Ep[]>(() => {
     if (ordering) {
-      return (ordering.bySeason.get(season) ?? []).map((e) => ({
-        season: e.seasonNumber,
-        episode: e.episodeNumber,
-        name: e.name || undefined,
-        still: stillFrom(e.stillPath, e.stillUrl),
-        overview: e.overview || undefined,
-        runtime: e.runtime,
-        airDate: e.airDate,
-      }));
+      return (ordering.bySeason.get(season) ?? []).map((e) => {
+        const preferred = preferredEpisodeVideo(full?.videos, e.seasonNumber, e.episodeNumber);
+        return {
+          season: e.seasonNumber,
+          episode: e.episodeNumber,
+          name: preferredEpisodeName(preferred) ?? (e.name || undefined),
+          still: preferred?.thumbnail || stillFrom(e.stillPath, e.stillUrl),
+          overview: preferredEpisodeOverview(preferred) ?? (e.overview || undefined),
+          runtime: e.runtime,
+          airDate: e.airDate,
+        };
+      });
     }
     const byNum = new Map<number, Ep>();
     for (const v of full?.videos ?? []) {

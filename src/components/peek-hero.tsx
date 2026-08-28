@@ -11,6 +11,8 @@ import { useTitleLogo } from "@/lib/title-logo";
 import { smartPlayEpisode } from "@/lib/smart-play";
 import { useView } from "@/lib/view";
 import { observe, usePageVisible } from "@/lib/visibility";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 const ROTATE_MS = 9500;
 const EASE = "cubic-bezier(0.32, 0.72, 0.24, 1)";
@@ -195,6 +197,8 @@ function PeekSlide({
   const t = useT();
   const { settings } = useSettings();
   const { openMeta, openPicker } = useView();
+  const preferredMeta = usePreferredMeta(meta, active);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const imdbRating = useImdbRating(meta, resolvedImdb);
   const [logoState, setLogo] = useState<string | undefined>(meta.logo);
@@ -232,7 +236,7 @@ function PeekSlide({
 
   return (
     <div
-      onClick={() => (active ? openMeta(meta) : onSelect())}
+      onClick={() => (active ? openMeta(displayMeta) : onSelect())}
       className="absolute left-1/2 top-1/2 h-[420px] w-[920px] overflow-hidden rounded-[20px] shadow-[0_28px_60px_-26px_rgba(0,0,0,0.7)]"
       style={{
         transform: `translate(-50%, -50%) translateX(${translatePct}%) scale(${scale})`,
@@ -260,7 +264,7 @@ function PeekSlide({
           {logo ? (
             <img
               src={logo}
-              alt={meta.name}
+              alt={displayMeta.name}
               decoding="async"
               onLoad={() => setLogoLoaded(true)}
               className="max-h-[80px] w-auto max-w-[360px] object-contain object-left rtl:object-right drop-shadow-[0_4px_18px_rgba(0,0,0,0.55)]"
@@ -271,7 +275,7 @@ function PeekSlide({
             />
           ) : (
             <h3 className="font-display text-[40px] font-medium leading-[0.95] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-              {meta.name}
+              {displayMeta.name}
             </h3>
           )}
         </div>
@@ -295,7 +299,7 @@ function PeekSlide({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay });
+                  openPicker(displayMeta, smartPlayEpisode(displayMeta), { autoPlay: settings.instantPlay });
                 }}
                 className="flex h-10 items-center gap-2 rounded-full bg-white px-5 text-[13px] font-semibold text-black transition-transform hover:scale-[1.04] active:scale-[0.97]"
               >
@@ -305,7 +309,7 @@ function PeekSlide({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  openMeta(meta);
+                  openMeta(displayMeta);
                 }}
                 className="flex h-10 items-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 text-[13px] font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
               >

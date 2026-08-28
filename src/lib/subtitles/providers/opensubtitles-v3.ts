@@ -1,7 +1,7 @@
 import { dinfo, dwarn } from "@/lib/debug";
 import { safeFetch } from "@/lib/safe-fetch";
 import type { SubResult, SubSearchQuery } from "../types";
-import { normalizeLang } from "../language";
+import { normalizeSubtitleLang } from "../language";
 
 const ENDPOINTS = [
   "https://opensubtitles.stremio.homes",
@@ -12,7 +12,7 @@ const ENDPOINTS = [
 type RawSub = {
   id?: string;
   url: string;
-  lang: string;
+  lang?: string | null;
   m?: string;
   SubFormat?: string;
   fps?: number;
@@ -69,7 +69,7 @@ export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResul
   for (const list of results) {
     for (const s of list) {
       if (!s.url) continue;
-      const key = `${s.lang}|${s.url}`;
+      const key = `${normalizeSubtitleLang(s.lang)}|${s.url}`;
       if (seen.has(key)) continue;
       seen.add(key);
       merged.push(s);
@@ -78,7 +78,7 @@ export async function searchOpenSubtitlesV3(q: SubSearchQuery): Promise<SubResul
   if (merged.length > 0) dinfo("[opensubtitles-v3] raw sample", merged[0]);
   const perLang = new Map<string, number>();
   return merged.map((s) => {
-    const lang = normalizeLang(s.lang);
+    const lang = normalizeSubtitleLang(s.lang);
     const n = (perLang.get(lang) ?? 0) + 1;
     perLang.set(lang, n);
     return {

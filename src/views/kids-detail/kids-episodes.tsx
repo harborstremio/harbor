@@ -5,6 +5,11 @@ import { useT } from "@/lib/i18n";
 import { tmdbSeasonEpisodes, type Episode, type Season } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import {
+  preferredEpisodeName,
+  preferredEpisodeOverview,
+  preferredEpisodeVideo,
+} from "@/lib/preferred-meta";
 
 const STILL = "https://image.tmdb.org/t/p/w300";
 
@@ -12,10 +17,12 @@ export function KidsEpisodes({
   meta,
   tvId,
   seasons,
+  preferredVideos,
 }: {
   meta: Meta;
   tvId: number;
   seasons: Season[];
+  preferredVideos?: Meta["videos"];
 }) {
   const t = useT();
   const { settings } = useSettings();
@@ -31,14 +38,28 @@ export function KidsEpisodes({
     tmdbSeasonEpisodes(settings.tmdbKey, tvId, season)
       .then((e) => {
         if (cancelled) return;
-        setEps(e);
+        setEps(
+          e.map((ep) => {
+            const preferred = preferredEpisodeVideo(
+              preferredVideos,
+              ep.seasonNumber,
+              ep.episodeNumber,
+            );
+            return {
+              ...ep,
+              name: preferredEpisodeName(preferred) ?? ep.name,
+              overview: preferredEpisodeOverview(preferred) ?? ep.overview,
+              stillUrl: preferred?.thumbnail || ep.stillUrl,
+            };
+          }),
+        );
         setLoading(false);
       })
       .catch(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [tvId, season, settings.tmdbKey]);
+  }, [preferredVideos, tvId, season, settings.tmdbKey]);
 
   const play = (ep: Episode) =>
     openPicker(
@@ -182,7 +203,7 @@ function EpisodeCard({
   onPlay: () => void;
   t: (k: string, p?: Record<string, string | number>) => string;
 }) {
-  const still = ep.stillPath ? `${STILL}${ep.stillPath}` : undefined;
+  const still = ep.stillUrl || (ep.stillPath ? `${STILL}${ep.stillPath}` : undefined);
   const rating = ep.voteAverage && ep.voteAverage > 0 ? ep.voteAverage.toFixed(1) : undefined;
   return (
     <button type="button" onClick={onPlay} className="group flex flex-col gap-2 text-start">

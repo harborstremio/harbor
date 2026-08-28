@@ -4,17 +4,24 @@ import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { ResultPoster } from "../result-poster";
+import { mergePreferredMeta, preferredEpisodeName, preferredEpisodeVideo } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: () => void; index: number }) {
   const { openMeta } = useView();
   const t = useT();
   const { meta, season, episode, episodeTitle } = result;
   const description = useLocalizedOverview(meta);
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const isEpisode = season != null && episode != null;
+  const displayEpisodeTitle = isEpisode
+    ? preferredEpisodeName(preferredEpisodeVideo(preferredMeta?.videos, season, episode)) || episodeTitle
+    : undefined;
   return (
     <button
       onClick={() => {
-        openMeta(meta, isEpisode ? { episodeHint: { season, episode } } : undefined);
+        openMeta(displayMeta, isEpisode ? { episodeHint: { season, episode } } : undefined);
         onClose();
       }}
       style={{ animationDelay: `${Math.min(index, 8) * 55}ms` }}
@@ -30,10 +37,10 @@ function AiResultRow({ result, onClose, index }: { result: AiResult; onClose: ()
           </span>
         )}
         <span className="truncate text-[16px] font-semibold text-ink">
-          {isEpisode && episodeTitle ? episodeTitle : meta.name}
+          {isEpisode && displayEpisodeTitle ? displayEpisodeTitle : displayMeta.name}
         </span>
         <div className="flex items-center gap-2 text-[12.5px] text-ink-muted">
-          {isEpisode && <span className="truncate">{meta.name}</span>}
+          {isEpisode && <span className="truncate">{displayMeta.name}</span>}
           {isEpisode && meta.releaseInfo && <span aria-hidden className="h-1 w-1 rounded-full bg-ink-subtle" />}
           {meta.releaseInfo && <span>{meta.releaseInfo}</span>}
           {meta.imdbRating && (

@@ -6,7 +6,7 @@ import { classify } from "./match";
 import type { CastEntry } from "@/lib/providers/tmdb";
 import type { GalleryEntry, WireFace } from "./match";
 
-const SCAN_MS = 500;
+const SCAN_MS = 4000;
 const SEEN_WINDOW_MS = 6000;
 const CAPTURE_ERROR = "couldn't capture the video frame";
 const CAPTURE_FAILURES_BEFORE_ERROR = 3;
@@ -172,10 +172,11 @@ export function useFaceId({ metaKey, cast, liveScan, isPaused, loadBitmap }: Arg
   }, [ready, liveScan, metaKey, cast, loadBitmap, runScan]);
 
   useEffect(() => {
-    if (!ready || !liveScan) return;
+    if (!ready || !liveScan || isPaused) return;
+    if (document.visibilityState !== "visible") return;
     const t = setInterval(() => void runScan(), SCAN_MS);
     return () => clearInterval(t);
-  }, [ready, liveScan, runScan]);
+  }, [ready, liveScan, isPaused, runScan]);
 
   useEffect(() => {
     if (ready && liveScan && isPaused) void runScan();

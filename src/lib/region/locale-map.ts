@@ -1,5 +1,5 @@
 export type LocaleProfile = {
-  uiLanguage: "en" | "ar" | "es" | "pt" | "ru";
+  uiLanguage: "en" | "ar" | "es" | "hu" | "pt" | "ru";
   tmdbLanguage: string;
   contentLanguage: string;
   subtitleLanguage: string;
@@ -67,6 +67,17 @@ export function localeForRegion(region: string): LocaleProfile {
       greetingKey: null,
     };
   }
+  if (r === "HU") {
+    return {
+      uiLanguage: "hu",
+      tmdbLanguage: "hu-HU",
+      contentLanguage: "hu",
+      subtitleLanguage: "Hungarian",
+      audioLanguage: "Hungarian",
+      rtl: false,
+      greetingKey: null,
+    };
+  }
   if (LUSOPHONE_REGIONS.has(r)) {
     return {
       uiLanguage: "pt",
@@ -99,6 +110,7 @@ export function isLocalizedRegion(region: string): boolean {
 export function localeLabel(profile: LocaleProfile): string {
   if (profile.uiLanguage === "ar") return "العربية (Arabic)";
   if (profile.uiLanguage === "es") return "Español (Spanish)";
+  if (profile.uiLanguage === "hu") return "Magyar (Hungarian)";
   if (profile.uiLanguage === "pt") return "Português (Portuguese)";
   if (profile.uiLanguage === "ru") return "Русский (Russian)";
   return "English";

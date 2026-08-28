@@ -19,6 +19,8 @@ import { fetchAddonCatalogPage, fetchAddonMeta, isCollectionCatalog } from "@/li
 import { MobileDetail } from "./mobile-detail";
 import { MobileAwards } from "./mobile-awards";
 import { MobileGenrePage } from "./mobile-genre-page";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -789,6 +791,8 @@ function Grid({ metas, onOpenDetail }: { metas: Meta[]; onOpenDetail: (m: Meta) 
 
 function GridTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail: (m: Meta) => void }) {
   const { settings } = useSettings();
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const { src, onError } = usePosterChain(
     settings.rpdbKey,
     meta.id,
@@ -798,11 +802,11 @@ function GridTile({ meta, onOpenDetail }: { meta: Meta; onOpenDetail: (m: Meta) 
   return (
     <button
       type="button"
-      onClick={() => onOpenDetail(meta)}
+      onClick={() => onOpenDetail(displayMeta)}
       className="text-start transition-transform duration-150 active:scale-[0.96] motion-reduce:transition-none"
     >
       <Poster src={src} onError={onError} seed={meta.id} ratio="portrait" lazy className="rounded-[12px]" />
-      <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-muted">{meta.name}</p>
+      <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-snug text-ink-muted">{displayMeta.name}</p>
     </button>
   );
 }

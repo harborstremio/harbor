@@ -40,13 +40,17 @@ export function usePauseOnInactive({
     let unlisten: (() => void) | undefined;
     let cancelled = false;
     void import("@tauri-apps/api/event").then(({ listen }) =>
-      listen<{ focused: boolean; minimized: boolean }>("harbor://window-activity", (e) => {
+      listen<{ focused: boolean; minimized: boolean; wasPlaying?: boolean }>("harbor://window-activity", (e) => {
         const bridge = bridgeRef.current;
         if (!bridge) return;
-        const { focused, minimized } = e.payload;
+        const { focused, minimized, wasPlaying } = e.payload;
         if (!focused) {
           const shouldPause = minimized ? pauseMinimized : pauseUnfocused;
-          if (shouldPause && snapRef.current.status === "playing") {
+          // A close-to-tray event may have been paused natively before mpv's
+          // property change reaches React. Prefer that source of truth when it
+          // is present so restoring the window resumes precisely that stream.
+          const shouldResumeAfterRestore = wasPlaying ?? snapRef.current.status === "playing";
+          if (shouldPause && shouldResumeAfterRestore) {
             autoPausedRef.current = true;
             bridge.pause();
           }

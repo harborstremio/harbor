@@ -4,6 +4,8 @@ import { AwardChips } from "@/components/award-chips";
 import { ResultPoster } from "./result-poster";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { useView } from "@/lib/view";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 export function TopMatch({
   match,
@@ -18,9 +20,11 @@ export function TopMatch({
   const yearTxt = match.meta.releaseInfo ?? "";
   const rating = match.voteAverage && match.voteAverage > 0 ? match.voteAverage.toFixed(1) : null;
   const synopsis = (useLocalizedOverview(match.meta) ?? "").trim();
+  const preferredMeta = usePreferredMeta(match.meta);
+  const displayMeta = mergePreferredMeta(match.meta, preferredMeta);
 
   const handleOpen = () => {
-    openMeta(match.meta);
+    openMeta(displayMeta);
     onClose();
   };
 
@@ -47,7 +51,7 @@ export function TopMatch({
             className="mt-1 truncate text-[clamp(22px,2.2vw,30px)] font-medium leading-[1.1] tracking-tight text-ink"
             style={{ fontFamily: "var(--font-display, 'Fraunces')" }}
           >
-            {match.meta.name}
+            {displayMeta.name}
           </h2>
           <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-[13px] text-ink-muted">
             <span className="font-medium">{match.kind === "movie" ? "Movie" : "Series"}</span>

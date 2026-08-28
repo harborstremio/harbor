@@ -18,7 +18,11 @@ import { StremioRail } from "@/chrome/stremio-rail";
 import { TopDock } from "@/chrome/topdock";
 import { CinematicOverlay } from "@/chrome/cinematic-overlay";
 import { Topbar, TogetherButton } from "@/chrome/topbar";
-import { startMaintenance, subscribeMemoryPressure } from "@/lib/maintenance";
+import {
+  setMaintenancePlaybackActive,
+  startMaintenance,
+  subscribeMemoryPressure,
+} from "@/lib/maintenance";
 import { MiddleClickScroll } from "@/lib/use-middle-click-scroll";
 import { exitWindowFullscreenOnPlayerClose, toggleWindowFullscreen } from "@/lib/fullscreen-state";
 import { flushCloudSync } from "@/views/player/hooks/use-stremio-sync";
@@ -126,6 +130,7 @@ import { ThemeChromeBridge } from "@/components/theme-chrome-bridge";
 import type { MetaType } from "@/lib/cinemeta";
 import { useDiscordPresence } from "@/lib/discord/use-discord-presence";
 import { useWatchShare } from "@/lib/social/watch-presence";
+import { useHungarianDomTranslation } from "@/lib/i18n/use-dom-translation";
 import { Home } from "@/views/home";
 import { ParentalProvider } from "@/lib/parental";
 import { TraktProvider } from "@/lib/trakt/provider";
@@ -226,56 +231,38 @@ const OnboardingModal = lazy(() =>
   importOnboarding().then((m) => ({ default: m.OnboardingModal })),
 );
 
-function useViewPreloader(tmdbKey: string) {
+function useViewPreloader(tmdbKey: string, enabled: boolean) {
   const keyRef = useRef(tmdbKey);
   keyRef.current = tmdbKey;
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!enabled || typeof window === "undefined") return;
     let cancelled = false;
     const win = window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
     };
-    const schedule = (cb: () => void) =>
-      typeof win.requestIdleCallback === "function"
-        ? win.requestIdleCallback(cb, { timeout: 2500 })
-        : window.setTimeout(cb, 1200);
-    schedule(() => {
+    const warmCommonViews = () => {
       if (cancelled) return;
+      // These are the paths most often reached from the first screen. The
+      // rest stay genuinely lazy instead of importing almost the whole app.
       void importDetail();
       void importPlayPicker();
       void importPlayer();
       void importSettings();
-      void importAddons();
-      void importDiscover();
-      void importPerson();
-      void importPeople();
-      void importFilter();
-      void importCalendar();
-      void importMovies();
-      void importShows();
-      void importLive();
-      void importAnime();
-      void importQueue();
-      void importAward();
-      void importAnimeAward();
-      void importService();
-      void importMatchDetail();
-      void importOnboarding();
-      void importCatalogs();
-      void importLibrary();
-      void importCommunityCollections();
-      void importDownloads();
-      void importGrid();
-      void importWrapped();
-      void importKids();
       if (keyRef.current) {
         void import("@/lib/feed/pool").then((m) => m.getPool(keyRef.current)).catch(() => {});
       }
-    });
+    };
+    const idle = typeof win.requestIdleCallback === "function";
+    const handle = idle
+      ? win.requestIdleCallback!(warmCommonViews, { timeout: 2500 })
+      : window.setTimeout(warmCommonViews, 1200);
     return () => {
       cancelled = true;
+      if (idle) win.cancelIdleCallback?.(handle);
+      else window.clearTimeout(handle);
     };
-  }, []);
+  }, [enabled]);
 }
 
 const KEEP_ALIVE_MS = 1500;
@@ -324,6 +311,7 @@ function useIdleEvict(active: boolean, pin = false): boolean {
 }
 
 export function App({ onReady }: { onReady?: () => void }) {
+  useHungarianDomTranslation();
   return (
     <SettingsProvider>
       <ProfilesProvider>
@@ -391,7 +379,7 @@ export function App({ onReady }: { onReady?: () => void }) {
                                                   <RatingsSyncRunner />
                                                   <ActivitySyncRunner />
                                                   <AutoDownloadRunner />
-                                                  <RemindersRunner />
+                                                  <BackgroundReminderRunner />
                                                   <MangaTrackingRunner />
                                                   <RemoteHostMount />
                                                   <RemoteOpenBridge />
@@ -456,21 +444,43 @@ function TogetherFloater() {
 }
 
 function AutoDownloadRunner() {
-  useAutoDownloadRunner();
+  const { settings } = useSettings();
+  const { player } = useView();
+  useAutoDownloadRunner(settings.backgroundNetworkActivity, !!player);
   return null;
 }
 
+function BackgroundReminderRunner() {
+  const { player } = useView();
+  return <RemindersRunner suspended={!!player} />;
+}
+
 function FeaturedListsSyncRunner() {
+  const { player } = useView();
+  return player ? null : <FeaturedListsSyncActive />;
+}
+
+function FeaturedListsSyncActive() {
   useFeaturedListsSync();
   return null;
 }
 
 function RatingsSyncRunner() {
+  const { player } = useView();
+  return player ? null : <RatingsSyncActive />;
+}
+
+function RatingsSyncActive() {
   useRatingsSync();
   return null;
 }
 
 function ActivitySyncRunner() {
+  const { player } = useView();
+  return player ? null : <ActivitySyncActive />;
+}
+
+function ActivitySyncActive() {
   useActivitySync();
   return null;
 }
@@ -522,7 +532,9 @@ const STATS_SYNC_MIN_GAP_MS = 120000;
 function StatsSyncRunner() {
   const { authKey } = useAuth();
   const { activeId } = useProfiles();
+  const { player } = useView();
   useEffect(() => {
+    if (player) return;
     if (!authToken()) return;
     const pid = activeId ?? "default";
     let last = 0;
@@ -544,7 +556,7 @@ function StatsSyncRunner() {
       window.clearInterval(every);
       window.removeEventListener("focus", onFocus);
     };
-  }, [authKey, activeId]);
+  }, [authKey, activeId, player]);
   return null;
 }
 
@@ -733,7 +745,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
     layout === "nord" ||
     layout === "forest" ||
     layout === "stremio";
-  useViewPreloader(settings.tmdbKey);
+  useViewPreloader(settings.tmdbKey, settings.preloadViews);
 
   useEffect(() => {
     if (topKind === "home") return;
@@ -1152,7 +1164,11 @@ function Shell({ onReady }: { onReady?: () => void }) {
   }, [activeProfile?.id]);
 
   const playerActive = !!player;
-  useEffect(() => setNativeMemoryActive(playerActive), [playerActive]);
+  useEffect(() => {
+    setNativeMemoryActive(playerActive);
+    setMaintenancePlaybackActive(playerActive);
+    return () => setMaintenancePlaybackActive(false);
+  }, [playerActive]);
   useEffect(() => {
     if (!playerActive) void exitWindowFullscreenOnPlayerClose();
   }, [playerActive]);

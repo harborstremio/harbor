@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Play } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import type { EpisodeDetail } from "@/lib/providers/tmdb/tmdb-episode-types";
@@ -22,6 +22,12 @@ import { Pill } from "@/views/detail/pill";
 import { PlayModeHint } from "@/views/detail/play-mode-hint";
 import { TraktComments } from "@/views/detail/trakt-comments";
 import { stremioIdToTraktTarget } from "@/lib/trakt/ids";
+import {
+  preferredEpisodeName,
+  preferredEpisodeOverview,
+  preferredEpisodeVideo,
+} from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 export interface EpisodeDetailViewProps {
   seriesId: string;
@@ -45,6 +51,14 @@ export function EpisodeDetailView({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLElement>(null);
+  const lookupMeta = useMemo<Meta>(
+    () => seriesMeta ?? initialSeriesMeta ?? { id: seriesId, type: "series", name: seriesId },
+    [initialSeriesMeta, seriesId, seriesMeta],
+  );
+  const preferredMeta = usePreferredMeta(lookupMeta);
+  const preferredVideo = preferredEpisodeVideo(preferredMeta?.videos, season, episode);
+  const preferredName = preferredEpisodeName(preferredVideo);
+  const preferredOverview = preferredEpisodeOverview(preferredVideo);
 
   const resolvedImdb = useTmdbImdbId(seriesMeta?.id);
   const imdbId = resolvedImdb ?? (seriesMeta?.id.startsWith("tt") ? seriesMeta.id : null);
@@ -124,7 +138,7 @@ export function EpisodeDetailView({
     return `https://image.tmdb.org/t/p/${size}${path}`;
   };
 
-  const background = getImageUrl(episodeData?.stillPath, "original") ?? seriesMeta?.background ?? undefined;
+  const background = preferredVideo?.thumbnail ?? getImageUrl(episodeData?.stillPath, "original") ?? seriesMeta?.background ?? undefined;
 
   // Episode rating: hosted IMDb → OMDB (via episode IMDb ID) → TMDB vote_average → none
   const episodeRating = harborEpisodeRating ??
@@ -154,12 +168,12 @@ export function EpisodeDetailView({
       season: episodeData.seasonNumber,
       episode: episodeData.episodeNumber,
       runtime: episodeData.runtime ?? undefined,
-      name: episodeData.name,
-      still: getImageUrl(episodeData.stillPath, "w300") || undefined,
-      overview: episodeData.overview || undefined,
+      name: preferredName ?? episodeData.name,
+      still: preferredVideo?.thumbnail ?? (getImageUrl(episodeData.stillPath, "w300") || undefined),
+      overview: preferredOverview ?? (episodeData.overview || undefined),
     };
     openPicker(seriesMeta, playEpisode, { autoPlay: settings.instantPlay });
-  }, [seriesMeta, episodeData, openPicker, settings.instantPlay]);
+  }, [seriesMeta, episodeData, openPicker, preferredName, preferredOverview, preferredVideo?.thumbnail, settings.instantPlay]);
 
   const handleSeriesClick = useCallback(() => {
     if (seriesMeta) openMeta(seriesMeta);
@@ -239,11 +253,11 @@ export function EpisodeDetailView({
                 className="mb-4 inline-flex items-center gap-1 text-[14px] font-semibold text-ink-muted transition-colors hover:text-ink"
               >
                 <ArrowLeft size={16} />
-                {seriesMeta.name}
+                {preferredMeta?.name || seriesMeta.name}
               </button>
 
               <TitlePlate
-                title={`S${episodeData.seasonNumber}E${episodeData.episodeNumber} — ${episodeData.name}`}
+                title={`S${episodeData.seasonNumber}E${episodeData.episodeNumber} — ${preferredName || episodeData.name}`}
                 loading={false}
               />
 
@@ -284,8 +298,8 @@ export function EpisodeDetailView({
       </section>
 
       <div className="flex flex-col gap-16 px-12 pb-24 pt-14">
-        {episodeData.overview && (
-          <Synopsis text={episodeData.overview} />
+        {(preferredOverview || episodeData.overview) && (
+          <Synopsis text={preferredOverview || episodeData.overview} />
         )}
 
         {episodeData.guestStars && episodeData.guestStars.length > 0 && (
@@ -318,7 +332,7 @@ export function EpisodeDetailView({
                 >
                   <img
                     src={getImageUrl(still.filePath, "w780")}
-                    alt={`${episodeData.name} — ${t("Still {n}", { n: idx + 1 })}`}
+                    alt={`${preferredName || episodeData.name} — ${t("Still {n}", { n: idx + 1 })}`}
                     loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />

@@ -259,6 +259,9 @@ export function useTrackAutoload(params: {
         settings,
         addons: readyAddons ?? [],
         langs,
+        // Keep automatic selection language-aware, but populate the picker
+        // with every language returned by each subtitle provider.
+        searchLangs: [],
         searchImdbId,
         candidateIds,
         season: searchSeason,

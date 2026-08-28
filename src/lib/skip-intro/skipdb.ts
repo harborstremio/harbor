@@ -19,6 +19,7 @@ type RawResponse = {
 };
 
 const cache = new Map<string, SkipSegment[]>();
+const warmCache = new Map<string, SkipSegment[]>();
 const inflight = new Map<string, Promise<SkipSegment[]>>();
 
 function toSegment(raw: RawSeg | null | undefined, kind: SkipKind): SkipSegment | null {
@@ -41,6 +42,11 @@ export function fetchSkipDbSegments(
   if (episode) {
     params.set("season", String(episode.season));
     params.set("episode", String(episode.episode));
+  }
+  const baseKey = params.toString();
+  if (durationSec > 0) {
+    const warm = warmCache.get(baseKey);
+    if (warm) return Promise.resolve(warm);
   }
   if (durationSec > 0) params.set("duration", String(Math.round(durationSec)));
   const key = params.toString();
@@ -68,6 +74,7 @@ export function fetchSkipDbSegments(
     add(s?.preview, "outro");
     out.sort((a, b) => a.startSec - b.startSec);
     cache.set(key, out);
+    if (durationSec <= 0 && out.length > 0) warmCache.set(baseKey, out);
     return out;
   })()
     .catch((): SkipSegment[] => [])

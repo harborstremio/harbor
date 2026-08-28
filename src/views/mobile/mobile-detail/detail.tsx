@@ -34,6 +34,8 @@ import {
 import { useAnimeAnilistDetails } from "@/views/detail/use-anime-anilist-details";
 import { useAnimeCharacters } from "@/views/detail/use-anime-characters";
 import { useMalRating } from "@/lib/mal-rating";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
 
 export function MobileDetail({ meta, onClose }: { meta: Meta; onClose: () => void }) {
   const [reduced] = useState(prefersReducedMotion);
@@ -96,10 +98,16 @@ function DetailBody({
   onOpenMeta: (m: Meta) => void;
 }) {
   const { settings } = useSettings();
+  const preferredMeta = usePreferredMeta(meta);
   const { playOnHost, openOnHost } = useMobileRemote();
   const key = settings.tmdbKey;
   const isAnime = isAnimeId(meta.id);
   const full = useCinemetaFull(meta);
+  const displayMeta = useMemo(() => mergePreferredMeta(meta, preferredMeta), [meta, preferredMeta]);
+  const displayFull = useMemo(
+    () => mergePreferredMeta(full ?? meta, preferredMeta),
+    [full, meta, preferredMeta],
+  );
   const tmdb = useTmdbDetail(meta, key);
   const anime = useAnimeDetail(meta, isAnime);
   const detail = isAnime ? anime.detail : tmdb.detail;
@@ -119,7 +127,7 @@ function DetailBody({
   );
 
   const isSeries = !isAnime && (detail?.kind === "tv" || meta.type === "series");
-  const title = detail?.title || meta.name;
+  const title = preferredMeta?.name || detail?.title || meta.name;
   const logo = detail?.logo || meta.logo;
   const backdrop = detail?.backdrop || full?.background || meta.background || meta.poster;
   const year = (detail?.year || meta.releaseInfo || "").slice(0, 4);
@@ -127,7 +135,8 @@ function DetailBody({
   const rating = isAnime ? malRating : imdbRating || detail?.rating;
   const runtime = detail?.runtime;
   const genres = (detail?.genres?.length ? detail.genres : meta.genres) ?? [];
-  const overview = detail?.overview || full?.description || meta.description || "";
+  const overview =
+    preferredMeta?.description || detail?.overview || full?.description || meta.description || "";
 
   const imdbId = detail?.imdbId ?? (meta.id.startsWith("tt") ? meta.id : null);
   const releaseYear = Number(year) || undefined;
@@ -139,8 +148,8 @@ function DetailBody({
   const awardGroups = useMemo(() => awardSummary(awards), [awards]);
   const heroAwardSummary = useMemo(() => pickHeroAwards(awardGroups), [awardGroups]);
 
-  const seasons = useMemo(() => seasonList(full, detail), [full, detail]);
-  const first = useMemo(() => firstEpisode(full, seasons), [full, seasons]);
+  const seasons = useMemo(() => seasonList(displayFull, detail), [displayFull, detail]);
+  const first = useMemo(() => firstEpisode(displayFull, seasons), [displayFull, seasons]);
   const trailerId = detail?.trailerCandidates?.[0] ?? meta.trailerStreams?.[0]?.ytId ?? null;
 
   const { recItems, simItems } = useMemo(() => {
@@ -157,8 +166,8 @@ function DetailBody({
   const shownSimItems = useHideAnimeMetas(simItems);
 
   const onPlay = () => {
-    if (isSeries && first) playOnHost(meta, { season: first.season, episode: first.episode });
-    else playOnHost(meta);
+    if (isSeries && first) playOnHost(displayMeta, { season: first.season, episode: first.episode });
+    else playOnHost(displayMeta);
   };
 
   return (
@@ -196,12 +205,12 @@ function DetailBody({
 
         {isSeries && (
           <EpisodeSection
-            meta={meta}
-            full={full}
+            meta={displayMeta}
+            full={displayFull}
             detail={detail}
             tmdbKey={key}
             seasons={seasons}
-            onPlay={(ep) => playOnHost(meta, { season: ep.season, episode: ep.episode })}
+            onPlay={(ep) => playOnHost(displayMeta, { season: ep.season, episode: ep.episode })}
           />
         )}
 

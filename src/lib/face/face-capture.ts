@@ -1,4 +1,6 @@
-const DETECT_WIDTH = 960;
+// Recognition only needs a modest frame. The previous 960 px frame caused
+// unnecessary image decoding and CPU work next to native video playback.
+const DETECT_WIDTH = 640;
 
 export function imageDataUrlToBlob(dataUrl: string): Blob {
   const comma = dataUrl.indexOf(",");

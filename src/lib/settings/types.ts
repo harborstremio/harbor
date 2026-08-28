@@ -66,6 +66,12 @@ export type ProfileAudioMode = "auto" | "click" | "off";
 
 export type StreamPriorityEntry = { key: string; name: string };
 
+export type SettingsPagePreference = {
+  favorite?: boolean;
+  compact?: boolean;
+  showIntro?: boolean;
+};
+
 export type Settings = {
   soundTheme: "none" | "glass" | "modern" | "retro" | "cinematic";
   sfxVolume: number;
@@ -138,6 +144,7 @@ export type Settings = {
   playerTitleScale: number;
   playerTitleSeriesFirst: boolean;
   uiScale: number;
+  settingsPagePreferences: Record<string, SettingsPagePreference>;
   serveWebUi: boolean;
   remoteControlEnabled: boolean;
   controllerSupportEnabled: boolean;
@@ -147,6 +154,8 @@ export type Settings = {
   controllerKeyboardSize: number;
   controllerRepeatMs: number;
   controllerInitialDelayMs: number;
+  preloadViews: boolean;
+  backgroundNetworkActivity: boolean;
   trailerQuality: "auto" | "360p" | "720p" | "1080p" | "best";
   detailTrailerAutoplay: boolean;
   heroBackdropCarousel: boolean;
@@ -240,6 +249,7 @@ export type Settings = {
   seasonSourceLock: boolean;
   rememberLastStream: boolean;
   keepSourceNextEpisode: boolean;
+  playerHdrAuto: boolean;
   playerHdrToSdr: boolean;
   playerRtxHdr: boolean;
   playerRtxVsr: boolean;
@@ -584,7 +594,7 @@ export type Settings = {
   libraryHero: boolean;
   mangaEnabled: boolean;
   feedLocaleBias: boolean;
-  uiLanguage: "en" | "ar" | "pt" | "ru";
+  uiLanguage: "en" | "ar" | "hu" | "pt" | "ru";
   arabicWelcomeSeen: boolean;
   cropMode: string;
   customLists: CustomList[];

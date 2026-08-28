@@ -3,22 +3,51 @@ import { isWindowsDesktop } from "@/lib/platform";
 import { isRtxHdrBlocked, isRtxVsrBlocked } from "@/lib/player/rtx-video-policy";
 import { useT } from "@/lib/i18n";
 import { DisplayPanelSelector } from "./display-panel-selector";
+import { effectiveHdrToSdr } from "@/lib/player/hdr-output-policy";
 
-type HdrMode = "sdr" | "hdrWindow" | "hdrEmbedded";
+type HdrMode = "auto" | "sdr" | "hdrWindow" | "hdrEmbedded";
 
 const MODE_FLAGS: Record<
   HdrMode,
-  { playerHdrToSdr: boolean; playerHdrOpaqueWindow: boolean; playerHdrStage: "auto" | "off" | "always" }
+  {
+    playerHdrAuto: boolean;
+    playerHdrToSdr: boolean;
+    playerHdrOpaqueWindow: boolean;
+    playerHdrStage: "auto" | "off" | "always";
+  }
 > = {
-  sdr: { playerHdrToSdr: true, playerHdrOpaqueWindow: false, playerHdrStage: "off" },
-  hdrWindow: { playerHdrToSdr: false, playerHdrOpaqueWindow: true, playerHdrStage: "off" },
-  hdrEmbedded: { playerHdrToSdr: false, playerHdrOpaqueWindow: false, playerHdrStage: "auto" },
+  auto: {
+    playerHdrAuto: true,
+    playerHdrToSdr: false,
+    playerHdrOpaqueWindow: false,
+    playerHdrStage: "auto",
+  },
+  sdr: {
+    playerHdrAuto: false,
+    playerHdrToSdr: true,
+    playerHdrOpaqueWindow: false,
+    playerHdrStage: "off",
+  },
+  hdrWindow: {
+    playerHdrAuto: false,
+    playerHdrToSdr: false,
+    playerHdrOpaqueWindow: true,
+    playerHdrStage: "off",
+  },
+  hdrEmbedded: {
+    playerHdrAuto: false,
+    playerHdrToSdr: false,
+    playerHdrOpaqueWindow: false,
+    playerHdrStage: "auto",
+  },
 };
 
 function deriveMode(s: {
+  playerHdrAuto: boolean;
   playerHdrToSdr: boolean;
   playerHdrOpaqueWindow: boolean;
 }): HdrMode {
+  if (s.playerHdrAuto) return "auto";
   if (s.playerHdrOpaqueWindow) return "hdrWindow";
   if (s.playerHdrToSdr) return "sdr";
   return "hdrEmbedded";
@@ -30,7 +59,7 @@ export function HdrModePicker() {
   const current = deriveMode(settings);
   const svpAlwaysActive =
     settings.playerSvp && settings.svpVpyPath.length > 0 && settings.svpScope === "all";
-  const rtxHdrUnavailable = isRtxHdrBlocked(settings.playerHdrToSdr, svpAlwaysActive);
+  const rtxHdrUnavailable = isRtxHdrBlocked(effectiveHdrToSdr(settings), svpAlwaysActive);
   const rtxVsrUnavailable = isRtxVsrBlocked(svpAlwaysActive);
 
   const options: Array<{
@@ -41,10 +70,15 @@ export function HdrModePicker() {
     experimental?: boolean;
   }> = [
     {
+      id: "auto",
+      label: t("Automatic HDR / Dolby Vision"),
+      sub: t("Uses the active display's Windows HDR calibration. Dolby Vision is reshaped by libplacebo and output as display-matched HDR/PQ; SDR displays are handled automatically."),
+      recommended: true,
+    },
+    {
       id: "sdr",
       label: t("Tonemap to SDR"),
       sub: t("Maps HDR down to SDR with bt.2446a. Works on any display. Pick this if HDR looks washed-out or grey."),
-      recommended: true,
     },
     {
       id: "hdrWindow",

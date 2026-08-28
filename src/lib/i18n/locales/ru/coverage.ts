@@ -487,6 +487,17 @@ const coverage: Record<string, string> = {
   "{n} win": "{n} победа",
   "· {n} nom": "· {n} номинация",
   "· {n} noms": "· {n} номинаций",
+  "Favorite page": "Избранная страница",
+  "This Settings page": "Настройки этой страницы",
+  "These preferences apply only to the page you are viewing.": "Эти параметры применяются только к просматриваемой странице.",
+  "Keep at the top of its menu group": "В начало группы меню",
+  "Marks this page with a star and moves it before the other pages in the same group.": "Отмечает эту страницу звездой и перемещает её перед остальными страницами той же группы.",
+  "Compact page spacing": "Компактные отступы страницы",
+  "Fits more settings on screen by reducing card spacing without changing any feature.": "Умещает больше настроек на экране, уменьшая отступы карточек без изменения функций.",
+  "Show page introduction": "Показывать описание страницы",
+  "Shows the short explanation below this page's title.": "Показывает краткое пояснение под заголовком этой страницы.",
+  "Automatic HDR / Dolby Vision": "Автоматический HDR / Dolby Vision",
+  "Uses the active display's Windows HDR calibration. Dolby Vision is reshaped by libplacebo and output as display-matched HDR/PQ; SDR displays are handled automatically.": "Использует HDR-калибровку Windows для активного дисплея. libplacebo преобразует Dolby Vision и выводит согласованный с дисплеем HDR/PQ; SDR-дисплеи обрабатываются автоматически.",
 };
 
 export default coverage;

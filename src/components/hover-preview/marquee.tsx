@@ -15,7 +15,12 @@ import {
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import {
+  advisoryCategoryLabel,
+  normalizeContentAdvisories,
+} from "@/lib/content-advisory";
 import type { PreviewData } from "@/lib/hover-preview/preview-data";
+import { useT } from "@/lib/i18n";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { markMetaWatched } from "@/lib/mark-watched";
 import {
@@ -59,7 +64,6 @@ function useCrownLogo(meta: Meta): string | undefined {
   return logo;
 }
 
-const ADVISORY_SEV: Record<string, number> = { Mild: 1, Moderate: 2, Severe: 3 };
 const ADVISORY_COLOR: Record<string, string> = {
   Severe: "text-red-300",
   Moderate: "text-amber-300",
@@ -68,12 +72,12 @@ const ADVISORY_COLOR: Record<string, string> = {
 
 function advisoryChip(category: string): { Icon: LucideIcon; label: string } {
   const c = category.toLowerCase();
-  if (c.includes("sex") || c.includes("nudity")) return { Icon: Heart, label: "Nudity" };
+  if (c.includes("sex") || c.includes("nudity")) return { Icon: Heart, label: "Sex & Nudity" };
   if (c.includes("violence") || c.includes("gore")) return { Icon: Swords, label: "Violence" };
-  if (c.includes("profanity")) return { Icon: MessageSquareWarning, label: "Language" };
+  if (c.includes("profanity")) return { Icon: MessageSquareWarning, label: "Profanity" };
   if (c.includes("alcohol") || c.includes("drug") || c.includes("smoking"))
-    return { Icon: Wine, label: "Substances" };
-  if (c.includes("frighten") || c.includes("intense")) return { Icon: Ghost, label: "Intense" };
+    return { Icon: Wine, label: "Alcohol & Drugs" };
+  if (c.includes("frighten") || c.includes("intense")) return { Icon: Ghost, label: "Frightening" };
   return { Icon: ShieldAlert, label: category };
 }
 
@@ -103,11 +107,9 @@ function useAdvisory(imdbId: string | undefined): ParentalCategory[] {
 }
 
 function AdvisoryStrip({ imdbId }: { imdbId: string | undefined }) {
+  const t = useT();
   const cats = useAdvisory(imdbId);
-  const rated = cats
-    .filter((c) => ADVISORY_SEV[c.severity])
-    .sort((a, b) => (ADVISORY_SEV[b.severity] ?? 0) - (ADVISORY_SEV[a.severity] ?? 0))
-    .slice(0, 4);
+  const rated = normalizeContentAdvisories(cats).slice(0, 4);
   if (rated.length === 0) return null;
   return (
     <div data-stagger="2" className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
@@ -116,11 +118,11 @@ function AdvisoryStrip({ imdbId }: { imdbId: string | undefined }) {
         return (
           <span
             key={c.category}
-            title={`${label} · ${c.severity}`}
+            title={`${t(advisoryCategoryLabel(label))} · ${t(c.severity)}`}
             className={`inline-flex items-center gap-1 text-[11.5px] font-medium ${ADVISORY_COLOR[c.severity] ?? "text-ink-subtle"}`}
           >
             <Icon size={13} strokeWidth={2} />
-            <span className="text-ink-muted">{label}</span>
+            <span className="text-ink-muted">{t(advisoryCategoryLabel(label))}</span>
           </span>
         );
       })}

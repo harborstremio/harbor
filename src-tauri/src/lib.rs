@@ -632,6 +632,26 @@ pub fn run() {
                 tauri::WindowEvent::CloseRequested { api, .. } => {
                     if tray::close_to_tray() {
                         api.prevent_close();
+                        // Hiding a Tauri window does not reliably emit a focus event on every
+                        // desktop platform. Pause mpv here, then notify the renderer so it can
+                        // remember that this was an automatic pause and resume only that case.
+                        use tauri::Emitter;
+                        let was_playing = if tray::pause_when_minimized() {
+                            window
+                                .app_handle()
+                                .try_state::<mpv::MpvState>()
+                                .and_then(|state| mpv::pause_for_background(&state))
+                        } else {
+                            None
+                        };
+                        let mut activity = serde_json::json!({ "focused": false, "minimized": true });
+                        if let Some(was_playing) = was_playing {
+                            activity["wasPlaying"] = serde_json::Value::Bool(was_playing);
+                        }
+                        let _ = window.emit(
+                            "harbor://window-activity",
+                            activity,
+                        );
                         let _ = window.hide();
                     } else if !CLOSE_IN_PROGRESS.swap(true, std::sync::atomic::Ordering::SeqCst) {
                         use tauri::Emitter;
@@ -744,6 +764,7 @@ pub fn run() {
             mpv::mpv_command,
             mpv::mpv_set_property,
             mpv::mpv_get_property,
+            mpv::mpv_playback_stats,
             mpv::mpv_audio_devices,
             mpv::mpv_set_geometry,
             mpv::mpv_force_below,
@@ -770,6 +791,7 @@ pub fn run() {
             hdr_overlay::hdr_overlay_hide,
             hdr_overlay::hdr_overlay_sync,
             hdr_overlay::hdr_overlay_emit_props,
+            hdr_overlay::hdr_overlay_emit_clock,
             hdr_overlay::hdr_overlay_emit_action,
             mpv::mpv_sub_add,
             mpv::sub_download,

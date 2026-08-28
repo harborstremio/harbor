@@ -19,6 +19,8 @@ import { fetchTvdbCast } from "@/lib/providers/tvdb-cast";
 import { PeopleRail, PosterRail, RailSection, RailSkeleton, type Person } from "./rails";
 import { useModalRatings } from "./use-modal-ratings";
 import { useTitleDetail } from "./use-title-detail";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 
 function isAnimeId(id: string): boolean {
   return id.startsWith("kitsu:") || id.startsWith("mal:") || id.startsWith("anilist:");
@@ -54,13 +56,15 @@ export function TitlePanel({
 }) {
   const t = useT();
   const { detail, loading, needsKey } = useTitleDetail(meta, tmdbKey, true);
+  const preferredMeta = usePreferredMeta(meta);
+  const displayMeta = useMemo(() => mergePreferredMeta(meta, preferredMeta), [meta, preferredMeta]);
   const [expanded, setExpanded] = useState(false);
   const overviewRef = useRef<HTMLParagraphElement>(null);
   const [overviewClamped, setOverviewClamped] = useState(false);
 
-  const title = detail?.title ?? meta.name ?? "";
+  const title = displayMeta.name || detail?.title || meta.name || "";
   const poster = posterUrl(detail?.poster, meta.poster);
-  const overview = detail?.overview?.trim() || meta.description?.trim() || "";
+  const overview = displayMeta.description?.trim() || detail?.overview?.trim() || meta.description?.trim() || "";
   const year = detail?.year ?? meta.releaseInfo ?? meta.releaseDate?.slice(0, 4) ?? "";
   const rating = detail?.rating ?? meta.imdbRating ?? "";
   const runtime = detail?.runtime ?? meta.runtime ?? "";
@@ -202,7 +206,7 @@ export function TitlePanel({
               ? onOpenEpisodes && (
                   <button
                     type="button"
-                    onClick={() => onOpenEpisodes(meta, imdbId)}
+                    onClick={() => onOpenEpisodes(displayMeta, imdbId)}
                     className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[15px] font-semibold text-black transition-transform hover:scale-[1.03]"
                   >
                     <Play size={17} strokeWidth={2.4} fill="currentColor" />
@@ -211,11 +215,11 @@ export function TitlePanel({
                 )
               : onPlay &&
                 (upcoming ? (
-                  <UpcomingCta detail={detail} onTry={() => onPlay(meta)} />
+                  <UpcomingCta detail={detail} onTry={() => onPlay(displayMeta)} />
                 ) : (
                   <button
                     type="button"
-                    onClick={() => onPlay(meta)}
+                    onClick={() => onPlay(displayMeta)}
                     className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[15px] font-semibold text-black transition-transform hover:scale-[1.03]"
                   >
                     <Play size={17} strokeWidth={2.4} fill="currentColor" />
@@ -224,7 +228,7 @@ export function TitlePanel({
                 ))}
             <button
               type="button"
-              onClick={() => onOpenDetail(meta)}
+              onClick={() => onOpenDetail(displayMeta)}
               className="inline-flex w-fit items-center gap-2 rounded-full bg-white/[0.12] px-5 py-2.5 text-[15px] font-semibold text-white ring-1 ring-white/15 transition-colors hover:bg-white/20"
             >
               {isSeries ? t("All episodes & details") : t("Full details")}

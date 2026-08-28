@@ -7,8 +7,8 @@ const MODEL_VERSION = "sface-int8-v3";
 const CACHE_DIR = "xray/face-gallery";
 const TMDB_IMG = "https://image.tmdb.org/t/p/w185";
 const PRIMARY_CAST = 24;
-const MAX_CAST = 80;
-const PRIMARY_CONCURRENCY = 3;
+const MAX_CAST = 24;
+const PRIMARY_CONCURRENCY = 1;
 const BACKGROUND_CONCURRENCY = 1;
 
 type CacheShape = {

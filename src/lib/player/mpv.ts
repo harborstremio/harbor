@@ -393,6 +393,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap = mpvFailureSnapshot(snap, reason);
       mediaRevision += 1;
       mpvStarted = false;
+      currentIsLive = null;
+      currentStartupProfile = null;
       finishPlaybackTrace(activeTraceId, "failed");
       activeTraceId = null;
       invoke("mpv_stop").catch(() => {});
@@ -494,7 +496,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       if (name === "dwidth" && typeof data === "number") snap.videoWidth = data;
       if (name === "dheight" && typeof data === "number") snap.videoHeight = data;
-      if (name === "video-params/gamma" && typeof data === "string" && data) snap.hdrGamma = data;
+      if (name === "video-params/gamma") snap.hdrGamma = typeof data === "string" ? data : "";
       if (name === "demuxer-cache-duration" && typeof data === "number") snap.bufferedSec = data;
       if (name === "paused-for-cache" && typeof data === "boolean") snap.buffering = data;
       if (name === "af") {
@@ -623,6 +625,9 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       snap.durationSec = 0;
       snap.bufferedSec = 0;
       snap.buffering = false;
+      snap.chapters = [];
+      snap.videoWidth = 0;
+      snap.videoHeight = 0;
       snap.firstFrameReady = false;
       snap.hdrGamma = "";
       pendingTracks = {};
@@ -648,6 +653,17 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       try {
         const opts = mpvOptions ?? { anime4k: false, hdrToSdr: true };
+        const nextIsLive = src.isLive === true;
+        // Live and on-demand streams use materially different native mpv
+        // buffering/reconnect profiles. Recreate the backend session when
+        // switching class instead of inheriting the previous source's profile.
+        if (mpvStarted && currentIsLive !== nextIsLive) {
+          suppressEndFileUntil = Date.now() + 1500;
+          await invoke("mpv_stop").catch(() => {});
+          mpvStarted = false;
+          currentIsLive = null;
+          currentStartupProfile = null;
+        }
         if (mpvStarted) {
           try {
             suppressEndFileUntil = Date.now() + 1500;
@@ -682,6 +698,8 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           } catch (err) {
             console.warn("[mpv] loadfile reload failed, falling back to recreate", err);
             mpvStarted = false;
+            currentIsLive = null;
+            currentStartupProfile = null;
           }
         }
         retainedMpv = null;
@@ -698,7 +716,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             anime4kShaders: opts.anime4kShaders ?? [],
             d3d11Flip: opts.d3d11Flip === true,
             macEdr: opts.macEdr === true,
-            isLive: src.isLive === true,
+            isLive: nextIsLive,
             fullDownload: opts.fullDownload === true,
             startupProfile: nextStartupProfile,
             headers: src.headers ?? null,
@@ -909,11 +927,12 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       hdrToSdr = on;
       const properties: Array<[string, string]> = on
         ? [
-            ["tone-mapping", "spline"],
+            ["tone-mapping", "bt.2446a"],
             ["gamut-mapping-mode", "perceptual"],
-            ["hdr-compute-peak", "yes"],
+            ["hdr-compute-peak", "auto"],
             ["hdr-contrast-recovery", "0.30"],
             ["hdr-peak-percentile", "99.995"],
+            ["allow-delayed-peak-detect", "yes"],
             ["dither-depth", "auto"],
             ["target-trc", "bt.1886"],
             ["target-prim", "bt.709"],
@@ -925,13 +944,17 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             ["hdr-compute-peak", "auto"],
             ["hdr-contrast-recovery", "0"],
             ["hdr-peak-percentile", "0"],
+            ["allow-delayed-peak-detect", "yes"],
             ["dither-depth", "auto"],
             ["target-trc", "auto"],
             ["target-prim", "auto"],
             ["target-contrast", "auto"],
           ];
       if (isWindowsDesktop() || isMacDesktop()) {
-        properties.push(["target-colorspace-hint", "yes"]);
+        properties.push(["target-colorspace-hint", "auto"]);
+      }
+      if (isWindowsDesktop()) {
+        properties.push(["target-colorspace-hint-mode", "target"]);
       }
       for (const [name, value] of properties) {
         void invoke("mpv_set_property", { name, value }).catch(() => {});

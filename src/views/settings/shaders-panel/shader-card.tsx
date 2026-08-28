@@ -3,6 +3,7 @@ import { useState } from "react";
 import { downloadShader } from "@/lib/shaders";
 import type { ShaderCatalogEntry } from "@/lib/player/shader-catalog";
 import { useSettings } from "@/lib/settings";
+import { effectiveHdrToSdr } from "@/lib/player/hdr-output-policy";
 import { ExtLink, Segmented, ToggleRow } from "../shared";
 import { BeforeAfter } from "./before-after";
 
@@ -28,7 +29,7 @@ export function ShaderCard({ entry }: { entry: ShaderCatalogEntry }) {
   const [error, setError] = useState<string | null>(null);
 
   const lockReason = entry.conflictsWith?.some((c) =>
-    c === "hdrToSdr" ? settings.playerHdrToSdr : c === "rtxHdr" ? settings.playerRtxHdr : false,
+    c === "hdrToSdr" ? effectiveHdrToSdr(settings) : c === "rtxHdr" ? settings.playerRtxHdr : false,
   )
     ? "Harbor's built-in HDR to SDR conversion is on. Turn it off in Video tuning to use this instead. Running both double-processes the picture."
     : undefined;

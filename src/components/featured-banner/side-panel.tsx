@@ -5,6 +5,7 @@ import { pickRandom } from "@/lib/feed/tags";
 import { tmdbMovieImages } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 import { useLiveImdbRating } from "@/lib/live-imdb";
 import { ImdbIcon } from "../icons/imdb-icon";
 import type { LightboxState } from "./types";
@@ -23,6 +24,8 @@ export function SidePanel({
   const { settings } = useSettings();
   const [stills, setStills] = useState<string[]>([]);
   const description = useLocalizedOverview(meta);
+  const preferredMeta = usePreferredMeta(meta);
+  const displayName = preferredMeta?.name || meta.name;
   const live = useLiveImdbRating(meta);
 
   useEffect(() => {
@@ -61,14 +64,14 @@ export function SidePanel({
   const openAt = (tileSrc: string | undefined) => {
     if (!tileSrc || lightboxImages.length === 0) return;
     const startIndex = Math.max(0, lightboxImages.indexOf(tileSrc));
-    onOpenLightbox({ images: lightboxImages, startIndex, title: meta.name });
+    onOpenLightbox({ images: lightboxImages, startIndex, title: displayName });
   };
 
   return (
     <aside className="flex flex-col gap-3 self-start rounded-2xl border border-edge-soft bg-elevated/35 p-4">
       <div className="flex flex-col gap-1">
         <h4 className="line-clamp-1 font-display text-[19px] font-medium tracking-tight text-ink">
-          {meta.name}
+          {displayName}
         </h4>
         <span className="text-[12px] uppercase tracking-[0.16em] text-ink-subtle">
           {String(activeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
@@ -79,7 +82,7 @@ export function SidePanel({
           <Still
             key={`${meta.id}-${i}`}
             src={src}
-            alt={meta.name}
+            alt={displayName}
             onClick={lightboxImages.length > 0 ? () => openAt(src) : undefined}
           />
         ))}

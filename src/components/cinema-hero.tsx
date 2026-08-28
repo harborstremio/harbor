@@ -8,6 +8,8 @@ import { useImdbRating } from "@/lib/imdb-rating";
 import { useSettings } from "@/lib/settings";
 import { useTitleLogo } from "@/lib/title-logo";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
+import { mergePreferredMeta } from "@/lib/preferred-meta";
+import { usePreferredMeta } from "@/lib/use-preferred-meta";
 import { smartPlayEpisode } from "@/lib/smart-play";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
 import { useT } from "@/lib/i18n";
@@ -211,6 +213,8 @@ function CinemaSlide({
   const { settings } = useSettings();
   const { openMeta, openPicker } = useView();
   const description = useLocalizedOverview(meta);
+  const preferredMeta = usePreferredMeta(meta, active);
+  const displayMeta = mergePreferredMeta(meta, preferredMeta);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const imdbRating = useImdbRating(meta, resolvedImdb);
   const [logoState, setLogo] = useState<string | undefined>(meta.logo);
@@ -357,7 +361,7 @@ function CinemaSlide({
             {t(eyebrow)}
           </span>
           <CinemaTitlePlate
-            name={meta.name}
+            name={displayMeta.name}
             logo={logo}
             loaded={logoLoaded}
             resolved={logoResolved}
@@ -390,14 +394,14 @@ function CinemaSlide({
           )}
           <div className="mt-2 flex items-center gap-3">
             <button
-              onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
+              onClick={() => openPicker(displayMeta, smartPlayEpisode(displayMeta), { autoPlay: settings.instantPlay })}
               className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.5)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               <Play size={17} fill="currentColor" />
               {t("Play")}
             </button>
             <button
-              onClick={() => openMeta(meta)}
+              onClick={() => openMeta(displayMeta)}
               className="flex h-12 items-center gap-2.5 rounded-md border border-edge bg-canvas/50 px-6 text-[14.5px] font-medium text-ink backdrop-blur-sm transition-colors duration-200 hover:bg-canvas/70"
             >
               <Info size={16} strokeWidth={2} />

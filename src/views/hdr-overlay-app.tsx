@@ -6,8 +6,10 @@ import { DragClickStage } from "./player/drag-click-stage";
 import { emptySnapshot, type PlayerSnapshot } from "@/lib/player/bridge";
 import { createForwardingMpvBridge } from "@/lib/player/mpv-forward";
 import { buildSubtitleTimingMediaKey } from "@/lib/player/subtitle-fps";
-import { hdrOverlayEmitAction, onHdrStageProps } from "@/lib/hdr-overlay";
+import { hdrOverlayEmitAction, onHdrStageClock, onHdrStageProps } from "@/lib/hdr-overlay";
 import type { PlayerSrc } from "@/lib/view";
+import { XrayOverlay } from "@/components/player/xray/xray-overlay";
+import { setPlaybackClock } from "@/lib/player/playback-clock";
 import { PlayerInteractionLockControls } from "@/components/player/player-interaction-lock";
 import { usePlayerInteractionBlocker } from "./player/hooks/use-player-interaction-lock";
 
@@ -125,9 +127,26 @@ function HdrOverlayChrome() {
   }, [bridge]);
 
   useEffect(() => {
+    const un = onHdrStageClock(({ positionSec, bufferedSec }) => {
+      setPlaybackClock(positionSec, bufferedSec);
+    });
+    return () => {
+      void un.then((fn) => fn()).catch(() => {});
+    };
+  }, []);
+
+  useEffect(() => {
     if (!payload) return;
-    const id = requestAnimationFrame(() => void hdrOverlayEmitAction("hdr-stage://ready", {}));
-    return () => cancelAnimationFrame(id);
+    const ready = () => void hdrOverlayEmitAction("hdr-stage://ready", {});
+    const frame = requestAnimationFrame(ready);
+    // Liveness does not require resending the full player state. A tiny
+    // heartbeat avoids rebuilding this transparent WebView every second while
+    // Windows is compositing 4K HDR underneath it.
+    const heartbeat = window.setInterval(ready, 4000);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearInterval(heartbeat);
+    };
   }, [payload]);
 
   useEffect(() => {
@@ -212,6 +231,14 @@ function HdrOverlayChrome() {
         download={download}
         sleep={undefined}
       />
+      {!payload.pipMode && (
+        <XrayOverlay
+          meta={src.meta}
+          visible={payload.visible}
+          isPaused={snap.status === "paused"}
+          bridgeRef={bridgeRef}
+        />
+      )}
       <PlayerInteractionLockControls
         enabled={payload.screenLockEnabled}
         locked={payload.screenLocked}
