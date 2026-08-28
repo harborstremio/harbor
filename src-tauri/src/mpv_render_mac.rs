@@ -325,24 +325,63 @@ pub fn resize_to(css: MpvGeometry) -> Result<(), String> {
             .superview()
             .ok_or_else(|| "GL view has no superview".to_string())?;
         let parent_bounds = parent.bounds();
-        let native = map_css_geometry(&css, parent_bounds.size.width, parent_bounds.size.height);
+        let pw = parent_bounds.size.width;
+        let ph = parent_bounds.size.height;
+
+        // Use CSS geometry directly — CSS pixels == points on macOS.
+        // map_css_geometry scales by parent_bounds.size / css_view,
+        // but on macOS the content view can be larger than the CSS
+        // viewport (safe areas, notch in fullscreen). That scaling
+        // pushes the right and bottom edges of the video frame
+        // beyond the visible area, cropping them.
+        let mut x = css.css_left;
+        let mut y = css.css_top;
+        let mut w = css.css_width;
+        let mut h = css.css_height;
+
+        // Snap edges to parent bounds, matching the logic in
+        // map_css_geometry but without the viewport scaling.
+        if css.css_left.abs() <= 2.0 {
+            w += x;
+            x = 0.0;
+        }
+        if css.css_top.abs() <= 2.0 {
+            h += y;
+            y = 0.0;
+        }
+        if css.css_left + css.css_width >= css.css_view_w - 2.0 {
+            w = pw - x;
+        }
+        if css.css_top + css.css_height >= css.css_view_h - 2.0 {
+            h = ph - y;
+        }
+
+        x = x.clamp(0.0, (pw - 1.0).max(0.0));
+        y = y.clamp(0.0, (ph - 1.0).max(0.0));
+        w = w.clamp(1.0, (pw - x).max(1.0));
+        h = h.clamp(1.0, (ph - y).max(1.0));
+
         let native_y = if parent.isFlipped() {
-            native.y
+            y
         } else {
-            parent_bounds.size.height - native.y - native.height
+            ph - y - h
         };
+
         let frame = objc2_foundation::NSRect {
             origin: objc2_foundation::NSPoint {
-                x: native.x,
+                x,
                 y: native_y,
             },
             size: objc2_foundation::NSSize {
-                width: native.width,
-                height: native.height,
+                width: w,
+                height: h,
             },
         };
         view_as_view.setFrame(frame);
-        let mask: usize = 0;
+        // Re-enable auto-resizing so the GL view fills its parent
+        // on subsequent window resizes, avoiding stale geometry
+        // between resize_to calls.
+        let mask = NS_VIEW_AUTORESIZE_WIDTH | NS_VIEW_AUTORESIZE_HEIGHT;
         let _: () = msg_send![view_as_view, setAutoresizingMask: mask];
         if let Some(gl_ctx) = embed.view.openGLContext() {
             let _: () = msg_send![&*gl_ctx, update];
