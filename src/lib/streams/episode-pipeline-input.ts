@@ -25,9 +25,9 @@ function embeddedStreams(meta: Meta, episode: PlayEpisode | undefined): Stream[]
       ? vids.find(
           (v) =>
             (v.season ?? null) === episode.season &&
-            ((v.episode ?? v.number) ?? null) === episode.episode,
+            (v.episode ?? v.number ?? null) === episode.episode,
         )
-      : vids.find((v) => v.id === meta.id) ?? (vids.length === 1 ? vids[0] : undefined);
+      : (vids.find((v) => v.id === meta.id) ?? (vids.length === 1 ? vids[0] : undefined));
   const raw = pick?.streams ?? [];
   return raw.map(
     (s) =>
@@ -51,14 +51,24 @@ export function buildEpisodePipelineInput(params: {
   strictMode: boolean;
   filterDisabled: boolean;
 }): PipelineInput {
-  const { meta, episode, imdbId, streamIds, addons, debrids, settings, strictMode, filterDisabled } = params;
+  const {
+    meta,
+    episode,
+    imdbId,
+    streamIds,
+    addons,
+    debrids,
+    settings,
+    strictMode,
+    filterDisabled,
+  } = params;
   const embedded = embeddedStreams(meta, episode);
   const addonNative = isAddonNativeMeta(meta);
   const requestType = addonNative
     ? meta.type
     : episode
       ? "series"
-      : meta.type === "series"
+      : meta.type === "series" || meta.type === "anime"
         ? "series"
         : "movie";
   const animeReq = streamIds.some((id) => id.startsWith("kitsu:") || id.startsWith("mal:"));
@@ -68,7 +78,7 @@ export function buildEpisodePipelineInput(params: {
   const effEpisode = imdbEpAligned ? (episode?.imdbEpisode ?? episode?.episode) : episode?.episode;
   const prevGroup =
     episode && typeof effSeason === "number" && typeof effEpisode === "number" && effEpisode > 1
-      ? readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined
+      ? (readPlayback(meta.id, effSeason, effEpisode - 1)?.releaseGroup ?? undefined)
       : undefined;
   return {
     request: {
@@ -76,7 +86,11 @@ export function buildEpisodePipelineInput(params: {
       ids: streamIds,
     },
     query: {
-      type: episode ? "series" : meta.type === "series" ? "series" : "movie",
+      type: episode
+        ? "series"
+        : meta.type === "series" || meta.type === "anime"
+          ? "series"
+          : "movie",
       imdbId: imdbId ?? "",
       title: meta.name,
       year: parseInt(meta.releaseInfo ?? "", 10) || undefined,
@@ -88,7 +102,11 @@ export function buildEpisodePipelineInput(params: {
     isAnime: animeReq,
     presetStreams: embedded.length > 0 ? embedded : undefined,
     trust: {
-      kind: episode ? "series" : meta.type === "series" ? "series" : "movie",
+      kind: episode
+        ? "series"
+        : meta.type === "series" || meta.type === "anime"
+          ? "series"
+          : "movie",
       expectedTitle: meta.name,
       releaseDate: meta.releaseDate ?? null,
       expectedYear: parseInt(meta.releaseInfo ?? "", 10) || null,
@@ -107,7 +125,7 @@ export function buildEpisodePipelineInput(params: {
       activeDebrids: debrids.map((d) => d.slug),
       preferredLanguages: settings.preferredLanguages,
       releaseDate: meta.releaseDate ?? null,
-      mediaKind: meta.type === "series" || episode ? "series" : "movie",
+      mediaKind: meta.type === "series" || meta.type === "anime" || episode ? "series" : "movie",
       runtimeMinutes: runtimeMinutes(meta.runtime),
       inTheaters: meta.inTheaters === true,
       bandwidthMbps: settings.bandwidthMbps > 0 ? settings.bandwidthMbps : undefined,
