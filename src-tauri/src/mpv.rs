@@ -649,6 +649,7 @@ pub async fn mpv_start(
         }
     }
     let is_live = args.is_live.unwrap_or(false);
+    let is_hls = args.url.contains(".m3u8");
     if is_live {
         let _ = mpv.set_property("cache", "yes");
         let _ = mpv.set_property("cache-secs", "30");
@@ -657,6 +658,20 @@ pub async fn mpv_start(
         let _ = mpv.set_property("demuxer-max-bytes", "64MiB");
         let _ = mpv.set_property("demuxer-max-back-bytes", "16MiB");
         let _ = mpv.set_property("demuxer-readahead-secs", "20");
+        let _ = mpv.set_property("network-timeout", "60");
+        let _ = mpv.set_property(
+            "stream-lavf-o",
+            "reconnect=1,reconnect_streamed=1,reconnect_delay_max=5,reconnect_on_network_error=1",
+        );
+        let _ = mpv.set_property("stream-buffer-size", "16MiB");
+    } else if is_hls {
+        let _ = mpv.set_property("cache", "yes");
+        let _ = mpv.set_property("cache-secs", "10");
+        let _ = mpv.set_property("cache-pause", "yes");
+        let _ = mpv.set_property("cache-pause-initial", "no");
+        let _ = mpv.set_property("demuxer-max-bytes", "16MiB");
+        let _ = mpv.set_property("demuxer-max-back-bytes", "16MiB");
+        let _ = mpv.set_property("demuxer-readahead-secs", "5");
         let _ = mpv.set_property("network-timeout", "60");
         let _ = mpv.set_property(
             "stream-lavf-o",
@@ -685,7 +700,7 @@ pub async fn mpv_start(
         );
         let _ = mpv.set_property("stream-buffer-size", "32MiB");
     }
-    if want_embed {
+        if want_embed {
         let _ = mpv.set_property("sub-visibility", "no");
         let _ = mpv.set_property("secondary-sub-visibility", "no");
     }
