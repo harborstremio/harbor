@@ -2,7 +2,7 @@ import { useEffect, useState, type RefObject } from "react";
 
 type Callback = (visible: boolean) => void;
 
-const subs = new WeakMap<Element, Callback>();
+const subs = new WeakMap<Element, Set<Callback>>();
 let observer: IntersectionObserver | null = null;
 
 function ensureObserver(): IntersectionObserver {
@@ -10,8 +10,8 @@ function ensureObserver(): IntersectionObserver {
   observer = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
-        const cb = subs.get(e.target);
-        if (cb) cb(e.isIntersecting);
+        const set = subs.get(e.target);
+        if (set) for (const cb of set) cb(e.isIntersecting);
       }
     },
     { rootMargin: "100px" },
@@ -21,18 +21,25 @@ function ensureObserver(): IntersectionObserver {
 
 export function observe(el: Element, cb: Callback): () => void {
   const o = ensureObserver();
-  subs.set(el, cb);
-  o.observe(el);
+  let set = subs.get(el);
+  if (!set) {
+    set = new Set();
+    subs.set(el, set);
+    o.observe(el);
+  }
+  set.add(cb);
   return () => {
-    o.unobserve(el);
-    subs.delete(el);
+    const s = subs.get(el);
+    if (!s) return;
+    s.delete(cb);
+    if (s.size === 0) {
+      o.unobserve(el);
+      subs.delete(el);
+    }
   };
 }
 
-export function useInViewport(
-  ref: RefObject<Element | null>,
-  initial = false,
-): boolean {
+export function useInViewport(ref: RefObject<Element | null>, initial = false): boolean {
   const [inView, setInView] = useState(initial);
   useEffect(() => {
     const el = ref.current;
@@ -43,9 +50,7 @@ export function useInViewport(
 }
 
 export function usePageVisible(): boolean {
-  const [visible, setVisible] = useState(
-    typeof document === "undefined" ? true : !document.hidden,
-  );
+  const [visible, setVisible] = useState(typeof document === "undefined" ? true : !document.hidden);
   useEffect(() => {
     const onChange = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", onChange);
