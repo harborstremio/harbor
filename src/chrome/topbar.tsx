@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, Users } from "lucide-react";
+import { ArrowLeft, Search, UserRound, Users } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { BackChrome } from "@/chrome/back-chrome";
@@ -18,6 +18,7 @@ import {
 } from "@/lib/hotkeys";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
+import { currentAuthor, subscribeAuthor, type Author } from "@/lib/theme-auth";
 import { useSearch } from "@/lib/search-context";
 import { useSettings } from "@/lib/settings";
 import { useTogether } from "@/lib/together/provider";
@@ -139,6 +140,7 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
           {settings.navbarSleepTimer && <SleepTimerButton />}
           <DownloadsButton />
           {!kid && <NotificationCenter />}
+          {!kid && <ProfileButton />}
           {!kid && <BookmarksButton />}
           {!onLiveRoot && !kid && <TogetherButton />}
           </div>
@@ -174,6 +176,26 @@ export function Topbar({ connecting = false }: { connecting?: boolean } = {}) {
         <CloseConfirmKids onConfirm={close} onCancel={() => setCloseConfirm(false)} />
       )}
     </header>
+  );
+}
+
+function ProfileButton() {
+  const { openProfile } = useView();
+  const t = useT();
+  const [author, setAuthor] = useState<Author | null>(currentAuthor);
+  useEffect(() => subscribeAuthor(() => setAuthor(currentAuthor())), []);
+  if (!author?.handle) return null;
+  const handle = author.handle;
+  return (
+    <button
+      type="button"
+      data-tauri-drag-region="false"
+      aria-label={t("View my profile")}
+      onClick={() => openProfile(handle)}
+      className="harbor-navbtn relative flex h-11 w-11 items-center justify-center rounded-xl bg-elevated/70 text-ink-muted transition-colors duration-150 hover:bg-elevated hover:text-ink"
+    >
+      <UserRound size={17} strokeWidth={1.9} />
+    </button>
   );
 }
 
