@@ -184,6 +184,16 @@ function addonNameSlug(name: string | undefined): DebridSlug | null {
   return null;
 }
 
+function urlDebridSlug(url: string | undefined): DebridSlug | null {
+  if (!url) return null;
+  if (/torbox/i.test(url)) return "tb";
+  if (/realdebrid|real-debrid/i.test(url)) return "rd";
+  if (/alldebrid/i.test(url)) return "ad";
+  if (/premiumize/i.test(url)) return "pm";
+  if (/debridlink|debrid-link/i.test(url)) return "dl";
+  return null;
+}
+
 function isDebridAwareAddon(name: string): boolean {
   return /(?:mediafusion|comet|torrentio|aiostreams|knightcrawler|jackettio|streamfusion|easynews)/i.test(
     name,

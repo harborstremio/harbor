@@ -1401,7 +1401,7 @@ fn parse_cache_flags(
     }
 
     if let (Some(url), Some(name)) = (url, addon_name) {
-        if let Some(slug) = addon_name_slug(Some(name)).or_else(|| url_debrid_slug(Some(url))) {
+        if let Some(slug) = addon_name_slug(Some(name)).or_else(|| url_debrid_slug(Some(url))).or_else(|| url_debrid_slug(Some(url))) {
             if !denied.contains(slug) && !out.get(slug).copied().unwrap_or(false) {
                 let is_http = URL_HTTP_RX.is_match(url);
                 let looks_debrid = URL_DEBRID_RX.is_match(url);
@@ -1459,6 +1459,27 @@ fn check_word_isolated(text: &str, rx: &Regex) -> bool {
         }
     }
     false
+}
+
+fn url_debrid_slug(url: Option<&str>) -> Option<&'static str> {
+    let url = url?;
+    let lower = url.to_lowercase();
+    if lower.contains("torbox") {
+        return Some("tb");
+    }
+    if lower.contains("realdebrid") || lower.contains("real-debrid") {
+        return Some("rd");
+    }
+    if lower.contains("alldebrid") {
+        return Some("ad");
+    }
+    if lower.contains("premiumize") {
+        return Some("pm");
+    }
+    if lower.contains("debridlink") || lower.contains("debrid-link") {
+        return Some("dl");
+    }
+    None
 }
 
 fn url_debrid_slug(url: Option<&str>) -> Option<&'static str> {
