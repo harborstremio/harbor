@@ -47,10 +47,18 @@ export function SourcePicker({
   const wrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) close();
-    };
+      if (!open) return;
+      const onDown = (e: MouseEvent) => {
+        // Guard: back/forward mouse buttons should not exit fullscreen
+        // when the source picker is open — the global handler in App.tsx
+        // calls exitPlayback() on button 3.
+        if (e.button === 3 || e.button === 4) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        if (!wrapRef.current?.contains(e.target as Node)) close();
+      };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (actions) setActions(null);
