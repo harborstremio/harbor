@@ -62,7 +62,9 @@ export async function fetchAddonStreams(
     }
   }
   if (skipped.length > 0) console.info(`[addons] skipped: ${skipped.join(", ")}`);
-  console.info(`[addons] querying ${namedTasks.length}: ${namedTasks.map((t) => t.name).join(", ")}`);
+  console.info(
+    `[addons] querying ${namedTasks.length}: ${namedTasks.map((t) => t.name).join(", ")}`,
+  );
 
   const accumulated: Stream[] = [];
   const wrapped = namedTasks.map(({ name, p }) =>
@@ -115,6 +117,10 @@ function pickIds(addon: Addon, type: string, ids: string[]): string[] {
   const animeId = accepted.find((id) => ANIME_SCHEMES.some((s) => id.startsWith(s)));
   const ttId = accepted.find((id) => id.startsWith("tt"));
   if (animeId && ttId) return [animeId, ttId];
+  // For season-level requests (multiple IDs with same prefix), try all accepted
+  // IDs so addons that don't provide season packs can still return individual
+  // episode streams. The pipeline deduplicates by infoHash/URL.
+  if (accepted.length > 1) return accepted;
   return [accepted[0]];
 }
 
@@ -129,9 +135,7 @@ function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
     return streamResources.some((r) => {
       const typeOk = Array.isArray(r.types) && r.types.includes(type);
       const idOk =
-        !r.idPrefixes ||
-        r.idPrefixes.length === 0 ||
-        r.idPrefixes.some((p) => id.startsWith(p));
+        !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
       return typeOk && idOk;
     });
   }
