@@ -27,7 +27,7 @@ import { getSearchDisplayState } from "@/lib/search-display-state";
 export function SearchOverlay() {
   const { open, setOpen, query, setQuery, results, status, clear, recordRecent } = useSearch();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { openFilter, openMeta } = useView();
+  const { openFilter, openMeta, view } = useView();
   const t = useT();
   const [guideOpen, setGuideOpen] = useState(false);
   const [aiActive, setAiActive] = useState(false);
@@ -71,6 +71,12 @@ export function SearchOverlay() {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  // Dismiss search overlay when navigating to a different view (sidebar click, etc.)
+  useEffect(() => {
+    if (!open) return;
+    setOpen(false);
+  }, [view]);
 
   if (!open) return null;
 
