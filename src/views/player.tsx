@@ -154,6 +154,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     (isBundledEngineUrl(src.url) || isLocalEngineUrl(src.url)) &&
     !src.url.includes("/hlsv2/") &&
     !!src.streamRef?.infoHash;
+  const isLocalSrc = isLocalUrl(src.url);
   const { stats: engineStats, genuineFailure } = useEngineStats({
     url: src.url,
     infoHash: src.streamRef?.infoHash ?? null,
@@ -171,6 +172,8 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
           streamLen: engineStats?.streamLen ?? 0,
         }),
       );
+    } else if (isLocalSrc) {
+      setPlaybackDownloaded(1);
     } else if (!isLive && !isHls) {
       const dur = snap.durationSec || 0;
       setPlaybackDownloaded(dur > 0 ? Math.min(1, (snap.positionSec + snap.bufferedSec) / dur) : 0);
@@ -182,6 +185,7 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     engineStats?.streamLen,
     src.url,
     isP2pEngine,
+    isLocalSrc,
     src.isLive,
     src.meta.id,
     snap.positionSec,
@@ -868,7 +872,6 @@ export function PlayerView({ src }: { src: PlayerSrc }) {
     exitPlayer,
   });
 
-  const isLocalSrc = isLocalUrl(src.url);
   const cancelToPicker = useCallback(() => {
     if (isLocalSrc || src.meta.id?.startsWith("iptv:")) {
       void closePlayer();

@@ -1,6 +1,8 @@
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import assert from "node:assert/strict";
 // @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
+import { readFileSync } from "node:fs";
+// @ts-expect-error Node test types are intentionally outside the browser-only tsconfig.
 import test from "node:test";
 import type { Settings } from "../src/lib/settings/types.ts";
 import { compileMpvOptions, svpMpvLines } from "../src/lib/player/mpv-tuning.ts";
@@ -31,6 +33,32 @@ test("only the P2P engine reports whole-file download progress", () => {
       streamLen: 0,
     }),
     0,
+  );
+});
+
+test("a fully downloaded local file is reported as cached immediately, not buffering", () => {
+  const source = readFileSync(new URL("../src/views/player.tsx", import.meta.url), "utf8");
+
+  const p2pBranchAt = source.indexOf("if (isP2pEngine) {");
+  const localBranchAt = source.indexOf("} else if (isLocalSrc) {");
+  const genericBufferBranchAt = source.indexOf(
+    "setPlaybackDownloaded(dur > 0 ? Math.min(1, (snap.positionSec + snap.bufferedSec) / dur) : 0);",
+  );
+
+  assert.ok(p2pBranchAt !== -1, "playback-downloaded effect's P2P branch is missing");
+  assert.ok(localBranchAt !== -1, "local-source branch is missing from the playback-downloaded effect");
+  assert.ok(genericBufferBranchAt !== -1, "generic position+buffered heuristic branch is missing");
+  assert.ok(
+    p2pBranchAt < localBranchAt && localBranchAt < genericBufferBranchAt,
+    "local-source branch must be checked before the generic position+buffered heuristic, " +
+      "so an already-on-disk downloaded file isn't treated as still buffering",
+  );
+
+  const localBranch = source.slice(localBranchAt, genericBufferBranchAt);
+  assert.match(
+    localBranch,
+    /setPlaybackDownloaded\(1\);/,
+    "a local (already-on-disk) file must be reported as 100% downloaded, not derived from position + buffered",
   );
 });
 
