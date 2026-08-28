@@ -1,7 +1,7 @@
 import { Cast, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { fetchTrailer, getQualityHint, trailerSrc } from "@/lib/trailer";
+import { fetchTrailer, resolveTrailerQuality, trailerSrc } from "@/lib/trailer";
 import { isMacDesktop } from "@/lib/platform";
 import { openUrl } from "@/lib/window";
 import { useSettings } from "@/lib/settings";
@@ -43,7 +43,7 @@ export function TrailerOverlay({
   useEffect(() => {
     let cancelled = false;
     const pref = settings.trailerQuality;
-    const quality = pref === "auto" ? (getQualityHint() === "360p" ? "360p" : "1080p") : pref;
+    const quality = resolveTrailerQuality(pref);
     fetchTrailer(id, quality).then((info) => {
       if (cancelled) return;
       if (info) setStreamUrl(trailerSrc(info));

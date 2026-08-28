@@ -82,6 +82,21 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
             }
         }
     } else if cfg!(target_os = "macos") {
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(dir) = exe.parent() {
+                owned.push(dir.join("ffmpeg").to_string_lossy().to_string());
+                owned.push(
+                    dir.join("ffmpeg-aarch64-apple-darwin")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+                owned.push(
+                    dir.join("ffmpeg-x86_64-apple-darwin")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+            }
+        }
         for p in [
             "/opt/homebrew/bin/ffmpeg",
             "/usr/local/bin/ffmpeg",
