@@ -231,6 +231,16 @@ export function PlayPicker({
   const isCached = useCallback(
     (s: ScoredStream) =>
       (s.url != null && !s.infoHash && !hasUncachedMarker(s)) ||
+      (s.url != null &&
+        s.infoHash &&
+        !hasUncachedMarker(s) &&
+        debrids.some((d) => {
+          const looksDebrid =
+            /(?:realdebrid|real-debrid|torbox|alldebrid|premiumize|debridlink|debrid-link|elfhosted)/i.test(
+              s.url!,
+            );
+          return looksDebrid || s.cached[d.slug] === true;
+        })) ||
       debrids.some((d) => s.cached[d.slug] === true || s.inLibrary[d.slug] === true) ||
       hasCachedMarker(s),
     [debrids],

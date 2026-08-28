@@ -1,10 +1,24 @@
-import { ArrowUpToLine, Check, ChevronDown, ChevronUp, Copy, Download, MoreHorizontal, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import {
+  ArrowUpToLine,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Download,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { confirmDialog } from "@/lib/dialog";
 import { useT } from "@/lib/i18n";
 import type { IptvPlaylistSource } from "@/lib/iptv/types";
 import { EMPTY_FORM, PlaylistForm, type PlaylistFormValue } from "./source-picker/playlist-form";
+import { TvModalClose } from "@/components/tv-modal-close";
+import { useTvFocusScope } from "@/lib/keyboard-navigation";
 
 type ActionsState = { id: string; copied: boolean };
 
@@ -46,11 +60,21 @@ export function SourcePicker({
   const [actions, setActions] = useState<ActionsState | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
+  useTvFocusScope(open, wrapRef);
+
   useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) close();
-    };
+      if (!open) return;
+      const onDown = (e: MouseEvent) => {
+        // Guard: back/forward mouse buttons should not exit fullscreen
+        // when the source picker is open — the global handler in App.tsx
+        // calls exitPlayback() on button 3.
+        if (e.button === 3 || e.button === 4) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        if (!wrapRef.current?.contains(e.target as Node)) close();
+      };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (actions) setActions(null);
@@ -73,7 +97,7 @@ export function SourcePicker({
     setActions(null);
   };
 
-  const editing = editingId ? sources.find((s) => s.id === editingId) ?? null : null;
+  const editing = editingId ? (sources.find((s) => s.id === editingId) ?? null) : null;
   const active = sources.find((s) => s.id === activeId);
   const ago = fetchedAt ? formatAgo(Date.now() - fetchedAt, t) : null;
 
@@ -110,7 +134,11 @@ export function SourcePicker({
           />
         </button>
         {open && (
-          <div className="absolute start-0 top-[calc(100%+8px)] z-[100] w-[340px] overflow-hidden rounded-2xl border border-edge-soft bg-elevated shadow-[0_18px_50px_-15px_rgba(0,0,0,0.6)]">
+          <div
+            data-tv-focus-scope
+            className="absolute start-0 top-[calc(100%+8px)] z-[100] w-[340px] overflow-hidden rounded-2xl border border-edge-soft bg-elevated shadow-[0_18px_50px_-15px_rgba(0,0,0,0.6)]"
+          >
+            <TvModalClose onClose={() => close()} label={t("Close source picker")} />
             {mode === "list" && (
               <>
                 <div className="max-h-[280px] overflow-y-auto py-1.5">
@@ -133,9 +161,7 @@ export function SourcePicker({
                           onSelect(s.id);
                           close();
                         }}
-                        onToggleMenu={() =>
-                          setActions(isOpen ? null : { id: s.id, copied: false })
-                        }
+                        onToggleMenu={() => setActions(isOpen ? null : { id: s.id, copied: false })}
                         onCloseMenu={() => setActions(null)}
                         onEdit={() => {
                           setEditingId(s.id);
@@ -148,7 +174,9 @@ export function SourcePicker({
                           setActions(null);
                         }}
                         onDelete={async () => {
-                          if (await confirmDialog(t('Remove playlist "{name}"?', { name: s.name }))) {
+                          if (
+                            await confirmDialog(t('Remove playlist "{name}"?', { name: s.name }))
+                          ) {
                             onRemove(s.id);
                             setActions(null);
                           }
@@ -315,10 +343,7 @@ function SourceRow({
         </button>
       </div>
       {isMenuOpen && (
-        <PortalMenu
-          triggerRef={triggerRef}
-          onClose={onCloseMenu}
-        >
+        <PortalMenu triggerRef={triggerRef} onClose={onCloseMenu}>
           {onMoveTop && index > 0 && (
             <MenuItem icon={<ArrowUpToLine size={14} strokeWidth={1.9} />} onClick={onMoveTop}>
               {t("Move to top")}
@@ -328,7 +353,9 @@ function SourceRow({
             {t("Edit")}
           </MenuItem>
           <MenuItem
-            icon={copied ? <Check size={14} strokeWidth={2.2} /> : <Copy size={14} strokeWidth={1.9} />}
+            icon={
+              copied ? <Check size={14} strokeWidth={2.2} /> : <Copy size={14} strokeWidth={1.9} />
+            }
             onClick={onCopy}
             accent={copied}
           >
@@ -456,7 +483,10 @@ function MenuItem({
   );
 }
 
-function formatAgo(ms: number, t: (key: string, vars?: Record<string, string | number>) => string): string {
+function formatAgo(
+  ms: number,
+  t: (key: string, vars?: Record<string, string | number>) => string,
+): string {
   const s = Math.floor(ms / 1000);
   if (s < 60) return t("just now");
   const m = Math.floor(s / 60);
