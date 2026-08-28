@@ -63,6 +63,7 @@
       "icons/icon.ico"
     ],
     "linux": {
+      "categories": ["AudioVideo", "Video", "Player"],
       "deb": {
         "depends": [
           "libmpv2 | libmpv1",
