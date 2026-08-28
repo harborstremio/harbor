@@ -110,24 +110,26 @@ export function SearchOverlay() {
     if (e.button !== 0) return;
     const startX = e.clientX;
     const startY = e.clientY;
+    let moved = false;
     let dragStarted = false;
     const onMove = (ev: MouseEvent) => {
       if (dragStarted) return;
       const dx = Math.abs(ev.clientX - startX);
       const dy = Math.abs(ev.clientY - startY);
-      if (dx > 6 || dy > 6) {
-        dragStarted = true;
-        window.removeEventListener("mousemove", onMove);
-        window.removeEventListener("mouseup", onUp);
-        import("@tauri-apps/api/window")
-          .then(({ getCurrentWindow }) => getCurrentWindow().startDragging())
-          .catch(() => {});
-      }
+      if (dx <= 6 && dy <= 6) return;
+      moved = true;
+      if (!settings.dragAnywhere) return;
+      dragStarted = true;
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      import("@tauri-apps/api/window")
+        .then(({ getCurrentWindow }) => getCurrentWindow().startDragging())
+        .catch(() => {});
     };
     const onUp = () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
-      if (!dragStarted) close();
+      if (!dragStarted && !moved) close();
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -190,7 +192,7 @@ export function SearchOverlay() {
       <button
         aria-label={t("Close search")}
         onMouseDown={beginDragOrClose}
-        className={`harbor-search-backdrop absolute inset-0 cursor-default ${
+        className={`harbor-search-backdrop no-press absolute inset-0 cursor-default ${
           closing ? "harbor-search-scrim-out" : "harbor-search-scrim-in"
         }`}
       />
