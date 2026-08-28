@@ -42,7 +42,7 @@ pub fn read_torrents_disabled(app: &tauri::AppHandle) -> bool {
 
 fn parse_torrents_disabled(json: &str) -> bool {
     // Cheap field scan. We only need to know whether
-    // `"torrentsDisabled":true` appears in the file. False is the safe
+    // `\"torrentsDisabled\":true` appears in the file. False is the safe
     // default if we cannot confirm it.
     let needle = "\"torrentsDisabled\"";
     let Some(idx) = json.find(needle) else {
@@ -59,4 +59,49 @@ fn parse_torrents_disabled(json: &str) -> bool {
         }
     }
     matches!(chars.next(), Some('t') | Some('T'))
+}
+
+/// Read the `remoteStreamServerUrl` field from the settings file. Returns the
+/// URL string if set to a non-empty value, or an empty string otherwise.
+pub fn read_remote_stream_server_url(app: &tauri::AppHandle) -> String {
+    let path = match settings_path(app) {
+        Ok(p) => p,
+        Err(_) => return String::new(),
+    };
+    let s = match std::fs::read_to_string(&path) {
+        Ok(s) => s,
+        Err(_) => return String::new(),
+    };
+    parse_remote_stream_server_url(&s)
+}
+
+fn parse_remote_stream_server_url(json: &str) -> String {
+    // Cheap field scan for `\"remoteStreamServerUrl\":\"...\"`
+    let needle = "\"remoteStreamServerUrl\"";
+    let Some(idx) = json.find(needle) else {
+        return String::new();
+    };
+    let rest = &json[idx + needle.len()..];
+    let mut chars = rest.chars().peekable();
+    // Skip whitespace and ':'
+    while let Some(c) = chars.peek() {
+        if c.is_whitespace() || *c == ':' {
+            chars.next();
+        } else {
+            break;
+        }
+    }
+    // Expect opening quote
+    if !matches!(chars.next(), Some('"')) {
+        return String::new();
+    }
+    // Read until closing quote
+    let mut url = String::new();
+    loop {
+        match chars.next() {
+            None | Some('"') => break,
+            Some(c) => url.push(c),
+        }
+    }
+    url
 }

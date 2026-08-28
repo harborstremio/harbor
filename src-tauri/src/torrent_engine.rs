@@ -321,6 +321,12 @@ pub fn ensure_started_on_setup(app: &AppHandle) {
         st.last_error = Some("torrents disabled in settings".to_string());
         return;
     }
+    if !crate::settings_store::read_remote_stream_server_url(app).is_empty() {
+        eprintln!("[torrent-engine] remote streaming server configured — skipping local engine init");
+        let mut st = engine().lock().unwrap();
+        st.last_error = Some("remote streaming server in use".to_string());
+        return;
+    }
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
         if let Err(e) = init(app).await {
