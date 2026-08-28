@@ -46,7 +46,9 @@ export async function resolveMeta(
   if (preferCustomMeta()) {
     for (const { a, p } of addonRaces) {
       const result = await p;
-      if (result && result.poster) return withOrigin(result, a);
+      if (result && (result.poster || (result.name && (result.description || result.videos)))) {
+        return withOrigin(result, a);
+      }
     }
     return (await cinemetaPromise) ?? null;
   }
