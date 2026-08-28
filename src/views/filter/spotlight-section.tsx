@@ -78,7 +78,12 @@ function jitter(seed: string): number {
 function isCameo(c: PersonCredit): boolean {
   const ch = (c.character ?? "").toLowerCase().trim();
   if (!ch) return false;
-  if (ch.includes("(uncredited)") || ch.includes("archive footage") || ch.includes("archival footage")) return true;
+  if (
+    ch.includes("(uncredited)") ||
+    ch.includes("archive footage") ||
+    ch.includes("archival footage")
+  )
+    return true;
   if (ch === "self" || ch === "himself" || ch === "herself" || ch === "themselves") return true;
   if (ch.startsWith("self ") || ch.startsWith("himself ") || ch.startsWith("herself ")) return true;
   return false;
@@ -158,9 +163,7 @@ export function SpotlightSection({
           reportDone();
           return;
         }
-        setProfileUrl(
-          p.profilePath ? `https://image.tmdb.org/t/p/h632${p.profilePath}` : null,
-        );
+        setProfileUrl(p.profilePath ? `https://image.tmdb.org/t/p/h632${p.profilePath}` : null);
         const credits = spotlightCredits(p, spotlight, genreId);
         const metas = credits.map(creditToMeta);
         claim(metas);
@@ -229,13 +232,9 @@ export function SpotlightSection({
         </div>
       </button>
       {items
-        ? items.map((m) => (
-            <div key={m.id} className="w-36 shrink-0">
-              <PickCard meta={m} />
-            </div>
-          ))
+        ? items.map((m) => <PickCard key={m.id} meta={m} />)
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40" />
+            <div key={i} className="aspect-[2/3] w-full animate-pulse rounded-xl bg-elevated/40" />
           ))}
     </Row>
   );

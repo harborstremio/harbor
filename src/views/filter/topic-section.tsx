@@ -9,13 +9,7 @@ import { tmdbDiscover, tmdbResolveKeywordIds } from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { MAX_PAGES, MIN_INITIAL_FILL, SpotlightGateContext } from "./spotlight-gate";
 
-export function TopicSection({
-  topic,
-  mediaType,
-}: {
-  topic: Topic;
-  mediaType: "movie" | "tv";
-}) {
+export function TopicSection({ topic, mediaType }: { topic: Topic; mediaType: "movie" | "tv" }) {
   const t = useT();
   const { settings } = useSettings();
   const dedup = useDedupOnSeenIds(`topic:${mediaType}:${topic.id}`);
@@ -140,13 +134,9 @@ export function TopicSection({
   return (
     <Row title={title} onEndReached={onEndReached}>
       {items
-        ? items.map((m) => (
-            <div key={m.id} className="w-36 shrink-0">
-              <PickCard meta={m} />
-            </div>
-          ))
+        ? items.map((m) => <PickCard key={m.id} meta={m} />)
         : Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-36 shrink-0 animate-pulse rounded-xl bg-elevated/40" />
+            <div key={i} className="aspect-[2/3] w-full animate-pulse rounded-xl bg-elevated/40" />
           ))}
     </Row>
   );
