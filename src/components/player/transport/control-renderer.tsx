@@ -98,6 +98,7 @@ export type ControlContext = {
   timeFormat?: TimeFormat;
   onCycleTimeFormat?: () => void;
   volumeStyle?: VolumeStyle;
+  alwaysShowClock?: boolean;
   seekBackStepSec: number;
   seekForwardStepSec: number;
   title?: string;
@@ -267,6 +268,7 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           durationSec={ctx.snap.durationSec}
           isLiveChannel={ctx.isLiveChannel}
           tight={ctx.tight}
+          alwaysShowClock={ctx.alwaysShowClock}
           active={ctx.active}
         />
       );
@@ -278,11 +280,13 @@ export function renderControl(id: PlayerControlId, ctx: ControlContext): ReactNo
           timeFormat={ctx.timeFormat}
           isLiveChannel={ctx.isLiveChannel}
           tight={ctx.tight}
+          alwaysShowClock={ctx.alwaysShowClock}
           active={ctx.active}
           onCycle={ctx.editing ? undefined : ctx.onCycleTimeFormat}
         />
       );
     }
+
     case "volume": {
       if (ctx.tight) return null;
       return (
