@@ -177,6 +177,9 @@ export function HeroCarousel({
     if (wantNext) setActive(active + 1);
     else if (wantPrev) setActive(active - 1);
     setOffset(0);
+    setTimeout(() => {
+      moved.current = false;
+    }, 0);
   };
 
   const onClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
