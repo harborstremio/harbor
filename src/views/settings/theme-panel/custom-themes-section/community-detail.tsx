@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useEscape, useModalExit } from "@/components/modal-shell";
 import { createPortal } from "react-dom";
 import { Check, Download, Loader2, Share2, Star, X } from "lucide-react";
 import { downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
+import { UserHoverCard } from "@/views/profile/user-hover-card";
+import { subscribeOpenProfile } from "@/lib/social/open-profile";
 
 export function CommunityDetail({
   theme,
@@ -13,6 +15,7 @@ export function CommunityDetail({
 }) {
   const { closing, close } = useModalExit(onClose);
   useEscape(close);
+  useEffect(() => subscribeOpenProfile(close), [close]);
   const [t, setT] = useState(theme);
   const [downloading, setDownloading] = useState(false);
   const [done, setDone] = useState(false);
@@ -72,7 +75,15 @@ export function CommunityDetail({
               </div>
               <h2 className="mt-2 font-display text-[26px] font-medium leading-tight text-ink">{t.name}</h2>
               <p className="text-[13px] text-ink-subtle">
-                by {t.author} · {t.downloads} downloads · {t.ratingAvg || "-"}/5 ({t.ratingCount})
+                by{" "}
+                {t.authorHandle ? (
+                  <UserHoverCard handle={t.authorHandle}>
+                    <span className="cursor-pointer transition-colors hover:text-ink">{t.author}</span>
+                  </UserHoverCard>
+                ) : (
+                  t.author
+                )}{" "}
+                · {t.downloads} downloads · {t.ratingAvg || "-"}/5 ({t.ratingCount})
               </p>
             </div>
             {t.blurb && <p className="text-[13.5px] leading-relaxed text-ink-muted">{t.blurb}</p>}

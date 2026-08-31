@@ -3,6 +3,7 @@ import { ArrowDownToLine, Star } from "lucide-react";
 import type { StoreTheme } from "@/lib/theme-store";
 import type { StoreBundle } from "@/lib/bundle-store";
 import { FeaturedBadge } from "@/views/profile/profile-bits";
+import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { fmtCount } from "../format";
 import { Fit } from "./fit";
 import { PaletteSeam } from "./palette-seam";
@@ -72,7 +73,15 @@ export function MarketHero({
             <ArrowDownToLine size={14} strokeWidth={2.2} />
             {fmtCount(item.downloads)} downloads
           </span>
-          <span>by {item.author || "Anonymous"}</span>
+          {"swatch" in item && item.authorHandle ? (
+            <UserHoverCard handle={item.authorHandle}>
+              <span className="cursor-pointer transition-colors hover:text-ink">
+                by {item.author || "Anonymous"}
+              </span>
+            </UserHoverCard>
+          ) : (
+            <span>by {item.author || "Anonymous"}</span>
+          )}
         </div>
         <div className="max-w-[34rem]">{payload}</div>
         <div className="mt-1 flex flex-wrap items-center gap-3">

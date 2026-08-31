@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 import { ArrowDownToLine, Check, RefreshCw, Share2, Star, X } from "lucide-react";
 import { downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
 import { FeaturedBadge } from "@/views/profile/profile-bits";
+import { UserHoverCard } from "@/views/profile/user-hover-card";
+import { subscribeOpenProfile } from "@/lib/social/open-profile";
 import { fmtCount } from "./format";
 import { CommentsSection } from "./comments/comments-section";
 import { Fit } from "./market/fit";
@@ -33,6 +35,8 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
   }, [close]);
+
+  useEffect(() => subscribeOpenProfile(close), [close]);
 
   const rate = async (v: number) => {
     setMyRating(v);
@@ -91,7 +95,15 @@ export function ThemeDetail({ theme, onClose }: { theme: StoreTheme; onClose: ()
                     <ArrowDownToLine size={12} strokeWidth={2.2} />
                     {fmtCount(t.downloads)}
                   </span>
-                  <span>by {t.author || "Anonymous"}</span>
+                  {t.authorHandle ? (
+                    <UserHoverCard handle={t.authorHandle}>
+                      <span className="cursor-pointer transition-colors hover:text-ink">
+                        by {t.author || "Anonymous"}
+                      </span>
+                    </UserHoverCard>
+                  ) : (
+                    <span>by {t.author || "Anonymous"}</span>
+                  )}
                 </div>
               </div>
 

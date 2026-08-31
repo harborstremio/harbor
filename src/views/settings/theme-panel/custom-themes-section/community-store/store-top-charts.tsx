@@ -1,5 +1,6 @@
 import { ArrowDownToLine, Flame, Sparkles, Star, TrendingUp, type LucideIcon } from "lucide-react";
 import { SectionHeader } from "@/views/profile/section-header";
+import { UserHoverCard } from "@/views/profile/user-hover-card";
 import type { StoreTheme } from "@/lib/theme-store";
 import { fmtCount } from "./format";
 
@@ -117,7 +118,17 @@ function ChartRow({
       <RowThumb theme={theme} />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-[13px] font-semibold leading-tight text-ink">{theme.name}</span>
-        <span className="truncate text-[11.5px] text-ink-subtle">{theme.author || "Anonymous"}</span>
+        <span className="truncate text-[11.5px] text-ink-subtle">
+          {theme.authorHandle ? (
+            <UserHoverCard handle={theme.authorHandle}>
+              <span className="transition-colors hover:text-ink" onClick={(e) => e.stopPropagation()}>
+                {theme.author || "Anonymous"}
+              </span>
+            </UserHoverCard>
+          ) : (
+            theme.author || "Anonymous"
+          )}
+        </span>
       </span>
       <span className="shrink-0 ps-1">
         {kind === "rating" && theme.ratingCount > 0 ? (

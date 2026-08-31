@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AlertCircle, Check, Download, Loader2, Star, Upload } from "lucide-react";
 import { Search } from "@/components/icons/search-icon";
 import { browseThemes, downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
+import { UserHoverCard } from "@/views/profile/user-hover-card";
 import { CommunityDetail } from "./community-detail";
 import { ThemeUploadFlow } from "./theme-upload-flow";
 
@@ -193,7 +194,16 @@ function CommunityCard({ theme, onOpen }: { theme: StoreTheme; onOpen: () => voi
       <div className="flex min-w-0 flex-col px-4 py-3">
         <span className="truncate text-[14.5px] font-semibold text-ink">{t.name}</span>
         <span className="truncate text-[11.5px] text-ink-subtle">
-          {t.author} · {t.downloads} downloads
+          {t.authorHandle ? (
+            <UserHoverCard handle={t.authorHandle}>
+              <span className="transition-colors hover:text-ink" onClick={(e) => e.stopPropagation()}>
+                {t.author}
+              </span>
+            </UserHoverCard>
+          ) : (
+            t.author
+          )}{" "}
+          · {t.downloads} downloads
         </span>
       </div>
     </div>
