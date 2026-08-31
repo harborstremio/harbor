@@ -68,6 +68,14 @@ async function savePresence(next: PresenceStatus): Promise<void> {
   });
 }
 
+export function resolvePresence(value: unknown, online = false): PresenceStatus {
+  if (value === "online" || value === "away" || value === "dnd" || value === "offline") {
+    return value;
+  }
+
+  return online ? "online" : "offline";
+}
+
 export function setStatus(next: PresenceStatus): void {
   if (next === status) return;
   status = next;

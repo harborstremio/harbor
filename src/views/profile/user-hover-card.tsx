@@ -13,6 +13,11 @@ import { requestOpenProfile } from "@/lib/social/open-profile";
 import { regionFlagSrc } from "@/lib/region-flags";
 import { useReducedMotion } from "@/lib/use-reduced-motion";
 import { useT } from "@/lib/i18n";
+import {
+  PRESENCE_META,
+  resolvePresence,
+  type PresenceStatus,
+} from "@/lib/social/presence";
 import { fetchBadges, fetchSummary } from "./profile-api";
 import { orderShownBadges } from "./badge-catalog";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -49,7 +54,15 @@ function loadCard(handle: string): Promise<CardData> {
 
 const CARD_W = 300;
 
-export function UserHoverCard({ handle, children }: { handle: string; children: ReactElement<any> }) {
+export function UserHoverCard({
+  handle,
+  presence,
+  children,
+}: {
+  handle: string;
+  presence?: PresenceStatus;
+  children: ReactElement<any>;
+}) {
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const ref = useRef<HTMLElement>(null);
   const openTimer = useRef<number | null>(null);
@@ -131,7 +144,7 @@ export function UserHoverCard({ handle, children }: { handle: string; children: 
     <>
       {trigger}
       {anchor && (
-        <ProfileHoverCard handle={handle} anchor={anchor} onEnter={clearClose} onLeave={scheduleClose} />
+        <ProfileHoverCard handle={handle} presence={presence} anchor={anchor} onEnter={clearClose} onLeave={scheduleClose} />
       )}
     </>
   );
@@ -142,11 +155,13 @@ export const HOVER_CARD_CLOSE_MS = 180;
 
 export function ProfileHoverCard({
   handle,
+  presence: presenceOverride,
   anchor,
   onEnter,
   onLeave,
 }: {
   handle: string;
+  presence?: PresenceStatus;
   anchor: DOMRect;
   onEnter: () => void;
   onLeave: () => void;
@@ -184,6 +199,7 @@ export function ProfileHoverCard({
   }, [anchor, data, failed]);
 
   const summary = data?.summary;
+  const presence = presenceOverride ?? resolvePresence(summary?.presence, summary?.online);
   const badges = orderShownBadges(data?.badges ?? [], data?.summary?.shownBadges);
   const mine = !!self.handle && self.handle.toLowerCase() === key;
   const cardAvatar = mine ? self.avatar ?? summary?.avatarUrl : summary?.avatarUrl;
@@ -205,7 +221,7 @@ export function ProfileHoverCard({
         top: placed?.top ?? anchor.bottom + 8,
         visibility: placed ? "visible" : "hidden",
       }}
-      className={`fixed z-[260] cursor-pointer overflow-hidden rounded-xl border border-edge bg-elevated/95 shadow-[0_28px_70px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl ${
+      className={`fixed z-[260] cursor-pointer overflow-hidden rounded-[20px] border border-edge bg-elevated/95 shadow-[0_28px_70px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl ${
         reduced ? "" : "animate-popover-in"
       }`}
     >
@@ -221,7 +237,7 @@ export function ProfileHoverCard({
       <div className="px-4 pb-4">
         <div className="-mt-9 mb-2.5 flex items-end justify-between">
           <span className="rounded-full bg-elevated p-[3px]">
-            <Avatar src={cardAvatar} size={60} online={summary?.online} alias={summary?.alias ?? handle} />
+            <Avatar src={cardAvatar} size={60} dotClass={PRESENCE_META[presence].dot} alias={summary?.alias ?? handle} />
           </span>
         </div>
 
@@ -237,8 +253,8 @@ export function ProfileHoverCard({
           <>
             <div className="mt-2 flex items-center gap-2 text-[11.5px] text-ink-muted">
               <span className="inline-flex items-center gap-1.5">
-                <span className={`h-2 w-2 rounded-full ${summary.online ? "bg-success" : "bg-ink-subtle"}`} />
-                {summary.online ? t("Online") : t("Offline")}
+                <span className={`h-2 w-2 rounded-full ${PRESENCE_META[presence].dot}`} />
+                {t(PRESENCE_META[presence].label)}
               </span>
               {summary.location && (
                 <>

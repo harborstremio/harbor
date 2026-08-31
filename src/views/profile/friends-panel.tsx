@@ -1,7 +1,11 @@
 import { UserPlus, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
-import { PRESENCE_META } from "@/lib/social/presence";
+import {
+  PRESENCE_META,
+  resolvePresence,
+  type PresenceStatus,
+} from "@/lib/social/presence";
 import { AddFriendsModal } from "./add-friends-modal";
 import { Avatar } from "./profile-bits";
 import { UserHoverCard } from "./user-hover-card";
@@ -10,18 +14,21 @@ import type { Friend } from "./profile-types";
 const FRIENDS_PAGE = 6;
 const FRIENDS_STEP = 12;
 
+function friendPresence(f: Friend): PresenceStatus {
+  return resolvePresence(f.presence ?? f.status, f.online);
+}
+
 function friendDotClass(f: Friend): string {
-  const s = f.presence ?? f.status;
-  if (s === "online" || s === "away" || s === "dnd" || s === "offline") return PRESENCE_META[s].dot;
-  return f.online ? "bg-success" : "bg-ink-subtle";
+  return PRESENCE_META[friendPresence(f)].dot;
 }
 
 function FriendRow({ f, onOpen }: { f: Friend; onOpen?: (h: string) => void }) {
+  const presence = friendPresence(f);
   return (
-    <UserHoverCard handle={f.handle}>
+    <UserHoverCard handle={f.handle} presence={presence}>
       <button
         onClick={() => onOpen?.(f.handle)}
-        className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-1.5 text-start transition-colors hover:bg-elevated"
+        className="flex w-full min-h-11 items-center gap-3 rounded-[10px] px-2 py-1.5 text-start transition-colors hover:bg-elevated"
       >
         <Avatar src={f.avatarUrl} size={40} dotClass={friendDotClass(f)} alias={f.alias} />
         <div className="min-w-0 flex-1">
@@ -68,7 +75,7 @@ export function FriendsPanel({
   return (
     <section
       aria-label={t("Friends")}
-      className="rounded-lg bg-surface p-4 ring-1 ring-edge-soft"
+      className="rounded-[14px] bg-surface p-4 ring-1 ring-edge-soft"
     >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-ink-subtle">
@@ -145,7 +152,7 @@ export function FriendsPanel({
           {remaining > 0 && (
             <button
               onClick={() => setShown((s) => s + FRIENDS_STEP)}
-              className="min-h-9 rounded-md text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+              className="min-h-9 rounded-[10px] text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
             >
               {t("Show {count} more", { count: Math.min(remaining, FRIENDS_STEP) })}
             </button>
