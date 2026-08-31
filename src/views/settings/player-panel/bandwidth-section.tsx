@@ -25,6 +25,7 @@ export function BandwidthInput() {
           <span className="text-[13.5px] font-medium text-ink">Internet speed</span>
           <span className="text-[12.5px] text-ink-subtle">
             Pick the cap your link can sustain. Run a real speed test if you need a number.
+            This only affects which streams rank higher. It does not limit download speed.
           </span>
         </div>
         <SpeedTestButton />
