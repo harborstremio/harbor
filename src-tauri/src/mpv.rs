@@ -184,6 +184,7 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     ("paused-for-cache", 18, PropertyKind::Flag),
     ("secondary-sub-text", 19, PropertyKind::String),
     ("path", 20, PropertyKind::String),
+    ("audio-device-list", 21, PropertyKind::Node),
 ];
 
 #[derive(Clone, Copy)]
@@ -1182,6 +1183,7 @@ const MPV_ALLOWED_COMMANDS: &[&str] = &[
     "frame-step",
     "frame-back-step",
     "loadfile",
+    "ao-reload",
 ];
 
 fn mpv_property_blocked(name: &str) -> bool {

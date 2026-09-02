@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import type { PlayerStatus } from "./bridge";
 
 let positionSec = 0;
 let bufferedSec = 0;
@@ -110,5 +111,33 @@ export function usePlaybackDownloadedGated(active: boolean): number {
     active ? subscribePlaybackClock : NEVER,
     () => downloadedFraction,
     () => downloadedFraction,
+  );
+}
+
+let status: PlayerStatus = "idle";
+const statusListeners = new Set<() => void>();
+
+export function setPlaybackStatus(next: PlayerStatus): void {
+  if (status === next) return;
+  status = next;
+  for (const l of statusListeners) l();
+}
+
+export function getPlaybackStatus(): PlayerStatus {
+  return status;
+}
+
+export function subscribePlaybackStatus(cb: () => void): () => void {
+  statusListeners.add(cb);
+  return () => {
+    statusListeners.delete(cb);
+  };
+}
+
+export function usePlaybackStatus(): PlayerStatus {
+  return useSyncExternalStore(
+    subscribePlaybackStatus,
+    () => status,
+    () => status,
   );
 }

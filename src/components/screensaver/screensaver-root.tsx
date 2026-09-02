@@ -3,6 +3,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { useBigPicture } from "@/lib/big-picture";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
+import { usePlaybackStatus } from "@/lib/player/playback-clock";
 import { useIdleScreensaver } from "@/lib/screensaver/use-idle-screensaver";
 import type { AmbientItem } from "./ambient-overlay";
 
@@ -31,12 +32,17 @@ export function ScreensaverRoot() {
   const { settings } = useSettings();
   const { player, picker, topKind } = useView();
   const { active: bigPicture } = useBigPicture();
+  const playerStatus = usePlaybackStatus();
   const enabled = settings.screensaver;
   const delayMs = Math.max(1, settings.screensaverDelayMin || 5) * 60000;
   // Big Picture claims keydown in the capture phase, so this hook's bubble
   // listeners never see its navigation and it would idle out mid use.
+  // Suppress while the player is actively playing (an idle ambient overlay
+  // over moving video would obscure the content), but allow it once playback
+  // is paused or stopped so an idle viewer still gets the screensaver.
+  const activelyPlaying = !!player && playerStatus === "playing";
   const suppressed =
-    bigPicture || !!player || !!picker || topKind === "live" || topKind === "vod";
+    bigPicture || activelyPlaying || !!picker || topKind === "live" || topKind === "vod";
   const { active, dismiss } = useIdleScreensaver(enabled, delayMs, suppressed);
 
   const [items, setItems] = useState<AmbientItem[]>([]);

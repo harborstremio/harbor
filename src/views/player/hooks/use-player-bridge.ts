@@ -16,7 +16,7 @@ import {
 } from "@/lib/player/shader-chain";
 import type { PlayerSrc } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
-import { setPlaybackClock } from "@/lib/player/playback-clock";
+import { setPlaybackClock, setPlaybackStatus } from "@/lib/player/playback-clock";
 import { isLinuxDesktop, isWindowsDesktop } from "@/lib/platform";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { svpEnsureRunning, svpStatus } from "@/lib/svp";
@@ -149,6 +149,7 @@ export function usePlayerBridge(params: {
       setEngine(chosen);
       off = bridge.subscribe((s) => {
         setPlaybackClock(s.positionSec, s.bufferedSec);
+        setPlaybackStatus(s.status);
         if (snapChangedIgnoringClock(prevSnapRef.current, s)) {
           prevSnapRef.current = s;
           setSnap(s);
@@ -163,6 +164,7 @@ export function usePlayerBridge(params: {
       bridge?.destroy();
       bridgeRef.current = null;
       setPlaybackClock(0, 0);
+      setPlaybackStatus("idle");
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bridgeKey, svpPending]);
