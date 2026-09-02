@@ -42,13 +42,13 @@ export function LiquidGlassSurface({
   motionSpeed: _motionSpeed,
   variant = "default",
   backdropBlur = true,
-  blurRadius = 2.5,
-  tintOpacity = 40,
+  blurRadius = 8,
+  tintOpacity = 20,
   ...wrapperProps
 }: LiquidGlassSurfaceProps & { blurRadius?: number; tintOpacity?: number }) {
   const strength = Math.min(1, Math.max(0, intensity));
-  const normalizedBlur = clampSetting(blurRadius, 2, 12);
-  const normalizedTint = clampSetting(tintOpacity, 40, 100);
+  const normalizedBlur = clampSetting(blurRadius, 2, 20);
+  const normalizedTint = clampSetting(tintOpacity, 0, 100);
   const blurEnabled = backdropBlur && normalizedBlur > 0;
   const surfaceStyle: CSSProperties = {
     position: "relative",
@@ -57,20 +57,20 @@ export function LiquidGlassSurface({
     borderRadius: radius,
     backgroundImage: [
       variant === "overlay"
-        ? `linear-gradient(145deg, rgba(255,255,255,${0.09 + strength * 0.04}), rgba(255,255,255,0.028))`
-        : `linear-gradient(145deg, rgba(255,255,255,${0.045 + strength * 0.025}), rgba(255,255,255,0.012))`,
-      `linear-gradient(118deg, rgba(255,255,255,${0.022 + strength * 0.018}) 0%, rgba(255,255,255,${0.008 + strength * 0.006}) 24%, transparent 48%)`,
-      `radial-gradient(78% 110% at -20% 50%, rgba(95,190,255,${0.012 + strength * 0.015}) 0%, transparent 62%), radial-gradient(78% 110% at 120% 50%, rgba(255,120,205,${0.01 + strength * 0.013}) 0%, transparent 62%)`,
+        ? `linear-gradient(145deg, rgba(255,255,255,${0.08 + strength * 0.03}), rgba(255,255,255,0.015))`
+        : `linear-gradient(145deg, rgba(255,255,255,${0.035 + strength * 0.02}), rgba(255,255,255,0.006))`,
+      `linear-gradient(118deg, rgba(255,255,255,${0.018 + strength * 0.012}) 0%, rgba(255,255,255,0.004) 24%, transparent 48%)`,
+      `radial-gradient(78% 110% at -20% 50%, rgba(95,190,255,${0.018 + strength * 0.018}) 0%, transparent 62%), radial-gradient(78% 110% at 120% 50%, rgba(255,120,205,${0.014 + strength * 0.015}) 0%, transparent 62%)`,
     ].join(", "),
     backgroundColor:
       variant === "overlay"
-        ? "rgba(8,12,20,0.28)"
+        ? "rgba(8,12,20,0.25)"
         : `color-mix(in srgb, var(--color-canvas) ${normalizedTint}%, transparent)`,
     boxShadow:
       variant === "overlay"
         ? "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.18), 0 8px 22px rgba(0,0,0,0.28)"
         : "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.05)",
-    backdropFilter: blurEnabled ? `blur(${normalizedBlur}px) saturate(1.08)` : undefined,
+    backdropFilter: blurEnabled ? `blur(${normalizedBlur}px) saturate(1.15)` : undefined,
     ...style,
   };
 

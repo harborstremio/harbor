@@ -590,10 +590,6 @@ export const ContinueCard = memo(function ContinueCard({
             radius="9999px"
             shaderRadius={0.58}
             intensity={0.9}
-            experimentalStyle={{
-              background:
-                "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
-            }}
             style={{
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
             }}
@@ -639,10 +635,6 @@ export const ContinueCard = memo(function ContinueCard({
               radius="9999px"
               shaderRadius={0.58}
               intensity={0.9}
-              experimentalStyle={{
-                background:
-                  "linear-gradient(145deg, rgba(8,12,18,0.50), rgba(8,12,18,0.38) 52%, rgba(8,12,18,0.44))",
-              }}
               style={{
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(0,0,0,0.05)",
               }}

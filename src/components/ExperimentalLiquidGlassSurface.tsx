@@ -36,7 +36,7 @@ export function ExperimentalLiquidGlassSurface({
   className = "",
   contentClassName = "",
   surfaceClassName = "",
-  variant = "surface",
+  variant: _variant = "surface",
   backdropBlur = true,
   rendererOpacity = 100,
   style,
@@ -81,61 +81,61 @@ export function ExperimentalLiquidGlassSurface({
   const { transition: callerTransition, ...callerStyle } = style ?? {};
 
   const active = alwaysActive || keyboardActive;
-  const activeMix = active ? 1 : 0.22;
+  const activeMix = active ? 1 : 0.55;
   const pressedMix = pressed ? 0.88 : 1;
 
   const transitionMs = normalizedSpeed <= 0 ? 0 : Math.round(260 / Math.max(0.35, normalizedSpeed));
 
-  const resolvedVariant = variant === "default" ? "surface" : variant;
+  const standardBlur = (7 + normalizedRefraction * 1.5) * globalOpacity;
 
-  const standardBlur = (2.7 + normalizedRefraction * 0.5) * globalOpacity;
+  const topSurfaceAlpha = 0.024 * globalOpacity * normalizedIntensity;
+  const topEdgeAlpha = 0.12 * globalOpacity * normalizedIntensity;
+  const bottomEdgeAlpha = 0.08 * globalOpacity;
 
-  const topSurfaceAlpha = 0.0065 * globalOpacity * normalizedIntensity;
-  const bottomSurfaceAlpha = 0.0012 * globalOpacity * normalizedIntensity;
-  const topEdgeAlpha = 0.058 * globalOpacity * normalizedIntensity;
-  const bottomEdgeAlpha = 0.032 * globalOpacity;
+  const lensAlpha = 0.11 * globalOpacity * normalizedIntensity * normalizedLens * activeMix;
 
-  const lensAlpha = 0.082 * globalOpacity * normalizedIntensity * normalizedLens * activeMix;
+  const spectrumAlpha = 0.095 * globalOpacity * normalizedIntensity * spectrumLevel * activeMix;
 
-  const spectrumAlpha = 0.078 * globalOpacity * normalizedIntensity * spectrumLevel * activeMix;
-
-  const chromaticAlpha = 0.052 * globalOpacity * normalizedIntensity * spectrumLevel * activeMix;
+  const chromaticAlpha = 0.065 * globalOpacity * normalizedIntensity * spectrumLevel * activeMix;
 
   const causticsAlpha =
-    0.058 * globalOpacity * normalizedIntensity * normalizedCaustics * activeMix;
+    0.075 * globalOpacity * normalizedIntensity * normalizedCaustics * activeMix;
 
   const sheenAlpha =
-    0.044 * globalOpacity * normalizedIntensity * (0.55 + normalizedRefraction * 0.35) * activeMix;
+    0.06 * globalOpacity * normalizedIntensity * (0.55 + normalizedRefraction * 0.35) * activeMix;
 
   const maskStart = 24 + (1 - normalizedRadius) * 18;
   const maskMiddle = 63 + (1 - normalizedRadius) * 7;
 
-  const blurValue = `blur(${standardBlur}px) saturate(${
-    1.34 + normalizedRefraction * 0.065
-  }) brightness(1.012) contrast(1.035)`;
+  const blurValue = `blur(${standardBlur}px) saturate(${1.3 + normalizedRefraction * 0.06})`;
 
   const glassStyle: CSSProperties = {
     position: "relative",
     isolation: "isolate",
     overflow: "hidden",
     borderRadius: radius,
-    backdropFilter:
-      resolvedVariant === "surface" && backdropBlur && globalOpacity > 0 ? blurValue : undefined,
+    backdropFilter: backdropBlur && globalOpacity > 0 ? blurValue : undefined,
+    WebkitBackdropFilter: backdropBlur && globalOpacity > 0 ? blurValue : undefined,
+    backgroundColor:
+      _variant === "overlay"
+        ? `rgba(8,12,20,${alpha(0.35 * globalOpacity)})`
+        : `color-mix(in srgb, var(--color-canvas) ${Math.round(35 * globalOpacity)}%, transparent)`,
     background: [
       `linear-gradient(145deg, rgba(255,255,255,${alpha(
         topSurfaceAlpha,
-      )}) 0%, rgba(255,255,255,${alpha(bottomSurfaceAlpha)}) 58%, rgba(80,145,210,${alpha(
-        0.0018 * globalOpacity * normalizedRefraction,
+      )}) 0%, transparent 48%, rgba(120,190,255,${alpha(
+        0.015 * globalOpacity * normalizedRefraction,
       )}) 100%)`,
-      `radial-gradient(125% 95% at 50% -12%, rgba(255,255,255,${alpha(
-        0.022 * globalOpacity * normalizedIntensity,
-      )}) 0%, transparent 56%)`,
+      `radial-gradient(120% 90% at 50% -10%, rgba(255,255,255,${alpha(
+        0.025 * globalOpacity * normalizedIntensity,
+      )}) 0%, transparent 55%)`,
     ].join(", "),
     boxShadow: [
       `inset 0 1px 0 rgba(255,255,255,${alpha(topEdgeAlpha)})`,
       `inset 0 -1px 0 rgba(0,0,0,${alpha(bottomEdgeAlpha)})`,
-      `inset 1px 0 0 rgba(90,190,255,${alpha(0.011 * globalOpacity * normalizedLens)})`,
-      `inset -1px 0 0 rgba(255,90,190,${alpha(0.0085 * globalOpacity * spectrumLevel)})`,
+      `inset 1px 0 0 rgba(90,190,255,${alpha(0.018 * globalOpacity * normalizedLens)})`,
+      `inset -1px 0 0 rgba(255,90,190,${alpha(0.015 * globalOpacity * spectrumLevel)})`,
+      `0 4px 16px rgba(0,0,0,${alpha(0.25 * globalOpacity)})`,
     ].join(", "),
     transform: pressed ? `scale(${1 - 0.007 * normalizedMotion}) translateZ(0)` : "translateZ(0)",
     transition: [
@@ -155,16 +155,14 @@ export function ExperimentalLiquidGlassSurface({
     zIndex: 0,
     borderRadius: "inherit",
     pointerEvents: "none",
-    backdropFilter:
-      resolvedVariant === "overlay" && backdropBlur && globalOpacity > 0 ? blurValue : undefined,
     background: [
       `radial-gradient(110% 88% at 50% -9%, rgba(255,255,255,${alpha(
         0.018 * globalOpacity * normalizedIntensity,
       )}) 0%, transparent 58%)`,
       `linear-gradient(152deg, rgba(255,255,255,${alpha(
-        0.0055 * globalOpacity,
+        0.008 * globalOpacity,
       )}) 0%, transparent 34%, transparent 70%, rgba(100,180,255,${alpha(
-        0.005 * globalOpacity,
+        0.006 * globalOpacity,
       )}) 100%)`,
     ].join(", "),
   };
@@ -233,7 +231,10 @@ export function ExperimentalLiquidGlassSurface({
     })`,
     maskImage: `radial-gradient(ellipse at center, transparent 0%, transparent ${
       maskStart - 7
-    }%, rgba(0,0,0,0.72) ${maskMiddle}%, #000 100%)`,
+    }%, rgba(255,255,255,0.72) ${maskMiddle}%, #fff 100%)`,
+    WebkitMaskImage: `radial-gradient(ellipse at center, transparent 0%, transparent ${
+      maskStart - 7
+    }%, rgba(255,255,255,0.72) ${maskMiddle}%, #fff 100%)`,
   };
 
   const causticsLayerStyle: CSSProperties = {
@@ -262,7 +263,9 @@ export function ExperimentalLiquidGlassSurface({
       1.5 - normalizedCaustics * 0.38,
     )}px) contrast(${1.08 + normalizedCaustics * 0.24})`,
     maskImage:
-      "radial-gradient(ellipse at center, rgba(0,0,0,0.16) 0%, rgba(0,0,0,0.7) 57%, #000 100%)",
+      "radial-gradient(ellipse at center, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.7) 57%, #fff 100%)",
+    WebkitMaskImage:
+      "radial-gradient(ellipse at center, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.7) 57%, #fff 100%)",
   };
 
   const chromaticEdgeStyle: CSSProperties = {
@@ -298,9 +301,12 @@ export function ExperimentalLiquidGlassSurface({
     ].join(", "),
     backgroundSize: "150% 150%, 145% 145%",
     mixBlendMode: "screen",
-    maskImage: `radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.32) ${
+    maskImage: `radial-gradient(ellipse at center, transparent 0%, rgba(255,255,255,0.32) ${
       maskStart - 5
-    }%, #000 100%)`,
+    }%, #fff 100%)`,
+    WebkitMaskImage: `radial-gradient(ellipse at center, transparent 0%, rgba(255,255,255,0.32) ${
+      maskStart - 5
+    }%, #fff 100%)`,
   };
 
   return (
